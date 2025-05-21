@@ -1,0 +1,38 @@
+
+@plugin "flyonui";
+@import "flyonui/variants.css";
+@source "./node_modules/flyonui/flyonui.js"; 
+@import "tailwindcss";
+
+@layer base {
+  html {
+    font-family: 'Roboto', sans-serif;
+  }
+}
+
+@theme {
+  --color-jerarquia1: #9dc5bc;
+  --color-jerarquia2: #3eac91;
+  --color-jerarquia3: #147f5e;
+  --color-jerarquia4: #2b463c; 
+  --color-bgcolor1: #efefef;
+  --color-background-primary: #f1f1dd;
+  --color-background-secondary: #526581;
+  --color-background-dashboard: #DEE5E5;
+  }
+
+.perspective {
+  perspective: 1000px;
+}
+
+#card img {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.input-floating-label {
+  background-color: var(--color-bgcolor1);
+  color: gray;
+  border-radius: 0.5rem;
+  font-weight: 400;
+}
