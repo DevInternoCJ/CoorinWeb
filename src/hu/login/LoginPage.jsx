@@ -3,6 +3,7 @@ import LoginCard from "./LoginCard";
 import { useState } from "react";
 import PasswordChangeQuestion from './changePassword/PasswordChangeQuestion';
 import ChangePassword from "./changePassword/ChangePassword";
+import { Navigate } from "react-router-dom";
 
 
 const MaranathaLogin = () => {
