@@ -1,13 +1,10 @@
 import React from "react";
-
-
 import GridExecutives from "./board/executives/gridExecutives";
+import GridConsultations from "./board/consultations/GridConsultations";
+
 export default function CoorinDashboard() {
   return (
-    
     <div className="relative bg-background-dashboard py-14 sm:py-2 overflow-hidden">
- 
-
       <div className="mx-auto max-w-2xl px-2 lg:max-w-screen lg:px-8 relative">
         <h2 className="text-base/7 font-semibold text-indigo-600">
           Menu Principal
@@ -17,18 +14,21 @@ export default function CoorinDashboard() {
         </span>
         <div className="mt-2 grid grid-cols-6 gap-4 sm:mt-8 md:mt-8 lg:mt-0 xl:mt-0">
           <div className="col-span-6">
-           
-              <GridExecutives />
-            
+            <GridExecutives />
           </div>
-
-          <div className="col-span-6 row-start-2 relative">
+        </div>
+        <hr className="my-8 border-t border-gray-500 opacity-60" />
+        {/* Nuevo bloque de Consultas */}
+        <span className="mx-auto mt-2 text-4xl font-semibold tracking-tight text-balance text-gray-950 sm:text-4xl ">
+          Consultas
+        </span>
+        <div className="-mt-10">
+          <GridConsultations />
+        </div>
+                <div className="col-span-6 row-start-2 relative">
             <div className="absolute inset-px rounded-lg bg-white"></div>
             <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)]">
               <div className="px-8 pt-8 sm:px-10 sm:pt-10">
-                <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
-                  Performance
-                </p>
                 <p className="mt-2 max-w-lg text-sm/6 text-gray-600 text-center">
                   Lorem ipsum, dolor sit amet consectetur adipisicing elit
                   maiores impedit.
@@ -93,7 +93,6 @@ export default function CoorinDashboard() {
             </div>
             <div className="pointer-events-none absolute inset-px rounded-lg shadow-sm ring-1 ring-black/5 rounded-br-4xl"></div>
           </div>
-        </div>
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ const CardExecutive = () => {
             <div className="flex justify-center">
               <ExecutiveChart
                 className="
-                 size-8"
+                size-8"
                 style={{ color: `var(--${catalog.fontcolor})` }}
               />
             </div>
