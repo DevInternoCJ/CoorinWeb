@@ -78,7 +78,7 @@ export const ExclamationKey = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
-    viewBox="0 -6 36 36"
+    viewBox="0 0 24 24"
     strokeWidth={1.5}
     stroke="currentColor"
     className={props.className}
