@@ -23,7 +23,7 @@ const LoginPage = () => {
               data-overlay="#middle-center-modal"
               onClick={() => setShowPasswordModal(true)}
             >
-              Modal
+              gestor de contraseñas
             </button>
             <button
               onClick={() => setShowChangePassword(true)}
@@ -34,7 +34,10 @@ const LoginPage = () => {
               aria-controls="tab-modal"
               data-overlay="#tab-modal"
             >
-              Modal 2
+              cambio de contraseña
+            </button>
+            <button className="btn btn-primary" Link to="/dashboardPage">
+              Dashboard
             </button>
           </div>
         </div>
