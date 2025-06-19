@@ -1,9 +1,10 @@
-import React from "react";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import LoginCard from "./LoginCard";
 import { useState } from "react";
 import PasswordChangeQuestion from "./changePassword/PasswordChangeQuestion";
 import ChangePassword from "./changePassword/ChangePassword";
-import { Navigate } from "react-router-dom";
+
 
 const LoginPage = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -37,8 +38,8 @@ const LoginPage = () => {
             >
               cambio de contraseña
             </button>
-            <button className="btn btn-primary" Link to="/dashboardPage">
-              Dashboard
+            <button className="btn btn-primary">
+              <Link to="/dashboardPage">dashboard</Link>
             </button>
           </div>
         </div>
