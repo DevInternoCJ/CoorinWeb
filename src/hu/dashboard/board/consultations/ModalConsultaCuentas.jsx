@@ -4,19 +4,46 @@ import ModalConsultaCuentasFiltros from "./ModalConsultaCuentasFiltros";
 import ModalConsultaCuentasColumnas from "./ModalConsultaCuentasColumnas";
 import ModalConsultaCuentasFooter from "./ModalConsultaCuentasFooter";
 
-const ModalConsultaCuentas = () => {
+const ModalConsultaCuentas = ({ onClose }) => {
     return (
-        <div className="modal-xl-container">
-            <ModalConsultaCuentasHeader />
-            <div className="flex flex-col md:flex-row gap-4 mt-2">
-                <div className="flex-1">
+        <div className="modal-xl-container" style={{ maxWidth: "98vw", overflowX: "hidden" }}>
+            <ModalConsultaCuentasHeader onClose={onClose} />
+            <div
+                style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: "1rem",
+                    overflowX: "auto",
+                    width: "100%",
+                    minHeight: "1px",
+                    alignItems: "stretch"
+                }}
+                className="scrollbar-gray"
+            >
+                <div style={{ minWidth: 0, flex: 1, display: "flex", flexDirection: "column" }}>
                     <ModalConsultaCuentasFiltros />
                 </div>
-                <div className="w-full md:w-1/3">
+                <div style={{ minWidth: 0, flex: "0 0 450px", maxWidth: "450px", display: "flex", flexDirection: "column" }}>
                     <ModalConsultaCuentasColumnas />
                 </div>
             </div>
-            <ModalConsultaCuentasFooter />
+            <div style={{ width: "100%", overflowX: "auto" }}>
+                <ModalConsultaCuentasFooter />
+            </div>
+            <style>{`
+                .scrollbar-gray::-webkit-scrollbar {
+                    height: 8px;
+                    width: 8px;
+                    background: #f5f5f5;
+                }
+                .scrollbar-gray::-webkit-scrollbar-thumb {
+                    background: #b0b0b0;
+                    border-radius: 4px;
+                }
+                .scrollbar-gray::-webkit-scrollbar-thumb:hover {
+                    background: #888;
+                }
+            `}</style>
         </div>
     );
 };

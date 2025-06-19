@@ -21,16 +21,14 @@ const DropdownArrow = () => (
     </span>
 );
 
-const ModalConsultaCuentasHeader = () => (
+const ModalConsultaCuentasHeader = ({ onClose }) => (
     <div className="flex items-center gap-4 mb-2 w-full">
-        {/* Logo preparado */}
-        {/* <div className="flex flex-col items-center gap-2 min-w-[120px]"> */}
-            {/* <img src={logo} alt="Logo" className="h-10 w-auto object-contain" /> */}
-        {/* </div> */}
+        {/* Título alineado a la izquierda */}
         <h2 className="text-xl font-bold text-[var(--color-jerarquia3)] mb-1 flex justify-start">
-            Consulta de cuentas
+            Consulta cuentas - Coorin
         </h2>
-        <div className="flex-1 flex flex-row items-center gap-4 justify-end">
+        {/* Elementos centrados en el modal */}
+        <div className="flex-1 flex flex-row items-center justify-center">
             <div className="flex items-center gap-8">
                 <span className="text-base text-[var(--color-jerarquia4)] font-semibold">Cartera</span>
                 <span className="text-base text-[var(--color-jerarquia4)]">American Express</span>
@@ -54,7 +52,15 @@ const ModalConsultaCuentasHeader = () => (
                 </div>
             </div>
         </div>
-        {/* Aquí puedes agregar botones de minimizar/cerrar si lo necesitas */}
+        {/* Botón de cierre */}
+        <button
+            onClick={onClose}
+            className="ml-4 text-[var(--color-jerarquia3)] hover:text-red-600 transition rounded-full p-1"
+            style={{ fontSize: "1.5rem", lineHeight: 1 }}
+            aria-label="Cerrar"
+        >
+            &times;
+        </button>
     </div>
 );
 

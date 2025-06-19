@@ -93,7 +93,7 @@ const CardConsultations = () => {
                 )
             )}
             <ModalBase open={open} onClose={() => setOpen(false)}>
-                <ModalConsultaCuentas />
+                <ModalConsultaCuentas onClose={() => setOpen(false)} />
             </ModalBase>
         </>
     );
