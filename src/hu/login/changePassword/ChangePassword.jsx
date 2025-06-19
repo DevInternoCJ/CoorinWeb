@@ -63,21 +63,21 @@ const ChangePassword = ({ onClose, show }) => {
       <div
         className="fixed top-0 left-0 w-full h-full bg-background-primary z-0"
       />
-      <div className="modal-content w-2xl z-10 relative bg-jerarquia3 rounded-4xl shadow-2xl shadow-jerarquia4">
+      <div className="modal-content w-2xl z-10 relative bg-background-dashboard rounded-3xl shadow-2xl shadow-jerarquia4">
         <div className="modal-header flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ArrowSync className="size-8 text-neutral-100"/>
-            <h3 className="modal-title text-neutral-200 font-bold">
-              Modificar Contraseña
+            <ArrowSync className="size-8 text-jerarquia4"/>
+            <h3 className="modal-title text-jerarquia4 font-bold">
+              Actualización de Contraseña
             </h3>
           </div>
           <button
             type="button"
-            className="text-neutral-200 hover:text-neutral-800 focus:outline-none"
+            className="text-jerarquia4 hover:text-jerarquia3 focus:outline-none btn btn-text btn-circle btn-sm"
             aria-label="Close"
             onClick={onClose}
           >
-            <span className="icon-[tabler--x] size-4">X</span>
+            <span className=" text-2xl hover:rotate-30">×</span>
           </button>
         </div>
         <form onSubmit={handleSubmit}>
@@ -173,8 +173,8 @@ const ChangePassword = ({ onClose, show }) => {
                 </button>
               </div>
             </div>
-            <div className="bg-jerarquia2 p-4 rounded-4xl mt-4">
-              <h4 className="text-neutral-50 font-semibold mb-2">
+            <div className="bg-jerarquia1 p-4 rounded-3xl mt-4">
+              <h4 className="text-jerarquia4 font-semibold mb-2">
                 Requisitos de la contraseña
               </h4>
               <ul className="text-sm">
@@ -182,7 +182,7 @@ const ChangePassword = ({ onClose, show }) => {
                   <li
                     key={req.key}
                     className={`flex items-center ${
-                      errors[req.key] ? "text-red-700" : "text-jerarquia4"
+                      errors[req.key] ? "text-red-900" : "text-jerarquia3"
                     }`}
                   >
                     <span className="mr-2">{errors[req.key] ? "•" : "✓"}</span>{" "}
@@ -191,7 +191,7 @@ const ChangePassword = ({ onClose, show }) => {
                 ))}
                 <li
                   className={`flex items-center ${
-                    errors.matchError ? "text-red-700" : "text-jerarquia4"
+                    errors.matchError ? "text-red-900" : "text-jerarquia3"
                   }`}
                 >
                   <span className="mr-2">{errors.matchError ? "•" : "✓"}</span>{" "}
@@ -203,11 +203,11 @@ const ChangePassword = ({ onClose, show }) => {
           <div className="modal-footer">
             <button
               type="submit"
-              className="btn bg-blue-600 hover:bg-blue-500 text-neutral-200 border border-blue-600 hover:border hover:border-jerarquia1 focus:ring-2 focus:ring-jerarquia1 hover:text-neutral-800 hover:shadow-2xl hover:shadow-blue-300"
+              className="btn bg-jerarquia2 rounded-lg hover:bg-jerarquia3 text-jerarquia4 border border-jerarquia2 hover:border hover:border-jerarquia4 focus:ring-2 focus:ring-jerarquia1 hover:text-jerarquia1 hover:shadow-2xl hover:shadow-jerarquia4"
             >
               Actualizar{" "}
               <span>
-                <LockSync className="size-4" />
+                <LockSync className="size-4 rotate-40 hover:rotate-220" />
               </span>
             </button>
           </div>

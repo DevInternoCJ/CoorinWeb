@@ -1,12 +1,11 @@
 import React from "react";
 import LoginCard from "./LoginCard";
 import { useState } from "react";
-import PasswordChangeQuestion from './changePassword/PasswordChangeQuestion';
+import PasswordChangeQuestion from "./changePassword/PasswordChangeQuestion";
 import ChangePassword from "./changePassword/ChangePassword";
 import { Navigate } from "react-router-dom";
 
-
-const MaranathaLogin = () => {
+const LoginPage = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
 
@@ -25,7 +24,7 @@ const MaranathaLogin = () => {
               data-overlay="#middle-center-modal"
               onClick={() => setShowPasswordModal(true)}
             >
-              Modal
+              gestor de contraseñas
             </button>
             <button
               onClick={() => setShowChangePassword(true)}
@@ -36,7 +35,10 @@ const MaranathaLogin = () => {
               aria-controls="tab-modal"
               data-overlay="#tab-modal"
             >
-              Modal tab accessibility
+              cambio de contraseña
+            </button>
+            <button className="btn btn-primary" Link to="/dashboardPage">
+              Dashboard
             </button>
           </div>
         </div>
@@ -51,4 +53,4 @@ const MaranathaLogin = () => {
   );
 };
 
-export default MaranathaLogin;
+export default LoginPage;
