@@ -2,16 +2,24 @@ import React from 'react'
 import { Routes, Route, Link } from 'react-router-dom';
 import './index.css'
 import './App.css'
-import LoginPage  from '../src/hu/login/LoginPage';
+import LoginPage from '../src/hu/login/LoginPage';
 import CoorinDashboard from "./hu/dashboard/CoorinDashboard";
+import PrortectedRoute from './utils/ProtectedRoute';
+// import useLocalStorage from './utils/useLocalStorage';
+
 function App() {
+
+// const [user, setUser] = useLocalStorage(true);
 
   return (
     <>
       <div className="container-fluid min-h-screen">
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/dashboardPage" element={<CoorinDashboard/>}/>
+          <Route element={<PrortectedRoute canActivate={true} redirectTo='/' />}>
+            <Route path="/dashboardPage" element={<CoorinDashboard />} />
+          </Route>
+          {/* <Route element={<PrortectedRoute canActivate={false} redirectTo='/login'/>}/> */}
         </Routes>
       </div>
     </>

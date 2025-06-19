@@ -29,60 +29,53 @@ export default function CoorinDashboard() {
           <div className="pointer-events-none absolute inset-px rounded-lg shadow-sm ring-1 ring-black/5"></div>
         </div>
 
-        <div className="col-span-3 row-span-2 row-start-3 relative">
-          <div className="absolute inset-px rounded-lg bg-white rounded-bl-4xl"></div>
-          <div className="relative flex h-full flex-col overflow-hidden rounded-bl-[calc(2rem+1px)]">
-            <div className="px-8 pt-8 pb-3 sm:px-10 sm:pt-10 sm:pb-0">
-              <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
-                Security
-              </p>
-              <p className="mt-2 max-w-lg text-sm/6 text-gray-600 text-center">
-                Morbi viverra dui mi arcu sed. Tellus semper adipiscing
-                suspendisse semper morbi.
-              </p>
-            </div>
-            <div className="@container flex flex-1 items-center lg:py-6">
-              <img
-                className="h-[min(152px,40cqw)] object-cover"
-                src="https://tailwindcss.com/plus-assets/img/component-images/bento-03-security.png"
-                alt=""
-              />
-            </div>
-          </div>
-          <div className="pointer-events-none absolute inset-px rounded-lg shadow-sm ring-1 ring-black/5 rounded-bl-4xl"></div>
-        </div>
 
-        <div className="col-span-3 row-span-2 col-start-4 row-start-3 relative">
-          <div className="absolute inset-px rounded-lg bg-white rounded-br-4xl"></div>
-          <div className="relative flex h-full flex-col overflow-hidden rounded-br-[calc(2rem+1px)]">
-            <div className="px-8 pt-8 pb-3 sm:px-10 sm:pt-10 sm:pb-0">
-              <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
-                Powerful APIs
-              </p>
-              <p className="mt-2 max-w-lg text-sm/6 text-gray-600 text-center">
-                Sit quis amet rutrum tellus ullamcorper ultricies libero dolor
-                eget sem sodales gravida.
-              </p>
-            </div>
-            <div className="relative min-h-120 w-full grow">
-              <div className="absolute top-10 right-0 bottom-0 left-10 overflow-hidden rounded-tl-xl bg-gray-900 shadow-2xl">
-                <div className="flex bg-gray-800/40 ring-1 ring-white/5">
-                  <div className="-mb-px flex text-sm/6 font-medium text-gray-400">
-                    <div className="border-r border-b border-r-white/10 border-b-white/20 bg-white/5 px-4 py-2 text-white">
-                      NotificationSetting.jsx
-                    </div>
-                    <div className="border-r border-gray-600/10 px-4 py-2">
-                      App.jsx
-                    </div>
-                  </div>
-                </div>
-                <div className="px-6 pt-6 pb-14">
-                  {/* Your code example */}
-                </div>
+        <div className="grid grid-cols-2 gap-4 mt-8">
+        
+          <div className="relative bg-white shadow-lg ring-1 ring-black/5 rounded-bl-4xl flex flex-col p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-800">
+              <span className="mr-2">
+                {/* Icono personalizado para Sesiones */}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="inline-block w-6 h-6 text-gray-700">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
+                </svg>
+              </span>
+              Sesiones
+            </h3>
+            <div className="bg-[#e5ebf2] rounded-lg flex-1 min-h-[200px] p-4">
+              <div className="overflow-x-auto max-h-[200vmax]">
+                <table className="min-w-full border border-gray-200 rounded-lg bg-[var(--color-jerarquia1)]">
+                  <thead>
+                    <tr className="bg-[var(--color-jerarquia1)]">
+                      <th className="px-4 py-2 text-left text-sm text-[var(--color-base-200)] font-bold">Dato 1</th>
+                      <th className="px-4 py-2 text-left text-sm text-[var(--color-base-200)] font-bold">Dato 2</th>
+                      <th className="px-4 py-2 text-left text-sm text-[var(--color-base-200)] font-bold">Dato 3</th>
+                      <th className="px-4 py-2 text-left text-sm text-[var(--color-base-200)] font-bold">Dato 4</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="px-4 py-2 border-t text-[var(--color-base-200)] font-bold">Valor 1</td>
+                      <td className="px-4 py-2 border-t text-[var(--color-base-200)] font-bold">Valor 2</td>
+                      <td className="px-4 py-2 border-t text-[var(--color-base-200)] font-bold">Valor 3</td>
+                      <td className="px-4 py-2 border-t text-[var(--color-base-200)] font-bold">Valor 4</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
-          <div className="pointer-events-none absolute inset-px rounded-lg shadow-sm ring-1 ring-black/5 rounded-br-4xl"></div>
+          {/* Lado derecho vacío como en la imagen */}
+          <div className="relative bg-white shadow-lg ring-1 ring-black/5 rounded-br-4xl flex flex-col p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-800">
+              <span className="mr-2">
+                {/* Icono de ramificación (puedes usar un ícono de tu librería de iconos preferida) */}
+                <svg xmlns="http://www.w3.org/2000/svg" className="inline-block w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7a3 3 0 11-6 0 3 3 0 016 0zm0 0v10a3 3 0 006 0V7m0 10a3 3 0 006 0V7a3 3 0 10-6 0" /></svg>
+              </span>
+              Ramificación
+            </h3>
+            <div className="bg-[#e5ebf2] rounded-lg flex-1 min-h-[200px]"></div>
+          </div>
         </div>
       </div>
     </div>
