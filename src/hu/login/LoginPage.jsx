@@ -15,7 +15,7 @@ const LoginPage = () => {
       <div className="min-h-screen min-w-screen flex justify-center p-4 bg-background-primary">
         <div className=" block justify-center items-center my-auto">
           <LoginCard />
-          <div>
+          <div className=''>
             <button
               type="button"
               className="btn btn-primary"
@@ -25,7 +25,7 @@ const LoginPage = () => {
               data-overlay="#middle-center-modal"
               onClick={() => setShowPasswordModal(true)}
             >
-              gestor de contraseñas
+              gestor
             </button>
             <button
               onClick={() => setShowChangePassword(true)}
@@ -36,7 +36,7 @@ const LoginPage = () => {
               aria-controls="tab-modal"
               data-overlay="#tab-modal"
             >
-              cambio de contraseña
+              cambio
             </button>
             <button className="btn btn-primary">
               <Link to="/dashboardPage">dashboard</Link>

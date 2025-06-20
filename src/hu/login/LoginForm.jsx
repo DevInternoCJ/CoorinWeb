@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import LoginWallets from "./LoginWallets";
-import { LoginUser,LoginKey } from "./LoginIcons";
+import { LoginUser, LoginKey } from "./LoginIcons";
 
 const LoginForm = () => {
   const [username, setUsername] = useState('');
@@ -38,7 +38,7 @@ const LoginForm = () => {
         </h4>
         {/* Username Field */}
         <div className=" flex">
-          <LoginUser className="size-9.5 border border-jerarquia2 rounded-l-lg bg-jerarquia2"/>
+          <LoginUser className="size-9.5 border border-jerarquia2 rounded-l-lg bg-jerarquia2" />
           <div className="input-floating mb-4">
             <input
               type="text"
@@ -52,19 +52,19 @@ const LoginForm = () => {
               id="floatingInput"
             />
             <label
-              className="input-floating-label block text-sm font-medium mb-1"
+              className="input-floating-label border-0 block text-sm font-medium mb-1"
               htmlFor="floatingInput"
             >
               Usuario
             </label>
           </div>
         </div>
-        <div className="flex ">    
-          <LoginKey className="size-9.5 border border-jerarquia2 rounded-l-lg bg-jerarquia2"/>
+        <div className="flex ">
+          <LoginKey className="size-9.5 border border-jerarquia2 rounded-l-lg bg-jerarquia2" />
           <div className="input-floating mb-4">
             <input
               type="password"
-              placeholder=""
+              placeholder="**********"
               className="w-full px-3 text-neutral-900 py-2 text-sm bg-neutral-100 border rounded-r-lg border-jerarquia2 focus:ring-2 focus:ring-jerarquia2 focus:outline-none"
               value={password}
               onChange={handlePasswordChange}
