@@ -106,7 +106,7 @@ const ModalConsultaCuentasFooter = () => {
                 </div>
             </div>
             <div className="w-full mt-8 mb-2 flex justify-start">
-                <span className="text-base text-[var(--color-jerarquia4)] ">
+                <span className="text-base text-gray-500">
                     Indique los parámetros que desea buscar y presione Agregar.
                 </span>
             </div>

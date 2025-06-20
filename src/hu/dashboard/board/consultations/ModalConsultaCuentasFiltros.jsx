@@ -70,18 +70,13 @@ const ModalConsultaCuentasFiltros = () => (
             }}
             className="scrollbar-gray"
         >
-            <table className="text-xs mb-2 text-black" style={{ minWidth: "1200px", width: "max-content" }}>
+            <table className="text-xs mb-2 text-black" style={{ minWidth: "890px", width: "max-content" }}>
                 <thead style={{ position: "sticky", top: 0, zIndex: 2, background: "var(--color-background-secondary)" }}>
                     <tr className="bg-[var(--color-background-secondary)] text-white">
                         <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)] rounded-tl-md">Concepto</th>
                         <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Campo</th>
                         <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Valores</th>
                         <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Operador</th>
-                        <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Extra</th>
-                        <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Campo 6</th>
-                        <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Campo 7</th>
-                        <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Campo 8</th>
-                        <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Campo 9</th>
                         <th className="px-2 py-1 text-right rounded-tr-md">Borrar</th>
                     </tr>
                 </thead>
@@ -92,11 +87,6 @@ const ModalConsultaCuentasFiltros = () => (
                             <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)]">Campo {i + 1}</td>
                             <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)]">Valor {i + 1}</td>
                             <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)]">=</td>
-                            <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)]">Extra {i + 1}</td>
-                            <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)]">C6-{i + 1}</td>
-                            <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)]">C7-{i + 1}</td>
-                            <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)]">C8-{i + 1}</td>
-                            <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)]">C9-{i + 1}</td>
                             <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-right">
                                 <button className="text-red-500 hover:underline">Borrar</button>
                             </td>
