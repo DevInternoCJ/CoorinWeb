@@ -1,9 +1,8 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import LoginCard from "./LoginCard";
-import { useState } from "react";
-import PasswordChangeQuestion from "./changePassword/PasswordChangeQuestion";
-import ChangePassword from "./changePassword/ChangePassword";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import LoginCard from "./LoginCard"; // Ajusta la ruta si es necesario
+import PasswordChangeQuestion from "./changePassword/PasswordChangeQuestion"; // Ajusta la ruta
+import ChangePassword from "./changePassword/ChangePassword"; // Ajusta la ruta
 
 
 const LoginPage = () => {
@@ -14,8 +13,9 @@ const LoginPage = () => {
     <>
       <div className="min-h-screen min-w-screen flex justify-center p-4 bg-background-primary">
         <div className=" block justify-center items-center my-auto">
-          <LoginCard />
-          <div className=''>
+          {/* LoginCard ahora maneja su propio estado y la llamada a loginUser */}
+          <LoginCard /> 
+          <div>
             <button
               type="button"
               className="btn btn-primary"
@@ -38,6 +38,7 @@ const LoginPage = () => {
             >
               cambio
             </button>
+            {/* Este Link debe funcionar correctamente si tienes React Router configurado */}
             <button className="btn btn-primary">
               <Link to="/dashboardPage">dashboard</Link>
             </button>
