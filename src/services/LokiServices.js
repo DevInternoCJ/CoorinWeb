@@ -2,10 +2,10 @@ import axios from 'axios';
 
 // ¡ASEGÚRATE DE QUE ESTA ES LA URL CORRECTA!
 // Según tu curl, la base es http://192.168.7.33:8030
-const API_BASE_URL = 'http://192.168.7.33:8030/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
     // IMPORTANTE: El token de autorización NO DEBE IR AQUÍ para la petición de LOGIN.

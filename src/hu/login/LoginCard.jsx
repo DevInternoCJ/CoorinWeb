@@ -1,7 +1,7 @@
 // src/components/LoginCard.jsx
-import React, { useEffect } from 'react';
-import LoginForm from './LoginForm'; // Importamos LoginForm
-import LogoCoorin7 from '../../assets/logo_coorin_7.svg';
+import React, { useEffect } from "react";
+import LoginForm from "./LoginForm"; // Importamos LoginForm
+import LogoCoorin7 from "../../assets/logo_coorin_7.svg";
 
 const LoginCard = () => {
   useEffect(() => {
@@ -50,7 +50,9 @@ const LoginCard = () => {
           <div className="lg:w-1/2">
             <div className="w-full text-center md:pt-8 px-6">
               {/* <div id="card" className="perspective mt-5"> */}
-              <div id="logo-card" className="perspective mt-5"> {/* <--- CAMBIO AQUÍ: ID único */}
+              <div id="logo-card" className="perspective mt-5">
+                {" "}
+                {/* <--- CAMBIO AQUÍ: ID único */}
                 <img
                   src={LogoCoorin7}
                   alt="logo-coorin"
