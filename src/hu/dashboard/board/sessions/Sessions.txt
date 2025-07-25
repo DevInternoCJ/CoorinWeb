@@ -1,0 +1,17 @@
+ESTRUCTURA DE SESIONES
+
+Componentes:
+- SessionsComponent.jsx: Componente principal que muestra la tabla de sesiones activas
+
+Funcionalidades:
+- Visualización de sesiones de usuario activas
+- Información de inicio/fin de sesión
+- Ubicación e IP de acceso
+- Estado de las sesiones
+- Duración de las sesiones
+- Scroll horizontal y vertical para tablas grandes
+
+Estilos:
+- Uso de variables CSS personalizadas
+- Scrollbar personalizado
+- Tabla responsive con cabecera fija

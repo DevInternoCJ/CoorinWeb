@@ -2,11 +2,14 @@ import React, { useState } from "react";
 import DataDashConsul from "../../DataDashConsul";
 import { ExecutiveChart } from "../../DashboardIcons";
 import { IconCuentas, IconProductividad, IconGenerales, IconHistoricos } from "./IconesConsultations";
-import ModalConsultaCuentas from "./ModalConsultaCuentas";
-import ModalBase from "./ModalBase";
+import ModalConsultaCuentas from "./counts/ModalConsultaCuentas";
+import ModalBaseCuentas from "./counts/ModalBaseCuentas";
+import ModalConsultaProductividad from "./Productivity/ModalConsultaProductividad";
+import ModalBaseProductividad from "./Productivity/ModalBaseProductividad";
 
 const CardConsultations = () => {
     const [open, setOpen] = useState(false);
+    const [openProductividad, setOpenProductividad] = useState(false);
 
     return (
         <>
@@ -47,7 +50,13 @@ const CardConsultations = () => {
                         className="card card-sm sm:max-w-sm rounded-xl p-1 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer"
                         key={catalog.id}
                         style={{ backgroundColor: `var(--${catalog.color})` }}
-                        onClick={() => alert(`Click en ${catalog.title}`)}
+                        onClick={() => {
+                            if (catalog.title === "Productividad") {
+                                setOpenProductividad(true);
+                            } else {
+                                alert(`Click en ${catalog.title}`);
+                            }
+                        }}
                         tabIndex={0}
                         role="button"
                     >
@@ -89,12 +98,14 @@ const CardConsultations = () => {
                         <div className="card-footer text-center">
                             <p className="text-base-content group-hover:text-black transition-colors duration-200">Abrir</p>
                         </div>
-                    </div>
-                )
+                    </div>                )
             )}
-            <ModalBase open={open} onClose={() => setOpen(false)}>
+            <ModalBaseCuentas open={open} onClose={() => setOpen(false)}>
                 <ModalConsultaCuentas onClose={() => setOpen(false)} />
-            </ModalBase>
+            </ModalBaseCuentas>
+            <ModalBaseProductividad open={openProductividad} onClose={() => setOpenProductividad(false)}>
+                <ModalConsultaProductividad onClose={() => setOpenProductividad(false)} />
+            </ModalBaseProductividad>
         </>
     );
 };

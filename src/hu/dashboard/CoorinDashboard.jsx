@@ -1,5 +1,5 @@
 import React from "react";
-import GridExecutives from "./board/executives/gridExecutives";
+import GridExecutives from "./board/executives/GridExecutives";
 import GridConsultations from "./board/consultations/GridConsultations";
 import CoordinDashboard from "./board/consultations/CoordinDashboard";
 

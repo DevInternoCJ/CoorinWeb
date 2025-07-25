@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
-import "./modalBase.css";
+import "./modalBaseCuentas.css";
 
-const ModalBase = ({ open, onClose, children }) => {
+const ModalBaseCuentas = ({ open, children }) => {
     const [bounce, setBounce] = useState(false);
     const modalRef = useRef(null);
 
@@ -68,4 +68,4 @@ const ModalBase = ({ open, onClose, children }) => {
     );
 };
 
-export default ModalBase;
+export default ModalBaseCuentas;

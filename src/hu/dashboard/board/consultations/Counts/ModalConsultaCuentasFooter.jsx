@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { IconCustomTable } from "./IconesConsultations";
-import ModalSeleccionCampania from "./ModalSeleccionCampania";
+import { IconCustomTable } from "../IconesConsultations";
+import ModalSeleccionCampania from "../ModalCamapañas/ModalSeleccionCampania";
 
 const ModalConsultaCuentasFooter = () => {
     const [openSeleccionCampania, setOpenSeleccionCampania] = useState(false);
