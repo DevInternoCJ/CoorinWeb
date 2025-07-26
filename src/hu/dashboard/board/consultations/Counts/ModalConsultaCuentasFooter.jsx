@@ -11,14 +11,14 @@ const ModalConsultaCuentasFooter = () => {
                     {/* Botón Consultar centrado, alineado con la tabla Filtros (3/4) */}
                     <div className="flex justify-center items-center" style={{ width: "75%" }}>
                         <button
-                            className="bg-[var(--color-background-secondary)] text-white rounded px-6 py-2 font-semibold hover:bg-[var(--color-jerarquia3)] transition flex items-center gap-2"
+                            className="bg-[var(--color-background-secondary)] text-white rounded px-3 py-1 font-semibold hover:bg-[var(--color-jerarquia3)] transition flex items-center gap-2"
                             style={{ cursor: "pointer" }}
                         >
-                            Consultar
-                            <span className="material-icons text-base align-middle">table_view</span>
+                            Consultar table_view
+                            <span className="material-icons text-base align-middle"></span>
                         </button>
                         <IconCustomTable
-                            className="ml-2 size-6 cursor-pointer"
+                            className="size-8 cursor-pointer"
                             style={{ color: "var(--color-jerarquia3)" }}
                             onClick={() => setOpenSeleccionCampania(true)}
                         />

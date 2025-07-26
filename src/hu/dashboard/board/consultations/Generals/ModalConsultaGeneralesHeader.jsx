@@ -1,5 +1,5 @@
 import React from "react";
-import { IconCuentas } from "../IconesConsultations";
+import { IconGenerales } from "../IconesConsultations";
 
 // Flecha tipo chevron moderna
 const DropdownArrow = () => (
@@ -22,35 +22,17 @@ const DropdownArrow = () => (
     </span>
 );
 
-const ModalConsultaCuentasHeader = ({ onClose }) => (
+const ModalConsultaGeneralesHeader = ({ onClose }) => (
     <div className="flex items-center gap-4 mb-2 w-full">
         {/* Título alineado a la izquierda */}
         <h2 className="text-xl font-bold text-[var(--color-jerarquia3)] mb-1 flex justify-start items-center gap-2">
-            <IconCuentas className="size-6" />
-            Consulta cuentas - Coorin
+            <IconGenerales className="size-6" />
+            Consulta generales - Coorin
         </h2>
         {/* Elementos centrados en el modal */}
         <div className="flex-1 flex flex-row items-center justify-center">
             <div className="flex items-center gap-8">
-                <span className="text-base text-[var(--color-jerarquia4)] font-semibold">Cartera</span>
-                <span className="text-base text-[var(--color-jerarquia4)]">American Express</span>
-                <span className="text-base text-[var(--color-jerarquia4)] font-semibold ml-8">Producto</span>
                 <div className="relative">
-                    <select
-                        className="w-32 font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
-                    >
-                        <option>Amex</option>
-                    </select>
-                    <DropdownArrow />
-                </div>
-                <span className="text-base text-[var(--color-jerarquia4)] font-semibold ml-8">Consulta</span>
-                <div className="relative">
-                    <select
-                        className="w-32 font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
-                    >
-                        <option value=""> </option>
-                    </select>
-                    <DropdownArrow />
                 </div>
             </div>
         </div>
@@ -66,4 +48,4 @@ const ModalConsultaCuentasHeader = ({ onClose }) => (
     </div>
 );
 
-export default ModalConsultaCuentasHeader;
+export default ModalConsultaGeneralesHeader;

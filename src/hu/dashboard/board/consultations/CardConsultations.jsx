@@ -6,10 +6,13 @@ import ModalConsultaCuentas from "./counts/ModalConsultaCuentas";
 import ModalBaseCuentas from "./counts/ModalBaseCuentas";
 import ModalConsultaProductividad from "./Productivity/ModalConsultaProductividad";
 import ModalBaseProductividad from "./Productivity/ModalBaseProductividad";
+import ModalConsultaGenerales from "./Generals/ModalConsultaGenerales";
+import ModalBaseGenerales from "./Generals/ModalBaseGenerales";
 
 const CardConsultations = () => {
     const [open, setOpen] = useState(false);
     const [openProductividad, setOpenProductividad] = useState(false);
+    const [openGenerales, setOpenGenerales] = useState(false);
 
     return (
         <>
@@ -53,6 +56,8 @@ const CardConsultations = () => {
                         onClick={() => {
                             if (catalog.title === "Productividad") {
                                 setOpenProductividad(true);
+                            } else if (catalog.title === "Generales") {
+                                setOpenGenerales(true);
                             } else {
                                 alert(`Click en ${catalog.title}`);
                             }
@@ -106,6 +111,9 @@ const CardConsultations = () => {
             <ModalBaseProductividad open={openProductividad} onClose={() => setOpenProductividad(false)}>
                 <ModalConsultaProductividad onClose={() => setOpenProductividad(false)} />
             </ModalBaseProductividad>
+            <ModalBaseGenerales open={openGenerales} onClose={() => setOpenGenerales(false)}>
+                <ModalConsultaGenerales onClose={() => setOpenGenerales(false)} />
+            </ModalBaseGenerales>
         </>
     );
 };

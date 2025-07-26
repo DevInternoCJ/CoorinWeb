@@ -22,145 +22,165 @@ const DropdownArrow = () => (
 );
 
 const ModalProductividadContent = () => {
-    const [selectedPeriod, setSelectedPeriod] = useState("mensual");
-    const [selectedTeam, setSelectedTeam] = useState("todos");
-    const [selectedIndicator, setSelectedIndicator] = useState("productividad");
+    const [selectedExecutive, setSelectedExecutive] = useState("ALDF");
+    const [expandedNodes, setExpandedNodes] = useState({});
 
-    // Datos de ejemplo para la tabla de productividad por ejecutivo
-    const executiveData = [
-        { id: 5, negociaciones: 45, montoNegociaciones: 125000, saldoSolucionado: 98000, montoPromedio: 2778, saldo: 27000 },
-        { id: 7, negociaciones: 38, montoNegociaciones: 110000, saldoSolucionado: 87000, montoPromedio: 2895, saldo: 23000 },
-        { id: 8, negociaciones: 42, montoNegociaciones: 118000, saldoSolucionado: 95000, montoPromedio: 2810, saldo: 23000 },
-        { id: 9, negociaciones: 35, montoNegociaciones: 98000, saldoSolucionado: 78000, montoPromedio: 2800, saldo: 20000 },
-        { id: 10, negociaciones: 48, montoNegociaciones: 135000, saldoSolucionado: 108000, montoPromedio: 2813, saldo: 27000 },
-        { id: 11, negociaciones: 41, montoNegociaciones: 115000, saldoSolucionado: 92000, montoPromedio: 2805, saldo: 23000 },
-        { id: 12, negociaciones: 39, montoNegociaciones: 108000, saldoSolucionado: 86000, montoPromedio: 2769, saldo: 22000 },
-        { id: 13, negociaciones: 44, montoNegociaciones: 122000, saldoSolucionado: 97000, montoPromedio: 2773, saldo: 25000 },
-        { id: 14, negociaciones: 36, montoNegociaciones: 102000, saldoSolucionado: 81000, montoPromedio: 2833, saldo: 21000 },
-        { id: 15, negociaciones: 47, montoNegociaciones: 130000, saldoSolucionado: 105000, montoPromedio: 2766, saldo: 25000 },
-        { id: 16, negociaciones: 33, montoNegociaciones: 95000, saldoSolucionado: 76000, montoPromedio: 2879, saldo: 19000 },
-        { id: 17, negociaciones: 40, montoNegociaciones: 112000, saldoSolucionado: 89000, montoPromedio: 2800, saldo: 23000 },
-        { id: 18, negociaciones: 37, montoNegociaciones: 105000, saldoSolucionado: 84000, montoPromedio: 2838, saldo: 21000 },
-        { id: 19, negociaciones: 43, montoNegociaciones: 120000, saldoSolucionado: 96000, montoPromedio: 2791, saldo: 24000 },
-        { id: 20, negociaciones: 34, montoNegociaciones: 97000, saldoSolucionado: 77000, montoPromedio: 2853, saldo: 20000 },
-        { id: 21, negociaciones: 46, montoNegociaciones: 128000, saldoSolucionado: 102000, montoPromedio: 2783, saldo: 26000 },
-        { id: 22, negociaciones: 41, montoNegociaciones: 114000, saldoSolucionado: 91000, montoPromedio: 2780, saldo: 23000 }
-    ];
-
-    // Calcular totales
-    const totals = executiveData.reduce((acc, exec) => ({
-        negociaciones: acc.negociaciones + exec.negociaciones,
-        montoNegociaciones: acc.montoNegociaciones + exec.montoNegociaciones,
-        saldoSolucionado: acc.saldoSolucionado + exec.saldoSolucionado,
-        montoPromedio: 0,
-        saldo: acc.saldo + exec.saldo
-    }), { negociaciones: 0, montoNegociaciones: 0, saldoSolucionado: 0, montoPromedio: 0, saldo: 0 });
-
-    totals.montoPromedio = Math.round(totals.montoNegociaciones / totals.negociaciones);
-
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('es-MX', {
-            style: 'currency',
-            currency: 'MXN',
-            minimumFractionDigits: 0
-        }).format(amount);
+    const toggleExpanded = (executiveValue) => {
+        setExpandedNodes(prev => ({
+            ...prev,
+            [executiveValue]: !prev[executiveValue]
+        }));
     };
 
+    const getVisibleExecutives = () => {
+        const result = [];
+        
+        executiveOptions.forEach(executive => {
+            // Siempre mostrar nivel 1 (principales)
+            if (executive.level === 1) {
+                result.push(executive);
+                
+                // Mostrar subordinados solo si está expandido
+                if (expandedNodes[executive.value]) {
+                    const subordinates = executiveOptions.filter(sub => sub.parent === executive.value);
+                    subordinates.forEach(sub => {
+                        result.push(sub);
+                        
+                        // Mostrar subordinados de nivel 3 si el de nivel 2 está expandido
+                        if (expandedNodes[sub.value]) {
+                            const subSubordinates = executiveOptions.filter(subsub => subsub.parent === sub.value);
+                            result.push(...subSubordinates);
+                        }
+                    });
+                }
+            }
+        });
+        
+        return result;
+    };
+
+    // Datos de ramificación/ejecutivos con jerarquía
+    const executiveOptions = [
+        { value: "ALDF", label: "ALDF - Alan De La O Flores", level: 1, isManager: true },
+        { value: "JMPR", label: "JMPR - Juan Manuel Pérez Rodríguez", level: 2, isManager: false, parent: "ALDF" },
+        { value: "MAGS", label: "MAGS - María Alejandra González Sánchez", level: 2, isManager: false, parent: "ALDF" },
+        { value: "RAFM", label: "RAFM - Roberto Andrés Fernández Martín", level: 1, isManager: true },
+        { value: "LEVA", label: "LEVA - Leticia Esperanza Vargas Aguilar", level: 2, isManager: false, parent: "RAFM" },
+        { value: "JCHL", label: "JCHL - José Carlos Hernández López", level: 2, isManager: false, parent: "RAFM" },
+        { value: "AMRT", label: "AMRT - Ana María Ramírez Torres", level: 3, isManager: false, parent: "JCHL" },
+        { value: "DAFV", label: "DAFV - Daniel Antonio Flores Vázquez", level: 3, isManager: false, parent: "LEVA" }
+    ];
+
     return (
-        <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col" style={{ minWidth: 0 }}>
-            {/* Fila de filtros con label a la izquierda, selects centrados */}
-            <div className="flex items-center mb-2 w-full">
-                <span className="text-xs font-semibold pl-1 mr-4" style={{ color: "var(--color-jerarquia2)" }}>Filtros</span>
-                <div className="flex-1 flex justify-center">
-                    <div className="flex items-center gap-4">
-                        <div className="relative">
-                            <select 
-                                value={selectedIndicator}
-                                onChange={(e) => setSelectedIndicator(e.target.value)}
-                                className="w-32 font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
+        <div className="flex gap-4 h-full">
+            {/* Columna izquierda - Dropdown de Ejecutivos/Ramificación */}
+            <div className="w-72 bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex flex-col">
+                
+                <div className="space-y-1">
+                    {getVisibleExecutives().map((executive) => {
+                        const hasSubordinates = executiveOptions.some(sub => sub.parent === executive.value);
+                        const isExpanded = expandedNodes[executive.value];
+                        
+                        return (
+                            <div
+                                key={executive.value}
+                                className={`p-2 rounded cursor-pointer transition-colors border ${
+                                    selectedExecutive === executive.value
+                                        ? 'bg-[var(--color-jerarquia1)] border-[var(--color-jerarquia2)] text-white'
+                                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                                }`}
+                                style={{ 
+                                    marginLeft: `${(executive.level - 1) * 16}px`,
+                                    borderLeft: executive.level > 1 ? `3px solid var(--color-jerarquia${executive.level})` : 'none'
+                                }}
+                                onClick={() => setSelectedExecutive(executive.value)}
                             >
-                                <option value="productividad">Productividad</option>
-                                <option value="negociaciones">Negociaciones</option>
-                                <option value="rendimiento">Rendimiento</option>
-                            </select>
-                            <DropdownArrow />
-                        </div>
-                        <div className="relative">
-                            <select 
-                                value={selectedPeriod}
-                                onChange={(e) => setSelectedPeriod(e.target.value)}
-                                className="w-32 font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
-                            >
-                                <option value="diario">Diario</option>
-                                <option value="semanal">Semanal</option>
-                                <option value="mensual">Mensual</option>
-                                <option value="trimestral">Trimestral</option>
-                            </select>
-                            <DropdownArrow />
-                        </div>
-                        <div className="relative">
-                            <select 
-                                value={selectedTeam}
-                                onChange={(e) => setSelectedTeam(e.target.value)}
-                                className="w-45 font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
-                            >
-                                <option value="todos">Todos los equipos</option>
-                                <option value="ventas">Equipo de Ventas</option>
-                                <option value="cobranza">Equipo de Cobranza</option>
-                                <option value="atencion">Atención al Cliente</option>
-                            </select>
-                            <DropdownArrow />
-                        </div>
-                    </div>
+                                {/* Indicador de jerarquía */}
+                                <div className="flex items-center gap-2">
+                                    {/* Botón de expand/collapse para managers con subordinados */}
+                                    {hasSubordinates && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleExpanded(executive.value);
+                                            }}
+                                            className="text-xs font-bold text-[var(--color-jerarquia3)] hover:text-[var(--color-jerarquia4)] transition-colors"
+                                        >
+                                            {isExpanded ? '▼' : '▶'}
+                                        </button>
+                                    )}
+                                    
+                                    {executive.level > 1 && (
+                                        <span className="text-xs opacity-60">
+                                            {'└─'.repeat(executive.level - 1)}
+                                        </span>
+                                    )}
+                                    {executive.isManager && (
+                                        <span className="text-xs font-bold text-[var(--color-jerarquia3)]">
+                                            👑
+                                        </span>
+                                    )}
+                                    <div className="flex-1">
+                                        <div className={`text-xs font-semibold ${executive.isManager ? 'text-[var(--color-jerarquia3)]' : ''}`}>
+                                            {executive.value}
+                                        </div>
+                                        <div className="text-xs opacity-90">
+                                            {executive.label.split(' - ')[1]}
+                                        </div>
+                                        {executive.level > 1 && (
+                                            <div className="text-xs opacity-60 italic">
+                                                Reporta a: {executive.parent}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
-            {/* Tabla con scroll */}
-            <div
-                style={{
-                    overflowX: "auto",
-                    overflowY: "auto",
-                    maxHeight: "31vh",
-                    height: "100%",
-                    scrollbarColor: "#b0b0b0 #f5f5f5",
-                    scrollbarWidth: "thin",
-                    flex: 1
-                }}
-                className="scrollbar-gray"
-            >
-                <table className="text-xs mb-2 text-black" style={{ minWidth: "890px", width: "max-content" }}>
-                    <thead style={{ position: "sticky", top: 0, zIndex: 2, background: "var(--color-background-secondary)" }}>
-                        <tr className="bg-[var(--color-background-secondary)] text-white">
-                            <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)] rounded-tl-md">Ejecutivos</th>
-                            <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)]">Negociaciones</th>
-                            <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)]">MontoNegociaciones</th>
-                            <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)]">SaldoSolucionado</th>
-                            <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)]">MontoPromedio</th>
-                            <th className="px-2 py-1 text-center rounded-tr-md">Saldo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {executiveData.map((executive, i) => (
-                            <tr key={executive.id}>
-                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-center font-semibold">{executive.id}</td>
-                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-center">{executive.negociaciones}</td>
-                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-right">{formatCurrency(executive.montoNegociaciones)}</td>
-                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-right">{formatCurrency(executive.saldoSolucionado)}</td>
-                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-right">{formatCurrency(executive.montoPromedio)}</td>
-                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-right">{formatCurrency(executive.saldo)}</td>
+            {/* Columna derecha - Tabla de datos */}
+            <div className="flex-1 bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex flex-col" style={{ minWidth: 0 }}>
+                {/* Fila de filtros con label a la izquierda, selects centrados */}
+                <div className="flex items-center mb-2 w-full">
+                    <span className="text-xs font-semibold pl-1 mr-4" style={{ color: "var(--color-jerarquia2)" }}>Ejecutivos - 1</span>
+                </div>
+
+                {/* Tabla con scroll */}
+                <div
+                    style={{
+                        overflowX: "auto",
+                        overflowY: "auto",
+                        maxHeight: "31vh",
+                        height: "100%",
+                        scrollbarColor: "#b0b0b0 #f5f5f5",
+                        scrollbarWidth: "thin",
+                        flex: 1
+                    }}
+                    className="scrollbar-gray"
+                >
+                    <table className="text-xs mb-2 text-black" style={{ minWidth: "890px", width: "max-content" }}>
+                        <thead style={{ position: "sticky", top: 0, zIndex: 2, background: "var(--color-background-secondary)" }}>
+                            <tr className="bg-[var(--color-background-secondary)] text-white">
+                                <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)] rounded-tl-md">Extensión</th>
+                                <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)]">Ingreso</th>
+                                <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)]">PrimerGestión</th>
+                                <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)]">Modo</th>
+                                <th className="px-2 py-1 text-center rounded-tr-md">TiempoEnModo</th>
                             </tr>
-                        ))}
-                        {/* Fila de totales */}
-                        <tr className="bg-[var(--color-background-secondary)] text-white font-bold">
-                            <td className="px-2 py-1 text-center">Total</td>
-                            <td className="px-2 py-1 text-center">{totals.negociaciones}</td>
-                            <td className="px-2 py-1 text-right">{formatCurrency(totals.montoNegociaciones)}</td>
-                            <td className="px-2 py-1 text-right">{formatCurrency(totals.saldoSolucionado)}</td>
-                            <td className="px-2 py-1 text-right">{formatCurrency(totals.montoPromedio)}</td>
-                            <td className="px-2 py-1 text-right">{formatCurrency(totals.saldo)}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-center font-semibold">0</td>
+                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-center">09:14 a. m.</td>
+                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-center">01:29 p. m.</td>
+                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-center">Consulta</td>
+                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-center">3:59:52</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <style>{`
                 .scrollbar-gray::-webkit-scrollbar {
@@ -181,4 +201,3 @@ const ModalProductividadContent = () => {
 };
 
 export default ModalProductividadContent;
-                                    

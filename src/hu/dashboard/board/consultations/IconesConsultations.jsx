@@ -75,7 +75,7 @@ export const IconHistoricos = (props) => (
     </svg>
 );
 
-// Nuevo ícono para Tablas Personalizadas
+// Nuevo ícono para icono al lado del Boton Consultar 
 export const IconCustomTable = (props) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
