@@ -5,14 +5,17 @@ import { IconCuentas, IconProductividad, IconGenerales, IconHistoricos } from ".
 import ModalConsultaCuentas from "./counts/ModalConsultaCuentas";
 import ModalBaseCuentas from "./counts/ModalBaseCuentas";
 import ModalConsultaProductividad from "./Productivity/ModalConsultaProductividad";
-import ModalBaseProductividad from "./Productivity/ModalBaseProductividad";
+import ModalBaseProductividad from "./productivity/ModalBaseProductividad";
 import ModalConsultaGenerales from "./Generals/ModalConsultaGenerales";
 import ModalBaseGenerales from "./Generals/ModalBaseGenerales";
+import ModalConsultaHistoricos from "./Historical/ModalConsultaHistoricos";
+import ModalBaseHistoricos from "./Historical/ModalBaseHistoricos";
 
 const CardConsultations = () => {
     const [open, setOpen] = useState(false);
     const [openProductividad, setOpenProductividad] = useState(false);
     const [openGenerales, setOpenGenerales] = useState(false);
+    const [openHistoricos, setOpenHistoricos] = useState(false);
 
     return (
         <>
@@ -58,6 +61,8 @@ const CardConsultations = () => {
                                 setOpenProductividad(true);
                             } else if (catalog.title === "Generales") {
                                 setOpenGenerales(true);
+                            } else if (catalog.title === "Historicos") {
+                                setOpenHistoricos(true);
                             } else {
                                 alert(`Click en ${catalog.title}`);
                             }
@@ -114,6 +119,9 @@ const CardConsultations = () => {
             <ModalBaseGenerales open={openGenerales} onClose={() => setOpenGenerales(false)}>
                 <ModalConsultaGenerales onClose={() => setOpenGenerales(false)} />
             </ModalBaseGenerales>
+            <ModalBaseHistoricos open={openHistoricos} onClose={() => setOpenHistoricos(false)}>
+                <ModalConsultaHistoricos onClose={() => setOpenHistoricos(false)} />
+            </ModalBaseHistoricos>
         </>
     );
 };
