@@ -1,15 +1,21 @@
 import React from "react";
 import dataDash from "../../dataDash";
 import { ExecutiveChart } from "../../DashboardIcons";
+import { IconMetas, IconValidadores, IconEncargados, IconCatalogos, IconScripts, IconPantalla } from "./IconesEjecutives";
 const CardExecutive = () => {
   return (
     <>
       {dataDash.map((catalog) => (
         <div
-          className="card card-sm sm:max-w-sm rounded-xl p-1"
+          className="card card-sm sm:max-w-sm rounded-xl p-1 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer"
           key={catalog.id}
           style={{ backgroundColor: `var(--${catalog.color})` }}
+          tabIndex={0}
+          role="button"
+          onClick={() => alert(`Click en ${catalog.title}`)}
         >
+          {/* Máscara opaca al hacer hover */}
+          <div className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-15 transition-opacity duration-100 bg-black"></div>
           <div className="card-header">
             <h5
               className="card-title font-weight-600"
@@ -20,15 +26,46 @@ const CardExecutive = () => {
           </div>
           <div key={catalog.id} className="card-body">
             <div className="flex justify-center">
-              <ExecutiveChart
-                className="
-                size-8"
-                style={{ color: `var(--${catalog.fontcolor})` }}
-              />
+              {catalog.title === "Metas" ? (
+                <IconMetas
+                  className="size-8"
+                  style={{ color: `var(--${catalog.fontcolor})` }}
+                />
+              ) : catalog.title === "Validadores" ? (
+                <IconValidadores
+                  className="size-8"
+                  style={{ color: `var(--${catalog.fontcolor})` }}
+                />
+              ) : catalog.title === "Encargados" ? (
+                <IconEncargados
+                  className="size-8"
+                  style={{ color: `var(--${catalog.fontcolor})` }}
+                />
+              ) : catalog.title === "Catalogos" ? (
+                <IconCatalogos
+                  className="size-8"
+                  style={{ color: `var(--${catalog.fontcolor})` }}
+                />
+              ) : catalog.title === "Scripts" ? (
+                <IconScripts
+                  className="size-8"
+                  style={{ color: `var(--${catalog.fontcolor})` }}
+                />
+              ) : catalog.title === "Pantalla" ? (
+                <IconPantalla
+                  className="size-8"
+                  style={{ color: `var(--${catalog.fontcolor})` }}
+                />
+              ) : (
+                <ExecutiveChart
+                  className="size-8"
+                  style={{ color: `var(--${catalog.fontcolor})` }}
+                />
+              )}
             </div>
           </div>
           <div className="card-footer text-center">
-            <p className="text-base-content">Abrir</p>
+            <p className="text-base-content group-hover:text-black transition-colors duration-200">Abrir</p>
           </div>
         </div>
       ))}
