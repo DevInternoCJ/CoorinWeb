@@ -1,8 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import dataDash from "../../dataDash";
 import { ExecutiveChart } from "../../DashboardIcons";
 import { IconMetas, IconValidadores, IconEncargados, IconCatalogos, IconScripts, IconPantalla } from "./IconesEjecutives";
+import ModalMetasEjecutivos from "./ModalMetasEjecutivos";
 const CardExecutive = () => {
+  const [showMetasModal, setShowMetasModal] = useState(false);
+
+  const handleCardClick = (title) => {
+    if (title === "Metas") {
+      setShowMetasModal(true);
+    } else {
+      alert(`Click en ${title}`);
+    }
+  };
+
   return (
     <>
       {dataDash.map((catalog) => (
@@ -12,7 +23,7 @@ const CardExecutive = () => {
           style={{ backgroundColor: `var(--${catalog.color})` }}
           tabIndex={0}
           role="button"
-          onClick={() => alert(`Click en ${catalog.title}`)}
+          onClick={() => handleCardClick(catalog.title)}
         >
           {/* Máscara opaca al hacer hover */}
           <div className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-15 transition-opacity duration-100 bg-black"></div>
@@ -69,6 +80,11 @@ const CardExecutive = () => {
           </div>
         </div>
       ))}
+      
+      {/* Modal de Metas */}
+      {showMetasModal && (
+        <ModalMetasEjecutivos onClose={() => setShowMetasModal(false)} />
+      )}
     </>
   );
 };
