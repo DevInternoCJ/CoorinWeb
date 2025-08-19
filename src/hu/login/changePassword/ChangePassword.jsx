@@ -63,7 +63,7 @@ const ChangePassword = ({ onClose, show }) => {
       <div
         className="fixed top-0 left-0 w-full h-full bg-background-primary z-0"
       />
-      <div className="modal-content w-2xl z-10 relative bg-background-dashboard rounded-3xl shadow-2xl shadow-jerarquia4">
+      <div className=" w-2xl z-10 relative bg-background-dashboard rounded-3xl shadow-2xl shadow-jerarquia4">
         <div className="modal-header flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ArrowSync className="size-8 text-jerarquia4"/>
