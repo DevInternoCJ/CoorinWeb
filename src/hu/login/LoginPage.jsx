@@ -1,57 +1,27 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+// src/pages/LoginPage.jsx
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import LoginCard from "./LoginCard";
-import { useState } from "react";
-import PasswordChangeQuestion from "./changePassword/PasswordChangeQuestion";
-import ChangePassword from "./changePassword/ChangePassword";
-
 
 const LoginPage = () => {
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showPasswordContent, setShowPasswordContent] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
 
   return (
     <>
       <div className="min-h-screen min-w-screen flex justify-center p-4 bg-background-primary">
-        <div className=" block justify-center items-center my-auto">
-          <LoginCard />
-          <div>
-            <button
-              type="button"
-              className="btn btn-primary"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-              aria-controls="middle-center-modal"
-              data-overlay="#middle-center-modal"
-              onClick={() => setShowPasswordModal(true)}
-            >
-              gestor de contraseñas
-            </button>
-            <button
-              onClick={() => setShowChangePassword(true)}
-              type="button"
-              className="btn btn-primary"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-              aria-controls="tab-modal"
-              data-overlay="#tab-modal"
-            >
-              cambio de contraseña
-            </button>
-            <button className="btn btn-primary">
-              <Link to="/dashboardPage">dashboard</Link>
-            </button>
-          </div>
+        <div className="block justify-center items-center my-auto">
+          
+          {/* LoginCard con ambos contenidos */}
+          <LoginCard 
+            showPasswordContent={showPasswordContent}
+            showChangePassword={showChangePassword}
+            onClosePassword={() => setShowPasswordContent(false)}
+            onCloseChangePassword={() => setShowChangePassword(false)}
+          />
         </div>
       </div>
-      {showPasswordModal && (
-        <PasswordChangeQuestion onClose={() => setShowPasswordModal(false)} />
-      )}
-      {showChangePassword && (
-        <ChangePassword onClose={() => setShowChangePassword(false)} />
-      )}
     </>
   );
 };
-
 export default LoginPage;

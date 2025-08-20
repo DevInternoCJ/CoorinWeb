@@ -1,66 +1,90 @@
-import React from "react";
-import { useEffect } from 'react'
-import  LoginForm  from './LoginForm'
-import LogoCoorin7 from '../../assets/logo_coorin_7.svg';
+// src/components/LoginCard.jsx
+import React, { useState } from "react";
+import LogoCoorin7 from "../../assets/logo_coorin_7.svg";
+import LogicCard from "./LogicCard";
+import LoginForm from "./LoginForm";
+import PasswordChangeContent from "./changePassword/PasswordChangeContent";
+import ChangePassword from "./changePassword/ChangePassword";
 
-const LoginCard = () => {
+const LoginCard = ({
+  logo = LogoCoorin7,
+  formComponent = null,
+  children
+}) => {
+  const [showPasswordContent, setShowPasswordContent] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
-  useEffect(() => {
-    const card = document.getElementById("card");
-    if (!card) return;
+  // Función que se ejecuta cuando el login es exitoso
+  const handleLoginSuccess = () => {
+    // Aquí deberías verificar si la contraseña está por expirar
+    // Por ahora lo mostramos directamente para probar
+    setShowPasswordContent(true);
+  };
 
-    const img = card.querySelector("img");
-    if (!img) return;
+  // Función para manejar el click en "Sí"
+  const handleAcceptPasswordChange = () => {
+    setShowPasswordContent(false);
+    setShowChangePassword(true);
+  };
 
-    const handleMouseMove = (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = -(y - centerY) / 5;
-      const rotateY = (x - centerX) / 5;
+  // Función para cerrar PasswordChangeContent
+  const handleClosePasswordContent = () => {
+    setShowPasswordContent(false);
+  };
 
-      img.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-    };
+  // Función para cerrar ChangePassword
+  const handleCloseChangePassword = () => {
+    setShowChangePassword(false);
+  };
 
-    const handleMouseLeave = () => {
-      img.style.transform = "rotateX(0) rotateY(0) scale(1)";
-    };
-
-    card.addEventListener("mousemove", handleMouseMove);
-    card.addEventListener("mouseleave", handleMouseLeave);
-
-    return () => {
-      card.removeEventListener("mousemove", handleMouseMove);
-      card.removeEventListener("mouseleave", handleMouseLeave);
-    };
-  }, []);
+  const defaultContent = formComponent ? (
+    React.createElement(formComponent, { onLoginSuccess: handleLoginSuccess })
+  ) : (
+    <LoginForm onLoginSuccess={handleLoginSuccess} />
+  );
 
   return (
-    <>
-      <div className="bg-bgcolor1 shadow-2xl shadow-gray-500 rounded-4xl">
-        <div className="w-xs sm:w-md md:xl lg:w-3xl rounded-4xl h-4xl block lg:flex justify-center p-4 font-sans bg-cover bg-no-repeat bg-center bg-[url(/src/assets/backgroundLogin.svg)] ">
+    <div className="bg-bgcolor1 shadow-2xl shadow-gray-500 rounded-4xl">
+      <div className="w-xs sm:w-md md:xl lg:w-3xl rounded-4xl h-4xl block lg:flex justify-center p-4 font-sans bg-cover bg-no-repeat bg-center bg-[url(/src/assets/backgroundLogin.svg)]">
+        
+        {/* Logo - solo se muestra en login normal */}
+        {!showPasswordContent && !showChangePassword && (
           <div className="lg:w-1/2">
-            <div className=" w-full text-center md:pt-8 px-6">
-              <div id="card" className="perspective mt-5">
+            <div className="w-full text-center md:pt-8 px-6">
+              <LogicCard
+                id="login-logo-card"
+                intensity={5}
+                scale={1.05}
+                className="mt-5"
+              >
                 <img
-                  src={LogoCoorin7}
+                  src={logo}
                   alt="logo-coorin"
-                  className="mx-auto my-auto md:mt-5 h-auto max-w-[20vh] lg:max-w-[40vh] rotate-x-30 -rotate-y-30 
-                transition-transform duration-200 ease-out"
+                  className="mx-auto my-auto h-auto max-w-[20vh] lg:max-w-[40vh] rotate-x-30 -rotate-y-30 transition-transform duration-200 ease-out"
                 />
-              </div>
+              </LogicCard>
             </div>
-            <div></div>
           </div>
-          <LoginForm />
+        )}
+
+        {/* Contenido principal */}
+        <div className={(!showPasswordContent && !showChangePassword) ? "lg:w-1/2" : "w-full"}>
+          {showPasswordContent ? (
+            <PasswordChangeContent 
+              onClose={handleClosePasswordContent}
+              onAccept={handleAcceptPasswordChange}
+            />
+          ) : showChangePassword ? (
+            <ChangePassword 
+              onClose={handleCloseChangePassword} 
+              show={true} 
+            />
+          ) : (
+            children || defaultContent
+          )}
         </div>
-       
       </div>
-    
-    </>
+    </div>
   );
 };
-
 export default LoginCard;

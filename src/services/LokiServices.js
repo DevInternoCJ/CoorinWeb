@@ -1,26 +1,59 @@
-// src/api/api.js (o tu archivo de configuración de Axios)
-
 import axios from 'axios';
 
-// ¡CAMBIA ESTA LÍNEA!
-const API_BASE_URL = 'http://192.168.7.33:8030'; // La URL base de tu API
+const API_URL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
-    // Tus otros headers, como el de autorización, si los tienes
-    // 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
   },
 });
 
-// ... (El resto de tu configuración de interceptores y funciones de petición) ...
+// Interceptores
+api.interceptors.request.use(
+  config => {
+    // Si la URL es la de login, no añadas el token
+    if (config.url !== '/Auth/login') {
+      const token = localStorage.getItem('token'); 
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
 
-// Ejemplo de función de petición ajustada
+// --- NUEVA FUNCIÓN PARA EL INICIO DE SESIÓN ---
+export const loginUser = async (userData) => {
+  try {
+    const response = await api.post('/Auth/login', {
+      usuario: userData.usuario,
+      contrasenia: userData.contrasenia,
+      extension: 0,
+      bloqueo: 1,
+      dominio: "CONJUR",
+      computadora: "Coorin",
+      usuarioWindows: userData.usuarioWindows,
+      ip: "192.168.7.33:7000", 
+      aplicacion: "Coorin", 
+      version: "3.4.2", 
+      servidor: "Cronoss"
+    });
+
+    // La respuesta debería contener el token y la información del usuario
+    return response.data;
+  } catch (error) {
+    console.error('Error en el inicio de sesión:', error);
+    throw error;
+  }
+};
+
 export const getMyData = async () => {
   try {
-    // Axios automáticamente usará 'http://192.168.7.33:8030/scalar/...'
-    const response = await api.get('/scalar/'); // Si la raíz de tus endpoints es '/scalar/'
+    const response = await api.get('/scalar/');
     return response.data;
   } catch (error) {
     console.error('Error fetching data from local API:', error);
