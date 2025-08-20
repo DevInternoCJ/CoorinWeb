@@ -71,7 +71,7 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
           className="btn btn-text btn-circle btn-sm absolute end-0 -top-6 -right-6"
           aria-label="Close"
         >
-          <span className="hover:rotate-30 text-2xl text-neutral-900 hover:text-neutral-700">
+          <span className="hover:rotate-30 text-3xl text-red-900 hover:text-red-800 font-bold">
             ×
           </span>
         </button>

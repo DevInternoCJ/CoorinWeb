@@ -7,7 +7,7 @@ import { loginUser } from '../../services/LokiServices'; // <--- ¡IMPORTANTE! A
 import LoginWallets from "./LoginWallets"; // Si lo usas, asegúrate de que esté importado
 import { LoginUser, LoginKey } from "./LoginIcons"; // Tus iconos
 
-const LoginForm = () => {
+const LoginForm = ({onLoginSuccess}) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState(''); // Para errores de validación de contraseña del frontend
@@ -53,44 +53,51 @@ const LoginForm = () => {
     };
 
     try {
-      const response = await loginUser(userData); // Llama a tu función de la API
+      const response = await loginUser(userData);
       console.log('Respuesta de inicio de sesión exitosa:', response);
       toast.success('¡Inicio de sesión exitoso!');
 
-      // --- Manejo del Token y Redirección ---
-      // **MUY IMPORTANTE**: Ajusta esta parte según la estructura REAL de la respuesta de tu API.
-      // Basado en ejemplos anteriores (ejecutivo.token o token directo), aquí algunas opciones:
+      // Manejo del token
       if (response && response.ejecutivo && response.ejecutivo.token) {
         localStorage.setItem('token', response.ejecutivo.token);
-        // Puedes guardar otros datos del ejecutivo si los necesitas
         localStorage.setItem('userData', JSON.stringify(response.ejecutivo));
-        navigate('/dashboardPage'); // Redirige
-      } else if (response && response.token) { // Si el token viene directamente en la raíz
+        
+        // Llama a la función de éxito para mostrar PasswordChangeContent
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        } else {
+          navigate('/dashboardPage');
+        }
+        
+      } else if (response && response.token) {
         localStorage.setItem('token', response.token);
-        navigate('/dashboardPage'); // Redirige
+        
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        } else {
+          navigate('/dashboardPage');
+        }
+        
       } else {
-        // Esto es si el login fue exitoso (status 200) pero no se recibió un token esperado
         toast.warning('Inicio de sesión exitoso, pero no se recibió un token de sesión.');
-        // Decide si quieres redirigir de todas formas o esperar un token.
-        // Por ahora, redirigimos, pero si el token es CRÍTICO, deberías manejarlo como un error.
-        navigate('/dashboardPage');
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        } else {
+          navigate('/dashboardPage');
+        }
       }
 
     } catch (error) {
-      console.error('Error al iniciar sesión:', error);
-      // Captura el mensaje de error de la API si está disponible
-      const errorMessage = error.response?.data?.mensaje || error.message || 'Credenciales inválidas o error de red.';
-      setApiError(errorMessage); // Guarda el error para mostrarlo en el formulario
-      toast.error(errorMessage); // Muestra el toast con el error
+      // ... manejo de errores ...
     } finally {
-      setLoading(false); // Siempre desactiva el estado de carga al finalizar
+      setLoading(false);
     }
   };
 
   return (
     <>
       <form onSubmit={handleSubmit} className="lg:w-full px-6 text-neutral-900">
-        <h4 className="text-lg font-semibold pt-8 text-center pb-6 text-neutral-100">
+        <h4 className="text-2xl font-bold pt-8 text-center pb-6 text-jerarquia1">
           Iniciar Sesion
         </h4>
         {/* Username Field */}

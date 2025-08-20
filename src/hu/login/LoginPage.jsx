@@ -19,30 +19,6 @@ const LoginPage = () => {
             onClosePassword={() => setShowPasswordContent(false)}
             onCloseChangePassword={() => setShowChangePassword(false)}
           />
-          
-          <div className="mt-4 flex gap-2 justify-center">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => {
-                setShowPasswordContent(true);
-                setShowChangePassword(false);
-              }}
-            >
-              gestor
-            </button>
-            
-            <button
-              onClick={() => {
-                setShowChangePassword(true);
-                setShowPasswordContent(false);
-              }}
-              type="button"
-              className="btn btn-primary"
-            >
-              cambio
-            </button>
-          </div>
         </div>
       </div>
     </>

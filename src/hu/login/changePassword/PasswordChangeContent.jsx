@@ -2,7 +2,7 @@
 import React from "react";
 import { ExclamationKey } from "./PasswordIcons";
 
-const PasswordChangeContent = ({ onClose }) => {
+const PasswordChangeContent = ({ onClose, onAccept }) => { // <--- Añade onAccept
   return (
     <div className="flex flex-col justify-center items-center p-6 ">
       <div className="w-full relative mb-6">
@@ -27,12 +27,14 @@ const PasswordChangeContent = ({ onClose }) => {
         >
           No
         </button>
-        <button className="w-2/5 btn rounded-lg bg-jerarquia3 hover:bg-jerarquia2 border border-jerarquia3 hover:border-jerarquia4 text-background-dashboard hover:text-neutral-800 hover:shadow-lg hover:shadow-jerarquia3 transition-all duration-200 py-3 font-medium">
+        <button 
+          onClick={onAccept} // <--- Usa onAccept aquí
+          className="w-2/5 btn rounded-lg bg-jerarquia3 hover:bg-jerarquia2 border border-jerarquia3 hover:border-jerarquia4 text-background-dashboard hover:text-neutral-800 hover:shadow-lg hover:shadow-jerarquia3 transition-all duration-200 py-3 font-medium"
+        >
           Sí
         </button>
       </div>
     </div>
   );
 };
-
 export default PasswordChangeContent;
