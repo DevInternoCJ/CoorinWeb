@@ -117,7 +117,7 @@ const ModalProductividadContent = () => {
                                     )}
                                     {executive.isManager && (
                                         <span className="text-xs font-bold text-[var(--color-jerarquia3)]">
-                                            👑
+                                            🧑🏻‍💻
                                         </span>
                                     )}
                                     <div className="flex-1">

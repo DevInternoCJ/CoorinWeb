@@ -1,6 +1,0 @@
-Esta rama es para ti Uriel <3
-
-Aqui dentro podras hacer los merge necesarios de los cambios que vayan existiendo 
-De aqui parte para darle la rama que necesite cada dev y al final unes los cambios aqui 
-
---Loki 2025
