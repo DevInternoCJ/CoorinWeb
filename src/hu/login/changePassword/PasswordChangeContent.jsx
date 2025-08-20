@@ -2,8 +2,12 @@
 import React from "react";
 import { ExclamationKey } from "./PasswordIcons";
 import ButtonLogin from '../ButtonLogin'
+import { useNavigate } from 'react-router-dom'; // useNavigate
 
-const PasswordChangeContent = ({ onClose, onAccept }) => { // <--- Añade onAccept
+const PasswordChangeContent = ({ onClose, onAccept }) => { 
+  const handleNoClick = () => {
+    navigate('/dashboardPage'); // <--- Navegar programáticamente
+  };
   return (
     <div className="flex flex-col justify-center items-center p-6 ">
       <div className="w-full relative mb-6">
@@ -23,13 +27,13 @@ const PasswordChangeContent = ({ onClose, onAccept }) => { // <--- Añade onAcce
       <hr className="text-jerarquia1 w-full mb-8" />
       <div className="flex justify-between w-full gap-4">
         <button
-          onClick={onClose}
+          onClick={handleNoClick} 
           className="w-1/2 btn rounded-lg bg-red-700 border border-red-700 hover:border-jerarquia4 text-background-dashboard hover:text-jerarquia4 hover:bg-red-600 hover:shadow-lg hover:shadow-red-700 transition-all duration-200 py-3 font-medium"
         >
           No
         </button>
         <ButtonLogin
-          onClick={onAccept} // <--- Usa onAccept aquí
+          onClick={onAccept} 
         >
           Sí
         </ButtonLogin>
