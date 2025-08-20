@@ -18,6 +18,8 @@
   --color-background-primary: #f1f1dd;
   --color-background-secondary: #526581;
   --color-background-dashboard: #DEE5E5;
+
+
   }
 
 .perspective {
@@ -46,4 +48,60 @@
 }
 .input-floating-label:focus {
   border: 1.5px solid var(--color-jerarquia3);
+}
+
+
+/* Ejemplo: styles/sidebar.css */
+
+.sidebar-coorin {
+  background-color: var(--color-background-dashboard);
+  color: var(--color-jerarquia4);
+}
+
+.sidebar-coorin .menu-item {
+  color: var(--color-jerarquia4);
+  padding: 10px 12px;
+  border-radius: 0.375rem;
+  background-color: var(--color-background-dashboard);
+  
+}
+
+.sidebar-coorin .menu-item:hover {
+  background-color: var(--color-jerarquia2);
+  color: var(--color-bgcolor1);
+}
+
+.sidebar-coorin .menu-item.selected,
+.sidebar-coorin .menu-item.active {
+  background-color: var(--color-jerarquia1);
+  color: var(--color-jerarquia4);
+}
+
+.sidebar-coorin .divider {
+  color: var(--color-background-secondary);
+  border-color: var(--color-jerarquia3);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sidebar-coorin .divider::before,
+.sidebar-coorin .divider::after {
+  content: "";
+  flex: 1 1 0%;
+  height: 1px;
+  
+  display: block;
+  border-radius: 2px;
+}
+
+.sidebar-coorin .divider::before {
+  margin-right: 0.75rem;
+  background-color: var(--color-background-secondary);
+}
+
+.sidebar-coorin .divider::after {
+  margin-left: 0.75rem;
+  background-color: var(--color-background-secondary);
 }

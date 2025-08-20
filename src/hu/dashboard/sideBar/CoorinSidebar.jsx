@@ -51,7 +51,7 @@ const RenderSubMenus = ({ subMenus, parentId }) => (
           {nextSubMenuKey ? (
             <>
               <a
-                className="menu-item collapse-toggle collapse-open:bg-jerarquia4 text-bgcolor1"
+                className="menu-item collapse-toggle collapse-open:color-background-primary text-bgcolor1"
                 id={`submenu-${item.id}`}
                 data-collapse={`#submenu-${item.id}-collapse`}>
                 {item.icon && iconMap[item.icon] && (
