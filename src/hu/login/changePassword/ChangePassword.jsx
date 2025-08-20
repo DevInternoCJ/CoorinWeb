@@ -1,7 +1,9 @@
 // src/components/changePassword/ChangePassword.jsx (versión adaptada)
 import React, { useState, useEffect, useCallback } from "react";
-import { EyeOpen, EyeClosed, ArrowSync, LockSync } from "./PasswordIcons";
+import { EyeOpen, ArrowSync, LockSync } from "./PasswordIcons";
 import PASSWORD_REQUIREMENTS from "./Validations";
+import ButtonLogin from "../ButtonLogin";
+import EyeClose from '../../../assets/eye-close.svg'
 
 const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
   const [newPassword, setNewPassword] = useState('');
@@ -56,11 +58,11 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
 
   return (
     <div className="flex flex-col justify-center items-center p-6 w-full">
-      
+
       {/* Header adaptado para LoginCard */}
       <div className="w-full relative mb-6">
         <div className="flex items-center justify-start">
-          <ArrowSync className="size-8 text-jerarquia4"/>
+          <ArrowSync className="size-8 text-jerarquia4" />
           <h3 className="text-2xl font-bold text-jerarquia4 ml-3">
             Actualización de Contraseña
           </h3>
@@ -71,7 +73,7 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
           className="btn btn-text btn-circle btn-sm absolute end-0 -top-6 -right-6"
           aria-label="Close"
         >
-          <span className="hover:rotate-30 text-3xl text-red-900 hover:text-red-800 font-bold">
+          <span className="hover:rotate-30 text-3xl text-jerarquia1 hover:text-jerarquia2 font-bold">
             ×
           </span>
         </button>
@@ -89,23 +91,22 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
             tabIndex="-1"
             readOnly
           />
-          
+
           {/* Campo Nueva Contraseña */}
           <div className="flex items-end mb-4 relative">
             <div className="input-floating w-full relative">
               <input
                 type={showNewPassword ? "text" : "password"}
                 placeholder=""
-                className={`w-full pl-3 pr-10 text-neutral-900 py-2 text-sm bg-neutral-100 rounded-lg border focus:ring-2 focus:ring-jerarquia2 focus:outline-none ${
-                  newPassword.length > 0 &&
-                  (errors.minLengthError ||
-                    errors.uppercaseError ||
-                    errors.lowercaseError ||
-                    errors.numberError ||
-                    errors.symbolError)
+                className={`w-full pl-3 pr-10 text-neutral-900 py-2 text-sm bg-neutral-100 rounded-lg border focus:ring-2 focus:ring-jerarquia2 focus:outline-none ${newPassword.length > 0 &&
+                    (errors.minLengthError ||
+                      errors.uppercaseError ||
+                      errors.lowercaseError ||
+                      errors.numberError ||
+                      errors.symbolError)
                     ? "border-red-500 focus:border-red-500"
                     : "border-jerarquia2 focus:border-jerarquia2"
-                }`}
+                  }`}
                 value={newPassword}
                 onChange={handleNewPasswordChange}
                 maxLength={50}
@@ -126,9 +127,9 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
                 aria-label="Toggle password visibility"
               >
                 {showNewPassword ? (
-                  <EyeOpen className="size-5" />
+                  <EyeOpen className="size-5 text-neutral-900" />
                 ) : (
-                  <EyeClosed className="size-5" />
+                  <img src={EyeClose} alt="eye-close" className="size-5" />
                 )}
               </button>
             </div>
@@ -140,11 +141,10 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder=""
-                className={`w-full pl-3 pr-10 text-neutral-900 py-2 text-sm bg-neutral-100 rounded-lg border focus:ring-2 focus:ring-jerarquia2 focus:outline-none ${
-                  confirmPassword.length > 0 && errors.matchError
+                className={`w-full pl-3 pr-10 text-neutral-900 py-2 text-sm bg-neutral-100 rounded-lg border focus:ring-2 focus:ring-jerarquia2 focus:outline-none ${confirmPassword.length > 0 && errors.matchError
                     ? "border-red-500 focus:border-red-500"
                     : "border-jerarquia2 focus:border-jerarquia2"
-                }`}
+                  }`}
                 value={confirmPassword}
                 onChange={handleConfirmPasswordChange}
                 maxLength={50}
@@ -165,9 +165,9 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
                 aria-label="Toggle password visibility"
               >
                 {showConfirmPassword ? (
-                  <EyeOpen className="size-5" />
+                  <EyeOpen className="size-5 text-neutral-900" />
                 ) : (
-                  <EyeClosed className="size-5" />
+                  <img src={EyeClose} alt="eye-close" className="size-5" />
                 )}
               </button>
             </div>
@@ -182,18 +182,16 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
               {PASSWORD_REQUIREMENTS.map((req) => (
                 <li
                   key={req.key}
-                  className={`flex items-center ${
-                    errors[req.key] ? "text-red-900" : "text-jerarquia3"
-                  }`}
+                  className={`flex items-center ${errors[req.key] ? "text-red-900" : "text-jerarquia3"
+                    }`}
                 >
                   <span className="mr-2">{errors[req.key] ? "•" : "✓"}</span>{" "}
                   {req.label}
                 </li>
               ))}
               <li
-                className={`flex items-center ${
-                  errors.matchError ? "text-red-900" : "text-jerarquia3"
-                }`}
+                className={`flex items-center ${errors.matchError ? "text-red-900" : "text-jerarquia3"
+                  }`}
               >
                 <span className="mr-2">{errors.matchError ? "•" : "✓"}</span>{" "}
                 La nueva contraseña debe coincidir con su confirmación
@@ -201,18 +199,14 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
             </ul>
           </div>
         </div>
-
-        {/* Botón de enviar */}
         <div className="modal-footer mt-6">
-          <button
-            type="submit"
-            className="btn bg-jerarquia2 rounded-lg hover:bg-jerarquia3 text-jerarquia4 border border-jerarquia2 hover:border hover:border-jerarquia4 focus:ring-2 focus:ring-jerarquia1 hover:text-jerarquia1 hover:shadow-2xl hover:shadow-jerarquia4 w-full py-3"
+          <ButtonLogin
           >
             Actualizar{" "}
             <span>
               <LockSync className="size-4 rotate-40 hover:rotate-220 inline ml-2" />
             </span>
-          </button>
+          </ButtonLogin>
         </div>
       </form>
     </div>

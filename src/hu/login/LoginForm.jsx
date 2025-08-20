@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { toast } from 'sonner'; // Para notificaciones
 import { useNavigate } from 'react-router-dom'; // Para redirección
 import { loginUser } from '../../services/LokiServices'; // <--- ¡IMPORTANTE! Asegúrate de que esta ruta sea correcta
-
+import ButtonLogin from './ButtonLogin'
 import LoginWallets from "./LoginWallets"; // Si lo usas, asegúrate de que esté importado
 import { LoginUser, LoginKey } from "./LoginIcons"; // Tus iconos
 
@@ -162,13 +162,14 @@ const LoginForm = ({onLoginSuccess}) => {
           </div>
         </div>
         {/* <LoginWallets /> */}
-        <button
+         <ButtonLogin
           type="submit"
-          className="w-full bg-jerarquia2 text-neutral-900 hover:text-neutral-200 border border-jerarquia2 hover:border hover:border-jerarquia1  focus:ring-2 focus:ring-jerarquia1 py-2 px-4 mt-14 rounded-lg text-sm font-medium hover:bg-jerarquia3 focus:outline-none cursor-pointer transition duration-200 ease-in-out hover:shadow-lg hover:shadow-jerarquia2"
+          loading={loading}
           disabled={loading}
+          className="mt-14"
         >
           {loading ? 'Accediendo...' : 'Acceder'}
-        </button>
+        </ButtonLogin>
         <div className=" px-6 mt-3 rounded-4xl py-4  text-center">
           <p className="text-[10px] text-neutral-400">© 2025 Coorin</p>
           <p className="text-[10px] text-neutral-400 mt-1">
