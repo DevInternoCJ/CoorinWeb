@@ -2,6 +2,14 @@ import React from "react";
 import DropdownTipoInformacion from "./DropdownTipoInformacion";
 import InformacionPagoDropdown from "./DropdownComponents/InformacionPagoDropdown";
 import InformacionPagosReportDropdown from "./DropdownComponents/InformacionPagosReportDropdown";
+import InformacionErroneosDropdown from "./DropdownComponents/InformacionErroneosDropdown";
+import InformacionDomiciliosDropdown from "./DropdownComponents/InformacionDomiciliosDropdown";
+import InformacionCorreosDropdown from "./DropdownComponents/InformacionCorreosDropdown";
+import InformacionBusquedaDropdown from "./DropdownComponents/InformacionBusquedaDropdown";
+import InformacionOfrecimientosDropdown from "./DropdownComponents/InformacionOfrecimientosDropdown";
+import InformacionComentariosDropdown from "./DropdownComponents/InformacionComentariosDropdown";
+import InformacionListaNegraDropdown from "./DropdownComponents/InformacionListaNegraDropdown";
+import InformacionArrepentimientosDropdown from "./DropdownComponents/InformacionArrepentimientosDropdown";
 
 const ModalBaseInformacion = ({ children }) => {
     return (
@@ -33,6 +41,14 @@ const ModalBaseInformacion = ({ children }) => {
                     <DropdownTipoInformacion>
                         <InformacionPagoDropdown value="Pagos" />
                         <InformacionPagosReportDropdown value="Pagos reportados" />
+                        <InformacionErroneosDropdown value="Datos Erroneos" />
+                        <InformacionDomiciliosDropdown value="Domicilios" />
+                        <InformacionCorreosDropdown value="Correos" />
+                        <InformacionBusquedaDropdown value="Busqueda" />
+                        <InformacionOfrecimientosDropdown value="Ofrecimientos" />
+                        <InformacionComentariosDropdown value="Comentarios" />
+                        <InformacionListaNegraDropdown value="Lista Negra" />
+                        <InformacionArrepentimientosDropdown value="Arrepentimientos" />
                     </DropdownTipoInformacion>
                 </div>
                 {/* El resto del contenido va después del dropdown */}
