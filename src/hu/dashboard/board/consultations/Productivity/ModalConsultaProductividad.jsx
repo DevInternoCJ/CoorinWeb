@@ -2,23 +2,11 @@ import React from "react";
 import ModalProductividadHeader from "./ModalProductividadHeader";
 import ModalProductividadContent from "./ModalProductividadContent";
 import ModalProductividadFooter from "./ModalProductividadFooter";
-import ConsorcioLogo from "../../../../../assets/ConsorcioLetras_OLD.png";
+import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 
-// Flecha tipo chevron moderna
+// Flecha tipo chevron moderna usando clase global
 const DropdownArrow = () => (
-    <span
-        style={{
-            pointerEvents: "none",
-            position: "absolute",
-            right: "0.75rem",
-            top: "50%",
-            transform: "translateY(-50%)",
-            fontSize: "1.15rem",
-            color: "#2b463c",
-            display: "flex",
-            alignItems: "center"
-        }}
-    >
+    <span className="modal-dropdown-arrow">
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
             <path d="M6 8l4 4 4-4" stroke="#2b463c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
@@ -52,18 +40,10 @@ const ModalConsultaProductividad = ({ onClose }) => {
                         alignItems: "center", 
                         gap: "1rem" 
                     }}>
-                        <span style={{ 
-                            fontSize: "14px", 
-                            fontWeight: "600", 
-                            color: "var(--color-jerarquia4)" 
-                        }}>
-                            Indicadores
-                        </span>
-                        
+                        <span className="modal-span-1">Indicadores</span>
                         <div className="relative">
                             <select
-                                className="w-32 font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
-                                style={{ fontSize: "14px" }}
+                                className="modal-dropdown-select appearance-none w-32 font-semibold"
                             >
                                 <option value="sesiones">Sesiones</option>
                                 <option value="contactos">Contactos</option>
@@ -71,37 +51,23 @@ const ModalConsultaProductividad = ({ onClose }) => {
                             </select>
                             <DropdownArrow />
                         </div>
-                        
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                            <label style={{ 
-                                display: "flex", 
-                                alignItems: "center", 
-                                gap: "0.25rem",
-                                fontSize: "14px",
-                                color: "var(--color-jerarquia4)"
-                            }}>
+                        <div className="flex items-center gap-2">
+                            <label className="flex items-center gap-1 text-[var(--color-jerarquia4)] text-sm font-medium">
                                 <input 
                                     type="radio" 
                                     name="timeFilter" 
                                     value="dia" 
                                     defaultChecked 
-                                    style={{ margin: 0 }}
+                                    className="modal-radio"
                                 />
                                 Día
                             </label>
-                            
-                            <label style={{ 
-                                display: "flex", 
-                                alignItems: "center", 
-                                gap: "0.25rem",
-                                fontSize: "14px",
-                                color: "var(--color-jerarquia4)"
-                            }}>
+                            <label className="flex items-center gap-1 text-[var(--color-jerarquia4)] text-sm font-medium">
                                 <input 
                                     type="radio" 
                                     name="timeFilter" 
                                     value="hora" 
-                                    style={{ margin: 0 }}
+                                    className="modal-radio"
                                 />
                                 Hora
                             </label>
@@ -111,37 +77,21 @@ const ModalConsultaProductividad = ({ onClose }) => {
             </div>
 
             <div
+                className="flex flex-col gap-4 scrollbar-gray"
                 style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "1rem",
                     overflowY: "auto",
                     width: "100%",
                     minHeight: "400px",
                     maxHeight: "60vh",
                     padding: "1rem 0"
                 }}
-                className="modal-scroll-gray"
             >
                 <ModalProductividadContent />
             </div>
             <div style={{ width: "100%", overflowX: "auto" }}>
                 <ModalProductividadFooter />
             </div>
-            <style>{`
-                .modal-scroll-gray::-webkit-scrollbar {
-                    height: 8px;
-                    width: 8px;
-                    background: #f5f5f5;
-                }
-                .modal-scroll-gray::-webkit-scrollbar-thumb {
-                    background: #b0b0b0;
-                    border-radius: 4px;
-                }
-                .modal-scroll-gray::-webkit-scrollbar-thumb:hover {
-                    background: #888;
-                }
-            `}</style>
+            {/* El scroll personalizado ahora se maneja solo con la clase global scrollbar-gray */}
         </div>
     );
 };

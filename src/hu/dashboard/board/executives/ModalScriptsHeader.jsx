@@ -1,7 +1,7 @@
 import React from "react";
-import { IconMetas } from "./IconesEjecutives";
+import { IconScripts } from "./IconesEjecutives";
 
-const ModalMetasHeader = ({ onClose }) => {
+const ModalScriptsHeader = ({ onClose }) => {
     return (
         <div style={{ 
             display: "flex", 
@@ -10,14 +10,15 @@ const ModalMetasHeader = ({ onClose }) => {
             borderBottom: "2px solid var(--color-jerarquia1)",
             paddingBottom: "1rem"
         }}>
+
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <IconMetas 
+                <IconScripts 
                     className="size-6" 
                     style={{ color: "var(--color-jerarquia3)" }}
                 />
                 <div>
                     <h2 className="text-xl font-bold text-[var(--color-jerarquia3)] mb-1 flex justify-start">
-                        Metas diarias ejecutivos - Coorin
+                        Scripts - Coorin
                     </h2>
                 </div>
             </div>
@@ -36,4 +37,4 @@ const ModalMetasHeader = ({ onClose }) => {
     );
 };
 
-export default ModalMetasHeader;
+export default ModalScriptsHeader;

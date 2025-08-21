@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ConsorcioLogo from "../../../../assets/ConsorcioLetras_OLD.png";
+import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
 
 // Flecha tipo chevron moderna
 const DropdownArrow = () => (
@@ -76,12 +76,12 @@ const ModalMetasContent = () => {
                 {/* Columna izquierda - Logo y Ramificación de Ejecutivos */}
                 <div className="w-72 flex flex-col gap-3">
                     {/* Logo del Consorcio Jurídico centrado arriba de la ramificación */}
-                    <div className="flex justify-center items-center bg-white rounded-lg p-2 shadow border border-[var(--color-jerarquia1)]">
+                    <div className="flex justify-center items-center bg-white rounded-lg p-3 ">
                         <img 
                             src={ConsorcioLogo} 
                             alt="Consorcio Jurídico" 
                             style={{ 
-                                height: "40px", 
+                                height: "65px", 
                                 width: "auto",
                                 objectFit: "contain"
                             }}
@@ -351,7 +351,7 @@ const ModalMetasContent = () => {
                                         <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>
                                             {selectedExecutive} - {executiveOptions.find(exec => exec.value === selectedExecutive)?.label.split(' - ')[1] || "Ejecutivo"}
                                         </td>
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>usuario{i + 1}</td>
+                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>ALDF{i + 1}</td>
                                         <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>{Math.floor(Math.random() * 100)}</td>
                                         <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>{Math.floor(Math.random() * 50)}</td>
                                         <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>{Math.floor(Math.random() * 30)}</td>

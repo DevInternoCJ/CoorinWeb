@@ -9,10 +9,9 @@ const ModalConsultaCuentasFooter = () => {
             <div className="flex flex-col items-center gap-4 mt-4">
                 <div className="flex flex-row w-full items-center">
                     {/* Botón Consultar centrado, alineado con la tabla Filtros (3/4) */}
-                    <div className="flex justify-center items-center" style={{ width: "75%" }}>
+                    <div className="flex justify-center items-center" style={{ width: "67%" }}>
                         <button
-                            className="bg-[var(--color-background-secondary)] text-white rounded px-3 py-1 font-semibold hover:bg-[var(--color-jerarquia3)] transition flex items-center gap-2"
-                            style={{ cursor: "pointer" }}
+                            className="modal-btn modal-btn-primary flex items-center gap-2"
                         >
                             Consultar table_view
                             <span className="material-icons text-base align-middle"></span>
@@ -24,23 +23,23 @@ const ModalConsultaCuentasFooter = () => {
                         />
                     </div>
                     {/* Radios alineados con la tabla Columnas (1/4) */}
-                    <div className="flex justify-center items-center gap-8 pr-2" style={{ width: "25%" }}>
+                    <div className="flex justify-center items-center " style={{ width: "33%" }}>
                         <label className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10]`}>
                             <input
                                 type="radio"
                                 name="tipo"
                                 defaultChecked
-                                className="w-4 h-4 accent-[var(--color-jerarquia3)]"
+                                className="modal-radio"
                             />
-                            <span className="text-base text-[var(--color-jerarquia4)] font-semibold">Contar</span>
+                            <span className="modal-span-1">Contar</span>
                         </label>
                         <label className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10]`}>
                             <input
                                 type="radio"
                                 name="tipo"
-                                className="w-4 h-4 accent-[var(--color-jerarquia3)]"
+                                className="modal-radio"
                             />
-                            <span className="text-base text-[var(--color-jerarquia4)] font-semibold">Detalle</span>
+                            <span className="modal-span-1">Detalle</span>
                         </label>
                     </div>
                 </div>
@@ -52,61 +51,32 @@ const ModalConsultaCuentasFooter = () => {
                             overflowY: "auto",
                             maxHeight: "20vh",
                             width: "100%",
-                            scrollbarColor: "#b0b0b0 #f5f5f5",
-                            scrollbarWidth: "thin"
                         }}
                         className="scrollbar-gray"
                     >
-                        <table className="w-full text-xs mb-2 min-w-[1400px] bg-white text-black">
-                            <thead style={{ position: "sticky", top: 0, zIndex: 2, background: "var(--color-background-secondary)" }}>
-                                <tr className="bg-[var(--color-background-secondary)] text-white">
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)] rounded-tl-md">Columna 1</th>
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Columna 2</th>
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Columna 3</th>
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Columna 4</th>
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Columna 5</th>
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Columna 6</th>
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Columna 7</th>
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Columna 8</th>
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Columna 9</th>
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Columna 10</th>
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Columna 11</th>
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Columna 12</th>
-                                    <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)]">Columna 13</th>
-                                    <th className="px-2 py-1 text-left rounded-tr-md">Columna 14</th>
+                        <table className="modal-table">
+                            <thead>
+                                <tr>
+                                    {Array.from({ length: 14 }).map((_, j) => (
+                                        <th key={j}>Columna {j + 1}</th>
+                                    ))}
                                 </tr>
                             </thead>
                             <tbody>
                                 {Array.from({ length: 25 }).map((_, i) => (
                                     <tr key={i}>
                                         {Array.from({ length: 14 }).map((_, j) => (
-                                            <td key={j} className="px-2 py-1 border-b border-[var(--color-jerarquia1)]">
-                                                Dato {j + 1}-{i + 1}
-                                            </td>
+                                            <td key={j}>Dato {j + 1}-{i + 1}</td>
                                         ))}
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-                    <style>{`
-                        .scrollbar-gray::-webkit-scrollbar {
-                            height: 8px;
-                            width: 8px;
-                            background: #f5f5f5;
-                        }
-                        .scrollbar-gray::-webkit-scrollbar-thumb {
-                            background: #b0b0b0;
-                            border-radius: 4px;
-                        }
-                        .scrollbar-gray::-webkit-scrollbar-thumb:hover {
-                            background: #888;
-                        }
-                    `}</style>
                 </div>
             </div>
-            <div className="w-full mt-8 mb-2 flex justify-start">
-                <span className="text-base text-gray-500">
+            <div className="modal-footer-help">
+                <span className="modal-span-2 text-gray-500">
                     Indique los parámetros que desea buscar y presione Agregar.
                 </span>
             </div>

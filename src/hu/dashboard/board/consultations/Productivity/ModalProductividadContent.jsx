@@ -65,17 +65,38 @@ const ModalProductividadContent = () => {
         { value: "JMPR", label: "JMPR - Juan Manuel Pérez Rodríguez", level: 2, isManager: false, parent: "ALDF" },
         { value: "MAGS", label: "MAGS - María Alejandra González Sánchez", level: 2, isManager: false, parent: "ALDF" },
         { value: "RAFM", label: "RAFM - Roberto Andrés Fernández Martín", level: 1, isManager: true },
-        { value: "LEVA", label: "LEVA - Leticia Esperanza Vargas Aguilar", level: 2, isManager: false, parent: "RAFM" },
-        { value: "JCHL", label: "JCHL - José Carlos Hernández López", level: 2, isManager: false, parent: "RAFM" },
+        { value: "LEVA", label: "LEVA - Leticia Esperanza Vargas Aguilar Leticia Esperanza Vargas Aguilar ", level: 2, isManager: false, parent: "RAFM" },
+        { value: "JCHL", label: "JCHL - ", level: 2, isManager: false, parent: "RAFM" },
         { value: "AMRT", label: "AMRT - Ana María Ramírez Torres", level: 3, isManager: false, parent: "JCHL" },
-        { value: "DAFV", label: "DAFV - Daniel Antonio Flores Vázquez", level: 3, isManager: false, parent: "LEVA" }
+        { value: "DAFV", label: "DAFV - Daniel Antonio Flores Vázquez", level: 3, isManager: false, parent: "LEVA" },
+        // Más ejemplos para pruebas de scroll y ancho
+        { value: "MGR1", label: "MGR1 - Manager Uno", level: 1, isManager: true },
+        { value: "EMP1", label: "EMP1 - Empleado Uno", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP2", label: "EMP2 - Empleado Dos", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP3", label: "EMP3 - Empleado Tres", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP4", label: "EMP4 - Empleado Cuatro", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP5", label: "EMP5 - Empleado Cinco", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP6", label: "EMP6 - Empleado Seis", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP7", label: "EMP7 - Empleado Siete", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP8", label: "EMP8 - Empleado Ocho", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP9", label: "EMP9 - Empleado Nueve", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP10", label: "EMP10 - Empleado Diez", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP11", label: "EMP11 - Empleado Once", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP12", label: "EMP12 - Empleado Doce", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP13", label: "EMP13 - Empleado Trece", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP14", label: "EMP14 - Empleado Catorce", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP15", label: "EMP15 - Empleado Quince", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP16", label: "EMP16 - Empleado Dieciséis", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP17", label: "EMP17 - Empleado Diecisiete", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP18", label: "EMP18 - Empleado Dieciocho", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP19", label: "EMP19 - Empleado Diecinueve", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP20", label: "EMP20 - Empleado Veinte", level: 2, isManager: false, parent: "MGR1" }
     ];
 
     return (
         <div className="flex gap-4 h-full">
             {/* Columna izquierda - Dropdown de Ejecutivos/Ramificación */}
-            <div className="w-72 bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex flex-col">
-                
+            <div className="productividad-branch" style={{overflowX: 'auto', overflowY: 'auto', maxHeight: '56vh', width: '18rem'}}>
                 <div className="space-y-1">
                     {getVisibleExecutives().map((executive) => {
                         const hasSubordinates = executiveOptions.some(sub => sub.parent === executive.value);
@@ -87,7 +108,7 @@ const ModalProductividadContent = () => {
                                 className={`p-2 rounded cursor-pointer transition-colors border ${
                                     selectedExecutive === executive.value
                                         ? 'bg-[var(--color-jerarquia1)] border-[var(--color-jerarquia2)] text-white'
-                                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                                        : 'bg-white border-[var(--color-jerarquia1)] hover:bg-gray-100'
                                 }`}
                                 style={{ 
                                     marginLeft: `${(executive.level - 1) * 16}px`,
@@ -117,7 +138,7 @@ const ModalProductividadContent = () => {
                                     )}
                                     {executive.isManager && (
                                         <span className="text-xs font-bold text-[var(--color-jerarquia3)]">
-                                            🧑🏻‍💻
+                                            👑
                                         </span>
                                     )}
                                     <div className="flex-1">
@@ -144,7 +165,7 @@ const ModalProductividadContent = () => {
             <div className="flex-1 bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex flex-col" style={{ minWidth: 0 }}>
                 {/* Fila de filtros con label a la izquierda, selects centrados */}
                 <div className="flex items-center mb-2 w-full">
-                    <span className="text-xs font-semibold pl-1 mr-4" style={{ color: "var(--color-jerarquia2)" }}>Ejecutivos - 1</span>
+                    <span className="modal-span-1 pl-1 mr-4">Ejecutivos - 1</span>
                 </div>
 
                 {/* Tabla con scroll */}
@@ -154,29 +175,27 @@ const ModalProductividadContent = () => {
                         overflowY: "auto",
                         maxHeight: "31vh",
                         height: "100%",
-                        scrollbarColor: "#b0b0b0 #f5f5f5",
-                        scrollbarWidth: "thin",
                         flex: 1
                     }}
                     className="scrollbar-gray"
                 >
-                    <table className="text-xs mb-2 text-black" style={{ minWidth: "890px", width: "max-content" }}>
-                        <thead style={{ position: "sticky", top: 0, zIndex: 2, background: "var(--color-background-secondary)" }}>
-                            <tr className="bg-[var(--color-background-secondary)] text-white">
-                                <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)] rounded-tl-md">Extensión</th>
-                                <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)]">Ingreso</th>
-                                <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)]">PrimerGestión</th>
-                                <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)]">Modo</th>
-                                <th className="px-2 py-1 text-center rounded-tr-md">TiempoEnModo</th>
+                    <table className="modal-table mb-2">
+                        <thead>
+                            <tr>
+                                <th>Extensión</th>
+                                <th>Ingreso</th>
+                                <th>PrimerGestión</th>
+                                <th>Modo</th>
+                                <th>TiempoEnModo</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-center font-semibold">0</td>
-                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-center">09:14 a. m.</td>
-                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-center">01:29 p. m.</td>
-                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-center">Consulta</td>
-                                <td className="px-2 py-1 border-b border-[var(--color-jerarquia1)] text-center">3:59:52</td>
+                                <td className="font-semibold">0</td>
+                                <td>09:14 a. m.</td>
+                                <td>01:29 p. m.</td>
+                                <td>Consulta</td>
+                                <td>3:59:52</td>
                             </tr>
                         </tbody>
                     </table>

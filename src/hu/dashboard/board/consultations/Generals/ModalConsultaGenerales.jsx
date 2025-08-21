@@ -3,7 +3,7 @@ import ModalConsultaGeneralesHeader from "./ModalConsultaGeneralesHeader";
 import ModalConsultaGeneralesFiltros from "./ModalConsultaGeneralesFiltros";
 import ModalConsultaGeneralesColumnas from "./ModalConsultaGeneralesColumnas";
 import ModalConsultaGeneralesFooter from "./ModalConsultaGeneralesFooter";
-import ConsorcioLogo from "../../../../../assets/ConsorcioLetras_OLD.png";
+import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 
 // Flecha tipo chevron moderna
 const DropdownArrow = () => (

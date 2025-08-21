@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ConsorcioLogo from "../../../../../assets/ConsorcioLetras_OLD.png";
+import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 
 const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
     const [isIndividual, setIsIndividual] = useState();

@@ -1,13 +1,14 @@
 import React from "react";
 
-const ModalMetasFooter = () => {
+const ModalPantallaFooter = () => {
     return (
         <div className="flex justify-between items-end mt-6 pt-4 border-t-2 border-[var(--color-jerarquia1)]">
             <div className="text-sm text-[var(--color-jerarquia3)] font-medium">
-                Seleccione los ejecutivos para guardar sus Metas Diarias
+                <div>Editando</div>
             </div>
         </div>
     );
 };
 
-export default ModalMetasFooter;
+
+export default ModalPantallaFooter;

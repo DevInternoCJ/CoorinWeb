@@ -1,20 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
+import ModalScriptsHeader from "./ModalScriptsHeader";
+import ModalScriptsContent from "./ModalScriptsContent";
+import ModalScriptsFooter from "./ModalScriptsFooter";
 
-const ModalBaseHistoricos = ({ open, children }) => {
+const ModalScriptsEjecutivos = ({ onClose }) => {
     const [bounce, setBounce] = useState(false);
     const [shakeAnimation, setShakeAnimation] = useState(false);
     const modalRef = useRef(null);
 
     // Siempre define los hooks antes de cualquier return o condicional
     useEffect(() => {
-        if (open) {
-            setBounce(true);
-            const timer = setTimeout(() => setBounce(false), 200);
-            return () => clearTimeout(timer);
-        }
-    }, [open]);
-
-    if (!open) return null;
+        setBounce(true);
+        const timer = setTimeout(() => setBounce(false), 200);
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleBackdropClick = (e) => {
         if (modalRef.current && !modalRef.current.contains(e.target)) {
@@ -56,7 +55,39 @@ const ModalBaseHistoricos = ({ open, children }) => {
                 }}
                 className={`scrollbar-gray${shakeAnimation ? " animate-shake-modal" : ""}`}
             >
-                {children}
+                <div className="modal-xl-container" style={{ width: "70vw", maxWidth: "70vw", overflowX: "hidden" }}>
+                    <ModalScriptsHeader onClose={onClose} />
+                    
+                    <div style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0",
+                        height: "calc(100% - 80px)", // Altura ajustada para mostrar el footer
+                        overflow: "hidden"
+                    }}>
+                        {/* Contenido principal con los scripts */}
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            width: "100%",
+                            flex: 1,
+                            overflow: "hidden"
+                        }}>
+                            <ModalScriptsContent />
+                        </div>
+
+                        {/* Footer con mensaje informativo - siempre visible */}
+                        <div style={{
+                            padding: "0.5rem 0",
+                            backgroundColor: "#f9fafb",
+                            borderTop: "1px solid #e5e7eb",
+                            borderRadius: "0 0 8px 8px",
+                            flexShrink: 0
+                        }}>
+                            <ModalScriptsFooter />
+                        </div>
+                    </div>
+                </div>
             </div>
             <style>{`
                 @keyframes shake-modal {
@@ -87,4 +118,4 @@ const ModalBaseHistoricos = ({ open, children }) => {
     );
 };
 
-export default ModalBaseHistoricos;
+export default ModalScriptsEjecutivos;
