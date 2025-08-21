@@ -49,14 +49,13 @@ export const loginUser = async (userData) => {
   }
 };
 
-export const ValidatePassword = async (userData) => {
+export const ValidatePassword = async (userData, idEjecutivo) => {
   try {
-    const response = await api.post('/Auth/login', {
+    const response = await api.post('/Auth/validar-contrasenia', {
       contrasenia: userData.contrasenia,
-      servidor: "Cronoss"
-      
+      servidor: "Cronoss",
+      idEjecutivo
     });
-
     // La respuesta debería contener el token y la información del usuario
     return response.data;
   } catch (error) {
@@ -65,6 +64,23 @@ export const ValidatePassword = async (userData) => {
   }
 };
 
+export const UpdatePassword = async (passwordData) => {
+  try {
+    // Obtener el token del localStorage
+    const token = localStorage.getItem('token');
+    
+    const response = await api.post('/Auth/restablecer-contrasenia', passwordData, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // Agregar el token de autorización
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar la contraseña:', error);
+    throw error;
+  }
+};
 
 
 
