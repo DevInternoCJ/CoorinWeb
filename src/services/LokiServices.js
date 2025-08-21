@@ -26,7 +26,7 @@ api.interceptors.request.use(
   }
 );
 
-// --- NUEVA FUNCIÓN PARA EL INICIO DE SESIÓN ---
+// --- ENDPOINT PARA EL INICIO DE SESIÓN ---
 export const loginUser = async (userData) => {
   try {
     const response = await api.post('/Auth/login', {
@@ -37,10 +37,24 @@ export const loginUser = async (userData) => {
       dominio: "CONJUR",
       computadora: "Coorin",
       usuarioWindows: userData.usuarioWindows,
-      ip: "192.168.7.33:7000", 
+      ip: API_URL, 
       aplicacion: "Coorin", 
       version: "3.4.2", 
       servidor: "Cronoss"
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error en el inicio de sesión:', error);
+    throw error;
+  }
+};
+
+export const ValidatePassword = async (userData) => {
+  try {
+    const response = await api.post('/Auth/login', {
+      contrasenia: userData.contrasenia,
+      servidor: "Cronoss"
+      
     });
 
     // La respuesta debería contener el token y la información del usuario
@@ -51,14 +65,6 @@ export const loginUser = async (userData) => {
   }
 };
 
-export const getMyData = async () => {
-  try {
-    const response = await api.get('/scalar/');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching data from local API:', error);
-    throw error;
-  }
-};
 
-export default api;
+
+
