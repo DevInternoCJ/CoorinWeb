@@ -1,15 +1,19 @@
-// src/components/changePassword/ChangePassword.jsx (versión adaptada)
+// src/components/changePassword/ChangePassword.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import { EyeOpen, ArrowSync, LockSync } from "./PasswordIcons";
 import PASSWORD_REQUIREMENTS from "./Validations";
 import ButtonLogin from "../ButtonLogin";
-import EyeClose from '../../../assets/eye-close.svg'
+import EyeClose from '../../../assets/eye-close.svg';
+import { UpdatePassword } from '../../../services/LokiServices';
 
-const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
+const ChangePassword = ({ onClose }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const [username, setUsername] = useState(''); // Estado para el username
 
   // Estado de errores
   const [errors, setErrors] = useState({
@@ -20,6 +24,14 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
     symbolError: false,
     matchError: false,
   });
+
+  // Obtener el username del localStorage al cargar el componente
+  useEffect(() => {
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
 
   // Validación de contraseña
   const validatePassword = useCallback((pwd, confirmPwd) => {
@@ -44,16 +56,47 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
     setTimeout(() => setter(false), 400);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     validatePassword(newPassword, confirmPassword);
+    
+    // Verificar si hay errores de validación
     const hasError = Object.values(errors).some(Boolean);
     if (hasError) {
       console.log('Errores de validación. No se puede actualizar la contraseña.');
       return;
     }
-    console.log('Contraseña actualizada:', newPassword);
-    onClose();
+    
+    // Si no hay errores, proceder con el cambio de contraseña
+    setLoading(true);
+    setApiError('');
+    
+    try {
+      // Obtener datos del usuario desde localStorage
+      if (!username) {
+        throw new Error('No se pudo obtener el usuario');
+      }
+      
+      // Llamar al endpoint UpdatePassword con el username
+      const response = await UpdatePassword({
+        usuario: username, // Usar el username obtenido
+        servidor: "Cronoss",
+        nuevaContra: newPassword,
+         contra: confirmPassword
+      });
+      
+      console.log('Contraseña actualizada exitosamente:', response);
+      
+      // Mostrar mensaje de éxito y cerrar el modal
+      alert('Contraseña actualizada exitosamente');
+      onClose();
+      
+    } catch (error) {
+      console.error('Error al cambiar la contraseña:', error);
+      setApiError(error.message || 'Error al cambiar la contraseña. Intenta nuevamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -113,6 +156,7 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
                 required
                 autoComplete="new-password"
                 id="new-password-floating"
+                disabled={loading}
               />
               <label
                 className="input-floating-label block text-sm font-medium text-neutral-500"
@@ -125,6 +169,7 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
                 onClick={() => togglePasswordVisibility(setShowNewPassword)}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500"
                 aria-label="Toggle password visibility"
+                disabled={loading}
               >
                 {showNewPassword ? (
                   <EyeOpen className="size-5 text-neutral-900" />
@@ -151,6 +196,7 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
                 required
                 autoComplete="new-password"
                 id="confirm-password-floating"
+                disabled={loading}
               />
               <label
                 className="input-floating-label ms-2 block text-sm font-medium text-neutral-500"
@@ -163,6 +209,7 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
                 onClick={() => togglePasswordVisibility(setShowConfirmPassword)}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500"
                 aria-label="Toggle password visibility"
+                disabled={loading}
               >
                 {showConfirmPassword ? (
                   <EyeOpen className="size-5 text-neutral-900" />
@@ -172,6 +219,13 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
               </button>
             </div>
           </div>
+
+          {/* Mostrar error de API si existe */}
+          {apiError && (
+            <div className="text-red-500 text-sm mb-4 p-2 bg-red-50 rounded-lg">
+              {apiError}
+            </div>
+          )}
 
           {/* Requisitos de la contraseña */}
           <div className="bg-jerarquia1 p-4 rounded-3xl mt-4">
@@ -201,8 +255,11 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
         </div>
         <div className="modal-footer mt-6">
           <ButtonLogin
+            type="submit"
+            loading={loading}
+            disabled={loading}
           >
-            Actualizar{" "}
+            {loading ? 'Actualizando...' : 'Actualizar'}{" "}
             <span>
               <LockSync className="size-4 rotate-40 hover:rotate-220 inline ml-2" />
             </span>
@@ -212,5 +269,4 @@ const ChangePassword = ({ onClose }) => { // Removemos la prop 'show'
     </div>
   );
 };
-
 export default ChangePassword;
