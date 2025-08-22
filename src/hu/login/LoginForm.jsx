@@ -7,7 +7,7 @@ import ButtonLogin from './ButtonLogin'
 import LoginWallets from "./LoginWallets";
 import { LoginUser, LoginKey } from "./LoginIcons";
 
-const LoginForm = ({onLoginSuccess}) => {
+const LoginForm = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -53,7 +53,7 @@ const LoginForm = ({onLoginSuccess}) => {
     try {
       const response = await loginUser(userData);
       console.log('Respuesta de inicio de sesión exitosa:', response);
-      
+
       // Obtener el idEjecutivo de la respuesta
       let idEjecutivo;
       if (response && response.ejecutivo && response.ejecutivo.idEjecutivo) {
@@ -62,9 +62,9 @@ const LoginForm = ({onLoginSuccess}) => {
         idEjecutivo = response.idEjecutivo;
       } else {
         throw new Error('No se pudo obtener el idEjecutivo de la respuesta');
-      }   
+      }
 
-     // Guardar el username en localStorage para usarlo en ChangePassword
+      // Guardar el username en localStorage para usarlo en ChangePassword
       localStorage.setItem('username', username);
       // Llamar al endpoint ValidatePassword con los parámetros correctos
       try {
@@ -72,11 +72,11 @@ const LoginForm = ({onLoginSuccess}) => {
           {
             contrasenia: password, // La contraseña que el usuario ingresó
             servidor: "Cronoss"    // Valor fijo según tu endpoint
-          }, 
+          },
           idEjecutivo              // El idEjecutivo obtenido
-        );      
+        );
         console.log('Respuesta de validación de contraseña:', passwordValidation);
-        
+
         // Manejar la respuesta según la estructura que devuelve tu API
         // (Ajusta esto según lo que realmente devuelve tu endpoint)
         if (passwordValidation) {
@@ -86,7 +86,6 @@ const LoginForm = ({onLoginSuccess}) => {
           }
         } else {
           toast.success('¡Inicio de sesión exitoso!');
-          
           // Guardar token y datos de usuario
           if (response && response.ejecutivo && response.ejecutivo.token) {
             localStorage.setItem('token', response.ejecutivo.token);
@@ -94,27 +93,35 @@ const LoginForm = ({onLoginSuccess}) => {
           } else if (response && response.token) {
             localStorage.setItem('token', response.token);
           }
-          
+
           navigate('/dashboardPage');
         }
       } catch (validationError) {
         console.error('Error en validación de contraseña:', validationError);
-        
+
+        // Si el error es 404, mostrar el mensaje específico de la respuesta
+        if (validationError.response && validationError.response.status === 404) {
+          const errorMessage = validationError.response.data;
+          toast.error(errorMessage);
+          setApiError(errorMessage);
+        }
         // Si el error es 400, podría significar que la contraseña necesita ser cambiada
-        if (validationError.response && validationError.response.status === 400) {
+        else if (validationError.response && validationError.response.status === 400) {
           toast.info('Por favor, actualiza tu contraseña.');
           if (onLoginSuccess) {
             onLoginSuccess();
           }
         } else {
-          toast.error('Error al validar la contraseña. Por favor, contacta al administrador.');
+          const genericError = response.data.loginResult.Mensaje || 'Error al validar la contraseña. Por favor, contacta al administrador.';
+          toast.error(genericError);
+          setApiError(genericError);
         }
       }
 
     } catch (error) {
       console.error('Error en inicio de sesión:', error);
-      setApiError(error.message || 'Error al iniciar sesión. Verifica tus credenciales.');
-      toast.error(error.message || 'Error al iniciar sesión. Verifica tus credenciales.');
+      setApiError(error.response.data.loginResult.Mensaje || 'Error al iniciar sesión. Verifica tus credenciales.');
+      toast.error(error.response.data.loginResult.Mensaje || 'Error al iniciar sesión. Verifica tus credenciales.');
     } finally {
       setLoading(false);
     }
@@ -188,7 +195,7 @@ const LoginForm = ({onLoginSuccess}) => {
           </div>
         </div>
         {/* <LoginWallets /> */}
-         <ButtonLogin
+        <ButtonLogin
           type="submit"
           loading={loading}
           disabled={loading}

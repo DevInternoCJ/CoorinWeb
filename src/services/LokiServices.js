@@ -14,7 +14,7 @@ api.interceptors.request.use(
   config => {
     // Si la URL es la de login, no añadas el token
     if (config.url !== '/Auth/login') {
-      const token = localStorage.getItem('token'); 
+      const token = localStorage.getItem('token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -37,36 +37,59 @@ export const loginUser = async (userData) => {
       dominio: "CONJUR",
       computadora: "Coorin",
       usuarioWindows: userData.usuarioWindows,
-      ip: API_URL, 
-      aplicacion: "Coorin", 
-      version: "3.4.2", 
+      ip: API_URL,
+      aplicacion: "Coorin",
+      version: "3.4.2",
       servidor: "Cronoss"
     };
-    
+
     console.log('📤 Enviando a /Auth/login:', requestData);
-    
-    const response = await api.post('/Auth/login', requestData);
-    
+
+    const response = await api.post('/Auth/login', requestData, {
+      headers: {
+        'Accept': 'application/json, text/plain, */*', // Aceptar múltiples tipos de contenido
+        'Content-Type': 'application/json'
+      },
+      transformResponse: [(data) => {
+        try {
+          // Intentar parsear como JSON primero
+          return JSON.parse(data);
+        } catch (jsonError) {
+          // Si falla el parseo JSON, devolver como texto plano
+          console.log('Respuesta en texto plano, devolviendo como string:', data);
+          return data;
+        }
+      }]
+    });
+
     console.log('📥 Respuesta de /Auth/login:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ Error en el inicio de sesión:', error);
+    // Mejorar el manejo de errores para respuestas de texto plano
+    if (error.response && typeof error.response.data === 'string') {
+      const customError = new Error(error.response.data);
+      customError.response = error.response;
+      throw customError;
+    }
+
     throw error;
   }
 };
 
-export const ValidatePassword = async (userData, idEjecutivo) => {
+//userData, idEjecutivo
+export const ValidatePassword = async () => {
   try {
     const requestData = {
-      contrasenia: userData.contrasenia,
-      servidor: "Cronoss",
-      idEjecutivo
+      // contrasenia: userData.contrasenia,
+      // servidor: "Cronoss",
+      // idEjecutivo
     };
-    
+
     console.log('📤 Enviando a /Auth/validar-contrasenia:', requestData);
-    
+
     const response = await api.post('/Auth/validar-contrasenia', requestData);
-    
+
     console.log('📥 Respuesta de /Auth/validar-contrasenia:', response.data);
     return response.data;
   } catch (error) {
@@ -74,27 +97,64 @@ export const ValidatePassword = async (userData, idEjecutivo) => {
     throw error;
   }
 };
+// export const ValidatePassword = async (userData, idEjecutivo) => {
+//   try {
+//     const requestData = {
+//       contrasenia: userData.contrasenia,
+//       servidor: "Cronoss",
+//       idEjecutivo
+//     };
+
+//     console.log('📤 Enviando a /Auth/validar-contrasenia:', requestData);
+
+//     const response = await api.post('/Auth/validar-contrasenia', requestData, {
+//       headers: {
+//         'Accept': 'text/plain', // Aceptar respuesta como texto plano
+//         'Content-Type': 'application/json' // Enviar como JSON
+//       },
+//       transformResponse: [(data) => {
+//         // No transformar la respuesta, dejarla como texto plano
+//         return data;
+//       }]
+//     });
+
+//     console.log('📥 Respuesta de /Auth/validar-contrasenia:', response.data);
+//     return response.data;
+//   } catch (error) {
+//     console.error('❌ Error en validación de contraseña:', error);
+
+//     // Si la respuesta es texto plano, asegurarnos de capturarla correctamente
+//     if (error.response && typeof error.response.data === 'string') {
+//       // Crear un nuevo error con el mensaje correcto
+//       const customError = new Error(error.response.data);
+//       customError.response = error.response;
+//       throw customError;
+//     }
+
+//     throw error;
+//   }
+// };
 
 export const UpdatePassword = async (passwordData) => {
   try {
     // Obtener el token del localStorage
     const token = localStorage.getItem('token');
-    
+
     console.log('📤 Enviando a /Auth/restablecer-contrasenia:', passwordData);
     console.log('🔑 Token usado:', token);
-    
+
     const response = await api.post('/Auth/restablecer-contrasenia', passwordData, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}` // Agregar el token de autorización
       }
     });
-    
+
     console.log('📥 Respuesta de /Auth/restablecer-contrasenia:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ Error al actualizar la contraseña:', error);
-    
+
     // Mostrar más detalles del error
     if (error.response) {
       console.error('📊 Datos de respuesta del error:', error.response.data);
@@ -105,7 +165,7 @@ export const UpdatePassword = async (passwordData) => {
     } else {
       console.error('❌ Error al configurar la solicitud:', error.message);
     }
-    
+
     throw error;
   }
 };
