@@ -6,7 +6,6 @@ import CoordinDashboard from "./board/consultations/CoordinDashboard";
 
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const handleSidebarToggle = () => setSidebarOpen((prev) => !prev);
 
   return (

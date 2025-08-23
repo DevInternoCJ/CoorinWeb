@@ -7,12 +7,58 @@ import { LoginUser, LoginKey } from "./LoginIcons";
 
 // Constantes para mensajes de error
 const ERROR_MESSAGES = {
-  PASSWORD_LENGTH: 'La contraseña debe tener al menos 10 caracteres.',
+  PASSWORD_LENGTH: 'La contraseña debe tener al menos 8 caracteres.',
   REQUIRED_FIELDS: 'Por favor, ingresa tu usuario y contraseña.',
   NO_ID_EJECUTIVO: 'No se pudo obtener el idEjecutivo de la respuesta',
   PASSWORD_VALIDATION: 'Error al validar la contraseña. Por favor, contacta al administrador.',
   LOGIN_ERROR: 'Error al iniciar sesión. Verifica tus credenciales.'
 };
+
+// Componente InputField separado (fuera de LoginForm)
+const InputField = ({ 
+  icon: Icon, 
+  type, 
+  placeholder, 
+  value, 
+  onChange, 
+  id, 
+  label, 
+  minLength, 
+  maxLength, 
+  required, 
+  disabled 
+}) => (
+  <div className="flex">
+    <Icon className="size-9.5 border border-jerarquia2 rounded-l-lg bg-jerarquia2" />
+    <div className="input-floating mb-4">
+      <input
+        type={type}
+        placeholder={placeholder}
+        className="w-full px-3 text-neutral-900 py-2 text-sm bg-neutral-100 border rounded-r-lg border-jerarquia2 focus:ring-2 focus:ring-jerarquia2 focus:outline-none"
+        value={value}
+        onChange={onChange}
+        minLength={minLength}
+        maxLength={maxLength}
+        required={required}
+        autoComplete={type === 'password' ? 'current-password' : 'username'}
+        id={id}
+        disabled={disabled}
+      />
+      <label
+        className={`input-floating-label block text-sm font-medium ${type === 'password' ? 'text-neutral-500' : 'border-0'} mb-1`}
+        htmlFor={id}
+      >
+        {label}
+      </label>
+      {type === 'password' && (
+        <div
+          data-strong-password='{"target": "#password-floating", "stripClasses": "strong-password:bg-jerarquia1 strong-password-accepted:bg-jerarquia2 h-1.5 flex-auto bg-neutral-500"}'
+          className="rounded-full overflow-hidden mt-2 flex gap-0.5"
+        ></div>
+      )}
+    </div>
+  </div>
+);
 
 const LoginForm = ({ onLoginSuccess }) => {
   const [formData, setFormData] = useState({
@@ -32,10 +78,11 @@ const LoginForm = ({ onLoginSuccess }) => {
     } else if (field === 'password') {
       setFormData(prev => ({ ...prev, password: value }));
       setPasswordError(
-        value.length > 0 && value.length < 10 ? ERROR_MESSAGES.PASSWORD_LENGTH : ''
+        value.length > 0 && value.length < 8 ? ERROR_MESSAGES.PASSWORD_LENGTH : ''
       );
     }
   }, []);
+
   // Extraer idEjecutivo de la respuesta
   const extractIdEjecutivo = useCallback((response) => {
     if (response?.ejecutivo?.idEjecutivo) {
@@ -45,6 +92,7 @@ const LoginForm = ({ onLoginSuccess }) => {
     }
     throw new Error(ERROR_MESSAGES.NO_ID_EJECUTIVO);
   }, []);
+
   // Guardar datos de usuario en localStorage
   const saveUserData = useCallback((response) => {
     if (response?.ejecutivo?.token) {
@@ -54,6 +102,7 @@ const LoginForm = ({ onLoginSuccess }) => {
       localStorage.setItem('token', response.token);
     }
   }, []);
+
   // Manejar errores de validación de contraseña
   const handlePasswordValidationError = useCallback((error, onLoginSuccess) => {
     console.error('Error en validación de contraseña:', error);
@@ -70,6 +119,7 @@ const LoginForm = ({ onLoginSuccess }) => {
       setApiError(genericError);
     }
   }, []);
+
   // Procesar login exitoso
   const processSuccessfulLogin = useCallback((response, passwordValidation, onLoginSuccess, navigate) => {
     if (passwordValidation) {
@@ -81,6 +131,7 @@ const LoginForm = ({ onLoginSuccess }) => {
       navigate('/dashboardPage');
     }
   }, [saveUserData]);
+
   // Handler principal de submit
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -123,39 +174,6 @@ const LoginForm = ({ onLoginSuccess }) => {
       setLoading(false);
     }
   };
-  // Componente de input reutilizable
-  const InputField = ({ icon: Icon, type, placeholder, value, onChange, id, label, minLength, maxLength, required, disabled }) => (
-    <div className="flex">
-      <Icon className="size-9.5 border border-jerarquia2 rounded-l-lg bg-jerarquia2" />
-      <div className="input-floating mb-4">
-        <input
-          type={type}
-          placeholder={placeholder}
-          className="w-full px-3 text-neutral-900 py-2 text-sm bg-neutral-100 border rounded-r-lg border-jerarquia2 focus:ring-2 focus:ring-jerarquia2 focus:outline-none"
-          value={value}
-          onChange={onChange}
-          minLength={minLength}
-          maxLength={maxLength}
-          required={required}
-          autoComplete={type === 'password' ? 'current-password' : 'username'}
-          id={id}
-          disabled={disabled}
-        />
-        <label
-          className={`input-floating-label block text-sm font-medium ${type === 'password' ? 'text-neutral-500' : 'border-0'} mb-1`}
-          htmlFor={id}
-        >
-          {label}
-        </label>
-        {type === 'password' && (
-          <div
-            data-strong-password='{"target": "#password-floating", "stripClasses": "strong-password:bg-jerarquia1 strong-password-accepted:bg-jerarquia2 h-1.5 flex-auto bg-neutral-500"}'
-            className="rounded-full overflow-hidden mt-2 flex gap-0.5"
-          ></div>
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <form onSubmit={handleSubmit} className="lg:w-full px-6 text-neutral-900">
@@ -173,6 +191,7 @@ const LoginForm = ({ onLoginSuccess }) => {
         maxLength={4}
         required
         disabled={loading}
+        autoComplete="off"
       />   
       <InputField
         icon={LoginKey}
@@ -186,6 +205,7 @@ const LoginForm = ({ onLoginSuccess }) => {
         maxLength={50}
         required
         disabled={loading}
+        autoComplete="off"
       />    
       {passwordError && (
         <p className="text-red-400 text-xs mt-1 mb-2">{passwordError}</p>
@@ -210,4 +230,5 @@ const LoginForm = ({ onLoginSuccess }) => {
     </form>
   );
 };
+
 export default LoginForm;
