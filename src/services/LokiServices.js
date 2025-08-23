@@ -42,42 +42,51 @@ export const loginUser = async (userData) => {
       version: "3.4.2",
       servidor: "Cronoss"
     };
-
     console.log('📤 Enviando a /Auth/login:', requestData);
-
     const response = await api.post('/Auth/login', requestData, {
       headers: {
-        'Accept': 'application/json, text/plain, */*', // Aceptar múltiples tipos de contenido
+        'Accept': 'application/json, text/plain, */*',
         'Content-Type': 'application/json'
       },
       transformResponse: [(data) => {
         try {
-          // Intentar parsear como JSON primero
           return JSON.parse(data);
         } catch (jsonError) {
-          // Si falla el parseo JSON, devolver como texto plano
           console.log('Respuesta en texto plano, devolviendo como string:', data);
           return data;
         }
       }]
-    });
-
-    console.log('📥 Respuesta de /Auth/login:', response.data);
+    });  
+ 
+    if (response.data && response.data.ejecutivo && response.data.ejecutivo.Token) {
+      localStorage.setItem('token', response.data.ejecutivo.Token);
+      console.log('✅ Token guardado en localStorage:', response.data.ejecutivo.Token);   
+      // Verificar que realmente se guardó
+      const savedToken = localStorage.getItem('token');
+      console.log('🔍 Token recuperado de localStorage:', savedToken);
+      // Guardar datos del usuario
+      localStorage.setItem('userData', JSON.stringify({
+        idEjecutivo: response.data.ejecutivo.idEjecutivo,
+        usuario: response.data.ejecutivo.Usuario,
+        nombre: response.data.ejecutivo.NombreEjecutivo
+      }));
+    } else {
+      console.warn('⚠️ No se recibió token en la respuesta');
+      console.warn('⚠️ Estructura completa de la respuesta:', response.data);
+    }    
     return response.data;
   } catch (error) {
     console.error('❌ Error en el inicio de sesión:', error);
-    // Mejorar el manejo de errores para respuestas de texto plano
     if (error.response && typeof error.response.data === 'string') {
       const customError = new Error(error.response.data);
       customError.response = error.response;
       throw customError;
     }
-
     throw error;
   }
 };
 
-//userData, idEjecutivo
+//(userData, idEjecutivo)
 export const ValidatePassword = async () => {
   try {
     const requestData = {
@@ -85,11 +94,8 @@ export const ValidatePassword = async () => {
       // servidor: "Cronoss",
       // idEjecutivo
     };
-
     console.log('📤 Enviando a /Auth/validar-contrasenia:', requestData);
-
     const response = await api.post('/Auth/validar-contrasenia', requestData);
-
     console.log('📥 Respuesta de /Auth/validar-contrasenia:', response.data);
     return response.data;
   } catch (error) {
@@ -135,40 +141,40 @@ export const ValidatePassword = async () => {
 //   }
 // };
 
+// Actualizar contraseña (versión optimizada)
 export const UpdatePassword = async (passwordData) => {
   try {
-    // Obtener el token del localStorage
+    // Verificar que el token existe antes de proceder
     const token = localStorage.getItem('token');
-
+    
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
     console.log('📤 Enviando a /Auth/restablecer-contrasenia:', passwordData);
-    console.log('🔑 Token usado:', token);
-
-    const response = await api.post('/Auth/restablecer-contrasenia', passwordData, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // Agregar el token de autorización
-      }
-    });
-
+    console.log('🔑 Token disponible:', token);
+    // ✅ DEJA QUE EL INTERCEPTOR AÑADA EL TOKEN AUTOMÁTICAMENTE
+    // NO añadas headers manualmente - el interceptor ya lo hace
+    const response = await api.post('/Auth/restablecer-contrasenia', passwordData);
     console.log('📥 Respuesta de /Auth/restablecer-contrasenia:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ Error al actualizar la contraseña:', error);
-
+    // Manejo específico de errores de autenticación
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
     // Mostrar más detalles del error
     if (error.response) {
       console.error('📊 Datos de respuesta del error:', error.response.data);
       console.error('🔢 Status del error:', error.response.status);
-      console.error('📋 Headers del error:', error.response.headers);
     } else if (error.request) {
       console.error('❌ No se recibió respuesta del servidor:', error.request);
     } else {
       console.error('❌ Error al configurar la solicitud:', error.message);
     }
-
     throw error;
   }
 };
-
-
 
