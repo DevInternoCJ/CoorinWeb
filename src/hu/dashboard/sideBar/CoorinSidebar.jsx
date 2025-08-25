@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import dataSidebar from "./DataSidebar";
 import {
   AcademicCapIcon,
@@ -80,6 +80,28 @@ const RenderSubMenus = ({ subMenus, parentId }) => (
 );
 
 export const CoorinSidebar = ({ open }) => {
+  // En tu archivo principal o en un useEffect
+useEffect(() => {
+  const handleCollapseClick = (e) => {
+    const collapseToggle = e.target.closest('[data-collapse]');
+    if (!collapseToggle) return;
+
+    e.preventDefault();
+    const targetId = collapseToggle.getAttribute('data-collapse');
+    const targetElement = document.querySelector(targetId);
+    
+    if (targetElement) {
+      targetElement.classList.toggle('hidden');
+    }
+  };
+
+  document.addEventListener('click', handleCollapseClick);
+  
+  return () => {
+    document.removeEventListener('click', handleCollapseClick);
+  };
+}, []);
+
   return (
     <aside
       id="overlay-body-scrolling-with-backdrop"
