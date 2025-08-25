@@ -11,7 +11,7 @@ export default function CoorinDashboard() {
   return (
     <>
       <CoorinSidebar open={sidebarOpen} />
-      <div className="relative bg-background-dashboard py-14 sm:py-2 overflow-hidden">
+      <div className="relative bg-background-dashboard py-14 sm:py-2 overflow-hidden h-screen">
         <div className="mx-auto max-w-2xl px-2 lg:max-w-screen lg:px-8 relative">
           <h2
             className="text-base/7 font-semibold text-jerarquia3 cursor-pointer"
