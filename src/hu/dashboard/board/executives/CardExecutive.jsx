@@ -10,12 +10,17 @@ import {
   IconPantalla,
 } from "./IconesEjecutives";
 import ModalMetasEjecutivos from "./ModalMetasEjecutivos";
+import LampshadeFields from "../../../administracion/gespa/camposPantalla/LampshadeFields"
+
 const CardExecutive = () => {
   const [showMetasModal, setShowMetasModal] = useState(false);
+  const [showPantallaModal, setShowPantallaModal] = useState(false); // Estado para el modal de Pantalla
 
   const handleCardClick = (title) => {
     if (title === "Metas") {
       setShowMetasModal(true);
+    } else if (title === "Pantalla") {
+      setShowPantallaModal(true); // Abrir modal de Pantalla
     } else {
       alert(`Click en ${title}`);
     }
@@ -91,6 +96,14 @@ const CardExecutive = () => {
       {/* Modal de Metas */}
       {showMetasModal && (
         <ModalMetasEjecutivos onClose={() => setShowMetasModal(false)} />
+      )}
+
+      {/* Modal de Pantalla */}
+      {showPantallaModal && (
+        <LampshadeFields 
+          isOpen={showPantallaModal} 
+          onClose={() => setShowPantallaModal(false)} 
+        />
       )}
     </>
   );

@@ -41,16 +41,15 @@ export default function CoorinDashboard() {
       <div className="relative bg-background-dashboard py-14 sm:py-2 overflow-hidden h-screen">
         <div className="mx-auto max-w-2xl px-2 lg:max-w-screen lg:px-8 relative"> 
             <a
-            className=" flex gap-1 items-center"
+            className=" flex gap-1 items-center my-2"
               ref={menuButtonRef}
               aria-expanded={sidebarOpen}
               aria-controls="overlay-body-scrolling-with-backdrop"
               data-overlay="#overlay-body-scrolling-with-backdrop"
               onClick={handleSidebarToggle}
             >
-              <img src={Menu} alt="menu-principal" className=" cursor-pointer" /> <h2 className="font-semibold text-jerarquia3 cursor-pointer text-2xl">Menu Principal</h2>
-            </a>
-          
+              <img src={Menu} alt="menu-principal" className=" rounded-md cursor-pointer hover:shadow-lg hover:shadow-jerarquia2" />
+            </a>    
           {/* Resto de tu código */}
           <span className="mx-auto mt-2 text-4xl font-semibold tracking-tight text-balance text-gray-950 sm:text-4xl">
             Ejecutivos
