@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { obetenerTablaMetas } from '../../../../services/LokiServices';
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
 
 // Flecha tipo chevron moderna
@@ -17,34 +18,64 @@ const DropdownArrow = () => (
         }}
     >
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <path d="M6 8l4 4 4-4" stroke="#2b463c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M6 8l4 4 4-4" stroke="#2b463c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
     </span>
 );
 
-const ModalMetasContent = () => {
-    const [selectedExecutive, setSelectedExecutive] = useState("ALDF");
-    const [expandedNodes, setExpandedNodes] = useState({ "ALDF": true, "RAFM": true });
 
-    const toggleExpanded = (value) => {
+const ModalMetasContent = () => {
+    const [tablaMetas, setTablaMetas] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [expandedNodes, setExpandedNodes] = useState({});
+    const [selectedExecutive, setSelectedExecutive] = useState("ALDF");
+
+    const toggleExpanded = (executiveValue) => {
         setExpandedNodes(prev => ({
             ...prev,
-            [value]: !prev[value]
+            [executiveValue]: !prev[executiveValue]
         }));
     };
 
-    // Función para obtener ejecutivos visibles según el estado de expansión
+
+    useEffect(() => {
+        const fetchTablaMetas = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                // Obtener idEjecutivo del usuario logueado desde localStorage
+                const userData = JSON.parse(localStorage.getItem('userData'));
+                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+                console.log('🟢 idEjecutivo (usuario logueado) que se enviará al endpoint:', idEjecutivo, userData);
+                if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
+                const data = await obetenerTablaMetas(idEjecutivo);
+                setTablaMetas(Array.isArray(data) ? data : []);
+            } catch (err) {
+                setError('Error al obtener la tabla de metas');
+                setTablaMetas([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTablaMetas();
+    }, []);
+
     const getVisibleExecutives = () => {
-        let result = [];
-        
+        const result = [];
+
         executiveOptions.forEach(executive => {
+            // Siempre mostrar nivel 1 (principales)
             if (executive.level === 1) {
                 result.push(executive);
+
+                // Mostrar subordinados solo si está expandido
                 if (expandedNodes[executive.value]) {
                     const subordinates = executiveOptions.filter(sub => sub.parent === executive.value);
-                    result.push(...subordinates);
-                    
                     subordinates.forEach(sub => {
+                        result.push(sub);
+
+                        // Mostrar subordinados de nivel 3 si el de nivel 2 está expandido
                         if (expandedNodes[sub.value]) {
                             const subSubordinates = executiveOptions.filter(subsub => subsub.parent === sub.value);
                             result.push(...subSubordinates);
@@ -53,7 +84,7 @@ const ModalMetasContent = () => {
                 }
             }
         });
-        
+
         return result;
     };
 
@@ -63,308 +94,311 @@ const ModalMetasContent = () => {
         { value: "JMPR", label: "JMPR - Juan Manuel Pérez Rodríguez", level: 2, isManager: false, parent: "ALDF" },
         { value: "MAGS", label: "MAGS - María Alejandra González Sánchez", level: 2, isManager: false, parent: "ALDF" },
         { value: "RAFM", label: "RAFM - Roberto Andrés Fernández Martín", level: 1, isManager: true },
-        { value: "LEVA", label: "LEVA - Leticia Esperanza Vargas Aguilar", level: 2, isManager: false, parent: "RAFM" },
-        { value: "JCHL", label: "JCHL - José Carlos Hernández López", level: 2, isManager: false, parent: "RAFM" },
+        { value: "LEVA", label: "LEVA - Leticia Esperanza Vargas Aguilar Leticia Esperanza Vargas Aguilar ", level: 2, isManager: false, parent: "RAFM" },
+        { value: "JCHL", label: "JCHL - ", level: 2, isManager: false, parent: "RAFM" },
         { value: "AMRT", label: "AMRT - Ana María Ramírez Torres", level: 3, isManager: false, parent: "JCHL" },
-        { value: "DAFV", label: "DAFV - Daniel Antonio Flores Vázquez", level: 3, isManager: false, parent: "LEVA" }
+        { value: "DAFV", label: "DAFV - Daniel Antonio Flores Vázquez", level: 3, isManager: false, parent: "LEVA" },
+        // Más ejemplos para pruebas de scroll y ancho
+        { value: "MGR1", label: "MGR1 - Manager Uno", level: 1, isManager: true },
+        { value: "EMP1", label: "EMP1 - Empleado Uno", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP2", label: "EMP2 - Empleado Dos", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP3", label: "EMP3 - Empleado Tres", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP4", label: "EMP4 - Empleado Cuatro", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP5", label: "EMP5 - Empleado Cinco", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP6", label: "EMP6 - Empleado Seis", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP7", label: "EMP7 - Empleado Siete", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP8", label: "EMP8 - Empleado Ocho", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP9", label: "EMP9 - Empleado Nueve", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP10", label: "EMP10 - Empleado Diez", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP11", label: "EMP11 - Empleado Once", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP12", label: "EMP12 - Empleado Doce", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP13", label: "EMP13 - Empleado Trece", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP14", label: "EMP14 - Empleado Catorce", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP15", label: "EMP15 - Empleado Quince", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP16", label: "EMP16 - Empleado Dieciséis", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP17", label: "EMP17 - Empleado Diecisiete", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP18", label: "EMP18 - Empleado Dieciocho", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP19", label: "EMP19 - Empleado Diecinueve", level: 2, isManager: false, parent: "MGR1" },
+        { value: "EMP20", label: "EMP20 - Empleado Veinte", level: 2, isManager: false, parent: "MGR1" }
     ];
 
     return (
-        <div>
-            {/* Contenido principal con ramificación y tabla */}
-            <div className="flex gap-4 px-4" style={{ height: "60vh" }}>
-                {/* Columna izquierda - Logo y Ramificación de Ejecutivos */}
-                <div className="w-72 flex flex-col gap-3">
-                    {/* Logo del Consorcio Jurídico centrado arriba de la ramificación */}
-                    <div className="flex justify-center items-center bg-white rounded-lg p-3 ">
-                        <img 
-                            src={ConsorcioLogo} 
-                            alt="Consorcio Jurídico" 
-                            style={{ 
-                                height: "65px", 
-                                width: "auto",
-                                objectFit: "contain"
-                            }}
-                        />
-                    </div>
+        <div className="flex gap-4 h-full">
+            {/* Columna izquierda - Dropdown de Ejecutivos/Ramificación */}
+            <div className="productividad-branch" style={{ overflowX: 'auto', overflowY: 'auto', height: '56vh', width: '18rem' }}>
+                <div className="space-y-1">
+                    {getVisibleExecutives().map((executive) => {
+                        const hasSubordinates = executiveOptions.some(sub => sub.parent === executive.value);
+                        const isExpanded = expandedNodes[executive.value];
 
-                    {/* Ramificación de Ejecutivos */}
-                    <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex flex-col flex-1">
-                        <div className="space-y-1">
-                            {getVisibleExecutives().map((executive) => {
-                                const hasSubordinates = executiveOptions.some(sub => sub.parent === executive.value);
-                                const isExpanded = expandedNodes[executive.value];
-                                
-                                return (
-                                    <div
-                                        key={executive.value}
-                                        className={`p-2 rounded cursor-pointer transition-colors border ${
-                                            selectedExecutive === executive.value
-                                                ? 'bg-[var(--color-jerarquia1)] border-[var(--color-jerarquia2)] text-white'
-                                                : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                                        }`}
-                                        style={{ 
-                                            marginLeft: `${(executive.level - 1) * 16}px`,
-                                            borderLeft: executive.level > 1 ? `3px solid var(--color-jerarquia${executive.level})` : 'none'
-                                        }}
-                                        onClick={() => setSelectedExecutive(executive.value)}
-                                    >
-                                        {/* Indicador de jerarquía */}
-                                        <div className="flex items-center gap-2">
-                                            {/* Botón de expand/collapse para managers con subordinados */}
-                                            {hasSubordinates && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        toggleExpanded(executive.value);
-                                                    }}
-                                                    className="text-xs font-bold text-[var(--color-jerarquia3)] hover:text-[var(--color-jerarquia4)] transition-colors"
-                                                >
-                                                    {isExpanded ? '▼' : '▶'}
-                                                </button>
-                                            )}
-                                            
-                                            {executive.level > 1 && (
-                                                <span className="text-xs opacity-60">
-                                                    {'└─'.repeat(executive.level - 1)}
-                                                </span>
-                                            )}
-                                            {executive.isManager && (
-                                                <span className="text-xs font-bold text-[var(--color-jerarquia3)]">
-                                                    👑
-                                                </span>
-                                            )}
-                                            <div className="flex-1">
-                                                <div className={`text-xs font-semibold ${executive.isManager ? 'text-[var(--color-jerarquia3)]' : ''}`}>
-                                                    {executive.value}
-                                                </div>
-                                                <div className="text-xs opacity-90">
-                                                    {executive.label.split(' - ')[1]}
-                                                </div>
-                                                {executive.level > 1 && (
-                                                    <div className="text-xs opacity-60 italic">
-                                                        Reporta a: {executive.parent}
-                                                    </div>
-                                                )}
-                                            </div>
+                        return (
+                            <div
+                                key={executive.value}
+                                className={`p-2 rounded cursor-pointer transition-colors border ${selectedExecutive === executive.value
+                                        ? 'bg-[var(--color-jerarquia1)] border-[var(--color-jerarquia2)] text-white'
+                                        : 'bg-white border-[var(--color-jerarquia1)] hover:bg-gray-100'
+                                    }`}
+                                style={{
+                                    marginLeft: `${(executive.level - 1) * 16}px`,
+                                    borderLeft: executive.level > 1 ? `3px solid var(--color-jerarquia${executive.level})` : 'none'
+                                }}
+                                onClick={() => setSelectedExecutive(executive.value)}
+                            >
+                                {/* Indicador de jerarquía */}
+                                <div className="flex items-center gap-2">
+                                    {/* Botón de expand/collapse para managers con subordinados */}
+                                    {hasSubordinates && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleExpanded(executive.value);
+                                            }}
+                                            className="text-xs font-bold text-[var(--color-jerarquia3)] hover:text-[var(--color-jerarquia4)] transition-colors"
+                                        >
+                                            {isExpanded ? '▼' : '▶'}
+                                        </button>
+                                    )}
+
+                                    {executive.level > 1 && (
+                                        <span className="text-xs opacity-60">
+                                            {'└─'.repeat(executive.level - 1)}
+                                        </span>
+                                    )}
+                                    {executive.isManager && (
+                                        <span className="text-xs font-bold text-[var(--color-jerarquia3)]">
+                                            👑
+                                        </span>
+                                    )}
+                                    <div className="flex-1">
+                                        <div className={`text-xs font-semibold ${executive.isManager ? 'text-[var(--color-jerarquia3)]' : ''}`}>
+                                            {executive.value}
                                         </div>
+                                        <div className="text-xs opacity-90">
+                                            {executive.label.split(' - ')[1]}
+                                        </div>
+                                        {executive.level > 1 && (
+                                            <div className="text-xs opacity-60 italic">
+                                                Reporta a: {executive.parent}
+                                            </div>
+                                        )}
                                     </div>
-                                );
-                            })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Columna derecha - Inputs y Tabla principal */}
+            <div className="flex-1 flex flex-col gap-3" style={{ minWidth: 0 }}>
+                {/* Fila de inputs */}
+                <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)]">
+                    <div className="grid grid-cols-9 gap-2">
+                        {/* Cuentas */}
+                        <div className="flex flex-col">
+                            <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Cuentas</label>
+                            <input
+                                type="text"
+                                style={{
+                                    backgroundColor: "var(--color-bgcolor2)",
+                                    color: "var(--color-jerarquia3)",
+                                    border: "1px solid var(--color-jerarquia1)",
+                                    borderRadius: "0.25rem",
+                                    padding: "0.25rem 0.5rem",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "400"
+                                }}
+                            />
+                        </div>
+
+                        {/* Titulares */}
+                        <div className="flex flex-col">
+                            <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Titulares</label>
+                            <input
+                                type="text"
+                                style={{
+                                    backgroundColor: "var(--color-bgcolor2)",
+                                    color: "var(--color-jerarquia3)",
+                                    border: "1px solid var(--color-jerarquia1)",
+                                    borderRadius: "0.25rem",
+                                    padding: "0.25rem 0.5rem",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "400"
+                                }}
+                            />
+                        </div>
+
+                        {/* Negociaciones */}
+                        <div className="flex flex-col">
+                            <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Negociaciones</label>
+                            <input
+                                type="text"
+                                style={{
+                                    backgroundColor: "var(--color-bgcolor2)",
+                                    color: "var(--color-jerarquia3)",
+                                    border: "1px solid var(--color-jerarquia1)",
+                                    borderRadius: "0.25rem",
+                                    padding: "0.25rem 0.5rem",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "400"
+                                }}
+                            />
+                        </div>
+
+                        {/* Cumplimientos */}
+                        <div className="flex flex-col">
+                            <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Cumplimientos</label>
+                            <input
+                                type="text"
+                                style={{
+                                    backgroundColor: "var(--color-bgcolor2)",
+                                    color: "var(--color-jerarquia3)",
+                                    border: "1px solid var(--color-jerarquia1)",
+                                    borderRadius: "0.25rem",
+                                    padding: "0.25rem 0.5rem",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "400"
+                                }}
+                            />
+                        </div>
+
+                        {/* Monto Cumplido */}
+                        <div className="flex flex-col">
+                            <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Monto Cumplido</label>
+                            <input
+                                type="text"
+                                style={{
+                                    backgroundColor: "var(--color-bgcolor2)",
+                                    color: "var(--color-jerarquia3)",
+                                    border: "1px solid var(--color-jerarquia1)",
+                                    borderRadius: "0.25rem",
+                                    padding: "0.25rem 0.5rem",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "400"
+                                }}
+                            />
+                        </div>
+
+                        {/* Saldo Solucionado */}
+                        <div className="flex flex-col">
+                            <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Saldo Solucionado</label>
+                            <input
+                                type="text"
+                                style={{
+                                    backgroundColor: "var(--color-bgcolor2)",
+                                    color: "var(--color-jerarquia3)",
+                                    border: "1px solid var(--color-jerarquia1)",
+                                    borderRadius: "0.25rem",
+                                    padding: "0.25rem 0.5rem",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "400"
+                                }}
+                            />
+                        </div>
+
+                        {/* Segmento */}
+                        <div className="flex flex-col">
+                            <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Segmento</label>
+                            <input
+                                type="text"
+                                style={{
+                                    backgroundColor: "var(--color-bgcolor2)",
+                                    color: "var(--color-jerarquia3)",
+                                    border: "1px solid var(--color-jerarquia1)",
+                                    borderRadius: "0.25rem",
+                                    padding: "0.25rem 0.5rem",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "400"
+                                }}
+                            />
+                        </div>
+
+                        {/* Hora Entrada */}
+                        <div className="flex flex-col">
+                            <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Hora Entrada</label>
+                            <input
+                                type="time"
+                                defaultValue="00:00"
+                                style={{
+                                    backgroundColor: "var(--color-bgcolor2)",
+                                    color: "var(--color-jerarquia3)",
+                                    border: "1px solid var(--color-jerarquia1)",
+                                    borderRadius: "0.25rem",
+                                    padding: "0.25rem 0.5rem",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "400"
+                                }}
+                            />
+                        </div>
+
+                        {/* Hora Salida */}
+                        <div className="flex flex-col">
+                            <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Hora Salida</label>
+                            <input
+                                type="time"
+                                defaultValue="00:00"
+                                style={{
+                                    backgroundColor: "var(--color-bgcolor2)",
+                                    color: "var(--color-jerarquia3)",
+                                    border: "1px solid var(--color-jerarquia1)",
+                                    borderRadius: "0.25rem",
+                                    padding: "0.25rem 0.5rem",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "400"
+                                }}
+                            />
                         </div>
                     </div>
                 </div>
 
-                {/* Columna derecha - Inputs y Tabla principal */}
-                <div className="flex-1 flex flex-col gap-3" style={{ minWidth: 0 }}>
-                    {/* Fila de inputs */}
-                    <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)]">
-                        <div className="grid grid-cols-9 gap-2">
-                            {/* Cuentas */}
-                            <div className="flex flex-col">
-                                <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Cuentas</label>
-                                <input
-                                    type="text"
-                                    style={{
-                                        backgroundColor: "var(--color-bgcolor2)",
-                                        color: "var(--color-jerarquia3)",
-                                        border: "1px solid var(--color-jerarquia1)",
-                                        borderRadius: "0.25rem",
-                                        padding: "0.25rem 0.5rem",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "400"
-                                    }}
-                                />
-                            </div>
-
-                            {/* Titulares */}
-                            <div className="flex flex-col">
-                                <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Titulares</label>
-                                <input
-                                    type="text"
-                                    style={{
-                                        backgroundColor: "var(--color-bgcolor2)",
-                                        color: "var(--color-jerarquia3)",
-                                        border: "1px solid var(--color-jerarquia1)",
-                                        borderRadius: "0.25rem",
-                                        padding: "0.25rem 0.5rem",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "400"
-                                    }}
-                                />
-                            </div>
-
-                            {/* Negociaciones */}
-                            <div className="flex flex-col">
-                                <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Negociaciones</label>
-                                <input
-                                    type="text"
-                                    style={{
-                                        backgroundColor: "var(--color-bgcolor2)",
-                                        color: "var(--color-jerarquia3)",
-                                        border: "1px solid var(--color-jerarquia1)",
-                                        borderRadius: "0.25rem",
-                                        padding: "0.25rem 0.5rem",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "400"
-                                    }}
-                                />
-                            </div>
-
-                            {/* Cumplimientos */}
-                            <div className="flex flex-col">
-                                <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Cumplimientos</label>
-                                <input
-                                    type="text"
-                                    style={{
-                                        backgroundColor: "var(--color-bgcolor2)",
-                                        color: "var(--color-jerarquia3)",
-                                        border: "1px solid var(--color-jerarquia1)",
-                                        borderRadius: "0.25rem",
-                                        padding: "0.25rem 0.5rem",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "400"
-                                    }}
-                                />
-                            </div>
-
-                            {/* Monto Cumplido */}
-                            <div className="flex flex-col">
-                                <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Monto Cumplido</label>
-                                <input
-                                    type="text"
-                                    style={{
-                                        backgroundColor: "var(--color-bgcolor2)",
-                                        color: "var(--color-jerarquia3)",
-                                        border: "1px solid var(--color-jerarquia1)",
-                                        borderRadius: "0.25rem",
-                                        padding: "0.25rem 0.5rem",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "400"
-                                    }}
-                                />
-                            </div>
-
-                            {/* Saldo Solucionado */}
-                            <div className="flex flex-col">
-                                <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Saldo Solucionado</label>
-                                <input
-                                    type="text"
-                                    style={{
-                                        backgroundColor: "var(--color-bgcolor2)",
-                                        color: "var(--color-jerarquia3)",
-                                        border: "1px solid var(--color-jerarquia1)",
-                                        borderRadius: "0.25rem",
-                                        padding: "0.25rem 0.5rem",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "400"
-                                    }}
-                                />
-                            </div>
-
-                            {/* Segmento */}
-                            <div className="flex flex-col">
-                                <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Segmento</label>
-                                <input
-                                    type="text"
-                                    style={{
-                                        backgroundColor: "var(--color-bgcolor2)",
-                                        color: "var(--color-jerarquia3)",
-                                        border: "1px solid var(--color-jerarquia1)",
-                                        borderRadius: "0.25rem",
-                                        padding: "0.25rem 0.5rem",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "400"
-                                    }}
-                                />
-                            </div>
-
-                            {/* Hora Entrada */}
-                            <div className="flex flex-col">
-                                <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Hora Entrada</label>
-                                <input
-                                    type="time"
-                                    defaultValue="00:00"
-                                    style={{
-                                        backgroundColor: "var(--color-bgcolor2)",
-                                        color: "var(--color-jerarquia3)",
-                                        border: "1px solid var(--color-jerarquia1)",
-                                        borderRadius: "0.25rem",
-                                        padding: "0.25rem 0.5rem",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "400"
-                                    }}
-                                />
-                            </div>
-
-                            {/* Hora Salida */}
-                            <div className="flex flex-col">
-                                <label className="text-xs font-medium text-[var(--color-jerarquia3)] mb-1">Hora Salida</label>
-                                <input
-                                    type="time"
-                                    defaultValue="00:00"
-                                    style={{
-                                        backgroundColor: "var(--color-bgcolor2)",
-                                        color: "var(--color-jerarquia3)",
-                                        border: "1px solid var(--color-jerarquia1)",
-                                        borderRadius: "0.25rem",
-                                        padding: "0.25rem 0.5rem",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "400"
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Tabla principal */}
-                    <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex-1 flex flex-col" style={{ minWidth: 0 }}>
-                        {/* Tabla con scroll */}
-                        <div style={{ maxHeight: "calc(60vh - 12rem)", overflow: "auto" }} className="scrollbar-gray">
-                        <table className="w-full text-sm" style={{ minWidth: "1200px" }}>
-                            <thead style={{ position: "sticky", top: 0, zIndex: 2 }}>
-                                <tr className="bg-[var(--color-background-secondary)] text-white">
-                                    <th className="px-2 py-2 text-left border-r border-[var(--color-jerarquia1)] rounded-tl-md whitespace-nowrap" style={{ minWidth: "80px" }}>
+                {/* Tabla principal */}
+                <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex-1 flex flex-col" style={{ minWidth: 0 }}>
+                    {/* Tabla con scroll */}
+                    <div style={{ maxHeight: "calc(60vh - 12rem)", overflow: "auto" }} className="scrollbar-gray">
+                        <table className="modal-table">
+                            <thead>
+                                <tr>
+                                    <th>
                                         <input type="checkbox" className="mr-2" />
                                         Cambiar
                                     </th>
-                                    <th className="px-2 py-2 text-left border-r border-[var(--color-jerarquia1)] whitespace-nowrap" style={{ minWidth: "120px" }}>Ejecutivo</th>
-                                    <th className="px-2 py-2 text-left border-r border-[var(--color-jerarquia1)] whitespace-nowrap" style={{ minWidth: "80px" }}>Usuario</th>
-                                    <th className="px-2 py-2 text-left border-r border-[var(--color-jerarquia1)] whitespace-nowrap" style={{ minWidth: "70px" }}>Cuentas</th>
-                                    <th className="px-2 py-2 text-left border-r border-[var(--color-jerarquia1)] whitespace-nowrap" style={{ minWidth: "70px" }}>Titulares</th>
-                                    <th className="px-2 py-2 text-left border-r border-[var(--color-jerarquia1)] whitespace-nowrap" style={{ minWidth: "100px" }}>Negociaciones</th>
-                                    <th className="px-2 py-2 text-left border-r border-[var(--color-jerarquia1)] whitespace-nowrap" style={{ minWidth: "100px" }}>Cumplimientos</th>
-                                    <th className="px-2 py-2 text-left border-r border-[var(--color-jerarquia1)] whitespace-nowrap" style={{ minWidth: "110px" }}>Monto Cumplido</th>
-                                    <th className="px-2 py-2 text-left border-r border-[var(--color-jerarquia1)] whitespace-nowrap" style={{ minWidth: "120px" }}>Saldo Solucionado</th>
-                                    <th className="px-2 py-2 text-left border-r border-[var(--color-jerarquia1)] whitespace-nowrap" style={{ minWidth: "80px" }}>Segmento</th>
-                                    <th className="px-2 py-2 text-left border-r border-[var(--color-jerarquia1)] whitespace-nowrap" style={{ minWidth: "100px" }}>Hora Entrada</th>
-                                    <th className="px-2 py-2 text-left rounded-tr-md whitespace-nowrap" style={{ minWidth: "90px" }}>Hora Salida</th>
+                                    <th>Ejecutivo</th>
+                                    <th>Usuario</th>
+                                    <th>Cuentas</th>
+                                    <th>Titulares</th>
+                                    <th>Negociaciones</th>
+                                    <th>Cumplimientos</th>
+                                    <th>Monto Cumplido</th>
+                                    <th>Saldo Solucionado</th>
+                                    <th>Segmento</th>
+                                    <th>Hora Entrada</th>
+                                    <th>Hora Salida</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {/* Datos de ejemplo */}
-                                {Array.from({ length: 20 }).map((_, i) => (
-                                    <tr key={i} className="hover:bg-gray-50">
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>
-                                            <input type="checkbox" />
-                                        </td>
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>
-                                            {selectedExecutive} - {executiveOptions.find(exec => exec.value === selectedExecutive)?.label.split(' - ')[1] || "Ejecutivo"}
-                                        </td>
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>ALDF{i + 1}</td>
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>{Math.floor(Math.random() * 100)}</td>
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>{Math.floor(Math.random() * 50)}</td>
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>{Math.floor(Math.random() * 30)}</td>
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>{Math.floor(Math.random() * 20)}</td>
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>
-                                            ${(Math.random() * 10000).toFixed(2)}
-                                        </td>
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>
-                                            ${(Math.random() * 5000).toFixed(2)}
-                                        </td>
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>Segmento {i % 3 + 1}</td>
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>00:00</td>
-                                        <td className="px-2 py-2 border-b border-[var(--color-jerarquia1)]" style={{ color: "#000000" }}>00:00</td>
+                                {loading && (
+                                    <tr><td colSpan={12} style={{ textAlign: 'center' }}>Cargando...</td></tr>
+                                )}
+                                {error && !loading && (
+                                    <tr><td colSpan={12} style={{ color: 'red', textAlign: 'center' }}>{error}</td></tr>
+                                )}
+                                {!loading && !error && tablaMetas.length === 0 && (
+                                    <tr><td colSpan={12} style={{ textAlign: 'center' }}>Sin datos</td></tr>
+                                )}
+                                {!loading && !error && tablaMetas.map((row, i) => (
+                                    <tr key={row.id || row.usuario || i}>
+                                        <td><input type="checkbox" /></td>
+                                        <td>{row.ejecutivo || row.nombreEjecutivo || row.nombre || ''}</td>
+                                        <td>{row.usuario || row.usuarioEjecutivo || row.clave || ''}</td>
+                                        <td>{row.cuentas !== undefined ? row.cuentas : (row.totalCuentas !== undefined ? row.totalCuentas : '')}</td>
+                                        <td>{row.titulares !== undefined ? row.titulares : (row.totalTitulares !== undefined ? row.totalTitulares : '')}</td>
+                                        <td>{row.negociaciones !== undefined ? row.negociaciones : (row.totalNegociaciones !== undefined ? row.totalNegociaciones : '')}</td>
+                                        <td>{row.cumplimientos !== undefined ? row.cumplimientos : (row.totalCumplimientos !== undefined ? row.totalCumplimientos : '')}</td>
+                                        <td>{row.montoCumplido !== undefined ? `$${Number(row.montoCumplido).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : (row.monto_cumplido !== undefined ? `$${Number(row.monto_cumplido).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : '')}</td>
+                                        <td>{row.saldoSolucionado !== undefined ? `$${Number(row.saldoSolucionado).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : (row.saldo_solucionado !== undefined ? `$${Number(row.saldo_solucionado).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : '')}</td>
+                                        <td>{row.segmento || row.nombreSegmento || ''}</td>
+                                        <td>{row.horaEntrada || row.hora_entrada || ''}</td>
+                                        <td>{row.horaSalida || row.hora_salida || ''}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -372,9 +406,8 @@ const ModalMetasContent = () => {
                     </div>
                 </div>
             </div>
-        </div>
 
-        <style>{`
+            <style>{`
             .scrollbar-gray::-webkit-scrollbar {
                 height: 8px;
                 width: 8px;
@@ -388,8 +421,7 @@ const ModalMetasContent = () => {
                 background: #888;
             }
         `}</style>
-    </div>
-);
+        </div>
+    );
 };
-
 export default ModalMetasContent;
