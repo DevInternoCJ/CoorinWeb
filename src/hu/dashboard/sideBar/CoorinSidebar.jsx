@@ -15,6 +15,7 @@ import {
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import LogoCoorin7 from "../../../assets/logo_coorin_7.svg";
+import { forwardRef } from "react";
 
 // Mapeo de nombres a componentes de Heroicons
 const iconMap = {
@@ -79,7 +80,7 @@ const RenderSubMenus = ({ subMenus, parentId }) => (
   </ul>
 );
 
-export const CoorinSidebar = ({ open }) => {
+export const CoorinSidebar = forwardRef(({ open }, ref) => {
   // En tu archivo principal o en un useEffect
 useEffect(() => {
   const handleCollapseClick = (e) => {
@@ -104,6 +105,7 @@ useEffect(() => {
 
   return (
     <aside
+    ref={ref}
       id="overlay-body-scrolling-with-backdrop"
       className={`sidebar-coorin drawer drawer-start fixed top-0 left-0 h-full bg-white shadow-lg max-w-64 z-20 transform transition-transform duration-300
         ${open ? "translate-x-0" : "-translate-x-full"}`}
@@ -163,4 +165,4 @@ useEffect(() => {
       </div>
     </aside>
   );
-};
+});
