@@ -78,44 +78,67 @@ const LampshadeFields = ({ isOpen, onClose }) => {
                     </div>
 
                     {/* Sección Info */}
-                    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                        <h3 className="text-lg font-bold mb-3 text-blue-800 border-b pb-2">Info</h3>
-                        <div className="mb-3">
-                            <p className="font-medium text-gray-700">Empresa:</p>
-                            <div className="ml-4 mt-1 space-y-1">
-                                <p className="text-gray-800 font-mono">/ WO \ CBO</p>
-                                <p className="text-gray-800 font-mono">No \ 264.00</p>
-                                <p className="text-gray-800 font-mono">Ingressos</p>
-                            </div>
-                        </div>
+                    <div className="bg-gray-500 p-4 rounded-lg border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-bold mb-3 pb-2">Info</h3>
+                        {/* Sección Info */}
+                        <div className="bg-gray-500 p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full border-collapse text-white">
+                                    <tbody>
+                                        {/* Fila 1 */}
+                                        <tr className="border-b border-gray-200">
+                                            <td className="py-2 px-3 font-semibold  whitespace-nowrap">Empresa;</td>
+                                            <td className="py-2 px-3 "></td>
+                                            <td className="py-2 px-3 font-semibold  whitespace-nowrap">Asigna</td>
+                                            <td className="py-2 px-3 ">08/01/2020</td>
+                                            <td className="py-2 px-3 font-semibold  whitespace-nowrap">Segment</td>
+                                            <td className="py-2 px-3 ">MEDIUM RETURN Primes</td>
+                                            <td className="py-2 px-3 font-semibold  whitespace-nowrap">Saldo Actual</td>
+                                            <td className="py-2 px-3  font-medium">$ 33,880.77</td>
+                                            <td className="py-2 px-3 font-semibold whitespace-nowrap">Estado</td>
+                                            <td className="py-2 px-3 ">NAYARIT</td>
+                                        </tr>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div className="bg-blue-50 p-3 rounded border border-blue-100">
-                                <p className="text-sm mb-1"><span className="font-semibold text-blue-800">Asigna:</span> <span className="text-gray-700">08/01/2020</span></p>
-                                <p className="text-sm mb-1"><span className="font-semibold text-blue-800">Segment:</span> <span className="text-gray-700">MEDIUM RETURN Primes</span></p>
-                                <p className="text-sm mb-1"><span className="font-semibold text-blue-800">Saldo Actual:</span> <span className="text-green-700 font-medium">$ 33,880.77</span></p>
-                                <p className="text-sm"><span className="font-semibold text-blue-800">Estado:</span> <span className="text-gray-700">NAYARIT</span></p>
-                            </div>
-                            <div className="bg-green-50 p-3 rounded border border-green-100">
-                                <p className="text-sm mb-1"><span className="font-semibold text-green-800">Cancel:</span> <span className="text-gray-700">04/01/2020</span></p>
-                                <p className="text-sm mb-1"><span className="font-semibold text-green-800">Producio:</span> <span className="text-gray-700">Charge PR</span></p>
-                                <p className="text-sm mb-1"><span className="font-semibold text-green-800">Saldo Initial:</span> <span className="text-green-700 font-medium">$ 33,880.77</span></p>
-                                <p className="text-sm"><span className="font-semibold text-green-800">Dias OA:</span> <span className="text-gray-700">2057</span></p>
-                            </div>
-                            <div className="bg-purple-50 p-3 rounded border border-purple-100">
-                                <p className="text-sm mb-1"><span className="font-semibold text-purple-800">Aniv:</span> <span className="text-gray-700">12/09/2019</span></p>
-                                <p className="text-sm mb-1"><span className="font-semibold text-purple-800">AgencyID:</span> <span className="text-gray-700">41 ICMOCO</span></p>
-                                <p className="text-sm mb-1"><span className="font-semibold text-purple-800">Min Más Atrasado:</span> <span className="text-red-600 font-medium">$ 23,000.00</span></p>
-                                <p className="text-sm"><span className="font-semibold text-purple-800">Ejecutivo:</span> <span className="text-gray-700">E- ANT</span></p>
-                            </div>
-                            <div className="bg-gray-100 p-3 rounded border border-gray-200">
-                                <p className="text-sm mb-1"><span className="font-semibold text-gray-800">Corte:</span> <span className="text-gray-700">06/09/2025</span></p>
-                                <p className="text-sm mb-1"><span className="font-semibold text-gray-800">Inv:</span> <span className="text-gray-700">Último Pago</span></p>
-                                <p className="text-sm"><span className="font-semibold text-gray-800">Feh Últ Pago:</span> <span className="text-gray-500">-</span></p>
+                                        {/* Fila 2 */}
+                                        <tr className="border-b border-gray-200">
+                                            <td className="py-2 px-3 font-semibold  whitespace-nowrap">Cancel</td>
+                                            <td className="py-2 px-3 ">04/01/2020</td>
+                                            <td className="py-2 px-3 font-semibold   whitespace-nowrap">Producto</td>
+                                            <td className="py-2 px-3 ">Charge PR</td>
+                                            <td className="py-2 px-3 font-semibold  whitespace-nowrap">Saldo Initial</td>
+                                            <td className="py-2 px-3 font-medium">$ 33,880.77</td>
+                                            <td className="py-2 px-3 font-semibold whitespace-nowrap">Dias OA</td>
+                                            <td className="py-2 px-3 ">2057</td>
+                                        </tr>
+
+                                        {/* Fila 3 */}
+                                        <tr className="border-b border-gray-200">
+                                            <td className="py-2 px-3 font-semibold whitespace-nowrap">/ WO \ CBO Ingressos </td>
+                                            <td className="py-2 px-3">No \ 264.00</td>
+                                            <td className="py-2 px-3 font-semibold  whitespace-nowrap">Aniv</td>
+                                            <td className="py-2 px-3 ">12/09/2019</td>
+                                            <td className="py-2 px-3 font-semibold   whitespace-nowrap">AgencyID</td>
+                                            <td className="py-2 px-3 ">41 ICMOCO</td>
+                                            <td className="py-2 px-3 font-semibold   whitespace-nowrap">Min Más Atrasado</td>
+                                            <td className="py-2 px-3  font-medium">$ 23,000.00</td>
+                                            <td className="py-2 px-3 font-semibold   whitespace-nowrap">Ejecutivo</td>
+                                            <td className="py-2 px-3 ">E- ANT</td>
+                                        </tr>
+
+                                        {/* Fila 4 */}
+                                        <tr>
+                                            <td className="py-2 px-3 font-semibold   whitespace-nowrap">Corte</td>
+                                            <td className="py-2 px-3 ">06/09/2025</td>
+                                            <td className="py-2 px-3 font-semibold   whitespace-nowrap">Inv</td>
+                                            <td className="py-2 px-3 ">Último Pago</td>
+                                            <td className="py-2 px-3 font-semibold whitespace-nowrap">Fch Últ Pago</td>
+                                            <td className="py-2 px-3 " colSpan="3">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-
                     {/* Sección Posicion */}
                     <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                         <h3 className="text-lg font-bold mb-3 text-blue-800 border-b pb-2">Posicion</h3>
