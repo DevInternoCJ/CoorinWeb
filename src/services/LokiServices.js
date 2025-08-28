@@ -199,7 +199,61 @@ export const GetScreenFields = async (servidor, idProducto) => {
     
     return response.data;
   } catch (error) {
-    // ... mismo manejo de errores
+     console.error('❌ Error al actualizar la contraseña:', error);
+    // Manejo específico de errores de autenticación
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    // Mostrar más detalles del error
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+export const GetGridFields = async (servidor, idProducto) => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    
+    console.log('📤 Enviando a /CamposPantalla/grid-producto-sample');
+    console.log('🔑 Parámetros:', { servidor, idProducto });
+    
+    // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
+    const response = await api.get(`/CamposPantalla/grid-producto-sample/${servidor}/${idProducto}/70/5`);
+    
+    console.log('📥 Respuesta de /CamposPantalla/grid-producto-sample:', response.data);
+    
+    return response.data;
+  } catch (error) {
+     console.error('❌ Error al actualizar la contraseña:', error);
+    // Manejo específico de errores de autenticación
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    // Mostrar más detalles del error
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
   }
 };
 
