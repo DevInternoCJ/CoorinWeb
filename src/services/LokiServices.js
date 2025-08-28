@@ -68,7 +68,8 @@ export const loginUser = async (userData) => {
       localStorage.setItem('userData', JSON.stringify({
         idEjecutivo: response.data.ejecutivo.idEjecutivo,
         usuario: response.data.ejecutivo.Usuario,
-        nombre: response.data.ejecutivo.NombreEjecutivo
+        nombre: response.data.ejecutivo.NombreEjecutivo,
+        dias: response.data.ejecutivo.Días
       }));
     } else {
       console.warn('⚠️ No se recibió token en la respuesta');
@@ -176,6 +177,29 @@ export const UpdatePassword = async (passwordData) => {
       console.error('❌ Error al configurar la solicitud:', error.message);
     }
     throw error;
+  }
+};
+
+// services/LokiServices.js
+export const GetScreenFields = async (servidor, idProducto) => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    
+    console.log('📤 Enviando a /CamposPantalla/campos-pantalla');
+    console.log('🔑 Parámetros:', { servidor, idProducto });
+    
+    // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
+    const response = await api.get(`/CamposPantalla/campos-pantalla/${servidor}/${idProducto}`);
+    
+    console.log('📥 Respuesta de /CamposPantalla/campos-pantalla:', response.data);
+    
+    return response.data;
+  } catch (error) {
+    // ... mismo manejo de errores
   }
 };
 

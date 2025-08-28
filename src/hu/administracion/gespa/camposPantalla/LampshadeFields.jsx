@@ -64,58 +64,6 @@ const LampshadeFields = ({ isOpen, onClose }) => {
     },
   ];
 
-  // Datos para la tabla de Posicion
-  const positionData = [
-    {
-      id: 1,
-      position: "1",
-      alias: "Empresa",
-      campos: "[employersname]; [employersaddress]",
-      formato: "Texto",
-      resaltado: "Resaltado",
-    },
-    {
-      id: 2,
-      position: "2",
-      alias: "WO \\ CBO / Ingressos",
-      campos: "[WO7] \\ [CBO] \\ [BlogueoHerramienta] \\ [month/income]",
-      formato: "Numero",
-      resaltado: "Sobre Resaltado",
-    },
-    {
-      id: 3,
-      position: "3",
-      alias: "Asigna",
-      campos: "[batchdate]",
-      formato: "Fecha",
-      resaltado: "Resaltado",
-    },
-    {
-      id: 4,
-      position: "4",
-      alias: "Segment",
-      campos: "[CollectibilityCode] [SegmentoAMX] [DescuentoAMX]",
-      formato: "Texto",
-      resaltado: "Sobre Resaltado",
-    },
-    {
-      id: 5,
-      position: "5",
-      alias: "Saldo Actual",
-      campos: "[CurrentbalanceG]",
-      formato: "Moneda",
-      resaltado: "Sobre Resaltado",
-    },
-    {
-      id: 6,
-      position: "6",
-      alias: "Estado",
-      campos: "[Estado]",
-      formato: "Texto",
-      resaltado: "Normal",
-    },
-  ];
-
   // Datos para la sección Info
   const infoData = [
     // Fila 1
@@ -157,7 +105,7 @@ const LampshadeFields = ({ isOpen, onClose }) => {
         <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
           <CanteraSection />
           <InfoSection infoData={infoData} />
-          <PositionSection positionData={positionData} />
+          <PositionSection />
           <BatchdateSection tableData={tableData} />
         </div>
       </div>

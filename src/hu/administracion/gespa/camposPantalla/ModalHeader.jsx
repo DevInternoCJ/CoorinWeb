@@ -10,7 +10,7 @@ const ModalHeader = ({ onClose }) => {
       </div>
       <button
         onClick={onClose}
-        className="text-white hover:text-red-300 text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+        className="text-jerarquia3 hover:bg-background-dashboard hover:text-red-600 text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors"
       >
         &times;
       </button>

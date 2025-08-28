@@ -1,5 +1,5 @@
 // src/components/LoginCard.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import LogoCoorin7 from "../../assets/logo_coorin_7.svg";
 import LogicCard from "./LogicCard";
 import LoginForm from "./LoginForm";
@@ -7,12 +7,23 @@ import PasswordChangeContent from "./changePassword/PasswordChangeContent";
 import ChangePassword from "./changePassword/ChangePassword";
 
 const LoginCard = ({
+
   logo = LogoCoorin7,
   formComponent = null,
   children
 }) => {
   const [showPasswordContent, setShowPasswordContent] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [diasRestantes, setDiasRestantes] = useState(null);
+
+  useEffect(() => {
+    // Obtener los días del localStorage
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      const parsedData = JSON.parse(userData);
+      setDiasRestantes(parsedData.dias);
+    }
+  }, []);
 
   // Función que se ejecuta cuando el login es exitoso
   const handleLoginSuccess = () => {
@@ -73,6 +84,7 @@ const LoginCard = ({
             <PasswordChangeContent 
               onClose={handleClosePasswordContent}
               onAccept={handleAcceptPasswordChange}
+              dias={diasRestantes || "_"} // Valor por defecto por si no hay datos
             />
           ) : showChangePassword ? (
             <ChangePassword 
