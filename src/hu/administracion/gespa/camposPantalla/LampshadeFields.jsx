@@ -2,8 +2,8 @@ import React from "react";
 import ModalHeader from "./ModalHeader";
 import CanteraSection from "./WalletSection";
 import InfoSection from "./InfoSection";
-import PositionSection from "./PositionSection";
-import BatchdateSection from "./BatchdateSection";
+import PositionSection from "./TableEditFields";
+import BatchdateSection from "./GridLampsFields";
 
 const LampshadeFields = ({ isOpen, onClose }) => {
 

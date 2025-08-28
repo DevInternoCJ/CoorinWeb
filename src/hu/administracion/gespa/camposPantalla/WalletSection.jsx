@@ -1,6 +1,6 @@
 import React from "react";
 import LogoConjur from "../../../../assets/ConsorcioLetras_OLD.png";
-import CustomSelect from "./CustomSelect";
+import CustomSelect from "./SelectWallet";
 
 const CanteraSection = () => {
   return (

@@ -1,7 +1,7 @@
 import React from "react";
-import CustomSelect from "./CustomSelect";
+import CustomSelect from "./SelectWallet";
 
-const PositionRow = ({ data }) => {
+const OptionFields = ({ data }) => {
   const formatOptions = ["Texto", "Numero", "Moneda", "Fecha", "Porcentaje"];
   const highlightOptions = ["Normal", "Resaltado", "Sobre Resaltado"];
 
@@ -30,4 +30,4 @@ const PositionRow = ({ data }) => {
   );
 };
 
-export default PositionRow;
+export default OptionFields;

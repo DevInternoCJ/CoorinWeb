@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { GetGridFields } from "../../../../services/LokiServices"; // Ajusta la ruta según tu estructura
 
-const BatchdateSection = () => {
+const GridLampsFields = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,9 +36,6 @@ const BatchdateSection = () => {
   if (loading) {
     return (
       <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-        <h3 className="text-lg font-bold mb-3 text-blue-800 border-b pb-2">
-          batchdate
-        </h3>
         <div className="flex justify-center items-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           <span className="ml-3 text-gray-600">Cargando datos...</span>
@@ -73,9 +70,6 @@ const BatchdateSection = () => {
   if (tableData.length === 0) {
     return (
       <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-        <h3 className="text-lg font-bold mb-3 text-blue-800 border-b pb-2">
-          batchdate
-        </h3>
         <div className="text-center py-8 text-gray-500">
           No hay datos disponibles
         </div>
@@ -92,25 +86,10 @@ const BatchdateSection = () => {
 
   return (
   <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-    <h3 className="text-lg font-bold mb-3 text-blue-800 border-b pb-2">
-      batchdate
-    </h3>
-    
-    {/* Información de los parámetros usados */}
-    <div className="mb-4 bg-blue-50 border border-blue-200 rounded-md p-3">
-      <p className="text-sm text-blue-800">
-        <span className="font-semibold">Parámetros usados:</span> servidor = "{servidor}", idProducto = {idProducto}
-      </p>
-      <p className="text-sm text-blue-800 mt-1">
-        <span className="font-semibold">Registros:</span> {tableData.length} | 
-        <span className="font-semibold"> Columnas:</span> {Object.keys(tableData[0]).length}
-      </p>
-    </div>
-
     <div className="overflow-x-auto border rounded-lg max-h-96">
       <table className="min-w-full bg-white">
         <thead>
-          <tr className="bg-gray-200 border-b">
+          <tr className=" bg-background-secondary border-b">
             {Object.keys(tableData[0]).map((key) => (
               <th
                 key={key}
@@ -164,4 +143,4 @@ const BatchdateSection = () => {
 );
 };
 
-export default BatchdateSection;
+export default GridLampsFields;

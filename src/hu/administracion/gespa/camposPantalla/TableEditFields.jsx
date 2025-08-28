@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import PositionRow from "./PositionRow";
+import PositionRow from "./OptionFields";
 import { GetScreenFields } from "../../../../services/LokiServices";
 
-const PositionSection = () => {
+const TableEditFields = () => {
   const [positionData, setPositionData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -76,13 +76,6 @@ const PositionSection = () => {
 
   return (
     <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-      {/* Información de los parámetros usados */}
-      <div className="mb-4 bg-blue-50 border border-blue-200 rounded-md p-3">
-        <p className="text-sm text-blue-800">
-          <span className="font-semibold">Parámetros usados:</span> servidor = "{servidor}", idProducto = {idProducto}
-        </p>
-      </div>
-
       {/* Encabezados de la tabla */}
       <div className="bg-background-secondary rounded-md grid grid-cols-12 gap-3 mb-2 py-2 px-3 font-semibold text-white text-sm">
         <div className="col-span-1">Position</div>
@@ -119,4 +112,4 @@ const PositionSection = () => {
   );
 };
 
-export default PositionSection;
+export default TableEditFields;
