@@ -29,7 +29,7 @@ const InformacionArrepentimientosDropdown = () => {
                 setResultados([]);
             }
         } catch (err) {
-            setError("Error al consultar arrepentimientos.");
+            setError("Verifica que la cuenta sea correcta.");
         } finally {
             setLoading(false);
         }

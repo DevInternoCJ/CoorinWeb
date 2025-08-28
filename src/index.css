@@ -1,3 +1,50 @@
+/* Forzar color y visibilidad de los sufijos AM/PM en los inputs type=time */
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+  color: #111;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-size: 1em;
+}
+input[type="time"]::-ms-input-placeholder {
+  color: #111;
+  font-weight: 600;
+}
+input[type="time"]::placeholder {
+  color: #111;
+  font-weight: 600;
+}
+/* Forzar color negro en los selectores internos de input[type=time] para AM/PM */
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+  color: #111;
+}
+input[type="time"]::-webkit-input-placeholder {
+  color: #111;
+}
+input[type="time"]::-moz-placeholder {
+  color: #111;
+}
+input[type="time"]:-ms-input-placeholder {
+  color: #111;
+}
+input[type="time"]::placeholder {
+  color: #111;
+}
+input[type="time"]::-ms-input-placeholder {
+  color: #111;
+}
+/* === Estilo global para inputs === */
+input, input[type="text"], input[type="number"], input[type="time"], input[type="password"], input[type="email"] {
+  color: #111;
+}
+/* === Estilo global para label === */
+label {
+  font-weight: 600;
+  color: var(--color-jerarquia4);
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+  display: inline-block;
+  letter-spacing: 0.01em;
+}
 /* === Ramificación Productividad === */
 .productividad-branch {
   background: #fff;
