@@ -244,16 +244,19 @@ export const obetenerTablaMetas = async (idEjecutivo) => {
 };
 
 // Obtener ramificación de encargados (sin parámetros)
-export const obetenerJerarquiaEncargados = async () => {
+export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    console.log('📤 Enviando a /carteras/metas-productividad');
+    const idNum = Number(idEjecutivo);
+    const requestData = [idNum];
+    const url = `/Encargados/ejecutivos-propios/${idNum}`;
+    console.log('📤 Enviando a', url, 'con:', requestData);
     // El interceptor añade el token automáticamente
-    const response = await api.post('/carteras/metas-productividad');
-    console.log('📥 Respuesta de /Encargados/ramificacion:', response.data);
+    const response = await api.post(url, requestData);
+    console.log('📥 Respuesta de', url + ':', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ Error al obtener la ramificación de encargados:', error);

@@ -1,3 +1,20 @@
+/* Hover oscuro para elementos de la jerarquía de ejecutivos */
+.executive-hierarchy-item {
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.executive-hierarchy-item:hover {
+  background: #d9e0e9;
+  color: #f7f7f7;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px #111a, 0 0 1px #000a;
+}
+.executive-hierarchy-item.selected {
+  background: var(--color-jerarquia1, #e0f7fa);
+  color: #2b463c;
+}
 /* Forzar color y visibilidad de los sufijos AM/PM en los inputs type=time */
 input[type="time"]::-webkit-datetime-edit-ampm-field {
   color: #111;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Toaster, toast } from "sonner";
-import { obetenerTablaMetas, actualizarMetas } from '../../../../services/LokiServices';
+import { obetenerTablaMetas, actualizarMetas, obetenerJerarquiaEncargados } from '../../../../services/LokiServices';
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
 
 // Flecha tipo chevron moderna
@@ -29,8 +29,10 @@ const ModalMetasContent = () => {
     const [tablaMetas, setTablaMetas] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [expandedNodes, setExpandedNodes] = useState({});
-    const [selectedExecutive, setSelectedExecutive] = useState("ALDF");
+    // Estado para la jerarquía de ejecutivos (lógica separada)
+    const [executiveTree, setExecutiveTree] = useState([]);
+    const [loadingJerarquia, setLoadingJerarquia] = useState(false);
+    const [errorJerarquia, setErrorJerarquia] = useState(null);
     // Estado para checkboxes y edición de inputs
     const [selectedRows, setSelectedRows] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
@@ -48,11 +50,77 @@ const ModalMetasContent = () => {
         horaSalida: ''
     });
 
-    const toggleExpanded = (executiveValue) => {
-        setExpandedNodes(prev => ({
-            ...prev,
-            [executiveValue]: !prev[executiveValue]
-        }));
+
+    // Lógica separada para obtener la jerarquía de ejecutivos
+    useEffect(() => {
+        const fetchExecutiveTree = async () => {
+            setLoadingJerarquia(true);
+            setErrorJerarquia(null);
+            try {
+                const userData = JSON.parse(localStorage.getItem('userData'));
+                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+                if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
+                const data = await obetenerJerarquiaEncargados(idEjecutivo);
+                console.log('🟢 Respuesta jerarquía ejecutivos:', data);
+                setExecutiveTree(Array.isArray(data) ? data : []);
+            } catch (e) {
+                setErrorJerarquia('Error al obtener la jerarquía de ejecutivos');
+                setExecutiveTree([]);
+            } finally {
+                setLoadingJerarquia(false);
+            }
+        };
+        fetchExecutiveTree();
+    }, []);
+
+    // Handler para click en ejecutivo de la jerarquía
+    const handleExecutiveClick = (node) => {
+        // Prepara los inputs para el ejecutivo seleccionado
+        setInputValues({
+            cuentas: '',
+            titulares: '',
+            negociaciones: '',
+            cumplimientos: '',
+            montoCumplido: '',
+            saldoSolucionado: '',
+            segmento: '',
+            horaEntrada: '',
+            horaSalida: ''
+        });
+        // Guarda el idEjecutivo seleccionado para el envío
+        setSelectedExecutive(node.idEjecutivo);
+    };
+
+    // Estado para el ejecutivo seleccionado desde la jerarquía
+    const [selectedExecutive, setSelectedExecutive] = useState(null);
+
+    // Renderizado recursivo de la jerarquía, cada ejecutivo es clickeable
+    const renderExecutiveTree = (tree, level = 0) => {
+        if (!Array.isArray(tree)) return null;
+        return tree.map((node, idx) => {
+            const isSelected = selectedExecutive === node.idEjecutivo;
+            return (
+                <React.Fragment key={node.usuario || node.id || idx}>
+                    <div
+                        className={`executive-hierarchy-item${isSelected ? ' selected' : ''}`}
+                        style={{
+                            paddingLeft: level * 18,
+                            marginBottom: 2,
+                            fontWeight: 500,
+                            fontSize: 13,
+                            color: isSelected ? '#2b463c' : undefined
+                        }}
+                        onClick={() => handleExecutiveClick(node)}
+                        title="Seleccionar ejecutivo para alta de metas"
+                    >
+                        {node.usuario || ''} - {node.nombreEjecutivo || ''}
+                    </div>
+                    {Array.isArray(node.subordinados) && node.subordinados.length > 0 && (
+                        renderExecutiveTree(node.subordinados, level + 1)
+                    )}
+                </React.Fragment>
+            );
+        });
     };
 
 
@@ -68,7 +136,7 @@ const ModalMetasContent = () => {
                 if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
                 const data = await obetenerTablaMetas(idEjecutivo);
                 setTablaMetas(Array.isArray(data) ? data : []);
-            } catch (err) {
+            } catch {
                 setError('Error al obtener la tabla de metas');
                 setTablaMetas([]);
             } finally {
@@ -78,66 +146,6 @@ const ModalMetasContent = () => {
         fetchTablaMetas();
     }, []);
 
-    const getVisibleExecutives = () => {
-        const result = [];
-
-        executiveOptions.forEach(executive => {
-            // Siempre mostrar nivel 1 (principales)
-            if (executive.level === 1) {
-                result.push(executive);
-
-                // Mostrar subordinados solo si está expandido
-                if (expandedNodes[executive.value]) {
-                    const subordinates = executiveOptions.filter(sub => sub.parent === executive.value);
-                    subordinates.forEach(sub => {
-                        result.push(sub);
-
-                        // Mostrar subordinados de nivel 3 si el de nivel 2 está expandido
-                        if (expandedNodes[sub.value]) {
-                            const subSubordinates = executiveOptions.filter(subsub => subsub.parent === sub.value);
-                            result.push(...subSubordinates);
-                        }
-                    });
-                }
-            }
-        });
-
-        return result;
-    };
-
-    // Datos de ramificación/ejecutivos con jerarquía
-    const executiveOptions = [
-        { value: "ALDF", label: "ALDF - Alan De La O Flores", level: 1, isManager: true },
-        { value: "JMPR", label: "JMPR - Juan Manuel Pérez Rodríguez", level: 2, isManager: false, parent: "ALDF" },
-        { value: "MAGS", label: "MAGS - María Alejandra González Sánchez", level: 2, isManager: false, parent: "ALDF" },
-        { value: "RAFM", label: "RAFM - Roberto Andrés Fernández Martín", level: 1, isManager: true },
-        { value: "LEVA", label: "LEVA - Leticia Esperanza Vargas Aguilar Leticia Esperanza Vargas Aguilar ", level: 2, isManager: false, parent: "RAFM" },
-        { value: "JCHL", label: "JCHL - ", level: 2, isManager: false, parent: "RAFM" },
-        { value: "AMRT", label: "AMRT - Ana María Ramírez Torres", level: 3, isManager: false, parent: "JCHL" },
-        { value: "DAFV", label: "DAFV - Daniel Antonio Flores Vázquez", level: 3, isManager: false, parent: "LEVA" },
-        // Más ejemplos para pruebas de scroll y ancho
-        { value: "MGR1", label: "MGR1 - Manager Uno", level: 1, isManager: true },
-        { value: "EMP1", label: "EMP1 - Empleado Uno", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP2", label: "EMP2 - Empleado Dos", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP3", label: "EMP3 - Empleado Tres", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP4", label: "EMP4 - Empleado Cuatro", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP5", label: "EMP5 - Empleado Cinco", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP6", label: "EMP6 - Empleado Seis", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP7", label: "EMP7 - Empleado Siete", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP8", label: "EMP8 - Empleado Ocho", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP9", label: "EMP9 - Empleado Nueve", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP10", label: "EMP10 - Empleado Diez", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP11", label: "EMP11 - Empleado Once", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP12", label: "EMP12 - Empleado Doce", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP13", label: "EMP13 - Empleado Trece", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP14", label: "EMP14 - Empleado Catorce", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP15", label: "EMP15 - Empleado Quince", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP16", label: "EMP16 - Empleado Dieciséis", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP17", label: "EMP17 - Empleado Diecisiete", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP18", label: "EMP18 - Empleado Dieciocho", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP19", label: "EMP19 - Empleado Diecinueve", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP20", label: "EMP20 - Empleado Veinte", level: 2, isManager: false, parent: "MGR1" }
-    ];
 
     // Manejo de selección individual
     const handleRowCheckbox = (rowKey) => {
@@ -170,6 +178,47 @@ const ModalMetasContent = () => {
 
     // Handler para el botón Guardar
     const handleGuardar = async () => {
+        // Si hay un ejecutivo seleccionado desde la jerarquía, se hace alta directa
+        if (selectedExecutive) {
+            const payload = {
+                idEjecutivo: selectedExecutive,
+                cuentas: Number(inputValues.cuentas) || 0,
+                titulares: Number(inputValues.titulares) || 0,
+                negociaciones: Number(inputValues.negociaciones) || 0,
+                cumplimientos: Number(inputValues.cumplimientos) || 0,
+                montoCumplido: Number(inputValues.montoCumplido) || 0,
+                saldoSolucionado: Number(inputValues.saldoSolucionado) || 0,
+                segmento: inputValues.segmento || null,
+                horaEntrada: inputValues.horaEntrada || '',
+                horaSalida: inputValues.horaSalida || '',
+                nuevo: 1 // Alta de metas para ejecutivo seleccionado
+            };
+            try {
+                console.log('➡️ Enviando payload a actualizarMetas (alta):', payload);
+                await actualizarMetas(payload);
+                toast.success('¡Metas guardadas correctamente!');
+                setSelectedExecutive(null); // Limpiar selección
+                setInputValues({
+                    cuentas: '', titulares: '', negociaciones: '', cumplimientos: '', montoCumplido: '', saldoSolucionado: '', segmento: '', horaEntrada: '', horaSalida: ''
+                });
+                // Refrescar la tabla después de guardar
+                try {
+                    const userData = JSON.parse(localStorage.getItem('userData'));
+                    const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+                    if (idEjecutivo) {
+                        const data = await obetenerTablaMetas(idEjecutivo);
+                        setTablaMetas(Array.isArray(data) ? data : []);
+                    }
+                } catch {
+                    toast.error('Error al refrescar la tabla de metas');
+                    setTablaMetas([]);
+                }
+            } catch (e) {
+                toast.error('Error al guardar metas: ' + (e?.message || e));
+            }
+            return;
+        }
+        // ...lógica original para edición múltiple...
         if (selectedRows.length === 0) return;
         try {
             for (const rowKey of selectedRows) {
@@ -217,69 +266,22 @@ const ModalMetasContent = () => {
             <div style={{ width: '18rem', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', marginBottom: 8, position: 'absolute', zIndex: 2, marginTrim: "4rem" }}>
                 <img src={ConsorcioLogo} alt="Consorcio Jurídico" style={{ maxWidth: 120, maxHeight: 60, objectFit: 'contain', filter: 'drop-shadow(0 2px 8px #bdbdbd)' }} />
             </div>
-            {/* Columna izquierda - Dropdown de Ejecutivos/Ramificación */}
-            <div className="productividad-branch" style={{ overflowX: 'auto', overflowY: 'auto', height: '56vh', width: '18rem', marginTop: 60 }}>
-                <div className="space-y-1">
-                    {getVisibleExecutives().map((executive) => {
-                        const hasSubordinates = executiveOptions.some(sub => sub.parent === executive.value);
-                        const isExpanded = expandedNodes[executive.value];
 
-                        return (
-                            <div
-                                key={executive.value}
-                                className={`p-2 rounded cursor-pointer transition-colors border ${selectedExecutive === executive.value
-                                        ? 'bg-[var(--color-jerarquia1)] border-[var(--color-jerarquia2)] text-white'
-                                        : 'bg-white border-[var(--color-jerarquia1)] hover:bg-gray-100'
-                                    }`}
-                                style={{
-                                    marginLeft: `${(executive.level - 1) * 16}px`,
-                                    borderLeft: executive.level > 1 ? `3px solid var(--color-jerarquia${executive.level})` : 'none'
-                                }}
-                                onClick={() => setSelectedExecutive(executive.value)}
-                            >
-                                {/* Indicador de jerarquía */}
-                                <div className="flex items-center gap-2">
-                                    {/* Botón de expand/collapse para managers con subordinados */}
-                                    {hasSubordinates && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                toggleExpanded(executive.value);
-                                            }}
-                                            className="text-xs font-bold text-[var(--color-jerarquia3)] hover:text-[var(--color-jerarquia4)] transition-colors"
-                                        >
-                                            {isExpanded ? '▼' : '▶'}
-                                        </button>
-                                    )}
-
-                                    {executive.level > 1 && (
-                                        <span className="text-xs opacity-60">
-                                            {'└─'.repeat(executive.level - 1)}
-                                        </span>
-                                    )}
-                                    {executive.isManager && (
-                                        <span className="text-xs font-bold text-[var(--color-jerarquia3)]">
-                                            👑
-                                        </span>
-                                    )}
-                                    <div className="flex-1">
-                                        <div className={`text-xs font-semibold ${executive.isManager ? 'text-[var(--color-jerarquia3)]' : ''}`}>
-                                            {executive.value}
-                                        </div>
-                                        <div className="text-xs opacity-90">
-                                            {executive.label.split(' - ')[1]}
-                                        </div>
-                                        {executive.level > 1 && (
-                                            <div className="text-xs opacity-60 italic">
-                                                Reporta a: {executive.parent}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
+            {/* Columna izquierda - Jerarquía de Ejecutivos */}
+            <div className="productividad-branch" style={{ overflowX: 'auto', overflowY: 'auto', height: '56vh', width: '18rem', marginTop: 60, background: '#ffffff', borderRadius: 8, border: '1px solid #e0e0e0', padding: 8 }}>
+                {/* Usuario y Ejecutivo principal */}
+                {tablaMetas.length > 0 && (
+                    <div style={{ marginBottom: 10, padding: 6, background: 'var(--color-bgcolor2)', borderRadius: 4, fontWeight: 600, color: '#2b463c', fontSize: 14, textAlign: 'center' }}>
+                        {tablaMetas[0].usuario || ''} - {tablaMetas[0].ejecutivo || tablaMetas[0].nombreEjecutivo || tablaMetas[0].nombre || ''}
+                    </div>
+                )}
+                {loadingJerarquia ? (
+                    <div style={{ color: '#2b463c', fontWeight: 500, fontSize: 15, textAlign: 'center', marginTop: 30 }}>Cargando jerarquía...</div>
+                ) : errorJerarquia ? (
+                    <div style={{ color: '#b71c1c', fontWeight: 500, fontSize: 14, textAlign: 'center', marginTop: 30 }}>{errorJerarquia}</div>
+                ) : (
+                    renderExecutiveTree(executiveTree)
+                )}
             </div>
 
             {/* Columna derecha - Inputs y Tabla principal */}
