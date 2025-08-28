@@ -4,7 +4,7 @@ import { ExclamationKey } from "./PasswordIcons";
 import ButtonLogin from '../ButtonLogin'
 import { useNavigate } from 'react-router-dom'; // useNavigate
 
-const PasswordChangeContent = ({ onClose, onAccept}) => {
+const PasswordChangeContent = ({ onClose, onAccept, dias}) => {
   const navigate = useNavigate(); 
   const handleNoClick = () => {
     navigate('/dashboardPage'); // <--- Navegar programáticamente
@@ -22,7 +22,7 @@ const PasswordChangeContent = ({ onClose, onAccept}) => {
       </div>
       <div className="mb-8 text-red-800 w-full text-center">
         <h6 className="text-lg font-semibold mb-2">
-          Su contraseña expira en {d} días
+          Su contraseña expira en {dias} días
         </h6>
         <h6 className="text-lg font-semibold">¿Desea cambiar ahora?</h6>
       </div>
