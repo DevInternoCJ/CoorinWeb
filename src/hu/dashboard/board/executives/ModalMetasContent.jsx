@@ -3,27 +3,6 @@ import { Toaster, toast } from "sonner";
 import { obetenerTablaMetas, actualizarMetas, obetenerJerarquiaEncargados } from '../../../../services/LokiServices';
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
 
-// Flecha tipo chevron moderna
-const DropdownArrow = () => (
-    <span
-        style={{
-            pointerEvents: "none",
-            position: "absolute",
-            right: "0.75rem",
-            top: "50%",
-            transform: "translateY(-50%)",
-            fontSize: "1.15rem",
-            color: "#2b463c",
-            display: "flex",
-            alignItems: "center"
-        }}
-    >
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <path d="M6 8l4 4 4-4" stroke="#2b463c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-    </span>
-);
-
 
 const ModalMetasContent = () => {
     const [tablaMetas, setTablaMetas] = useState([]);
@@ -59,10 +38,29 @@ const ModalMetasContent = () => {
             try {
                 const userData = JSON.parse(localStorage.getItem('userData'));
                 const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+                const usuario = userData?.usuario || '';
+                const nombreEjecutivo = userData?.nombre || userData?.nombreEjecutivo || userData?.ejecutivo || '';
                 if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
                 const data = await obetenerJerarquiaEncargados(idEjecutivo);
                 console.log('🟢 Respuesta jerarquía ejecutivos:', data);
-                setExecutiveTree(Array.isArray(data) ? data : []);
+                // Si la respuesta NO incluye el nodo raíz, lo agregamos manualmente
+                let tree = [];
+                if (Array.isArray(data)) {
+                    // Buscamos si el propio ejecutivo está en la raíz
+                    const found = data.find(n => n.idEjecutivo === idEjecutivo);
+                    if (found) {
+                        tree = data;
+                    } else {
+                        // Lo agregamos como nodo raíz
+                        tree = [{
+                            idEjecutivo,
+                            usuario,
+                            nombreEjecutivo,
+                            subordinados: data
+                        }];
+                    }
+                }
+                setExecutiveTree(tree);
             } catch (e) {
                 setErrorJerarquia('Error al obtener la jerarquía de ejecutivos');
                 setExecutiveTree([]);
@@ -73,9 +71,14 @@ const ModalMetasContent = () => {
         fetchExecutiveTree();
     }, []);
 
-    // Handler para click en ejecutivo de la jerarquía
+
+    // Estado para los ejecutivos seleccionados desde la jerarquía (array)
+    const [selectedExecutives, setSelectedExecutives] = useState([]); // array de idEjecutivo
+    const [allSubordinateIds, setAllSubordinateIds] = useState([]);
+    const [allHierarchyIds, setAllHierarchyIds] = useState([]); // ids de toda la jerarquía
+
+    // Handler para click en ejecutivo de la jerarquía (selección inteligente)
     const handleExecutiveClick = (node) => {
-        // Prepara los inputs para el ejecutivo seleccionado
         setInputValues({
             cuentas: '',
             titulares: '',
@@ -87,18 +90,33 @@ const ModalMetasContent = () => {
             horaEntrada: '',
             horaSalida: ''
         });
-        // Guarda el idEjecutivo seleccionado para el envío
-        setSelectedExecutive(node.idEjecutivo);
+        setSelectedRows([]);
+        setEditValues({});
+        setError(null);
+        setTablaMetas([]);
+        setLoading(true);
+
+        // Si el nodo tiene subordinados, seleccionar solo los subordinados directos
+        if (Array.isArray(node.subordinados) && node.subordinados.length > 0) {
+            const idsSubordinados = node.subordinados.map(sub => sub.idEjecutivo).filter(Boolean);
+            setSelectedExecutives(idsSubordinados);
+        } else {
+            // Si no tiene subordinados, solo ese ejecutivo
+            setSelectedExecutives([node.idEjecutivo]);
+        }
+        setLoading(false);
     };
 
-    // Estado para el ejecutivo seleccionado desde la jerarquía
-    const [selectedExecutive, setSelectedExecutive] = useState(null);
 
-    // Renderizado recursivo de la jerarquía, cada ejecutivo es clickeable
+    // Renderizado recursivo de la jerarquía, cada ejecutivo es clickeable y solo uno puede estar seleccionado
     const renderExecutiveTree = (tree, level = 0) => {
         if (!Array.isArray(tree)) return null;
         return tree.map((node, idx) => {
-            const isSelected = selectedExecutive === node.idEjecutivo;
+            // Seleccionado si todos los subordinados están seleccionados o si es único seleccionado
+            const isSelected =
+                (Array.isArray(node.subordinados) && node.subordinados.length > 0
+                    ? node.subordinados.every(sub => selectedExecutives.includes(sub.idEjecutivo))
+                    : selectedExecutives.length === 1 && selectedExecutives[0] === node.idEjecutivo);
             return (
                 <React.Fragment key={node.usuario || node.id || idx}>
                     <div
@@ -108,10 +126,11 @@ const ModalMetasContent = () => {
                             marginBottom: 2,
                             fontWeight: 500,
                             fontSize: 13,
-                            color: isSelected ? '#2b463c' : undefined
+                            color: isSelected ? '#2b463c' : undefined,
+                            userSelect: 'none',
                         }}
                         onClick={() => handleExecutiveClick(node)}
-                        title="Seleccionar ejecutivo para alta de metas"
+                        title={Array.isArray(node.subordinados) && node.subordinados.length > 0 ? "Mostrar solo subordinados" : "Mostrar solo este ejecutivo"}
                     >
                         {node.usuario || ''} - {node.nombreEjecutivo || ''}
                     </div>
@@ -124,28 +143,120 @@ const ModalMetasContent = () => {
     };
 
 
+
+    // Al cargar, seleccionar por defecto el ejecutivo logueado y calcular todos los ids de la jerarquía
     useEffect(() => {
-        const fetchTablaMetas = async () => {
-            setLoading(true);
-            setError(null);
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+        if (!idEjecutivo || !executiveTree.length) return;
+        const rootNode = executiveTree.find(n => n.idEjecutivo === idEjecutivo);
+        // Función recursiva para obtener todos los ids de la jerarquía, incluyendo el propio
+        const getAllHierarchyIds = (node) => {
+            let ids = [];
+            if (!node) return ids;
+            if (node.idEjecutivo) ids.push(node.idEjecutivo);
+            if (Array.isArray(node.subordinados) && node.subordinados.length > 0) {
+                for (const sub of node.subordinados) {
+                    ids = ids.concat(getAllHierarchyIds(sub));
+                }
+            }
+            return ids;
+        };
+        if (rootNode) {
+            // ids subordinados directos
+            if (Array.isArray(rootNode.subordinados) && rootNode.subordinados.length > 0) {
+                const idsSubordinados = rootNode.subordinados.map(sub => Number(sub.idEjecutivo)).filter(id => Number.isInteger(id) && id > 0);
+                setAllSubordinateIds(idsSubordinados);
+                setSelectedExecutives(idsSubordinados);
+            } else if (idEjecutivo) {
+                setAllSubordinateIds([Number(idEjecutivo)]);
+                setSelectedExecutives([Number(idEjecutivo)]);
+            }
+            // ids de toda la jerarquía (incluyendo el propio)
+            const allIds = getAllHierarchyIds(rootNode)
+                .map(id => Number(id))
+                .filter(id => Number.isInteger(id) && id > 0);
+            setAllHierarchyIds(allIds);
+        } else {
+            setAllHierarchyIds([]);
+        }
+    }, [executiveTree]);
+
+    // Cuando cambian los ejecutivos seleccionados, buscar sus metas
+    useEffect(() => {
+        // Filtrar solo ids válidos (enteros > 0) y detectar los inválidos
+        // Filtrar solo ids válidos (enteros > 0) y detectar los inválidos
+        let validIds = [];
+        let invalidIndexes = [];
+        if (Array.isArray(selectedExecutives)) {
+            selectedExecutives.forEach((id, idx) => {
+                const numId = Number(id);
+                if (Number.isInteger(numId) && numId > 0 && !isNaN(numId)) {
+                    validIds.push(numId);
+                } else {
+                    invalidIndexes.push(idx);
+                }
+            });
+        }
+        // Si hay algún NaN en validIds, limpiar el array
+        if (validIds.some(id => isNaN(id))) {
+            validIds = validIds.filter(id => Number.isInteger(id) && id > 0 && !isNaN(id));
+        }
+        // Notificar usuarios omitidos y mostrar ids inválidos en consola
+        if (invalidIndexes.length > 0 && Array.isArray(selectedExecutives)) {
+            // Lista de ids inválidos
+            const idInvalidos = invalidIndexes.map(idx => selectedExecutives[idx]);
+            console.warn('Lista de idInvalidos detectados:', idInvalidos);
+            // Buscar los usuarios omitidos en la jerarquía
+            const omitidos = invalidIndexes.map(idx => {
+                // Buscar en executiveTree el usuario correspondiente
+                let usuario = selectedExecutives[idx];
+                // Buscar nombre si es posible
+                let nombre = '';
+                const buscarNombre = (tree) => {
+                    if (!Array.isArray(tree)) return null;
+                    for (const node of tree) {
+                        if (node.idEjecutivo === usuario || node.usuario === usuario) {
+                            return node.nombreEjecutivo || node.nombre || '';
+                        }
+                        if (node.subordinados) {
+                            const found = buscarNombre(node.subordinados);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                };
+                nombre = buscarNombre(executiveTree) || '';
+                return `${usuario}${nombre ? ' (' + nombre + ')' : ''}`;
+            });
+            const mensaje = `Se omitieron los siguientes usuarios por tener id inválido: ${omitidos.join(', ')}`;
+            console.warn(mensaje);
+            toast.warning(mensaje);
+        }
+        // Mostrar en consola los ids enviados y el usuario seleccionado
+        if (validIds.length > 0) {
+            console.log('🟢 Ids enviados a obetenerTablaMetas:', validIds, '| Usuario seleccionado:', selectedExecutives);
+        } else {
+            console.log('⚠️ No se enviaron ids válidos a obetenerTablaMetas. selectedExecutives:', selectedExecutives);
+        }
+        if (!validIds.length) {
+            setTablaMetas([]);
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        (async () => {
             try {
-                // Obtener idEjecutivo del usuario logueado desde localStorage
-                const userData = JSON.parse(localStorage.getItem('userData'));
-                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
-                console.log('🟢 idEjecutivo (usuario logueado) que se enviará al endpoint:', idEjecutivo, userData);
-                if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
-                const data = await obetenerTablaMetas(idEjecutivo);
-                setTablaMetas(Array.isArray(data) ? data : []);
+                const data = await obetenerTablaMetas(validIds);
+                setTablaMetas(Array.isArray(data) ? data.filter(Boolean) : []);
             } catch {
                 setError('Error al obtener la tabla de metas');
                 setTablaMetas([]);
             } finally {
                 setLoading(false);
             }
-        };
-        fetchTablaMetas();
-    }, []);
-
+        })();
+    }, [selectedExecutives, executiveTree]);
 
     // Manejo de selección individual
     const handleRowCheckbox = (rowKey) => {
@@ -178,37 +289,33 @@ const ModalMetasContent = () => {
 
     // Handler para el botón Guardar
     const handleGuardar = async () => {
-        // Si hay un ejecutivo seleccionado desde la jerarquía, se hace alta directa
-        if (selectedExecutive) {
-            const payload = {
-                idEjecutivo: selectedExecutive,
-                cuentas: Number(inputValues.cuentas) || 0,
-                titulares: Number(inputValues.titulares) || 0,
-                negociaciones: Number(inputValues.negociaciones) || 0,
-                cumplimientos: Number(inputValues.cumplimientos) || 0,
-                montoCumplido: Number(inputValues.montoCumplido) || 0,
-                saldoSolucionado: Number(inputValues.saldoSolucionado) || 0,
-                segmento: inputValues.segmento || null,
-                horaEntrada: inputValues.horaEntrada || '',
-                horaSalida: inputValues.horaSalida || '',
-                nuevo: 1 // Alta de metas para ejecutivo seleccionado
-            };
+        // Alta de metas para todos los ejecutivos seleccionados (inputs de arriba)
+        if (selectedExecutives.length > 0 && selectedRows.length === 0) {
             try {
-                console.log('➡️ Enviando payload a actualizarMetas (alta):', payload);
-                await actualizarMetas(payload);
+                for (const idEjecutivo of selectedExecutives) {
+                    const payload = {
+                        idEjecutivo,
+                        cuentas: Number(inputValues.cuentas) || 0,
+                        titulares: Number(inputValues.titulares) || 0,
+                        negociaciones: Number(inputValues.negociaciones) || 0,
+                        cumplimientos: Number(inputValues.cumplimientos) || 0,
+                        montoCumplido: Number(inputValues.montoCumplido) || 0,
+                        saldoSolucionado: Number(inputValues.saldoSolucionado) || 0,
+                        segmento: inputValues.segmento || null,
+                        horaEntrada: inputValues.horaEntrada || '',
+                        horaSalida: inputValues.horaSalida || '',
+                        nuevo: 1
+                    };
+                    await actualizarMetas(payload);
+                }
                 toast.success('¡Metas guardadas correctamente!');
-                setSelectedExecutive(null); // Limpiar selección
                 setInputValues({
                     cuentas: '', titulares: '', negociaciones: '', cumplimientos: '', montoCumplido: '', saldoSolucionado: '', segmento: '', horaEntrada: '', horaSalida: ''
                 });
-                // Refrescar la tabla después de guardar
+                // Refrescar la tabla
                 try {
-                    const userData = JSON.parse(localStorage.getItem('userData'));
-                    const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
-                    if (idEjecutivo) {
-                        const data = await obetenerTablaMetas(idEjecutivo);
-                        setTablaMetas(Array.isArray(data) ? data : []);
-                    }
+                    const dataArr = await Promise.all(selectedExecutives.map(id => obetenerTablaMetas(id)));
+                    setTablaMetas(dataArr.flat().filter(Boolean));
                 } catch {
                     toast.error('Error al refrescar la tabla de metas');
                     setTablaMetas([]);
@@ -218,14 +325,12 @@ const ModalMetasContent = () => {
             }
             return;
         }
-        // ...lógica original para edición múltiple...
+        // Edición múltiple de filas seleccionadas en la tabla
         if (selectedRows.length === 0) return;
         try {
             for (const rowKey of selectedRows) {
-                // Buscar la fila original
                 const row = tablaMetas.find((r, i) => (r.id || r.usuario || i) === rowKey);
                 if (!row) continue;
-                // Tomar valores del estado de los inputs de arriba
                 const payload = {
                     idEjecutivo: row.idEjecutivo || row.id || row.usuario || rowKey,
                     cuentas: Number(inputValues.cuentas) || 0,
@@ -237,20 +342,15 @@ const ModalMetasContent = () => {
                     segmento: inputValues.segmento || null,
                     horaEntrada: inputValues.horaEntrada || '',
                     horaSalida: inputValues.horaSalida || '',
-                    nuevo: 0 // Siempre enviar 0 cuando se selecciona el checkbox
+                    nuevo: 0
                 };
-                console.log('➡️ Enviando payload a actualizarMetas:', payload);
                 await actualizarMetas(payload);
             }
             toast.success('¡Metas guardadas correctamente!');
-            // Refrescar la tabla después de guardar
+            // Refrescar la tabla
             try {
-                const userData = JSON.parse(localStorage.getItem('userData'));
-                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
-                if (idEjecutivo) {
-                    const data = await obetenerTablaMetas(idEjecutivo);
-                    setTablaMetas(Array.isArray(data) ? data : []);
-                }
+                const dataArr = await Promise.all(selectedExecutives.map(id => obetenerTablaMetas(id)));
+                setTablaMetas(dataArr.flat().filter(Boolean));
             } catch {
                 toast.error('Error al refrescar la tabla de metas');
                 setTablaMetas([]);
@@ -270,11 +370,25 @@ const ModalMetasContent = () => {
             {/* Columna izquierda - Jerarquía de Ejecutivos */}
             <div className="productividad-branch" style={{ overflowX: 'auto', overflowY: 'auto', height: '56vh', width: '18rem', marginTop: 60, background: '#ffffff', borderRadius: 8, border: '1px solid #e0e0e0', padding: 8 }}>
                 {/* Usuario y Ejecutivo principal */}
-                {tablaMetas.length > 0 && (
-                    <div style={{ marginBottom: 10, padding: 6, background: 'var(--color-bgcolor2)', borderRadius: 4, fontWeight: 600, color: '#2b463c', fontSize: 14, textAlign: 'center' }}>
-                        {tablaMetas[0].usuario || ''} - {tablaMetas[0].ejecutivo || tablaMetas[0].nombreEjecutivo || tablaMetas[0].nombre || ''}
-                    </div>
-                )}
+                {(() => {
+                    const userData = JSON.parse(localStorage.getItem('userData'));
+                    const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+                    const nombreSesion = userData?.nombre || userData?.nombreEjecutivo || userData?.ejecutivo || '';
+                    const usuarioSesion = userData?.usuario || '';
+                    if (!idEjecutivoSesion) return null;
+                    return (
+                        <div
+                            className="sticky-session-executive"
+                            title="Mostrar metas de TODOS los encargados de la jerarquía"
+                            onClick={() => {
+                                console.log('🟢 Enviando estos idEjecutivo al endpoint:', allHierarchyIds);
+                                setSelectedExecutives(allHierarchyIds);
+                            }}
+                        >
+                            {usuarioSesion} - {nombreSesion}
+                        </div>
+                    );
+                })()}
                 {loadingJerarquia ? (
                     <div style={{ color: '#2b463c', fontWeight: 500, fontSize: 15, textAlign: 'center', marginTop: 30 }}>Cargando jerarquía...</div>
                 ) : errorJerarquia ? (
@@ -290,7 +404,7 @@ const ModalMetasContent = () => {
                 <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)]" style={{overflowX: 'auto'}}>
                     <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem', minWidth: 900 }}>
                         {/* Cuentas */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 110 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 70 }}>
                             <label>Cuentas</label>
                             <input
                                 type="number"
@@ -309,7 +423,7 @@ const ModalMetasContent = () => {
                         </div>
 
                         {/* Titulares */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 110 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 70 }}>
                             <label>Titulares</label>
                             <input
                                 type="number"
@@ -366,8 +480,8 @@ const ModalMetasContent = () => {
                         </div>
 
                         {/* Monto Cumplido */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 130 }}>
-                            <label>Monto Cumplido</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 100 }}>
+                            <label>M. Cumplido</label>
                             <input
                                 type="number"
                                 step="0.01"
@@ -386,8 +500,8 @@ const ModalMetasContent = () => {
                         </div>
 
                         {/* Saldo Solucionado */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 130 }}>
-                            <label>SaldoSolucionado</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 120 }}>
+                            <label>S. Solucionado</label>
                             <input
                                 type="number"
                                 step="0.01"
@@ -406,7 +520,7 @@ const ModalMetasContent = () => {
                         </div>
 
                         {/* Segmento */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 110 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 80 }}>
                             <label>Segmento</label>
                             <input
                                 type="text"
@@ -426,12 +540,12 @@ const ModalMetasContent = () => {
 
                         {/* Hora Entrada */}
                         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 110, position: 'relative' }}>
-                            <label>Hora Entrada</label>
+                            <label>H. Entrada</label>
                             <div style={{ position: 'relative', width: '100%' }}>
                                 <input
                                     type="time"
-                                    value={inputValues.horaEntrada}
-                                    onChange={e => setInputValues(v => ({ ...v, horaEntrada: e.target.value }))}
+                                    value={inputValues.horaEntrada === null ? '' : inputValues.horaEntrada}
+                                    onChange={e => setInputValues(v => ({ ...v, horaEntrada: e.target.value === '' ? null : e.target.value }))}
                                     style={{
                                         backgroundColor: "var(--color-bgcolor2)",
                                         color: "#111",
@@ -454,12 +568,12 @@ const ModalMetasContent = () => {
 
                         {/* Hora Salida */}
                         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 110, position: 'relative' }}>
-                            <label>Hora Salida</label>
+                            <label>H. Salida</label>
                             <div style={{ position: 'relative', width: '100%' }}>
                                 <input
                                     type="time"
-                                    value={inputValues.horaSalida}
-                                    onChange={e => setInputValues(v => ({ ...v, horaSalida: e.target.value }))}
+                                    value={inputValues.horaSalida === null ? '' : inputValues.horaSalida}
+                                    onChange={e => setInputValues(v => ({ ...v, horaSalida: e.target.value === '' ? null : e.target.value }))}
                                     style={{
                                         backgroundColor: "var(--color-bgcolor2)",
                                         color: "#111",
@@ -536,13 +650,19 @@ const ModalMetasContent = () => {
                                     </tr>
                                 )}
                                 {error && !loading && (
-                                    toast.error(error)
+                                    <tr>
+                                        <td colSpan={12} style={{ textAlign: 'center', color: '#b71c1c', fontWeight: 500 }}>
+                                            {error}
+                                        </td>
+                                    </tr>
                                 )}
                                 {!loading && !error && tablaMetas.length === 0 && (
                                     <tr><td colSpan={12} style={{ textAlign: 'center' }}>Sin datos</td></tr>
                                 )}
                                 {!loading && !error && tablaMetas.map((row, i) => {
                                     const rowKey = row.id || row.usuario || i;
+                                    // Normalizar valores para que siempre se pinte algo aunque vengan null/undefined
+                                    const safe = (val, def = '') => val !== null && val !== undefined ? val : def;
                                     return (
                                         <tr key={rowKey}>
                                             <td>
@@ -552,15 +672,15 @@ const ModalMetasContent = () => {
                                                     onChange={() => handleRowCheckbox(rowKey)}
                                                 />
                                             </td>
-                                            <td style={{ minWidth: 180, maxWidth: 260, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={row.ejecutivo || row.nombreEjecutivo || row.nombre || ''}>
-                                                {row.ejecutivo || row.nombreEjecutivo || row.nombre || ''}
+                                            <td style={{ minWidth: 180, maxWidth: 260, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={safe(row.ejecutivo) || safe(row.nombreEjecutivo) || safe(row.nombre)}>
+                                                {safe(row.ejecutivo) || safe(row.nombreEjecutivo) || safe(row.nombre)}
                                             </td>
-                                            <td>{row.usuario || row.usuarioEjecutivo || row.clave || ''}</td>
+                                            <td>{safe(row.usuario) || safe(row.usuarioEjecutivo) || safe(row.clave)}</td>
                                             <td>
                                                 <input
                                                     type="number"
                                                     min={0}
-                                                    value={editValues[rowKey]?.cuentas ?? row.cuentas ?? row.totalCuentas ?? ''}
+                                                    value={safe(editValues[rowKey]?.cuentas, safe(row.cuentas, safe(row.totalCuentas, 0)))}
                                                     onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], cuentas: e.target.value } }))}
                                                     style={{ width: 60 }}
                                                     disabled={!selectedRows.includes(rowKey)}
@@ -570,7 +690,7 @@ const ModalMetasContent = () => {
                                                 <input
                                                     type="number"
                                                     min={0}
-                                                    value={editValues[rowKey]?.titulares ?? row.titulares ?? row.totalTitulares ?? ''}
+                                                    value={safe(editValues[rowKey]?.titulares, safe(row.titulares, safe(row.totalTitulares, 0)))}
                                                     onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], titulares: e.target.value } }))}
                                                     style={{ width: 60 }}
                                                     disabled={!selectedRows.includes(rowKey)}
@@ -580,7 +700,7 @@ const ModalMetasContent = () => {
                                                 <input
                                                     type="number"
                                                     min={0}
-                                                    value={editValues[rowKey]?.negociaciones ?? row.negociaciones ?? row.totalNegociaciones ?? ''}
+                                                    value={safe(editValues[rowKey]?.negociaciones, safe(row.negociaciones, safe(row.totalNegociaciones, 0)))}
                                                     onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], negociaciones: e.target.value } }))}
                                                     style={{ width: 60 }}
                                                     disabled={!selectedRows.includes(rowKey)}
@@ -590,7 +710,7 @@ const ModalMetasContent = () => {
                                                 <input
                                                     type="number"
                                                     min={0}
-                                                    value={editValues[rowKey]?.cumplimientos ?? row.cumplimientos ?? row.totalCumplimientos ?? ''}
+                                                    value={safe(editValues[rowKey]?.cumplimientos, safe(row.cumplimientos, safe(row.totalCumplimientos, 0)))}
                                                     onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], cumplimientos: e.target.value } }))}
                                                     style={{ width: 60 }}
                                                     disabled={!selectedRows.includes(rowKey)}
@@ -601,7 +721,7 @@ const ModalMetasContent = () => {
                                                     type="number"
                                                     min={0}
                                                     step={0.01}
-                                                    value={editValues[rowKey]?.montoCumplido ?? editValues[rowKey]?.monto_cumplido ?? row.montoCumplido ?? row.monto_cumplido ?? ''}
+                                                    value={safe(editValues[rowKey]?.montoCumplido, safe(editValues[rowKey]?.monto_cumplido, safe(row.montoCumplido, safe(row.monto_cumplido, 0))))}
                                                     onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], montoCumplido: e.target.value } }))}
                                                     style={{ width: 80 }}
                                                     disabled={!selectedRows.includes(rowKey)}
@@ -612,7 +732,7 @@ const ModalMetasContent = () => {
                                                     type="number"
                                                     min={0}
                                                     step={0.01}
-                                                    value={editValues[rowKey]?.saldoSolucionado ?? editValues[rowKey]?.saldo_solucionado ?? row.saldoSolucionado ?? row.saldo_solucionado ?? ''}
+                                                    value={safe(editValues[rowKey]?.saldoSolucionado, safe(editValues[rowKey]?.saldo_solucionado, safe(row.saldoSolucionado, safe(row.saldo_solucionado, 0))))}
                                                     onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], saldoSolucionado: e.target.value } }))}
                                                     style={{ width: 80 }}
                                                     disabled={!selectedRows.includes(rowKey)}
@@ -621,7 +741,7 @@ const ModalMetasContent = () => {
                                             <td>
                                                 <input
                                                     type="text"
-                                                    value={editValues[rowKey]?.segmento ?? row.segmento ?? row.nombreSegmento ?? ''}
+                                                    value={safe(editValues[rowKey]?.segmento, safe(row.segmento, safe(row.nombreSegmento, '')))}
                                                     onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], segmento: e.target.value } }))}
                                                     style={{ width: 80 }}
                                                     disabled={!selectedRows.includes(rowKey)}
@@ -630,8 +750,8 @@ const ModalMetasContent = () => {
                                             <td>
                                                 <input
                                                     type="time"
-                                                    value={editValues[rowKey]?.horaEntrada ?? row.horaEntrada ?? row.hora_entrada ?? ''}
-                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], horaEntrada: e.target.value } }))}
+                                                    value={editValues[rowKey]?.horaEntrada === null ? '' : safe(editValues[rowKey]?.horaEntrada, safe(row.horaEntrada, safe(row.hora_entrada, '')))}
+                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], horaEntrada: e.target.value === '' ? null : e.target.value } }))}
                                                     style={{ width: 120, color: '#111' }}
                                                     disabled={!selectedRows.includes(rowKey)}
                                                 />
@@ -639,8 +759,8 @@ const ModalMetasContent = () => {
                                             <td>
                                                 <input
                                                     type="time"
-                                                    value={editValues[rowKey]?.horaSalida ?? row.horaSalida ?? row.hora_salida ?? ''}
-                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], horaSalida: e.target.value } }))}
+                                                    value={editValues[rowKey]?.horaSalida === null ? '' : safe(editValues[rowKey]?.horaSalida, safe(row.horaSalida, safe(row.hora_salida, '')))}
+                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], horaSalida: e.target.value === '' ? null : e.target.value } }))}
                                                     style={{ width: 120, color: '#111' }}
                                                     disabled={!selectedRows.includes(rowKey)}
                                                 />
@@ -671,4 +791,5 @@ const ModalMetasContent = () => {
         </div>
     );
 };
+
 export default ModalMetasContent;

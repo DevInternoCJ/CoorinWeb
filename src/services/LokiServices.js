@@ -217,10 +217,8 @@ export const obetenerTablaMetas = async (idEjecutivo) => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
     // Probar enviando solo el array como body
-    const idNum = Number(idEjecutivo);
-    const requestData = [idNum];
+    const requestData = Array.isArray(idEjecutivo) ? idEjecutivo : [Number(idEjecutivo)];
     console.log('📤 Enviando a /carteras/metas-productividad con:', requestData);
-    // El interceptor añade el token automáticamente
     const response = await api.post('/carteras/metas-productividad', requestData);
     console.log('📥 Respuesta de /carteras/metas-productividad:', response.data);
     return response.data;

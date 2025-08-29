@@ -1,3 +1,19 @@
+/* Fijo para el idEjecutivo de la sesión en la ramificación */
+.sticky-session-executive {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #ffffff;
+  margin-bottom: 10px;
+  padding: 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  color: #2b463c;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #e0e0e033;
+}
 /* Hover oscuro para elementos de la jerarquía de ejecutivos */
 .executive-hierarchy-item {
   cursor: pointer;
@@ -7,7 +23,7 @@
 .executive-hierarchy-item:hover {
   background: #d9e0e9;
   color: #f7f7f7;
-  font-weight: 600;
+  /* font-weight: 600; */
   letter-spacing: 0.02em;
   text-shadow: 0 1px 2px #111a, 0 0 1px #000a;
 }
