@@ -74,6 +74,8 @@ const ModalMetasContent = () => {
 
     // Estado para los ejecutivos seleccionados desde la jerarquía (array)
     const [selectedExecutives, setSelectedExecutives] = useState([]); // array de idEjecutivo
+    // Estado para el nodo actualmente seleccionado en la jerarquía (para iluminar solo uno)
+    const [selectedExecutiveNode, setSelectedExecutiveNode] = useState(null);
     const [allSubordinateIds, setAllSubordinateIds] = useState([]);
     const [allHierarchyIds, setAllHierarchyIds] = useState([]); // ids de toda la jerarquía
 
@@ -96,12 +98,24 @@ const ModalMetasContent = () => {
         setTablaMetas([]);
         setLoading(true);
 
-        // Si el nodo tiene subordinados, seleccionar solo los subordinados directos
-        if (Array.isArray(node.subordinados) && node.subordinados.length > 0) {
-            const idsSubordinados = node.subordinados.map(sub => sub.idEjecutivo).filter(Boolean);
-            setSelectedExecutives(idsSubordinados);
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+
+        setSelectedExecutiveNode(node.idEjecutivo); // Guardar el nodo seleccionado para iluminar
+
+        if (node.idEjecutivo === Number(idEjecutivoSesion)) {
+            if (Array.isArray(node.subordinados) && node.subordinados.length > 0) {
+                const idsSubordinados = node.subordinados.map(sub => sub.idEjecutivo).filter(Boolean);
+                setSelectedExecutives(idsSubordinados);
+            } else {
+                setSelectedExecutives([]);
+            }
+        } else if (Array.isArray(node.subordinados) && node.subordinados.length > 0) {
+            // Si tiene subordinados, mostrar solo los subordinados de ese subordinado
+            const idsSubSub = node.subordinados.map(sub => sub.idEjecutivo).filter(Boolean);
+            setSelectedExecutives(idsSubSub);
         } else {
-            // Si no tiene subordinados, solo ese ejecutivo
+            // Si no tiene subordinados, marcar solo este nodo como seleccionado (para iluminarlo)
             setSelectedExecutives([node.idEjecutivo]);
         }
         setLoading(false);
@@ -112,11 +126,8 @@ const ModalMetasContent = () => {
     const renderExecutiveTree = (tree, level = 0) => {
         if (!Array.isArray(tree)) return null;
         return tree.map((node, idx) => {
-            // Seleccionado si todos los subordinados están seleccionados o si es único seleccionado
-            const isSelected =
-                (Array.isArray(node.subordinados) && node.subordinados.length > 0
-                    ? node.subordinados.every(sub => selectedExecutives.includes(sub.idEjecutivo))
-                    : selectedExecutives.length === 1 && selectedExecutives[0] === node.idEjecutivo);
+            // Solo iluminar el nodo seleccionado en la jerarquía
+            const isSelected = node.idEjecutivo === selectedExecutiveNode;
             return (
                 <React.Fragment key={node.usuario || node.id || idx}>
                     <div
@@ -168,9 +179,11 @@ const ModalMetasContent = () => {
                 const idsSubordinados = rootNode.subordinados.map(sub => Number(sub.idEjecutivo)).filter(id => Number.isInteger(id) && id > 0);
                 setAllSubordinateIds(idsSubordinados);
                 setSelectedExecutives(idsSubordinados);
+                setSelectedExecutiveNode(idEjecutivo); // Iluminar solo el nodo raíz al inicio
             } else if (idEjecutivo) {
                 setAllSubordinateIds([Number(idEjecutivo)]);
                 setSelectedExecutives([Number(idEjecutivo)]);
+                setSelectedExecutiveNode(idEjecutivo);
             }
             // ids de toda la jerarquía (incluyendo el propio)
             const allIds = getAllHierarchyIds(rootNode)
@@ -185,7 +198,6 @@ const ModalMetasContent = () => {
     // Cuando cambian los ejecutivos seleccionados, buscar sus metas
     useEffect(() => {
         // Filtrar solo ids válidos (enteros > 0) y detectar los inválidos
-        // Filtrar solo ids válidos (enteros > 0) y detectar los inválidos
         let validIds = [];
         let invalidIndexes = [];
         if (Array.isArray(selectedExecutives)) {
@@ -198,20 +210,14 @@ const ModalMetasContent = () => {
                 }
             });
         }
-        // Si hay algún NaN en validIds, limpiar el array
         if (validIds.some(id => isNaN(id))) {
             validIds = validIds.filter(id => Number.isInteger(id) && id > 0 && !isNaN(id));
         }
-        // Notificar usuarios omitidos y mostrar ids inválidos en consola
         if (invalidIndexes.length > 0 && Array.isArray(selectedExecutives)) {
-            // Lista de ids inválidos
             const idInvalidos = invalidIndexes.map(idx => selectedExecutives[idx]);
             console.warn('Lista de idInvalidos detectados:', idInvalidos);
-            // Buscar los usuarios omitidos en la jerarquía
             const omitidos = invalidIndexes.map(idx => {
-                // Buscar en executiveTree el usuario correspondiente
                 let usuario = selectedExecutives[idx];
-                // Buscar nombre si es posible
                 let nombre = '';
                 const buscarNombre = (tree) => {
                     if (!Array.isArray(tree)) return null;
@@ -233,13 +239,40 @@ const ModalMetasContent = () => {
             console.warn(mensaje);
             toast.warning(mensaje);
         }
-        // Mostrar en consola los ids enviados y el usuario seleccionado
         if (validIds.length > 0) {
             console.log('🟢 Ids enviados a obetenerTablaMetas:', validIds, '| Usuario seleccionado:', selectedExecutives);
         } else {
             console.log('⚠️ No se enviaron ids válidos a obetenerTablaMetas. selectedExecutives:', selectedExecutives);
         }
-        if (!validIds.length) {
+
+        // Lógica para ocultar la info de un subordinado directo o de un subordinado de un subordinado directo ("nieto") sin subordinados, solo cuando se selecciona uno a uno
+        // Caso: solo hay un id seleccionado y ese nodo es subordinado directo o nieto directo y no tiene subordinados
+        let debeOcultar = false;
+        if (selectedExecutives.length === 1 && executiveTree.length > 0) {
+            const userData = JSON.parse(localStorage.getItem('userData'));
+            const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+            const rootNode = executiveTree.find(n => n.idEjecutivo === Number(idEjecutivoSesion));
+            if (rootNode && Array.isArray(rootNode.subordinados)) {
+                // 1. Buscar si el seleccionado es subordinado directo de la raíz
+                const sub = rootNode.subordinados.find(s => s.idEjecutivo === Number(selectedExecutives[0]));
+                if (sub && (!Array.isArray(sub.subordinados) || sub.subordinados.length === 0)) {
+                    debeOcultar = true;
+                }
+                // 2. Buscar si el seleccionado es subordinado de un subordinado directo (nieto)
+                if (!debeOcultar) {
+                    for (const subDir of rootNode.subordinados) {
+                        if (Array.isArray(subDir.subordinados)) {
+                            const nieto = subDir.subordinados.find(n => n.idEjecutivo === Number(selectedExecutives[0]));
+                            if (nieto && (!Array.isArray(nieto.subordinados) || nieto.subordinados.length === 0)) {
+                                debeOcultar = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (!validIds.length || debeOcultar) {
             setTablaMetas([]);
             return;
         }
@@ -293,6 +326,14 @@ const ModalMetasContent = () => {
         if (selectedExecutives.length > 0 && selectedRows.length === 0) {
             try {
                 for (const idEjecutivo of selectedExecutives) {
+                    let nuevoValor = 1;
+                    if (inputValues.nuevo !== undefined) {
+                        if (inputValues.nuevo === true || inputValues.nuevo === 1 || inputValues.nuevo === '1' || inputValues.nuevo === 'true') {
+                            nuevoValor = 1;
+                        } else {
+                            nuevoValor = 0;
+                        }
+                    }
                     const payload = {
                         idEjecutivo,
                         cuentas: Number(inputValues.cuentas) || 0,
@@ -304,7 +345,7 @@ const ModalMetasContent = () => {
                         segmento: inputValues.segmento || null,
                         horaEntrada: inputValues.horaEntrada || '',
                         horaSalida: inputValues.horaSalida || '',
-                        nuevo: 1
+                        nuevo: nuevoValor
                     };
                     await actualizarMetas(payload);
                 }
@@ -331,6 +372,14 @@ const ModalMetasContent = () => {
             for (const rowKey of selectedRows) {
                 const row = tablaMetas.find((r, i) => (r.id || r.usuario || i) === rowKey);
                 if (!row) continue;
+                let nuevoValor = 0;
+                if (row.nuevo !== undefined) {
+                    if (row.nuevo === true || row.nuevo === 1 || row.nuevo === '1' || row.nuevo === 'true') {
+                        nuevoValor = 1;
+                    } else {
+                        nuevoValor = 0;
+                    }
+                }
                 const payload = {
                     idEjecutivo: row.idEjecutivo || row.id || row.usuario || rowKey,
                     cuentas: Number(inputValues.cuentas) || 0,
@@ -342,7 +391,7 @@ const ModalMetasContent = () => {
                     segmento: inputValues.segmento || null,
                     horaEntrada: inputValues.horaEntrada || '',
                     horaSalida: inputValues.horaSalida || '',
-                    nuevo: 0
+                    nuevo: nuevoValor
                 };
                 await actualizarMetas(payload);
             }
@@ -378,11 +427,16 @@ const ModalMetasContent = () => {
                     if (!idEjecutivoSesion) return null;
                     return (
                         <div
-                            className="sticky-session-executive"
+                            className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? ' selected' : ''}`}
                             title="Mostrar metas de TODOS los encargados de la jerarquía"
                             onClick={() => {
-                                console.log('🟢 Enviando estos idEjecutivo al endpoint:', allHierarchyIds);
-                                setSelectedExecutives(allHierarchyIds);
+                                // Excluir el propio idEjecutivo de la sesión
+                                const idsSinSesion = allHierarchyIds.filter(id => id !== Number(idEjecutivoSesion));
+                                console.log('🟢 Enviando estos idEjecutivo al endpoint (sin sesión):', idsSinSesion);
+                                setSelectedExecutives(idsSinSesion);
+                                setSelectedRows([]); // Limpiar selección de filas
+                                setEditValues({}); // Limpiar edición
+                                setSelectedExecutiveNode(Number(idEjecutivoSesion)); // Iluminar el nodo raíz
                             }}
                         >
                             {usuarioSesion} - {nombreSesion}
@@ -390,7 +444,21 @@ const ModalMetasContent = () => {
                     );
                 })()}
                 {loadingJerarquia ? (
-                    <div style={{ color: '#2b463c', fontWeight: 500, fontSize: 15, textAlign: 'center', marginTop: 30 }}>Cargando jerarquía...</div>
+                    <div style={{ color: '#2b463c', fontWeight: 500, fontSize: 15, textAlign: 'center', marginTop: 30, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+                        <div className="spinner-sonner" style={{ marginBottom: 8 }}>
+                            <svg width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" stroke="#2b463c">
+                                <g fill="none" fillRule="evenodd">
+                                    <g transform="translate(1 1)" strokeWidth="3">
+                                        <circle strokeOpacity=".3" cx="18" cy="18" r="18" />
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite" />
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+                        <span>Cargando jerarquía...</span>
+                    </div>
                 ) : errorJerarquia ? (
                     <div style={{ color: '#b71c1c', fontWeight: 500, fontSize: 14, textAlign: 'center', marginTop: 30 }}>{errorJerarquia}</div>
                 ) : (
@@ -659,115 +727,122 @@ const ModalMetasContent = () => {
                                 {!loading && !error && tablaMetas.length === 0 && (
                                     <tr><td colSpan={12} style={{ textAlign: 'center' }}>Sin datos</td></tr>
                                 )}
-                                {!loading && !error && tablaMetas.map((row, i) => {
-                                    const rowKey = row.id || row.usuario || i;
-                                    // Normalizar valores para que siempre se pinte algo aunque vengan null/undefined
-                                    const safe = (val, def = '') => val !== null && val !== undefined ? val : def;
-                                    return (
-                                        <tr key={rowKey}>
-                                            <td>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedRows.includes(rowKey)}
-                                                    onChange={() => handleRowCheckbox(rowKey)}
-                                                />
-                                            </td>
-                                            <td style={{ minWidth: 180, maxWidth: 260, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={safe(row.ejecutivo) || safe(row.nombreEjecutivo) || safe(row.nombre)}>
-                                                {safe(row.ejecutivo) || safe(row.nombreEjecutivo) || safe(row.nombre)}
-                                            </td>
-                                            <td>{safe(row.usuario) || safe(row.usuarioEjecutivo) || safe(row.clave)}</td>
-                                            <td>
-                                                <input
-                                                    type="number"
-                                                    min={0}
-                                                    value={safe(editValues[rowKey]?.cuentas, safe(row.cuentas, safe(row.totalCuentas, 0)))}
-                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], cuentas: e.target.value } }))}
-                                                    style={{ width: 60 }}
-                                                    disabled={!selectedRows.includes(rowKey)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="number"
-                                                    min={0}
-                                                    value={safe(editValues[rowKey]?.titulares, safe(row.titulares, safe(row.totalTitulares, 0)))}
-                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], titulares: e.target.value } }))}
-                                                    style={{ width: 60 }}
-                                                    disabled={!selectedRows.includes(rowKey)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="number"
-                                                    min={0}
-                                                    value={safe(editValues[rowKey]?.negociaciones, safe(row.negociaciones, safe(row.totalNegociaciones, 0)))}
-                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], negociaciones: e.target.value } }))}
-                                                    style={{ width: 60 }}
-                                                    disabled={!selectedRows.includes(rowKey)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="number"
-                                                    min={0}
-                                                    value={safe(editValues[rowKey]?.cumplimientos, safe(row.cumplimientos, safe(row.totalCumplimientos, 0)))}
-                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], cumplimientos: e.target.value } }))}
-                                                    style={{ width: 60 }}
-                                                    disabled={!selectedRows.includes(rowKey)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="number"
-                                                    min={0}
-                                                    step={0.01}
-                                                    value={safe(editValues[rowKey]?.montoCumplido, safe(editValues[rowKey]?.monto_cumplido, safe(row.montoCumplido, safe(row.monto_cumplido, 0))))}
-                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], montoCumplido: e.target.value } }))}
-                                                    style={{ width: 80 }}
-                                                    disabled={!selectedRows.includes(rowKey)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="number"
-                                                    min={0}
-                                                    step={0.01}
-                                                    value={safe(editValues[rowKey]?.saldoSolucionado, safe(editValues[rowKey]?.saldo_solucionado, safe(row.saldoSolucionado, safe(row.saldo_solucionado, 0))))}
-                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], saldoSolucionado: e.target.value } }))}
-                                                    style={{ width: 80 }}
-                                                    disabled={!selectedRows.includes(rowKey)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="text"
-                                                    value={safe(editValues[rowKey]?.segmento, safe(row.segmento, safe(row.nombreSegmento, '')))}
-                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], segmento: e.target.value } }))}
-                                                    style={{ width: 80 }}
-                                                    disabled={!selectedRows.includes(rowKey)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="time"
-                                                    value={editValues[rowKey]?.horaEntrada === null ? '' : safe(editValues[rowKey]?.horaEntrada, safe(row.horaEntrada, safe(row.hora_entrada, '')))}
-                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], horaEntrada: e.target.value === '' ? null : e.target.value } }))}
-                                                    style={{ width: 120, color: '#111' }}
-                                                    disabled={!selectedRows.includes(rowKey)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="time"
-                                                    value={editValues[rowKey]?.horaSalida === null ? '' : safe(editValues[rowKey]?.horaSalida, safe(row.horaSalida, safe(row.hora_salida, '')))}
-                                                    onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], horaSalida: e.target.value === '' ? null : e.target.value } }))}
-                                                    style={{ width: 120, color: '#111' }}
-                                                    disabled={!selectedRows.includes(rowKey)}
-                                                />
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                {!loading && !error && tablaMetas
+                                    // Excluir el propio idEjecutivo de la sesión
+                                    .filter(row => {
+                                        const userData = JSON.parse(localStorage.getItem('userData'));
+                                        const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+                                        return row.idEjecutivo !== Number(idEjecutivoSesion);
+                                    })
+                                    .map((row, i) => {
+                                        const rowKey = row.id || row.usuario || i;
+                                        // Normalizar valores para que siempre se pinte algo aunque vengan null/undefined
+                                        const safe = (val, def = '') => val !== null && val !== undefined ? val : def;
+                                        return (
+                                            <tr key={rowKey}>
+                                                <td>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedRows.includes(rowKey)}
+                                                        onChange={() => handleRowCheckbox(rowKey)}
+                                                    />
+                                                </td>
+                                                <td style={{ minWidth: 180, maxWidth: 260, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={safe(row.ejecutivo) || safe(row.nombreEjecutivo) || safe(row.nombre)}>
+                                                    {safe(row.ejecutivo) || safe(row.nombreEjecutivo) || safe(row.nombre)}
+                                                </td>
+                                                <td>{safe(row.usuario) || safe(row.usuarioEjecutivo) || safe(row.clave)}</td>
+                                                <td>
+                                                    <input
+                                                        type="number"
+                                                        min={0}
+                                                        value={safe(editValues[rowKey]?.cuentas, safe(row.cuentas, safe(row.totalCuentas, 0)))}
+                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], cuentas: e.target.value } }))}
+                                                        style={{ width: 60 }}
+                                                        disabled={!selectedRows.includes(rowKey)}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="number"
+                                                        min={0}
+                                                        value={safe(editValues[rowKey]?.titulares, safe(row.titulares, safe(row.totalTitulares, 0)))}
+                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], titulares: e.target.value } }))}
+                                                        style={{ width: 60 }}
+                                                        disabled={!selectedRows.includes(rowKey)}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="number"
+                                                        min={0}
+                                                        value={safe(editValues[rowKey]?.negociaciones, safe(row.negociaciones, safe(row.totalNegociaciones, 0)))}
+                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], negociaciones: e.target.value } }))}
+                                                        style={{ width: 60 }}
+                                                        disabled={!selectedRows.includes(rowKey)}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="number"
+                                                        min={0}
+                                                        value={safe(editValues[rowKey]?.cumplimientos, safe(row.cumplimientos, safe(row.totalCumplimientos, 0)))}
+                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], cumplimientos: e.target.value } }))}
+                                                        style={{ width: 60 }}
+                                                        disabled={!selectedRows.includes(rowKey)}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="number"
+                                                        min={0}
+                                                        step={0.01}
+                                                        value={safe(editValues[rowKey]?.montoCumplido, safe(editValues[rowKey]?.monto_cumplido, safe(row.montoCumplido, safe(row.monto_cumplido, 0))))}
+                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], montoCumplido: e.target.value } }))}
+                                                        style={{ width: 80 }}
+                                                        disabled={!selectedRows.includes(rowKey)}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="number"
+                                                        min={0}
+                                                        step={0.01}
+                                                        value={safe(editValues[rowKey]?.saldoSolucionado, safe(editValues[rowKey]?.saldo_solucionado, safe(row.saldoSolucionado, safe(row.saldo_solucionado, 0))))}
+                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], saldoSolucionado: e.target.value } }))}
+                                                        style={{ width: 80 }}
+                                                        disabled={!selectedRows.includes(rowKey)}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="text"
+                                                        value={safe(editValues[rowKey]?.segmento, safe(row.segmento, safe(row.nombreSegmento, '')))}
+                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], segmento: e.target.value } }))}
+                                                        style={{ width: 80 }}
+                                                        disabled={!selectedRows.includes(rowKey)}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="time"
+                                                        value={editValues[rowKey]?.horaEntrada === null ? '' : safe(editValues[rowKey]?.horaEntrada, safe(row.horaEntrada, safe(row.hora_entrada, '')))}
+                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], horaEntrada: e.target.value === '' ? null : e.target.value } }))}
+                                                        style={{ width: 120, color: '#111' }}
+                                                        disabled={!selectedRows.includes(rowKey)}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="time"
+                                                        value={editValues[rowKey]?.horaSalida === null ? '' : safe(editValues[rowKey]?.horaSalida, safe(row.horaSalida, safe(row.hora_salida, '')))}
+                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], horaSalida: e.target.value === '' ? null : e.target.value } }))}
+                                                        style={{ width: 120, color: '#111' }}
+                                                        disabled={!selectedRows.includes(rowKey)}
+                                                    />
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                             </tbody>
                         </table>
                         {/* El botón Guardar ahora está fuera de la tabla */}
