@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
+import JerarquiaConR from "./JerarquiaConR/JerarquiaConR";
+import { obetenerJerarquiaEncargados } from '../../../../services/LokiServices';
 
 // Flecha tipo chevron moderna
 const DropdownArrow = () => (
@@ -22,54 +24,98 @@ const DropdownArrow = () => (
     </span>
 );
 
+
 const ModalValidadoresContent = () => {
-    const [selectedValidador, setSelectedValidador] = useState("ALDF");
+    // Estados para la jerarquía de ejecutivos (como en ModalMetasContent)
+    const [executiveTree, setExecutiveTree] = useState([]);
+    const [loadingJerarquia, setLoadingJerarquia] = useState(false);
+    const [errorJerarquia, setErrorJerarquia] = useState(null);
+    const [selectedExecutives, setSelectedExecutives] = useState([]); // array de idEjecutivo
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [editValues, setEditValues] = useState({});
+    const [selectedExecutiveNode, setSelectedExecutiveNode] = useState(null);
+    const [allHierarchyIds, setAllHierarchyIds] = useState([]);
+    // Otros estados propios del modal
     const [cartera, setCartera] = useState("American Express");
     const [producto, setProducto] = useState("Amex");
     const [arrepentimientos, setArrepentimientos] = useState(false);
-    const [expandedNodes, setExpandedNodes] = useState({ "ALDF": true, "RAFM": true });
 
-    const toggleExpanded = (value) => {
-        setExpandedNodes(prev => ({
-            ...prev,
-            [value]: !prev[value]
-        }));
-    };
-
-    const validadorOptions = [
-        { value: "ALDF", label: "ALDF - Alan De La O Flores", level: 1, isManager: true },
-        { value: "JMPR", label: "JMPR - Juan Manuel Pérez Rodríguez", level: 2, isManager: false, parent: "ALDF" },
-        { value: "MAGS", label: "MAGS - María Alejandra González Sánchez", level: 2, isManager: false, parent: "ALDF" },
-        { value: "RAFM", label: "RAFM - Roberto Andrés Fernández Martín", level: 1, isManager: true },
-        { value: "LEVA", label: "LEVA - Leticia Esperanza Vargas Aguilar", level: 2, isManager: false, parent: "RAFM" },
-        { value: "JCHL", label: "JCHL - José Carlos Hernández López", level: 2, isManager: false, parent: "RAFM" },
-        { value: "AMRT", label: "AMRT - Ana María Ramírez Torres", level: 3, isManager: false, parent: "JCHL" },
-        { value: "DAFV", label: "DAFV - Daniel Antonio Flores Vázquez", level: 3, isManager: false, parent: "LEVA" }
-    ];
-
-    // Función para obtener validadores visibles según el estado de expansión
-    const getVisibleValidadores = () => {
-        let result = [];
-        
-        validadorOptions.forEach(validador => {
-            if (validador.level === 1) {
-                result.push(validador);
-                if (expandedNodes[validador.value]) {
-                    const subordinates = validadorOptions.filter(sub => sub.parent === validador.value);
-                    result.push(...subordinates);
-                    
-                    subordinates.forEach(sub => {
-                        if (expandedNodes[sub.value]) {
-                            const subSubordinates = validadorOptions.filter(subsub => subsub.parent === sub.value);
-                            result.push(...subSubordinates);
-                        }
-                    });
+    // Obtener la jerarquía de ejecutivos (idéntico a ModalMetasContent)
+    useEffect(() => {
+        const fetchExecutiveTree = async () => {
+            setLoadingJerarquia(true);
+            setErrorJerarquia(null);
+            try {
+                const userData = JSON.parse(localStorage.getItem('userData'));
+                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+                const usuario = userData?.usuario || '';
+                const nombreEjecutivo = userData?.nombre || userData?.nombreEjecutivo || userData?.ejecutivo || '';
+                if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
+                const data = await obetenerJerarquiaEncargados(idEjecutivo);
+                let tree = [];
+                if (Array.isArray(data)) {
+                    const found = data.find(n => n.idEjecutivo === idEjecutivo);
+                    if (found) {
+                        tree = data;
+                    } else {
+                        // Si no está el propio ejecutivo, lo agregamos como raíz
+                        tree = [{
+                            idEjecutivo: idEjecutivo,
+                            usuario,
+                            nombreEjecutivo,
+                            subordinados: data
+                        }];
+                    }
                 }
+                setExecutiveTree(tree);
+            } catch (e) {
+                setErrorJerarquia('Error al obtener la jerarquía de ejecutivos');
+                setExecutiveTree([]);
+            } finally {
+                setLoadingJerarquia(false);
             }
+        };
+        fetchExecutiveTree();
+    }, []);
+
+    // Renderizado recursivo de la jerarquía (como prop para JerarquiaConR)
+    const renderExecutiveTree = (tree, level = 0) => {
+        if (!Array.isArray(tree)) return null;
+        return tree.map((node, idx) => {
+            const isSelected = node.idEjecutivo === selectedExecutiveNode;
+            return (
+                <React.Fragment key={node.usuario || node.id || idx}>
+                    <div
+                        className={`executive-hierarchy-item${isSelected ? ' selected' : ''}`}
+                        style={{
+                            paddingLeft: level * 18,
+                            marginBottom: 2,
+                            fontWeight: 500,
+                            fontSize: 13,
+                            color: isSelected ? '#2b463c' : undefined,
+                            userSelect: 'none',
+                        }}
+                        onClick={() => {
+                            setSelectedExecutiveNode(node.idEjecutivo);
+                            if (Array.isArray(node.subordinados) && node.subordinados.length > 0) {
+                                const idsSub = node.subordinados.map(sub => sub.idEjecutivo).filter(Boolean);
+                                setSelectedExecutives(idsSub);
+                            } else {
+                                setSelectedExecutives([]);
+                            }
+                        }}
+                        title={Array.isArray(node.subordinados) && node.subordinados.length > 0 ? "Mostrar solo subordinados" : "Mostrar solo este ejecutivo"}
+                    >
+                        {node.usuario || ''} - {node.nombreEjecutivo || ''}
+                    </div>
+                    {Array.isArray(node.subordinados) && node.subordinados.length > 0 && (
+                        renderExecutiveTree(node.subordinados, level + 1)
+                    )}
+                </React.Fragment>
+            );
         });
-        
-        return result;
     };
+
 
     return (
         <div style={{
@@ -78,123 +124,24 @@ const ModalValidadoresContent = () => {
             height: "100%",
             gap: "1rem"
         }}>
-            {/* Columna izquierda - Ramificación (movida desde donde estaba el logo) */}
+            {/* Columna izquierda - Jerarquía de ejecutivos */}
             <div style={{
-                width: "288px", // w-72 equivalent
+                width: "300px",
                 display: "flex",
                 flexDirection: "column"
             }}>
-                {/* Ramificación de Validadores */}
-                <div style={{
-                    backgroundColor: "white",
-                    borderRadius: "0.5rem",
-                    padding: "0.75rem",
-                    boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-                    border: "1px solid var(--color-jerarquia1)",
-                    display: "flex",
-                    flexDirection: "column",
-                    flex: 1,
-                    maxHeight: "400px",
-                    overflowY: "auto"
-                }}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                        {getVisibleValidadores().map((validador) => {
-                            const hasSubordinates = validadorOptions.some(sub => sub.parent === validador.value);
-                            const isExpanded = expandedNodes[validador.value];
-                            
-                            return (
-                                <div
-                                    key={validador.value}
-                                    style={{
-                                        padding: "0.5rem",
-                                        borderRadius: "0.25rem",
-                                        cursor: "pointer",
-                                        transition: "colors 0.2s",
-                                        border: "1px solid",
-                                        marginLeft: `${(validador.level - 1) * 16}px`,
-                                        borderLeft: validador.level > 1 ? `3px solid var(--color-jerarquia${validador.level})` : 'none',
-                                        backgroundColor: selectedValidador === validador.value 
-                                            ? 'var(--color-jerarquia1)' 
-                                            : 'rgb(249 250 251)',
-                                        borderColor: selectedValidador === validador.value 
-                                            ? 'var(--color-jerarquia2)' 
-                                            : 'rgb(229 231 235)',
-                                        color: selectedValidador === validador.value ? 'white' : 'inherit'
-                                    }}
-                                    className={selectedValidador !== validador.value ? 'hover-bg-gray-100' : ''}
-                                    onClick={() => setSelectedValidador(validador.value)}
-                                >
-                                    {/* Indicador de jerarquía */}
-                                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                        {/* Botón de expand/collapse para managers con subordinados */}
-                                        {hasSubordinates && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    toggleExpanded(validador.value);
-                                                }}
-                                                style={{
-                                                    fontSize: "0.75rem",
-                                                    fontWeight: "bold",
-                                                    color: "var(--color-jerarquia3)",
-                                                    transition: "colors 0.2s",
-                                                    background: "none",
-                                                    border: "none",
-                                                    cursor: "pointer"
-                                                }}
-                                                className="hover-text-jerarquia4"
-                                            >
-                                                {isExpanded ? '▼' : '▶'}
-                                            </button>
-                                        )}
-                                        
-                                        {validador.level > 1 && (
-                                            <span style={{
-                                                fontSize: "0.75rem",
-                                                opacity: 0.6
-                                            }}>
-                                                {'└─'.repeat(validador.level - 1)}
-                                            </span>
-                                        )}
-                                        {validador.isManager && (
-                                            <span style={{
-                                                fontSize: "0.75rem",
-                                                fontWeight: "bold",
-                                                color: "var(--color-jerarquia3)"
-                                            }}>
-                                                👑
-                                            </span>
-                                        )}
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{
-                                                fontSize: "0.75rem",
-                                                fontWeight: "600",
-                                                color: validador.isManager ? "var(--color-jerarquia3)" : "inherit"
-                                            }}>
-                                                {validador.value}
-                                            </div>
-                                            <div style={{
-                                                fontSize: "0.75rem",
-                                                opacity: 0.9
-                                            }}>
-                                                {validador.label.split(' - ')[1]}
-                                            </div>
-                                            {validador.level > 1 && (
-                                                <div style={{
-                                                    fontSize: "0.75rem",
-                                                    opacity: 0.6,
-                                                    fontStyle: "italic"
-                                                }}>
-                                                    Reporta a: {validador.parent}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
+                <JerarquiaConR
+                    executiveTree={executiveTree}
+                    loadingJerarquia={loadingJerarquia}
+                    errorJerarquia={errorJerarquia}
+                    selectedExecutiveNode={selectedExecutiveNode}
+                    allHierarchyIds={allHierarchyIds}
+                    setSelectedExecutives={setSelectedExecutives}
+                    setSelectedRows={setSelectedRows}
+                    setEditValues={setEditValues}
+                    setSelectedExecutiveNode={setSelectedExecutiveNode}
+                    renderExecutiveTree={renderExecutiveTree}
+                />
             </div>
 
             {/* Campos del lado derecho */}

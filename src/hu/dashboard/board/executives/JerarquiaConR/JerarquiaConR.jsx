@@ -18,7 +18,7 @@ const JerarquiaConR = ({
     const nombreSesion = userData?.nombre || userData?.nombreEjecutivo || userData?.ejecutivo || '';
     const usuarioSesion = userData?.usuario || '';
     return (
-        <div className="productividad-branch" style={{ overflowX: 'auto', overflowY: 'auto', height: '56vh', width: '18rem', marginTop: 60, background: '#ffffff', borderRadius: 8, border: '1px solid #e0e0e0', padding: 8 }}>
+        <div className="productividad-branch" style={{ overflowX: 'auto', overflowY: 'auto', height: '56vh', width: '18rem', background: '#ffffff', borderRadius: 8, border: '1px solid #e0e0e0', padding: 8 }}>
             {/* Usuario y Ejecutivo principal */}
             {idEjecutivoSesion && (
                 <div

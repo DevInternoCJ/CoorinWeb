@@ -412,24 +412,26 @@ const ModalMetasContent = () => {
 
     return (
         <div className="flex gap-4 h-full">
-            {/* Logo Consorcio Jurídico arriba de la ramificación, fuera de su div */}
-            <div style={{ width: '18rem', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', marginBottom: 8, position: 'absolute', zIndex: 2, marginTrim: "4rem" }}>
-                <img src={ConsorcioLogo} alt="Consorcio Jurídico" style={{ maxWidth: 120, maxHeight: 60, objectFit: 'contain', filter: 'drop-shadow(0 2px 8px #bdbdbd)' }} />
+            {/* Columna izquierda: Logo + Jerarquía en una sola columna */}
+            <div style={{ width: '18rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                {/* Logo */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem 0 0.5rem 0' }}>
+                    <img src={ConsorcioLogo} alt="Consorcio Jurídico" style={{ width: 70, height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 8px #bdbdbd)' }} />
+                </div>
+                {/* Jerarquía */}
+                <JerarquiaConR
+                    executiveTree={executiveTree}
+                    loadingJerarquia={loadingJerarquia}
+                    errorJerarquia={errorJerarquia}
+                    selectedExecutiveNode={selectedExecutiveNode}
+                    allHierarchyIds={allHierarchyIds}
+                    setSelectedExecutives={setSelectedExecutives}
+                    setSelectedRows={setSelectedRows}
+                    setEditValues={setEditValues}
+                    setSelectedExecutiveNode={setSelectedExecutiveNode}
+                    renderExecutiveTree={renderExecutiveTree}
+                />
             </div>
-
-            {/* Columna izquierda - Jerarquía de Ejecutivos (extraída a componente) */}
-            <JerarquiaConR
-                executiveTree={executiveTree}
-                loadingJerarquia={loadingJerarquia}
-                errorJerarquia={errorJerarquia}
-                selectedExecutiveNode={selectedExecutiveNode}
-                allHierarchyIds={allHierarchyIds}
-                setSelectedExecutives={setSelectedExecutives}
-                setSelectedRows={setSelectedRows}
-                setEditValues={setEditValues}
-                setSelectedExecutiveNode={setSelectedExecutiveNode}
-                renderExecutiveTree={renderExecutiveTree}
-            />
 
             {/* Columna derecha - Inputs y Tabla principal */}
             <div className="flex-1 flex flex-col gap-3" style={{ minWidth: 0 }}>

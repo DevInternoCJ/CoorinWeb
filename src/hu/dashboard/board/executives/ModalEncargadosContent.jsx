@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { obetenerDropdownsEncargados } from '../../../../services/LokiServices';
+import JerarquiaConR from "./JerarquiaConR/JerarquiaConR";
+import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados } from '../../../../services/LokiServices';
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
 import equivalenciasCartera from "../../../../utils/equivalenciasCartera";
 import equivalenciasProducto from "../../../../utils/equivalenciasProducto";
@@ -23,8 +24,9 @@ const DropdownArrow = () => (
         </svg>
     </span>
 );
+
 const ModalEncargadosContent = () => {
-    // State and logic hooks
+    // Estados para dropdowns y logo
     const [cartera, setCartera] = React.useState("");
     const [producto, setProducto] = React.useState("");
     const [carteras, setCarteras] = React.useState([]);
@@ -33,17 +35,24 @@ const ModalEncargadosContent = () => {
     const [selectedEncargado, setSelectedEncargado] = React.useState(null);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
-    const [encargadoOptions, setEncargadoOptions] = React.useState([]);
-    const [expandedNodes, setExpandedNodes] = React.useState({});
-    const [selectedExecutive, setSelectedExecutive] = useState("ALDF");
 
-    // Fetch encargados and set initial state
-    React.useEffect(() => {
+    // Estados mínimos para la jerarquía
+    const [executiveTree, setExecutiveTree] = useState([]);
+    const [loadingJerarquia, setLoadingJerarquia] = useState(false);
+    const [errorJerarquia, setErrorJerarquia] = useState(null);
+    const [selectedExecutives, setSelectedExecutives] = useState([]);
+    const [selectedExecutiveNode, setSelectedExecutiveNode] = useState(null);
+    const [allHierarchyIds, setAllHierarchyIds] = useState([]);
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [editValues, setEditValues] = useState({});
+
+    // Fetch encargados y setear dropdowns (debe usar obetenerDropdownsEncargados)
+    useEffect(() => {
         setLoading(true);
         obetenerDropdownsEncargados()
             .then(data => {
                 setEncargados(data);
-                // Get unique carteras and productos
+                // Get unique carteras y productos
                 const uniqueCarteras = Array.from(new Set(data.map(item => item.idCartera)));
                 setCarteras(uniqueCarteras);
                 setCartera(uniqueCarteras[0] || "");
@@ -53,15 +62,6 @@ const ModalEncargadosContent = () => {
                 setSelectedEncargado(
                     data.find(item => item.idCartera === (uniqueCarteras[0] || "") && item.idProducto === (productosFiltrados[0] || ""))?.idEjecutivo || null
                 );
-                // Build encargadoOptions for tree
-                const options = data.map(item => ({
-                    value: item.idEjecutivo,
-                    label: `${item.idEjecutivo} - ${item.nombreEjecutivo}`,
-                    parent: item.idJefe,
-                    level: item.nivel,
-                    isManager: item.nivel === 1
-                }));
-                setEncargadoOptions(options);
             })
             .catch(err => {
                 setError("Error al cargar encargados");
@@ -69,143 +69,118 @@ const ModalEncargadosContent = () => {
             .finally(() => setLoading(false));
     }, []);
 
-    const toggleExpanded = (executiveValue) => {
-        setExpandedNodes(prev => ({
-            ...prev,
-            [executiveValue]: !prev[executiveValue]
-        }));
-    };
+    // Obtener la jerarquía de encargados (idéntico a ModalMetasContent)
+    useEffect(() => {
+        const fetchExecutiveTree = async () => {
+            setLoadingJerarquia(true);
+            setErrorJerarquia(null);
+            try {
+                const userData = JSON.parse(localStorage.getItem('userData'));
+                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+                const usuario = userData?.usuario || '';
+                const nombreEjecutivo = userData?.nombre || userData?.nombreEjecutivo || userData?.ejecutivo || '';
+                if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
+                const data = await obetenerJerarquiaEncargados(idEjecutivo);
+                let tree = [];
+                if (Array.isArray(data)) {
+                    const found = data.find(n => n.idEjecutivo === idEjecutivo);
+                    if (found) {
+                        tree = data;
+                    } else {
+                        tree = [{
+                            idEjecutivo,
+                            usuario,
+                            nombreEjecutivo,
+                            subordinados: data
+                        }];
+                    }
+                }
+                setExecutiveTree(tree);
+            } catch (e) {
+                setErrorJerarquia('Error al obtener la jerarquía de ejecutivos');
+                setExecutiveTree([]);
+            } finally {
+                setLoadingJerarquia(false);
+            }
+        };
+        fetchExecutiveTree();
+    }, []);
 
-    const getVisibleExecutives = () => {
-        const result = [];
-        
-        executiveOptions.forEach(executive => {
-            // Siempre mostrar nivel 1 (principales)
-            if (executive.level === 1) {
-                result.push(executive);
-                
-                // Mostrar subordinados solo si está expandido
-                if (expandedNodes[executive.value]) {
-                    const subordinates = executiveOptions.filter(sub => sub.parent === executive.value);
-                    subordinates.forEach(sub => {
-                        result.push(sub);
-                        
-                        // Mostrar subordinados de nivel 3 si el de nivel 2 está expandido
-                        if (expandedNodes[sub.value]) {
-                            const subSubordinates = executiveOptions.filter(subsub => subsub.parent === sub.value);
-                            result.push(...subSubordinates);
-                        }
-                    });
+    // Calcular todos los ids de la jerarquía al cargar
+    useEffect(() => {
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+        if (!idEjecutivo || !executiveTree.length) return;
+        const rootNode = executiveTree.find(n => n.idEjecutivo === idEjecutivo);
+        const getAllHierarchyIds = (node) => {
+            let ids = [];
+            if (!node) return ids;
+            if (node.idEjecutivo) ids.push(node.idEjecutivo);
+            if (Array.isArray(node.subordinados) && node.subordinados.length > 0) {
+                for (const sub of node.subordinados) {
+                    ids = ids.concat(getAllHierarchyIds(sub));
                 }
             }
-        });
-        
-        return result;
-    };
+            return ids;
+        };
+        if (rootNode) {
+            const allIds = getAllHierarchyIds(rootNode)
+                .map(id => Number(id))
+                .filter(id => Number.isInteger(id) && id > 0);
+            setAllHierarchyIds(allIds);
+        } else {
+            setAllHierarchyIds([]);
+        }
+    }, [executiveTree]);
 
-    // Datos de ramificación/ejecutivos con jerarquía
-    const executiveOptions = [
-        { value: "ALDF", label: "ALDF - Alan De La O Flores", level: 1, isManager: true },
-        { value: "JMPR", label: "JMPR - Juan Manuel Pérez Rodríguez", level: 2, isManager: false, parent: "ALDF" },
-        { value: "MAGS", label: "MAGS - María Alejandra González Sánchez", level: 2, isManager: false, parent: "ALDF" },
-        { value: "RAFM", label: "RAFM - Roberto Andrés Fernández Martín", level: 1, isManager: true },
-        { value: "LEVA", label: "LEVA - Leticia Esperanza Vargas Aguilar Leticia Esperanza Vargas Aguilar ", level: 2, isManager: false, parent: "RAFM" },
-        { value: "JCHL", label: "JCHL - ", level: 2, isManager: false, parent: "RAFM" },
-        { value: "AMRT", label: "AMRT - Ana María Ramírez Torres", level: 3, isManager: false, parent: "JCHL" },
-        { value: "DAFV", label: "DAFV - Daniel Antonio Flores Vázquez", level: 3, isManager: false, parent: "LEVA" },
-        // Más ejemplos para pruebas de scroll y ancho
-        { value: "MGR1", label: "MGR1 - Manager Uno", level: 1, isManager: true },
-        { value: "EMP1", label: "EMP1 - Empleado Uno", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP2", label: "EMP2 - Empleado Dos", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP3", label: "EMP3 - Empleado Tres", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP4", label: "EMP4 - Empleado Cuatro", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP5", label: "EMP5 - Empleado Cinco", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP6", label: "EMP6 - Empleado Seis", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP7", label: "EMP7 - Empleado Siete", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP8", label: "EMP8 - Empleado Ocho", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP9", label: "EMP9 - Empleado Nueve", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP10", label: "EMP10 - Empleado Diez", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP11", label: "EMP11 - Empleado Once", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP12", label: "EMP12 - Empleado Doce", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP13", label: "EMP13 - Empleado Trece", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP14", label: "EMP14 - Empleado Catorce", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP15", label: "EMP15 - Empleado Quince", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP16", label: "EMP16 - Empleado Dieciséis", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP17", label: "EMP17 - Empleado Diecisiete", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP18", label: "EMP18 - Empleado Dieciocho", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP19", label: "EMP19 - Empleado Diecinueve", level: 2, isManager: false, parent: "MGR1" },
-        { value: "EMP20", label: "EMP20 - Empleado Veinte", level: 2, isManager: false, parent: "MGR1" }
-    ];
+    // Renderizado recursivo para la jerarquía
+    const renderExecutiveTree = (tree, level = 0) => {
+        if (!Array.isArray(tree)) return null;
+        return tree.map((node, idx) => {
+            const isSelected = node.idEjecutivo === selectedExecutiveNode;
+            return (
+                <React.Fragment key={node.usuario || node.id || idx}>
+                    <div
+                        className={`executive-hierarchy-item${isSelected ? ' selected' : ''}`}
+                        style={{
+                            paddingLeft: level * 18,
+                            marginBottom: 2,
+                            fontWeight: 500,
+                            fontSize: 13,
+                            color: isSelected ? '#2b463c' : undefined,
+                            userSelect: 'none',
+                        }}
+                        onClick={() => setSelectedExecutiveNode(node.idEjecutivo)}
+                        title={Array.isArray(node.subordinados) && node.subordinados.length > 0 ? "Mostrar solo subordinados" : "Mostrar solo este ejecutivo"}
+                    >
+                        {node.usuario || ''} - {node.nombreEjecutivo || ''}
+                    </div>
+                    {Array.isArray(node.subordinados) && node.subordinados.length > 0 && (
+                        renderExecutiveTree(node.subordinados, level + 1)
+                    )}
+                </React.Fragment>
+            );
+        });
+    };
 
     return (
         <div className="flex gap-4 h-full">
-            {/* Columna izquierda - Dropdown de Ejecutivos/Ramificación */}
-            <div className="productividad-branch" style={{overflowX: 'auto', overflowY: 'auto', maxHeight: '56vh', width: '18rem'}}>
-                <div className="space-y-1">
-                    {getVisibleExecutives().map((executive) => {
-                        const hasSubordinates = executiveOptions.some(sub => sub.parent === executive.value);
-                        const isExpanded = expandedNodes[executive.value];
-                        
-                        return (
-                            <div
-                                key={executive.value}
-                                className={`p-2 rounded cursor-pointer transition-colors border ${
-                                    selectedExecutive === executive.value
-                                        ? 'bg-[var(--color-jerarquia1)] border-[var(--color-jerarquia2)] text-white'
-                                        : 'bg-white border-[var(--color-jerarquia1)] hover:bg-gray-100'
-                                }`}
-                                style={{ 
-                                    marginLeft: `${(executive.level - 1) * 16}px`,
-                                    borderLeft: executive.level > 1 ? `3px solid var(--color-jerarquia${executive.level})` : 'none'
-                                }}
-                                onClick={() => setSelectedExecutive(executive.value)}
-                            >
-                                {/* Indicador de jerarquía */}
-                                <div className="flex items-center gap-2">
-                                    {/* Botón de expand/collapse para managers con subordinados */}
-                                    {hasSubordinates && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                toggleExpanded(executive.value);
-                                            }}
-                                            className="text-xs font-bold text-[var(--color-jerarquia3)] hover:text-[var(--color-jerarquia4)] transition-colors"
-                                        >
-                                            {isExpanded ? '▼' : '▶'}
-                                        </button>
-                                    )}
-                                    
-                                    {executive.level > 1 && (
-                                        <span className="text-xs opacity-60">
-                                            {'└─'.repeat(executive.level - 1)}
-                                        </span>
-                                    )}
-                                    {executive.isManager && (
-                                        <span className="text-xs font-bold text-[var(--color-jerarquia3)]">
-                                            👑
-                                        </span>
-                                    )}
-                                    <div className="flex-1">
-                                        <div className={`text-xs font-semibold ${executive.isManager ? 'text-[var(--color-jerarquia3)]' : ''}`}>
-                                            {executive.value}
-                                        </div>
-                                        <div className="text-xs opacity-90">
-                                            {executive.label.split(' - ')[1]}
-                                        </div>
-                                        {executive.level > 1 && (
-                                            <div className="text-xs opacity-60 italic">
-                                                Reporta a: {executive.parent}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
+            {/* Columna izquierda: Solo Jerarquía */}
+            <div style={{ width: "18rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
+                <JerarquiaConR
+                    executiveTree={executiveTree}
+                    loadingJerarquia={loadingJerarquia}
+                    errorJerarquia={errorJerarquia}
+                    selectedExecutiveNode={selectedExecutiveNode}
+                    allHierarchyIds={allHierarchyIds}
+                    setSelectedExecutives={setSelectedExecutives}
+                    setSelectedRows={setSelectedRows}
+                    setEditValues={setEditValues}
+                    setSelectedExecutiveNode={setSelectedExecutiveNode}
+                    renderExecutiveTree={renderExecutiveTree}
+                />
             </div>
-
-            {/* Columna derecha - Campos y logo */}
+            {/* Columna derecha - Logo y Campos */}
             <div style={{
                 width: "300px",
                 display: "flex",
@@ -213,19 +188,11 @@ const ModalEncargadosContent = () => {
                 gap: "1rem",
             }}>
                 {/* Logo */}
-                <div style={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    justifyContent: "center",
-                    padding: "1rem",
-                }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem 0 0.5rem 0" }}>
                     <img 
                         src={ConsorcioLogo} 
                         alt="Logo Consorcio" 
-                        style={{ 
-                            width: "70px", 
-                            height: "auto" 
-                        }} 
+                        style={{ width: "70px", height: "auto" }} 
                     />
                 </div>
                 {/* Cartera */}
@@ -347,55 +314,6 @@ const ModalEncargadosContent = () => {
                     </button>
                 </div>
             </div>
-            <style>{`
-                .hover-bg-gray-100:hover {
-                    background-color: rgb(243 244 246) !important;
-                }
-                .hover-text-jerarquia4:hover {
-                    color: var(--color-jerarquia4) !important;
-                }
-                /* Estilos para el scrollbar del panel de ramificación */
-                div[style*="overflowY: auto"]::-webkit-scrollbar {
-                    width: 8px;
-                }
-                div[style*="overflowY: auto"]::-webkit-scrollbar-track {
-                    background: #f5f5f5;
-                    border-radius: 4px;
-                }
-                div[style*="overflowY: auto"]::-webkit-scrollbar-thumb {
-                    background: #b0b0b0;
-                    border-radius: 4px;
-                }
-                div[style*="overflowY: auto"]::-webkit-scrollbar-thumb:hover {
-                    background: #888;
-                }
-            `}</style>
-        
-    
-
-            <style>{`
-                .hover-bg-gray-100:hover {
-                    background-color: rgb(243 244 246) !important;
-                }
-                .hover-text-jerarquia4:hover {
-                    color: var(--color-jerarquia4) !important;
-                }
-                /* Estilos para el scrollbar del panel de ramificación */
-                div[style*="overflowY: auto"]::-webkit-scrollbar {
-                    width: 8px;
-                }
-                div[style*="overflowY: auto"]::-webkit-scrollbar-track {
-                    background: #f5f5f5;
-                    border-radius: 4px;
-                }
-                div[style*="overflowY: auto"]::-webkit-scrollbar-thumb {
-                    background: #b0b0b0;
-                    border-radius: 4px;
-                }
-                div[style*="overflowY: auto"]::-webkit-scrollbar-thumb:hover {
-                    background: #888;
-                }
-            `}</style>
         </div>
     );
 };
