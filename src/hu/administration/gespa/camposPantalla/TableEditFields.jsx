@@ -2,25 +2,21 @@ import React, { useState, useEffect } from "react";
 import PositionRow from "./OptionFields";
 import { GetScreenFields } from "../../../../services/LokiServices";
 
-const TableEditFields = () => {
+const TableEditFields = ({idProducto}) => {
   const [positionData, setPositionData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   // Parámetros requeridos por el endpoint
   const servidor = "Cronoss";
-  const idProducto = 1;
 
   useEffect(() => {
+      if (!idProducto || idProducto === 0) return;
     const fetchScreenFields = async () => {
       try {
         setLoading(true);
-        setError(null);
-        
+        setError(null);      
         // Pasar los parámetros al servicio
         const data = await GetScreenFields(servidor, idProducto);
-        
-        // Transformar los datos según la estructura esperada
         // Ajusta esta transformación basado en la estructura real de la respuesta
         const transformedData = data.map((item, index) => ({
           id: item.id || index + 1,

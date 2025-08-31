@@ -1,13 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import ModalHeader from "./ModalHeader";
-import CanteraSection from "./WalletSection";
+import WalletSection from "./WalletSection";
 import InfoSection from "./InfoSection";
-import PositionSection from "./TableEditFields";
-import BatchdateSection from "./GridLampsFields";
+import TableEditFields from "./TableEditFields";
+import GridLampsFields from "./GridLampsFields";
+
+const PRODUCT_OPTIONS = [
+  { label: "Producto", value: 0 },
+  { label: "Amex", value: 1 },
+];
 
 const LampshadeFields = ({ isOpen, onClose }) => {
+  const [selectedProduct, setSelectedProduct] = useState(null); 
+  const [verifyResult, setVerifyResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   if (!isOpen) return null;
-  // Datos para la sección Info
+
   const infoData = [
     // Fila 1
     [
@@ -43,12 +52,23 @@ const LampshadeFields = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-opacity-70 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden border border-gray-300">
-        <ModalHeader onClose={onClose} />      
+        <ModalHeader onClose={onClose} />
         <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
-          <CanteraSection />
+          <WalletSection
+            selectedProduct={selectedProduct}
+            setSelectedProduct={setSelectedProduct}
+            verifyResult={verifyResult}
+            setVerifyResult={setVerifyResult}
+            loading={loading}
+            setLoading={setLoading}
+          />
           <InfoSection infoData={infoData} />
-          <PositionSection />
-          <BatchdateSection />
+          {selectedProduct && selectedProduct.value !== 0 && (
+  <>
+    <TableEditFields idProducto={selectedProduct.value} />
+    <GridLampsFields idProducto={selectedProduct.value} />
+  </>
+)}
         </div>
       </div>
     </div>

@@ -1,20 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import LogoConjur from "../../../../assets/ConsorcioLetras_OLD.png";
 import CustomSelect from "./SelectWallet";
 import { GetVerifyProduct } from "../../../../services/LokiServices";
 
 const PRODUCT_OPTIONS = [
+  { label: "Producto", value: 0 },
   { label: "Amex", value: 1 },
 ];
 
-const CanteraSection = () => {
+// ...otros imports y código...
+const WalletSection = ({ selectedProduct, setSelectedProduct, verifyResult, setVerifyResult, loading, setLoading }) => {
   const servidor = "Cronoss";
-  const [selectedProduct, setSelectedProduct] = useState(PRODUCT_OPTIONS[0]);
-  const [verifyResult, setVerifyResult] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  // Llama al endpoint cuando cambia el producto seleccionado
   useEffect(() => {
+    // Solo llama si hay producto seleccionado
+     console.log("selectedProduct:", selectedProduct);
+  if (!selectedProduct || selectedProduct.value !== 1) return;
     const fetchVerifyProduct = async () => {
       setLoading(true);
       try {
@@ -27,14 +28,13 @@ const CanteraSection = () => {
       }
     };
     fetchVerifyProduct();
-  }, [selectedProduct, servidor]);
+  }, [selectedProduct, servidor, setLoading, setVerifyResult]);
 
   return (
     <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex justify-between items-center">
       <div>
         <img src={LogoConjur} alt="logo-conjur" className="h-14" />
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Select de Cartera */}
         <div>
@@ -46,20 +46,19 @@ const CanteraSection = () => {
             defaultValue="American Express"
           />
         </div>
-
         {/* Select de Producto */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Producto
           </label>
           <CustomSelect
-            options={PRODUCT_OPTIONS.map(opt => opt.label)}
-            defaultValue={PRODUCT_OPTIONS[0].label}
-            onChange={label => {
-              const found = PRODUCT_OPTIONS.find(opt => opt.label === label);
-              setSelectedProduct(found || PRODUCT_OPTIONS[0]);
-            }}
-          />
+  options={PRODUCT_OPTIONS.map(opt => opt.label)}
+  defaultValue={null}
+  onChange={label => {
+    const found = PRODUCT_OPTIONS.find(opt => opt.label === label);
+    setSelectedProduct(found ? { ...found } : null);
+  }}
+/>
           {loading && <p className="text-xs text-gray-400 mt-1">Verificando producto...</p>}
           {verifyResult && (
             <p className="text-xs text-green-600 mt-1">Producto verificado correctamente.</p>
@@ -70,4 +69,4 @@ const CanteraSection = () => {
   );
 };
 
-export default CanteraSection;
+export default WalletSection;

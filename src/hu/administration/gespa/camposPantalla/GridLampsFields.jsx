@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { GetGridFields } from "../../../../services/LokiServices"; // Ajusta la ruta según tu estructura
 
-const GridLampsFields = () => {
+const GridLampsFields = ({idProducto}) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   // Parámetros requeridos por el endpoint
   const servidor = "Cronoss";
-  const idProducto = 1;
 
   useEffect(() => {
+     if (!idProducto || idProducto === 0) return;
     const fetchGridData = async () => {
       try {
         setLoading(true);
