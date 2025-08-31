@@ -6,64 +6,7 @@ import PositionSection from "./TableEditFields";
 import BatchdateSection from "./GridLampsFields";
 
 const LampshadeFields = ({ isOpen, onClose }) => {
-
-
   if (!isOpen) return null;
-
-  // Datos de ejemplo para la tabla
-  const tableData = [
-    {
-      customerid: "923706974099MXN",
-      batchdate: "13/07/2020",
-      name: "19680330",
-      loan_productcode: "SB",
-      recoveredcode: "TMAC",
-      receiptdate: "10/10/2019",
-      lastpaymentdate: "20/06/2019",
-      initialbalance: "4904.23",
-    },
-    {
-      customerid: "399170560091MXN",
-      batchdate: "08/01/2020",
-      name: "19840918",
-      loan_productcode: "PR",
-      recoveredcode: "PCMC",
-      receiptdate: "08/01/2020",
-      lastpaymentdate: "24/10/2019",
-      initialbalance: "33880.77",
-    },
-    {
-      customerid: "761870246099MXN",
-      batchdate: "19/10/2021",
-      name: "19700923",
-      loan_productcode: "PR",
-      recoveredcode: "PCMC",
-      receiptdate: "19/10/2021",
-      lastpaymentdate: "08/10/2021",
-      initialbalance: "5548.90",
-    },
-    {
-      customerid: "630139719092MXN",
-      batchdate: "17/04/2025",
-      name: "19760403",
-      loan_productcode: "PL",
-      recoveredcode: "WHIC",
-      receiptdate: "09/01/2023",
-      lastpaymentdate: "03/10/2022",
-      initialbalance: "359258.74",
-    },
-    {
-      customerid: "602525651095MXN",
-      batchdate: "04/03/2022",
-      name: "19900507",
-      loan_productcode: "GL",
-      recoveredcode: "XXXX",
-      receiptdate: "30/10/2020",
-      lastpaymentdate: "02/11/2020",
-      initialbalance: "44287.02",
-    },
-  ];
-
   // Datos para la sección Info
   const infoData = [
     // Fila 1
@@ -100,13 +43,12 @@ const LampshadeFields = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-opacity-70 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden border border-gray-300">
-        <ModalHeader onClose={onClose} />
-        
+        <ModalHeader onClose={onClose} />      
         <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
           <CanteraSection />
           <InfoSection infoData={infoData} />
           <PositionSection />
-          <BatchdateSection tableData={tableData} />
+          <BatchdateSection />
         </div>
       </div>
     </div>
