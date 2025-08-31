@@ -10,7 +10,7 @@ import {
   IconPantalla,
 } from "./IconesEjecutives";
 import ModalMetasEjecutivos from "./ModalMetasEjecutivos";
-import LampshadeFields from "../../../administracion/gespa/camposPantalla/LampshadeFields"
+import LampshadeFields from "../../../administration/gespa/camposPantalla/LampshadeFields"
 
 const CardExecutive = () => {
   const [showMetasModal, setShowMetasModal] = useState(false);
