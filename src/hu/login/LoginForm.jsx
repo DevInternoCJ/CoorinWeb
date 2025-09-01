@@ -23,7 +23,7 @@ const LoginForm = ({onLoginSuccess}) => {
     const value = e.target.value;
     setPassword(value);
     setPasswordError(
-      value.length > 0 && value.length < 9
+      value.length > 0 && value.length < 8
         ? 'La contraseña debe tener al menos 10 caracteres.'
         : ''
     );

@@ -411,7 +411,7 @@ const ModalMetasContent = () => {
     };
 
     return (
-        <div className="flex gap-4 h-full">
+        <div className="flex gap-4 h-full" style={{ maxHeight: '60vh', overflow: 'hidden' }}>
             {/* Columna izquierda: Logo + Jerarquía en una sola columna */}
             <div style={{ width: '18rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                 {/* Logo */}
@@ -632,9 +632,9 @@ const ModalMetasContent = () => {
                 </div>
 
                 {/* Tabla principal */}
-                <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex-1 flex flex-col" style={{ minWidth: 0 }}>
+                <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex-1 flex flex-col" style={{ minWidth: 0, minHeight: 0 }}>
                     {/* Tabla con scroll */}
-                    <div style={{ maxHeight: "calc(60vh - 12rem)", overflow: "auto" }} className="scrollbar-gray">
+                    <div style={{ maxHeight: "40vh", overflow: "auto", marginBottom: "1rem" }} className="scrollbar-gray">
                         <table className="modal-table">
                             <thead>
                                 <tr>
@@ -814,17 +814,17 @@ const ModalMetasContent = () => {
                         </table>
                         {/* El botón Guardar ahora está fuera de la tabla */}
                     </div>
-                </div>
-                {/* Botón Guardar centrado debajo de la tabla */}
-                <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 18 }}>
-                    <button
-                        className="modal-btn"
-                        style={{ background: '#2b463c', color: '#fff', minWidth: 140, height: 40, fontWeight: 600, fontSize: 16, borderRadius: 6, opacity: selectedRows.length > 0 ? 1 : 0.5, cursor: selectedRows.length > 0 ? 'pointer' : 'not-allowed', boxShadow: '0 2px 8px #bdbdbb33' }}
-                        onClick={handleGuardar}
-                        disabled={selectedRows.length === 0}
-                    >
-                        Guardar
-                    </button>
+                    {/* Botón Guardar dentro del contenedor de la tabla pero fuera del scroll */}
+                    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: '1rem' }}>
+                        <button
+                            className="modal-btn"
+                            style={{ background: '#2b463c', color: '#fff', minWidth: 140, height: 40, fontWeight: 600, fontSize: 16, borderRadius: 6, opacity: selectedRows.length > 0 ? 1 : 0.5, cursor: selectedRows.length > 0 ? 'pointer' : 'not-allowed', boxShadow: '0 2px 8px #bdbdbb33' }}
+                            onClick={handleGuardar}
+                            disabled={selectedRows.length === 0}
+                        >
+                            Guardar
+                        </button>
+                    </div>
                 </div>
             </div>
 
