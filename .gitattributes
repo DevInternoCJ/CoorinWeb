@@ -1,0 +1,66 @@
+# ===========================
+# EOL Normalization
+# ===========================
+# Auto-detect text files and normalize line endings to LF
+* text=auto
+
+# Explicitly set for common file types
+*.cs     text eol=lf
+*.csproj text eol=lf
+*.sln    text eol=lf
+*.json   text eol=lf
+*.xml    text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.md     text eol=lf
+*.sh     text eol=lf
+*.ps1    text eol=lf
+
+# ===========================
+# Force UTF-8 Encoding
+# ===========================
+*.cs     text eol=lf charset=utf-8
+*.csproj text eol=lf charset=utf-8
+*.json   text eol=lf charset=utf-8
+*.xml    text eol=lf charset=utf-8
+*.md     text eol=lf charset=utf-8
+
+# ===========================
+# Treat binary files properly
+# ===========================
+# Prevent Git from trying to diff binary files
+*.dll    binary
+*.exe    binary
+*.pdb    binary
+*.ico    binary
+*.jpg    binary
+*.jpeg   binary
+*.png    binary
+*.gif    binary
+*.pdf    binary
+*.zip    binary
+*.tar    binary
+*.gz     binary
+*.7z     binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.eot    binary
+*.pfx    binary
+*.cer    binary
+*.key    binary
+
+# ===========================
+# GitHub linguist overrides
+# ===========================
+# Tell GitHub Linguist to ignore certain folders
+docs/ linguist-documentation
+wwwroot/ linguist-vendored
+publish/ linguist-generated
+bin/ linguist-generated
+obj/ linguist-generated
+
+# ===========================
+# Optional: Mark tests as such
+# ===========================
+*Tests/* linguist-documentation

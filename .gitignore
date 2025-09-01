@@ -1,0 +1,82 @@
+#########################################
+# Archivos de compilación
+#########################################
+bin/
+obj/
+out/
+
+#########################################
+# Configuración de usuario y entorno
+#########################################
+.vscode/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+#########################################
+# Archivos de logs y temporales
+#########################################
+*.log
+Logs/
+*.tmp
+*.temp
+*.bak
+
+#########################################
+# Archivos de configuración sensibles
+#########################################
+appsettings.Development.json
+appsettings.Local.json
+appsettings.Secure.json
+appsettings.*.json
+*.key
+*.pfx
+*.cer
+
+# Si usas secretos de usuario con dotnet user-secrets
+**/secrets.json
+
+#########################################
+# Paquetes NuGet descargados
+#########################################
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+
+#########################################
+# Archivos de publicación
+#########################################
+publish/
+wwwroot/
+
+#########################################
+# Archivos de sistema
+#########################################
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+#########################################
+# Otros
+#########################################
+
+# Rider (JetBrains)
+.idea/
+*.sln.iml
+
+# Archivos de cobertura
+coverage/
+*.coverage
+*.coveragexml
+
+# Archivos generados por herramientas
+TestResults/
+_ReSharper*/
+*.ncrunch*
+*.sonarqube/
+*.vspscc
+*.vssscc
