@@ -117,7 +117,7 @@ namespace Loki.Mark.Consulta.Histórico.Services
                     throw new ArgumentException("La fecha hasta no puede ser mayor a la fecha actual");
             }
         }
-    
+
         private async Task<List<string>> LeerCuentasDeArchivoAsync(IFormFile archivo)
         {
             var cuentas = new List<string>();

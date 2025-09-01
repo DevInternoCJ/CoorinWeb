@@ -80,3 +80,4 @@ _ReSharper*/
 *.sonarqube/
 *.vspscc
 *.vssscc
+.Models

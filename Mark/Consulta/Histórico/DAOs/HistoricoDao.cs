@@ -121,7 +121,7 @@ namespace Loki.Mark.Consulta.Histórico.DAOs
                         }
                         else
                         {
-                            
+
                             _logger.LogWarning($"Vista vw_PagosAmex no existe en servidor {servidor}. Creando tabla informativa.");
 
                             tablePagos = new DataTable("Pagos");
@@ -238,7 +238,7 @@ namespace Loki.Mark.Consulta.Histórico.DAOs
                         if (dataTable.Rows.Count == 0)
                         {
                             _logger.LogInformation("Tabla vacía, asegurando estructura de columnas");
-                         
+
                         }
 
                         return dataTable;

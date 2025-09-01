@@ -17,7 +17,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Services
         }
         private readonly CustomDbContextFactory _dbContFactory;
 
-        
+
 
         public async Task<IEnumerable<ValidadoresDTO>?> ObtieneValidadores(int idProducto, string servidor, string tipoBase)
         {

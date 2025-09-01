@@ -17,7 +17,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
         private readonly IValidadoresDAOs _validadoresDao;
         private readonly IValidadoresService _validadoresService;
         private readonly DaoBase _daobase;
-        
+
 
         public ValidadoresController(IValidadoresService validadoresservices, IValidadoresDAOs validadoresdao, IDbContextFactory contextfactory, DaoBase daobase)
         {
@@ -28,21 +28,17 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
         }
         [HttpGet("validadores")]
         [SwaggerOperation(Summary = "Obtiene validadores",
-            Description = "obtiene una lista de validadores al ingresar el idproducto y tipobase, la cual retorna una lista de idEejecutivo correspondiente")]
+        Description = "obtiene una lista de validadores al ingresar el idproducto y tipobase, la cual retorna una lista de idEejecutivo correspondiente")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<ValidadoresDTO>>> ObtieneValidadores(
-    int idProducto,
-    [FromQuery] string tipoBase)
+        public async Task<ActionResult<IEnumerable<ValidadoresDTO>>> ObtieneValidadores(int idProducto)
         {
-            if (string.IsNullOrEmpty(tipoBase))
-            {
-                return BadRequest("El parámetro 'tipoBase' es requerido.");
-            }
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
             if (string.IsNullOrWhiteSpace(servidorClaim))
             {
                 return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
             }
+
+            string tipoBase = "Collection";
 
             var validadores = await _validadoresService.ObtieneValidadores(idProducto, servidorClaim, tipoBase);
             if (validadores == null)
@@ -54,30 +50,27 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
             return Ok(respuesta);
         }
 
+
         [HttpGet("validadores-arrepentimientos")]
         [SwaggerOperation(Summary = "validadores arrepentimientos",
             Description = "obtiene los idEjecutivo de acuerdo al id del producto especificado extrayendo de la tabla validadoresArrepentimientos")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<ValidadoresDTO>>> ObtieneValidadoresArrepentimientos(
-        int idProducto,
-        [FromQuery] string tipoBase)
+        public async Task<ActionResult<IEnumerable<ValidadoresDTO>>> ObtieneValidadoresArrepentimientos(int idProducto)
         {
-            if (string.IsNullOrEmpty(tipoBase))
-            {
-                return BadRequest("El parámetro 'tipoBase' es requerido.");
-            }
-
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
             if (string.IsNullOrWhiteSpace(servidorClaim))
             {
                 return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
             }
 
-            var validadores = await _validadoresService.ObtieneValidadoresArrepentimientos(idProducto, servidorClaim, tipoBase);
+            string tipoBase = "Collection";
+
+            var validadores = await _validadoresService.ObtieneValidadores(idProducto, servidorClaim, tipoBase);
             if (validadores == null)
             {
                 return StatusCode(500, "Ocurrió un error al obtener los validadores.");
             }
+
             var respuesta = validadores.Select(v => new { v.IdEjecutivo }).ToList();
             return Ok(respuesta);
         }
@@ -90,19 +83,16 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
 
         public async Task<ActionResult> InsertaEliminaValidadores([FromBody] ValidadoresRequest dto)
         {
-            if (dto == null || string.IsNullOrWhiteSpace(dto.tipoBase))
+            var servidorClaim = User.Claims.FirstOrDefault(c => c.Type == "servidor");
+
+            if (servidorClaim == null || string.IsNullOrWhiteSpace(servidorClaim.Value))
             {
-                return BadRequest("El parámetro 'tipoBase' es requerido.");
+                return Unauthorized(new { error = "No se encontró la información del servidor en el token." });
             }
-            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            string tipoBase = "Collection";
+            var servidor = servidorClaim.Value;
 
-            if (string.IsNullOrWhiteSpace(servidorClaim))
-            {
-                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-            }
-
-            var resultado = await _validadoresDao.InsertaEliminaValidadores(dto, servidorClaim);
-
+            var resultado = await _validadoresDao.InsertaEliminaValidadores(dto, servidor, tipoBase);
             if (resultado == null)
             {
                 return StatusCode(500, "Ocurrió un error al eliminar-insertar los validadores.");
@@ -110,31 +100,30 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
             return Ok(resultado);
         }
 
-        [HttpPost("inserta-elimina-validadorAmex")]
+        [HttpPost("inserta-elimina-validadores-arrepentimientos")]
         [Authorize]
         [SwaggerOperation(
-            Summary ="inserta elimina validadorAmex",
+            Summary = "inserta elimina Validadores Arrepentimientos",
             Description = "Inserta un validador arrepentimiento y en caso de existir lo elimina")]
         public async Task<ActionResult> InsertaEliminaValidadoresArrepentimientos([FromBody] ValidadoresRequest dto)
         {
-            if (dto == null || string.IsNullOrWhiteSpace(dto.tipoBase))
+
+            var servidorClaim = User.Claims.FirstOrDefault(c => c.Type == "servidor");
+
+            if (servidorClaim == null || string.IsNullOrWhiteSpace(servidorClaim.Value))
             {
-                return BadRequest("El parámetro 'tipoBase' es requerido.");
+                return Unauthorized(new { error = "No se encontró la información del servidor en el token." });
             }
-            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            string tipoBase = "Collection";
+            var servidor = servidorClaim.Value;
 
-            if (string.IsNullOrWhiteSpace(servidorClaim))
-            {
-                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-            }
-
-            var resultado = await _validadoresDao.InsertaEliminaValidadoresArrepentimientos(dto, servidorClaim);
-
+            var resultado = await _validadoresDao.InsertaEliminaValidadoresArrepentimientos(dto, servidor, tipoBase);
             if (resultado == null)
             {
                 return StatusCode(500, "Ocurrió un error al eliminar-insertar los validadores.");
             }
             return Ok(resultado);
         }
+
     }
 }

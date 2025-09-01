@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 namespace Loki.Mark.Administracion.Ejecutivos.Validadores.DAOs
 
 {
-    public class ValidadoresDao: IValidadoresDAOs
+    public class ValidadoresDao : IValidadoresDAOs
 
     {
         private readonly IDbContextFactory _dbContFactory;
@@ -22,9 +22,9 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.DAOs
         }
 
 
-        public async Task<string> InsertaEliminaValidadores(ValidadoresRequest dto, string servidor)
+        public async Task<string> InsertaEliminaValidadores(ValidadoresRequest dto, string servidor, string tipoBase)
         {
-            var connection = _dbContFactory.GetSqlConnection(servidor, dto.tipoBase);
+            var connection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
             try
             {
                 await connection.OpenAsync();
@@ -57,9 +57,9 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.DAOs
         }
 
 
-        public async Task<string> InsertaEliminaValidadoresArrepentimientos(ValidadoresRequest dto, string servidor)
+        public async Task<string> InsertaEliminaValidadoresArrepentimientos(ValidadoresRequest dto, string servidor, string tipoBase)
         {
-            var connection = _dbContFactory.GetSqlConnection(servidor, dto.tipoBase);
+            var connection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
             try
             {
                 await connection.OpenAsync();
@@ -95,7 +95,4 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.DAOs
     }
 
 }
-
- 
-
 
