@@ -8,7 +8,6 @@ import ModalValidadoresEjecutivos from "./ModalValidadoresEjecutivos";
 import ModalEncargadosEjecutivos from "./ModalEncargadosEjecutivos";
 import ModalCatalogosEjecutivos from "./ModalCatalogosEjecutivos";
 import ModalScriptsEjecutivos from "./ModalScriptsEjecutivos";
-import ModalPantallaEjecutivos from "./ModalPantallaEjecutivos";
 
 const CardExecutive = () => {
   const [showMetasModal, setShowMetasModal] = useState(false);
@@ -138,7 +137,7 @@ const CardExecutive = () => {
       
       {/* Modal de Pantalla */}
       {showPantallaModal && (
-        <ModalPantallaEjecutivos onClose={() => setShowPantallaModal(false)} />
+        <LampshadeFields onClose={() => setShowPantallaModal(false)} />
       )}
     </>
   );
