@@ -25,29 +25,25 @@ const DropdownArrow = () => (
 const ModalConsultaCuentasHeader = ({ onClose }) => (
     <div className="flex items-center gap-4 mb-2 w-full">
         {/* Título alineado a la izquierda */}
-        <h2 className="text-xl font-bold text-[var(--color-jerarquia3)] mb-1 flex justify-start items-center gap-2">
-            <IconCuentas className="size-6" />
+        <h2 className="modal-title">
+            <IconCuentas className="modal-title-icon" />
             Consulta cuentas - Coorin
         </h2>
         {/* Elementos centrados en el modal */}
         <div className="flex-1 flex flex-row items-center justify-center">
             <div className="flex items-center gap-8">
-                <span className="text-base text-[var(--color-jerarquia4)] font-semibold">Cartera</span>
-                <span className="text-base text-[var(--color-jerarquia4)]">American Express</span>
-                <span className="text-base text-[var(--color-jerarquia4)] font-semibold ml-8">Producto</span>
+                <span className="modal-span-1">Cartera</span>
+                <span className="modal-span-2">American Express</span>
+                <span className="modal-span-1 ml-8">Producto</span>
                 <div className="relative">
-                    <select
-                        className="w-32 font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
-                    >
+                    <select className="modal-dropdown-select appearance-none">
                         <option>Amex</option>
                     </select>
                     <DropdownArrow />
                 </div>
-                <span className="text-base text-[var(--color-jerarquia4)] font-semibold ml-8">Consulta</span>
+                <span className="modal-span-1 ml-8">Consulta</span>
                 <div className="relative">
-                    <select
-                        className="w-32 font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
-                    >
+                    <select className="modal-dropdown-select appearance-none">
                         <option value=""> </option>
                     </select>
                     <DropdownArrow />
@@ -57,8 +53,7 @@ const ModalConsultaCuentasHeader = ({ onClose }) => (
         {/* Botón de cierre */}
         <button
             onClick={onClose}
-            className="ml-4 text-[var(--color-jerarquia3)] hover:text-red-600 transition rounded-full p-1"
-            style={{ fontSize: "1.5rem", lineHeight: 1 }}
+            className="modal-btn modal-btn-close ml-4"
             aria-label="Cerrar"
         >
             &times;

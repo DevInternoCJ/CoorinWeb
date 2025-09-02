@@ -30,20 +30,6 @@ const ModalConsultaCuentas = ({ onClose }) => {
             <div style={{ width: "100%", overflowX: "auto" }}>
                 <ModalConsultaCuentasFooter />
             </div>
-            <style>{`
-                .scrollbar-gray::-webkit-scrollbar {
-                    height: 8px;
-                    width: 8px;
-                    background: #f5f5f5;
-                }
-                .scrollbar-gray::-webkit-scrollbar-thumb {
-                    background: #b0b0b0;
-                    border-radius: 4px;
-                }
-                .scrollbar-gray::-webkit-scrollbar-thumb:hover {
-                    background: #888;
-                }
-            `}</style>
         </div>
     );
 };

@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import GridExecutives from "./board/executives/GridExecutives";
 import { CoorinSidebar } from "./sideBar/CoorinSidebar";
 import GridConsultations from "./board/consultations/GridConsultations";
-import CoordinDashboard from "./board/consultations/CoordinDashboard";
 import Menu from "../../assets/menu.svg";
+import TablaSesiones from "./board/consultations/TablaSesiones";
+import RamificacionSesiones from "./board/consultations/RamificacionSesiones";
 
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedExecutiveId, setSelectedExecutiveId] = useState(null);
 
   const handleSidebarToggle = () => setSidebarOpen((prev) => !prev);
 
@@ -51,7 +53,7 @@ export default function CoorinDashboard() {
 
           <div className="grid grid-cols-2 gap-4 mt-8 w-full">
             <div className="relative w-full">
-              <CoordinDashboard />
+              <RamificacionSesiones onExecutiveSelect={setSelectedExecutiveId} />
             </div>
             <div className="relative bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-6 w-full h-82">
               <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-800">
@@ -74,10 +76,14 @@ export default function CoorinDashboard() {
                 Ramificación
               </h3>
               <div className="bg-[#e5ebf2] rounded-lg flex-1 min-h-[120px]"></div>
+            {/* Tabla de Sesiones */}
+            <div className="relative w-full">
+              <TablaSesiones selectedExecutiveId={selectedExecutiveId} />
             </div>
           </div>
         </div>
       </div>
+    </div>
     </>
   );
 }

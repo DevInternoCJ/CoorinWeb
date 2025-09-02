@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from "react";
-import "./modalBaseGenerales.css";
 
 const ModalBaseGenerales = ({ open, children }) => {
     const [bounce, setBounce] = useState(false);

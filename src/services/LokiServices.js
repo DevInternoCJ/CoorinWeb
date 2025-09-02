@@ -333,3 +333,255 @@ export const SaveScreenFields = async (servidor, data) => {
 
 
 
+// Nuevo endpoint para Lista Negra con parámetros
+export const darkListV2 = async ({ idCartera = 1, selector, dato }) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    const params = { idCartera, selector, dato };
+    console.log('📤 Enviando a /ListaNegra/get-lista-negra con:', params);
+    // El interceptor añade el token automáticamente
+    const response = await api.get('/ListaNegra/get-lista-negra', { params });
+    console.log('📥 Respuesta de /ListaNegra/get-lista-negra:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error al obtener la ListaNegra:', error);
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+export const getRegrest = async ({ idCartera, cuenta }) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    const params = { idCartera, cuenta};
+    console.log('📤 Enviando a /arrepentimientos/get-arrepentimientos a con:', params);
+    // El interceptor añade el token automáticamente
+    const response = await api.get('/arrepentimientos/get-arrepentimientos', { params });
+    console.log('📥 Respuesta de /arrepentimientos/get-arrepentimientos:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error al obtener la Arrepentimientos:', error);
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+export const actualizarMetas = async (payload) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('📤 Enviando a /carteras/establecer-metasproductividad con:', payload);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/carteras/establecer-metasproductividad', payload);
+    console.log('📥 Respuesta de /carteras/establecer-metasproductividad:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error al obtener los catalogos:', error);
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const getSessions = async ({ idEjecutivo }) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    const url = `/Sesiones/get-sesiones-ejecutivos/${idEjecutivo}`;
+    console.log('Enviando a', url);
+    // El interceptor añade el token automáticamente
+    const response = await api.get(url);
+    console.log('Respuesta de', url + ':', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener las sesiones:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const getValidators = async ({ idProducto }) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    const params = { idProducto};
+    console.log('Enviando a /ejecutivos/validadores a con:', params);
+    // El interceptor añade el token automáticamente
+    const response = await api.get('/ejecutivos/validadores', { params });
+    console.log('Respuesta de /ejecutivos/validadores:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener la Arrepentimientos:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+// Obtener ramificación de encargados (sin parámetros)
+export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    const idNum = Number(idEjecutivo);
+    const requestData = [idNum];
+    const url = `/Encargados/ejecutivos-propios/${idNum}`;
+    console.log('📤 Enviando a', url, 'con:', requestData);
+    // El interceptor añade el token automáticamente
+    const response = await api.post(url, requestData);
+    console.log('📥 Respuesta de', url + ':', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error al obtener la ramificación de encargados:', error);
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+export const obetenerTablaMetas = async (idEjecutivo) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // Probar enviando solo el array como body
+    const requestData = Array.isArray(idEjecutivo) ? idEjecutivo : [Number(idEjecutivo)];
+    console.log('📤 Enviando a /carteras/metas-productividad con:', requestData);
+    const response = await api.post('/carteras/metas-productividad', requestData);
+    console.log('📥 Respuesta de /carteras/metas-productividad:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error al obtener la tabla metas:', error);
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+// Obtener ramificación de encargados (sin parámetros)
+export const obetenerDropdownsEncargados = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('📤 Enviando a /Encargados/ramificacion (sin body)');
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/Encargados/encargados');
+    console.log('📥 Respuesta de /Encargados/ramificacion:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error al obtener la ramificación de encargados:', error);
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};

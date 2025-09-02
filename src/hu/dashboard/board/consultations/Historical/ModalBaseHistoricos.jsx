@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 const ModalBaseHistoricos = ({ open, children }) => {
     const [bounce, setBounce] = useState(false);
+    const [shakeAnimation, setShakeAnimation] = useState(false);
     const modalRef = useRef(null);
 
     // Siempre define los hooks antes de cualquier return o condicional
@@ -17,7 +18,9 @@ const ModalBaseHistoricos = ({ open, children }) => {
 
     const handleBackdropClick = (e) => {
         if (modalRef.current && !modalRef.current.contains(e.target)) {
-            // No cerramos el modal al hacer clic en el backdrop
+            // Activar animación de shake en lugar de cerrar
+            setShakeAnimation(true);
+            setTimeout(() => setShakeAnimation(false), 500);
         }
     };
 
@@ -51,11 +54,22 @@ const ModalBaseHistoricos = ({ open, children }) => {
                     transform: bounce ? "scale(1.02)" : "scale(1)",
                     transition: "transform 0.2s ease-out",
                 }}
-                className="scrollbar-gray"
+                className={`scrollbar-gray${shakeAnimation ? " animate-shake-modal" : ""}`}
             >
                 {children}
             </div>
             <style>{`
+                @keyframes shake-modal {
+                    0% { transform: scale(1); }
+                    20% { transform: scale(1.05, 0.95); }
+                    40% { transform: scale(0.95, 1.05); }
+                    60% { transform: scale(1.03, 0.97); }
+                    80% { transform: scale(0.97, 1.03); }
+                    100% { transform: scale(1); }
+                }
+                .animate-shake-modal {
+                    animation: shake-modal 0.5s;
+                }
                 .scrollbar-gray::-webkit-scrollbar {
                     height: 8px;
                     width: 8px;

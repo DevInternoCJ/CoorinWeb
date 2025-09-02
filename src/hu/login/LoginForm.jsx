@@ -201,7 +201,7 @@ const LoginForm = ({ onLoginSuccess }) => {
         onChange={(e) => handleInputChange('password', e.target.value)}
         id="password-floating"
         label="Contraseña"
-        minLength={10}
+        minLength={9}
         maxLength={50}
         required
         disabled={loading}
