@@ -339,7 +339,7 @@ export const darkListV2 = async ({ idCartera = 1, selector, dato }) => {
   }
 };
 
-export const getRegrest = async ({ idCartera = 1, cuenta }) => {
+export const getRegrest = async ({ idCartera, cuenta }) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -415,6 +415,38 @@ export const getSessions = async ({ idEjecutivo }) => {
     return response.data;
   } catch (error) {
     console.error('Error al obtener las sesiones:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const getValidators = async ({ idProducto }) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    const params = { idProducto};
+    console.log('Enviando a /ejecutivos/validadores a con:', params);
+    // El interceptor añade el token automáticamente
+    const response = await api.get('/ejecutivos/validadores', { params });
+    console.log('Respuesta de /ejecutivos/validadores:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener la Arrepentimientos:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');

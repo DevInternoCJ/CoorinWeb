@@ -1,7 +1,7 @@
 /* Fijo para el idEjecutivo de la sesión en la ramificación */
 .sticky-session-executive {
   position: sticky;
-  top: 0;
+  top: -10px;
   z-index: 3;
   background: #ffffff;
   margin-bottom: 10px;
@@ -19,6 +19,11 @@
   cursor: pointer;
   border-radius: 4px;
   transition: background 0.2s;
+  white-space: nowrap;
+  display: inline-block;
+  margin-right: 10px;
+  /* padding: 0.5px 8px; */
+  vertical-align: top;
 }
 .executive-hierarchy-item:hover {
   background: #d9e0e9;
@@ -41,6 +46,16 @@ input[type="time"]::-webkit-datetime-edit-ampm-field {
 input[type="time"]::-ms-input-placeholder {
   color: #111;
   font-weight: 600;
+}
+/* Hacer el icono nativo transparente pero funcional */
+input[type="time"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  z-index: 2;
 }
 input[type="time"]::placeholder {
   color: #111;
@@ -94,6 +109,22 @@ label {
 }
 .productividad-branch * {
   color: #111 !important;
+}
+
+/* === Contenedor de jerarquía con scroll horizontal === */
+.executive-hierarchy-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  white-space: nowrap;
+  padding: 4px;
+  max-height: 400px;
+}
+
+/* === Contenedor de nivel de jerarquía === */
+.executive-hierarchy-level {
+  display: block;
+  margin-bottom: 4px;
+  white-space: nowrap;
 }
 
 /* === Ramificación Sesiones - Altura limitada === */
@@ -225,6 +256,19 @@ label {
 }
 .modal-checkbox:focus {
   outline: 2px solid var(--color-jerarquia3);
+  outline-offset: 1px;
+}
+/* === Checkbox pequeño para tablas === */
+.modal-checkbox-small {
+  width: 0.8rem;
+  height: 0.8rem;
+  accent-color: var(--color-jerarquia3);
+  border-radius: 0.2rem;
+  border: 1px solid var(--color-jerarquia1);
+  transition: border 0.2s;
+}
+.modal-checkbox-small:focus {
+  outline: 1px solid var(--color-jerarquia3);
   outline-offset: 1px;
 }
 /* === Tabla global para modales === */

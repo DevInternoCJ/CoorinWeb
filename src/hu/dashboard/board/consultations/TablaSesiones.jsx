@@ -11,39 +11,6 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
 
-    // Función para aplanar la estructura jerárquica de sesiones manteniendo el orden
-    const flattenSessions = (sessionsData) => {
-        let allSessions = [];
-        
-        if (!Array.isArray(sessionsData)) return allSessions;
-        
-        const procesSession = (session) => {
-            // Agregar la sesión actual PRIMERO
-            allSessions.push({
-                usuario: session.usuario,
-                nombreEjecutivo: session.nombreEjecutivo,
-                idEjecutivo: session.idEjecutivo,
-                idEncargado: session.idEncargado,
-                sesionAbierta: session.sesionAbierta,
-                bloqueado: session.bloqueado
-            });
-            
-            // DESPUÉS procesar subordinados en el mismo orden que vienen
-            if (Array.isArray(session.subordinados) && session.subordinados.length > 0) {
-                session.subordinados.forEach(subordinado => {
-                    procesSession(subordinado);
-                });
-            }
-        };
-        
-        // Procesar cada sesión del array principal en el orden original
-        sessionsData.forEach(session => {
-            procesSession(session);
-        });
-        
-        return allSessions;
-    };
-
     // Efecto para cargar las sesiones cuando cambia el ejecutivo seleccionado
     useEffect(() => {
         const fetchSessions = async () => {
@@ -62,10 +29,32 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                 const data = await getSessions({ idEjecutivo: idToUse });
                 console.log('🟢 Respuesta de getSessions:', data);
                 
-                // Aplanar la estructura jerárquica para mostrar todas las sesiones
-                const flattenedSessions = flattenSessions(Array.isArray(data) ? data : []);
-                console.log('🟢 Sesiones aplanadas:', flattenedSessions);
-                setSessions(flattenedSessions);
+                // Obtener solo los subordinados directos, excluyendo el usuario actual
+                let directSubordinates = [];
+                
+                if (Array.isArray(data)) {
+                    data.forEach(session => {
+                        // Solo agregar subordinados directos, no el nodo padre ni subordinados de subordinados
+                        if (Array.isArray(session.subordinados) && session.subordinados.length > 0) {
+                            session.subordinados.forEach(subordinado => {
+                                // Verificar que no sea el usuario actual
+                                if (subordinado.idEjecutivo !== idEjecutivoSesion) {
+                                    directSubordinates.push({
+                                        usuario: subordinado.usuario,
+                                        nombreEjecutivo: subordinado.nombreEjecutivo,
+                                        idEjecutivo: subordinado.idEjecutivo,
+                                        idEncargado: subordinado.idEncargado,
+                                        sesionAbierta: subordinado.sesionAbierta,
+                                        bloqueado: subordinado.bloqueado
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                console.log('🟢 Subordinados directos:', directSubordinates);
+                setSessions(directSubordinates);
             } catch (e) {
                 console.error('Error al obtener las sesiones:', e);
                 setError('Error al cargar las sesiones');
@@ -163,7 +152,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                                             type="checkbox" 
                                             checked={session.bloqueado} 
                                             readOnly 
-                                            className="modal-checkbox"
+                                            className="modal-checkbox-small"
                                         />
                                     ) : '---'}
                                 </td>
@@ -184,7 +173,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                                             type="checkbox" 
                                             checked={session.sesionAbierta} 
                                             readOnly 
-                                            className="modal-checkbox"
+                                            className="modal-checkbox-small"
                                         />
                                     ) : '---'}
                                 </td>

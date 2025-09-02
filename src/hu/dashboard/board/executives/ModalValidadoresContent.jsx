@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
-import JerarquiaConR from "./JerarquiaConR/JerarquiaConR";
+import JerarquiaConCheckbox from "./JerarquiaConR/JerarquiaConCheckbox";
 import { obetenerJerarquiaEncargados } from '../../../../services/LokiServices';
 
 // Flecha tipo chevron moderna
@@ -36,9 +36,14 @@ const ModalValidadoresContent = () => {
     const [selectedExecutiveNode, setSelectedExecutiveNode] = useState(null);
     const [allHierarchyIds, setAllHierarchyIds] = useState([]);
     // Otros estados propios del modal
-    const [cartera, setCartera] = useState("American Express");
     const [producto, setProducto] = useState("Amex");
     const [arrepentimientos, setArrepentimientos] = useState(false);
+
+    // Función para obtener idCartera desde localStorage
+    const getIdCartera = () => {
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        return userData?.idCartera || userData?.idcartera || userData?.cartera || 1; // fallback a 1 si no existe
+    };
 
     // Obtener la jerarquía de ejecutivos (idéntico a ModalMetasContent)
     useEffect(() => {
@@ -68,7 +73,8 @@ const ModalValidadoresContent = () => {
                     }
                 }
                 setExecutiveTree(tree);
-            } catch (e) {
+            } catch (error) {
+                console.error('Error al obtener la jerarquía:', error);
                 setErrorJerarquia('Error al obtener la jerarquía de ejecutivos');
                 setExecutiveTree([]);
             } finally {
@@ -77,45 +83,6 @@ const ModalValidadoresContent = () => {
         };
         fetchExecutiveTree();
     }, []);
-
-    // Renderizado recursivo de la jerarquía (como prop para JerarquiaConR)
-    const renderExecutiveTree = (tree, level = 0) => {
-        if (!Array.isArray(tree)) return null;
-        return tree.map((node, idx) => {
-            const isSelected = node.idEjecutivo === selectedExecutiveNode;
-            return (
-                <React.Fragment key={node.usuario || node.id || idx}>
-                    <div
-                        className={`executive-hierarchy-item${isSelected ? ' selected' : ''}`}
-                        style={{
-                            paddingLeft: level * 18,
-                            marginBottom: 2,
-                            fontWeight: 500,
-                            fontSize: 13,
-                            color: isSelected ? '#2b463c' : undefined,
-                            userSelect: 'none',
-                        }}
-                        onClick={() => {
-                            setSelectedExecutiveNode(node.idEjecutivo);
-                            if (Array.isArray(node.subordinados) && node.subordinados.length > 0) {
-                                const idsSub = node.subordinados.map(sub => sub.idEjecutivo).filter(Boolean);
-                                setSelectedExecutives(idsSub);
-                            } else {
-                                setSelectedExecutives([]);
-                            }
-                        }}
-                        title={Array.isArray(node.subordinados) && node.subordinados.length > 0 ? "Mostrar solo subordinados" : "Mostrar solo este ejecutivo"}
-                    >
-                        {node.usuario || ''} - {node.nombreEjecutivo || ''}
-                    </div>
-                    {Array.isArray(node.subordinados) && node.subordinados.length > 0 && (
-                        renderExecutiveTree(node.subordinados, level + 1)
-                    )}
-                </React.Fragment>
-            );
-        });
-    };
-
 
     return (
         <div style={{
@@ -130,7 +97,7 @@ const ModalValidadoresContent = () => {
                 display: "flex",
                 flexDirection: "column"
             }}>
-                <JerarquiaConR
+                <JerarquiaConCheckbox
                     executiveTree={executiveTree}
                     loadingJerarquia={loadingJerarquia}
                     errorJerarquia={errorJerarquia}
@@ -140,7 +107,7 @@ const ModalValidadoresContent = () => {
                     setSelectedRows={setSelectedRows}
                     setEditValues={setEditValues}
                     setSelectedExecutiveNode={setSelectedExecutiveNode}
-                    renderExecutiveTree={renderExecutiveTree}
+                    selectedExecutives={selectedExecutives}
                 />
             </div>
 
@@ -180,13 +147,18 @@ const ModalValidadoresContent = () => {
                     }}>
                         Cartera
                     </label>
-                    <input
-                        type="text"
-                        value={cartera}
-                        onChange={(e) => setCartera(e.target.value)}
+                    <div
                         className="font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1"
-                        style={{ fontSize: "14px", width: "100%" }}
-                    />
+                        style={{ 
+                            fontSize: "14px", 
+                            width: "100%",
+                            cursor: "default",
+                            userSelect: "none",
+                            pointerEvents: "none"
+                        }}
+                    >
+                        {getIdCartera()}     American Express
+                    </div>
                 </div>
 
                 {/* Producto */}

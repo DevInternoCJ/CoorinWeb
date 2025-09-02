@@ -7,6 +7,12 @@ const InformacionArrepentimientosDropdown = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // Obtener idCartera desde localStorage
+    const getIdCartera = () => {
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        return userData?.idCartera || userData?.idcartera || userData?.cartera || 1; // fallback a 1 si no existe
+    };
+
     const handleBuscar = async () => {
         setResultados(null);
         setError(null);
@@ -14,9 +20,13 @@ const InformacionArrepentimientosDropdown = () => {
             setError("Ingrese una cuenta para buscar.");
             return;
         }
+        
+        const idCartera = getIdCartera();
+        console.log('🔍 Usando idCartera:', idCartera);
+        
         setLoading(true);
         try {
-            const data = await getRegrest({ idCartera: 1, cuenta: valor });
+            const data = await getRegrest({ idCartera, cuenta: valor });
             if (Array.isArray(data) && data.length > 0) {
                 // Ordenar por fecha y hora descendente
                 const ordenados = [...data].sort((a, b) => {
@@ -28,7 +38,8 @@ const InformacionArrepentimientosDropdown = () => {
             } else {
                 setResultados([]);
             }
-        } catch (err) {
+        } catch (error) {
+            console.error('Error al buscar arrepentimientos:', error);
             setError("Verifica que la cuenta sea correcta.");
         } finally {
             setLoading(false);
@@ -39,7 +50,7 @@ const InformacionArrepentimientosDropdown = () => {
         <div style={{ width: '100%', maxWidth: 700, margin: '0 auto', padding: '1.5rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', overflow: 'hidden' }}>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 18, width: '100%' }}>
                 <span className="modal-span-2">Cartera</span>
-                <span style={{ fontWeight: 600 }}>1</span>
+                <span style={{ fontWeight: 600 }}>{getIdCartera()}</span>
             </div>
             <div style={{ display: 'flex', width: '100%', gap: 8, marginBottom: 18, justifyContent: 'center' }}>
                 <input
