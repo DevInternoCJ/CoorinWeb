@@ -69,7 +69,8 @@ export const loginUser = async (userData) => {
         idEjecutivo: response.data.ejecutivo.idEjecutivo,
         usuario: response.data.ejecutivo.Usuario,
         nombre: response.data.ejecutivo.NombreEjecutivo,
-        dias: response.data.ejecutivo.Días
+        dias: response.data.ejecutivo.Días,
+        Jerarquía: response.data.ejecutivo.Jerarquía
       }));
     } else {
       console.warn('⚠️ No se recibió token en la respuesta');
@@ -86,7 +87,6 @@ export const loginUser = async (userData) => {
     throw error;
   }
 };
-
 
 //(userData, idEjecutivo)
 export const ValidatePassword = async () => {
@@ -276,6 +276,42 @@ export const GetVerifyProduct = async (servidor, idProducto) => {
     return response.data;
   } catch (error) {
      console.error('❌ Error al verificar producto:', error);
+    // Manejo específico de errores de autenticación
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    // Mostrar más detalles del error
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+export const SaveScreenFields = async (servidor, data) => {
+  try {
+    // Verificar que el token existe antes de proceder
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('📤 Enviando a /CamposPantalla/guardar-campos-pantalla:', data);
+    console.log('🔑 Token disponible:', token);
+    // ✅ DEJA QUE EL INTERCEPTOR AÑADA EL TOKEN AUTOMÁTICAMENTE
+    // NO añadas headers manualmente - el interceptor ya lo hace
+    const response = await api.post(`/CamposPantalla/guardar-campos-pantalla/${servidor}`,data);
+    console.log('📥 Respuesta de /CamposPantalla/guardar-campos-pantalla', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error al guardar campos pantalla', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('⚠️ Error 401 - Token inválido o expirado');

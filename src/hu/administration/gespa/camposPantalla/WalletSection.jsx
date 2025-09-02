@@ -8,14 +8,19 @@ const PRODUCT_OPTIONS = [
   { label: "Amex", value: 1 },
 ];
 
-// ...otros imports y código...
-const WalletSection = ({ selectedProduct, setSelectedProduct, verifyResult, setVerifyResult, loading, setLoading }) => {
+const WalletSection = ({
+  selectedProduct,
+  setSelectedProduct,
+  verifyResult,
+  setVerifyResult,
+  loading,
+  setLoading,
+}) => {
   const servidor = "Cronoss";
 
   useEffect(() => {
-    // Solo llama si hay producto seleccionado
-     console.log("selectedProduct:", selectedProduct);
-  if (!selectedProduct || selectedProduct.value !== 1) return;
+    console.log("selectedProduct:", selectedProduct);
+    if (!selectedProduct || selectedProduct.value !== 1) return;
     const fetchVerifyProduct = async () => {
       setLoading(true);
       try {
@@ -52,16 +57,22 @@ const WalletSection = ({ selectedProduct, setSelectedProduct, verifyResult, setV
             Producto
           </label>
           <CustomSelect
-  options={PRODUCT_OPTIONS.map(opt => opt.label)}
-  defaultValue={null}
-  onChange={label => {
-    const found = PRODUCT_OPTIONS.find(opt => opt.label === label);
-    setSelectedProduct(found ? { ...found } : null);
-  }}
-/>
-          {loading && <p className="text-xs text-gray-400 mt-1">Verificando producto...</p>}
+            options={PRODUCT_OPTIONS.map((opt) => opt.label)}
+            defaultValue={null}
+            onChange={(label) => {
+              const found = PRODUCT_OPTIONS.find((opt) => opt.label === label);
+              setSelectedProduct(found ? { ...found } : null);
+            }}
+          />
+          {loading && (
+            <p className="text-xs text-gray-400 mt-1">
+              Verificando producto...
+            </p>
+          )}
           {verifyResult && (
-            <p className="text-xs text-green-600 mt-1">Producto verificado correctamente.</p>
+            <p className="text-xs text-green-600 mt-1">
+              Producto verificado correctamente.
+            </p>
           )}
         </div>
       </div>
