@@ -48,12 +48,12 @@ const ModalMetasEjecutivos = ({ onClose }) => {
                     padding: "1.5rem",
                     maxWidth: "80vw",
                     maxHeight: "90vh",
-                    overflow: "auto",
+                    overflow: "hidden",
                     boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
                     transform: bounce ? "scale(1.02)" : "scale(1)",
                     transition: "transform 0.2s ease-out",
                 }}
-                className={`scrollbar-gray${shakeAnimation ? " animate-shake-modal" : ""}`}
+                className={shakeAnimation ? " animate-shake-modal" : ""}
             >
                 <div className="modal-xl-container" style={{ maxWidth: "70vw", overflowX: "hidden" }}>
                     <ModalMetasHeader onClose={onClose} />
@@ -106,6 +106,16 @@ const ModalMetasEjecutivos = ({ onClose }) => {
                         }
                         .modal-scroll-gray::-webkit-scrollbar-thumb:hover {
                             background: #888;
+                        }
+                        /* Estilo para filas con checkbox activo */
+                        .modal-table tr.row-selected {
+                            background: #9dc5bc !important;
+                        }
+                        .modal-table tr.row-selected:hover {
+                            background: #8bb5b0 !important;
+                        }
+                        .modal-table tr.row-selected td {
+                            color: #2b463c !important;
                         }
                     `}</style>
                 </div>

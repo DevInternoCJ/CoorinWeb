@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 
 const JerarquiaConR = ({
     executiveTree,
@@ -17,8 +17,26 @@ const JerarquiaConR = ({
     const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
     const nombreSesion = userData?.nombre || userData?.nombreEjecutivo || userData?.ejecutivo || '';
     const usuarioSesion = userData?.usuario || '';
+    
+    // Ref para el contenedor de la ramificación
+    const ramificacionRef = useRef(null);
+
+    // Función para hacer scroll hacia arriba
+    const scrollToTop = () => {
+        if (ramificacionRef.current) {
+            ramificacionRef.current.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+    };
+
     return (
-        <div className="productividad-branch" style={{ overflowX: 'auto', overflowY: 'auto', height: '56vh', width: '18rem', background: '#ffffff', borderRadius: 8, border: '1px solid #e0e0e0', padding: 8 }}>
+        <div 
+            ref={ramificacionRef}
+            className="productividad-branch" 
+            style={{ overflowX: 'auto', overflowY: 'auto', height: '56vh', width: '18rem', background: '#ffffff', borderRadius: 8, border: '1px solid #e0e0e0', padding: 8 }}
+        >
             {/* Usuario y Ejecutivo principal */}
             {idEjecutivoSesion && (
                 <div
@@ -32,6 +50,11 @@ const JerarquiaConR = ({
                         setSelectedRows([]); // Limpiar selección de filas
                         setEditValues({}); // Limpiar edición
                         setSelectedExecutiveNode(Number(idEjecutivoSesion)); // Iluminar el nodo raíz
+                        
+                        // Hacer autoscroll hacia arriba
+                        setTimeout(() => {
+                            scrollToTop();
+                        }, 100);
                     }}
                 >
                     {usuarioSesion} - {nombreSesion}
