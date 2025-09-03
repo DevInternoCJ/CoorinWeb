@@ -5,8 +5,10 @@ import PASSWORD_REQUIREMENTS from "./Validations";
 import ButtonLogin from "../ButtonLogin";
 import EyeClose from "../../../assets/eye-close.svg";
 import { UpdatePassword } from "../../../services/LokiServices";
+import { useUserStore } from "../../../contextGlobal/userStore";
 
 const ChangePassword = ({ onClose }) => {
+  const user = useUserStore((state) => state.user);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -26,12 +28,11 @@ const ChangePassword = ({ onClose }) => {
   });
 
   // Obtener el username del localStorage al cargar el componente
-  useEffect(() => {
-    const storedUsername = localStorage.getItem("username");
-    if (storedUsername) {
-      setUsername(storedUsername);
+ useEffect(() => {
+    if (user && user.usuario) {
+      setUsername(user.usuario);
     }
-  }, []);
+  }, [user]);
 
   // Validación de contraseña
   const validatePassword = useCallback((pwd, confirmPwd) => {

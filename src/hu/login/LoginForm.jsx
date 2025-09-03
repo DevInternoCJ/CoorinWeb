@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { loginUser, ValidatePassword } from "../../services/LokiServices";
 import ButtonLogin from "./ButtonLogin";
 import { LoginUser, LoginKey } from "./LoginIcons";
+import { useUserStore } from "../../contextGlobal/userStore";
 
 // Constantes para mensajes de error
 const ERROR_MESSAGES = {
@@ -58,6 +59,8 @@ const InputField = ({
 );
 
 const LoginForm = ({ onLoginSuccess }) => {
+  const setUser = useUserStore((state) => state.setUser);
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -124,18 +127,29 @@ const LoginForm = ({ onLoginSuccess }) => {
 
   // Procesar login exitoso
   const processSuccessfulLogin = useCallback(
-    (response, passwordValidation, onLoginSuccess, navigate) => {
-      if (passwordValidation) {
-        toast.info("Por favor, actualiza tu contraseña.");
-        onLoginSuccess?.();
-      } else {
-        toast.success("¡Inicio de sesión exitoso!");
-        saveUserData(response);
-        navigate("/dashboardPage");
+  (response, passwordValidation, onLoginSuccess, navigate) => {
+    if (passwordValidation) {
+      toast.info("Por favor, actualiza tu contraseña.");
+      onLoginSuccess?.();
+    } else {
+      toast.success("¡Inicio de sesión exitoso!");
+      saveUserData(response);
+      // Guarda en zustand
+      if (response?.ejecutivo) {
+        setUser({
+          idEjecutivo: response.ejecutivo.idEjecutivo,
+          usuario: response.ejecutivo.Usuario,
+          nombre: response.ejecutivo.NombreEjecutivo,
+          dias: response.ejecutivo.Días,
+          Jerarquía: response.ejecutivo.Jerarquía,
+          token: response.ejecutivo.Token
+        });
       }
-    },
-    [saveUserData]
-  );
+      navigate("/dashboardPage");
+    }
+  },
+  [saveUserData, setUser, navigate, onLoginSuccess]
+);
 
   // Handler principal de submit
   const handleSubmit = async (e) => {

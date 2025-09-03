@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import LogoConjur from "../../../../assets/ConsorcioLetras_OLD.png";
+import LogoCoorin from "../../../../assets/logo_coorin_3.svg";
 import CustomSelect from "./SelectWallet";
 import { GetVerifyProduct } from "../../../../services/LokiServices";
 
@@ -36,9 +37,9 @@ const WalletSection = ({
   }, [selectedProduct, servidor, setLoading, setVerifyResult]);
 
   return (
-    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex justify-between items-center">
+    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex justify-evenly items-center">
       <div>
-        <img src={LogoConjur} alt="logo-conjur" className="h-14" />
+        <img src={LogoCoorin} alt="logo-conjur" className="h-20" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Select de Cartera */}

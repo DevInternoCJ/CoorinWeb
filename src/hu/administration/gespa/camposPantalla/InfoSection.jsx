@@ -5,7 +5,7 @@ const InfoSection = ({ infoData }) => {
     <div className="bg-background-secondary p-4 rounded-lg shadow-sm">
       <h3 className="text-lg text-white font-bold mb-3">Info</h3>
       <div className="overflow-x-auto">
-        <table className="table-border border border-jerarquia1 rounded-lg text-white w-full">
+        <table className="table-border border border-background-primary rounded-lg text-white w-full">
           <tbody>
             {infoData.map((row, rowIndex) => (
               <tr key={rowIndex} className="border-b border-jerarquia1 last:border-b-0">
@@ -14,7 +14,7 @@ const InfoSection = ({ infoData }) => {
                     <td className="py-2 px-2 font-semibold ">
                       {item.label}
                     </td>
-                    <td className={`py-2 px-2 text-jerarquia2 ${item.highlight ? "font-medium" : ""}`}>
+                    <td className={`py-2 px-2 text-green-500 ${item.highlight ? "font-medium" : ""}`}>
                       {item.value}
                     </td>
                   </React.Fragment>
