@@ -246,34 +246,35 @@ const ModalMetasContent = () => {
             console.log('⚠️ No se enviaron ids válidos a obetenerTablaMetas. selectedExecutives:', selectedExecutives);
         }
 
-        // Lógica para ocultar la info de un subordinado directo o de un subordinado de un subordinado directo ("nieto") sin subordinados, solo cuando se selecciona uno a uno
-        // Caso: solo hay un id seleccionado y ese nodo es subordinado directo o nieto directo y no tiene subordinados
-        let debeOcultar = false;
-        if (selectedExecutives.length === 1 && executiveTree.length > 0) {
-            const userData = JSON.parse(localStorage.getItem('userData'));
-            const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
-            const rootNode = executiveTree.find(n => n.idEjecutivo === Number(idEjecutivoSesion));
-            if (rootNode && Array.isArray(rootNode.subordinados)) {
-                // 1. Buscar si el seleccionado es subordinado directo de la raíz
-                const sub = rootNode.subordinados.find(s => s.idEjecutivo === Number(selectedExecutives[0]));
-                if (sub && (!Array.isArray(sub.subordinados) || sub.subordinados.length === 0)) {
-                    debeOcultar = true;
-                }
-                // 2. Buscar si el seleccionado es subordinado de un subordinado directo (nieto)
-                if (!debeOcultar) {
-                    for (const subDir of rootNode.subordinados) {
-                        if (Array.isArray(subDir.subordinados)) {
-                            const nieto = subDir.subordinados.find(n => n.idEjecutivo === Number(selectedExecutives[0]));
-                            if (nieto && (!Array.isArray(nieto.subordinados) || nieto.subordinados.length === 0)) {
-                                debeOcultar = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (!validIds.length || debeOcultar) {
+        // // Lógica para ocultar la info de un subordinado directo o de un subordinado de un subordinado directo ("nieto") sin subordinados, solo cuando se selecciona uno a uno
+        // // Caso: solo hay un id seleccionado y ese nodo es subordinado directo o nieto directo y no tiene subordinados
+        // let debeOcultar = false;
+        // if (selectedExecutives.length === 1 && executiveTree.length > 0) {
+        //     const userData = JSON.parse(localStorage.getItem('userData'));
+        //     const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+        //     const rootNode = executiveTree.find(n => n.idEjecutivo === Number(idEjecutivoSesion));
+        //     if (rootNode && Array.isArray(rootNode.subordinados)) {
+        //         // 1. Buscar si el seleccionado es subordinado directo de la raíz
+        //         const sub = rootNode.subordinados.find(s => s.idEjecutivo === Number(selectedExecutives[0]));
+        //         if (sub && (!Array.isArray(sub.subordinados) || sub.subordinados.length === 0)) {
+        //             debeOcultar = true;
+        //         }
+        //         // 2. Buscar si el seleccionado es subordinado de un subordinado directo (nieto)
+        //         if (!debeOcultar) {
+        //             for (const subDir of rootNode.subordinados) {
+        //                 if (Array.isArray(subDir.subordinados)) {
+        //                     const nieto = subDir.subordinados.find(n => n.idEjecutivo === Number(selectedExecutives[0]));
+        //                     if (nieto && (!Array.isArray(nieto.subordinados) || nieto.subordinados.length === 0)) {
+        //                         debeOcultar = true;
+        //                         break;
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        // if (!validIds.length || debeOcultar) {
+        if (!validIds.length) {
             setTablaMetas([]);
             return;
         }

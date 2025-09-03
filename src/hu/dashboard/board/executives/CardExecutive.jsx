@@ -138,7 +138,7 @@ const CardExecutive = () => {
       
       {/* Modal de Pantalla */}
       {showPantallaModal && (
-        <ModalPantallaEjecutivos onClose={() => setShowPantallaModal(false)} />
+        <LampshadeFields onClose={() => setShowPantallaModal(false)} />
       )}
     </>
   );
