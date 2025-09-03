@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import OptionFields from "./OptionFields";
 import { GetScreenFields, SaveScreenFields } from "../../../../services/LokiServices";
+import { useUserStore } from "../../../../contextGlobal/userStore";
 
 const TableEditFields = ({ idProducto }) => {
   const [editData, setEditData] = useState([]);
@@ -10,10 +11,9 @@ const TableEditFields = ({ idProducto }) => {
   const [saveResult, setSaveResult] = useState(null);
   const servidor = "Cronoss";
 
-const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-  const idEjecutivo = userData.idEjecutivo;
-  const Jerarquía = userData.Jerarquía;
-
+const user = useUserStore((state) => state.user);
+  const idEjecutivo = user?.idEjecutivo;
+  const Jerarquía = user?.Jerarquía;
   useEffect(() => {
     if (!idProducto || idProducto === 0) return;
     const fetchScreenFields = async () => {
