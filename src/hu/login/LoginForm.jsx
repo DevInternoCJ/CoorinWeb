@@ -60,7 +60,7 @@ const InputField = ({
 
 const LoginForm = ({ onLoginSuccess }) => {
   const setUser = useUserStore((state) => state.setUser);
-
+  
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -127,29 +127,18 @@ const LoginForm = ({ onLoginSuccess }) => {
 
   // Procesar login exitoso
   const processSuccessfulLogin = useCallback(
-  (response, passwordValidation, onLoginSuccess, navigate) => {
-    if (passwordValidation) {
-      toast.info("Por favor, actualiza tu contraseña.");
-      onLoginSuccess?.();
-    } else {
-      toast.success("¡Inicio de sesión exitoso!");
-      saveUserData(response);
-      // Guarda en zustand
-      if (response?.ejecutivo) {
-        setUser({
-          idEjecutivo: response.ejecutivo.idEjecutivo,
-          usuario: response.ejecutivo.Usuario,
-          nombre: response.ejecutivo.NombreEjecutivo,
-          dias: response.ejecutivo.Días,
-          Jerarquía: response.ejecutivo.Jerarquía,
-          token: response.ejecutivo.Token
-        });
+    (response, passwordValidation, onLoginSuccess, navigate) => {
+      if (passwordValidation) {
+        toast.info("Por favor, actualiza tu contraseña.");
+        onLoginSuccess?.();
+      } else {
+        toast.success("¡Inicio de sesión exitoso!");
+        saveUserData(response);
+        navigate("/dashboardPage");
       }
-      navigate("/dashboardPage");
-    }
-  },
-  [saveUserData, setUser, navigate, onLoginSuccess]
-);
+    },
+    [saveUserData]
+  );
 
   // Handler principal de submit
   const handleSubmit = async (e) => {
@@ -174,6 +163,16 @@ const LoginForm = ({ onLoginSuccess }) => {
       console.log("Respuesta de inicio de sesión exitosa:", response);
       const idEjecutivo = extractIdEjecutivo(response);
       localStorage.setItem("username", formData.username);
+       if (response?.ejecutivo) {
+        setUser({
+          idEjecutivo: response.ejecutivo.idEjecutivo,
+          usuario: response.ejecutivo.Usuario,
+          nombre: response.ejecutivo.NombreEjecutivo,
+          dias: response.ejecutivo.Días,
+          Jerarquía: response.ejecutivo.Jerarquía,
+          token: response.ejecutivo.Token
+        });
+      }
       try {
         const passwordValidation = await ValidatePassword(
           { contrasenia: formData.password, servidor: "Cronoss" },

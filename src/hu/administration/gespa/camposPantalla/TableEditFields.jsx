@@ -12,6 +12,7 @@ const TableEditFields = ({ idProducto }) => {
   const servidor = "Cronoss";
 
 const user = useUserStore((state) => state.user);
+  console.log("Datos de usuario en el store:", user);
   const idEjecutivo = user?.idEjecutivo;
   const Jerarquía = user?.Jerarquía;
   useEffect(() => {
