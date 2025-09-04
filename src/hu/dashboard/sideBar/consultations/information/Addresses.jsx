@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const InformacionDomiciliosDropdown = () => {
+const Addresses = () => {
     const [mensaje, setMensaje] = useState("");
 
     const handleGuardar = () => {
@@ -31,4 +31,4 @@ const InformacionDomiciliosDropdown = () => {
     );
 };
 
-export default InformacionDomiciliosDropdown;
+export default Addresses;

@@ -1,8 +1,8 @@
 
 import React, { useState } from "react";
-import { darkListV2 } from "../../../../../../services/LokiServices";
+import { darkListV2 } from "../../../../services/LokiServices";
 
-const InformacionListaNegraDropdown = () => {
+const DarkList = () => {
 
     const [tipo, setTipo] = useState("cuenta");
     const [valor, setValor] = useState("");
@@ -211,4 +211,4 @@ const InformacionListaNegraDropdown = () => {
     );
 }
 
-export default InformacionListaNegraDropdown;
+export default DarkList;

@@ -83,7 +83,7 @@ const dataEjemplo = [
     }
 ];
 
-const InformacionPagosReportDropdown = () => {
+const ReportingPayments = () => {
     const [mostrarTabla, setMostrarTabla] = useState(false);
 
     return (
@@ -149,4 +149,4 @@ const InformacionPagosReportDropdown = () => {
     );
 };
 
-export default InformacionPagosReportDropdown;
+export default ReportingPayments;

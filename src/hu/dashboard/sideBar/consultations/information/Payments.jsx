@@ -1,6 +1,6 @@
 import React from "react";
 
-const InformacionPagoDropdown = () => (
+const Payments = () => (
     <div style={{ maxWidth: 340, margin: '0 auto', padding: '1.5rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{ width: '100%', marginBottom: '1.2rem' }}>
             <div className="modal-span-2" style={{ marginBottom: 8 }}>Cartera <span style={{ fontWeight: 600 }}>American Express</span></div>
@@ -32,4 +32,4 @@ const InformacionPagoDropdown = () => (
     </div>
 );
 
-export default InformacionPagoDropdown;
+export default Payments;

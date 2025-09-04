@@ -50,7 +50,7 @@ const dataSidebar = {
               icon: "UserGroupIcon",
               subMenus2: [
                 { id: "1BBB", title: "Pagos", icon: "EnvelopeIcon" },
-                { id: "2BBB", title: "Pagos repostados", icon: "BookOpenIcon" },
+                { id: "2BBB", title: "Pagos reportados", icon: "BookOpenIcon" },
                 { id: "3BBB", title: "Datos Erroneos", icon: "BookOpenIcon" },
                 { id: "4BBB", title: "Domicilios", icon: "BookOpenIcon" },
                 { id: "5BBB", title: "Correos", icon: "BookOpenIcon" },

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const InformacionErroneosDropdown = () => {
+const Wrongs = () => {
     const [buscado, setBuscado] = useState(false);
 
     return (
@@ -36,4 +36,4 @@ const InformacionErroneosDropdown = () => {
     );
 };
 
-export default InformacionErroneosDropdown;
+export default Wrongs;
