@@ -1,7 +1,6 @@
 import React from "react";
-import LogoCoorin from "../../../../assets/logo_coorin_3.svg";
 
-const ModalHeader = ({ onClose }) => {
+const ModalHeader = ({ onClose, title}) => {
   return (
     <div className="p-3 flex justify-between items-center">
       <div className="flex items-center gap-2 text-jerarquia3">
@@ -20,7 +19,7 @@ const ModalHeader = ({ onClose }) => {
           />
         </svg>
         <h2 className="text-xl font-bold text-jerarquia3">
-          Campos Pantalla - Coorin
+          {title}
         </h2>
       </div>
       <button

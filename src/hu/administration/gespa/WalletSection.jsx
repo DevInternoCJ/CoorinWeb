@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import LogoConjur from "../../../../assets/ConsorcioLetras_OLD.png";
-import LogoCoorin from "../../../../assets/logo_coorin_3.svg";
-import CustomSelect from "./SelectWallet";
-import { GetVerifyProduct } from "../../../../services/LokiServices";
+import LogoConjur from "../../../assets/ConsorcioLetras_OLD.png";
+import LogoCoorin from "../../../assets/logo_coorin_3.svg";
+import CustomSelect from "./camposPantalla/SelectWallet";
+import { GetVerifyProduct } from "../../../services/LokiServices";
 
 const PRODUCT_OPTIONS = [
   { label: "Producto", value: 0 },
