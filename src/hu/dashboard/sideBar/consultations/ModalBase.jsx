@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 import DarkList from "./DarkList";
 import Regrest from "./Regrest";
 import Payments from "./information/Payments";
@@ -12,6 +12,25 @@ import Comments from "./information/Comments";
 import VGP from "./information/VGP";
 
 const ModalBase = ({ onClose, selectedOption = "Lista Negra" }) => {
+    const [bounce, setBounce] = useState(false);
+    const modalRef = useRef(null);
+
+    // Efecto para manejar la tecla Escape
+    useEffect(() => {
+        const handler = (e) => {
+            if (e.key === "Escape") {
+                setBounce(true);
+                setTimeout(() => setBounce(false), 500);
+            }
+        };
+        window.addEventListener("keydown", handler);
+        return () => window.removeEventListener("keydown", handler);
+    }, []);
+
+    const handleBackdropClick = () => {
+        setBounce(true);
+        setTimeout(() => setBounce(false), 500);
+    };
     // Mapeo de componentes para cada opción del sidebar
     const componentsMap = {
         "Lista Negra": <DarkList />,
@@ -29,14 +48,20 @@ const ModalBase = ({ onClose, selectedOption = "Lista Negra" }) => {
 
     return (
         <div className="modal-blur-bg">
-            <div className="modal-content modal-xl-container" style={{
-                maxWidth: "920px",
-                minWidth: "690px",
-                height: "633px",
-                display: "flex",
-                flexDirection: "column",
-                position: "relative"
-            }}>
+            <div className="modal-overlay" onClick={handleBackdropClick} />
+            <div
+                ref={modalRef}
+                className={`modal-content modal-xl-container${bounce ? " animate-bounce-modal" : ""}`}
+                onClick={e => e.stopPropagation()}
+                style={{
+                    maxWidth: "920px",
+                    minWidth: "690px",
+                    height: "633px",
+                    display: "flex",
+                    flexDirection: "column",
+                    position: "relative"
+                }}
+            >
                 {/* Header simplificado sin dropdown */}
                 <div style={{
                     display: "flex",
@@ -77,6 +102,19 @@ const ModalBase = ({ onClose, selectedOption = "Lista Negra" }) => {
                     )}
                 </div>
             </div>
+            <style>{`
+                @keyframes bounce-modal {
+                    0% { transform: scale(1); }
+                    20% { transform: scale(1.05, 0.95); }
+                    40% { transform: scale(0.95, 1.05); }
+                    60% { transform: scale(1.03, 0.97); }
+                    80% { transform: scale(0.97, 1.03); }
+                    100% { transform: scale(1); }
+                }
+                .animate-bounce-modal {
+                    animation: bounce-modal 0.5s;
+                }
+            `}</style>
         </div>
     );
 };
