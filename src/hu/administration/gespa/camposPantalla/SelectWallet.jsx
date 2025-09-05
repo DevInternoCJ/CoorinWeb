@@ -1,6 +1,6 @@
 import React from "react";
 
-const CustomSelect = ({ options, defaultValue, className = "", onChange }) => (
+const SelectWallet = ({ options, defaultValue, className = "", onChange }) => (
   <div className="relative">
     <select
       defaultValue={defaultValue}
@@ -31,4 +31,4 @@ const CustomSelect = ({ options, defaultValue, className = "", onChange }) => (
   </div>
 );
 
-export default CustomSelect;
+export default SelectWallet;

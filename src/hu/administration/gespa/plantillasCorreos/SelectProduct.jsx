@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import LogoCoorin from "../../../../assets/logo_coorin_3.svg";
-import CustomSelect from "./SelectWallet";
+import SelectWallet from "./SelectWallet";
 import { GetVerifyProduct } from "../../../../services/LokiServices";
 
 const PRODUCT_OPTIONS = [
@@ -46,7 +46,7 @@ const WalletSection = ({
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Cartera
           </label>
-          <CustomSelect
+          <SelectWallet
             options={["American Express"]}
             defaultValue="American Express"
           />
@@ -56,7 +56,7 @@ const WalletSection = ({
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Producto
           </label>
-          <CustomSelect
+          <SelectWallet
             options={PRODUCT_OPTIONS.map((opt) => opt.label)}
             defaultValue={null}
             onChange={(label) => {
