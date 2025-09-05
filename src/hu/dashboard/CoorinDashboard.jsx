@@ -4,16 +4,21 @@ import { CoorinSidebar } from "./sideBar/CoorinSidebar";
 import GridConsultations from "./board/consultations/GridConsultations";
 import Menu from "../../assets/menu.svg";
 import TablaSesiones from "./board/consultations/TablaSesiones";
+import PlantillasCorreoModal from "../administration/gespa/plantillasCorreos/EmailTemplates";
 import RamificacionSesiones from "./board/consultations/RamificacionSesiones";
-
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedExecutiveId, setSelectedExecutiveId] = useState(null);
   const sidebarRef = useRef(null);
   const buttonRef = useRef(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const handleSidebarToggle = () => setSidebarOpen((prev) => !prev);
-
+const handlePlantillasCorreoClick = () => {
+    setModalOpen(true);
+    setSidebarOpen(false); // Opcional: cerrar sidebar al abrir modal
+  };
+  const handleCloseModal = () => setModalOpen(false);
   // Efecto para detectar clics fuera del sidebar
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -39,7 +44,12 @@ export default function CoorinDashboard() {
   return (
     <>
       <div ref={sidebarRef}>
-        <CoorinSidebar open={sidebarOpen} />
+        <CoorinSidebar open={sidebarOpen} 
+        onPlantillasCorreoClick={handlePlantillasCorreoClick} />
+         <PlantillasCorreoModal 
+        isOpen={modalOpen} 
+        onClose={handleCloseModal} 
+      />
       </div>
       <div className="relative bg-background-dashboard py-14 sm:py-2 overflow-hidden h-screen">
         {/* Botón de menú con z-index alto para que siempre esté visible */}
