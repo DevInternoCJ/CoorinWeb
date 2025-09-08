@@ -1,6 +1,6 @@
 import React from "react";
 
-const InformacionOfrecimientosDropdown = () => {
+const Searches = () => {
     return (
         <div style={{ width: 340, margin: '0 auto', padding: '1.5rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ width: '100%', marginBottom: '1.2rem' }}>
@@ -9,7 +9,7 @@ const InformacionOfrecimientosDropdown = () => {
                     <span className="modal-span-2" style={{ minWidth: 80 }}>Consulta</span>
                     <select className="modal-dropdown-select" style={{ marginLeft: 8, width: 140 }} defaultValue="">
                         <option value="">- Todas -</option>
-                        <option value="ofrecimientos">Ofrecimientos</option>
+                        <option value="busqueda">Búsqueda</option>
                     </select>
                 </div>
                 <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
@@ -27,10 +27,10 @@ const InformacionOfrecimientosDropdown = () => {
                 </button>
             </div>
             <div className="modal-span-2" style={{ fontSize: 15, marginTop: 8, textAlign: 'center', color: '#8a9a8a' }}>
-                Elija la consulta de las cuentas que desee los pagos y el periodo. de los ofrecimientos.
+                Elija la consulta de las cuentas que desee el reporte de busqueda de datos
             </div>
         </div>
     );
 };
 
-export default InformacionOfrecimientosDropdown;
+export default Searches;

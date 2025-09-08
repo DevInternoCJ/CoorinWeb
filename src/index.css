@@ -211,6 +211,7 @@ label {
   border-radius: 50%;
   padding: 0.25rem 0.5rem;
   border: none;
+  cursor: pointer;
   transition: color 0.2s, background 0.2s;
 }
 .modal-btn-close:hover {

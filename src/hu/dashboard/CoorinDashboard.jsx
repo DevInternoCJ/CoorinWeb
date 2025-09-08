@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import GridExecutives from "./board/executives/GridExecutives";
 import { CoorinSidebar } from "./sideBar/CoorinSidebar";
 import GridConsultations from "./board/consultations/GridConsultations";
-import TablaSesiones from "./board/consultations/TablaSesiones";
+import TablaSesiones from "../dashboard/board/sessions/TablaSesiones";
 import PlantillasCorreoModal from "../administration/gespa/plantillasCorreos/EmailTemplates";
-import RamificacionSesiones from "./board/consultations/RamificacionSesiones";
+import RamificacionSesiones from "../dashboard/board/sessions/RamificacionSesiones";
+import ModalBase from "./sideBar/consultations/ModalBase";
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedExecutiveId, setSelectedExecutiveId] = useState(null);
@@ -12,6 +13,9 @@ export default function CoorinDashboard() {
   const buttonRef = useRef(null);
   const [modalOpen, setModalOpen] = useState(false);
 
+  const [modalSidebarOpen, setModalSidebarOpen] = useState(false);
+  const [selectedSidebarOption, setSelectedSidebarOption] = useState("");
+  
   const handleSidebarToggle = () => setSidebarOpen((prev) => !prev);
 const handlePlantillasCorreoClick = () => {
     setModalOpen(true);
@@ -40,10 +44,41 @@ const handlePlantillasCorreoClick = () => {
     };
   }, [sidebarOpen]);
 
+  // Función para manejar clicks del sidebar
+  const handleSidebarMenuClick = (menuId, menuTitle) => {
+    // Cerrar sidebar en móviles después del click
+    setSidebarOpen(false);
+    
+    // Mapeo de IDs del sidebar a opciones del modal
+    const sidebarOptionsMap = {
+      "2BB": "Lista Negra",        // Lista Negra
+      "3BB": "Arrepentimientos",   // Arrepentimientos
+      "1BBB": "Pagos",             // Pagos
+      "2BBB": "Pagos reportados",  // Pagos reportados
+      "3BBB": "Datos Erroneos",    // Datos Erróneos
+      "4BBB": "Domicilios",        // Domicilios
+      "5BBB": "Correos",           // Correos
+      "6BBB": "Búsquedas",         // Búsquedas
+      "7BBB": "Ofrecimientos",     // Ofrecimientos
+      "8BBB": "Comentarios",       // Comentarios
+      "9BBB": "VGP"                // VGP
+    };
+
+    // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
+    if (sidebarOptionsMap[menuId]) {
+      setSelectedSidebarOption(sidebarOptionsMap[menuId]);
+      setModalSidebarOpen(true);
+    }
+    // Para otros elementos del menú
+    else {
+      console.log(`Click en menú: ${menuTitle} (ID: ${menuId})`);
+    }
+  };
+
   return (
     <>
       <div ref={sidebarRef}>
-        <CoorinSidebar open={sidebarOpen} 
+        <CoorinSidebar open={sidebarOpen} onMenuClick={handleSidebarMenuClick} 
         onPlantillasCorreoClick={handlePlantillasCorreoClick} />
          <PlantillasCorreoModal 
         isOpen={modalOpen} 
@@ -117,6 +152,14 @@ const handlePlantillasCorreoClick = () => {
           </div>
         </div>
       </div>
+    
+    {/* Modal Base para Sidebar */}
+    {modalSidebarOpen && (
+      <ModalBase 
+        onClose={() => setModalSidebarOpen(false)} 
+        selectedOption={selectedSidebarOption}
+      />
+    )}
     </>
   );
 }

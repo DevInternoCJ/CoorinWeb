@@ -246,34 +246,35 @@ const ModalMetasContent = () => {
             console.log('⚠️ No se enviaron ids válidos a obetenerTablaMetas. selectedExecutives:', selectedExecutives);
         }
 
-        // Lógica para ocultar la info de un subordinado directo o de un subordinado de un subordinado directo ("nieto") sin subordinados, solo cuando se selecciona uno a uno
-        // Caso: solo hay un id seleccionado y ese nodo es subordinado directo o nieto directo y no tiene subordinados
-        let debeOcultar = false;
-        if (selectedExecutives.length === 1 && executiveTree.length > 0) {
-            const userData = JSON.parse(localStorage.getItem('userData'));
-            const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
-            const rootNode = executiveTree.find(n => n.idEjecutivo === Number(idEjecutivoSesion));
-            if (rootNode && Array.isArray(rootNode.subordinados)) {
-                // 1. Buscar si el seleccionado es subordinado directo de la raíz
-                const sub = rootNode.subordinados.find(s => s.idEjecutivo === Number(selectedExecutives[0]));
-                if (sub && (!Array.isArray(sub.subordinados) || sub.subordinados.length === 0)) {
-                    debeOcultar = true;
-                }
-                // 2. Buscar si el seleccionado es subordinado de un subordinado directo (nieto)
-                if (!debeOcultar) {
-                    for (const subDir of rootNode.subordinados) {
-                        if (Array.isArray(subDir.subordinados)) {
-                            const nieto = subDir.subordinados.find(n => n.idEjecutivo === Number(selectedExecutives[0]));
-                            if (nieto && (!Array.isArray(nieto.subordinados) || nieto.subordinados.length === 0)) {
-                                debeOcultar = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (!validIds.length || debeOcultar) {
+        // // Lógica para ocultar la info de un subordinado directo o de un subordinado de un subordinado directo ("nieto") sin subordinados, solo cuando se selecciona uno a uno
+        // // Caso: solo hay un id seleccionado y ese nodo es subordinado directo o nieto directo y no tiene subordinados
+        // let debeOcultar = false;
+        // if (selectedExecutives.length === 1 && executiveTree.length > 0) {
+        //     const userData = JSON.parse(localStorage.getItem('userData'));
+        //     const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+        //     const rootNode = executiveTree.find(n => n.idEjecutivo === Number(idEjecutivoSesion));
+        //     if (rootNode && Array.isArray(rootNode.subordinados)) {
+        //         // 1. Buscar si el seleccionado es subordinado directo de la raíz
+        //         const sub = rootNode.subordinados.find(s => s.idEjecutivo === Number(selectedExecutives[0]));
+        //         if (sub && (!Array.isArray(sub.subordinados) || sub.subordinados.length === 0)) {
+        //             debeOcultar = true;
+        //         }
+        //         // 2. Buscar si el seleccionado es subordinado de un subordinado directo (nieto)
+        //         if (!debeOcultar) {
+        //             for (const subDir of rootNode.subordinados) {
+        //                 if (Array.isArray(subDir.subordinados)) {
+        //                     const nieto = subDir.subordinados.find(n => n.idEjecutivo === Number(selectedExecutives[0]));
+        //                     if (nieto && (!Array.isArray(nieto.subordinados) || nieto.subordinados.length === 0)) {
+        //                         debeOcultar = true;
+        //                         break;
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        // if (!validIds.length || debeOcultar) {
+        if (!validIds.length) {
             setTablaMetas([]);
             return;
         }
@@ -706,12 +707,18 @@ const ModalMetasContent = () => {
                                         // Normalizar valores para que siempre se pinte algo aunque vengan null/undefined
                                         const safe = (val, def = '') => val !== null && val !== undefined ? val : def;
                                         return (
-                                            <tr key={rowKey}>
+                                            <tr 
+                                                key={rowKey} 
+                                                className={selectedRows.includes(rowKey) ? 'row-selected' : ''} 
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => handleRowCheckbox(rowKey)}
+                                            >
                                                 <td>
                                                     <input
                                                         type="checkbox"
                                                         checked={selectedRows.includes(rowKey)}
                                                         onChange={() => handleRowCheckbox(rowKey)}
+                                                        onClick={(e) => e.stopPropagation()}
                                                     />
                                                 </td>
                                                 <td style={{ minWidth: 180, maxWidth: 260, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={safe(row.ejecutivo) || safe(row.nombreEjecutivo) || safe(row.nombre)}>
@@ -724,6 +731,7 @@ const ModalMetasContent = () => {
                                                         min={0}
                                                         value={safe(editValues[rowKey]?.cuentas, safe(row.cuentas, safe(row.totalCuentas, 0)))}
                                                         onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], cuentas: e.target.value } }))}
+                                                        onClick={(e) => e.stopPropagation()}
                                                         style={{ width: 60 }}
                                                         disabled={!selectedRows.includes(rowKey)}
                                                     />
@@ -734,6 +742,7 @@ const ModalMetasContent = () => {
                                                         min={0}
                                                         value={safe(editValues[rowKey]?.titulares, safe(row.titulares, safe(row.totalTitulares, 0)))}
                                                         onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], titulares: e.target.value } }))}
+                                                        onClick={(e) => e.stopPropagation()}
                                                         style={{ width: 60 }}
                                                         disabled={!selectedRows.includes(rowKey)}
                                                     />
@@ -744,6 +753,7 @@ const ModalMetasContent = () => {
                                                         min={0}
                                                         value={safe(editValues[rowKey]?.negociaciones, safe(row.negociaciones, safe(row.totalNegociaciones, 0)))}
                                                         onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], negociaciones: e.target.value } }))}
+                                                        onClick={(e) => e.stopPropagation()}
                                                         style={{ width: 60 }}
                                                         disabled={!selectedRows.includes(rowKey)}
                                                     />
@@ -754,6 +764,7 @@ const ModalMetasContent = () => {
                                                         min={0}
                                                         value={safe(editValues[rowKey]?.cumplimientos, safe(row.cumplimientos, safe(row.totalCumplimientos, 0)))}
                                                         onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], cumplimientos: e.target.value } }))}
+                                                        onClick={(e) => e.stopPropagation()}
                                                         style={{ width: 60 }}
                                                         disabled={!selectedRows.includes(rowKey)}
                                                     />
@@ -765,6 +776,7 @@ const ModalMetasContent = () => {
                                                         step={0.01}
                                                         value={safe(editValues[rowKey]?.montoCumplido, safe(editValues[rowKey]?.monto_cumplido, safe(row.montoCumplido, safe(row.monto_cumplido, 0))))}
                                                         onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], montoCumplido: e.target.value } }))}
+                                                        onClick={(e) => e.stopPropagation()}
                                                         style={{ width: 80 }}
                                                         disabled={!selectedRows.includes(rowKey)}
                                                     />
@@ -776,6 +788,7 @@ const ModalMetasContent = () => {
                                                         step={0.01}
                                                         value={safe(editValues[rowKey]?.saldoSolucionado, safe(editValues[rowKey]?.saldo_solucionado, safe(row.saldoSolucionado, safe(row.saldo_solucionado, 0))))}
                                                         onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], saldoSolucionado: e.target.value } }))}
+                                                        onClick={(e) => e.stopPropagation()}
                                                         style={{ width: 80 }}
                                                         disabled={!selectedRows.includes(rowKey)}
                                                     />
@@ -785,6 +798,7 @@ const ModalMetasContent = () => {
                                                         type="text"
                                                         value={safe(editValues[rowKey]?.segmento, safe(row.segmento, safe(row.nombreSegmento, '')))}
                                                         onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], segmento: e.target.value } }))}
+                                                        onClick={(e) => e.stopPropagation()}
                                                         style={{ width: 80 }}
                                                         disabled={!selectedRows.includes(rowKey)}
                                                     />
@@ -794,6 +808,7 @@ const ModalMetasContent = () => {
                                                         type="time"
                                                         value={editValues[rowKey]?.horaEntrada === null ? '' : safe(editValues[rowKey]?.horaEntrada, safe(row.horaEntrada, safe(row.hora_entrada, '')))}
                                                         onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], horaEntrada: e.target.value === '' ? null : e.target.value } }))}
+                                                        onClick={(e) => e.stopPropagation()}
                                                         style={{ width: 120, color: '#111' }}
                                                         disabled={!selectedRows.includes(rowKey)}
                                                     />
@@ -803,6 +818,7 @@ const ModalMetasContent = () => {
                                                         type="time"
                                                         value={editValues[rowKey]?.horaSalida === null ? '' : safe(editValues[rowKey]?.horaSalida, safe(row.horaSalida, safe(row.hora_salida, '')))}
                                                         onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], horaSalida: e.target.value === '' ? null : e.target.value } }))}
+                                                        onClick={(e) => e.stopPropagation()}
                                                         style={{ width: 120, color: '#111' }}
                                                         disabled={!selectedRows.includes(rowKey)}
                                                     />

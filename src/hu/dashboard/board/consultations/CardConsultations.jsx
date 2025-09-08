@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import DataDashConsul from "../../DataDashConsul";
 import { ExecutiveChart } from "../../DashboardIcons";
-import { IconCuentas, IconProductividad, IconGenerales, IconHistoricos, IconInformacion } from "./IconesConsultations";
+import { IconCuentas, IconProductividad, IconGenerales, IconHistoricos } from "./IconesConsultations";
 import ModalConsultaCuentas from "./counts/ModalConsultaCuentas";
 import ModalBaseCuentas from "./counts/ModalBaseCuentas";
 import ModalConsultaProductividad from "./Productivity/ModalConsultaProductividad";
@@ -10,14 +10,12 @@ import ModalConsultaGenerales from "./Generals/ModalConsultaGenerales";
 import ModalBaseGenerales from "./Generals/ModalBaseGenerales";
 import ModalConsultaHistoricos from "./Historical/ModalConsultaHistoricos";
 import ModalBaseHistoricos from "./Historical/ModalBaseHistoricos";
-import ModalInformacion from "./Information/ModalInformacion";
 
 const CardConsultations = () => {
     const [open, setOpen] = useState(false);
     const [openProductividad, setOpenProductividad] = useState(false);
     const [openGenerales, setOpenGenerales] = useState(false);
     const [openHistoricos, setOpenHistoricos] = useState(false);
-    const [openInformation, setOpenInformation] = useState(false);
 
     return (
         <>
@@ -125,37 +123,6 @@ const CardConsultations = () => {
             <ModalBaseHistoricos open={openHistoricos} onClose={() => setOpenHistoricos(false)}>
                 <ModalConsultaHistoricos onClose={() => setOpenHistoricos(false)} />
             </ModalBaseHistoricos>
-            {/* Tarjeta de Información al final */}
-            <div
-                className="card card-sm sm:max-w-sm rounded-xl p-1 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer"
-                style={{ backgroundColor: "var(--color-jerarquia3)" }}
-                tabIndex={0}
-                role="button"
-                onClick={() => setOpenInformation(true)}
-            >
-                {/* Máscara opaca al hacer hover */}
-                <div className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-15 transition-opacity duration-100 bg-black"></div>
-                <div className="card-header">
-                    <h5
-                        className="card-title font-weight-600"
-                        style={{ color: "#fff" }}
-                    >
-                        Informacio
-                    </h5>
-                </div>
-                <div className="card-body">
-                    <div className="flex justify-center">
-                        <IconInformacion className="size-8" style={{ color: "#fff" }} />
-                    </div>
-                </div>
-                <div className="card-footer text-center">
-                    <p className="text-base-content group-hover:text-black transition-colors duration-200">Abrir</p>
-                </div>
-            </div>
-            {/* Modal de Información */}
-            {openInformation && (
-                <ModalInformacion onClose={() => setOpenInformation(false)} />
-            )}
         </>
     );
 };

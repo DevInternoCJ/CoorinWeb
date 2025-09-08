@@ -1,6 +1,6 @@
 import React from "react";
 
-const InformacionComentariosDropdown = () => {
+const Comments = () => {
     return (
         <div style={{ width: 340, margin: '0 auto', padding: '1.5rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ width: '100%', marginBottom: '1.2rem' }}>
@@ -33,4 +33,4 @@ const InformacionComentariosDropdown = () => {
     );
 };
 
-export default InformacionComentariosDropdown;
+export default Comments;

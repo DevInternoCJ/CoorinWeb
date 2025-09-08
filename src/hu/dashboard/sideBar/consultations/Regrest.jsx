@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { getRegrest } from "../../../../../../services/LokiServices";
+import { getRegrest } from "../../../../services/LokiServices";
 
-const InformacionArrepentimientosDropdown = () => {
+const Regrest = () => {
     const [valor, setValor] = useState("");
     const [resultados, setResultados] = useState(null); // array de arrepentimientos
     const [loading, setLoading] = useState(false);
@@ -132,4 +132,4 @@ const InformacionArrepentimientosDropdown = () => {
     );
 };
 
-export default InformacionArrepentimientosDropdown;
+export default Regrest;

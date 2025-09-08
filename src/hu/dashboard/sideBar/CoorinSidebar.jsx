@@ -34,7 +34,7 @@ const iconMap = {
 import LogoCoorin7 from "../../../assets/CoorinGreen.svg";
 
 // Renderiza submenús anidados recursivamente (soporta subMenus2, subMenus3, etc.)
-const RenderSubMenus = ({ subMenus, parentId, onPlantillasCorreoClick }) => (
+const RenderSubMenus = ({ subMenus, parentId, onMenuClick, onPlantillasCorreoClick }) => (
   <ul
     id={parentId}
     className="collapse hidden w-auto space-y-0.5 overflow-hidden transition-[height] duration-300"
@@ -70,6 +70,7 @@ const RenderSubMenus = ({ subMenus, parentId, onPlantillasCorreoClick }) => (
                 subMenus={item[nextSubMenuKey]}
                 parentId={`submenu-${item.id}-collapse`}
                 onPlantillasCorreoClick={onPlantillasCorreoClick}
+                onMenuClick={onMenuClick}
               />
             </>
           ) : (
@@ -77,11 +78,14 @@ const RenderSubMenus = ({ subMenus, parentId, onPlantillasCorreoClick }) => (
               href="#" 
               className="menu-item"
               onClick={(e) => {
-                if (isPlantillasCorreo) {
-                  e.preventDefault();
+                 if (isPlantillasCorreo)
+                e.preventDefault();
+                if (onMenuClick) {
+                  onMenuClick(item.id, item.title);
                   onPlantillasCorreoClick();
                 }
-              }}>
+              }}
+            >
               {item.icon && iconMap[item.icon] && (
                 <span className="inline-flex mr-2 text-jerarquia3">
                   {React.createElement(iconMap[item.icon], {
@@ -98,7 +102,7 @@ const RenderSubMenus = ({ subMenus, parentId, onPlantillasCorreoClick }) => (
   </ul>
 );
 
-export const CoorinSidebar = ({ onPlantillasCorreoClick }) => {
+export const CoorinSidebar = ({ onMenuClick, onPlantillasCorreoClick }) => {
   return (
     <aside
       id="overlay-body-scrolling-with-backdrop"
@@ -160,6 +164,7 @@ export const CoorinSidebar = ({ onPlantillasCorreoClick }) => {
                       <RenderSubMenus
                         subMenus={menu.subMenus}
                         parentId={`menu-app-collapse-${indiceIdx}-${sectionIdx}-${menuIdx}`}
+                        onMenuClick={onMenuClick}
                         onPlantillasCorreoClick={onPlantillasCorreoClick}
                       />
                     </li>

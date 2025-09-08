@@ -148,7 +148,6 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                 </span>
                 Ramificación
             </h3>
-            <div className="flex-1 min-h-[120px] scrollbar-gray">
                 <JerarquiaConR
                     executiveTree={executiveTree}
                     loadingJerarquia={loadingJerarquia}
@@ -161,7 +160,6 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                     setSelectedExecutiveNode={setSelectedExecutiveNode}
                     renderExecutiveTree={renderExecutiveTree}
                 />
-            </div>
         </div>
     );
 };
