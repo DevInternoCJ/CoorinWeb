@@ -1,35 +1,94 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import GridExecutives from "./board/executives/GridExecutives";
 import { CoorinSidebar } from "./sideBar/CoorinSidebar";
 import GridConsultations from "./board/consultations/GridConsultations";
-import Menu from "../../assets/menu.svg";
 import TablaSesiones from "./board/consultations/TablaSesiones";
+import PlantillasCorreoModal from "../administration/gespa/plantillasCorreos/EmailTemplates";
 import RamificacionSesiones from "./board/consultations/RamificacionSesiones";
-
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedExecutiveId, setSelectedExecutiveId] = useState(null);
+  const sidebarRef = useRef(null);
+  const buttonRef = useRef(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
   const handleSidebarToggle = () => setSidebarOpen((prev) => !prev);
+const handlePlantillasCorreoClick = () => {
+    setModalOpen(true);
+    setSidebarOpen(false); // Opcional: cerrar sidebar al abrir modal
+  };
+  const handleCloseModal = () => setModalOpen(false);
+  // Efecto para detectar clics fuera del sidebar
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Si el sidebar está abierto y se hizo clic fuera del sidebar y del botón
+      if (sidebarOpen && 
+          sidebarRef.current && 
+          !sidebarRef.current.contains(event.target) &&
+          buttonRef.current &&
+          !buttonRef.current.contains(event.target)) {
+        setSidebarOpen(false);
+      }
+    };
+
+    // Agregar el event listener cuando el componente se monta
+    document.addEventListener("mousedown", handleClickOutside);
+    
+    // Limpiar el event listener cuando el componente se desmonta
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [sidebarOpen]);
 
   return (
     <>
-      <CoorinSidebar open={sidebarOpen} />
+      <div ref={sidebarRef}>
+        <CoorinSidebar open={sidebarOpen} 
+        onPlantillasCorreoClick={handlePlantillasCorreoClick} />
+         <PlantillasCorreoModal 
+        isOpen={modalOpen} 
+        onClose={handleCloseModal} 
+      />
+      </div>
       <div className="relative bg-background-dashboard py-14 sm:py-2 overflow-hidden h-screen">
-        <div className="mx-auto max-w-2xl px-2 lg:max-w-screen lg:px-8 relative">
-          <a
-            className=" flex gap-1 items-center my-2"
+        {/* Botón de menú con z-index alto para que siempre esté visible */}
+        <div className="fixed top-4 left-8 z-20">
+          <button
+            ref={buttonRef}
+            className=" p-1 border-1 border-jerarquia2 rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-jerarquia3 focus:ring-opacity-50 bg-background-dashboard shadow-md"
             aria-expanded={sidebarOpen}
             aria-controls="overlay-body-scrolling-with-backdrop"
             data-overlay="#overlay-body-scrolling-with-backdrop"
             onClick={handleSidebarToggle}
           >
-            <img
-              src={Menu}
-              alt="menu-principal"
-              className=" rounded-md cursor-pointer hover:shadow-lg hover:shadow-jerarquia2"
-            />
-          </a>
-          {/* Resto de tu código */}
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              strokeWidth={1.5} 
+              stroke="currentColor" 
+              className={`size-8 text-jerarquia3 transition-transform duration-300 ${sidebarOpen ? 'transform rotate-90' : ''}`}
+            >
+              {/* Líneas del menú hamburguesa - se ocultan cuando está abierto */}
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                className={`transition-all duration-300 ${sidebarOpen ? 'opacity-0' : 'opacity-100'}`}
+              />
+              
+              {/* Líneas para formar la X cuando está abierto */}
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                d="M6 18L18 6M6 6l12 12"
+                className={`transition-all duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}
+              />
+            </svg>
+          </button>
+        </div>
+        
+        <div className="mx-auto max-w-2xl px-2 lg:max-w-screen lg:px-8 relative pt-16">
           <span className="mx-auto mt-2 text-4xl font-semibold tracking-tight text-balance text-gray-950 sm:text-4xl">
             Ejecutivos
           </span>
@@ -52,12 +111,12 @@ export default function CoorinDashboard() {
             <div className="relative w-full">
               <RamificacionSesiones onExecutiveSelect={setSelectedExecutiveId} />
             </div>
-             <div className="relative w-full">
+            <div className="relative w-full">
               <TablaSesiones selectedExecutiveId={selectedExecutiveId} />
             </div>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 }

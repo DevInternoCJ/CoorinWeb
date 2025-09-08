@@ -386,11 +386,10 @@ label {
 }
 
 .input-floating-label {
-  background-color: var(--color-bgcolor1);
+  background-color: whitesmoke;
   color: gray;
   border-radius: 0.5rem;
   font-weight: 400;
-  border: 1px solid var(--color-jerarquia1);
   padding: 0.25rem 0.5rem;
   outline: none;
   transition: border 0.2s;

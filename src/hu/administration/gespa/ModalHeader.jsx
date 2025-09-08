@@ -1,12 +1,13 @@
 import React from "react";
-import LogoCoorin from "../../../../assets/logo_coorin_3.svg";
 
-const ModalHeader = ({ onClose }) => {
+const ModalHeader = ({ onClose, title, icon}) => {
   return (
     <div className="p-3 flex justify-between items-center">
-      <div className="flex items-center gap-2">
-        <img src={LogoCoorin} alt="Logo-coorin" className="h-8" />
-        <h2 className="text-xl font-bold text-jerarquia3">Campos Pantalla - Coorin</h2>
+      <div className="flex items-center gap-2 text-jerarquia3">
+        {icon}
+        <h2 className="text-xl font-bold text-jerarquia3">
+          {title}
+        </h2>
       </div>
       <button
         onClick={onClose}
