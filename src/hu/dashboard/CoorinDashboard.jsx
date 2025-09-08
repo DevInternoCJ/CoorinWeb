@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import GridExecutives from "./board/executives/GridExecutives";
 import { CoorinSidebar } from "./sideBar/CoorinSidebar";
 import GridConsultations from "./board/consultations/GridConsultations";
-import Menu from "../../assets/menu.svg";
 import TablaSesiones from "./board/consultations/TablaSesiones";
 import PlantillasCorreoModal from "../administration/gespa/plantillasCorreos/EmailTemplates";
 import RamificacionSesiones from "./board/consultations/RamificacionSesiones";
@@ -53,7 +52,7 @@ const handlePlantillasCorreoClick = () => {
       </div>
       <div className="relative bg-background-dashboard py-14 sm:py-2 overflow-hidden h-screen">
         {/* Botón de menú con z-index alto para que siempre esté visible */}
-        <div className="fixed top-4 left-8 z-50">
+        <div className="fixed top-4 left-8 z-20">
           <button
             ref={buttonRef}
             className=" p-1 border-1 border-jerarquia2 rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-jerarquia3 focus:ring-opacity-50 bg-background-dashboard shadow-md"

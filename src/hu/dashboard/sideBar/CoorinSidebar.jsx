@@ -31,7 +31,7 @@ const iconMap = {
   ShieldCheckIcon,
   // ...otros iconos si los necesitas
 };
-import LogoCoorin7 from "../../../assets/logo_coorin_7.svg";
+import LogoCoorin7 from "../../../assets/CoorinGreen.svg";
 
 // Renderiza submenús anidados recursivamente (soporta subMenus2, subMenus3, etc.)
 const RenderSubMenus = ({ subMenus, parentId, onPlantillasCorreoClick }) => (

@@ -6,11 +6,6 @@ import TableEditFields from "./TableEditFields";
 import GridLampsFields from "./GridLampsFields";
 import { IconScreens } from "../IconsTemplates";
 
-const PRODUCT_OPTIONS = [
-  { label: "Producto", value: 0 },
-  { label: "Amex", value: 1 },
-];
-
 const LampshadeFields = ({ isOpen, onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [verifyResult, setVerifyResult] = useState(null);
@@ -52,7 +47,7 @@ const LampshadeFields = ({ isOpen, onClose }) => {
 
   return (
     <div className=" modal-blur-bg fixed inset-0 bg-opacity-70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden border border-gray-300">
+      <div className="bg-white rounded-lg shadow-2xl max-w-6xl max-h-[90vh] overflow-hidden border border-gray-300">
         <ModalHeader icon={<IconScreens className="size-6" />} title="Campos Pantalla" onClose={onClose} />
         <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
           <WalletSection

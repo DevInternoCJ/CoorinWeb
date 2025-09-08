@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import LogoConjur from "../../../assets/ConsorcioLetras_OLD.png";
-import LogoCoorin from "../../../assets/logo_coorin_3.svg";
+import LogoCoorin from "../../../assets/logo_coorin_7.svg";
 import CustomSelect from "./camposPantalla/SelectWallet";
 import { GetVerifyProduct } from "../../../services/LokiServices";
 
@@ -44,7 +44,7 @@ const WalletSection = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Select de Cartera */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-jerarquia2 mb-1">
             Cartera
           </label>
           <CustomSelect
@@ -54,7 +54,7 @@ const WalletSection = ({
         </div>
         {/* Select de Producto */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-jerarquia2 mb-1">
             Producto
           </label>
           <CustomSelect
