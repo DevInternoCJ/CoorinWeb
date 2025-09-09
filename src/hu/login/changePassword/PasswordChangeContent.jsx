@@ -4,6 +4,7 @@ import { ExclamationKey } from "./PasswordIcons";
 import ButtonLogin from '../ButtonLogin'
 import { useNavigate } from 'react-router-dom'; // useNavigate
 
+
 const PasswordChangeContent = ({ onClose, onAccept, dias}) => {
   const navigate = useNavigate(); 
   const handleNoClick = () => {

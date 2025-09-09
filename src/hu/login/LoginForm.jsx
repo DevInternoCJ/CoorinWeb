@@ -163,7 +163,6 @@ const LoginForm = ({ onLoginSuccess }) => {
       console.log("Respuesta de inicio de sesión exitosa:", response);
       const idEjecutivo = extractIdEjecutivo(response);
       localStorage.setItem("username", formData.username);
-       if (response?.ejecutivo) {
         setUser({
           idEjecutivo: response.ejecutivo.idEjecutivo,
           usuario: response.ejecutivo.Usuario,
@@ -172,7 +171,6 @@ const LoginForm = ({ onLoginSuccess }) => {
           Jerarquía: response.ejecutivo.Jerarquía,
           token: response.ejecutivo.Token
         });
-      }
       try {
         const passwordValidation = await ValidatePassword(
           { contrasenia: formData.password, servidor: "Cronoss" },
