@@ -682,3 +682,38 @@ export const getCatalogoValueCard = async () => {
     throw error;
   }
 };
+
+export const getProductivity = async (requestData = null) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    
+    console.log('📤 Enviando a /Productividad/get-productividad con:', requestData);
+    
+    // Si se envían datos, hacer POST con body, sino POST sin body
+    const response = requestData 
+      ? await api.post('/Productividad/get-productividad', requestData)
+      : await api.post('/Productividad/get-productividad');
+    
+    console.log('📥 Respuesta de /Productividad/get-productividad:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error al obtener la productividad:', error);
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
