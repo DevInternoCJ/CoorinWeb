@@ -10,12 +10,19 @@ const DarkList = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // Obtener idCartera desde localStorage
+    const getIdCartera = () => {
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        return userData?.idCartera || userData?.idcartera || userData?.cartera || 1; // fallback a 1 si no existe
+    };
+
     // Reiniciar mensajes y valor al cambiar de tipo
     const handleTipoChange = (nuevoTipo) => {
         setTipo(nuevoTipo);
         setValor("");
         setError(null);
         setResultado(null);
+        
     };
 
     const handleBuscar = async (e) => {
@@ -97,7 +104,7 @@ const DarkList = () => {
         }
         setLoading(true);
         try {
-            const res = await darkListV2({ idCartera: 1, selector: tipo, dato: valor });
+            const res = await darkListV2({ idCartera: getIdCartera(), selector: tipo, dato: valor });
             if (typeof res?.enListaNegra === "boolean") {
                 setResultado({
                     enListaNegra: res.enListaNegra,

@@ -59,10 +59,10 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
             {/* Sección Cartera */}
             <div style={{ marginBottom: "2.5rem" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
-                    <label className="text-sm font-medium text-[var(--color-jerarquia3)]">
+                    <label className="modal-span-1">
                         Cartera:
                     </label>
-                    <span className="text-sm text-[var(--color-jerarquia3)]">
+                    <span className="modal-span-2">
                         American Express
                     </span>
                 </div>
@@ -77,12 +77,9 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                             name="tipo"
                             checked={isIndividual}
                             onChange={() => handleIndividualChange(true)}
-                            style={{ 
-                                accentColor: "var(--color-jerarquia1)",
-                                transform: "scale(1.1)"
-                            }}
+                            className="modal-radio"
                         />
-                        <span className="text-sm text-[var(--color-jerarquia3)]">Individual</span>
+                        <span className="modal-span-2">Individual</span>
                     </label>
                     <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
                         <input
@@ -90,12 +87,9 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                             name="tipo"
                             checked={!isIndividual}
                             onChange={() => handleIndividualChange(false)}
-                            style={{ 
-                                accentColor: "var(--color-jerarquia1)",
-                                transform: "scale(1.1)"
-                            }}
+                            className="modal-radio"
                         />
-                        <span className="text-sm text-[var(--color-jerarquia3)]">Archivo</span>
+                        <span className="modal-span-2">Archivo</span>
                     </label>
                 </div>
             </div>
@@ -114,12 +108,9 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                                 type="checkbox"
                                 checked={checked}
                                 onChange={() => handleCheckboxChange(key)}
-                                style={{ 
-                                    accentColor: "var(--color-jerarquia1)",
-                                    transform: "scale(1.1)"
-                                }}
+                                className="modal-checkbox"
                             />
-                            <span className="text-sm text-[var(--color-jerarquia3)] capitalize">
+                            <span className="modal-span-2 capitalize">
                                 {key === "accionamientos" ? "Accionamientos" : key}
                             </span>
                         </label>
@@ -142,12 +133,9 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                                 type="checkbox"
                                 checked={periodo}
                                 onChange={() => setPeriodo(!periodo)}
-                                style={{ 
-                                    accentColor: "var(--color-jerarquia1)",
-                                    transform: "scale(1.1)"
-                                }}
+                                className="modal-checkbox"
                             />
-                            <span className="text-sm font-medium text-[var(--color-jerarquia3)]">Período</span>
+                            <span className="modal-span-1">Período</span>
                         </label>
                     </div>
                     
@@ -155,7 +143,7 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                     {periodo && (
                         <>
                             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                <label className="text-xs text-[var(--color-jerarquia3)] whitespace-nowrap">Desde:</label>
+                                <label className="modal-span-2 whitespace-nowrap">Desde:</label>
                                 <input
                                     type="date"
                                     value={fechaDesde.split('/').reverse().join('-')}
@@ -169,7 +157,7 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                                 />
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                <label className="text-xs text-[var(--color-jerarquia3)] whitespace-nowrap">Hasta:</label>
+                                <label className="modal-span-2 whitespace-nowrap">Hasta:</label>
                                 <input
                                     type="date"
                                     value={fechaHasta.split('/').reverse().join('-')}
@@ -196,7 +184,7 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                         alignItems: "center",
                         justifyContent: "center"
                     }}>
-                        <label className="text-sm font-medium text-[var(--color-jerarquia3)] whitespace-nowrap">
+                        <label className="modal-span-1 whitespace-nowrap">
                             Cuenta:
                         </label>
                         <input
@@ -215,24 +203,8 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                         />
                         <button
                             onClick={handleBuscar}
-                            style={{
-                                backgroundColor: "var(--color-jerarquia1)",
-                                color: "white",
-                                padding: "0.5rem 1.5rem",
-                                borderRadius: "0.5rem",
-                                border: "none",
-                                fontSize: "0.875rem",
-                                fontWeight: "500",
-                                cursor: "pointer",
-                                transition: "all 0.2s ease",
-                                whiteSpace: "nowrap"
-                            }}
-                            onMouseEnter={(e) => {
-                                e.target.style.backgroundColor = "var(--color-jerarquia2)";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.target.style.backgroundColor = "var(--color-jerarquia1)";
-                            }}
+                            className="modal-btn modal-btn-primary"
+                            style={{ whiteSpace: "nowrap" }}
                         >
                             Buscar
                         </button>
@@ -246,54 +218,14 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                     <div style={{ display: "flex", gap: "1rem", alignItems: "center", justifyContent: "flex-end" }}>
                         <button
                             onClick={() => console.log("Seleccionar archivo...")}
-                            style={{
-                                backgroundColor: "var(--color-jerarquia1)",
-                                color: "white",
-                                padding: "0.5rem 1.5rem",
-                                borderRadius: "0.5rem",
-                                border: "none",
-                                fontSize: "0.875rem",
-                                fontWeight: "500",
-                                cursor: "pointer",
-                                transition: "all 0.2s ease",
-                                whiteSpace: "nowrap"
-                            }}
-                            onMouseEnter={(e) => {
-                                e.target.style.backgroundColor = "var(--color-jerarquia2)";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.target.style.backgroundColor = "var(--color-jerarquia1)";
-                            }}
+                            className="modal-btn modal-btn-primary"
+                            style={{ whiteSpace: "nowrap" }}
                         >
                             Seleccione
                         </button>
                     </div>
                 </div>
             )}
-
-            {/* Estilos CSS para iconos del calendario */}
-            <style jsx>{`
-                .calendar-input::-webkit-calendar-picker-indicator {
-                    filter: invert(0);
-                    color: #000000;
-                    background-color: transparent;
-                    cursor: pointer;
-                }
-                
-                .calendar-input::-webkit-datetime-edit-text {
-                    color: #000000;
-                }
-                
-                .calendar-input::-webkit-datetime-edit {
-                    color: #000000;
-                }
-                
-                .calendar-input::-webkit-datetime-edit-day-field,
-                .calendar-input::-webkit-datetime-edit-month-field,
-                .calendar-input::-webkit-datetime-edit-year-field {
-                    color: #000000;
-                }
-            `}</style>
         </div>
     );
 };

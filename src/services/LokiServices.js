@@ -33,14 +33,14 @@ export const loginUser = async (userData) => {
       usuario: userData.usuario,
       contrasenia: userData.contrasenia,
       extension: 0,
-      bloqueo: 1,
+      bloqueo: 0,
       dominio: "CONJUR",
       computadora: "Coorin",
       usuarioWindows: userData.usuarioWindows,
       ip: API_URL,
       aplicacion: "Coorin",
       version: "3.4.2",
-      servidor: "Cronoss"
+      servidor: "Thor"
     };
     console.log('📤 Enviando a /Auth/login:', requestData);
     const response = await api.post('/Auth/login', requestData, {
@@ -334,7 +334,7 @@ export const SaveScreenFields = async (servidor, data) => {
 
 
 // Nuevo endpoint para Lista Negra con parámetros
-export const darkListV2 = async ({ idCartera = 1, selector, dato }) => {
+export const darkListV2 = async ({ idCartera, selector, dato }) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
