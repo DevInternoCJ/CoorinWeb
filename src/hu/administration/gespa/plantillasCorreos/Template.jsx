@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import CustomSelect from '../camposPantalla/SelectWallet';
 
 const Template = () => {
+  const [titulo, setTitulo] = useState('');
+  const [mensaje, setMensaje] = useState('');
+  const [textoPago, setTextoPago] = useState('');
 
   return (
     <div className=" bg-neutral-100 rounded-lg text-white mt-5">
@@ -19,12 +22,37 @@ const Template = () => {
         <div className="flex justify-between items-center mb-1">
           <span className="text-neutral-100">Texto</span>
         </div>
-        <div className=" border-1 p-3 border-jerarquia1 rounded-lg min-h-[200px] leading-relaxed">
-          <p className="font-bold">recordatorio de pago</p>
-          <p className="mt-2 text-gray-300">recordarle al th</p>
-          <p className="mt-2 text-white">
-            tiene que pagar <span className="font-bold">[Saldo]</span>
-          </p>
+        <div className="border-1 p-3 border-jerarquia1 rounded-lg min-h-[200px] leading-relaxed">
+          {/* Input para el título */}
+          <input
+            type="text"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            className="font-bold w-full bg-transparent border-b border-gray-600 focus:border-jerarquia3 focus:outline-none py-1 text-white"
+            placeholder="recordatorio de pago"
+          />
+          
+          {/* Input para el mensaje */}
+          <input
+            type="text"
+            value={mensaje}
+            onChange={(e) => setMensaje(e.target.value)}
+            className="mt-4 w-full bg-transparent border-b border-gray-600 focus:border-jerarquia3 focus:outline-none py-1 text-gray-300"
+            placeholder="recordarle al th"
+          />
+          
+          {/* Input para el texto de pago */}
+          <div className="mt-4 flex items-center">
+            <input
+              type="text"
+              value={textoPago}
+              onChange={(e) => setTextoPago(e.target.value)}
+              className="w-full bg-transparent border-b border-gray-600 focus:border-jerarquia3 focus:outline-none py-1 text-white"
+              placeholder="tiene que pagar"
+            />
+            <span className="font-bold ml-2 whitespace-nowrap">[Saldo]</span>
+          </div>
+          
           <button className="mt-4 px-4 py-2 bg-red-800 rounded-md hover:bg-red-700 transition-colors">
             Borrar
           </button>

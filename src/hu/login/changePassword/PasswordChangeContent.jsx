@@ -5,8 +5,8 @@ import ButtonLogin from '../ButtonLogin'
 import { useNavigate } from 'react-router-dom'; // useNavigate
 import { useUserStore } from "../../../contextGlobal/userStore";
 
-const PasswordChangeContent = ({ onClose, onAccept }) => {
-  const dias = useUserStore((state) => state.user?.dias); // ✅ Correcto
+const PasswordChangeContent = ({ onAccept }) => {
+  const dias = useUserStore((state) => state.user?.dias); 
   const navigate = useNavigate(); console.log("Días desde store:", dias);
   const handleNoClick = () => {
     navigate('/dashboardPage'); // <--- Navegar programáticamente

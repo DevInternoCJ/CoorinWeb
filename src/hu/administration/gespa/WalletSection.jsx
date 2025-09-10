@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import LogoConjur from "../../../assets/ConsorcioLetras_OLD.png";
 import LogoCoorin from "../../../assets/logo_coorin_7.svg";
 import CustomSelect from "./camposPantalla/SelectWallet";
 import { GetVerifyProduct } from "../../../services/LokiServices";
@@ -59,7 +58,7 @@ const WalletSection = ({
           </label>
           <CustomSelect
             options={PRODUCT_OPTIONS.map((opt) => opt.label)}
-            defaultValue={null}
+            defaultValue="AMEX"
             onChange={(label) => {
               const found = PRODUCT_OPTIONS.find((opt) => opt.label === label);
               setSelectedProduct(found ? { ...found } : null);
