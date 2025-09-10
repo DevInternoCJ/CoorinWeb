@@ -47,9 +47,8 @@ const InputField = ({
         disabled={disabled}
       />
       <label
-        className={`input-floating-label block text-sm font-medium ${
-          type === "password" ? "text-neutral-500" : "border-0"
-        } mb-1`}
+        className={`input-floating-label block text-sm font-medium ${type === "password" ? "text-neutral-500" : "border-0"
+          } mb-1`}
         htmlFor={id}
       >
         {label}
@@ -60,7 +59,7 @@ const InputField = ({
 
 const LoginForm = ({ onLoginSuccess }) => {
   const setUser = useUserStore((state) => state.setUser);
-  
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -163,14 +162,20 @@ const LoginForm = ({ onLoginSuccess }) => {
       console.log("Respuesta de inicio de sesión exitosa:", response);
       const idEjecutivo = extractIdEjecutivo(response);
       localStorage.setItem("username", formData.username);
-        setUser({
-          idEjecutivo: response.ejecutivo.idEjecutivo,
-          usuario: response.ejecutivo.Usuario,
-          nombre: response.ejecutivo.NombreEjecutivo,
-          dias: response.ejecutivo.Días,
-          Jerarquía: response.ejecutivo.Jerarquía,
-          token: response.ejecutivo.Token
-        });
+      const userInfo = response?.ejecutivo || response;
+
+      setUser({
+        idEjecutivo: userInfo.idEjecutivo,
+        usuario: userInfo.Usuario || userInfo.usuario,
+        nombre: userInfo.NombreEjecutivo || userInfo.nombre,
+        dias: userInfo.Días || userInfo.dias || userInfo.DiasExpiracion,
+        jerarquia: userInfo.Jerarquía || userInfo.jerarquia,
+        token: userInfo.Token || userInfo.token
+      });
+      console.log("Datos guardados en store:", {
+  dias: userInfo.Días || userInfo.dias,
+  estructura: userInfo
+});
       try {
         const passwordValidation = await ValidatePassword(
           { contrasenia: formData.password, servidor: "Cronoss" },

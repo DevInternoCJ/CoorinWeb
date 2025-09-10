@@ -3,14 +3,15 @@ import React from "react";
 import { ExclamationKey } from "./PasswordIcons";
 import ButtonLogin from '../ButtonLogin'
 import { useNavigate } from 'react-router-dom'; // useNavigate
+import { useUserStore } from "../../../contextGlobal/userStore";
 
-
-const PasswordChangeContent = ({ onClose, onAccept, dias}) => {
-  const navigate = useNavigate(); 
+const PasswordChangeContent = ({ onClose, onAccept }) => {
+  const dias = useUserStore((state) => state.user?.dias); // ✅ Correcto
+  const navigate = useNavigate(); console.log("Días desde store:", dias);
   const handleNoClick = () => {
     navigate('/dashboardPage'); // <--- Navegar programáticamente
   };
-  
+
   return (
     <div className="flex flex-col justify-center items-center p-6 ">
       <div className="w-full relative mb-6">

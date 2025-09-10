@@ -40,7 +40,7 @@ export const loginUser = async (userData) => {
       ip: API_URL,
       aplicacion: "Coorin",
       version: "3.4.2",
-      servidor: "Cronoss"
+      servidor: "Thor"
     };
     console.log('📤 Enviando a /Auth/login:', requestData);
     const response = await api.post('/Auth/login', requestData, {
