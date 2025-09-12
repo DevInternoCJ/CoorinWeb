@@ -18,18 +18,18 @@ const Template = () => {
         />
       </div>
 
-      <div className=" bg-background-secondary rounded-lg p-4 mt-3">
+      <div className=" bg-jerarquia1 rounded-lg p-4 mt-3">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-neutral-100">Texto</span>
+          <span className="text-jerarquia4 font-bold text-lg">Texto</span>
         </div>
-        <div className="border-1 p-3 border-jerarquia1 rounded-lg min-h-[200px] leading-relaxed">
+        <div className="border-1 p-3 border-background-dashboard rounded-lg min-h-[200px] leading-relaxed">
           {/* Input para el título */}
           <input
             type="text"
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
-            className="font-bold w-full bg-transparent border-b border-gray-600 focus:border-jerarquia3 focus:outline-none py-1 text-white"
-            placeholder="recordatorio de pago"
+            className=" w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-white"
+            placeholder="Recordatorio de pago"
           />
           
           {/* Input para el mensaje */}
@@ -37,8 +37,8 @@ const Template = () => {
             type="text"
             value={mensaje}
             onChange={(e) => setMensaje(e.target.value)}
-            className="mt-4 w-full bg-transparent border-b border-gray-600 focus:border-jerarquia3 focus:outline-none py-1 text-gray-300"
-            placeholder="recordarle al th"
+            className="mt-4 w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-gray-300"
+            placeholder="Recordarle al th"
           />
           
           {/* Input para el texto de pago */}
@@ -47,8 +47,8 @@ const Template = () => {
               type="text"
               value={textoPago}
               onChange={(e) => setTextoPago(e.target.value)}
-              className="w-full bg-transparent border-b border-gray-600 focus:border-jerarquia3 focus:outline-none py-1 text-white"
-              placeholder="tiene que pagar"
+              className="w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-white"
+              placeholder="Tiene que pagar"
             />
             <span className="font-bold ml-2 whitespace-nowrap">[Saldo]</span>
           </div>
