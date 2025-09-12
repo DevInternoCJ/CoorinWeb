@@ -1,85 +1,160 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { PostLoadData } from '../../../../services/LokiServices';
 
-const TablasInformacionCliente = () => {
-  // Datos de ejemplo basados en la imagen
-  const datosDeudor = {
-    nombreDeudor: 'CUSTAVO CARRIZALES RODRIGUEZ',
-    rfc: 'CARG6610253Y6',
-    numeroCliente: '13673',
-    saldo: '6000'
+const TablasInformacionClienteCompleta = () => {
+  const [datosDeudor, setDatosDeudor] = useState({});
+  const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = async () => {
+    try {
+      const requestData = { idCartera: 1, idProducto: 1 };
+      const response = await PostLoadData(requestData);
+
+      if (response && response.exito) {
+        // Datos del deudor
+        if (response.cuenta) {
+          setDatosDeudor({
+            nombreDeudor: response.cuenta.NombreDeudor || 'No disponible',
+            rfc: response.cuenta.RFC || 'No disponible',
+            numeroCliente: response.cuenta.NúmeroCliente || 'No disponible',
+            saldo: response.cuenta.Saldo ? `$${response.cuenta.Saldo.toLocaleString()}` : '$0.00'
+          });
+        }
+        // Guardar todos los datos del producto para la vista completa
+        setDatosProductoCompleto(response.producto);
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error('Error al obtener los datos:', error);
+      setError(error.message);
+      setLoading(false);
+    }
   };
 
-  const datosPrestamo = {
-    batchDate: '13/07/2020',
-    idCuenta: '376667870121003',
-    customerId: '923706974099MXN',
-    name: '19680330',
-    birthDate: 'SB',
-    loanProductCode: 'TMAC',
-    recovered: 'TMAC'
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Función para formatear valores vacíos o undefined
+  const formatValue = (value, key) => {
+    // Caso especial para el campo "Notas"
+    if (key === "Notas") {
+      return "Texto Grande";
+    }
+
+    // Caso especial para el campo "idCuenta" - tratarlo como string, no como número
+    if (key === "idCuenta") {
+      return value !== null && value !== undefined && value !== "" ? String(value) : "N/A";
+    }
+
+    if (value === null || value === undefined || value === "") {
+      return "N/A";
+    }
+
+    // Si es un objeto vacío
+    if (typeof value === "object" && Object.keys(value).length === 0) {
+      return "N/A";
+    }
+
+    // Si es un número, formatear como moneda (excepto para campos específicos)
+    if ((typeof value === "number" || (!isNaN(parseFloat(value)) && isFinite(value))) &&
+      key !== "idCuenta") { // Excluir idCuenta del formateo numérico
+      return `$${parseFloat(value).toLocaleString()}`;
+    }
+
+    return value;
   };
+
+  // Función para determinar la clase de estilo basada en el valor
+  const getValueClass = (value, key) => {
+    // Caso especial para el campo "Notas"
+    if (key === "Notas") {
+      return "text-red-600 font-semibold";
+    }
+
+    if (value === null || value === undefined || value === "" ||
+      (typeof value === "object" && Object.keys(value).length === 0)) {
+      return "text-gray-400 italic";
+    }
+
+    // Para valores numéricos importantes (excepto idCuenta)
+    if ((typeof value === "number" || !isNaN(parseFloat(value))) && key !== "idCuenta") {
+      return "font-mono text-blue-700";
+    }
+    // Para fechas
+    if (typeof value === "string" && value.match(/\d{2}\/\d{2}\/\d{4}/)) {
+      return "text-green-700";
+    }
+
+    return "text-gray-800";
+  };
+
+  if (loading) return <div className="text-center py-8">Cargando datos...</div>;
+  if (error) return <div className="text-center py-8 text-red-500">Error: {error}</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-md border border-gray-200">
+    <div className="max-w-6xl mx-auto p-4 bg-white rounded-lg shadow-md border border-gray-200">
       <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">Información del Cliente</h1>
-      
-      {/* Primera tabla: Información del Deudor */}
+      {/* Tabla de datos del deudor - Versión con efectos hover */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-3 text-gray-700">Datos del Deudor</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="px-4 py-2 border border-gray-300 text-left font-medium text-gray-700">NombreDeudor</th>
-                <th className="px-4 py-2 border border-gray-300 text-left font-medium text-gray-700">RFC</th>
-                <th className="px-4 py-2 border border-gray-300 text-left font-medium text-gray-700">NúmeroCliente</th>
-                <th className="px-4 py-2 border border-gray-300 text-left font-medium text-gray-700">Saldo</th>
-              </tr>
-            </thead>
+        <h2 className="text-lg font-semibold mb-4 text-gray-700">Datos del Deudor</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: "Nombre", value: datosDeudor.nombreDeudor, icon: "user", color: "gray" },
+            { label: "RFC", value: datosDeudor.rfc, icon: "document", color: "blue" },
+            { label: "Número Cliente", value: datosDeudor.numeroCliente, icon: "id", color: "gray" },
+            { label: "Saldo", value: datosDeudor.saldo, icon: "currency", color: "green" }
+          ].map((item, index) => (
+            <div key={index} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <div className={`text-xs font-medium text-${item.color}-600 uppercase tracking-wide mb-2`}>{item.label}</div>
+              <div className={`text-sm font-semibold text-${item.color}-700`}>{item.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Vista de tabla horizontal - TODOS los campos en una sola fila con mejor estilo */}
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Datos del Producto</h3>
+        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+          <table className="bg-white min-w-full">
             <tbody>
-              <tr>
-                <td className="px-4 py-2 border border-gray-300">{datosDeudor.nombreDeudor}</td>
-                <td className="px-4 py-2 border border-gray-300">{datosDeudor.rfc}</td>
-                <td className="px-4 py-2 border border-gray-300">{datosDeudor.numeroCliente}</td>
-                <td className="px-4 py-2 border border-gray-300">{datosDeudor.saldo}</td>
+              {/* Fila de encabezados */}
+              <tr className="bg-gray-50">
+                {Object.keys(datosProductoCompleto).map((key) => (
+                  <th
+                    key={key}
+                    className="py-3 w-auto px-4 border-b border-r text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap align-top"
+                  >
+                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                  </th>
+                ))}
+              </tr>
+
+              {/* Fila de valores - CORRECCIÓN: Pasar el key a las funciones */}
+              <tr className="hover:bg-gray-50">
+                {Object.entries(datosProductoCompleto).map(([key, value], index) => (
+                  <td
+                    key={index}
+                    className={`py-3 px-4 border-b border-r text-sm w-auto ${getValueClass(value, key)} break-words align-top`}
+                  >
+                    {formatValue(value, key)}
+                  </td>
+                ))}
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
 
-      {/* Segunda tabla: Datos del Préstamo */}
-      <div>
-        <h2 className="text-lg font-semibold mb-3 text-gray-700">Datos del Préstamo</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="px-4 py-2 border border-gray-300 text-left font-medium text-gray-700">batchdate</th>
-                <th className="px-4 py-2 border border-gray-300 text-left font-medium text-gray-700">idCuenta</th>
-                <th className="px-4 py-2 border border-gray-300 text-left font-medium text-gray-700">customerid</th>
-                <th className="px-4 py-2 border border-gray-300 text-left font-medium text-gray-700">name</th>
-                <th className="px-4 py-2 border border-gray-300 text-left font-medium text-gray-700">birthdate</th>
-                <th className="px-4 py-2 border border-gray-300 text-left font-medium text-gray-700">loan_productcode</th>
-                <th className="px-4 py-2 border border-gray-300 text-left font-medium text-gray-700">recoverd</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="px-4 py-2 border border-gray-300">{datosPrestamo.batchDate}</td>
-                <td className="px-4 py-2 border border-gray-300">{datosPrestamo.idCuenta}</td>
-                <td className="px-4 py-2 border border-gray-300">{datosPrestamo.customerId}</td>
-                <td className="px-4 py-2 border border-gray-300">{datosPrestamo.name}</td>
-                <td className="px-4 py-2 border border-gray-300">{datosPrestamo.birthDate}</td>
-                <td className="px-4 py-2 border border-gray-300">{datosPrestamo.loanProductCode}</td>
-                <td className="px-4 py-2 border border-gray-300">{datosPrestamo.recovered}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="mt-2 text-xs text-gray-500 text-center">
+          Desliza horizontalmente para ver todos los campos →
         </div>
       </div>
     </div>
   );
 };
 
-export default TablasInformacionCliente;
+export default TablasInformacionClienteCompleta;

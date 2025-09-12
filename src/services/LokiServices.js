@@ -589,27 +589,25 @@ export const obetenerDropdownsEncargados = async () => {
 export const PostLoadData = async (data) => {
   try {
     // Verificar que el token existe antes de proceder
-    const token = localStorage.getItem('token');
-    
+    const token = localStorage.getItem('token');  
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
-    }
+    }  
     console.log('📤 Enviando a /PlantillasCorreo/carga-datos:', data);
     console.log('🔑 Token disponible:', token);
-    // ✅ DEJA QUE EL INTERCEPTOR AÑADA EL TOKEN AUTOMÁTICAMENTE
-    // NO añadas headers manualmente - el interceptor ya lo hace
-    const response = await api.post(`/PlantillasCorreo/carga-datos`,data);
+    const response = await api.post(`/PlantillasCorreo/carga-datos`, data);
     console.log('📥 Respuesta de /PlantillasCorreo/carga-datos', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error al cargar datos', error);
+    console.error('❌ Error al cargar datos', error);  
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('⚠️ Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      localStorage.removeItem('userData');   
+      // Redirigir al login si es necesario
+      window.location.href = '/login';
     }
-    // Mostrar más detalles del error
     if (error.response) {
       console.error('📊 Datos de respuesta del error:', error.response.data);
       console.error('🔢 Status del error:', error.response.status);
@@ -617,7 +615,8 @@ export const PostLoadData = async (data) => {
       console.error('❌ No se recibió respuesta del servidor:', error.request);
     } else {
       console.error('❌ Error al configurar la solicitud:', error.message);
-       }   throw error;
+    }  
+    throw error;
   }
 };
 
