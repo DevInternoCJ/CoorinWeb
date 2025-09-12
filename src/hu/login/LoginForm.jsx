@@ -166,16 +166,24 @@ const LoginForm = ({ onLoginSuccess }) => {
 
       setUser({
         idEjecutivo: userInfo.idEjecutivo,
-        usuario: userInfo.Usuario || userInfo.usuario,
-        nombre: userInfo.NombreEjecutivo || userInfo.nombre,
-        dias: userInfo.Días || userInfo.dias || userInfo.DiasExpiracion,
-        jerarquia: userInfo.Jerarquía || userInfo.jerarquia,
-        token: userInfo.Token || userInfo.token
+        usuario: userInfo.Usuario,
+        nombre: userInfo.NombreEjecutivo,
+        dias: userInfo.Días,
+        jerarquia: userInfo.Jerarquía,
+        token: userInfo.Token,
+        cartera: userInfo.Cartera,
+        idSucursal: userInfo.idSucursal,
+        idArea: userInfo.idÁrea,
+        Extensión: userInfo.Extensión,
+        Encargado: userInfo.Encargado,
+        idEncargado: userInfo.idEncargado,
+        idLoginIngresado: userInfo.idLoginIngresado,
+        idProducto: userInfo.idProducto,
+        Segmento: userInfo.Segmento,
       });
       console.log("Datos guardados en store:", {
-  dias: userInfo.Días || userInfo.dias,
-  estructura: userInfo
-});
+        estructura: userInfo
+      });
       try {
         const passwordValidation = await ValidatePassword(
           { contrasenia: formData.password, servidor: "Cronoss" },
