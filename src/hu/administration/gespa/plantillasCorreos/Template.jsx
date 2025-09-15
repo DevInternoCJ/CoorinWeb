@@ -53,7 +53,7 @@ const Template = () => {
             <span className="font-bold ml-2 whitespace-nowrap">[Saldo]</span>
           </div>
           
-          <button className="mt-4 px-4 py-2 bg-red-800 rounded-md hover:bg-red-700 transition-colors">
+          <button className="mt-4 px-4 py-2 bg-red-700 rounded-md hover:bg-red-600 transition-colors">
             Borrar
           </button>
           <div className="flex items-center text-jerarquia3 mt-4">

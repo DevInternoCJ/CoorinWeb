@@ -97,10 +97,7 @@ const TablasInformacionClienteCompleta = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-4 bg-white rounded-lg shadow-md border border-gray-200">
-      <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">Información del Cliente</h1>
-      {/* Tabla de datos del deudor - Versión con efectos hover */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4 text-gray-700">Datos del Deudor</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: "Nombre", value: datosDeudor.nombreDeudor, icon: "user", color: "gray" },
@@ -118,16 +115,15 @@ const TablasInformacionClienteCompleta = () => {
 
       {/* Vista de tabla horizontal - TODOS los campos en una sola fila con mejor estilo */}
       <div className="mt-8">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">Datos del Producto</h3>
         <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
           <table className="bg-white min-w-full">
             <tbody>
               {/* Fila de encabezados */}
-              <tr className="bg-gray-50">
+              <tr className="bg-background-secondary">
                 {Object.keys(datosProductoCompleto).map((key) => (
                   <th
                     key={key}
-                    className="py-3 w-auto px-4 border-b border-r text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap align-top"
+                    className="py-3 w-auto px-4 border-b border-r-background-secondary text-xs font-semibold text-neutral-100 uppercase tracking-wider whitespace-nowrap align-top"
                   >
                     {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                   </th>
@@ -139,7 +135,7 @@ const TablasInformacionClienteCompleta = () => {
                 {Object.entries(datosProductoCompleto).map(([key, value], index) => (
                   <td
                     key={index}
-                    className={`py-3 px-4 border-b border-r text-sm w-auto ${getValueClass(value, key)} break-words align-top`}
+                    className={`py-3 px-4 border-b-jerarquia4 text-sm w-auto ${getValueClass(value, key)} break-words align-top`}
                   >
                     {formatValue(value, key)}
                   </td>

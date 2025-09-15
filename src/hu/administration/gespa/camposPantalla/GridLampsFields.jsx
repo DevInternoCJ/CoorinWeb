@@ -76,23 +76,17 @@ const GridLampsFields = ({idProducto}) => {
     );
   }
 
-  // Seleccionar solo las columnas más importantes para mostrar
-  // (puedes ajustar esto según lo que quieras mostrar)
-  const importantColumns = [
-    'batchdate', 'customerid', 'nombredeudor', 'loanProductcode', 
-    'currentbalance', 'estado', 'ejecutivo'
-  ];
 
   return (
   <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
     <div className="overflow-x-auto border rounded-lg max-h-96">
       <table className="min-w-full bg-white">
-        <thead>
+        <thead className=" ">
           <tr className=" bg-background-secondary border-b">
             {Object.keys(tableData[0]).map((key) => (
               <th
                 key={key}
-                className="py-2 px-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-300 whitespace-nowrap"
+                className="py-2 px-3 text-left text-xs font-bold text-neutral-100 uppercase whitespace-nowrap"
               >
                 {key}
               </th>
@@ -103,12 +97,12 @@ const GridLampsFields = ({idProducto}) => {
           {tableData.map((row, index) => (
             <tr
               key={index}
-              className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}
+              className={index % 2 === 0 ? "bg-white border-b-jerarquia4" : "bg-gray-100 border-b-jerarquia4"}
             >
               {Object.values(row).map((value, i) => (
                 <td
                   key={i}
-                  className={`py-2 px-3 text-sm border-b whitespace-nowrap ${
+                  className={`py-2 px-3 text-sm border-b-jerarquia4 whitespace-nowrap ${
                     // Aplicar estilos especiales a ciertas columnas
                     typeof value === 'number' ? 'text-right font-medium' : 'text-left'
                   } ${
