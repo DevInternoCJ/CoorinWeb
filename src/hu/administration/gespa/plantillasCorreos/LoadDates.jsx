@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { PostLoadData } from '../../../../services/LokiServices';
 
-const TablasInformacionClienteCompleta = () => {
+const LoadDates = ({selectedProduct}) => {
   const [datosDeudor, setDatosDeudor] = useState({});
   const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchData = async () => {
+  const fetchData = async (productId = 1) => {
     try {
-      const requestData = { idCartera: 1, idProducto: 1 };
+      const requestData = { idCartera: 1, idProducto: productId };
       const response = await PostLoadData(requestData);
 
       if (response && response.exito) {
@@ -34,10 +34,13 @@ const TablasInformacionClienteCompleta = () => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
+   useEffect(() => {
+    // Cuando cambia el producto seleccionado, cargar nuevos datos
+    if (selectedProduct && selectedProduct.value) {
+      setLoading(true);
+      fetchData(selectedProduct.value);
+    }
+  }, [selectedProduct]);
   // Función para formatear valores vacíos o undefined
   const formatValue = (value, key) => {
     // Caso especial para el campo "Notas"
@@ -153,4 +156,4 @@ const TablasInformacionClienteCompleta = () => {
   );
 };
 
-export default TablasInformacionClienteCompleta;
+export default LoadDates;

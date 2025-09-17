@@ -6,7 +6,22 @@ import { IconTemplate } from "../IconsTemplates";
 import LoadDates from "./LoadDates";
 
 const PlantillasCorreoModal = ({ isOpen, onClose }) => {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [verifyResult, setVerifyResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showDataTables, setShowDataTables] = useState(false); // Estado para controlar la visibilidad de las tablas
+
   if (!isOpen) return null;
+    const handleProductSelect = (product) => {
+    setSelectedProduct(product);
+    
+    // Mostrar las tablas de datos cuando se selecciona Amex (value = 1)
+    if (product && product.value === 1) {
+      setShowDataTables(true);
+    } else {
+      setShowDataTables(false);
+    }
+  };
 
   return (
     <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -17,9 +32,22 @@ const PlantillasCorreoModal = ({ isOpen, onClose }) => {
           onClose={onClose}
         />
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
-          <WalletSection />
+          <WalletSection 
+            selectedProduct={selectedProduct}
+            setSelectedProduct={setSelectedProduct}
+            verifyResult={verifyResult}
+            setVerifyResult={setVerifyResult}
+            loading={loading}
+            setLoading={setLoading}
+            onProductSelect={handleProductSelect}/>
           <Template />
-          <LoadDates />
+          {showDataTables && selectedProduct && (
+            <div className="mt-6 border-t pt-6">
+              <LoadDates
+                selectedProduct={selectedProduct}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

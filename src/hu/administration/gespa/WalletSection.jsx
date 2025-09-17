@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import LogoCoorin from "../../../assets/logo_coorin_7.svg";
 import CustomSelect from "./camposPantalla/SelectWallet";
 import { GetVerifyProduct } from "../../../services/LokiServices";
@@ -15,12 +15,23 @@ const WalletSection = ({
   setVerifyResult,
   loading,
   setLoading,
+  onProductSelect 
 }) => {
   const servidor = "Cronoss";
 
+  // Efecto solo para notificar al padre
   useEffect(() => {
-    console.log("selectedProduct:", selectedProduct);
+    if (selectedProduct && onProductSelect) {
+      onProductSelect(selectedProduct);
+    }
+  }, [selectedProduct, onProductSelect]); // Este efecto solo se ejecuta cuando selectedProduct cambia
+
+  // Efecto separado para la verificación del producto
+  useEffect(() => {
+    console.log("selectedProduct for verification:", selectedProduct);
+    
     if (!selectedProduct || selectedProduct.value !== 1) return;
+    
     const fetchVerifyProduct = async () => {
       setLoading(true);
       try {
@@ -32,6 +43,7 @@ const WalletSection = ({
         setLoading(false);
       }
     };
+    
     fetchVerifyProduct();
   }, [selectedProduct, servidor, setLoading, setVerifyResult]);
 
@@ -58,10 +70,10 @@ const WalletSection = ({
           </label>
           <CustomSelect
             options={PRODUCT_OPTIONS.map((opt) => opt.label)}
-            defaultValue="AMEX"
             onChange={(label) => {
               const found = PRODUCT_OPTIONS.find((opt) => opt.label === label);
-              setSelectedProduct(found ? { ...found } : null);
+              const selected = found ? { ...found } : null;
+              setSelectedProduct(selected);
             }}
           />
           {loading && (
