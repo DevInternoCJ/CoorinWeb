@@ -25,7 +25,6 @@ const LoadDates = ({selectedProduct}) => {
         // Guardar todos los datos del producto para la vista completa
         setDatosProductoCompleto(response.producto);
       }
-
       setLoading(false);
     } catch (error) {
       console.error('Error al obtener los datos:', error);
@@ -47,27 +46,22 @@ const LoadDates = ({selectedProduct}) => {
     if (key === "Notas") {
       return "Texto Grande";
     }
-
     // Caso especial para el campo "idCuenta" - tratarlo como string, no como número
     if (key === "idCuenta") {
       return value !== null && value !== undefined && value !== "" ? String(value) : "N/A";
     }
-
     if (value === null || value === undefined || value === "") {
       return "N/A";
     }
-
     // Si es un objeto vacío
     if (typeof value === "object" && Object.keys(value).length === 0) {
       return "N/A";
     }
-
     // Si es un número, formatear como moneda (excepto para campos específicos)
     if ((typeof value === "number" || (!isNaN(parseFloat(value)) && isFinite(value))) &&
       key !== "idCuenta") { // Excluir idCuenta del formateo numérico
       return `$${parseFloat(value).toLocaleString()}`;
     }
-
     return value;
   };
 

@@ -19,7 +19,6 @@ const WalletSection = ({
 }) => {
   const servidor = "Cronoss";
 
-  // Efecto solo para notificar al padre
   useEffect(() => {
     if (selectedProduct && onProductSelect) {
       onProductSelect(selectedProduct);
