@@ -170,7 +170,7 @@ const ModalProductividadContent = ({
             case 'Sesiones':
                 return (
                     <>
-                        <th>Encargado</th>
+                        <th>Extensiòn</th>
                         <th>Ejecutivo</th>
                         <th>Extensión</th>
                         <th>Ingreso</th>

@@ -3,7 +3,12 @@ import ModalConsultaHistoricosHeader from "./ModalConsultaHistoricosHeader";
 import ModalConsultaHistoricosFiltros from "./ModalConsultaHistoricosFiltros";
 
 const ModalConsultaHistoricos = ({ onClose }) => {
-    const [isIndividual, setIsIndividual] = useState(false);
+    const [isIndividual, setIsIndividual] = useState(); // null: ninguno, true: individual, false: archivo
+
+    // Mensaje para la vista inicial
+    const mensajeInicial = "Seleccione si son cuentas individuales o por archivo";
+    const mensajeIndividual = 'Introduzca la cuenta, seleccione que concepto(s) para buscar en histórico y presione "Buscar"';
+    const mensajeArchivo = "Seleccione qué concepto(s) y seleccione el libro de Excel (UNA pestaña, UNA columna) con las cuentas para buscarlas en histórico.";
 
     return (
         <div className="modal-xl-container" style={{ maxWidth: "800px", minWidth: "600px", height: "550px" }}>
@@ -36,9 +41,11 @@ const ModalConsultaHistoricos = ({ onClose }) => {
                         margin: 0,
                         fontStyle: "italic"
                     }}>
-                        {isIndividual 
-                            ? 'Introduzca la cuenta, seleccione que concepto(s) para buscar en histórico y presione "Buscar"'
-                            : 'Seleccione qué concepto(s) y seleccione el libro de Excel (UNA pestaña, UNA columna) con las cuentas para buscarlas en histórico.'
+                        {isIndividual === undefined || isIndividual === null
+                            ? mensajeInicial
+                            : isIndividual
+                                ? mensajeIndividual
+                                : mensajeArchivo
                         }
                     </p>
                 </div>
