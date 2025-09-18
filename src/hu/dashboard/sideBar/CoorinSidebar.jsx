@@ -78,11 +78,17 @@ const RenderSubMenus = ({ subMenus, parentId, onMenuClick, onPlantillasCorreoCli
               href="#" 
               className="menu-item"
               onClick={(e) => {
-                 if (isPlantillasCorreo)
                 e.preventDefault();
-                if (onMenuClick) {
-                  onMenuClick(item.id, item.title);
-                  onPlantillasCorreoClick();
+                if (isPlantillasCorreo) {
+                  // Solo llamar onPlantillasCorreoClick si es "Plantillas Correo"
+                  if (onPlantillasCorreoClick) {
+                    onPlantillasCorreoClick();
+                  }
+                } else {
+                  // Para otros elementos, usar onMenuClick
+                  if (onMenuClick) {
+                    onMenuClick(item.id, item.title);
+                  }
                 }
               }}
             >

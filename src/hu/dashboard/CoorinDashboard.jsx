@@ -49,7 +49,7 @@ const handlePlantillasCorreoClick = () => {
     // Cerrar sidebar en móviles después del click
     setSidebarOpen(false);
     
-    // Mapeo de IDs del sidebar a opciones del modal
+    // Mapeo de IDs del sidebar a opciones del modal - SOLO CONSULTAS
     const sidebarOptionsMap = {
       "2BB": "Lista Negra",        // Lista Negra
       "3BB": "Arrepentimientos",   // Arrepentimientos
@@ -69,7 +69,7 @@ const handlePlantillasCorreoClick = () => {
       setSelectedSidebarOption(sidebarOptionsMap[menuId]);
       setModalSidebarOpen(true);
     }
-    // Para otros elementos del menú
+    // Para otros elementos del menú (NO hacer nada más)
     else {
       console.log(`Click en menú: ${menuTitle} (ID: ${menuId})`);
     }

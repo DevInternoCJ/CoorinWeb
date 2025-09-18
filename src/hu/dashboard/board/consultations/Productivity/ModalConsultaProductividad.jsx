@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ModalProductividadHeader from "./ModalProductividadHeader";
 import ModalProductividadContent from "./ModalProductividadContent";
 import ModalProductividadFooter from "./ModalProductividadFooter";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
+import { getProductivity } from '../../../../../services/LokiServices';
 
 // Flecha tipo chevron moderna usando clase global
 const DropdownArrow = () => (
@@ -14,6 +15,81 @@ const DropdownArrow = () => (
 );
 
 const ModalConsultaProductividad = ({ onClose }) => {
+    // Estados para productividad
+    const [timeFilter, setTimeFilter] = useState('Dia'); // 'Dia' o 'Hora'
+    const [selectedIndicator, setSelectedIndicator] = useState('Sesiones'); // Seleccionar "Sesiones" por defecto
+    const [productivityData, setProductivityData] = useState([]);
+    const [loadingProductivity, setLoadingProductivity] = useState(false);
+    const [errorProductivity, setErrorProductivity] = useState(null);
+    const [selectedExecutiveNode, setSelectedExecutiveNode] = useState(null);
+
+    // Definir indicadores según el filtro de tiempo
+    const indicadoresDia = [
+        'Sesiones',
+        'Contactos', 
+        'Negociaciones',
+        'Porcentajes',
+        'Tiempos',
+        'Tiempo Promedio'
+    ];
+
+    const indicadoresHora = [
+        'Cuentas',
+        'Titulares',
+        'Conocidos',
+        'Desconocidos',
+        'Sin Contacto',
+        'Negociaciones',
+        'Monto Negociaciones',
+        'Saldo Solucionado'
+    ];
+
+    // Función para obtener datos de productividad
+    const fetchProductivityData = async (indicador, idsEjecutivos) => {
+        if (!indicador || !idsEjecutivos || idsEjecutivos.length === 0) return;
+        
+        setLoadingProductivity(true);
+        setErrorProductivity(null);
+        
+        try {
+            const requestData = {
+                indicador: indicador,
+                idsEjecutivos: idsEjecutivos
+            };
+            
+            console.log('📤 Enviando datos de productividad:', requestData);
+            const data = await getProductivity(requestData);
+            
+            // Manejar diferentes tipos de respuesta del servidor
+            if (Array.isArray(data)) {
+                setProductivityData(data);
+            } else if (data && data.message) {
+                // Servidor devuelve mensaje (sin datos)
+                console.log('📝 Servidor responde:', data.message);
+                setProductivityData([]);
+            } else if (data && typeof data === 'object') {
+                // Si es un objeto, intentar extraer array de datos
+                const dataArray = Object.values(data).find(val => Array.isArray(val));
+                setProductivityData(dataArray || []);
+            } else {
+                setProductivityData([]);
+            }
+        } catch (error) {
+            console.error('❌ Error al obtener datos de productividad:', error);
+            setErrorProductivity('Error al obtener los datos de productividad');
+            setProductivityData([]);
+        } finally {
+            setLoadingProductivity(false);
+        }
+    };
+
+    // Efecto para cargar datos cuando cambian el indicador o ejecutivo seleccionado
+    useEffect(() => {
+        if (selectedIndicator && selectedExecutiveNode) {
+            const idsToSend = [selectedExecutiveNode];
+            fetchProductivityData(selectedIndicator, idsToSend);
+        }
+    }, [selectedIndicator, selectedExecutiveNode]);
     return (
         <div className="modal-xl-container" style={{ maxWidth: "98vw", overflowX: "hidden" }}>
             <ModalProductividadHeader onClose={onClose} />
@@ -43,11 +119,15 @@ const ModalConsultaProductividad = ({ onClose }) => {
                         <span className="modal-span-1">Indicadores</span>
                         <div className="relative">
                             <select
+                                value={selectedIndicator}
+                                onChange={(e) => setSelectedIndicator(e.target.value)}
                                 className="modal-dropdown-select appearance-none w-32 font-semibold"
                             >
-                                <option value="sesiones">Sesiones</option>
-                                <option value="contactos">Contactos</option>
-                                <option value="negociaciones">Negociaciones</option>
+                                {(timeFilter === 'Dia' ? indicadoresDia : indicadoresHora).map((indicador) => (
+                                    <option key={indicador} value={indicador}>
+                                        {indicador}
+                                    </option>
+                                ))}
                             </select>
                             <DropdownArrow />
                         </div>
@@ -56,8 +136,12 @@ const ModalConsultaProductividad = ({ onClose }) => {
                                 <input 
                                     type="radio" 
                                     name="timeFilter" 
-                                    value="dia" 
-                                    defaultChecked 
+                                    value="Dia" 
+                                    checked={timeFilter === 'Dia'}
+                                    onChange={(e) => {
+                                        setTimeFilter(e.target.value);
+                                        setSelectedIndicator('Sesiones'); // Seleccionar "Sesiones" por defecto para "Día"
+                                    }}
                                     className="modal-radio"
                                 />
                                 Día
@@ -66,7 +150,12 @@ const ModalConsultaProductividad = ({ onClose }) => {
                                 <input 
                                     type="radio" 
                                     name="timeFilter" 
-                                    value="hora" 
+                                    value="Hora" 
+                                    checked={timeFilter === 'Hora'}
+                                    onChange={(e) => {
+                                        setTimeFilter(e.target.value);
+                                        setSelectedIndicator('Cuentas'); // Seleccionar "Cuentas" por defecto para "Hora"
+                                    }}
                                     className="modal-radio"
                                 />
                                 Hora
@@ -86,7 +175,15 @@ const ModalConsultaProductividad = ({ onClose }) => {
                     padding: "1rem 0"
                 }}
             >
-                <ModalProductividadContent />
+                <ModalProductividadContent 
+                    timeFilter={timeFilter}
+                    selectedIndicator={selectedIndicator}
+                    selectedExecutiveNode={selectedExecutiveNode}
+                    setSelectedExecutiveNode={setSelectedExecutiveNode}
+                    productivityData={productivityData}
+                    loadingProductivity={loadingProductivity}
+                    errorProductivity={errorProductivity}
+                />
             </div>
             <div style={{ width: "100%", overflowX: "auto" }}>
                 <ModalProductividadFooter />
