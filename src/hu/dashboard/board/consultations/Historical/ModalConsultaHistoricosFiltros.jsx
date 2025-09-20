@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import ExcelDownloader from "./ExcelDownloader";
+// import ExcelDownloader from "./ExcelDownloader";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 import { toast } from "sonner";
 
-import { historySingle } from "../../../../../services/LokiServices";
+import { historySingle, historyArchivoUpload } from "../../../../../services/LokiServices";
 
 
 async function fetchHistorySingle(params) {
@@ -63,8 +63,25 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
     };
 
     const [excelBlob, setExcelBlob] = useState(null);
+    const [archivo, setArchivo] = useState(null);
     const [cuentaError, setCuentaError] = useState("");
     const [showToast, setShowToast] = useState(false);
+
+    // Descargar el archivo Excel cuando excelBlob cambie
+    useEffect(() => {
+        if (excelBlob) {
+            const fileName = isIndividual ? `historico_${idCuenta}.xlsx` : `historico_archivo.xlsx`;
+            const url = window.URL.createObjectURL(excelBlob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            setExcelBlob(null);
+        }
+    }, [excelBlob, isIndividual, idCuenta]);
 
     // Ocultar el toast automáticamente después de 2 segundos
     useEffect(() => {
@@ -76,59 +93,108 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
         }
     }, [showToast, cuentaError]);
 
+    // Bandera para evitar petición individual al cambiar de modo
+    const [allowSubmit, setAllowSubmit] = useState(true);
+
     const handleBuscar = async () => {
-        // Validación antes de enviar
-        if (!idCuenta || idCuenta.length < 6) {
-            toast.warning("Ingrese un número de cuenta válido (mínimo 6 dígitos)");
-            return;
-        }
-        const checkboxesValidos = Object.entries(checkedItems)
-            .filter(([key]) => key !== "periodo")
-            .some(([_, checked]) => checked);
-        if (!checkboxesValidos) {
-            toast.warning("Seleccione al menos un tipo de consulta");
-            return;
-        }
-        try {
-            // Obtener idCartera desde localStorage (como en el label)
-            const userData = JSON.parse(localStorage.getItem("userData"));
-            const idCartera = userData?.idCartera || 1;
-            // Función para convertir fecha DD/MM/YYYY a YYYY-MM-DD
-            const formatFecha = (fecha) => {
-                if (!fecha) return null;
-                const [dia, mes, anio] = fecha.split("/");
-                return `${anio}-${mes}-${dia}`;
-            };
-            // Construir el objeto de parámetros
-            const params = {
-                idCartera,
-                incluirCuenta: checkedItems.cuenta,
-                incluirNegociaciones: checkedItems.negociaciones,
-                incluirVisitas: checkedItems.visitas,
-                incluirGestiones: checkedItems.gestiones,
-                incluirAccionamientos: checkedItems.accionamientos,
-                incluirPagos: checkedItems.pagos,
-                usarPeriodo: periodo,
-                fechaDesde: periodo ? formatFecha(fechaDesde) : null,
-                fechaHasta: periodo ? formatFecha(fechaHasta) : null,
-                cuenta: idCuenta || null
-            };
-            console.log("Body enviado al endpoint:", params);
-            const result = await fetchHistorySingle(params);
-            // Validar si el Excel está vacío (cuenta no existe)
-            if (result?.data && result.data.size === 0) {
-                toast.warning("La cuenta ingresada no existe");
-                setExcelBlob(null);
+        if (isIndividual) {
+            if (!allowSubmit) return;
+            // Validación antes de enviar
+            if (!idCuenta || idCuenta.length < 6) {
+                toast.warning("Ingrese un número de cuenta válido (mínimo 6 dígitos)");
                 return;
             }
-            setExcelBlob(result.data);
-        } catch (error) {
-            console.error("Error al consultar histórico individual:", error);
-            toast.error("Error al consultar histórico individual");
+            const checkboxesValidos = Object.entries(checkedItems)
+                .filter(([key]) => key !== "periodo")
+                .some(([_, checked]) => checked);
+            if (!checkboxesValidos) {
+                toast.warning("Seleccione al menos un tipo de consulta");
+                return;
+            }
+            try {
+                const userData = JSON.parse(localStorage.getItem("userData"));
+                const idCartera = userData?.idCartera || 1;
+                const formatFecha = (fecha) => {
+                    if (!fecha) return null;
+                    const [dia, mes, anio] = fecha.split("/");
+                    return `${anio}-${mes}-${dia}`;
+                };
+                const params = {
+                    idCartera,
+                    incluirCuenta: checkedItems.cuenta,
+                    incluirNegociaciones: checkedItems.negociaciones,
+                    incluirVisitas: checkedItems.visitas,
+                    incluirGestiones: checkedItems.gestiones,
+                    incluirAccionamientos: checkedItems.accionamientos,
+                    incluirPagos: checkedItems.pagos,
+                    usarPeriodo: periodo,
+                    fechaDesde: periodo ? formatFecha(fechaDesde) : null,
+                    fechaHasta: periodo ? formatFecha(fechaHasta) : null,
+                    cuenta: idCuenta || null
+                };
+                console.log("Body enviado al endpoint:", params);
+                const result = await fetchHistorySingle(params);
+                if (result?.data && result.data.size === 0) {
+                    toast.warning("La cuenta ingresada no existe");
+                    setExcelBlob(null);
+                    return;
+                }
+                setExcelBlob(result.data);
+            } catch (error) {
+                console.error("Error al consultar histórico individual:", error);
+                toast.error("Error al consultar histórico individual");
+            }
+        } else {
+            // Modo archivo
+            if (!archivo) {
+                toast.warning("Seleccione un archivo para subir");
+                return;
+            }
+            const checkboxesValidos = Object.entries(checkedItems)
+                .filter(([key]) => key !== "periodo")
+                .some(([_, checked]) => checked);
+            if (!checkboxesValidos) {
+                toast.warning("Seleccione al menos un tipo de consulta");
+                return;
+            }
+            try {
+                const userData = JSON.parse(localStorage.getItem("userData"));
+                const idCartera = userData?.idCartera || 1;
+                const formatFecha = (fecha) => {
+                    if (!fecha) return null;
+                    const [dia, mes, anio] = fecha.split("/");
+                    return `${anio}-${mes}-${dia}`;
+                };
+                const body = {
+                    Archivo: archivo,
+                    IdCartera: idCartera,
+                    IncluirCuenta: checkedItems.cuenta,
+                    IncluirNegociaciones: checkedItems.negociaciones,
+                    IncluirVisitas: checkedItems.visitas,
+                    IncluirGestiones: checkedItems.gestiones,
+                    IncluirAccionamientos: checkedItems.accionamientos,
+                    IncluirPagos: checkedItems.pagos,
+                    UsarPeriodo: periodo,
+                    FechaDesde: periodo ? formatFecha(fechaDesde) : null,
+                    FechaHasta: periodo ? formatFecha(fechaHasta) : null
+                };
+                console.log("Body enviado al endpoint archivo:", body);
+                const result = await historyArchivoUpload(body);
+                if (result?.data && result.data.size === 0) {
+                    toast.warning("El archivo no contiene cuentas válidas");
+                    setExcelBlob(null);
+                    return;
+                }
+                setExcelBlob(result.data);
+            } catch (error) {
+                console.error("Error al consultar histórico por archivo:", error);
+                toast.error("Error al consultar histórico por archivo");
+            }
         }
     };
 
     const handleTipoSeleccion = (individual) => {
+        setAllowSubmit(false); // Evita submit al cambiar
         setIsIndividual(individual);
         onIndividualChange(individual);
         // Función para obtener fecha un mes atrás en formato DD/MM/YYYY
@@ -149,8 +215,9 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
             const yyyy = hoy.getFullYear();
             return `${dd}/${mm}/${yyyy}`;
         };
+    setArchivo(null);
+    setExcelBlob(null);
         if (individual) {
-            // Limpiar campos específicos al seleccionar Individual
             setIdCuenta("");
             setCheckedItems(prev => ({
                 ...prev,
@@ -165,7 +232,6 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
             setFechaDesde(getFechaMesAtras());
             setFechaHasta(getFechaActual());
         } else {
-            // Limpiar campos específicos al seleccionar Archivo
             setIdCuenta("");
             setCheckedItems(prev => ({
                 ...prev,
@@ -176,10 +242,11 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                 accionamientos: false,
                 pagos: false
             }));
-            setPeriodo(true); // <-- Activar el checkbox de período en modo Archivo
+            setPeriodo(true);
             setFechaDesde(getFechaMesAtras());
             setFechaHasta(getFechaActual());
         }
+        setTimeout(() => setAllowSubmit(true), 100); // Reactiva submit tras cambio
     };
 
     return (
@@ -317,24 +384,50 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                                     </button>
                                 </div>
                             </div>
-                            {/* Descarga automática del Excel */}
-                            {excelBlob && (
-                                <ExcelDownloader blob={excelBlob} fileName={`historico_${idCuenta}.xlsx`} />
-                            )}
+                            {/* Descarga automática del Excel ahora se realiza por useEffect */}
                         </>
                     )}
 
-                    {/* Botón Buscar para modo Archivo alineado a la derecha */}
+                    {/* Input file oculto y botón Seleccionar para modo Archivo */}
                     {!isIndividual && (
                         <div style={{ marginBottom: "1.5rem" }}>
                             <div style={{ display: "flex", gap: "1rem", alignItems: "center", justifyContent: "flex-end" }}>
+                                <input
+                                    type="file"
+                                    accept=".xlsx,.xls"
+                                    id="archivoInput"
+                                    style={{ display: "none" }}
+                                    onChange={e => {
+                                        setArchivo(e.target.files[0]);
+                                        setExcelBlob(null);
+                                    }}
+                                />
                                 <button
-                                    onClick={() => console.log("Buscar archivo...")}
+                                    type="button"
                                     className="modal-btn modal-btn-primary"
                                     style={{ whiteSpace: "nowrap" }}
+                                    onClick={() => {
+                                        const algunoSeleccionado = Object.entries(checkedItems)
+                                            .filter(([key]) => ["cuenta","gestiones","visitas","negociaciones","accionamientos","pagos"].includes(key))
+                                            .some(([, checked]) => checked);
+                                        if (!algunoSeleccionado) {
+                                            toast.warning("Debe seleccionar al menos un tipo de histórico");
+                                            return;
+                                        }
+                                        document.getElementById('archivoInput').click();
+                                    }}
+                                    disabled={
+                                        !Object.entries(checkedItems)
+                                            .filter(([key]) => ["cuenta","gestiones","visitas","negociaciones","accionamientos","pagos"].includes(key))
+                                            .some(([, checked]) => checked)
+                                    }
                                 >
-                                    Buscar
+                                    Seleccionar
                                 </button>
+                                {/* Mostrar nombre del archivo seleccionado, sin mensaje extra */}
+                                {archivo && (
+                                    <span style={{ marginLeft: "1rem", fontSize: "0.9rem" }}>{archivo.name}</span>
+                                )}
                             </div>
                         </div>
                     )}

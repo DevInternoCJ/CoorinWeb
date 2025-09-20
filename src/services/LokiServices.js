@@ -737,19 +737,67 @@ export const historySingle = async (body) => {
     console.log('📥 Respuesta de /Histórico/individual:', response);
     return response;
   } catch (error) {
-    console.error('❌ Error al obtener historico:', error);
+    console.error('Error al obtener historico:', error);
     if (error.response?.status === 401) {
-      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      console.warn('Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
     }
     if (error.response) {
-      console.error('📊 Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
     } else if (error.request) {
-      console.error('❌ No se recibió respuesta del servidor:', error.request);
+      console.error('No se recibió respuesta del servidor:', error.request);
     } else {
-      console.error('❌ Error al configurar la solicitud:', error.message);
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+// Obtener Historico Archivo
+export const historyArchivoUpload = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // Construir FormData
+    const formData = new FormData();
+    // Asume que body es un objeto con las claves necesarias y el archivo
+    Object.entries(body).forEach(([key, value]) => {
+      // Si el valor es un array, agregar cada elemento por separado
+      if (Array.isArray(value)) {
+        value.forEach((v) => formData.append(key, v));
+      } else {
+        formData.append(key, value);
+      }
+    });
+    console.log('Enviando a /Histórico/archivo (FormData):', formData);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/Histórico/archivo', formData, {
+      headers: {
+        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json, text/plain, */*'
+        // No poner Content-Type, el navegador lo gestiona
+      },
+      responseType: 'blob'
+    });
+    console.log('Respuesta de /Histórico/archivo:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obtener historico Archivo:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
     }
     throw error;
   }
