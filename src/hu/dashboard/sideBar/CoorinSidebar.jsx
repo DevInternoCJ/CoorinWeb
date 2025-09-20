@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import dataSidebar from "./DataSidebar";
 import {
   AcademicCapIcon,
@@ -32,6 +32,7 @@ const iconMap = {
   // ...otros iconos si los necesitas
 };
 import LogoCoorin7 from "../../../assets/CoorinGreen.svg";
+import { initSidebarCollapse } from "./sidebarCollapse";
 
 // Renderiza submenús anidados recursivamente (soporta subMenus2, subMenus3, etc.)
 const RenderSubMenus = ({ subMenus, parentId, onMenuClick, onPlantillasCorreoClick }) => (
@@ -108,11 +109,22 @@ const RenderSubMenus = ({ subMenus, parentId, onMenuClick, onPlantillasCorreoCli
   </ul>
 );
 
-export const CoorinSidebar = ({ onMenuClick, onPlantillasCorreoClick }) => {
+export const CoorinSidebar = ({ open, onMenuClick, onPlantillasCorreoClick }) => {
+  // Clases para animar el sidebar (Tailwind)
+  const sidebarClasses = `sidebar-coorin drawer drawer-start overlay max-w-64 z-20 fixed top-0 left-0 h-full transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`;  
+
+  useEffect(() => {
+  if (open) {
+    setTimeout(() => {
+      initSidebarCollapse();
+    }, 0);
+  }
+}, [open]);
+
   return (
-    <aside
+    <sidebarClasses
       id="overlay-body-scrolling-with-backdrop"
-      className="sidebar-coorin drawer drawer-start overlay overlay-open:translate-x-0 max-w-64 z-20"
+      className={sidebarClasses}
       tabIndex="-1"
       aria-modal="true"
       role="dialog"
@@ -180,6 +192,6 @@ export const CoorinSidebar = ({ onMenuClick, onPlantillasCorreoClick }) => {
           )}
         </ul>
       </div>
-    </aside>
+    </sidebarClasses>
   );
-};
+}
