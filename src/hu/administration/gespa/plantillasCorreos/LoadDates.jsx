@@ -1,11 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { PostLoadData } from '../../../../services/LokiServices';
 
-const LoadDates = ({selectedProduct}) => {
+const LoadDates = ({ selectedProduct, onSaldoChange, isModalOpen}) => {
   const [datosDeudor, setDatosDeudor] = useState({});
   const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+    // Función para resetear todos los estados
+  const resetAllData = () => {
+    setDatosDeudor({});
+    setDatosProductoCompleto({});
+    setLoading(true);
+    setError(null);
+    onSaldoChange(''); // Resetear el saldo también
+  };
+    // Efecto para detectar cuando el modal se cierra y resetear los datos
+  useEffect(() => {
+    if (!isModalOpen) {
+      resetAllData();
+    }
+  }, [isModalOpen]);
+
 
   const fetchData = async (productId = 1) => {
     try {
@@ -15,12 +31,14 @@ const LoadDates = ({selectedProduct}) => {
       if (response && response.exito) {
         // Datos del deudor
         if (response.cuenta) {
+          const saldoFormateado = response.cuenta.Saldo ? `$${response.cuenta.Saldo.toLocaleString()}` : '$0.00';
           setDatosDeudor({
             nombreDeudor: response.cuenta.NombreDeudor || 'No disponible',
             rfc: response.cuenta.RFC || 'No disponible',
             numeroCliente: response.cuenta.NúmeroCliente || 'No disponible',
-            saldo: response.cuenta.Saldo ? `$${response.cuenta.Saldo.toLocaleString()}` : '$0.00'
+            saldo: saldoFormateado
           });
+          onSaldoChange(saldoFormateado);
         }
         // Guardar todos los datos del producto para la vista completa
         setDatosProductoCompleto(response.producto);
@@ -33,7 +51,7 @@ const LoadDates = ({selectedProduct}) => {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     // Cuando cambia el producto seleccionado, cargar nuevos datos
     if (selectedProduct && selectedProduct.value) {
       setLoading(true);
@@ -88,6 +106,7 @@ const LoadDates = ({selectedProduct}) => {
 
     return "text-gray-800";
   };
+  
 
   if (loading) return <div className="text-center py-8">Cargando datos...</div>;
   if (error) return <div className="text-center py-8 text-red-500">Error: {error}</div>;

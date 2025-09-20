@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CustomSelect from '../camposPantalla/SelectWallet';
 
-const Template = () => {
+const Template = ({saldo}) => {
   const [titulo, setTitulo] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [textoPago, setTextoPago] = useState('');
@@ -50,7 +50,7 @@ const Template = () => {
               className="w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-white"
               placeholder="Tiene que pagar"
             />
-            <span className="font-bold ml-2 whitespace-nowrap">[Saldo]</span>
+            <span className="font-bold ml-2 whitespace-nowrap">[{saldo || 'Saldo'}]</span>
           </div>
           
           <button className="mt-4 px-4 py-2 bg-red-700 rounded-md hover:bg-red-600 transition-colors">
