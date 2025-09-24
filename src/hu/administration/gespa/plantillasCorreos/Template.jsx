@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import CustomSelect from '../camposPantalla/SelectWallet';
 import { PostInsertScreen } from '../../../../services/LokiServices';
 
-const Template = () => {
+const Template = ({saldo}) => {
   const [titulo, setTitulo] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [textoPago, setTextoPago] = useState('');
@@ -85,7 +85,7 @@ const Template = () => {
               className="w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-white"
               placeholder="Texto adicional sobre el pago"
             />
-            <span className="font-bold ml-2 whitespace-nowrap">[Saldo]</span>
+            <span className="font-bold ml-2 whitespace-nowrap">[{saldo || 'Saldo'}]</span>
           </div>
 
           {/* Botón para enviar */}

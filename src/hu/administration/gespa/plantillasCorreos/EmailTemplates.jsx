@@ -10,6 +10,7 @@ const PlantillasCorreoModal = ({ isOpen, onClose }) => {
   const [verifyResult, setVerifyResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showDataTables, setShowDataTables] = useState(false); // Estado para controlar la visibilidad de las tablas
+  const [saldo, setSaldo] = useState('');
 
   if (!isOpen) return null;
     const handleProductSelect = (product) => {
@@ -40,11 +41,12 @@ const PlantillasCorreoModal = ({ isOpen, onClose }) => {
             loading={loading}
             setLoading={setLoading}
             onProductSelect={handleProductSelect}/>
-          <Template />
+          <Template saldo={saldo}/>
           {showDataTables && selectedProduct && (
             <div className="mt-6 border-t pt-6">
               <LoadDates
                 selectedProduct={selectedProduct}
+                onSaldoChange={setSaldo}
               />
             </div>
           )}
