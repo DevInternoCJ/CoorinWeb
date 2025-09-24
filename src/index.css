@@ -399,7 +399,6 @@ label {
   border: 1.5px solid var(--color-jerarquia3);
 }
 
-/* === Dropdown select global para modales === */
 .modal-dropdown-select {
   width: 8rem;
   font-weight: 600;
