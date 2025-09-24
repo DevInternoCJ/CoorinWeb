@@ -1,9 +1,16 @@
 import React, { useState } from "react";
 import dataDash from "../../dataDash";
 import { ExecutiveChart } from "../../DashboardIcons";
-import { IconMetas, IconValidadores, IconEncargados, IconCatalogos, IconScripts, IconPantalla } from "./IconesEjecutives";
+import {
+  IconMetas,
+  IconValidadores,
+  IconEncargados,
+  IconCatalogos,
+  IconScripts,
+  IconPantalla,
+} from "./IconesEjecutives";
 import ModalMetasEjecutivos from "./ModalMetasEjecutivos";
-import LampshadeFields from "../../../administration/gespa/camposPantalla/LampshadeFields"
+import LampshadeFields from "../../../administration/gespa/camposPantalla/LampshadeFields";
 import ModalValidadoresEjecutivos from "./ModalValidadoresEjecutivos";
 import ModalEncargadosEjecutivos from "./ModalEncargadosEjecutivos";
 import ModalCatalogosEjecutivos from "./ModalCatalogosEjecutivos";
@@ -39,69 +46,76 @@ const CardExecutive = () => {
     <>
       {dataDash.map((catalog) => (
         <div
-          className="card card-sm sm:max-w-sm rounded-xl p-1 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer"
+          className="card card-sm sm:max-w-sm rounded-2xl p-1 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer shadow-none"
           key={catalog.id}
           style={{ backgroundColor: `var(--${catalog.color})` }}
           tabIndex={0}
           role="button"
-          onClick={() => handleCardClick(catalog.title)}
-        >
+          onClick={() => handleCardClick(catalog.title)}>
           {/* Máscara opaca al hacer hover */}
-          <div className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-15 transition-opacity duration-100 bg-black"></div>
+          <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-15 transition-opacity duration-100"></div>
           <div className="card-header">
             <h5
               className="card-title font-weight-600"
-              style={{ color: `var(--${catalog.fontcolor})` }}
-            >
+              style={{ color: `var(--${catalog.fontcolor})` }}>
               {catalog.title}
             </h5>
           </div>
-          <div key={catalog.id} className="card-body">
+          <div key={catalog.id} className="card-body p-0 mb-0.5">
             <div className="flex justify-center">
-              {catalog.title === "Metas" ? (
-                <IconMetas
-                  className="size-8"
-                  style={{ color: `var(--${catalog.fontcolor})` }}
-                />
-              ) : catalog.title === "Validadores" ? (
-                <IconValidadores
-                  className="size-8"
-                  style={{ color: `var(--${catalog.fontcolor})` }}
-                />
-              ) : catalog.title === "Encargados" ? (
-                <IconEncargados
-                  className="size-8"
-                  style={{ color: `var(--${catalog.fontcolor})` }}
-                />
-              ) : catalog.title === "Catalogos" ? (
-                <IconCatalogos
-                  className="size-8"
-                  style={{ color: `var(--${catalog.fontcolor})` }}
-                />
-              ) : catalog.title === "Scripts" ? (
-                <IconScripts
-                  className="size-8"
-                  style={{ color: `var(--${catalog.fontcolor})` }}
-                />
-              ) : catalog.title === "Pantalla" ? (
-                <IconPantalla
-                  className="size-8"
-                  style={{ color: `var(--${catalog.fontcolor})` }}
-                />
-              ) : (
-                <ExecutiveChart
-                  className="size-8"
-                  style={{ color: `var(--${catalog.fontcolor})` }}
-                />
-              )}
+              <div className="avatar avatar-placeholder">
+                <div
+                  className={`bg-neutral-300/${catalog.iconShadow} text-neutral-content w-15 rounded-full`}>
+                  {catalog.title === "Metas" ? (
+                    <IconMetas
+                      className="size-8"
+                      style={{ color: `var(--${catalog.fontcolor})` }}
+                    />
+                  ) : catalog.title === "Validadores" ? (
+                    <IconValidadores
+                      className="size-8"
+                      style={{ color: `var(--${catalog.fontcolor})` }}
+                    />
+                  ) : catalog.title === "Encargados" ? (
+                    <IconEncargados
+                      className="size-8"
+                      style={{ color: `var(--${catalog.fontcolor})` }}
+                    />
+                  ) : catalog.title === "Catalogos" ? (
+                    <IconCatalogos
+                      className="size-8"
+                      style={{ color: `var(--${catalog.fontcolor})` }}
+                    />
+                  ) : catalog.title === "Scripts" ? (
+                    <IconScripts
+                      className="size-8"
+                      style={{ color: `var(--${catalog.fontcolor})` }}
+                    />
+                  ) : catalog.title === "Pantalla" ? (
+                    <IconPantalla
+                      className="size-8"
+                      style={{ color: `var(--${catalog.fontcolor})` }}
+                    />
+                  ) : (
+                    <ExecutiveChart
+                      className="size-8"
+                      style={{ color: `var(--${catalog.fontcolor})` }}
+                    />
+                  )}
+                </div>
+              </div>
             </div>
           </div>
           <div className="card-footer text-center">
-            <p className="text-base-content group-hover:text-black transition-colors duration-200">Abrir</p>
+            <p
+              className="group-hover:text-black transition-colors duration-200"
+              style={{ color: `var(--${catalog.fontcolor})` }}>
+              Abrir
+            </p>
           </div>
         </div>
       ))}
-      
+
       {/* Modal de Metas */}
       {showMetasModal && (
         <ModalMetasEjecutivos onClose={() => setShowMetasModal(false)} />
@@ -109,32 +123,38 @@ const CardExecutive = () => {
 
       {/* Modal de Pantalla */}
       {showPantallaModal && (
-        <LampshadeFields 
-          isOpen={showPantallaModal} 
-          onClose={() => setShowPantallaModal(false)} 
+        <LampshadeFields
+          isOpen={showPantallaModal}
+          onClose={() => setShowPantallaModal(false)}
         />
       )}
-      
+
       {/* Modal de Validadores */}
       {showValidadoresModal && (
-        <ModalValidadoresEjecutivos onClose={() => setShowValidadoresModal(false)} />
+        <ModalValidadoresEjecutivos
+          onClose={() => setShowValidadoresModal(false)}
+        />
       )}
-      
+
       {/* Modal de Encargados */}
       {showEncargadosModal && (
-        <ModalEncargadosEjecutivos onClose={() => setShowEncargadosModal(false)} />
+        <ModalEncargadosEjecutivos
+          onClose={() => setShowEncargadosModal(false)}
+        />
       )}
-      
+
       {/* Modal de Catálogos */}
       {showCatalogosModal && (
-        <ModalCatalogosEjecutivos onClose={() => setShowCatalogosModal(false)} />
+        <ModalCatalogosEjecutivos
+          onClose={() => setShowCatalogosModal(false)}
+        />
       )}
-      
+
       {/* Modal de Scripts */}
       {showScriptsModal && (
         <ModalScriptsEjecutivos onClose={() => setShowScriptsModal(false)} />
       )}
-      
+
       {/* Modal de Pantalla */}
       {showPantallaModal && (
         <LampshadeFields onClose={() => setShowPantallaModal(false)} />
