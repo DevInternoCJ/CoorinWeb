@@ -1,15 +1,66 @@
 import React, { useState, useEffect } from "react";
-import { getSessions } from '../../../../services/LokiServices';
+import { getSessions, patchLogoutEjecutive, patchUnlockedEjecutive } from '../../../../services/LokiServices';
+import { toast } from 'sonner';
 
 // Tabla de sesiones 
 const TablaSesiones = ({ selectedExecutiveId }) => {
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [loggingOut, setLoggingOut] = useState(null); // Para mostrar estado de logout por ejecutivo
+    const [unlocking, setUnlocking] = useState(null); // Para mostrar estado de desbloqueo por ejecutivo
+    // Función para manejar el desbloqueo del ejecutivo
+    const handleUnlockExecutive = async (rowIdEjecutivo) => {
+        try {
+            setUnlocking(rowIdEjecutivo);
+            const response = await patchUnlockedEjecutive(rowIdEjecutivo);
+            console.log('Desbloqueo exitoso:', response);
+            setSessions(prevSessions => 
+                prevSessions.map(session => 
+                    session.idEjecutivo === rowIdEjecutivo 
+                        ? { ...session, bloqueado: false }
+                        : session
+                )
+            );
+            toast.success(`Ejecutivo desbloqueado: ${rowIdEjecutivo}`);
+        } catch (error) {
+            console.error('Error al desbloquear ejecutivo:', error);
+            toast.error(`Error al desbloquear ejecutivo ID: ${rowIdEjecutivo}. ${error.message || 'Inténtalo de nuevo.'}`);
+        } finally {
+            setUnlocking(null);
+        }
+    };
 
     // Obtener el idEjecutivo del usuario logueado desde localStorage
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+
+    // Función para manejar el logout del ejecutivo
+    const handleLogoutExecutive = async (rowIdEjecutivo) => {
+        try {
+            setLoggingOut(rowIdEjecutivo);
+            
+            const response = await patchLogoutEjecutive(rowIdEjecutivo);
+            console.log('Logout exitoso:', response);
+            
+            // Actualizar la tabla de sesiones después del logout exitoso
+            setSessions(prevSessions => 
+                prevSessions.map(session => 
+                    session.idEjecutivo === rowIdEjecutivo 
+                        ? { ...session, sesionAbierta: false }
+                        : session
+                )
+            );
+            
+            toast.success(`Cierre exitoso para Ejecutivo: ${rowIdEjecutivo}`);
+            
+        } catch (error) {
+            console.error('❌ Error al cerrar sesión:', error);
+            toast.error(`Error al cerrar sesión del ejecutivo ID: ${rowIdEjecutivo}. ${error.message || 'Inténtalo de nuevo.'}`);
+        } finally {
+            setLoggingOut(null);
+        }
+    };
 
     // Efecto para cargar las sesiones cuando cambia el ejecutivo seleccionado
     useEffect(() => {
@@ -27,7 +78,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                 }
 
                 const data = await getSessions({ idEjecutivo: idToUse });
-                console.log('🟢 Respuesta de getSessions:', data);
+                console.log('Respuesta de getSessions:', data);
                 
                 // Obtener solo los subordinados directos, excluyendo el usuario actual
                 let directSubordinates = [];
@@ -53,7 +104,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                     });
                 }
                 
-                console.log('🟢 Subordinados directos:', directSubordinates);
+                console.log('Subordinados directos:', directSubordinates);
                 setSessions(directSubordinates);
             } catch (e) {
                 console.error('Error al obtener las sesiones:', e);
@@ -148,12 +199,35 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                                 </td>
                                 <td style={{ textAlign: 'center' }}>
                                     {session.bloqueado !== undefined ? (
-                                        <input 
-                                            type="checkbox" 
-                                            checked={session.bloqueado} 
-                                            readOnly 
-                                            className="modal-checkbox-small"
-                                        />
+                                        <>
+                                            <input 
+                                                type="checkbox" 
+                                                checked={session.bloqueado} 
+                                                readOnly 
+                                                className="modal-checkbox-small"
+                                                onDoubleClick={() => {
+                                                    // Solo permitir desbloqueo si está bloqueado
+                                                    if (session.bloqueado) {
+                                                        handleUnlockExecutive(session.idEjecutivo);
+                                                    }
+                                                }}
+                                                style={{ 
+                                                    cursor: session.bloqueado ? 'pointer' : 'default',
+                                                    opacity: unlocking === session.idEjecutivo ? 0.5 : 1
+                                                }}
+                                                title={session.bloqueado ? 'Doble clic para desbloquear' : 'No bloqueado'}
+                                            />
+                                            {unlocking === session.idEjecutivo && (
+                                                <div style={{ 
+                                                    display: 'inline-block', 
+                                                    marginLeft: '5px',
+                                                    fontSize: '10px',
+                                                    color: '#666'
+                                                }}>
+                                                    Desbloqueando...
+                                                </div>
+                                            )}
+                                        </>
                                     ) : '---'}
                                 </td>
                                 <td>
@@ -174,8 +248,29 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                                             checked={session.sesionAbierta} 
                                             readOnly 
                                             className="modal-checkbox-small"
+                                            onDoubleClick={() => {
+                                                // Solo permitir logout si la sesión está abierta
+                                                if (session.sesionAbierta) {
+                                                    handleLogoutExecutive(session.idEjecutivo);
+                                                }
+                                            }}
+                                            style={{ 
+                                                cursor: session.sesionAbierta ? 'pointer' : 'default',
+                                                opacity: loggingOut === session.idEjecutivo ? 0.5 : 1
+                                            }}
+                                            title={session.sesionAbierta ? 'Doble clic para cerrar sesión' : 'Sesión ya cerrada'}
                                         />
                                     ) : '---'}
+                                    {loggingOut === session.idEjecutivo && (
+                                        <div style={{ 
+                                            display: 'inline-block', 
+                                            marginLeft: '5px',
+                                            fontSize: '10px',
+                                            color: '#666'
+                                        }}>
+                                            Cerrando...
+                                        </div>
+                                    )}
                                 </td>
                             </tr>
                         ))}

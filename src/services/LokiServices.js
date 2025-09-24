@@ -502,7 +502,7 @@ export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
     const url = `/Encargados/ejecutivos-propios/${idNum}`;
     console.log('📤 Enviando a', url, 'con:', requestData);
     // El interceptor añade el token automáticamente
-    const response = await api.post(url, requestData);
+    const response = await api.get(url, requestData);
     console.log('📥 Respuesta de', url + ':', response.data);
     return response.data;
   } catch (error) {
@@ -564,7 +564,7 @@ export const obetenerDropdownsEncargados = async () => {
     }
     console.log('📤 Enviando a /Encargados/ramificacion (sin body)');
     // El interceptor añade el token automáticamente
-    const response = await api.post('/Encargados/encargados');
+    const response = await api.get('/Encargados/encargados');
     console.log('📥 Respuesta de /Encargados/ramificacion:', response.data);
     return response.data;
   } catch (error) {
@@ -786,6 +786,80 @@ export const historyArchivoUpload = async (body) => {
     return response;
   } catch (error) {
     console.error('Error al obtener historico Archivo:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const patchLogoutEjecutive = async (idEjecutivo) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // Probar enviando solo el array como body
+    const requestData = Array.isArray(idEjecutivo) ? idEjecutivo : [Number(idEjecutivo)];
+    const url = `/Sesiones/logout-ejecutivo/${idEjecutivo}`;
+    console.log('Enviando a', url, 'con:', requestData);
+    const response = await api.patch(url, requestData, {
+      headers: {
+        'Accept': '*/*'
+      }
+    });
+    console.log('Respuesta de', url + ':', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al cerrar sesion:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const patchUnlockedEjecutive = async (idEjecutivo) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // Probar enviando solo el array como body
+    const requestData = Array.isArray(idEjecutivo) ? idEjecutivo : [Number(idEjecutivo)];
+    const url = `Sesiones/unlock-ejecutivo/${idEjecutivo}`;
+    console.log('Enviando a', url, 'con:', requestData);
+    const response = await api.patch(url, requestData, {
+      headers: {
+        'Accept': '*/*'
+      }
+    });
+    console.log('Respuesta de', url + ':', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al desbloquear ejecutivo:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');
