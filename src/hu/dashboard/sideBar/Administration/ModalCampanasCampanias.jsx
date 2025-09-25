@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { campainghInCharge, enabledUnenabledCampaign } from "../../../../services/LokiServices";
+import { campainghInCharge, enabledUnenabledCampaign, campaignDeleteada } from "../../../../services/LokiServices";
 import { toast } from "sonner";
 import NewCampaign from "./NewCampaign";
 
@@ -95,7 +95,22 @@ const ModalCampanasCampanias = () => {
                                 <td>{row.Avance}</td>
                                 <td>{row.NúmeroCuentas}</td>
                                 <td>
-                                    <button className="modal-btn modal-btn-close" style={{ fontSize: 18 }}>&times;</button>
+                                    <button
+                                        className="modal-btn modal-btn-close"
+                                        style={{ fontSize: 18 }}
+                                        onClick={async () => {
+                                            if (!row.idCampaña) return;
+                                            try {
+                                                await campaignDeleteada({ idCampaña: row.idCampaña });
+                                                toast.success(`Campaña "${row.Campaña}" eliminada`);
+                                                await cargarCampanas();
+                                            } catch (e) {
+                                                toast.error("Error al eliminar campaña", e);
+                                            }
+                                        }}
+                                    >
+                                        &times;
+                                    </button>
                                 </td>
                             </tr>
                         ))}
