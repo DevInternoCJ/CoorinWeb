@@ -1,24 +1,27 @@
 
 import React, { useEffect, useState } from "react";
 import { campainghInCharge } from "../../../../services/LokiServices";
+import NewCampaign from "./NewCampaign";
 
 const ModalCampanasCampanias = () => {
     const [campanas, setCampanas] = useState([]);
 
-    useEffect(() => {
-        // Extraer datos del usuario desde localStorage
+    // Función para cargar campañas
+    const cargarCampanas = () => {
         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    const idEncargado = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.id ?? 1;
-    const idCartera = userData?.idCartera ?? userData?.idcartera ?? userData?.cartera ?? 1;
-    const idProducto = userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
-
+        const idEncargado = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.id ?? 1;
+        const idCartera = userData?.idCartera ?? userData?.idcartera ?? userData?.cartera ?? 1;
+        const idProducto = userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
         const params = { idEncargado, idCartera, idProducto };
-        console.log('Enviando a campainghInCharge:', params);
         campainghInCharge(params)
             .then(data => {
                 setCampanas(Array.isArray(data) ? data : [data]);
             })
             .catch(() => setCampanas([]));
+    };
+
+    useEffect(() => {
+        cargarCampanas();
     }, []);
 
     return (
@@ -76,11 +79,8 @@ const ModalCampanasCampanias = () => {
                     </tbody>
                 </table>
             </div>
-            {/* Input y botón Nueva estáticos, siempre visibles y centrados */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: 8, justifyContent: 'center', alignItems: 'center' }}>
-                <input type="text" className="modal-input w-130" placeholder="" />
-                <button className="modal-btn modal-btn-primary">Nueva</button>
-            </div>
+            {/* Componente para crear nueva campaña */}
+            <NewCampaign onCreated={cargarCampanas} />
         </div>
     );
 };
