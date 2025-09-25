@@ -1,10 +1,12 @@
 
 import React, { useEffect, useState } from "react";
-import { campainghInCharge } from "../../../../services/LokiServices";
+import { campainghInCharge, enabledUnenabledCampaign } from "../../../../services/LokiServices";
+import { toast } from "sonner";
 import NewCampaign from "./NewCampaign";
 
 const ModalCampanasCampanias = () => {
     const [campanas, setCampanas] = useState([]);
+    const [updatingId, setUpdatingId] = useState(null);
 
     // Función para cargar campañas
     const cargarCampanas = () => {
@@ -65,7 +67,28 @@ const ModalCampanasCampanias = () => {
                                     </span>
                                 </td>
                                 <td>
-                                    <input type="checkbox" checked={row.Encendida} readOnly />
+                                    <input
+                                        type="checkbox"
+                                        checked={updatingId === row.idCampaña ? !row.Encendida : row.Encendida}
+                                        readOnly
+                                        style={{ cursor: 'pointer' }}
+                                        onDoubleClick={async () => {
+                                            if (!row.idCampaña) return;
+                                            setUpdatingId(row.idCampaña);
+                                            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                                            const idEncargado = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.id ?? 1;
+                                            try {
+                                                const encender = !row.Encendida;
+                                                await enabledUnenabledCampaign({ idCampaña: row.idCampaña, idEncargado, encender });
+                                                toast.success(`Campaña "${row.Campaña}" ${encender ? "encendida" : "apagada"}`);
+                                                await cargarCampanas();
+                                            } catch (e) {
+                                                toast.error("Error al actualizar campaña", e);
+                                            } finally {
+                                                setUpdatingId(null);
+                                            }
+                                        }}
+                                    />
                                 </td>
                                 <td>{row.Usuario}</td>
                                 <td>{row.Campaña}</td>
