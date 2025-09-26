@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import OptionFields from "./OptionFields";
 import { GetScreenFields, SaveScreenFields } from "../../../../services/LokiServices";
 import { useUserStore } from "../../../../contextGlobal/userStore";
+import SaveButton from "../ButtonSave";
 
 const TableEditFields = ({ idProducto }) => {
   const [editData, setEditData] = useState([]);
@@ -141,13 +142,14 @@ const user = useUserStore((state) => state.user);
         </div>
       )}
       <div className="flex justify-end mt-4">
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded shadow"
-          onClick={handleSaveAll}
-          disabled={saving}
-        >
-          {saving ? "Guardando..." : "Guardar"}
-        </button>
+           <SaveButton
+        onClick={handleSaveAll}
+        loading={saving}
+        disabled={editData.length === 0 || saving}
+        size="medium"
+        variant="primary"
+        className="min-w-[120px]"
+      />
         {saveResult && (
           <span className="ml-3 text-xs text-green-700">{saveResult}</span>
         )}

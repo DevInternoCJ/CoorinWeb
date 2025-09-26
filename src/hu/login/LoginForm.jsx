@@ -171,7 +171,7 @@ const LoginForm = ({ onLoginSuccess }) => {
         dias: userInfo.Días,
         jerarquia: userInfo.Jerarquía,
         token: userInfo.Token,
-        cartera: userInfo.Cartera,
+        idCartera: userInfo.idCartera,
         idSucursal: userInfo.idSucursal,
         idArea: userInfo.idÁrea,
         Extensión: userInfo.Extensión,
@@ -186,7 +186,7 @@ const LoginForm = ({ onLoginSuccess }) => {
       });
       try {
         const passwordValidation = await ValidatePassword(
-          { contrasenia: formData.password, servidor: "Cronoss" },
+          { contrasenia: formData.password, servidor: "Thor" },
           idEjecutivo
         );
         console.log(
@@ -216,7 +216,7 @@ const LoginForm = ({ onLoginSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit} className="lg:w-full px-6 text-neutral-900">
-      <h4 className="text-2xl font-bold pt-8 text-center pb-6 text-jerarquia1">
+      <h4 className="text-2xl rounded-lg font-bold py-2 opacity-80 text-center px-2 bg-jerarquia1 text-jerarquia4 my-6">
         Iniciar Sesion
       </h4>
       <InputField
