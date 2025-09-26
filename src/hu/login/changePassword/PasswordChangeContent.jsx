@@ -1,4 +1,3 @@
-// src/components/PasswordChangeContent.jsx
 import React from "react";
 import { ExclamationKey } from "./PasswordIcons";
 import ButtonLogin from '../ButtonLogin'
@@ -22,8 +21,8 @@ const PasswordChangeContent = ({ onAccept }) => {
           </h3>
         </div>
       </div>
-      <div className="mb-8 text-red-800 w-full text-center">
-        <h6 className="text-lg font-semibold mb-2">
+      <div className=" text-red-800 w-full text-center mb-2 bg-jerarquia1 p-2 rounded-lg opacity-80">
+        <h6 className="text-lg font-semibold ">
           Su contraseña expira en {dias} días
         </h6>
         <h6 className="text-lg font-semibold">¿Desea cambiar ahora?</h6>

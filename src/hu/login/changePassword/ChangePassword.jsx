@@ -84,7 +84,7 @@ const ChangePassword = ({ onClose }) => {
       // Llamar al endpoint UpdatePassword con el username
       const response = await UpdatePassword({
         usuario: username, // Usar el username obtenido
-        servidor: "Cronoss",
+        servidor: "Thor",
         nuevaContra: newPassword,
         contra: confirmPassword,
       });
