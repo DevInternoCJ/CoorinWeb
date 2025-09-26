@@ -1,12 +1,13 @@
 
 import React, { useEffect, useState } from "react";
-import { campainghInCharge, enabledUnenabledCampaign, campaignDeleteada } from "../../../../services/LokiServices";
+import { campainghInCharge, enabledUnenabledCampaign, campaignDeleteada, campaignCleaning } from "../../../../services/LokiServices";
 import { toast } from "sonner";
 import NewCampaign from "./NewCampaign";
 
 const ModalCampanasCampanias = () => {
     const [campanas, setCampanas] = useState([]);
     const [updatingId, setUpdatingId] = useState(null);
+    const [modalLimpiar, setModalLimpiar] = useState({ open: false, idCampaña: null, nombre: "" });
 
     // Función para cargar campañas
     const cargarCampanas = () => {
@@ -61,9 +62,15 @@ const ModalCampanasCampanias = () => {
                                 <td>
                                     <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                                         {/* Icono limpiar */}
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" style={{ width: 24, height: 24 }}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
-                                        </svg>
+                                        <button
+                                            className="modal-btn modal-btn-table"
+                                            style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
+                                            onClick={() => setModalLimpiar({ open: true, idCampaña: row.idCampaña, nombre: row.Campaña })}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" style={{ width: 24, height: 24 }}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                                            </svg>
+                                        </button>
                                     </span>
                                 </td>
                                 <td>
@@ -119,6 +126,50 @@ const ModalCampanasCampanias = () => {
             </div>
             {/* Componente para crear nueva campaña */}
             <NewCampaign onCreated={cargarCampanas} />
+            {/* Modal de confirmación para limpiar campaña */}
+            {modalLimpiar.open && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'rgba(0,0,0,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999
+                }}>
+                    <div style={{ background: 'white', borderRadius: 8, padding: 24, minWidth: 320, boxShadow: '0 2px 16px rgba(0,0,0,0.15)' }}>
+                        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 12, color: '#000' }}>Limpiar Campaña</div>
+                        <div style={{ marginBottom: 18, fontSize: 15, color: '#000' }}>
+                            ¿Desea remover todas las cuentas de la campaña "{modalLimpiar.nombre}"?
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+                            <button
+                                className="modal-btn modal-btn-primary"
+                                style={{ minWidth: 60, height: 28, fontSize: 15, color: '#000' }}
+                                onClick={async () => {
+                                    try {
+                                        await campaignCleaning({ idCampaña: modalLimpiar.idCampaña });
+                                        toast.success(`Campaña "${modalLimpiar.nombre}" limpiada`);
+                                        await cargarCampanas();
+                                    } catch (e) {
+                                        toast.error("Error al limpiar campaña", e);
+                                    } finally {
+                                        setModalLimpiar({ open: false, idCampaña: null, nombre: "" });
+                                    }
+                                }}
+                            >Sí</button>
+                            <button
+                                className="modal-btn modal-btn-close"
+                                style={{ minWidth: 60, height: 28, fontSize: 15, color: '#000' }}
+                                onClick={() => setModalLimpiar({ open: false, idCampaña: null, nombre: "" })}
+                            >No</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
