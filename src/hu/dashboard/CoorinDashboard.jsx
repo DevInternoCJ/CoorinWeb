@@ -6,6 +6,7 @@ import TablaSesiones from "../dashboard/board/sessions/TablaSesiones";
 import PlantillasCorreoModal from "../administration/gespa/plantillasCorreos/EmailTemplates";
 import RamificacionSesiones from "../dashboard/board/sessions/RamificacionSesiones";
 import ModalBase from "./sideBar/consultations/ModalBase";
+import ModalBaseCampanas from "./sideBar/Administration/ModalBaseCampanas";
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedExecutiveId, setSelectedExecutiveId] = useState(null);
@@ -52,18 +53,22 @@ export default function CoorinDashboard() {
     setSidebarOpen(false);
 
     // Mapeo de IDs del sidebar a opciones del modal - SOLO CONSULTAS
-    const sidebarOptionsMap = {
-      "2BB": "Lista Negra", // Lista Negra
-      "3BB": "Arrepentimientos", // Arrepentimientos
-      "1BBB": "Pagos", // Pagos
-      "2BBB": "Pagos reportados", // Pagos reportados
-      "3BBB": "Datos Erroneos", // Datos Erróneos
-      "4BBB": "Domicilios", // Domicilios
-      "5BBB": "Correos", // Correos
-      "6BBB": "Búsquedas", // Búsquedas
-      "7BBB": "Ofrecimientos", // Ofrecimientos
-      "8BBB": "Comentarios", // Comentarios
-      "9BBB": "VGP", // VGP
+  const sidebarOptionsMap = {
+  "2BB": "Lista Negra",        // Lista Negra
+  "3BB": "Arrepentimientos",   // Arrepentimientos
+  "1BBB": "Pagos",             // Pagos
+  "2BBB": "Pagos reportados",  // Pagos reportados
+  "3BBB": "Datos Erroneos",    // Datos Erróneos
+  "4BBB": "Domicilios",        // Domicilios
+  "5BBB": "Correos",           // Correos
+  "6BBB": "Búsquedas",         // Búsquedas
+  "7BBB": "Ofrecimientos",     // Ofrecimientos
+  "8BBB": "Comentarios",       // Comentarios
+  "9BBB": "VGP",               // VGP
+  // Campañas en todos los menús
+  "1AA": "Campañas",
+  "1DD": "Campañas",
+  "1EE": "Campañas"
     };
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
@@ -164,14 +169,17 @@ export default function CoorinDashboard() {
           </div>
         </div>
       </div>
-
-      {/* Modal Base para Sidebar */}
-      {modalSidebarOpen && (
-        <ModalBase
-          onClose={() => setModalSidebarOpen(false)}
-          selectedOption={selectedSidebarOption}
-        />
-      )}
+    
+    {/* Modal Base para Sidebar */}
+    {modalSidebarOpen && selectedSidebarOption === "Campañas" && (
+      <ModalBaseCampanas open={modalSidebarOpen} onClose={() => setModalSidebarOpen(false)} />
+    )}
+    {modalSidebarOpen && selectedSidebarOption !== "Campañas" && (
+      <ModalBase 
+        onClose={() => setModalSidebarOpen(false)} 
+        selectedOption={selectedSidebarOption}
+      />
+    )}
     </>
   );
 }

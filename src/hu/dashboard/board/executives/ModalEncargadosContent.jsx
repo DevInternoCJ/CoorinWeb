@@ -4,6 +4,7 @@ import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados } from '../../
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
 import equivalenciasCartera from "../../../../utils/equivalenciasCartera";
 import equivalenciasProducto from "../../../../utils/equivalenciasProducto";
+import { toast } from "sonner";
 // Flecha tipo chevron moderna
 const DropdownArrow = () => (
     <span
@@ -64,7 +65,7 @@ const ModalEncargadosContent = () => {
                 );
             })
             .catch(err => {
-                setError("Error al cargar encargados");
+                toast.error("Error al cargar encargados. Inténtalo de nuevo.", err);
             })
             .finally(() => setLoading(false));
     }, []);
@@ -97,6 +98,7 @@ const ModalEncargadosContent = () => {
                 }
                 setExecutiveTree(tree);
             } catch (e) {
+                toast.error('Error al obtener la jerarquía de ejecutivos. Inténtalo de nuevo.', e);
                 setErrorJerarquia('Error al obtener la jerarquía de ejecutivos');
                 setExecutiveTree([]);
             } finally {

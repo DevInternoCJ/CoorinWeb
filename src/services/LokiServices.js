@@ -341,25 +341,25 @@ export const darkListV2 = async ({ idCartera, selector, dato }) => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
     const params = { idCartera, selector, dato };
-    console.log('📤 Enviando a /ListaNegra/get-lista-negra con:', params);
+    console.log('Enviando a /ListaNegra/get-lista-negra con:', params);
     // El interceptor añade el token automáticamente
     const response = await api.get('/ListaNegra/get-lista-negra', { params });
-    console.log('📥 Respuesta de /ListaNegra/get-lista-negra:', response.data);
+    console.log('Respuesta de /ListaNegra/get-lista-negra:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error al obtener la ListaNegra:', error);
+    console.error('Error al obtener la ListaNegra:', error);
     if (error.response?.status === 401) {
-      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      console.warn('Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
     }
     if (error.response) {
-      console.error('📊 Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
     } else if (error.request) {
-      console.error('❌ No se recibió respuesta del servidor:', error.request);
+      console.error('No se recibió respuesta del servidor:', error.request);
     } else {
-      console.error('❌ Error al configurar la solicitud:', error.message);
+      console.error('Error al configurar la solicitud:', error.message);
     }
     throw error;
   }
@@ -502,7 +502,7 @@ export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
     const url = `/Encargados/ejecutivos-propios/${idNum}`;
     console.log('📤 Enviando a', url, 'con:', requestData);
     // El interceptor añade el token automáticamente
-    const response = await api.post(url, requestData);
+    const response = await api.get(url, requestData);
     console.log('📥 Respuesta de', url + ':', response.data);
     return response.data;
   } catch (error) {
@@ -564,7 +564,7 @@ export const obetenerDropdownsEncargados = async () => {
     }
     console.log('📤 Enviando a /Encargados/ramificacion (sin body)');
     // El interceptor añade el token automáticamente
-    const response = await api.post('/Encargados/encargados');
+    const response = await api.get('/Encargados/encargados');
     console.log('📥 Respuesta de /Encargados/ramificacion:', response.data);
     return response.data;
   } catch (error) {
@@ -743,5 +743,347 @@ export const PostInsertScreen = async (data) => {
     }
     
     throw new Error(error.response?.data?.message || 'Error al crear plantilla');
+  }
+};
+
+// Obtener Historico invidual
+export const historySingle = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('📤 Enviando a /Histórico/individual:', body);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/Histórico/individual', body, {
+      headers: {
+        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json, text/plain, */*',
+        'Content-Type': 'application/json'
+      },
+      responseType: 'blob'
+    });
+    console.log('📥 Respuesta de /Histórico/individual:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obtener historico:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+// Obtener Historico Archivo
+export const historyArchivoUpload = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // Construir FormData
+    const formData = new FormData();
+    // Asume que body es un objeto con las claves necesarias y el archivo
+    Object.entries(body).forEach(([key, value]) => {
+      // Si el valor es un array, agregar cada elemento por separado
+      if (Array.isArray(value)) {
+        value.forEach((v) => formData.append(key, v));
+      } else {
+        formData.append(key, value);
+      }
+    });
+    console.log('Enviando a /Histórico/archivo (FormData):', formData);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/Histórico/archivo', formData, {
+      headers: {
+        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json, text/plain, */*'
+        // No poner Content-Type, el navegador lo gestiona
+      },
+      responseType: 'blob'
+    });
+    console.log('Respuesta de /Histórico/archivo:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obtener historico Archivo:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const patchLogoutEjecutive = async (idEjecutivo) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // Probar enviando solo el array como body
+    const requestData = Array.isArray(idEjecutivo) ? idEjecutivo : [Number(idEjecutivo)];
+    const url = `/Sesiones/logout-ejecutivo/${idEjecutivo}`;
+    console.log('Enviando a', url, 'con:', requestData);
+    const response = await api.patch(url, requestData, {
+      headers: {
+        'Accept': '*/*'
+      }
+    });
+    console.log('Respuesta de', url + ':', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al cerrar sesion:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const patchUnlockedEjecutive = async (idEjecutivo) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // Probar enviando solo el array como body
+    const requestData = Array.isArray(idEjecutivo) ? idEjecutivo : [Number(idEjecutivo)];
+    const url = `Sesiones/unlock-ejecutivo/${idEjecutivo}`;
+    console.log('Enviando a', url, 'con:', requestData);
+    const response = await api.patch(url, requestData, {
+      headers: {
+        'Accept': '*/*'
+      }
+    });
+    console.log('Respuesta de', url + ':', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al desbloquear ejecutivo:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+// Nuevo endpoint para Lista Negra con parámetros
+export const campainghInCharge = async ({ idEncargado, idCartera, idProducto }) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    const url = `/campañas/campañas-encargado/${idEncargado}/${idCartera}/${idProducto}`;
+    console.log('Enviando a', url, 'con:', { idEncargado, idCartera, idProducto });
+    // El interceptor añade el token automáticamente
+    const response = await api.get(url, {
+      headers: {
+        Accept: '*/*'
+      }
+    });
+    console.log('Respuesta de', url + ':', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener la Campañas de encargado:', error);
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const newCampaign = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('📤 Enviando a /carteras/nueva-campania:', body);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/carteras/nueva-campania', body, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('📥 Respuesta de /carteras/nueva-campania:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al crear campaña:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const enabledUnenabledCampaign = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+  const { idCampaña, ...rest } = body;
+  const url = `/campañas/habilitar-deshabilitar/${idCampaña}`;
+    console.log('📤 Enviando a', url, 'con:', rest);
+    // El interceptor añade el token automáticamente
+    const response = await api.patch(url, rest, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('📥 Respuesta de', url + ':', response);
+    return response;
+  } catch (error) {
+    console.error('Error al encender o apagar campaña:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+export const campaignDeleteada = async ({ idCampaña }) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    const params = { idCampaña };
+    console.log('Enviando a /carteras/eliminar-campania con:', params);
+    // El interceptor añade el token automáticamente
+    const response = await api.delete('/carteras/eliminar-campania', {
+      params,
+      headers: {
+        'Accept': '*/*'
+      }
+    });
+    console.log('Respuesta de /carteras/eliminar-campania:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar campaña:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const campaignCleaning = async ({ idCampaña }) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    const params = { idCampaña };
+    console.log('Enviando a /carteras/limpiar-campania con:', params);
+    // El interceptor añade el token automáticamente
+    const response = await api.put('/carteras/limpiar-campania', {}, {
+      params,
+      headers: {
+        'Accept': '*/*'
+      }
+    });
+    console.log('Respuesta de /carteras/limpiar-campania:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al limpiar la campaña:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
   }
 };
