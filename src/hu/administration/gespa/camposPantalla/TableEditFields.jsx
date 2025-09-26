@@ -10,7 +10,7 @@ const TableEditFields = ({ idProducto }) => {
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saveResult, setSaveResult] = useState(null);
-  const servidor = "Cronoss";
+  const servidor = "Thor";
 
 const user = useUserStore((state) => state.user);
   console.log("Datos de usuario en el store:", user);
