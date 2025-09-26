@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import ModalFilasCampañas from "./ModalFilasCampanias";
 import { campainghInCharge, enabledUnenabledCampaign, campaignDeleteada, campaignCleaning } from "../../../../services/LokiServices";
 import { toast } from "sonner";
 import NewCampaign from "./NewCampaign";
@@ -8,6 +9,8 @@ const ModalCampanasCampanias = () => {
     const [campanas, setCampanas] = useState([]);
     const [updatingId, setUpdatingId] = useState(null);
     const [modalLimpiar, setModalLimpiar] = useState({ open: false, idCampaña: null, nombre: "" });
+    const [modalFilas, setModalFilas] = useState({ open: false, cartera: "American Express" });
+    const [tipoFilas, setTipoFilas] = useState("archivo");
 
     // Función para cargar campañas
     const cargarCampanas = () => {
@@ -30,27 +33,36 @@ const ModalCampanasCampanias = () => {
     return (
         <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col" style={{ minWidth: 0 }}>
             <div className="flex items-center mb-2 w-full">
-                <span className="modal-span-1 pl-1 mr-4" style={{ color: "var(--color-jerarquia2)" }}>Campañas - </span>
+                    <span className="modal-span-1 pl-1 mr-4" style={{ color: "var(--color-jerarquia2)" }}>
+                        Campañas - {campanas.length}
+                    </span>
             </div>
             <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: "31vh", height: "100%", flex: 1 }} className="scrollbar-gray">
                 <table className="modal-table mb-2">
                     <thead>
                         <tr>
-                            <th>Filas</th>
-                            <th>Limpiar</th>
-                            <th>Encendida</th>
-                            <th>Creó</th>
-                            <th>Nombre</th>
-                            <th>Avance</th>
-                            <th>Cuentas</th>
-                            <th>Eliminar</th>
+                            <th style={{ textAlign: 'center' }}>Filas</th>
+                            <th style={{ textAlign: 'center' }}>Limpiar</th>
+                            <th style={{ textAlign: 'center' }}>Encendida</th>
+                            <th style={{ textAlign: 'center' }}>Creó</th>
+                            <th style={{ textAlign: 'center' }}>Nombre</th>
+                            <th style={{ textAlign: 'center' }}>Avance</th>
+                            <th style={{ textAlign: 'center' }}>Cuentas</th>
+                            <th style={{ textAlign: 'center' }}>Eliminar</th>
                         </tr>
                     </thead>
                     <tbody>
                         {campanas.map((row, i) => (
                             <tr key={i}>
-                                <td>
-                                    <button className="modal-btn modal-btn-table" style={{ padding: 0, background: 'transparent', border: 'none' }}>
+                                <td style={{ textAlign: 'center' }}>
+                                    <button
+                                        className="modal-btn modal-btn-table"
+                                        style={{ padding: 0, background: 'transparent', border: 'none', cursor: 'pointer' }}
+                                        onClick={() => {
+                                            setModalFilas({ open: true, cartera: "American Express" });
+                                            setTipoFilas("archivo"); // Selecciona Archivo por defecto
+                                        }}
+                                    >
                                         <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                                             {/* Icono de filas */}
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" style={{ width: 24, height: 24 }}>
@@ -59,7 +71,7 @@ const ModalCampanasCampanias = () => {
                                         </span>
                                     </button>
                                 </td>
-                                <td>
+                                <td style={{ textAlign: 'center' }}>
                                     <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                                         {/* Icono limpiar */}
                                         <button
@@ -73,7 +85,7 @@ const ModalCampanasCampanias = () => {
                                         </button>
                                     </span>
                                 </td>
-                                <td>
+                                <td style={{ textAlign: 'center' }}>
                                     <input
                                         type="checkbox"
                                         checked={updatingId === row.idCampaña ? !row.Encendida : row.Encendida}
@@ -97,11 +109,11 @@ const ModalCampanasCampanias = () => {
                                         }}
                                     />
                                 </td>
-                                <td>{row.Usuario}</td>
-                                <td>{row.Campaña}</td>
-                                <td>{row.Avance}</td>
-                                <td>{row.NúmeroCuentas}</td>
-                                <td>
+                                <td style={{ textAlign: 'center' }}>{row.Usuario}</td>
+                                <td style={{ textAlign: 'center' }}>{row.Campaña}</td>
+                                <td style={{ textAlign: 'center' }}>{row.Avance}</td>
+                                <td style={{ textAlign: 'center' }}>{row.NúmeroCuentas}</td>
+                                <td style={{ textAlign: 'center' }}>
                                     <button
                                         className="modal-btn modal-btn-close"
                                         style={{ fontSize: 18 }}
@@ -126,7 +138,12 @@ const ModalCampanasCampanias = () => {
             </div>
             {/* Componente para crear nueva campaña */}
             <NewCampaign onCreated={cargarCampanas} />
-            {/* Modal de confirmación para limpiar campaña */}
+            {/* Modal visual de Filas de trabajo (Promesa Midprimes) */}
+            <ModalFilasCampañas
+                open={modalFilas.open}
+                onClose={() => setModalFilas({ open: false, cartera: "American Express" })}
+                cartera={modalFilas.cartera}
+            />
             {modalLimpiar.open && (
                 <div style={{
                     position: 'fixed',
