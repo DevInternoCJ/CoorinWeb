@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace Loki.DbAllocation.ModelsCronoss;
+
+public partial class FechasAsignaciónOficial
+{
+    public short IdProducto { get; set; }
+
+    public int IdLogProceso { get; set; }
+
+    public DateOnly FechaVálidoDesde { get; set; }
+
+    public DateOnly? FechaVálidoHasta { get; set; }
+
+    public virtual Producto IdProductoNavigation { get; set; } = null!;
+}

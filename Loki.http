@@ -1,0 +1,15 @@
+<<<<<<< HEAD
+@Loki_HostAddress = http://localhost:5258
+
+GET {{Loki_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+=======
+@Loki_HostAddress = http://localhost:5258
+
+GET {{Loki_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+>>>>>>> origin/Mark-Historico/PlantillaCorreo

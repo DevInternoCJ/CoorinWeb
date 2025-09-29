@@ -1,0 +1,44 @@
+# --- Archivos y directorios de compilación ---
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.log
+
+# --- Archivos de usuario y sistema ---
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vs/
+*.vscode/
+.idea/
+
+# --- Archivos de dependencias ---
+packages/
+*.nupkg
+*.snupkg
+
+# --- Configuración sensible ---
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+secrets.json
+
+# --- Claves y certificados ---
+*.pem
+*.key
+*.pfx
+*.cer
+*.crt
+
+# --- Otros archivos innecesarios ---
+[Tt]humbs.db
+[Dd]esktop.ini
+*.DS_Store

@@ -1,0 +1,81 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace Loki.DbCollection.ModelsCronoss;
+
+public partial class ExtraProducto51
+{
+    public string IdCuenta { get; set; } = null!;
+
+    public string? SdocontI2 { get; set; }
+
+    public string? DiasmIni2 { get; set; }
+
+    public string? MinimoIni2 { get; set; }
+
+    public string? MoraaplcI { get; set; }
+
+    public string? MoracontI2 { get; set; }
+
+    public string? Solicitud2 { get; set; }
+
+    public string? VencidIni2 { get; set; }
+
+    public string? MoraaplcI2 { get; set; }
+
+    public string? GranTotalFacturas { get; set; }
+
+    public string? Intereses { get; set; }
+
+    public string? Mantenimiento { get; set; }
+
+    public string? Rentas { get; set; }
+
+    public string? RentasAdicionales { get; set; }
+
+    public string? Segmento { get; set; }
+
+    public string? Seguros { get; set; }
+
+    public string? EquipoCall { get; set; }
+
+    public string? Derechos { get; set; }
+
+    public string? Facturas { get; set; }
+
+    public string? Intereses1 { get; set; }
+
+    public string? Mantenimiento1 { get; set; }
+
+    public string? Rentas1 { get; set; }
+
+    public string? RentasAdicionales1 { get; set; }
+
+    public string? Seguros1 { get; set; }
+
+    public string? GranTotal { get; set; }
+
+    public string? MontoFacturas { get; set; }
+
+    public string? MontoInteres { get; set; }
+
+    public string? IdSap { get; set; }
+
+    public string? TotalFacturas { get; set; }
+
+    public string? TotalIntereses { get; set; }
+
+    public string? Contratos { get; set; }
+
+    public string? Cliente { get; set; }
+
+    public string? Derechos1 { get; set; }
+
+    public string? Personas { get; set; }
+
+    public string? Referencia { get; set; }
+
+    public string? MoraAplcI2 { get; set; }
+
+    public string? MoraContI2 { get; set; }
+}
