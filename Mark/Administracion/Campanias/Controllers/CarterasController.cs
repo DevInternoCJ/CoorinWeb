@@ -26,55 +26,55 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
             _dbContFactory = contextfactory;
         }
-        [HttpGet("get-carteras")]
-        [Authorize]
-        [SwaggerOperation(
-            Summary = "Carteras",
-            Description = "obtiene una lista de carteras existentes del servidor"
-            )]
-        public async Task<IActionResult> GetCuentas([FromQuery] string tipoBase)
-        {
-            // Extraer el servidor del token
-            //var servidorClaim = User.Claims.FirstOrDefault(c => c.Type == "servidor");
-            string? servidorClaim = User.FindFirst("Servidor")?.Value;
-            if (string.IsNullOrWhiteSpace(servidorClaim))
-            {
-                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-            }
-            //var servidor = servidorClaim.Value;
+        //[HttpGet("get-carteras")]
+        //[Authorize]
+        //[SwaggerOperation(
+        //    Summary = "Carteras",
+        //    Description = "obtiene una lista de carteras existentes del servidor"
+        //    )]
+        //public async Task<IActionResult> GetCuentas([FromQuery] string tipoBase)
+        //{
+        //    // Extraer el servidor del token
+        //    //var servidorClaim = User.Claims.FirstOrDefault(c => c.Type == "servidor");
+        //    string? servidorClaim = User.FindFirst("Servidor")?.Value;
+        //    if (string.IsNullOrWhiteSpace(servidorClaim))
+        //    {
+        //        return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+        //    }
+        //    //var servidor = servidorClaim.Value;
 
-            if (string.IsNullOrWhiteSpace(tipoBase))
-            {
-                return BadRequest(new { error = "El tipo de base es obligatorio." });
-            }
-            var cuentas = await _carterasService.GetCarteras(servidorClaim, tipoBase);
-            if (cuentas == null || cuentas.Count == 0)
-            {
-                return NotFound(new { error = "No se encontraron cuentas." });
-            }
-            return Ok(cuentas);
-        }
+        //    if (string.IsNullOrWhiteSpace(tipoBase))
+        //    {
+        //        return BadRequest(new { error = "El tipo de base es obligatorio." });
+        //    }
+        //    var cuentas = await _carterasService.GetCarteras(servidorClaim, tipoBase);
+        //    if (cuentas == null || cuentas.Count == 0)
+        //    {
+        //        return NotFound(new { error = "No se encontraron cuentas." });
+        //    }
+        //    return Ok(cuentas);
+        //}
 
 
-        [HttpGet("get-carteras-productos")]
-        [Authorize]
-        [SwaggerOperation(
-            Summary = "Obtener carteras productos",
-            Description = ""
-            )]
-        public async Task<IActionResult> GetCuentasProductos(string servidor, string tipobase)
-        {
-            if (string.IsNullOrWhiteSpace(servidor) || string.IsNullOrWhiteSpace(tipobase))
-            {
-                return BadRequest(new { error = "Servidor y tipo de base son obligatorios." });
-            }
-            var cuentas = await _carterasService.GetCarterasProductos(servidor, tipobase);
-            if (cuentas == null || cuentas.Count == 0)
-            {
-                return NotFound(new { error = "No se encontraron cuentas." });
-            }
-            return Ok(cuentas);
-        }
+        //[HttpGet("get-carteras-productos")]
+        //[Authorize]
+        //[SwaggerOperation(
+        //    Summary = "Obtener carteras productos",
+        //    Description = ""
+        //    )]
+        //public async Task<IActionResult> GetCuentasProductos(string servidor, string tipobase)
+        //{
+        //    if (string.IsNullOrWhiteSpace(servidor) || string.IsNullOrWhiteSpace(tipobase))
+        //    {
+        //        return BadRequest(new { error = "Servidor y tipo de base son obligatorios." });
+        //    }
+        //    var cuentas = await _carterasService.GetCarterasProductos(servidor, tipobase);
+        //    if (cuentas == null || cuentas.Count == 0)
+        //    {
+        //        return NotFound(new { error = "No se encontraron cuentas." });
+        //    }
+        //    return Ok(cuentas);
+        //}
 
         [HttpPost("nueva-campania")]
         [Authorize]
@@ -177,7 +177,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         [AllowAnonymous]
         [SwaggerOperation(
            Summary = "Asigna ejecutivos",
-            Description = "Se asigna una campaña encendida a cierto ejecutivo"
+            Description = "Se asigna un ejecutivo a la campaña indicada"
            )]
         public async Task<ActionResult<string>> AsignaEjecutivoCampaña([FromQuery] bool inserta, int idCampaña, [FromQuery] int idEjecutivo)
         {
@@ -202,7 +202,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
         [HttpGet("FilasRestantesPorCampaña")]
         [SwaggerOperation(
-        Summary = "Filas restantes por campaña",
+        Summary = "Actualiza avance",
             Description = "Se obtiene un registro de las filas restantes por idcampaña"
         //Descripcion = ""
         )]
@@ -289,7 +289,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
         [HttpPost("carga-filas-consultas")]
         [SwaggerOperation(
-        Summary = "Carga filas de consultas",
+        Summary = "Carga consulta filas",
         Description = "Ejecuta una consulta y procesa los resultados e inserta las " +
             "filas en la tabla FilasDeTrabajo. Permite incluir opcionalmente los campos idEjecutivo y NúmeroTelefónico. " +
             "También actualiza el número de cuentas asociadas a la campaña."
@@ -318,7 +318,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
         [HttpPost("crea-tabla-filasTemp")]
         [SwaggerOperation(
-            Summary = "Crea Tabla Filas Temp",
+            Summary = "Carga Archivo Filas",
             Description = "crea una tabla temporal con el idcampaña especificado la cual a partir de ahi se formará el nombre de la tabla, la cual se almacena en dbmemory"
             )]
         public async Task<IActionResult> CreaTablaFilasTemp(

@@ -50,7 +50,7 @@ namespace Loki.Mark.Administracion.Campanias.Controllers
 
 		[HttpGet("carteras-productos")]
 		[SwaggerOperation(
-			Summary = "Carteras",
+			Summary = "Carteras productos",
 			Description = "Devuelve todas las carteras activas actualmente en el servidor."
 		)]
 		[ProducesResponseType(StatusCodes.Status200OK)]

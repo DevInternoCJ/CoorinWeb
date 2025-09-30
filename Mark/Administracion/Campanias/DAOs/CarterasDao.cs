@@ -190,6 +190,22 @@ namespace Loki.Mark.Administracion.Carteras.DAOs
 
             return result;
         }
+
+        //carga filas para parametro de consulta
+        public async Task<dynamic?> CargaFilasConsulta(string consulta, string servidor)
+        {
+            var paramIdConsulta = new SqlParameter("@consulta", consulta.ToString());
+          
+            var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
+            var result = await _daoBase.ExecuteStoredProcedure(
+                dbContext,
+                "[AMS].[CargaFilasConsulta]",
+                paramIdConsulta
+
+            );
+
+            return result;
+        }
         public async Task<dynamic?> CreaTablaFilasTemp(int idcampaña, string servidor)
         {
             var paramIdCampaña = new SqlParameter("@idCampaña", idcampaña.ToString());
