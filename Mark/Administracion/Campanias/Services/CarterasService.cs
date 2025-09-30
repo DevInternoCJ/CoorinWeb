@@ -106,6 +106,19 @@ namespace Loki.Mark.Administracion.Carteras.Services
             }
             return resultado;
         }
+        public async Task<IEnumerable<dynamic>?> EjecutivoDeCampaña(int idCampaña, string servidor)
+        {
+            var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
 
+            var connection = (SqlConnection)dbContext.Database.GetDbConnection();
+
+            var result = await _daoBase.ExecuteStoredProcedureAsList(
+                connection,
+                "[AMS].[EjecutivosEnCampaña]",
+                new { idCampaña } // Pasar el parámetro al stored procedure
+            );
+
+            return result;
+        }
     }
 }

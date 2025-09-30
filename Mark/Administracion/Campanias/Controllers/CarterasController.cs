@@ -337,6 +337,39 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
             }
             return Ok(resultado);
         }
+        [HttpGet("Ejecutivos_en-Campaña")]
+        [AllowAnonymous]
+        [SwaggerOperation(
+           Summary = "Ejecutivos en campaña",
+           Description = "lista de los ejecutivos existentes en una campaña"
+           //Descripcion = ""
+           )]
+        public async Task<IActionResult> EejecutivosEnCampaña([FromQuery] int idCampaña)
+        {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+            {
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+            }
+
+            if (idCampaña <= 0)
+                return BadRequest("El parámetro 'idCampaña' es inválido.");
+            try
+            {
+                var resultado = await _carterasService.EjecutivoDeCampaña(idCampaña, servidorClaim);
+                return resultado == null || !resultado.Any()
+                    ? NotFound("No se encontraron datos.")
+                    : Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return ex is ArgumentException
+                    ? BadRequest(ex.Message)
+                    : StatusCode(500, $"Error inesperado: {ex.Message}");
+            }
+        }
+
     }
 }
 

@@ -11,6 +11,7 @@ namespace Loki.Mark.Administracion.Carteras.Interfaces
 
         Task<IEnumerable<dynamic>?> FilasRestantesPorCampaña(string servidor);
         Task<List<Dictionary<string, object>>> Top100Filas(int idCampaña, string servidor);
+        Task<IEnumerable<dynamic>?> EjecutivoDeCampaña(int idCampaña, string servidor);
 
 
     }

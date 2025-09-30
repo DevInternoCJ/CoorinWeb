@@ -78,47 +78,46 @@ namespace Loki.Mark.Administracion.Metas.Controllers
         }
         [HttpPost("establecer-metasproductividad")]
         [SwaggerOperation(
-     Summary = "Establecer metas productividad",
-     Description = "Define datos para la meta del ejecutivo."
- )]
+Summary = "Establecer metas productividad",
+Description = "Define datos para la meta del ejecutivo."
+)]
         [Authorize]
         public async Task<IActionResult> EstablecerMetasEjecutivos([FromBody] EjecutivosMetasDto model)
         {
             if (!ModelState.IsValid)
             {
-                // 1. Manejo de error de modelo (datos de entrada inválidos)
                 return BadRequest(new { errors = "Datos de entrada inválidos." });
             }
 
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
             if (string.IsNullOrWhiteSpace(servidorClaim))
             {
-                // 2. Manejo de error de claim de token
                 return BadRequest(new { errors = "No se encontró el claim 'Servidor' en el token." });
             }
 
             var result = await _metasDao.EstableceMetaEjecutivo(model, servidorClaim);
 
-            // 3. Manejo de errores específicos del DAO (e.g., no encontrado)
             if (result.Result is NotFoundObjectResult notFoundResult)
             {
                 return notFoundResult;
             }
-            if (result.Value != null && result.Value.AffectedRows > 0)
-            {
-                return Ok(new
-                {
-                    success = true,
-                    message = "Meta de ejecutivo guardada exitosamente.",
-                    affectedRows = result.Value.AffectedRows
-                });
-            }
-   
-            else
+
+            if (result.Result is OkObjectResult okResult)
             {
 
-                return StatusCode(500, new { errors = "Error al guardar la meta del ejecutivo o ninguna fila fue afectada." });
+                dynamic daoResponse = okResult.Value;
+                if (daoResponse != null && daoResponse.success)
+                {
+                    return Ok(new
+                    {
+                        //success = true,
+                        message = "Meta de ejecutivo guardada exitosamente.",
+                        //affectedRows = daoResponse.affectedRows
+                    });
+                }
             }
+
+            return StatusCode(500, new { errors = "Error al guardar la meta del ejecutivo." });
         }
     }
 }
