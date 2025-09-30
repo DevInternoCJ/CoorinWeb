@@ -7,6 +7,9 @@ const PRODUCT_OPTIONS = [
   { label: "Producto", value: 0 },
   { label: "Amex", value: 1 },
 ];
+const CARTERA_OPTIONS = [
+  { label: "American Express", value: "American Express" }
+];
 
 const WalletSection = ({
   selectedProduct,
@@ -57,10 +60,11 @@ const WalletSection = ({
           <label className="block text-sm font-medium text-jerarquia2 mb-1">
             Cartera
           </label>
-          <CustomSelect
-            options={["American Express"]}
-            defaultValue="American Express"
-          />
+          
+<CustomSelect
+  options={CARTERA_OPTIONS}
+  defaultValue={CARTERA_OPTIONS[0].value}
+/>
         </div>
         {/* Select de Producto */}
         <div>
@@ -68,13 +72,12 @@ const WalletSection = ({
             Producto
           </label>
           <CustomSelect
-            options={PRODUCT_OPTIONS.map((opt) => opt.label)}
-            onChange={(label) => {
-              const found = PRODUCT_OPTIONS.find((opt) => opt.label === label);
-              const selected = found ? { ...found } : null;
-              setSelectedProduct(selected);
-            }}
-          />
+  options={PRODUCT_OPTIONS}
+  onChange={(value) => {
+    const found = PRODUCT_OPTIONS.find((opt) => opt.value === Number(value) || opt.value === value);
+    setSelectedProduct(found ? { ...found } : null);
+  }}
+/>
           {loading && (
             <p className="text-xs text-gray-400 mt-1">
               Verificando producto...
