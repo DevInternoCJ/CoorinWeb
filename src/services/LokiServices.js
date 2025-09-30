@@ -1124,3 +1124,82 @@ export const topCampaign = async ({ idCampaña }) => {
     throw error;
   }
 };
+
+
+
+
+export const CreatedTableTempFilas = async (idCampaña) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    const NombreTabla = `FilasTemp_${idCampaña}`;
+    const payload = { NombreTabla };
+    const url = `/carteras/crea-tabla-filasTemp?idCampaña=${idCampaña}`;
+    console.log('Enviando a', url, payload);
+    // El interceptor añade el token automáticamente
+    const response = await api.post(url, payload, {
+      headers: {
+        'Accept': '*/*',
+      }
+    });
+    console.log('Respuesta de /carteras/nueva-campania:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al crear tabla temporal de filas cargadas:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const CargaFilasExcel = async (idCampaña, idCartera) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // El nombre de la tabla debe ser solo con el idCampaña
+    const NombreTabla = `FilasTemp_${idCampaña}`;
+    const payload = { NombreTabla };
+    const url = `/carteras/carga-filas?idCampaña=${idCampaña}&idCartera=${idCartera}`;
+    console.log('Enviando a', url, payload);
+    // El interceptor añade el token automáticamente
+    const response = await api.post(url, payload, {
+      headers: {
+        'Accept': '*/*',
+      }
+    });
+    console.log('Respuesta de /carteras/carga-filas:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al cargar filas excel:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};

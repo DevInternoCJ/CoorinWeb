@@ -11,7 +11,7 @@ const ModalCampanasCampanias = () => {
     const [updatingId, setUpdatingId] = useState(null);
     const [modalLimpiar, setModalLimpiar] = useState({ open: false, idCampaña: null, nombre: "" });
     const [modalTop100, setModalTop100] = useState({ open: false, idCampaña: null });
-    const [modalFilas, setModalFilas] = useState({ open: false, cartera: "American Express" });
+    const [modalFilas, setModalFilas] = useState({ open: false, cartera: "American Express", idCampaña: null });
     const [tipoFilas, setTipoFilas] = useState("archivo");
 
     // Función para cargar campañas
@@ -67,7 +67,7 @@ const ModalCampanasCampanias = () => {
                                         className="modal-btn modal-btn-table"
                                         style={{ padding: 0, background: 'transparent', border: 'none', cursor: 'pointer' }}
                                         onClick={() => {
-                                            setModalFilas({ open: true, cartera: "American Express" });
+                                            setModalFilas({ open: true, cartera: "American Express", idCampaña: row.idCampaña });
                                             setTipoFilas("archivo"); // Selecciona Archivo por defecto
                                         }}
                                     >
@@ -159,8 +159,9 @@ const ModalCampanasCampanias = () => {
             {/* Modal visual de Filas de trabajo (Promesa Midprimes) */}
             <ModalFilasCampañas
                 open={modalFilas.open}
-                onClose={() => setModalFilas({ open: false, cartera: "American Express" })}
+                onClose={() => setModalFilas({ open: false, cartera: "American Express", idCampaña: null })}
                 cartera={modalFilas.cartera}
+                idCampaña={modalFilas.idCampaña}
             />
             {modalLimpiar.open && (
                 <div style={{
