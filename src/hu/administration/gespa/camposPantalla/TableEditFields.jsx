@@ -14,7 +14,9 @@ const TableEditFields = ({ idProducto }) => {
 
   const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;
-  const jerarquía = user?.Jerarquía;
+  console.log("Datos de usuario en el store:", idEjecutivo);
+  const Jerarquía = user?.Jerarquía;
+  console.log (" Jerarquia: ", Jerarquía);
 
   useEffect(() => {
     if (!idProducto || idProducto === 0) return;
@@ -62,7 +64,7 @@ const TableEditFields = ({ idProducto }) => {
     const payload = {
       idProducto,
       idEjecutivo,
-      jerarquía,
+      Jerarquía,
       campos,
     };
     try {

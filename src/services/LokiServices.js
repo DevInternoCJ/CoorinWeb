@@ -89,59 +89,60 @@ export const loginUser = async (userData) => {
 };
 
 //(userData, idEjecutivo)
-export const ValidatePassword = async () => {
-  try {
-    const requestData = {
-      // contrasenia: userData.contrasenia,
-      // servidor: "Cronoss",
-      // idEjecutivo
-    };
-    console.log('📤 Enviando a /Auth/validar-contrasenia:', requestData);
-    const response = await api.post('/Auth/validar-contrasenia', requestData);
-    console.log('📥 Respuesta de /Auth/validar-contrasenia:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ Error en validación de contraseña:', error);
-    throw error;
-  }
-};
-// export const ValidatePassword = async (userData, idEjecutivo) => {
+// export const ValidatePassword = async () => {
 //   try {
 //     const requestData = {
-//       contrasenia: userData.contrasenia,
-//       servidor: "Cronoss",
-//       idEjecutivo
+//       // contrasenia: userData.contrasenia,
+//       // servidor: "Cronoss",
+//       // idEjecutivo
 //     };
-
 //     console.log('📤 Enviando a /Auth/validar-contrasenia:', requestData);
-
-//     const response = await api.post('/Auth/validar-contrasenia', requestData, {
-//       headers: {
-//         'Accept': 'text/plain', // Aceptar respuesta como texto plano
-//         'Content-Type': 'application/json' // Enviar como JSON
-//       },
-//       transformResponse: [(data) => {
-//         // No transformar la respuesta, dejarla como texto plano
-//         return data;
-//       }]
-//     });
-
+//     const response = await api.post('/Auth/validar-contrasenia', requestData);
 //     console.log('📥 Respuesta de /Auth/validar-contrasenia:', response.data);
 //     return response.data;
 //   } catch (error) {
 //     console.error('❌ Error en validación de contraseña:', error);
-
-//     // Si la respuesta es texto plano, asegurarnos de capturarla correctamente
-//     if (error.response && typeof error.response.data === 'string') {
-//       // Crear un nuevo error con el mensaje correcto
-//       const customError = new Error(error.response.data);
-//       customError.response = error.response;
-//       throw customError;
-//     }
-
 //     throw error;
 //   }
 // };
+
+export const ValidatePassword = async (userData, idEjecutivo) => {
+  try {
+    const requestData = {
+      contrasenia: userData.contrasenia,
+      servidor: "Cronoss",
+      idEjecutivo
+    };
+
+    console.log('📤 Enviando a /Auth/validar-contrasenia:', requestData);
+
+    const response = await api.post('/Auth/validar-contrasenia', requestData, {
+      headers: {
+        'Accept': 'text/plain', // Aceptar respuesta como texto plano
+        'Content-Type': 'application/json' // Enviar como JSON
+      },
+      transformResponse: [(data) => {
+        // No transformar la respuesta, dejarla como texto plano
+        return data;
+      }]
+    });
+
+    console.log('📥 Respuesta de /Auth/validar-contrasenia:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error en validación de contraseña:', error);
+
+    // Si la respuesta es texto plano, asegurarnos de capturarla correctamente
+    if (error.response && typeof error.response.data === 'string') {
+      // Crear un nuevo error con el mensaje correcto
+      const customError = new Error(error.response.data);
+      customError.response = error.response;
+      throw customError;
+    }
+
+    throw error;
+  }
+};
 
 // Actualizar contraseña (versión optimizada)
 export const UpdatePassword = async (passwordData) => {
@@ -743,5 +744,47 @@ export const PostInsertScreen = async (data) => {
     }
     
     throw new Error(error.response?.data?.message || 'Error al crear plantilla');
+  }
+};
+
+// Guardar plantilla 
+export const SaveCreateTemplate = async (payload) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('📤 Enviando a /PlantillasCorreo/crear-plantilla:', payload);
+    console.log('🔑 Token disponible:', token);
+    const response = await api.post(
+      '/PlantillasCorreo/crear-plantilla',
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log('📥 Respuesta de /PlantillasCorreo/crear-plantilla', response.data);
+    return response.data;
+  } catch (error) {
+    
+    console.error('❌ Error al guardar platilla', error);
+    // Manejo específico de errores de autenticación
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    // Mostrar más detalles del error
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
   }
 };

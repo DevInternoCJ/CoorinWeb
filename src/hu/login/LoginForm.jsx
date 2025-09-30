@@ -169,7 +169,7 @@ const LoginForm = ({ onLoginSuccess }) => {
         usuario: userInfo.Usuario,
         nombre: userInfo.NombreEjecutivo,
         dias: userInfo.Días,
-        jerarquia: userInfo.Jerarquía,
+        Jerarquía: userInfo.Jerarquía,
         token: userInfo.Token,
         idCartera: userInfo.idCartera,
         idSucursal: userInfo.idSucursal,
