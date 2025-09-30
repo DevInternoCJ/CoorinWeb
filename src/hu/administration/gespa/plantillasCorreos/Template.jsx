@@ -1,43 +1,37 @@
-import React, { useState } from 'react';
-import CustomSelect from '../camposPantalla/SelectWallet';
-import { PostInsertScreen } from '../../../../services/LokiServices';
+import React, { useState } from "react";
+import CustomSelect from "../camposPantalla/SelectWallet";
+import ButtonSave from "../ButtonSave";
+import { SaveCreateTemplate}  from "../../../../services/LokiServices";
+import { useUserStore } from "../../../../contextGlobal/userStore";
 
-const Template = ({saldo}) => {
-  const [titulo, setTitulo] = useState('');
-  const [mensaje, setMensaje] = useState('');
-  const [textoPago, setTextoPago] = useState('');
+const Template = ({ saldo, plantillas = [] }) => { 
   const [loading, setLoading] = useState(false);
+  const [titulo, setTitulo] = useState("");
+  const [mensaje, setMensaje] = useState("");
+  const [textoPago, setTextoPago] = useState("");
+  const [vistaPrevia, setVistaPrevia] = useState(false);
+  const [selectedPlantilla, setSelectedPlantilla] = useState("");
 
-  // Función para manejar el envío de datos
-  const handleSubmit = async () => {
+  const user = useUserStore((state) => state.user);
+  console.log("Datos de usuario en el store:", user);
+  const idEjecutivo = 38764;
+  console.log("idEjecutivo del usuario:", idEjecutivo);
+  const idProducto = 1;
+
+  const handleSave = async () => {
     setLoading(true);
-    
     try {
-      // Preparar los datos según lo que espera el endpoint
-      const dataToSend = {
-        idProducto: null,
-        nombre: null,
-        asunto: titulo, // Usamos el título como asunto
-        mensaje: `${mensaje} ${textoPago} [Saldo]`, // Combinamos mensaje y textoPago
-        idEjecutivo: 1
+      const payload = {
+        idProducto,
+        nombre: titulo,
+        asunto: mensaje,
+        mensaje: textoPago,
+        idEjecutivo,
       };
-
-      console.log('📤 Enviando datos:', dataToSend);
-      
-      // Llamar al servicio
-      const response = await PostInsertScreen(dataToSend);
-      
-      console.log('✅ Respuesta exitosa:', response);
-      alert('Plantilla creada exitosamente');
-      
-      // Limpiar formulario después del éxito
-      setTitulo('');
-      setMensaje('');
-      setTextoPago('');
-      
+      await SaveCreateTemplate(payload);
+      // Puedes mostrar un toast o limpiar los campos aquí
     } catch (error) {
-      console.error('❌ Error al enviar:', error);
-      alert('Error al crear la plantilla: ' + (error.message || 'Error desconocido'));
+      // Manejo de error (puedes mostrar un toast)
     } finally {
       setLoading(false);
     }
@@ -50,8 +44,12 @@ const Template = ({saldo}) => {
           Plantilla
         </label>
         <CustomSelect
-          options={["Recordatorio de Pago"]}
-          defaultValue="Recordatorio de Pago"
+          options={[
+            ...plantillas.map((p) => ({ label: p.nombre, value: p.id })),
+            { label: "Nuevo", value: "nuevo" },
+          ]}
+          defaultValue={plantillas[0]?.id || "nuevo"}
+          onChange={setSelectedPlantilla}
         />
       </div>
 
@@ -65,54 +63,57 @@ const Template = ({saldo}) => {
             type="text"
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
-            className="w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-white"
-            placeholder="Asunto del recordatorio"
+            className=" w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-white"
+            placeholder="Nombre"
           />
-          
+
+          {/* Input para el mensaje */}
           <input
             type="text"
             value={mensaje}
             onChange={(e) => setMensaje(e.target.value)}
             className="mt-4 w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-gray-300"
-            placeholder="Mensaje principal"
+            placeholder="Asunto"
           />
-          
+
+          {/* Input para el texto de pago */}
           <div className="mt-4 flex items-center">
             <input
               type="text"
               value={textoPago}
               onChange={(e) => setTextoPago(e.target.value)}
               className="w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-white"
-              placeholder="Texto adicional sobre el pago"
+              placeholder="Mensaje"
             />
-            <span className="font-bold ml-2 whitespace-nowrap">[{saldo || 'Saldo'}]</span>
+            <span className="font-bold ml-2 text-jerarquia4">
+              [{saldo || "Saldo"}]
+            </span>
           </div>
 
-          {/* Botón para enviar */}
-          <button 
-            onClick={handleSubmit}
-            disabled={loading}
-            className="mt-4 px-4 py-2 bg-green-600 rounded-md hover:bg-green-500 transition-colors disabled:bg-gray-400"
-          >
-            {loading ? 'Enviando...' : 'Guardar Plantilla'}
-          </button>
-
-          <button className="mt-4 ml-2 px-4 py-2 bg-red-700 rounded-md hover:bg-red-600 transition-colors">
+          <button className="bg-red-600 p-2 mt-5 rounded-md text-white hover:text-red-100 border-red-600 hover:border-red-500 focus:ring-red-500 hover:bg-red-700 hover:shadow-lg hover:shadow-red-600">
             Borrar
           </button>
-          
-          <div className="flex items-center text-jerarquia3 mt-4">
-            <input
-              type="checkbox"
-              id="vista-previa"
-              className="form-checkbox h-4 w-4 text-jerarquia3 rounded"
-            />
-            <label
-              htmlFor="vista-previa"
-              className="ml-2 text-sm text-jerarquia3"
-            >
-              Vista Previa
-            </label>
+          <div className="flex items-center justify-between text-jerarquia3 mt-4">
+            <div>
+              <input
+                type="checkbox"
+                id="vista-previa"
+                className="form-checkbox h-4 w-4 bg-blue-600 text-jerarquia3 rounded cursor-pointer"
+                checked={vistaPrevia}
+                onChange={(e) => setVistaPrevia(e.target.checked)}
+              />
+              <label
+                htmlFor="vista-previa"
+                className="ml-2 text-sm text-jerarquia3 "
+              >
+                Vista Previa
+              </label>
+            </div>
+            {vistaPrevia && (
+              <div className="">
+                <ButtonSave loading={loading} onClick={handleSave} />
+              </div>
+            )}
           </div>
         </div>
       </div>

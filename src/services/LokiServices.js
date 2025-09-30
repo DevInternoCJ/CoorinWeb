@@ -89,59 +89,60 @@ export const loginUser = async (userData) => {
 };
 
 //(userData, idEjecutivo)
-export const ValidatePassword = async () => {
-  try {
-    const requestData = {
-      // contrasenia: userData.contrasenia,
-      // servidor: "Cronoss",
-      // idEjecutivo
-    };
-    console.log('📤 Enviando a /Auth/validar-contrasenia:', requestData);
-    const response = await api.post('/Auth/validar-contrasenia', requestData);
-    console.log('📥 Respuesta de /Auth/validar-contrasenia:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ Error en validación de contraseña:', error);
-    throw error;
-  }
-};
-// export const ValidatePassword = async (userData, idEjecutivo) => {
+// export const ValidatePassword = async () => {
 //   try {
 //     const requestData = {
-//       contrasenia: userData.contrasenia,
-//       servidor: "Cronoss",
-//       idEjecutivo
+//       // contrasenia: userData.contrasenia,
+//       // servidor: "Cronoss",
+//       // idEjecutivo
 //     };
-
 //     console.log('📤 Enviando a /Auth/validar-contrasenia:', requestData);
-
-//     const response = await api.post('/Auth/validar-contrasenia', requestData, {
-//       headers: {
-//         'Accept': 'text/plain', // Aceptar respuesta como texto plano
-//         'Content-Type': 'application/json' // Enviar como JSON
-//       },
-//       transformResponse: [(data) => {
-//         // No transformar la respuesta, dejarla como texto plano
-//         return data;
-//       }]
-//     });
-
+//     const response = await api.post('/Auth/validar-contrasenia', requestData);
 //     console.log('📥 Respuesta de /Auth/validar-contrasenia:', response.data);
 //     return response.data;
 //   } catch (error) {
 //     console.error('❌ Error en validación de contraseña:', error);
-
-//     // Si la respuesta es texto plano, asegurarnos de capturarla correctamente
-//     if (error.response && typeof error.response.data === 'string') {
-//       // Crear un nuevo error con el mensaje correcto
-//       const customError = new Error(error.response.data);
-//       customError.response = error.response;
-//       throw customError;
-//     }
-
 //     throw error;
 //   }
 // };
+
+export const ValidatePassword = async (userData, idEjecutivo) => {
+  try {
+    const requestData = {
+      contrasenia: userData.contrasenia,
+      servidor: "Cronoss",
+      idEjecutivo
+    };
+
+    console.log('📤 Enviando a /Auth/validar-contrasenia:', requestData);
+
+    const response = await api.post('/Auth/validar-contrasenia', requestData, {
+      headers: {
+        'Accept': 'text/plain', // Aceptar respuesta como texto plano
+        'Content-Type': 'application/json' // Enviar como JSON
+      },
+      transformResponse: [(data) => {
+        // No transformar la respuesta, dejarla como texto plano
+        return data;
+      }]
+    });
+
+    console.log('📥 Respuesta de /Auth/validar-contrasenia:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error en validación de contraseña:', error);
+
+    // Si la respuesta es texto plano, asegurarnos de capturarla correctamente
+    if (error.response && typeof error.response.data === 'string') {
+      // Crear un nuevo error con el mensaje correcto
+      const customError = new Error(error.response.data);
+      customError.response = error.response;
+      throw customError;
+    }
+
+    throw error;
+  }
+};
 
 // Actualizar contraseña (versión optimizada)
 export const UpdatePassword = async (passwordData) => {
@@ -746,6 +747,48 @@ export const PostInsertScreen = async (data) => {
   }
 };
 
+// Guardar plantilla 
+export const SaveCreateTemplate = async (payload) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('📤 Enviando a /PlantillasCorreo/crear-plantilla:', payload);
+    console.log('🔑 Token disponible:', token);
+    const response = await api.post(
+      '/PlantillasCorreo/crear-plantilla',
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log('📥 Respuesta de /PlantillasCorreo/crear-plantilla', response.data);
+    return response.data;
+  } catch (error) {
+    
+    console.error('❌ Error al guardar platilla', error);
+    // Manejo específico de errores de autenticación
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    // Mostrar más detalles del error
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
 // Obtener Historico invidual
 export const historySingle = async (body) => {
   try {
@@ -757,7 +800,7 @@ export const historySingle = async (body) => {
     // El interceptor añade el token automáticamente
     const response = await api.post('/Histórico/individual', body, {
       headers: {
-        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json, text/plain, */*',
+        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json, text/plain, /',
         'Content-Type': 'application/json'
       },
       responseType: 'blob'
@@ -805,7 +848,7 @@ export const historyArchivoUpload = async (body) => {
     // El interceptor añade el token automáticamente
     const response = await api.post('/Histórico/archivo', formData, {
       headers: {
-        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json, text/plain, */*'
+        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json, text/plain, /'
         // No poner Content-Type, el navegador lo gestiona
       },
       responseType: 'blob'
@@ -830,7 +873,6 @@ export const historyArchivoUpload = async (body) => {
     throw error;
   }
 };
-
 
 export const patchLogoutEjecutive = async (idEjecutivo) => {
   try {
@@ -905,43 +947,6 @@ export const patchUnlockedEjecutive = async (idEjecutivo) => {
   }
 };
 
-// Nuevo endpoint para Lista Negra con parámetros
-export const campainghInCharge = async ({ idEncargado, idCartera, idProducto }) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
-    }
-    const url = `/campañas/campañas-encargado/${idEncargado}/${idCartera}/${idProducto}`;
-    console.log('Enviando a', url, 'con:', { idEncargado, idCartera, idProducto });
-    // El interceptor añade el token automáticamente
-    const response = await api.get(url, {
-      headers: {
-        Accept: '*/*'
-      }
-    });
-    console.log('Respuesta de', url + ':', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('Error al obtener la Campañas de encargado:', error);
-    if (error.response?.status === 401) {
-      console.warn('⚠️ Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
-    }
-    if (error.response) {
-      console.error('Datos de respuesta del error:', error.response.data);
-      console.error('Status del error:', error.response.status);
-    } else if (error.request) {
-      console.error('No se recibió respuesta del servidor:', error.request);
-    } else {
-      console.error('Error al configurar la solicitud:', error.message);
-    }
-    throw error;
-  }
-};
-
-
 export const newCampaign = async (body) => {
   try {
     const token = localStorage.getItem('token');
@@ -977,27 +982,25 @@ export const newCampaign = async (body) => {
   }
 };
 
-
-export const enabledUnenabledCampaign = async (body) => {
+export const campaignCleaning = async ({ idCampaña }) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-  const { idCampaña, ...rest } = body;
-  const url = `/campañas/habilitar-deshabilitar/${idCampaña}`;
-    console.log('📤 Enviando a', url, 'con:', rest);
+    const params = { idCampaña };
+    console.log('Enviando a /carteras/limpiar-campania con:', params);
     // El interceptor añade el token automáticamente
-    const response = await api.patch(url, rest, {
+    const response = await api.put('/carteras/limpiar-campania', {}, {
+      params,
       headers: {
-        'Accept': '*/*',
-        'Content-Type': 'application/json'
+        'Accept': '/'
       }
     });
-    console.log('📥 Respuesta de', url + ':', response);
-    return response;
+    console.log('Respuesta de /carteras/limpiar-campania:', response.data);
+    return response.data;
   } catch (error) {
-    console.error('Error al encender o apagar campaña:', error);
+    console.error('Error al limpiar la campaña:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');
@@ -1027,7 +1030,7 @@ export const campaignDeleteada = async ({ idCampaña }) => {
     const response = await api.delete('/carteras/eliminar-campania', {
       params,
       headers: {
-        'Accept': '*/*'
+        'Accept': '/'
       }
     });
     console.log('Respuesta de /carteras/eliminar-campania:', response.data);
@@ -1051,26 +1054,61 @@ export const campaignDeleteada = async ({ idCampaña }) => {
   }
 };
 
-
-export const campaignCleaning = async ({ idCampaña }) => {
+export const campainghInCharge = async ({ idEncargado, idCartera, idProducto }) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    const params = { idCampaña };
-    console.log('Enviando a /carteras/limpiar-campania con:', params);
+    const url = `/campañas/campañas-encargado/${idEncargado}/${idCartera}/${idProducto}`;
+    console.log('Enviando a', url, 'con:', { idEncargado, idCartera, idProducto });
     // El interceptor añade el token automáticamente
-    const response = await api.put('/carteras/limpiar-campania', {}, {
-      params,
+    const response = await api.get(url, {
       headers: {
-        'Accept': '*/*'
+        Accept: '/'
       }
     });
-    console.log('Respuesta de /carteras/limpiar-campania:', response.data);
+    console.log('Respuesta de', url + ':', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error al limpiar la campaña:', error);
+    console.error('Error al obtener la Campañas de encargado:', error);
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+export const enabledUnenabledCampaign = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+  const { idCampaña, ...rest } = body;
+  const url = `/campañas/habilitar-deshabilitar/${idCampaña}`;
+    console.log('📤 Enviando a', url, 'con:', rest);
+    // El interceptor añade el token automáticamente
+    const response = await api.patch(url, rest, {
+      headers: {
+        'Accept': '/',
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('📥 Respuesta de', url + ':', response);
+    return response;
+  } catch (error) {
+    console.error('Error al encender o apagar campaña:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');

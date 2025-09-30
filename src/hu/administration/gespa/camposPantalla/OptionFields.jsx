@@ -1,19 +1,51 @@
 import React from "react";
 import SelectWallet from "./SelectWallet";
 
-const formatOptions = ["Texto", "Numero", "Moneda", "Fecha", "Porcentaje"];
-const highlightOptions = ["Normal", "Resaltado", "Sobre Resaltado"];
+const formatOptions = [
+  { label: "Texto", value: 1 },
+  { label: "Numero", value: 2 },
+  { label: "Moneda", value: 3 },
+  { label: "Fecha", value: 4 },
+  { label: "Porcentaje", value: 5 }
+];
 
-// Ahora puedes usar userData.idEjecutivo, userData.usuario, etc.
+const highlightOptions = [
+  { label: "Normal", value: 1 },
+  { label: "Resaltado", value: 2 },
+  { label: "Sobre Resaltado", value: 3 }
+]
 
 const OptionFields = ({ data, onEdit }) => {
   return (
     <tr className="grid grid-cols-12 gap-3 items-center p-2 border-b-1 border-b-jerarquia3">
+      {/* Position - Solo lectura */}
       <td className="col-span-1 text-sm font-bold text-gray-800">
         {data.position}
       </td>
-      <td className="col-span-3 text-sm text-gray-700">{data.alias}</td>
-      <td className="col-span-4 text-sm text-gray-600">{data.campos}</td>
+      
+      {/* Alias - Editable */}
+      <td className="col-span-3">
+        <input
+          type="text"
+          value={data.alias || ""}
+          onChange={(e) => onEdit && onEdit("alias", e.target.value)}
+          className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Ingresa el alias..."
+        />
+      </td>
+      
+      {/* Campos - Editable */}
+      <td className="col-span-4">
+        <input
+          type="text"
+          value={data.campos || ""}
+          onChange={(e) => onEdit && onEdit("campos", e.target.value)}
+          className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Ingresa el campo..."
+        />
+      </td>
+      
+      {/* Formato Campo - Sin cambios (mantiene SelectWallet) */}
       <td className="col-span-2">
         <SelectWallet
           options={formatOptions}
@@ -22,6 +54,8 @@ const OptionFields = ({ data, onEdit }) => {
           onChange={value => onEdit && onEdit("formato", value)}
         />
       </td>
+      
+      {/* Resaltado - Sin cambios (mantiene SelectWallet) */}
       <td className="col-span-2">
         <SelectWallet
           options={highlightOptions}

@@ -121,7 +121,7 @@ const LoadDates = ({ selectedProduct, onSaldoChange, isModalOpen}) => {
             { label: "Número Cliente", value: datosDeudor.numeroCliente, icon: "id", color: "gray" },
             { label: "Saldo", value: datosDeudor.saldo, icon: "currency", color: "green" }
           ].map((item, index) => (
-            <div key={index} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div key={index} className="bg-background-primary p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-200">
               <div className={`text-xs font-medium text-${item.color}-600 uppercase tracking-wide mb-2`}>{item.label}</div>
               <div className={`text-sm font-semibold text-${item.color}-700`}>{item.value}</div>
             </div>
