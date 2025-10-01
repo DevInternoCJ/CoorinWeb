@@ -38,11 +38,13 @@ const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
             try {
                 const respuesta = await UsuarioRestante(idCampaña);
                 console.log('Respuesta UsuarioRestante:', respuesta);
-                // Actualizar el campo 'restantes' en la tabla de ejecutivos
+                // Actualizar el campo 'restantes' y 'asignado' en la tabla de ejecutivos
                 if (respuesta && Array.isArray(respuesta.data)) {
                     setExecutiveTree(prev => prev.map(ej => {
                         const encontrado = respuesta.data.find(r => r.idEjecutivo === ej.idEjecutivo);
-                        return encontrado ? { ...ej, restantes: encontrado.Restantes } : { ...ej, restantes: 0 };
+                        return encontrado
+                            ? { ...ej, restantes: encontrado.Restantes, asignado: true }
+                            : { ...ej, restantes: 0, asignado: false };
                     }));
                 }
             } catch (err) {
@@ -78,6 +80,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
         if (!idCampaña || !row.idEjecutivo) return;
         setLoadingRow(idx);
         try {
+            // inserta = checked (true/false), idCampaña = prop, idEjecutivo = row.idEjecutivo
             const response = await asignaEjecutivoCampanas(checked, idCampaña, row.idEjecutivo);
             // Si la respuesta fue exitosa, actualiza el estado asignado
             if (response?.data?.success || response?.status === 200) {
@@ -129,7 +132,9 @@ const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
                                         onChange={e => handleAsignar(e.target.checked, row, i)}
                                     />
                                 </td>
-                                <td className="modal-table-td" style={{ padding: '2px 2px', textAlign: 'center', width: '80px', minWidth: '60px' }}>{row.usuario}</td>
+                                <td className="modal-table-td" style={{ padding: '2px 2px', textAlign: 'center', width: '80px', minWidth: '60px', fontFamily: 'monospace', letterSpacing: '1px', fontSize: '1rem' }}>
+                                    <span style={{ display: 'inline-block', width: '60px', textAlign: 'center' }}>{row.usuario}</span>
+                                </td>
                                 <td className="modal-table-td" style={{ padding: '2px 2px', textAlign: 'center', width: '60px', minWidth: '40px' }}>{row.restantes ?? 0}</td>
                             </tr>
                         ))}
