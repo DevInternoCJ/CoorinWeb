@@ -5,6 +5,7 @@ namespace Loki.Mark.Consulta.Productividad.Interfaces
 {
     public interface IProductividadService
     {
-        Task<List<DTOs.ProductividadDTO.ProductividadDTO>> obtieneProductividad(string indicador, int idejecutivo, string servidor);
+        Task<object> obtieneProductividad(string indicador, int idEjecutivo, string servidor, bool esModoHora = false);
     }
+
 }
