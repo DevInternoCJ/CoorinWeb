@@ -17,7 +17,7 @@ const WalletSection = ({
   setLoading,
   onProductSelect 
 }) => {
-  const servidor = "Thor";
+  const servidor = "Albaz";
 
   useEffect(() => {
     if (selectedProduct && onProductSelect) {
