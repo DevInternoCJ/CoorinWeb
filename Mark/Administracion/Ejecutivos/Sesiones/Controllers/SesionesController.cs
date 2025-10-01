@@ -55,13 +55,15 @@ namespace Loki.Mark.Administracion.Ejecutivos.Sesiones.Controllers
 
 
 		[HttpPost("reset-password-ejecutivo")]
+		[AllowAnonymous]
 		[SwaggerOperation(
 			Summary = "Resetear Contraseña",
 			Description = "Reinicia la contraseña del usuario a 4 letras solicitado para que la cambie desde la pantalla de login."
 		)]
 		public async Task<IActionResult> ResetearContrasenia([FromBody] UsuarioRequest usuario)
 		{
-			string? servidorClaim = User.FindFirst("Servidor")?.Value;
+			//string? servidorClaim = User.FindFirst("Servidor")?.Value;
+			string? servidorClaim = "Albaz";
 
 			if (string.IsNullOrWhiteSpace(servidorClaim))
 			{

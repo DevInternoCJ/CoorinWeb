@@ -153,7 +153,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Sesiones.Services
 
 			var param = new SqlParameter("@usuario", SqlDbType.VarChar) { Value = usuario };
 
-			var result = await _daoBaseSesiones.ExecuteStoredProcedure(connection, "1.3.ReseteaContraseña", param);
+			var result = await _daoBaseSesiones.ExecuteStoredProcedure(connection, "dbo.[1.3.ReseteaContraseña]", param);
 
 			return result != null;
 		}
