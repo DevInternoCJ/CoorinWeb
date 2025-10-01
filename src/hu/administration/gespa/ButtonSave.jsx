@@ -23,7 +23,7 @@ const SaveButton = ({
   
   // Variantes de color
   const variants = {
-    primary: "bg-jerarquia3 hover:bg-green-600 focus:ring-green-500 text-white cursor-pointer",
+    primary: "bg-jerarquia2 text-neutral-900 hover:text-neutral-200 border-jerarquia2 hover:border-jerarquia1 focus:ring-jerarquia1 hover:bg-jerarquia3 hover:shadow-lg hover:shadow-jerarquia3",
     secondary: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-500 text-white",
     outline: "border-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white focus:ring-green-500"
   };

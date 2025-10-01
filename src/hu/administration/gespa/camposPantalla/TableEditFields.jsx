@@ -12,10 +12,12 @@ const TableEditFields = ({ idProducto }) => {
   const [saveResult, setSaveResult] = useState(null);
   const servidor = "Albaz";
 
-const user = useUserStore((state) => state.user);
-  console.log("Datos de usuario en el store:", user);
+  const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;
+  console.log("Datos de usuario en el store:", idEjecutivo);
   const Jerarquía = user?.Jerarquía;
+  console.log (" Jerarquia: ", Jerarquía);
+
   useEffect(() => {
     if (!idProducto || idProducto === 0) return;
     const fetchScreenFields = async () => {
@@ -31,7 +33,7 @@ const user = useUserStore((state) => state.user);
           formato: item.idFormatoCampo,
           resaltado: item.resaltado,
         }));
-        setEditData(transformedData.map((d) => ({ ...d }))); // Copia editable
+        setEditData(transformedData.map((d) => ({ ...d })));
       } catch (err) {
         console.error("Error fetching screen fields:", err);
         setError(err.message || "Error al cargar los campos de pantalla");
@@ -42,24 +44,23 @@ const user = useUserStore((state) => state.user);
     fetchScreenFields();
   }, [servidor, idProducto]);
 
-  // Actualiza un campo editable
   const handleEditField = (index, field, value) => {
     setEditData(prev =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
     );
   };
 
-  // Guardar todos los campos
   const handleSaveAll = async () => {
     setSaving(true);
     setSaveResult(null);
     const campos = editData.map(item => ({
-      posicion: item.position,
-      alias: item.alias,
-      nombreCampo: item.campos,
-      formatoCampo: item.formato,
-      resaltado: true, //item.resaltado === "Resaltado" || item.resaltado === "Sobre Resaltado",
-    }));
+  posicion: item.position,
+  alias: item.alias,
+  nombreCampo: item.campos,
+  formatoCampo: item.formato,
+  resaltado: typeof item.resaltado === "number" ? item.resaltado : 1, // Asegura número
+  editar: 1
+}));
     const payload = {
       idProducto,
       idEjecutivo,
@@ -109,49 +110,47 @@ const user = useUserStore((state) => state.user);
 
   return (
     <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-      <div className="bg-background-secondary rounded-md grid grid-cols-12 gap-3 mb-2 py-2 px-3 font-semibold text-white text-sm">
+      {/* Header */}
+      <div className="bg-background-secondary rounded-md grid grid-cols-12 gap-3 mb-4 py-3 px-3 font-semibold text-white text-sm">
         <div className="col-span-1">Position</div>
         <div className="col-span-3">Alias</div>
         <div className="col-span-4">Campos</div>
         <div className="col-span-2">Formato Campo</div>
         <div className="col-span-2">Resaltado</div>
       </div>
-      <table className="w-full">
-        <thead className="sr-only">
-          <tr>
-            <th>Position</th>
-            <th>Alias</th>
-            <th>Campos</th>
-            <th>Formato Campo</th>
-            <th>Resaltado</th>
-          </tr>
-        </thead>
-        <tbody className="space-y-2 flex flex-col">
-          {editData.map((item, idx) => (
-            <OptionFields
-              key={item.id}
-              data={item}
-              onEdit={(field, value) => handleEditField(idx, field, value)}
-            />
-          ))}
-        </tbody>
-      </table>
+      
+      {/* Body con espacio entre filas */}
+      <div className="space-y-3">
+        {editData.map((item, idx) => (
+          <OptionFields
+            key={item.id}
+            data={item}
+            onEdit={(field, value) => handleEditField(idx, field, value)}
+          />
+        ))}
+      </div>
+      
       {editData.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           No hay campos de pantalla disponibles para los parámetros especificados
         </div>
       )}
-      <div className="flex justify-end mt-4">
-           <SaveButton
-        onClick={handleSaveAll}
-        loading={saving}
-        disabled={editData.length === 0 || saving}
-        size="medium"
-        variant="primary"
-        className="min-w-[120px]"
-      />
+      
+      <div className="flex justify-end mt-6">
+        <SaveButton
+          onClick={handleSaveAll}
+          loading={saving}
+          disabled={editData.length === 0 || saving}
+          size="medium"
+          variant="primary"
+          className="min-w-[120px]"
+        />
         {saveResult && (
-          <span className="ml-3 text-xs text-green-700">{saveResult}</span>
+          <span className={`ml-3 text-sm font-medium ${
+            saveResult === "Guardado correctamente" ? "text-green-600" : "text-red-600"
+          }`}>
+            {saveResult}
+          </span>
         )}
       </div>
     </div>
