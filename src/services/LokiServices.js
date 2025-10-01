@@ -40,7 +40,7 @@ export const loginUser = async (userData) => {
       ip: API_URL,
       aplicacion: "Coorin",
       version: "3.4.2",
-      servidor: "Thor"
+      servidor: "Albaz"
     };
     console.log('📤 Enviando a /Auth/login:', requestData);
     const response = await api.post('/Auth/login', requestData, {
@@ -110,7 +110,7 @@ export const ValidatePassword = async (userData, idEjecutivo) => {
   try {
     const requestData = {
       contrasenia: userData.contrasenia,
-      servidor: "Cronoss",
+      servidor: "Albaz",
       idEjecutivo
     };
 
