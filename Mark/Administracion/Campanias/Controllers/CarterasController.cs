@@ -202,12 +202,10 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
         [HttpGet("FilasRestantesPorCampaña")]
         [SwaggerOperation(
-        Summary = "Actualiza avance",
-            Description = "Se obtiene un registro de las filas restantes por idcampaña"
-        //Descripcion = ""
-        )]
-       
-        public async Task<IActionResult> GetFilasRestantesPorCampaña()
+         Summary = "Actualiza avance",
+         Description = "Se obtiene un registro de las filas restantes por idcampaña con avance calculado"
+     )]
+        public async Task<IActionResult> GetFilasRestantesPorCampaña(int? idEncargado = null, short? idCartera = null, short? idProducto = null)
         {
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
@@ -218,9 +216,11 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
             try
             {
-                var resultado = await _carterasService.FilasRestantesPorCampaña(servidorClaim);
+                var resultado = await _carterasService.GetAvanceCompletoCampañas(servidorClaim, idEncargado, idCartera, idProducto);
 
-                return resultado == null ? NotFound("No se encontraron datos.") : Ok(resultado);
+                return resultado == null || !resultado.Any()
+                    ? NotFound("No se encontraron datos.")
+                    : Ok(resultado);
             }
             catch (Exception ex)
             {
