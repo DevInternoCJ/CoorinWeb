@@ -6,12 +6,12 @@ import { toast } from "sonner";
 import NewCampaign from "./NewCampaign";
 import ModalToponeHundred from "./ModalToponeHundred";
 
-const ModalCampanasCampanias = () => {
+const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
     const [campanas, setCampanas] = useState([]);
     const [updatingId, setUpdatingId] = useState(null);
     const [modalLimpiar, setModalLimpiar] = useState({ open: false, idCampaña: null, nombre: "" });
     const [modalTop100, setModalTop100] = useState({ open: false, idCampaña: null });
-    const [modalFilas, setModalFilas] = useState({ open: false, cartera: "American Express", idCampaña: null });
+    const [modalFilas, setModalFilas] = useState({ open: false, cartera: "American Express", idCampaña: null, nombreCampaña: "" });
     const [tipoFilas, setTipoFilas] = useState("archivo");
 
     // Función para cargar campañas
@@ -61,13 +61,24 @@ const ModalCampanasCampanias = () => {
                     </thead>
                     <tbody>
                         {sortedCampanas.map((row, i) => (
-                            <tr key={i} style={{ minHeight: 0, height: '28px', lineHeight: '1.1' }}>
+                            <tr
+                                key={i}
+                                style={{ minHeight: 0, height: '28px', lineHeight: '1.1' }}
+                                onClick={() => {
+                                    if (row.idCampaña) {
+                                        console.log('idCampaña', row.idCampaña);
+                                        if (typeof onSeleccionCampaña === 'function') {
+                                            onSeleccionCampaña(row.idCampaña);
+                                        }
+                                    }
+                                }}
+                            >
                                 <td style={{ textAlign: 'center', height: '28px', lineHeight: '1.1', paddingTop: 0, paddingBottom: 0 }}>
                                     <button
                                         className="modal-btn modal-btn-table"
                                         style={{ padding: 0, background: 'transparent', border: 'none', cursor: 'pointer' }}
                                         onClick={() => {
-                                            setModalFilas({ open: true, cartera: "American Express", idCampaña: row.idCampaña });
+                                            setModalFilas({ open: true, cartera: "American Express", idCampaña: row.idCampaña, nombreCampaña: row.Campaña });
                                             setTipoFilas("archivo"); // Selecciona Archivo por defecto
                                         }}
                                     >
@@ -159,9 +170,10 @@ const ModalCampanasCampanias = () => {
             {/* Modal visual de Filas de trabajo (Promesa Midprimes) */}
             <ModalFilasCampañas
                 open={modalFilas.open}
-                onClose={() => setModalFilas({ open: false, cartera: "American Express", idCampaña: null })}
+                onClose={() => setModalFilas({ open: false, cartera: "American Express", idCampaña: null, nombreCampaña: "" })}
                 cartera={modalFilas.cartera}
                 idCampaña={modalFilas.idCampaña}
+                nombreCampaña={modalFilas.nombreCampaña}
             />
             {modalLimpiar.open && (
                 <div style={{
