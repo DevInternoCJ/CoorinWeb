@@ -55,38 +55,65 @@ namespace Loki.Mark.Consulta.PlantillasCorreo.Services
 
         //carga datos
         public async Task<CargaDatos.CargaDatosResponse> CargarDatosCompletos(int idCartera, int idProducto, string servidor, string nombreBaseDatos)
-        {
-            var response = new CargaDatos.CargaDatosResponse();
+{
+    var response = new CargaDatos.CargaDatosResponse();
 
-            try
-            {
-                response.Plantillas = await _plantillascorreoDao.ObtenerPlantillasPorProducto(idProducto, servidor, nombreBaseDatos);
+    try
+    {
+        // 1. Obtener plantillas y agregar opción "Nuevo"
+        var plantillas = await _plantillascorreoDao.ObtenerPlantillasPorProducto(idProducto, servidor, nombreBaseDatos);
 
-                if (idProducto > 0)
+                Console.WriteLine($"Plantillas de BD: {plantillas?.Count ?? 0}");
+                if (plantillas != null)
                 {
-                    // 3. Verificar si existe la tabla del producto
-                    response.TablaExiste = await _plantillascorreoDao.VerificarTablaProducto(idProducto, servidor, nombreBaseDatos);
-
-                    if (response.TablaExiste)
+                    foreach (var p in plantillas)
                     {
-                        // 4. Obtener datos de ejemplo del producto
-                        response.Producto = await _plantillascorreoDao.ObtenerEjemploProducto(idProducto, servidor, nombreBaseDatos);
+                        Console.WriteLine($"ID: {p.IdCorreoScript}, Nombre: {p.Nombre}");
                     }
-
-                    // 5. Obtener datos de ejemplo de cuenta
-                    response.Cuenta = await _plantillascorreoDao.ObtenerEjemploCuenta(idCartera, servidor, nombreBaseDatos);
                 }
+                // Agregar opción "Nuevo" como en el código original
+                plantillas.Insert(0, new PlantillaCorreoDto 
+        { 
+            IdCorreoScript = 0, 
+            Nombre = " -- Nuevo -- ", 
+            Asunto = "", 
+            Mensaje = "" 
+        });
+                Console.WriteLine($"Plantillas totales: {plantillas.Count}");
+                response.Plantillas = plantillas;
 
-                response.Exito = true;
-            }
-            catch (Exception ex)
+        if (idProducto > 0)
+        {
+            // 2. Verificar tabla producto
+            response.TablaExiste = await _plantillascorreoDao.VerificarTablaProducto(idProducto, servidor, nombreBaseDatos);
+
+            if (response.TablaExiste)
             {
-                _logger.LogError(ex, "Error en CargarDatosCompletosAsync");
-                response.Exito = false;
-                response.MensajeError = ex.Message;
+                // 3. Obtener datos de ejemplo del producto
+                response.Producto = await _plantillascorreoDao.ObtenerEjemploProducto(idProducto, servidor, nombreBaseDatos);
+                
+                // 4. Lógica específica para cartera 7
+                response.EsCartera7 = (idCartera == 7);
+                if (response.EsCartera7)
+                {
+                    response.ColumnasOcultas = new List<string> { "Prestamo", "cta_cheque", "num_serie" };
+                }
             }
 
-            return response;
+            // 5. Obtener datos de ejemplo de cuenta
+            response.Cuenta = await _plantillascorreoDao.ObtenerEjemploCuenta(idCartera, servidor, nombreBaseDatos);
         }
+
+        response.Exito = true;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error en CargarDatosCompletos");
+        response.Exito = false;
+        response.MensajeError = ex.Message;
+    }
+
+    return response;
+}
     }
 }
