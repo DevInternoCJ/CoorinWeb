@@ -46,20 +46,19 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
         }
 
 		[HttpGet("muestra-campos/{idProducto}")]
-		[AllowAnonymous]
 		[SwaggerOperation(
 			Summary = "Muestra Campos Pantalla",
 			Description = "Muestra los campos traducidos con la información del producto escogido."
 		)]
 		public async Task<IActionResult> GetProductData(int idProducto)
 		{
-			string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            //string? servidorClaim = "Albaz";
 
-			if (string.IsNullOrWhiteSpace(servidorClaim))
+            if (string.IsNullOrWhiteSpace(servidorClaim))
 			{
 				return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
 			}
-
 
 			var datos = await _campService.MostrarCamposPantalla(servidorClaim, idProducto);
 			return Ok(datos);
@@ -96,8 +95,15 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
         )]
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> GuardarCamposPantalla(string servidor, [FromBody] CampoPantallaRequest request)
+        public async Task<IActionResult> GuardarCamposPantalla([FromBody] CampoPantallaRequest request)
         {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+            {
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+            }
+
             if (request == null || request.Campos == null || request.Campos.Count == 0)
             {
                 return BadRequest("No se recibieron campos para guardar.");
@@ -117,7 +123,7 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
                     return BadRequest($"La posición {index} debe tener un campo asociado.");
             }
 
-            var resultado = await _campService.InsertaActualizaCamposPantalla(servidor, request);
+            var resultado = await _campService.InsertaActualizaCamposPantalla(servidorClaim, request);
             return Ok(resultado);
         }
 
