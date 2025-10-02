@@ -129,7 +129,7 @@ namespace Loki.Mark.Consulta.Histórico.Services
             return cuentas;
         }
 
-        public async Task<DataSet> BuscarCuentasPorArchivoAsync(HistoricoArchivo request, string servidor)
+        public async Task<DataSet> BuscarCuentasPorArchivoAsync(HistoricoArchivo request, string servidor, string idEjecutivo)
         {
             if (request.Archivo == null || request.Archivo.Length == 0)
                 throw new ArgumentException("Archivo inválido");
@@ -138,7 +138,6 @@ namespace Loki.Mark.Consulta.Histórico.Services
                 !request.IncluirVisitas && !request.IncluirAccionamientos && !request.IncluirPagos)
                 throw new ArgumentException("Debe seleccionar al menos un concepto a consultar");
 
-            string tempTable = $"#TempHisCue_{Guid.NewGuid():N}";
             DataTable cuentas;
 
             var extension = Path.GetExtension(request.Archivo.FileName).ToLowerInvariant();
@@ -166,9 +165,9 @@ namespace Loki.Mark.Consulta.Histórico.Services
                 throw new ArgumentException("Formato de archivo no soportado. Solo CSV o XLSX.");
             }
 
-            return await _historicoDAO.BuscarCuentasPorArchivoAsync(cuentas, request, servidor, tempTable);
+            // Ya no necesitamos generar tempTable aquí, el DAO usará idEjecutivo
+            return await _historicoDAO.BuscarCuentasPorArchivoAsync(cuentas, request, servidor, idEjecutivo);
         }
-
 
     }
 

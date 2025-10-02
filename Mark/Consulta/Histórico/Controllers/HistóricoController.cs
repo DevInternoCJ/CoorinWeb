@@ -86,10 +86,7 @@ namespace Loki.Mark.Consulta.Histórico.Controllers
 
 
         [HttpPost("archivo")]
-        [ProducesResponseType(typeof(FileContentResult), 200)]
-        [ProducesResponseType(typeof(BadRequestObjectResult), 400)]
-        [ProducesResponseType(typeof(UnauthorizedObjectResult), 401)]
-        [ProducesResponseType(typeof(ObjectResult), 500)]
+        
         public async Task<IActionResult> BuscarPorArchivo([FromForm] HistoricoArchivo request)
         {
             try
@@ -101,7 +98,10 @@ namespace Loki.Mark.Consulta.Histórico.Controllers
                 if (string.IsNullOrWhiteSpace(servidorClaim))
                     return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
 
-                var resultado = await _historicoService.BuscarCuentasPorArchivoAsync(request, servidorClaim);
+                // Usar solo GUID para evitar colisiones
+                string idEjecutivo = $"Temp_{Guid.NewGuid():N}";
+
+                var resultado = await _historicoService.BuscarCuentasPorArchivoAsync(request, servidorClaim, idEjecutivo);
 
                 var excelResponse = await _historicoService.GenerarExcelAsync(resultado);
 
@@ -121,6 +121,5 @@ namespace Loki.Mark.Consulta.Histórico.Controllers
                 return StatusCode(500, new { error = $"Error interno del servidor: {ex.Message}" });
             }
         }
-
     }
 }
