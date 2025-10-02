@@ -40,7 +40,7 @@ export const loginUser = async (userData) => {
       ip: API_URL,
       aplicacion: "Coorin",
       version: "3.4.2",
-      servidor: "Thor"
+      servidor: "Albaz"
     };
     console.log('📤 Enviando a /Auth/login:', requestData);
     const response = await api.post('/Auth/login', requestData, {
@@ -110,7 +110,7 @@ export const ValidatePassword = async (userData, idEjecutivo) => {
   try {
     const requestData = {
       contrasenia: userData.contrasenia,
-      servidor: "Cronoss",
+      servidor: "Albaz",
       idEjecutivo
     };
 
@@ -747,48 +747,6 @@ export const PostInsertScreen = async (data) => {
   }
 };
 
-// Guardar plantilla 
-export const SaveCreateTemplate = async (payload) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
-    }
-    console.log('📤 Enviando a /PlantillasCorreo/crear-plantilla:', payload);
-    console.log('🔑 Token disponible:', token);
-    const response = await api.post(
-      '/PlantillasCorreo/crear-plantilla',
-      payload,
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    console.log('📥 Respuesta de /PlantillasCorreo/crear-plantilla', response.data);
-    return response.data;
-  } catch (error) {
-    
-    console.error('❌ Error al guardar platilla', error);
-    // Manejo específico de errores de autenticación
-    if (error.response?.status === 401) {
-      console.warn('⚠️ Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
-    }
-    // Mostrar más detalles del error
-    if (error.response) {
-      console.error('📊 Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
-    } else if (error.request) {
-      console.error('❌ No se recibió respuesta del servidor:', error.request);
-    } else {
-      console.error('❌ Error al configurar la solicitud:', error.message);
-    }
-    throw error;
-  }
-};
-
 // Obtener Historico invidual
 export const historySingle = async (body) => {
   try {
@@ -1121,6 +1079,48 @@ export const enabledUnenabledCampaign = async (body) => {
       console.error('No se recibió respuesta del servidor:', error.request);
     } else {
       console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+// Guardar plantilla 
+export const SaveCreateTemplate = async (payload) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('📤 Enviando a /PlantillasCorreo/crear-plantilla:', payload);
+    console.log('🔑 Token disponible:', token);
+    const response = await api.post(
+      '/PlantillasCorreo/crear-plantilla',
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log('📥 Respuesta de /PlantillasCorreo/crear-plantilla', response.data);
+    return response.data;
+  } catch (error) {
+    
+    console.error('❌ Error al guardar platilla', error);
+    // Manejo específico de errores de autenticación
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    // Mostrar más detalles del error
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
     }
     throw error;
   }

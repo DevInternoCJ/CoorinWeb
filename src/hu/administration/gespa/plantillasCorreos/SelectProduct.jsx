@@ -16,7 +16,7 @@ const WalletSection = ({
   loading,
   setLoading,
 }) => {
-  const servidor = "Thor";
+  const servidor = "Albaz";
 
   useEffect(() => {
     console.log("selectedProduct:", selectedProduct);

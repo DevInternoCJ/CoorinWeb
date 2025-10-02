@@ -186,7 +186,7 @@ const LoginForm = ({ onLoginSuccess }) => {
       });
       try {
         const passwordValidation = await ValidatePassword(
-          { contrasenia: formData.password, servidor: "Thor" },
+          { contrasenia: formData.password, servidor: "Albaz" },
           idEjecutivo
         );
         console.log(
