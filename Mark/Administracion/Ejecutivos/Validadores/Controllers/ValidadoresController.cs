@@ -65,7 +65,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
 
             string tipoBase = "Collection";
 
-            var validadores = await _validadoresService.ObtieneValidadores(idProducto, servidorClaim, tipoBase);
+            var validadores = await _validadoresService.ObtieneValidadoresArrepentimientos(idProducto, servidorClaim, tipoBase);
             if (validadores == null)
             {
                 return StatusCode(500, "Ocurrió un error al obtener los validadores.");
