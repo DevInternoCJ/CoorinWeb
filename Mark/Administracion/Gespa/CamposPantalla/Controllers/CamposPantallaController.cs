@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Loki.Mark.Administracion.Gespa.CamposPantalla.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
 {
@@ -34,7 +35,7 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
 
         [HttpGet("campos-pantalla/{servidor}/{idProducto}")]
         [SwaggerOperation(
-            Summary = "Obtener campos de pantalla",
+            Summary = "Obtener Campos Pantalla",
             Description = "Obtiene los campos configurados para la pantalla del producto indicado en el servidor especificado."
         )]
         [ProducesResponseType(typeof(List<object>), 200)]
@@ -44,8 +45,28 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
             return Ok(campos);
         }
 
+		[HttpGet("muestra-campos/{idProducto}")]
+		[AllowAnonymous]
+		[SwaggerOperation(
+			Summary = "Muestra Campos Pantalla",
+			Description = "Muestra los campos traducidos con la información del producto escogido."
+		)]
+		public async Task<IActionResult> GetProductData(int idProducto)
+		{
+			string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
-        [HttpGet("grid-producto-sample/{servidor}/{idProducto}/{porcentaje}/{maximo}")]
+			if (string.IsNullOrWhiteSpace(servidorClaim))
+			{
+				return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+			}
+
+
+			var datos = await _campService.MostrarCamposPantalla(servidorClaim, idProducto);
+			return Ok(datos);
+		}
+
+
+		[HttpGet("grid-producto-sample/{servidor}/{idProducto}/{porcentaje}/{maximo}")]
         [SwaggerOperation(
             Summary = "Grid de Producto",
             Description = "Devuelve la info. para el grid del producto mediante una muestra aleatoria de registros de la tabla Producto_{idProducto} usando porcentaje y/o máximo."
