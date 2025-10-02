@@ -140,7 +140,7 @@ namespace Loki.Mark.Consulta.PlantillasCorreo.DAOs
             }
         }
 
-
+        //carga datos
         public async Task<List<PlantillaCorreoDto>> ObtenerPlantillasPorProducto(int idProducto, string servidor, string nombreBaseDatos)
         {
             try
@@ -148,8 +148,7 @@ namespace Loki.Mark.Consulta.PlantillasCorreo.DAOs
                 string query = @"
             SELECT idCorreoScript, Nombre, Asunto, Mensaje 
             FROM dbo.PlantillasCorreo 
-            WHERE idProducto = @IdProducto 
-            ORDER BY Nombre";
+            WHERE idProducto = @IdProducto";
 
                 var dbContext = _dbContFactory.GetDbContext(servidor, nombreBaseDatos);
                 var connection = dbContext.Database.GetDbConnection();
@@ -169,7 +168,7 @@ namespace Loki.Mark.Consulta.PlantillasCorreo.DAOs
                 {
                     plantillas.Add(new PlantillaCorreoDto
                     {
-                        IdCorreoScript = reader.GetInt32(0),
+                        IdCorreoScript = reader.GetInt16(0),
                         Nombre = reader.GetString(1),
                         Asunto = reader.GetString(2),
                         Mensaje = reader.GetString(3)

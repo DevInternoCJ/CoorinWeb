@@ -10,7 +10,7 @@ namespace Loki.Mark.Consulta.Histórico.Interfaces
         Task<DataSet> BuscarCuentaIndividualAsync(ConsultaIndividualRequest request, string servidor);
         Task<ExcelResponse> GenerarExcelAsync(DataSet data);
         void ValidarRequest(ConsultaBaseRequest request);
-        Task<DataSet> BuscarCuentasPorArchivoAsync(HistoricoArchivo request, string servidor);
+        Task<DataSet> BuscarCuentasPorArchivoAsync(HistoricoArchivo request, string servidor, string idEjecutivo);
 
     }
 }

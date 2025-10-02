@@ -16,6 +16,8 @@
             public List<PlantillaCorreoDto> Plantillas { get; set; } = new List<PlantillaCorreoDto>();
             public Dictionary<string, object> Producto { get; set; }
             public Dictionary<string, object> Cuenta { get; set; }
+            public bool EsCartera7 { get; set; } // Nueva propiedad
+            public List<string> ColumnasOcultas { get; set; } // Nueva propiedad
         }
     }
 }

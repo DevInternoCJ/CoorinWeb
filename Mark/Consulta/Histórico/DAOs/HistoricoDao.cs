@@ -1,4 +1,5 @@
 ﻿using CoorinWeb.Loki.Global;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Loki.Mark.Consulta.Histórico.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -205,7 +206,7 @@ namespace Loki.Mark.Consulta.Histórico.DAOs
      DataTable cuentas,
      ConsultaBaseRequest parametros,
      string servidor,
-     string tempTable)
+     string idEjecutivo)
         {
             var ds = new DataSet();
             string dbHistory = "History";
@@ -217,10 +218,22 @@ namespace Loki.Mark.Consulta.Histórico.DAOs
                 if (conn.State != ConnectionState.Open)
                     await conn.OpenAsync();
 
-                // --- Crear tabla temporal (más flexible con VARCHAR(32)) ---
+                // Validar idEjecutivo
+                if (string.IsNullOrWhiteSpace(idEjecutivo))
+                    throw new UnauthorizedAccessException("idEjecutivo es requerido");
+
+                // --- Crear tabla temporal PERSISTENTE en dbComplemento ---
+                string tempTableName = $"HisCue_{idEjecutivo}";
+
                 var createTemp = $@"
-            CREATE TABLE {tempTable} (Cuenta VARCHAR(32) NOT NULL);
+            IF EXISTS (SELECT 1 FROM dbComplemento.sys.tables WHERE name = '{tempTableName}' AND schema_id = 5) 
+                DROP TABLE dbComplemento.Temp.{tempTableName};
+            
+            CREATE TABLE dbComplemento.Temp.{tempTableName} (
+                Cuenta CHAR(16) COLLATE Modern_Spanish_BIN2 NOT NULL
+            );
         ";
+
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = createTemp;
@@ -234,35 +247,34 @@ namespace Loki.Mark.Consulta.Histórico.DAOs
                         throw new Exception("Se encontró una fila con Cuenta vacía en el archivo.");
 
                     var cuenta = row["Cuenta"].ToString()?.Trim() ?? "";
-
-                    // eliminar caracteres invisibles
                     cuenta = cuenta.Replace("\t", "").Replace("\r", "").Replace("\n", "");
 
                     if (string.IsNullOrEmpty(cuenta))
                         throw new Exception("Se encontró una Cuenta vacía después de limpiar caracteres.");
 
-                    if (cuenta.Length > 32)
-                        throw new Exception($"La cuenta '{cuenta}' excede la longitud máxima permitida (32).");
+                    if (cuenta.Length > 16)
+                        throw new Exception($"La cuenta '{cuenta}' excede la longitud máxima permitida (16).");
 
-                    row["Cuenta"] = cuenta; // guardar valor limpio
+                    row["Cuenta"] = cuenta;
                 }
 
                 // --- Bulk insert ---
                 using (var bulk = new SqlBulkCopy((SqlConnection)conn))
                 {
-                    bulk.DestinationTableName = tempTable;
+                    bulk.DestinationTableName = $"dbComplemento.Temp.{tempTableName}";
+                    bulk.BulkCopyTimeout = 30 * 60;
                     bulk.WriteToServer(cuentas);
                 }
 
-                // --- Queries dinámicos ---
+                // --- Queries dinámicas usando la tabla temporal persistente ---
                 if (parametros.IncluirCuenta)
                 {
                     var query = $@"
                 SELECT DISTINCT GT.* 
                 FROM dbHistory..vw_CuentasHistórico GT
-                INNER JOIN {tempTable} HS
-                  ON GT.idCartera = @idCartera
-                 AND GT.Cuenta = HS.Cuenta";
+                INNER JOIN dbComplemento.Temp.{tempTableName} HS
+                    ON GT.idCartera = @idCartera
+                    AND GT.Cuenta = HS.Cuenta";
                     ds.Tables.Add(await EjecutarConsultaAsync(conn, query, parametros, "Cuenta"));
                 }
 
@@ -271,9 +283,9 @@ namespace Loki.Mark.Consulta.Histórico.DAOs
                     var query = $@"
                 SELECT DISTINCT GT.* 
                 FROM dbHistory..vw_NegociacionesOfrecimientos GT
-                INNER JOIN {tempTable} HS
-                  ON GT.idCartera = @idCartera
-                 AND GT.Cuenta = HS.Cuenta";
+                INNER JOIN dbComplemento.Temp.{tempTableName} HS
+                    ON GT.idCartera = @idCartera
+                    AND GT.Cuenta = HS.Cuenta";
                     if (parametros.UsarPeriodo)
                         query += " AND Fecha_Insert BETWEEN @Desde AND @Hasta";
                     ds.Tables.Add(await EjecutarConsultaAsync(conn, query, parametros, "Negociaciones"));
@@ -284,9 +296,9 @@ namespace Loki.Mark.Consulta.Histórico.DAOs
                     var query = $@"
                 SELECT DISTINCT GT.*
                 FROM dbHistory.dbo.vw_GestionesTelefónicas GT
-                INNER JOIN {tempTable} HS
-                  ON GT.idCartera = @idCartera
-                 AND GT.Cuenta = HS.Cuenta";
+                INNER JOIN dbComplemento.Temp.{tempTableName} HS
+                    ON GT.idCartera = @idCartera
+                    AND GT.Cuenta = HS.Cuenta";
                     if (parametros.UsarPeriodo)
                         query += " AND Fecha BETWEEN @Desde AND @Hasta";
                     ds.Tables.Add(await EjecutarConsultaAsync(conn, query, parametros, "Gestiones"));
@@ -297,9 +309,9 @@ namespace Loki.Mark.Consulta.Histórico.DAOs
                     var query = $@"
                 SELECT DISTINCT GT.*
                 FROM dbHistory.dbo.vw_GestionesDomiciliarias GT
-                INNER JOIN {tempTable} HS
-                  ON GT.idCartera = @idCartera
-                 AND GT.Cuenta = HS.Cuenta";
+                INNER JOIN dbComplemento.Temp.{tempTableName} HS
+                    ON GT.idCartera = @idCartera
+                    AND GT.Cuenta = HS.Cuenta";
                     if (parametros.UsarPeriodo)
                         query += " AND [Fecha Visita] BETWEEN @Desde AND @Hasta";
                     ds.Tables.Add(await EjecutarConsultaAsync(conn, query, parametros, "Visitas"));
@@ -310,9 +322,9 @@ namespace Loki.Mark.Consulta.Histórico.DAOs
                     var query = $@"
                 SELECT DISTINCT GT.*
                 FROM dbHistory.dbo.vw_Accionamientos GT
-                INNER JOIN {tempTable} HS
-                  ON GT.idCartera = @idCartera
-                 AND GT.Cuenta = HS.Cuenta";
+                INNER JOIN dbComplemento.Temp.{tempTableName} HS
+                    ON GT.idCartera = @idCartera
+                    AND GT.Cuenta = HS.Cuenta";
                     if (parametros.UsarPeriodo)
                         query += " AND Fecha BETWEEN @Desde AND @Hasta";
                     ds.Tables.Add(await EjecutarConsultaAsync(conn, query, parametros, "Accionamientos"));
@@ -322,23 +334,58 @@ namespace Loki.Mark.Consulta.Histórico.DAOs
                 {
                     string query;
                     if (parametros.IdCartera == 1)
+                    {
                         query = $@"
                     SELECT DISTINCT GT.* 
                     FROM dbHistory.dbo.vw_PagosAmex GT
-                    INNER JOIN {tempTable} HS
-                      ON GT.idCartera = @idCartera
-                     AND GT.idCuenta = HS.Cuenta";
+                    INNER JOIN dbComplemento.Temp.{tempTableName} HS
+                        ON GT.idCartera = @idCartera
+                        AND GT.idCuenta = HS.Cuenta";
+                    }
                     else
+                    {
                         query = $@"
                     SELECT DISTINCT GT.*
                     FROM dbHistory.dbo.Pagos GT
-                    INNER JOIN {tempTable} HS
-                      ON GT.idCartera = @idCartera
-                     AND GT.idCuenta = HS.Cuenta";
-
+                    INNER JOIN dbComplemento.Temp.{tempTableName} HS
+                        ON GT.idCartera = @idCartera
+                        AND GT.idCuenta = HS.Cuenta";
+                    }
                     if (parametros.UsarPeriodo)
                         query += " AND FechaPago BETWEEN @Desde AND @Hasta";
                     ds.Tables.Add(await EjecutarConsultaAsync(conn, query, parametros, "Pagos"));
+                }
+
+                // Renombrar las tablas según las columnas
+                foreach (DataTable tblDatos in ds.Tables)
+                {
+                    if (tblDatos.Columns.Contains("RFC"))
+                        tblDatos.TableName = "Cuenta";
+                    else if (tblDatos.Columns.Contains("Herramienta"))
+                        tblDatos.TableName = "Negociaciones";
+                    else if (tblDatos.Columns.Contains("NúmeroTelefónico"))
+                        tblDatos.TableName = "Gestiones";
+                    else if (tblDatos.Columns.Contains("Fecha Visita"))
+                        tblDatos.TableName = "Visitas";
+                    else if (tblDatos.Columns.Contains("Fecha"))
+                        tblDatos.TableName = "Accionamientos";
+                    else if (tblDatos.Columns.Contains("FechaPago"))
+                        tblDatos.TableName = "Pagos";
+                }
+
+                // --- Limpiar tabla temporal ---
+                try
+                {
+                    var dropTemp = $"DROP TABLE dbComplemento.Temp.{tempTableName}";
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = dropTemp;
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "No se pudo eliminar la tabla temporal {TempTableName}", tempTableName);
                 }
 
                 return ds;
