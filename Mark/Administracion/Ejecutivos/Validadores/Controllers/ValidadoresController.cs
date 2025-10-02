@@ -83,7 +83,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
 
         public async Task<ActionResult> InsertaEliminaValidadores([FromBody] ValidadoresRequest dto)
         {
-            var servidorClaim = User.Claims.FirstOrDefault(c => c.Type == "servidor");
+            var servidorClaim = User.Claims.FirstOrDefault(c => c.Type == "Servidor");
 
             if (servidorClaim == null || string.IsNullOrWhiteSpace(servidorClaim.Value))
             {
@@ -108,7 +108,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
         public async Task<ActionResult> InsertaEliminaValidadoresArrepentimientos([FromBody] ValidadoresRequest dto)
         {
 
-            var servidorClaim = User.Claims.FirstOrDefault(c => c.Type == "servidor");
+            var servidorClaim = User.Claims.FirstOrDefault(c => c.Type == "Servidor");
 
             if (servidorClaim == null || string.IsNullOrWhiteSpace(servidorClaim.Value))
             {
