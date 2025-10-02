@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
-import { obetenerJerarquiaEncargados } from '../../../../services/LokiServices';
+import { obetenerJerarquiaEncargados, ValidatorsNormal } from '../../../../services/LokiServices';
 
 // Flecha tipo chevron moderna
 const DropdownArrow = () => (
@@ -29,13 +29,39 @@ const ModalValidadoresContent = () => {
     const [executiveTree, setExecutiveTree] = useState([]);
     const [usuariosValidadores, setUsuariosValidadores] = useState([]);
     // Otros estados propios del modal
-    const [producto, setProducto] = useState("Amex");
+    const [producto, setProducto] = useState(""); // Iniciamos vacío para obligar selección
     const [arrepentimientos, setArrepentimientos] = useState(false);
+    const [validadoresFromAPI, setValidadoresFromAPI] = useState([]);
+    const [isLoadingValidadores, setIsLoadingValidadores] = useState(false);
 
     // Función para obtener idCartera desde localStorage
     const getIdCartera = () => {
         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
         return userData?.idCartera || userData?.idcartera || userData?.cartera || 1; // fallback a 1 si no existe
+    };
+
+    // Función para obtener validadores del API
+    const fetchValidadores = async (idProducto) => {
+        if (!idProducto) return;
+        
+        setIsLoadingValidadores(true);
+        try {
+            console.log(`🔍 Obteniendo validadores para producto: ${idProducto}`);
+            
+            const response = await ValidatorsNormal(idProducto);
+            
+            const validadores = response?.data || [];
+            console.log('📋 Validadores obtenidos del API:', validadores);
+            setValidadoresFromAPI(validadores);
+            
+            return validadores;
+        } catch (error) {
+            console.error('❌ Error al obtener validadores:', error);
+            setValidadoresFromAPI([]);
+            return [];
+        } finally {
+            setIsLoadingValidadores(false);
+        }
     };
 
     // Cargar ejecutivos (idéntico a ModalCampanasEjecutivos)
@@ -118,6 +144,48 @@ const ModalValidadoresContent = () => {
         setUsuariosValidadores(usuariosFiltrados);
     }, [usuariosFiltrados]);
 
+    // Efecto para obtener validadores cuando cambie el producto o arrepentimientos
+    useEffect(() => {
+        const getIdProducto = () => {
+            switch(producto) {
+                case "Amex":
+                    return 1;
+                default:
+                    return null;
+            }
+        };
+
+        const idProducto = getIdProducto();
+        if (idProducto && producto) {
+            fetchValidadores(idProducto);
+        } else {
+            // Si no hay producto seleccionado, limpiar validadores
+            setValidadoresFromAPI([]);
+        }
+    }, [producto, arrepentimientos]);
+
+    // Efecto para actualizar checkboxes cuando cambien los validadores del API o la jerarquía
+    useEffect(() => {
+        if (validadoresFromAPI.length > 0 && usuariosValidadores.length > 0) {
+            console.log('🔄 Actualizando checkboxes basados en validadores del API...');
+            
+            // Crear un Set con los idEjecutivo de los validadores para búsqueda rápida
+            const validadoresIds = new Set(validadoresFromAPI.map(v => v.idEjecutivo));
+            
+            setUsuariosValidadores(prev => {
+                const updated = prev.map(usuario => ({
+                    ...usuario,
+                    seleccionado: validadoresIds.has(usuario.idEjecutivo)
+                }));
+                
+                const selectedCount = updated.filter(u => u.seleccionado).length;
+                console.log(`✅ ${selectedCount} ejecutivos marcados automáticamente`);
+                
+                return updated;
+            });
+        }
+    }, [validadoresFromAPI, usuariosValidadores.length]);
+
     // Handler para seleccionar/deseleccionar usuarios
     const handleSeleccionarUsuario = (usuario, index) => {
         setUsuariosValidadores(prev => {
@@ -155,8 +223,13 @@ const ModalValidadoresContent = () => {
                     padding: "1rem",
                     height: "100%"
                 }}>
-                    <label className="modal-span-1">
-                        Usuarios Validadores - {usuariosValidadores.length}
+                    <label className="modal-span-1" style={{ color: "var(--color-jerarquia3)" }}>
+                        Validadores - {usuariosValidadores.length}
+                        {isLoadingValidadores && (
+                            <span style={{ marginLeft: "0.5rem", color: "var(--color-jerarquia2)", fontSize: "0.8rem" }}>
+                                (Cargando...)
+                            </span>
+                        )}
                     </label>
                     <div style={{
                         border: "1px solid var(--color-jerarquia1)",
@@ -181,7 +254,7 @@ const ModalValidadoresContent = () => {
                                     color: '#666',
                                     fontStyle: 'italic'
                                 }}>
-                                    No hay usuarios disponibles
+                                    {!producto ? 'Selecciona un producto para ver los validadores' : 'No hay usuarios disponibles'}
                                 </div>
                             ) : (
                                 usuariosValidadores.map((row, i) => (
@@ -195,9 +268,11 @@ const ModalValidadoresContent = () => {
                                             paddingLeft: '2px',
                                             marginBottom: '0.25rem',
                                             width: 'fit-content',
-                                            minWidth: '100%'
+                                            minWidth: '100%',
+                                            opacity: !producto ? 0.5 : 1,
+                                            pointerEvents: !producto ? 'none' : 'auto'
                                         }}
-                                        onClick={() => handleSeleccionarUsuario(row.usuario, i)}
+                                        onClick={() => producto && handleSeleccionarUsuario(row.usuario, i)}
                                     >
                                         {row.esSubordinado && (
                                             <span style={{ 
@@ -211,10 +286,13 @@ const ModalValidadoresContent = () => {
                                         <input
                                             type="checkbox"
                                             checked={row.seleccionado || false}
+                                            disabled={!producto}
                                             className="modal-checkbox-small"
                                             onChange={(e) => {
                                                 e.stopPropagation();
-                                                handleSeleccionarUsuario(row.usuario, i);
+                                                if (producto) {
+                                                    handleSeleccionarUsuario(row.usuario, i);
+                                                }
                                             }}
                                         />
                                         <span style={{ 
@@ -298,8 +376,16 @@ const ModalValidadoresContent = () => {
                             value={producto}
                             onChange={(e) => setProducto(e.target.value)}
                             className="font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
-                            style={{ fontSize: "14px", width: "100%", cursor: "pointer" }}
+                            style={{ 
+                                fontSize: "14px", 
+                                width: "100%", 
+                                cursor: "pointer",
+                                color: producto === "" ? "#999" : "var(--color-jerarquia4)"
+                            }}
                         >
+                            <option value="" disabled style={{ color: "#999" }}>
+                                Selecciona un producto...
+                            </option>
                             <option value="Amex">American Express</option>
                         </select>
                         <DropdownArrow />
@@ -311,12 +397,14 @@ const ModalValidadoresContent = () => {
                     display: "flex",
                     alignItems: "center",
                     gap: "0.5rem",
-                    justifyContent: "center"
+                    justifyContent: "center",
+                    opacity: !producto ? 0.5 : 1
                 }}>
                     <input
                         type="checkbox"
                         id="arrepentimientos"
                         checked={arrepentimientos}
+                        disabled={!producto}
                         onChange={(e) => setArrepentimientos(e.target.checked)}
                         style={{
                             width: "1rem",
@@ -329,7 +417,7 @@ const ModalValidadoresContent = () => {
                         style={{
                             fontSize: "0.875rem",
                             fontWeight: "500",
-                            cursor: "pointer",
+                            cursor: !producto ? "not-allowed" : "pointer",
                             color: "var(--color-jerarquia3)"
                         }}
                     >
