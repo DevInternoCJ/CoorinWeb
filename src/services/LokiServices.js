@@ -1312,3 +1312,38 @@ export const ValidatorsNormal = async (idProducto) => {
     throw error;
   }
 };
+
+
+export const InsertDeletedValidators = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/ejecutivos/inserta-elimina-validador', body, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('📥 Respuesta de /ejecutivos/inserta-elimina-validador:', response);
+    return response;
+  } catch (error) {
+    console.error('Error insertar o eliminar validador:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};

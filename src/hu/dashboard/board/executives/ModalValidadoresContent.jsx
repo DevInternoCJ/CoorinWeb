@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
-import { obetenerJerarquiaEncargados, ValidatorsNormal } from '../../../../services/LokiServices';
+import { obetenerJerarquiaEncargados, ValidatorsNormal, InsertDeletedValidators } from '../../../../services/LokiServices';
 
 // Flecha tipo chevron moderna
 const DropdownArrow = () => (
@@ -41,7 +41,7 @@ const ModalValidadoresContent = () => {
     };
 
     // Función para obtener validadores del API
-    const fetchValidadores = async (idProducto) => {
+    const fetchValidadores = useCallback(async (idProducto) => {
         if (!idProducto) return;
         
         setIsLoadingValidadores(true);
@@ -62,7 +62,7 @@ const ModalValidadoresContent = () => {
         } finally {
             setIsLoadingValidadores(false);
         }
-    };
+    }, []);
 
     // Cargar ejecutivos (idéntico a ModalCampanasEjecutivos)
     useEffect(() => {
@@ -144,17 +144,18 @@ const ModalValidadoresContent = () => {
         setUsuariosValidadores(usuariosFiltrados);
     }, [usuariosFiltrados]);
 
+    // Función para obtener idProducto basado en la selección
+    const getIdProducto = useCallback(() => {
+        switch(producto) {
+            case "Amex":
+                return 1;
+            default:
+                return null;
+        }
+    }, [producto]);
+
     // Efecto para obtener validadores cuando cambie el producto o arrepentimientos
     useEffect(() => {
-        const getIdProducto = () => {
-            switch(producto) {
-                case "Amex":
-                    return 1;
-                default:
-                    return null;
-            }
-        };
-
         const idProducto = getIdProducto();
         if (idProducto && producto) {
             fetchValidadores(idProducto);
@@ -162,7 +163,7 @@ const ModalValidadoresContent = () => {
             // Si no hay producto seleccionado, limpiar validadores
             setValidadoresFromAPI([]);
         }
-    }, [producto, arrepentimientos]);
+    }, [producto, arrepentimientos, getIdProducto, fetchValidadores]);
 
     // Efecto para actualizar checkboxes cuando cambien los validadores del API o la jerarquía
     useEffect(() => {
@@ -186,11 +187,54 @@ const ModalValidadoresContent = () => {
         }
     }, [validadoresFromAPI, usuariosValidadores.length]);
 
+    // Función para enviar cambio de validador al servidor
+    const sendValidatorChange = useCallback(async (idEjecutivo, inserta) => {
+        console.log('🔧 Preparando cambio de validador...');
+        console.log('📋 Parámetros recibidos:');
+        console.log('  - idEjecutivo:', idEjecutivo, '(tipo:', typeof idEjecutivo, ')');
+        console.log('  - inserta:', inserta, '(tipo:', typeof inserta, ')');
+        
+        const idProducto = getIdProducto();
+        console.log('  - idProducto obtenido:', idProducto, '(tipo:', typeof idProducto, ')');
+        
+        if (!idProducto) {
+            console.error('❌ No se puede enviar cambio: producto no seleccionado');
+            return;
+        }
+
+        const body = {
+            idEjecutivo: idEjecutivo,
+            idProducto: idProducto,
+            inserta: inserta,
+            tipoBase: "Collection"
+        };
+
+        console.log('📦 Body construido antes de enviar:', body);
+        console.log('🔍 Verificación de cada campo:');
+        console.log('  - body.idEjecutivo:', body.idEjecutivo, '(tipo:', typeof body.idEjecutivo, ')');
+        console.log('  - body.idProducto:', body.idProducto, '(tipo:', typeof body.idProducto, ')');
+        console.log('  - body.inserta:', body.inserta, '(tipo:', typeof body.inserta, ')');
+        console.log('  - body.tipoBase:', body.tipoBase, '(tipo:', typeof body.tipoBase, ')');
+
+        try {
+            console.log(`📤 Enviando cambio de validador:`, body);
+            const response = await InsertDeletedValidators(body);
+            console.log(`✅ Cambio de validador ${inserta ? 'insertado' : 'eliminado'} correctamente:`, response);
+        } catch (error) {
+            console.error(`❌ Error al ${inserta ? 'insertar' : 'eliminar'} validador:`, error);
+            // Aquí podrías mostrar un mensaje de error al usuario si lo deseas
+        }
+    }, [getIdProducto]);
+
     // Handler para seleccionar/deseleccionar usuarios
-    const handleSeleccionarUsuario = (usuario, index) => {
+    const handleSeleccionarUsuario = async (usuario, index) => {
+        const usuarioActual = usuariosValidadores[index];
+        const nuevoEstado = !usuarioActual.seleccionado;
+        
+        // Actualizar el estado local inmediatamente para mejor UX
         setUsuariosValidadores(prev => {
             const updated = prev.map((u, i) => 
-                i === index ? { ...u, seleccionado: !u.seleccionado } : u
+                i === index ? { ...u, seleccionado: nuevoEstado } : u
             );
             
             // Log para debug
@@ -199,6 +243,9 @@ const ModalValidadoresContent = () => {
             
             return updated;
         });
+
+        // Enviar cambio al servidor
+        await sendValidatorChange(usuarioActual.idEjecutivo, nuevoEstado);
     };
 
     return (
