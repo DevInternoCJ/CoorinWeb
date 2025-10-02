@@ -15,16 +15,24 @@ const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
                 const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id;
                 if (!idEjecutivo) return;
                 const data = await obetenerJerarquiaEncargados(idEjecutivo);
-                // Mapeo: ajusta según la estructura real del endpoint
+                // Mapeo: estructura completa según el endpoint
                 const mapped = Array.isArray(data) ? data.map(e => ({
                     usuario: e.usuario || e.Usuario || '',
+                    nombreEjecutivo: e.nombreEjecutivo || '',
                     asignado: e.asignado ?? false,
                     restantes: e.restantes ?? 0,
-                    subordinados: e.subordinados ?? [],
+                    subordinados: Array.isArray(e.subordinados) ? e.subordinados : [],
                     idEjecutivo: e.idEjecutivo || e.idejecutivo || e.id || '',
+                    idEncargado: e.idEncargado || null,
+                    sesionAbierta: e.sesionAbierta ?? false,
+                    bloqueado: e.bloqueado
                 })) : [];
+                
+                console.log('📊 Ejecutivos cargados del endpoint:', mapped.length);
+                console.log('🔍 Estructura de datos:', mapped.slice(0, 2)); // Mostrar primeros 2 para debug
                 setExecutiveTree(mapped);
-            } catch (err) {
+            } catch (error) {
+                console.error('Error al cargar ejecutivos:', error);
                 setExecutiveTree([]);
             }
         };
@@ -47,32 +55,66 @@ const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
                             : { ...ej, restantes: 0, asignado: false };
                     }));
                 }
-            } catch (err) {
-                console.error('Error al consumir UsuarioRestante:', err);
+            } catch (error) {
+                console.error('Error al consumir UsuarioRestante:', error);
             }
         };
         fetchRestantes();
     }, [idCampaña]);
 
-    // Ordenar ejecutivos: mantener el orden original, pero mover al final los que sean subordinados de algún otro encargado
+    // Mostrar todos los ejecutivos de la jerarquía con hijos al final
     const ejecutivosOrdenados = useMemo(() => {
         if (!executiveTree.length) return [];
-        // Normalizar usuarios y detectar todos los subordinados
-        const getUsuario = u => (u?.usuario || u?.Usuario || (typeof u === 'string' ? u : '')).toUpperCase();
-        const subordinadosSet = new Set();
-        executiveTree.forEach(e => {
-            if (Array.isArray(e.subordinados)) {
-                e.subordinados.forEach(sub => {
-                    subordinadosSet.add(getUsuario(sub));
+        
+        console.log('🔍 Mostrando TODOS los ejecutivos de la jerarquía...');
+        console.log('📊 Total ejecutivos del endpoint:', executiveTree.length);
+        
+        const ejecutivosFiltrados = [];
+        
+        // Tomar TODOS los ejecutivos principales (sin límite)
+        const ejecutivosPrincipales = executiveTree;
+        
+        // Separar principales y subordinados
+        const listaEjecutivosPrincipales = [];
+        const listaSubordinados = [];
+        
+        ejecutivosPrincipales.forEach(ejecutivo => {
+            // Agregar el ejecutivo principal a su lista
+            listaEjecutivosPrincipales.push({
+                ...ejecutivo,
+                nivelJerarquia: 1,
+                esSubordinado: false
+            });
+            
+            // Recopilar subordinados para agregar al final
+            if (Array.isArray(ejecutivo.subordinados) && ejecutivo.subordinados.length > 0) {
+                ejecutivo.subordinados.forEach(subordinado => {
+                    listaSubordinados.push({
+                        usuario: subordinado.usuario || subordinado.Usuario || '',
+                        asignado: subordinado.asignado ?? false,
+                        restantes: subordinado.restantes ?? 0,
+                        subordinados: subordinado.subordinados ?? [],
+                        idEjecutivo: subordinado.idEjecutivo || subordinado.idejecutivo || subordinado.id || '',
+                        idEncargado: subordinado.idEncargado || ejecutivo.idEjecutivo,
+                        nivelJerarquia: 2,
+                        esSubordinado: false, // Quitar marca de subordinado para no mostrar indentación
+                        encargadoPadre: ejecutivo.usuario
+                    });
                 });
             }
         });
-        // Ejecutivos que NO son subordinados de nadie (manteniendo el orden original)
-        const noSubordinados = executiveTree.filter(e => !subordinadosSet.has(getUsuario(e)));
-        // Ejecutivos que SÍ son subordinados de alguien (orden inverso al original)
-        const siSubordinados = executiveTree.filter(e => subordinadosSet.has(getUsuario(e))).reverse();
-        // Unir ambos grupos, asegurando que todos se pinten
-        return [...noSubordinados, ...siSubordinados];
+        
+        // Ordenar subordinados en orden inverso (último hijo arriba, primer hijo abajo)
+        listaSubordinados.reverse();
+        
+        // Combinar: primero ejecutivos principales, luego subordinados al final
+        ejecutivosFiltrados.push(...listaEjecutivosPrincipales, ...listaSubordinados);
+        
+        console.log('✅ Ejecutivos mostrados (TODOS los principales + subordinados al final):', ejecutivosFiltrados.length);
+        console.log('📋 Ejecutivos principales:', listaEjecutivosPrincipales.map(e => e.usuario));
+        console.log('📋 Subordinados al final (orden inverso):', listaSubordinados.map(e => `${e.usuario} (hijo de ${e.encargadoPadre})`));
+        
+        return ejecutivosFiltrados;
     }, [executiveTree]);
 
     // Handler para asignar ejecutivo a campaña
@@ -86,8 +128,8 @@ const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
             if (response?.data?.success || response?.status === 200) {
                 setExecutiveTree(prev => prev.map((r, i) => i === idx ? { ...r, asignado: checked } : r));
             }
-        } catch (err) {
-            // Si falla, no cambia el estado
+        } catch (error) {
+            console.error('Error al asignar ejecutivo:', error);
         } finally {
             setLoadingRow(null);
         }
@@ -133,7 +175,13 @@ const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
                                     />
                                 </td>
                                 <td className="modal-table-td" style={{ padding: '2px 2px', textAlign: 'center', width: '80px', minWidth: '60px', fontFamily: 'monospace', letterSpacing: '1px', fontSize: '1rem' }}>
-                                    <span style={{ display: 'inline-block', width: '60px', textAlign: 'center' }}>{row.usuario}</span>
+                                    <span style={{ 
+                                        display: 'inline-block', 
+                                        width: '100%', 
+                                        textAlign: 'center'
+                                    }}>
+                                        {row.usuario}
+                                    </span>
                                 </td>
                                 <td className="modal-table-td" style={{ padding: '2px 2px', textAlign: 'center', width: '60px', minWidth: '40px' }}>{row.restantes ?? 0}</td>
                             </tr>

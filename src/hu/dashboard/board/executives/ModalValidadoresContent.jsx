@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
-import JerarquiaConCheckbox from "./JerarquiaConR/JerarquiaConCheckbox";
 import { obetenerJerarquiaEncargados } from '../../../../services/LokiServices';
 
 // Flecha tipo chevron moderna
@@ -26,15 +25,9 @@ const DropdownArrow = () => (
 
 
 const ModalValidadoresContent = () => {
-    // Estados para la jerarquía de ejecutivos (como en ModalMetasContent)
+    // Estados principales (idéntico a ModalCampanasEjecutivos)
     const [executiveTree, setExecutiveTree] = useState([]);
-    const [loadingJerarquia, setLoadingJerarquia] = useState(false);
-    const [errorJerarquia, setErrorJerarquia] = useState(null);
-    const [selectedExecutives, setSelectedExecutives] = useState([]); // array de idEjecutivo
-    const [selectedRows, setSelectedRows] = useState([]);
-    const [editValues, setEditValues] = useState({});
-    const [selectedExecutiveNode, setSelectedExecutiveNode] = useState(null);
-    const [allHierarchyIds, setAllHierarchyIds] = useState([]);
+    const [usuariosValidadores, setUsuariosValidadores] = useState([]);
     // Otros estados propios del modal
     const [producto, setProducto] = useState("Amex");
     const [arrepentimientos, setArrepentimientos] = useState(false);
@@ -45,44 +38,100 @@ const ModalValidadoresContent = () => {
         return userData?.idCartera || userData?.idcartera || userData?.cartera || 1; // fallback a 1 si no existe
     };
 
-    // Obtener la jerarquía de ejecutivos (idéntico a ModalMetasContent)
+    // Cargar ejecutivos (idéntico a ModalCampanasEjecutivos)
     useEffect(() => {
-        const fetchExecutiveTree = async () => {
-            setLoadingJerarquia(true);
-            setErrorJerarquia(null);
+        const fetchExecutives = async () => {
             try {
                 const userData = JSON.parse(localStorage.getItem('userData'));
-                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
-                const usuario = userData?.usuario || '';
-                const nombreEjecutivo = userData?.nombre || userData?.nombreEjecutivo || userData?.ejecutivo || '';
-                if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
+                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id;
+                if (!idEjecutivo) return;
                 const data = await obetenerJerarquiaEncargados(idEjecutivo);
-                let tree = [];
-                if (Array.isArray(data)) {
-                    const found = data.find(n => n.idEjecutivo === idEjecutivo);
-                    if (found) {
-                        tree = data;
-                    } else {
-                        // Si no está el propio ejecutivo, lo agregamos como raíz
-                        tree = [{
-                            idEjecutivo: idEjecutivo,
-                            usuario,
-                            nombreEjecutivo,
-                            subordinados: data
-                        }];
-                    }
-                }
-                setExecutiveTree(tree);
+                // Mapeo: estructura completa según el endpoint
+                const mapped = Array.isArray(data) ? data.map(e => ({
+                    usuario: e.usuario || e.Usuario || '',
+                    nombreEjecutivo: e.nombreEjecutivo || '',
+                    subordinados: Array.isArray(e.subordinados) ? e.subordinados : [],
+                    idEjecutivo: e.idEjecutivo || e.idejecutivo || e.id || '',
+                    idEncargado: e.idEncargado || null,
+                    seleccionado: false // Añadimos campo para manejar selección
+                })) : [];
+                
+                console.log('📊 Ejecutivos cargados para validadores:', mapped.length);
+                console.log('🔍 Estructura de datos:', mapped.slice(0, 2)); // Mostrar primeros 2 para debug
+                setExecutiveTree(mapped);
             } catch (error) {
-                console.error('Error al obtener la jerarquía:', error);
-                setErrorJerarquia('Error al obtener la jerarquía de ejecutivos');
+                console.error('Error al cargar ejecutivos para validadores:', error);
                 setExecutiveTree([]);
-            } finally {
-                setLoadingJerarquia(false);
             }
         };
-        fetchExecutiveTree();
+        fetchExecutives();
     }, []);
+
+    // Filtrar ejecutivos: Replicar comportamiento exacto de ModalCampanasEjecutivos
+    const usuariosFiltrados = useMemo(() => {
+        if (!executiveTree.length) return [];
+        
+        console.log('🔍 Aplicando filtro para validadores - Solo primeros 13 ejecutivos + subordinados...');
+        console.log('📊 Total ejecutivos del endpoint:', executiveTree.length);
+        
+        const usuariosValidadores = [];
+        
+        // Tomar solo los primeros 13 ejecutivos principales
+        const ejecutivosPrincipales = executiveTree.slice(0, 13);
+        
+        ejecutivosPrincipales.forEach(ejecutivo => {
+            // Agregar el ejecutivo principal
+            usuariosValidadores.push({
+                ...ejecutivo,
+                usuario: ejecutivo.usuario || ejecutivo.Usuario || '',
+                nombreEjecutivo: ejecutivo.nombreEjecutivo || '',
+                displayName: `${ejecutivo.usuario || ejecutivo.Usuario || ''} - ${ejecutivo.nombreEjecutivo || ''}`,
+                nivelJerarquia: 1,
+                esSubordinado: false,
+                seleccionado: false
+            });
+            
+            // Agregar sus subordinados si los tiene
+            if (Array.isArray(ejecutivo.subordinados) && ejecutivo.subordinados.length > 0) {
+                ejecutivo.subordinados.forEach(subordinado => {
+                    usuariosValidadores.push({
+                        usuario: subordinado.usuario || subordinado.Usuario || '',
+                        nombreEjecutivo: subordinado.nombreEjecutivo || '',
+                        displayName: `${subordinado.usuario || subordinado.Usuario || ''} - ${subordinado.nombreEjecutivo || ''}`,
+                        idEjecutivo: subordinado.idEjecutivo || subordinado.idejecutivo || subordinado.id || '',
+                        idEncargado: subordinado.idEncargado || ejecutivo.idEjecutivo,
+                        nivelJerarquia: 2,
+                        esSubordinado: true,
+                        encargadoPadre: ejecutivo.usuario,
+                        seleccionado: false
+                    });
+                });
+            }
+        });
+        
+        console.log('✅ Usuarios filtrados para validadores:', usuariosValidadores.length);
+        return usuariosValidadores;
+    }, [executiveTree]);
+
+    // Actualizar usuariosValidadores cuando cambie usuariosFiltrados
+    useEffect(() => {
+        setUsuariosValidadores(usuariosFiltrados);
+    }, [usuariosFiltrados]);
+
+    // Handler para seleccionar/deseleccionar usuarios
+    const handleSeleccionarUsuario = (usuario, index) => {
+        setUsuariosValidadores(prev => {
+            const updated = prev.map((u, i) => 
+                i === index ? { ...u, seleccionado: !u.seleccionado } : u
+            );
+            
+            // Log para debug
+            const selectedUsers = updated.filter(u => u.seleccionado).map(u => u.displayName);
+            console.log('🔘 Usuarios seleccionados para validadores:', selectedUsers);
+            
+            return updated;
+        });
+    };
 
     return (
         <div style={{
@@ -91,24 +140,97 @@ const ModalValidadoresContent = () => {
             height: "100%",
             gap: "1rem"
         }}>
-            {/* Columna izquierda - Jerarquía de ejecutivos */}
+            {/* Columna izquierda - Tabla de usuarios validadores (estilo original) */}
             <div style={{
                 width: "300px",
                 display: "flex",
                 flexDirection: "column"
             }}>
-                <JerarquiaConCheckbox
-                    executiveTree={executiveTree}
-                    loadingJerarquia={loadingJerarquia}
-                    errorJerarquia={errorJerarquia}
-                    selectedExecutiveNode={selectedExecutiveNode}
-                    allHierarchyIds={allHierarchyIds}
-                    setSelectedExecutives={setSelectedExecutives}
-                    setSelectedRows={setSelectedRows}
-                    setEditValues={setEditValues}
-                    setSelectedExecutiveNode={setSelectedExecutiveNode}
-                    selectedExecutives={selectedExecutives}
-                />
+                <div style={{ 
+                    display: "flex", 
+                    flexDirection: "column",
+                    backgroundColor: "white",
+                    border: "1px solid var(--color-jerarquia1)",
+                    borderRadius: "8px",
+                    padding: "1rem",
+                    height: "100%"
+                }}>
+                    <label className="modal-span-1">
+                        Usuarios Validadores - {usuariosValidadores.length}
+                    </label>
+                    <div style={{
+                        border: "1px solid var(--color-jerarquia1)",
+                        borderRadius: "8px",
+                        backgroundColor: "white",
+                        flex: 1,
+                        overflow: "hidden"
+                    }}>
+                        <div
+                            style={{
+                                overflowY: "auto",
+                                height: "100%",
+                                width: "100%",
+                                padding: "0.5rem"
+                            }}
+                            className="scrollbar-gray"
+                        >
+                            {usuariosValidadores.length === 0 ? (
+                                <div style={{ 
+                                    textAlign: 'center', 
+                                    padding: '1rem',
+                                    color: '#666',
+                                    fontStyle: 'italic'
+                                }}>
+                                    No hay usuarios disponibles
+                                </div>
+                            ) : (
+                                usuariosValidadores.map((row, i) => (
+                                    <div 
+                                        key={i}
+                                        className="executive-hierarchy-item"
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            paddingLeft: '2px',
+                                            marginBottom: '0.25rem',
+                                            width: 'fit-content',
+                                            minWidth: '100%'
+                                        }}
+                                        onClick={() => handleSeleccionarUsuario(row.usuario, i)}
+                                    >
+                                        {row.esSubordinado && (
+                                            <span style={{ 
+                                                color: '#666',
+                                                fontSize: '0.8rem',
+                                                marginRight: '0.25rem'
+                                            }}>
+                                                └─
+                                            </span>
+                                        )}
+                                        <input
+                                            type="checkbox"
+                                            checked={row.seleccionado || false}
+                                            className="modal-checkbox-small"
+                                            onChange={(e) => {
+                                                e.stopPropagation();
+                                                handleSeleccionarUsuario(row.usuario, i);
+                                            }}
+                                        />
+                                        <span style={{ 
+                                            color: '#000',
+                                            fontSize: row.esSubordinado ? '0.8rem' : '0.85rem',
+                                            fontWeight: row.esSubordinado ? 'normal' : '500',
+                                            whiteSpace: 'nowrap'
+                                        }}>
+                                            {row.displayName}
+                                        </span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Campos del lado derecho */}
@@ -236,6 +358,41 @@ const ModalValidadoresContent = () => {
                     border-radius: 4px;
                 }
                 div[style*="overflowY: auto"]::-webkit-scrollbar-thumb:hover {
+                    background: #888;
+                }
+                /* Estilos para la tabla de usuarios validadores */
+                .modal-table {
+                    width: 100%;
+                    font-size: 0.75rem;
+                    border-collapse: collapse;
+                }
+                .modal-table-th {
+                    border: 1px solid #ddd;
+                    text-align: center;
+                    position: sticky;
+                    top: 0;
+                    z-index: 1;
+                }
+                .modal-table-td {
+                    border: 1px solid #ddd;
+                    border-top: none;
+                }
+                .modal-checkbox-small {
+                    cursor: pointer;
+                }
+                .scrollbar-gray::-webkit-scrollbar {
+                    width: 8px;
+                    height: 8px;
+                }
+                .scrollbar-gray::-webkit-scrollbar-track {
+                    background: #f5f5f5;
+                    border-radius: 4px;
+                }
+                .scrollbar-gray::-webkit-scrollbar-thumb {
+                    background: #b0b0b0;
+                    border-radius: 4px;
+                }
+                .scrollbar-gray::-webkit-scrollbar-thumb:hover {
                     background: #888;
                 }
             `}</style>
