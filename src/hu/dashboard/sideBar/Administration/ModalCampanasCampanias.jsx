@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import ModalFilasCampañas from "./ModalFilasCampanias";
-import { campainghInCharge, enabledUnenabledCampaign, campaignDeleteada, campaignCleaning } from "../../../../services/LokiServices";
+import { campainghInCharge, enabledUnenabledCampaign, campaignDeleteada, campaignCleaning, AvanceCampaing } from "../../../../services/LokiServices";
 import { toast } from "sonner";
 import NewCampaign from "./NewCampaign";
 import ModalToponeHundred from "./ModalToponeHundred";
@@ -15,17 +15,43 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
     const [tipoFilas, setTipoFilas] = useState("archivo");
 
     // Función para cargar campañas
-    const cargarCampanas = () => {
+    const cargarCampanas = async () => {
         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
         const idEncargado = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.id ?? 1;
         const idCartera = userData?.idCartera ?? userData?.idcartera ?? userData?.cartera ?? 1;
         const idProducto = userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
         const params = { idEncargado, idCartera, idProducto };
-        campainghInCharge(params)
-            .then(data => {
+        
+        try {
+            // Obtener las campañas
+            const campanasData = await campainghInCharge(params);
+            const campanasList = Array.isArray(campanasData) ? campanasData : [campanasData];
+            
+            // Obtener el avance de las campañas
+            const avanceResponse = await AvanceCampaing(idEncargado, idCartera, idProducto);
+            const avanceData = Array.isArray(avanceResponse.data) ? avanceResponse.data : [avanceResponse.data];
+            
+            // Combinar los datos: actualizar el campo Avance basado en idCampaña
+            const campanasConAvance = campanasList.map(campana => {
+                const avanceInfo = avanceData.find(avance => avance.idCampaña === campana.idCampaña);
+                return {
+                    ...campana,
+                    Avance: avanceInfo ? avanceInfo.avance : campana.Avance // Usar el nuevo avance si existe, sino mantener el original
+                };
+            });
+            
+            setCampanas(campanasConAvance);
+        } catch (error) {
+            console.error('Error al cargar campañas o avances:', error);
+            // Fallback: cargar solo las campañas sin avance actualizado
+            try {
+                const data = await campainghInCharge(params);
                 setCampanas(Array.isArray(data) ? data : [data]);
-            })
-            .catch(() => setCampanas([]));
+            } catch (fallbackError) {
+                console.error('Error en fallback:', fallbackError);
+                setCampanas([]);
+            }
+        }
     };
 
     useEffect(() => {
