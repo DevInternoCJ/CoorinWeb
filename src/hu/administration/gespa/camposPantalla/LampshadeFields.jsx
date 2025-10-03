@@ -58,7 +58,9 @@ const LampshadeFields = ({ isOpen, onClose }) => {
             loading={loading}
             setLoading={setLoading}
           />
-          <InfoSection infoData={infoData} />
+          {selectedProduct && (
+  <InfoSection idProducto={selectedProduct.value} />
+)}
           {selectedProduct && selectedProduct.value !== 0 && (
             <>
               <TableEditFields idProducto={selectedProduct.value} />

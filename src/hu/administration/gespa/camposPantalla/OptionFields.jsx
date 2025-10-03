@@ -10,9 +10,9 @@ const formatOptions = [
 ];
 
 const highlightOptions = [
-  { label: "Normal", value: 1 },
-  { label: "Resaltado", value: 2 },
-  { label: "Sobre Resaltado", value: 3 }
+  { label: "Normal", value: 0 },
+  { label: "Resaltado", value: 1 },
+  { label: "Sobre Resaltado", value: 2 }
 ]
 
 const OptionFields = ({ data, onEdit }) => {
