@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
-import { obetenerJerarquiaEncargados, ValidatorsNormal, Validatorsregrets, InsertDeletedValidators } from '../../../../services/LokiServices';
+import { obetenerJerarquiaEncargados, ValidatorsNormal, Validatorsregrets, InsertDeletedValidators, InsertDeletedValidatorsRegrets } from '../../../../services/LokiServices';
 import { toast } from "sonner";
 
 // Flecha tipo chevron moderna
@@ -217,12 +217,16 @@ const ModalValidadoresContent = () => {
         setIsProcessingChange(true);
         
         try {
-            const response = await InsertDeletedValidators(body);
-            console.log(`✅ Cambio de validador ${inserta ? 'insertado' : 'eliminado'} correctamente:`, response);
+            // Usar el endpoint correcto según el tipo de validador
+            const response = arrepentimientos 
+                ? await InsertDeletedValidatorsRegrets(body)
+                : await InsertDeletedValidators(body);
+                
+            console.log(`Cambio de validador ${inserta ? 'insertado' : 'eliminado'} correctamente (${arrepentimientos ? 'ARREPENTIMIENTOS' : 'NORMAL'}):`, response);
             // Solo mostrar toast de éxito en casos específicos si es necesario
             // toast.success(`Validador ${inserta ? 'agregado' : 'removido'} exitosamente`);
         } catch (error) {
-            console.error(`❌ Error al ${inserta ? 'insertar' : 'eliminar'} validador:`, error);
+            console.error(`Error al ${inserta ? 'insertar' : 'eliminar'} validador (${arrepentimientos ? 'ARREPENTIMIENTOS' : 'NORMAL'}):`, error);
             // Solo mostrar toast de error, evitando duplicados
             toast.error(`Error al ${inserta ? 'agregar' : 'remover'} validador`);
         } finally {
@@ -231,13 +235,13 @@ const ModalValidadoresContent = () => {
                 setIsProcessingChange(false);
             }, 300);
         }
-    }, [getIdProducto, isProcessingChange]);
+    }, [getIdProducto, isProcessingChange, arrepentimientos]);
 
     // Handler para seleccionar/deseleccionar usuarios
     const handleSeleccionarUsuario = async (usuario, index) => {
         // Evitar cambios múltiples mientras se procesa
         if (isProcessingChange) {
-            console.log('⚠️ Cambio en proceso, esperando...');
+            console.log('Cambio en proceso, esperando...');
             return;
         }
 
