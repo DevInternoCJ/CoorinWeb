@@ -3,7 +3,7 @@ import dataDash from "../../dataDash";
 import { ExecutiveChart } from "../../DashboardIcons";
 import { IconMetas, IconValidadores, IconEncargados, IconCatalogos, IconScripts, IconPantalla } from "./IconesEjecutives";
 import ModalMetasEjecutivos from "./ModalMetasEjecutivos";
-import LampshadeFields from "../../../administration/gespa/camposPantalla/LampshadeFields"
+import LampshadeFields from "../../../administration/gespa/screenFields/LampshadeFields"
 import ModalValidadoresEjecutivos from "./ModalValidadoresEjecutivos";
 import ModalEncargadosEjecutivos from "./ModalEncargadosEjecutivos";
 import ModalCatalogosEjecutivos from "./ModalCatalogosEjecutivos";

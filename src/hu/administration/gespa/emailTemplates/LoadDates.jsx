@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PostLoadData } from '../../../../services/LokiServices';
 
-const LoadDates = ({ selectedProduct, onSaldoChange, isModalOpen}) => {
+const LoadDates = ({ selectedProduct, onSaldoChange, isModalOpen, onPlantillasChange}) => {
   const [datosDeudor, setDatosDeudor] = useState({});
   const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
   const [loading, setLoading] = useState(true);
@@ -29,6 +29,10 @@ const LoadDates = ({ selectedProduct, onSaldoChange, isModalOpen}) => {
       const response = await PostLoadData(requestData);
 
       if (response && response.exito) {
+
+         if (response.plantillas && onPlantillasChange) {
+          onPlantillasChange(response.plantillas);
+        }
         // Datos del deudor
         if (response.cuenta) {
           const saldoFormateado = response.cuenta.Saldo ? `$${response.cuenta.Saldo.toLocaleString()}` : '$0.00';

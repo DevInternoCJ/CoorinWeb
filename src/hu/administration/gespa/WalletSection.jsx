@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import LogoCoorin from "../../../assets/logo_coorin_7.svg";
-import CustomSelect from "./camposPantalla/SelectWallet";
+import CustomSelect from "./screenFields/SelectWallet";
 import { GetVerifyProduct } from "../../../services/LokiServices";
 
 const PRODUCT_OPTIONS = [

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import CustomSelect from "../camposPantalla/SelectWallet";
+import React, { useState, useEffect} from "react";
+import SelectWallet from "../screenFields/SelectWallet";
 import ButtonSave from "../ButtonSave";
 import { SaveCreateTemplate}  from "../../../../services/LokiServices";
 import { useUserStore } from "../../../../contextGlobal/userStore";
@@ -10,7 +10,25 @@ const Template = ({ saldo, plantillas = [] }) => {
   const [mensaje, setMensaje] = useState("");
   const [textoPago, setTextoPago] = useState("");
   const [vistaPrevia, setVistaPrevia] = useState(false);
-  const [selectedPlantilla, setSelectedPlantilla] = useState("");
+  const [selectedPlantilla, setSelectedPlantilla] = useState(
+    plantillas[0]?.nombre ?? ""
+  );
+
+  useEffect(() => {
+    setSelectedPlantilla(plantillas[0]?.nombre ?? "");
+  }, [plantillas]);
+
+  // Esta función te permite obtener el idCorreoScript de la plantilla seleccionada
+  const handleSelectChange = (nombreSeleccionado) => {
+    setSelectedPlantilla(nombreSeleccionado);
+    const plantillaObj = plantillas.find(p => p.nombre === nombreSeleccionado);
+    if (plantillaObj) {
+      setTitulo(plantillaObj.nombre || "");
+      setMensaje(plantillaObj.asunto || "");
+      setTextoPago(plantillaObj.mensaje || "");
+      // Si necesitas guardar el idCorreoScript en un estado, aquí puedes hacerlo
+    }
+  };
 
   const user = useUserStore((state) => state.user);
   console.log("Datos de usuario en el store:", user);
@@ -40,18 +58,19 @@ const Template = ({ saldo, plantillas = [] }) => {
   return (
     <div className=" bg-neutral-100 rounded-lg text-white mt-5">
       <div className="flex justify-start items-center mb-4 gap-3">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Plantilla
-        </label>
-        <CustomSelect
-          options={[
-            ...plantillas.map((p) => ({ label: p.nombre, value: p.id })),
-            { label: "Nuevo", value: "nuevo" },
-          ]}
-          defaultValue={plantillas[0]?.id || "nuevo"}
-          onChange={setSelectedPlantilla}
-        />
-      </div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Plantilla
+  </label>
+<SelectWallet
+  options={plantillas.map((p) => ({
+    label: p.nombre,
+    value: p.nombre,
+    idCorreoScript: p.idCorreoScript
+  }))}
+  value={selectedPlantilla}
+          onChange={handleSelectChange}
+/>
+</div>
 
       <div className=" bg-jerarquia1 rounded-lg p-4 mt-3">
         <div className="flex justify-between items-center mb-1">
