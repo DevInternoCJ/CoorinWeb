@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { obetenerJerarquiaEncargados, asignaEjecutivoCampanas, UsuarioRestante } from "../../../../services/LokiServices";
+import { toast } from "sonner";
 
 const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
     const [executiveTree, setExecutiveTree] = useState([]);
@@ -57,6 +58,18 @@ const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
                 }
             } catch (error) {
                 console.error('Error al consumir UsuarioRestante:', error);
+                
+                // Verificar si es un error 404 (No se encontraron datos)
+                if (error.response?.status === 404) {
+                    toast.error("No se encontraron datos");
+                    
+                    // Limpiar todos los checkboxes (resetear asignado y restantes a valores por defecto)
+                    setExecutiveTree(prev => prev.map(ej => ({
+                        ...ej,
+                        restantes: 0,
+                        asignado: false
+                    })));
+                }
             }
         };
         fetchRestantes();

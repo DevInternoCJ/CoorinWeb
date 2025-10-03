@@ -144,52 +144,6 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                 console.error("Error al consultar histórico individual:", error);
                 toast.error("Error al consultar histórico individual");
             }
-        } else {
-            // Modo archivo
-            if (!archivo) {
-                toast.warning("Seleccione un archivo para subir");
-                return;
-            }
-            const checkboxesValidos = Object.entries(checkedItems)
-                .filter(([key]) => key !== "periodo")
-                .some(([_, checked]) => checked);
-            if (!checkboxesValidos) {
-                toast.warning("Seleccione al menos un tipo de consulta");
-                return;
-            }
-            try {
-                const userData = JSON.parse(localStorage.getItem("userData"));
-                const idCartera = userData?.idCartera || 1;
-                const formatFecha = (fecha) => {
-                    if (!fecha) return null;
-                    const [dia, mes, anio] = fecha.split("/");
-                    return `${anio}-${mes}-${dia}`;
-                };
-                const body = {
-                    Archivo: archivo,
-                    IdCartera: idCartera,
-                    IncluirCuenta: checkedItems.cuenta,
-                    IncluirNegociaciones: checkedItems.negociaciones,
-                    IncluirVisitas: checkedItems.visitas,
-                    IncluirGestiones: checkedItems.gestiones,
-                    IncluirAccionamientos: checkedItems.accionamientos,
-                    IncluirPagos: checkedItems.pagos,
-                    UsarPeriodo: periodo,
-                    FechaDesde: periodo ? formatFecha(fechaDesde) : null,
-                    FechaHasta: periodo ? formatFecha(fechaHasta) : null
-                };
-                console.log("Body enviado al endpoint archivo:", body);
-                const result = await historyArchivoUpload(body);
-                if (result?.data && result.data.size === 0) {
-                    toast.warning("El archivo no contiene cuentas válidas");
-                    setExcelBlob(null);
-                    return;
-                }
-                setExcelBlob(result.data);
-            } catch (error) {
-                console.error("Error al consultar histórico por archivo:", error);
-                toast.error("Error al consultar histórico por archivo");
-            }
         }
     };
 
@@ -397,9 +351,81 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                                     accept=".xlsx,.xls"
                                     id="archivoInput"
                                     style={{ display: "none" }}
-                                    onChange={e => {
-                                        setArchivo(e.target.files[0]);
-                                        setExcelBlob(null);
+                                    onChange={async (e) => {
+                                        const archivoSeleccionado = e.target.files[0];
+                                        if (archivoSeleccionado) {
+                                            setArchivo(archivoSeleccionado);
+                                            setExcelBlob(null);
+                                            
+                                            // Ejecutar automáticamente el endpoint historyArchivoUpload
+                                            try {
+                                                const userData = JSON.parse(localStorage.getItem("userData"));
+                                                const idCartera = userData?.idCartera || 1;
+                                                
+                                                const formatFecha = (fecha) => {
+                                                    if (!fecha) return null;
+                                                    const [dia, mes, anio] = fecha.split("/");
+                                                    return `${anio}-${mes}-${dia}`;
+                                                };
+                                                
+                                                const body = {
+                                                    Archivo: archivoSeleccionado,
+                                                    IdCartera: idCartera,
+                                                    IncluirCuenta: checkedItems.cuenta,
+                                                    IncluirNegociaciones: checkedItems.negociaciones,
+                                                    IncluirVisitas: checkedItems.visitas,
+                                                    IncluirGestiones: checkedItems.gestiones,
+                                                    IncluirAccionamientos: checkedItems.accionamientos,
+                                                    IncluirPagos: checkedItems.pagos,
+                                                    UsarPeriodo: periodo
+                                                };
+                                                
+                                                // Solo incluir las fechas si UsarPeriodo es true
+                                                if (periodo) {
+                                                    body.FechaDesde = formatFecha(fechaDesde);
+                                                    body.FechaHasta = formatFecha(fechaHasta);
+                                                }
+                                                
+                                                console.log("Body enviado al endpoint archivo:", body);
+                                                const result = await historyArchivoUpload(body);
+                                                
+                                                console.log("Respuesta del endpoint:", result);
+                                                
+                                                // Manejar la respuesta según lo que devuelva el servidor
+                                                if (result?.data) {
+                                                    // Crear blob directamente del ArrayBuffer
+                                                    const excelBlob = new Blob([result.data], {
+                                                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                                                    });
+                                                    
+                                                    // Verificar que el blob tenga contenido
+                                                    if (excelBlob.size === 0) {
+                                                        toast.warning("El archivo no contiene cuentas válidas");
+                                                        return;
+                                                    }
+                                                    
+                                                    // Descargar automáticamente
+                                                    const fileName = `historico_archivo_${new Date().toISOString().slice(0,10)}.xlsx`;
+                                                    const url = window.URL.createObjectURL(excelBlob);
+                                                    const link = document.createElement("a");
+                                                    link.href = url;
+                                                    link.setAttribute("download", fileName);
+                                                    document.body.appendChild(link);
+                                                    link.click();
+                                                    link.remove();
+                                                    window.URL.revokeObjectURL(url);
+                                                    
+                                                    toast.success("Archivo procesado y descargado correctamente");
+                                                    console.log("Archivo procesado exitosamente");
+                                                } else {
+                                                    toast.warning("El archivo no pudo ser procesado");
+                                                }
+                                                
+                                            } catch (error) {
+                                                console.error("Error al consultar histórico por archivo:", error);
+                                                toast.error("Error al consultar histórico por archivo");
+                                            }
+                                        }
                                     }}
                                 />
                                 <button

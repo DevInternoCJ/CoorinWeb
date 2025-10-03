@@ -794,21 +794,25 @@ export const historyArchivoUpload = async (body) => {
     const formData = new FormData();
     // Asume que body es un objeto con las claves necesarias y el archivo
     Object.entries(body).forEach(([key, value]) => {
-      // Si el valor es un array, agregar cada elemento por separado
-      if (Array.isArray(value)) {
-        value.forEach((v) => formData.append(key, v));
-      } else {
-        formData.append(key, value);
+      // Solo agregar si el valor no es null o undefined
+      if (value !== null && value !== undefined) {
+        // Si el valor es un array, agregar cada elemento por separado
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v));
+        } else {
+          formData.append(key, value);
+        }
       }
     });
     console.log('Enviando a /Histórico/archivo (FormData):', formData);
     // El interceptor añade el token automáticamente
     const response = await api.post('/Histórico/archivo', formData, {
       headers: {
-        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json, text/plain, */*'
-        // No poner Content-Type, el navegador lo gestiona
+        'Accept': '*/*',
+        'Content-Type': 'multipart/form-data'
+        // No establecer Content-Type manualmente, el navegador lo gestiona automáticamente con FormData
       },
-      responseType: 'blob'
+      responseType: 'arraybuffer' // Para recibir datos binarios correctamente
     });
     console.log('Respuesta de /Histórico/archivo:', response);
     return response;
