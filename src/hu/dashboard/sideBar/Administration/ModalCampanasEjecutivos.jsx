@@ -117,6 +117,13 @@ const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
         return ejecutivosFiltrados;
     }, [executiveTree]);
 
+    // Calcular contador de ejecutivos asignados vs total
+    const contadorEjecutivos = useMemo(() => {
+        const totalEjecutivos = ejecutivosOrdenados.length;
+        const ejecutivosAsignados = ejecutivosOrdenados.filter(e => e.asignado).length;
+        return { asignados: ejecutivosAsignados, total: totalEjecutivos };
+    }, [ejecutivosOrdenados]);
+
     // Handler para asignar ejecutivo a campaña
     const handleAsignar = async (checked, row, idx) => {
         if (!idCampaña || !row.idEjecutivo) return;
@@ -139,7 +146,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
         <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col" style={{ minWidth: 0, width: '300px', maxWidth: '300px' }}>
             <div className="flex items-center mb-2 w-full">
                 <span className="modal-span-1 pl-1" style={{ color: "var(--color-jerarquia2)", minWidth: 80 }}>
-                    Ejecutivos - {ejecutivosOrdenados.length}
+                    Ejecutivos ({contadorEjecutivos.asignados} / {contadorEjecutivos.total})
                 </span>
             </div>
             <div

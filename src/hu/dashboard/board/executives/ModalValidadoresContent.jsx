@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
-import { obetenerJerarquiaEncargados, ValidatorsNormal, InsertDeletedValidators } from '../../../../services/LokiServices';
+import { obetenerJerarquiaEncargados, ValidatorsNormal, Validatorsregrets, InsertDeletedValidators } from '../../../../services/LokiServices';
+import { toast } from "sonner";
 
 // Flecha tipo chevron moderna
 const DropdownArrow = () => (
@@ -33,6 +34,7 @@ const ModalValidadoresContent = () => {
     const [arrepentimientos, setArrepentimientos] = useState(false);
     const [validadoresFromAPI, setValidadoresFromAPI] = useState([]);
     const [isLoadingValidadores, setIsLoadingValidadores] = useState(false);
+    const [isProcessingChange, setIsProcessingChange] = useState(false);
 
     // Función para obtener idCartera desde localStorage
     const getIdCartera = () => {
@@ -41,22 +43,26 @@ const ModalValidadoresContent = () => {
     };
 
     // Función para obtener validadores del API
-    const fetchValidadores = useCallback(async (idProducto) => {
+    const fetchValidadores = useCallback(async (idProducto, esArrepentimientos = false) => {
         if (!idProducto) return;
         
         setIsLoadingValidadores(true);
         try {
-            console.log(`🔍 Obteniendo validadores para producto: ${idProducto}`);
-            
-            const response = await ValidatorsNormal(idProducto);
+            let response;
+            if (esArrepentimientos) {
+                // Llamar al endpoint de validadores arrepentimientos
+                response = await Validatorsregrets(idProducto);
+            } else {
+                // Llamar al endpoint normal
+                response = await ValidatorsNormal(idProducto);
+            }
             
             const validadores = response?.data || [];
-            console.log('📋 Validadores obtenidos del API:', validadores);
             setValidadoresFromAPI(validadores);
             
             return validadores;
         } catch (error) {
-            console.error('❌ Error al obtener validadores:', error);
+            toast.error('Error al obtener validadores:', error);
             setValidadoresFromAPI([]);
             return [];
         } finally {
@@ -82,11 +88,9 @@ const ModalValidadoresContent = () => {
                     seleccionado: false // Añadimos campo para manejar selección
                 })) : [];
                 
-                console.log('📊 Ejecutivos cargados para validadores:', mapped.length);
-                console.log('🔍 Estructura de datos:', mapped.slice(0, 2)); // Mostrar primeros 2 para debug
                 setExecutiveTree(mapped);
             } catch (error) {
-                console.error('Error al cargar ejecutivos para validadores:', error);
+                toast.error('Error al cargar ejecutivos para validadores:', error);
                 setExecutiveTree([]);
             }
         };
@@ -96,9 +100,6 @@ const ModalValidadoresContent = () => {
     // Filtrar ejecutivos: Replicar comportamiento exacto de ModalCampanasEjecutivos
     const usuariosFiltrados = useMemo(() => {
         if (!executiveTree.length) return [];
-        
-        console.log('🔍 Aplicando filtro para validadores - Solo primeros 13 ejecutivos + subordinados...');
-        console.log('📊 Total ejecutivos del endpoint:', executiveTree.length);
         
         const usuariosValidadores = [];
         
@@ -135,7 +136,6 @@ const ModalValidadoresContent = () => {
             }
         });
         
-        console.log('✅ Usuarios filtrados para validadores:', usuariosValidadores.length);
         return usuariosValidadores;
     }, [executiveTree]);
 
@@ -143,6 +143,13 @@ const ModalValidadoresContent = () => {
     useEffect(() => {
         setUsuariosValidadores(usuariosFiltrados);
     }, [usuariosFiltrados]);
+
+    // Calcular contador de validadores asignados vs total
+    const contadorValidadores = useMemo(() => {
+        const totalValidadores = usuariosValidadores.length;
+        const validadoresAsignados = usuariosValidadores.filter(u => u.seleccionado).length;
+        return { asignados: validadoresAsignados, total: totalValidadores };
+    }, [usuariosValidadores]);
 
     // Función para obtener idProducto basado en la selección
     const getIdProducto = useCallback(() => {
@@ -158,7 +165,8 @@ const ModalValidadoresContent = () => {
     useEffect(() => {
         const idProducto = getIdProducto();
         if (idProducto && producto) {
-            fetchValidadores(idProducto);
+            // Pasar el estado de arrepentimientos como parámetro
+            fetchValidadores(idProducto, arrepentimientos);
         } else {
             // Si no hay producto seleccionado, limpiar validadores
             setValidadoresFromAPI([]);
@@ -168,7 +176,6 @@ const ModalValidadoresContent = () => {
     // Efecto para actualizar checkboxes cuando cambien los validadores del API o la jerarquía
     useEffect(() => {
         if (validadoresFromAPI.length > 0 && usuariosValidadores.length > 0) {
-            console.log('🔄 Actualizando checkboxes basados en validadores del API...');
             
             // Crear un Set con los idEjecutivo de los validadores para búsqueda rápida
             const validadoresIds = new Set(validadoresFromAPI.map(v => v.idEjecutivo));
@@ -180,7 +187,7 @@ const ModalValidadoresContent = () => {
                 }));
                 
                 const selectedCount = updated.filter(u => u.seleccionado).length;
-                console.log(`✅ ${selectedCount} ejecutivos marcados automáticamente`);
+                console.log(` ${selectedCount} ejecutivos marcados automáticamente`);
                 
                 return updated;
             });
@@ -189,45 +196,51 @@ const ModalValidadoresContent = () => {
 
     // Función para enviar cambio de validador al servidor
     const sendValidatorChange = useCallback(async (idEjecutivo, inserta) => {
-        console.log('🔧 Preparando cambio de validador...');
-        console.log('📋 Parámetros recibidos:');
-        console.log('  - idEjecutivo:', idEjecutivo, '(tipo:', typeof idEjecutivo, ')');
-        console.log('  - inserta:', inserta, '(tipo:', typeof inserta, ')');
-        
+        // Evitar múltiples llamadas simultáneas
+        if (isProcessingChange) {
+            return;
+        }
+
         const idProducto = getIdProducto();
-        console.log('  - idProducto obtenido:', idProducto, '(tipo:', typeof idProducto, ')');
         
         if (!idProducto) {
-            console.error('❌ No se puede enviar cambio: producto no seleccionado');
+            toast.error('No se puede enviar cambio: producto no seleccionado');
             return;
         }
 
         const body = {
             idEjecutivo: idEjecutivo,
             idProducto: idProducto,
-            inserta: inserta,
-            tipoBase: "Collection"
+            inserta: inserta
         };
 
-        console.log('📦 Body construido antes de enviar:', body);
-        console.log('🔍 Verificación de cada campo:');
-        console.log('  - body.idEjecutivo:', body.idEjecutivo, '(tipo:', typeof body.idEjecutivo, ')');
-        console.log('  - body.idProducto:', body.idProducto, '(tipo:', typeof body.idProducto, ')');
-        console.log('  - body.inserta:', body.inserta, '(tipo:', typeof body.inserta, ')');
-        console.log('  - body.tipoBase:', body.tipoBase, '(tipo:', typeof body.tipoBase, ')');
-
+        setIsProcessingChange(true);
+        
         try {
-            console.log(`📤 Enviando cambio de validador:`, body);
             const response = await InsertDeletedValidators(body);
             console.log(`✅ Cambio de validador ${inserta ? 'insertado' : 'eliminado'} correctamente:`, response);
+            // Solo mostrar toast de éxito en casos específicos si es necesario
+            // toast.success(`Validador ${inserta ? 'agregado' : 'removido'} exitosamente`);
         } catch (error) {
             console.error(`❌ Error al ${inserta ? 'insertar' : 'eliminar'} validador:`, error);
-            // Aquí podrías mostrar un mensaje de error al usuario si lo deseas
+            // Solo mostrar toast de error, evitando duplicados
+            toast.error(`Error al ${inserta ? 'agregar' : 'remover'} validador`);
+        } finally {
+            // Pequeño delay para evitar cambios muy rápidos
+            setTimeout(() => {
+                setIsProcessingChange(false);
+            }, 300);
         }
-    }, [getIdProducto]);
+    }, [getIdProducto, isProcessingChange]);
 
     // Handler para seleccionar/deseleccionar usuarios
     const handleSeleccionarUsuario = async (usuario, index) => {
+        // Evitar cambios múltiples mientras se procesa
+        if (isProcessingChange) {
+            console.log('⚠️ Cambio en proceso, esperando...');
+            return;
+        }
+
         const usuarioActual = usuariosValidadores[index];
         const nuevoEstado = !usuarioActual.seleccionado;
         
@@ -239,7 +252,7 @@ const ModalValidadoresContent = () => {
             
             // Log para debug
             const selectedUsers = updated.filter(u => u.seleccionado).map(u => u.displayName);
-            console.log('🔘 Usuarios seleccionados para validadores:', selectedUsers);
+            console.log('Usuarios seleccionados para validadores:', selectedUsers);
             
             return updated;
         });
@@ -271,7 +284,7 @@ const ModalValidadoresContent = () => {
                     height: "100%"
                 }}>
                     <label className="modal-span-1" style={{ color: "var(--color-jerarquia3)" }}>
-                        Validadores - {usuariosValidadores.length}
+                        Validadores ({contadorValidadores.asignados} / {contadorValidadores.total})
                         {isLoadingValidadores && (
                             <span style={{ marginLeft: "0.5rem", color: "var(--color-jerarquia2)", fontSize: "0.8rem" }}>
                                 (Cargando...)
