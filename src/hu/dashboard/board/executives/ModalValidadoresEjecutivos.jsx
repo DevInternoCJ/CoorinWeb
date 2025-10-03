@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import ModalValidadoresHeader from "./ModalValidadoresHeader";
 import ModalValidadoresContent from "./ModalValidadoresContent";
 import ModalValidadoresFooter from "./ModalValidadoresFooter";
@@ -7,12 +7,25 @@ const ModalValidadoresEjecutivos = ({ onClose }) => {
     const [bounce, setBounce] = useState(false);
     const [shakeAnimation, setShakeAnimation] = useState(false);
     const modalRef = useRef(null);
+    // Estados para el footer
+    const [footerData, setFooterData] = useState({
+        lastAction: null,
+        lastUser: null,
+        producto: "",
+        arrepentimientos: false,
+        isProcessingChange: false
+    });
 
     // Siempre define los hooks antes de cualquier return o condicional
     useEffect(() => {
         setBounce(true);
         const timer = setTimeout(() => setBounce(false), 200);
         return () => clearTimeout(timer);
+    }, []);
+
+    // Función para manejar cambios en los datos del footer
+    const handleFooterDataChange = useCallback((data) => {
+        setFooterData(data);
     }, []);
 
     const handleBackdropClick = (e) => {
@@ -73,7 +86,9 @@ const ModalValidadoresEjecutivos = ({ onClose }) => {
                             flex: 1,
                             overflow: "hidden"
                         }}>
-                            <ModalValidadoresContent />
+                            <ModalValidadoresContent 
+                                onFooterDataChange={handleFooterDataChange}
+                            />
                         </div>
 
                         {/* Footer con mensaje informativo - siempre visible */}
@@ -84,7 +99,13 @@ const ModalValidadoresEjecutivos = ({ onClose }) => {
                             borderRadius: "0 0 8px 8px",
                             flexShrink: 0
                         }}>
-                            <ModalValidadoresFooter />
+                            <ModalValidadoresFooter 
+                                lastAction={footerData.lastAction}
+                                lastUser={footerData.lastUser}
+                                producto={footerData.producto}
+                                arrepentimientos={footerData.arrepentimientos}
+                                isProcessingChange={footerData.isProcessingChange}
+                            />
                         </div>
                     </div>
                 </div>

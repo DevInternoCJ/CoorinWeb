@@ -25,7 +25,9 @@ const DropdownArrow = () => (
 );
 
 
-const ModalValidadoresContent = () => {
+const ModalValidadoresContent = ({ 
+    onFooterDataChange // Nueva prop para comunicar cambios al padre
+}) => {
     // Estados principales (idéntico a ModalCampanasEjecutivos)
     const [executiveTree, setExecutiveTree] = useState([]);
     const [usuariosValidadores, setUsuariosValidadores] = useState([]);
@@ -35,6 +37,9 @@ const ModalValidadoresContent = () => {
     const [validadoresFromAPI, setValidadoresFromAPI] = useState([]);
     const [isLoadingValidadores, setIsLoadingValidadores] = useState(false);
     const [isProcessingChange, setIsProcessingChange] = useState(false);
+    // Estados para el footer
+    const [lastAction, setLastAction] = useState(null); // 'added' | 'removed' | null
+    const [lastUser, setLastUser] = useState(null);
 
     // Función para obtener idCartera desde localStorage
     const getIdCartera = () => {
@@ -151,6 +156,19 @@ const ModalValidadoresContent = () => {
         return { asignados: validadoresAsignados, total: totalValidadores };
     }, [usuariosValidadores]);
 
+    // Efecto para comunicar cambios al componente padre (para el footer)
+    useEffect(() => {
+        if (onFooterDataChange) {
+            onFooterDataChange({
+                lastAction,
+                lastUser,
+                producto,
+                arrepentimientos,
+                isProcessingChange
+            });
+        }
+    }, [lastAction, lastUser, producto, arrepentimientos, isProcessingChange, onFooterDataChange]);
+
     // Función para obtener idProducto basado en la selección
     const getIdProducto = useCallback(() => {
         switch(producto) {
@@ -160,6 +178,13 @@ const ModalValidadoresContent = () => {
                 return null;
         }
     }, [producto]);
+
+    // Efecto para limpiar el estado de la última acción cuando cambie el tipo de validador
+    useEffect(() => {
+        // Limpiar el estado de la última acción cuando cambie entre normal y arrepentimientos
+        setLastAction(null);
+        setLastUser(null);
+    }, [arrepentimientos]);
 
     // Efecto para obtener validadores cuando cambie el producto o arrepentimientos
     useEffect(() => {
@@ -223,6 +248,15 @@ const ModalValidadoresContent = () => {
                 : await InsertDeletedValidators(body);
                 
             console.log(`Cambio de validador ${inserta ? 'insertado' : 'eliminado'} correctamente (${arrepentimientos ? 'ARREPENTIMIENTOS' : 'NORMAL'}):`, response);
+            
+            // Encontrar el nombre del usuario para el mensaje del footer
+            const usuarioData = usuariosValidadores.find(u => u.idEjecutivo === idEjecutivo);
+            const nombreUsuario = usuarioData?.displayName || usuarioData?.usuario || `ID: ${idEjecutivo}`;
+            
+            // Actualizar estados para el footer
+            setLastAction(inserta ? 'added' : 'removed');
+            setLastUser(nombreUsuario);
+            
             // Solo mostrar toast de éxito en casos específicos si es necesario
             // toast.success(`Validador ${inserta ? 'agregado' : 'removido'} exitosamente`);
         } catch (error) {
@@ -235,7 +269,7 @@ const ModalValidadoresContent = () => {
                 setIsProcessingChange(false);
             }, 300);
         }
-    }, [getIdProducto, isProcessingChange, arrepentimientos]);
+    }, [getIdProducto, isProcessingChange, arrepentimientos, usuariosValidadores, setLastAction, setLastUser]);
 
     // Handler para seleccionar/deseleccionar usuarios
     const handleSeleccionarUsuario = async (usuario, index) => {
