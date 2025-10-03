@@ -37,6 +37,19 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
         accionamientos: false,
         pagos: false
     });
+
+    // Funciones para calcular fechas límite
+    const getFechaMaxima = () => {
+        const ayer = new Date();
+        ayer.setDate(ayer.getDate() - 1);
+        return ayer.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    };
+
+    const getFechaMinima = () => {
+        const hace10Anos = new Date();
+        hace10Anos.setFullYear(hace10Anos.getFullYear() - 10);
+        return hace10Anos.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    };
     const [periodo, setPeriodo] = useState(true);
     const [fechaDesde, setFechaDesde] = useState(() => {
         const hoy = new Date();
@@ -66,6 +79,7 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
     const [archivo, setArchivo] = useState(null);
     const [cuentaError, setCuentaError] = useState("");
     const [showToast, setShowToast] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Descargar el archivo Excel cuando excelBlob cambie
     useEffect(() => {
@@ -96,22 +110,57 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
     // Bandera para evitar petición individual al cambiar de modo
     const [allowSubmit, setAllowSubmit] = useState(true);
 
+    // Función para limpiar estado del archivo
+    const limpiarEstadoArchivo = () => {
+        setArchivo(null);
+        // Limpiar el input file
+        const fileInput = document.getElementById('archivoInput');
+        if (fileInput) {
+            fileInput.value = '';
+        }
+        // Restablecer checkboxes al estado inicial del modo archivo
+        setCheckedItems(prev => ({
+            ...prev,
+            cuenta: false,
+            gestiones: false,
+            visitas: false,
+            negociaciones: false,
+            accionamientos: false,
+            pagos: false
+        }));
+    };
+
     const handleBuscar = async () => {
         if (isIndividual) {
             if (!allowSubmit) return;
-            // Validación antes de enviar
-            if (!idCuenta || idCuenta.length < 6) {
-                toast.warning("Ingrese un número de cuenta válido (mínimo 6 dígitos)");
-                return;
-            }
+            
+            // 1. Primero validar que haya al menos un checkbox seleccionado
             const checkboxesValidos = Object.entries(checkedItems)
-                .filter(([key]) => key !== "periodo")
-                .some(([_, checked]) => checked);
+                .filter(([key]) => ["cuenta", "gestiones", "visitas", "negociaciones", "accionamientos", "pagos"].includes(key))
+                .some(([, checked]) => checked);
+            
             if (!checkboxesValidos) {
-                toast.warning("Seleccione al menos un tipo de consulta");
+                toast.warning("Debe seleccionar al menos una opción: Cuenta, Gestiones, Visitas, Negociaciones, Accionamientos o Pagos");
                 return;
             }
+            
+            // 2. Si el checkbox "cuenta" está marcado, validar que haya una cuenta válida
+            if (checkedItems.cuenta) {
+                if (!idCuenta || idCuenta.trim() === "") {
+                    toast.warning("Debe ingresar un número de cuenta");
+                    return;
+                }
+                if (idCuenta.length < 6) {
+                    toast.warning("Ingrese un número de cuenta válido (mínimo 6 dígitos)");
+                    return;
+                }
+            }
+            
             try {
+                // Activar spinner de carga
+                setIsLoading(true);
+                toast.loading("Consultando histórico...", { id: "buscar-loading" });
+                
                 const userData = JSON.parse(localStorage.getItem("userData"));
                 const idCartera = userData?.idCartera || 1;
                 const formatFecha = (fecha) => {
@@ -133,16 +182,28 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                     cuenta: idCuenta || null
                 };
                 console.log("Body enviado al endpoint:", params);
+                
                 const result = await fetchHistorySingle(params);
+                
+                // Remover toast de loading
+                toast.dismiss("buscar-loading");
+                
                 if (result?.data && result.data.size === 0) {
                     toast.warning("La cuenta ingresada no existe");
                     setExcelBlob(null);
                     return;
                 }
+                
                 setExcelBlob(result.data);
+                toast.success("Histórico consultado exitosamente. Descarga iniciada.");
+                
             } catch (error) {
                 console.error("Error al consultar histórico individual:", error);
+                toast.dismiss("buscar-loading");
                 toast.error("Error al consultar histórico individual");
+            } finally {
+                // Desactivar spinner
+                setIsLoading(false);
             }
         }
     };
@@ -204,11 +265,20 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
     };
 
     return (
-        <div style={{ minWidth: "400px", paddingRight: "1rem" }}>
-            {/* Logo del Consorcio */}
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
-                <img src={ConsorcioLogo} alt="Consorcio Jurídico" style={{ height: "60px", objectFit: "contain" }} />
-            </div>
+        <>
+            {/* CSS para la animación del spinner */}
+            <style>{`
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `}</style>
+            
+            <div style={{ minWidth: "400px", paddingRight: "1rem" }}>
+                {/* Logo del Consorcio */}
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
+                    <img src={ConsorcioLogo} alt="Consorcio Jurídico" style={{ height: "60px", objectFit: "contain" }} />
+                </div>
 
             {/* Sección Cartera */}
             <div style={{ marginBottom: "2.5rem" }}>
@@ -289,7 +359,17 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                                         <input
                                             type="date"
                                             value={fechaDesde.split('/').reverse().join('-')}
-                                            onChange={(e) => setFechaDesde(e.target.value.split('-').reverse().join('/'))}
+                                            min={getFechaMinima()}
+                                            max={getFechaMaxima()}
+                                            onChange={(e) => {
+                                                const nuevaFecha = e.target.value.split('-').reverse().join('/');
+                                                setFechaDesde(nuevaFecha);
+                                                // Si la fecha "Hasta" es anterior a la nueva fecha "Desde", ajustarla
+                                                const fechaHastaISO = fechaHasta.split('/').reverse().join('-');
+                                                if (e.target.value > fechaHastaISO) {
+                                                    setFechaHasta(nuevaFecha);
+                                                }
+                                            }}
                                             className="w-32 px-2 py-1 text-sm bg-white border border-black rounded focus:outline-none focus:border-[var(--color-jerarquia3)] cursor-pointer calendar-input"
                                             style={{ fontSize: "14px", color: "#000000", colorScheme: "light" }}
                                         />
@@ -299,7 +379,12 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                                         <input
                                             type="date"
                                             value={fechaHasta.split('/').reverse().join('-')}
-                                            onChange={(e) => setFechaHasta(e.target.value.split('-').reverse().join('/'))}
+                                            min={fechaDesde.split('/').reverse().join('-')}
+                                            max={getFechaMaxima()}
+                                            onChange={(e) => {
+                                                const nuevaFecha = e.target.value.split('-').reverse().join('/');
+                                                setFechaHasta(nuevaFecha);
+                                            }}
                                             className="w-32 px-2 py-1 text-sm bg-white border border-black rounded focus:outline-none focus:border-[var(--color-jerarquia3)] cursor-pointer calendar-input"
                                             style={{ fontSize: "14px", color: "#000000", colorScheme: "light" }}
                                         />
@@ -332,9 +417,25 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                                         onClick={handleBuscar}
                                         className="modal-btn modal-btn-primary"
                                         style={{ whiteSpace: "nowrap" }}
-                                        disabled={!idCuenta || idCuenta.length < 6 || !Object.entries(checkedItems).filter(([key]) => key !== "periodo").some(([, checked]) => checked)}
+                                        disabled={isLoading}
                                     >
-                                        Buscar
+                                        {isLoading ? (
+                                            <>
+                                                <span style={{ 
+                                                    display: "inline-block", 
+                                                    width: "16px", 
+                                                    height: "16px", 
+                                                    border: "2px solid #ffffff", 
+                                                    borderTop: "2px solid transparent", 
+                                                    borderRadius: "50%", 
+                                                    animation: "spin 1s linear infinite",
+                                                    marginRight: "8px"
+                                                }}></span>
+                                                Buscando...
+                                            </>
+                                        ) : (
+                                            "Buscar"
+                                        )}
                                     </button>
                                 </div>
                             </div>
@@ -359,6 +460,10 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                                             
                                             // Ejecutar automáticamente el endpoint historyArchivoUpload
                                             try {
+                                                // Activar spinner de carga
+                                                setIsLoading(true);
+                                                toast.loading("Procesando archivo...", { id: "archivo-loading" });
+                                                
                                                 const userData = JSON.parse(localStorage.getItem("userData"));
                                                 const idCartera = userData?.idCartera || 1;
                                                 
@@ -391,6 +496,9 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                                                 
                                                 console.log("Respuesta del endpoint:", result);
                                                 
+                                                // Remover toast de loading
+                                                toast.dismiss("archivo-loading");
+                                                
                                                 // Manejar la respuesta según lo que devuelva el servidor
                                                 if (result?.data) {
                                                     // Crear blob directamente del ArrayBuffer
@@ -417,13 +525,28 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                                                     
                                                     toast.success("Archivo procesado y descargado correctamente");
                                                     console.log("Archivo procesado exitosamente");
+                                                    
+                                                    // Limpiar estado para permitir nueva carga
+                                                    setTimeout(() => {
+                                                        limpiarEstadoArchivo();
+                                                        toast.info("Puede cargar un nuevo archivo si lo desea");
+                                                    }, 1500); // Esperar 1.5 segundos después del toast de éxito
                                                 } else {
                                                     toast.warning("El archivo no pudo ser procesado");
                                                 }
                                                 
                                             } catch (error) {
                                                 console.error("Error al consultar histórico por archivo:", error);
+                                                toast.dismiss("archivo-loading");
                                                 toast.error("Error al consultar histórico por archivo");
+                                                
+                                                // Limpiar estado también en caso de error para permitir reintentar
+                                                setTimeout(() => {
+                                                    limpiarEstadoArchivo();
+                                                }, 1000);
+                                            } finally {
+                                                // Desactivar spinner
+                                                setIsLoading(false);
                                             }
                                         }
                                     }}
@@ -431,29 +554,50 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                                 <button
                                     type="button"
                                     className="modal-btn modal-btn-primary"
-                                    style={{ whiteSpace: "nowrap" }}
+                                    style={{ 
+                                        whiteSpace: "nowrap",
+                                        opacity: isLoading || !Object.entries(checkedItems)
+                                            .filter(([key]) => ["cuenta","gestiones","visitas","negociaciones","accionamientos","pagos"].includes(key))
+                                            .some(([, checked]) => checked) ? 0.6 : 1,
+                                        cursor: isLoading ? "not-allowed" : "pointer"
+                                    }}
                                     onClick={() => {
+                                        // Validar si está cargando
+                                        if (isLoading) {
+                                            return;
+                                        }
+                                        
+                                        // Validar checkboxes
                                         const algunoSeleccionado = Object.entries(checkedItems)
                                             .filter(([key]) => ["cuenta","gestiones","visitas","negociaciones","accionamientos","pagos"].includes(key))
                                             .some(([, checked]) => checked);
+                                        
                                         if (!algunoSeleccionado) {
-                                            toast.warning("Debe seleccionar al menos un tipo de histórico");
+                                            toast.warning("Debe seleccionar al menos una opción: Cuenta, Gestiones, Visitas, Negociaciones, Accionamientos o Pagos");
                                             return;
                                         }
+                                        
                                         document.getElementById('archivoInput').click();
                                     }}
-                                    disabled={
-                                        !Object.entries(checkedItems)
-                                            .filter(([key]) => ["cuenta","gestiones","visitas","negociaciones","accionamientos","pagos"].includes(key))
-                                            .some(([, checked]) => checked)
-                                    }
                                 >
-                                    Seleccionar
+                                    {isLoading ? (
+                                        <>
+                                            <span style={{ 
+                                                display: "inline-block", 
+                                                width: "16px", 
+                                                height: "16px", 
+                                                border: "2px solid #ffffff", 
+                                                borderTop: "2px solid transparent", 
+                                                borderRadius: "50%", 
+                                                animation: "spin 1s linear infinite",
+                                                marginRight: "8px"
+                                            }}></span>
+                                            Procesando...
+                                        </>
+                                    ) : (
+                                        "Seleccionar"
+                                    )}
                                 </button>
-                                {/* Mostrar nombre del archivo seleccionado, sin mensaje extra */}
-                                {archivo && (
-                                    <span style={{ marginLeft: "1rem", fontSize: "0.9rem" }}>{archivo.name}</span>
-                                )}
                             </div>
                         </div>
                     )}
@@ -461,7 +605,8 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
             )}
 
             {/* Mensaje del footer */}
-        </div>
+            </div>
+        </>
     );
 };
 
