@@ -81,9 +81,7 @@ input[type="time"]::-ms-input-placeholder {
   color: #111;
 }
 /* === Estilo global para inputs === */
-input, input[type="text"], input[type="number"], input[type="time"], input[type="password"], input[type="email"] {
-  color: #111;
-}
+
 /* === Estilo global para label === */
 label {
   font-weight: 600;

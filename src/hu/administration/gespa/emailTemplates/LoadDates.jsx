@@ -25,8 +25,10 @@ const LoadDates = ({ selectedProduct, onSaldoChange, isModalOpen, onPlantillasCh
 
   const fetchData = async (productId = 1) => {
     try {
-      const requestData = { idCartera: 1, idProducto: productId };
-      const response = await PostLoadData(requestData);
+      const data = { idCartera: 1, idProducto: productId };
+      console.log('Body enviado a PostLoadData:', data, typeof data, Array.isArray(data));
+
+      const response = await PostLoadData(data);
 
       if (response && response.exito) {
 

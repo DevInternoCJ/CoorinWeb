@@ -4,6 +4,7 @@ import ModalHeader from "../ModalHeader";
 import Template from "./Template";
 import { IconTemplate } from "../IconsTemplates";
 import LoadDates from "./LoadDates";
+import { PostLoadData } from '../../../../services/LokiServices';
 
 const PlantillasCorreoModal = ({ isOpen, onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -13,7 +14,17 @@ const PlantillasCorreoModal = ({ isOpen, onClose }) => {
   const [saldo, setSaldo] = useState('');
   const [plantillas, setPlantillas] = useState([]);
 
+  const actualizarPlantillas = async () => {
+  // Puedes usar el mismo requestData que usa LoadDates
+  const data = { idCartera: 1, idProducto: 1 };
+  console.log('Body enviado a PostLoadData:', data, typeof data, Array.isArray(data));
 
+  const response = await PostLoadData(data);
+  console.log("requestData", data);
+  if (response && response.plantillas) {
+    setPlantillas(response.plantillas);
+  }
+};
   // Limpiar estados cuando el modal se cierra
   useEffect(() => {
     if (!isOpen) {
@@ -55,7 +66,10 @@ const PlantillasCorreoModal = ({ isOpen, onClose }) => {
             loading={loading}
             setLoading={setLoading}
             onProductSelect={handleProductSelect}/>
-          <Template saldo={saldo} plantillas={plantillas} />
+          <Template saldo={saldo} 
+          plantillas={plantillas}
+          onActualizarPlantillas={actualizarPlantillas}
+        />
           {showDataTables && selectedProduct && (
             <div className="mt-6 border-t pt-6">
               <LoadDates

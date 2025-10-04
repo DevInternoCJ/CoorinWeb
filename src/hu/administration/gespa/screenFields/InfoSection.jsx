@@ -25,7 +25,7 @@ const InfoSection = ({ idProducto }) => {
   }, [idProducto]);
 
   return (
-    <div className="bg-jerarquia4 p-4 rounded-lg shadow-sm">
+    <div className="bg-gray-700 p-4 rounded-lg shadow-sm">
       <h3 className="text-lg text-jerarquia1 font-bold mb-3">Info</h3>
    <div className="overflow-x-auto">
   <table className="table-border border border-jerarquia1 rounded-lg text-background-dashboard w-full">

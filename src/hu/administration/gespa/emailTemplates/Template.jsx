@@ -1,10 +1,10 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import SelectWallet from "../screenFields/SelectWallet";
 import ButtonSave from "../ButtonSave";
-import { SaveCreateTemplate}  from "../../../../services/LokiServices";
+import { SaveCreateTemplate } from "../../../../services/LokiServices";
 import { useUserStore } from "../../../../contextGlobal/userStore";
 
-const Template = ({ saldo, plantillas = [] }) => { 
+const Template = ({ saldo, plantillas = [], onActualizarPlantillas}) => {
   const [loading, setLoading] = useState(false);
   const [titulo, setTitulo] = useState("");
   const [mensaje, setMensaje] = useState("");
@@ -21,7 +21,9 @@ const Template = ({ saldo, plantillas = [] }) => {
   // Esta función te permite obtener el idCorreoScript de la plantilla seleccionada
   const handleSelectChange = (nombreSeleccionado) => {
     setSelectedPlantilla(nombreSeleccionado);
-    const plantillaObj = plantillas.find(p => p.nombre === nombreSeleccionado);
+    const plantillaObj = plantillas.find(
+      (p) => p.nombre === nombreSeleccionado
+    );
     if (plantillaObj) {
       setTitulo(plantillaObj.nombre || "");
       setMensaje(plantillaObj.asunto || "");
@@ -37,6 +39,7 @@ const Template = ({ saldo, plantillas = [] }) => {
   const idProducto = 1;
 
   const handleSave = async () => {
+    
     setLoading(true);
     try {
       const payload = {
@@ -48,6 +51,15 @@ const Template = ({ saldo, plantillas = [] }) => {
       };
       await SaveCreateTemplate(payload);
       // Puedes mostrar un toast o limpiar los campos aquí
+      if (plantillas.length > 0) {
+        setSelectedPlantilla(plantillas[0].nombre);
+        setTitulo(plantillas[0].nombre || "");
+        setMensaje(plantillas[0].asunto || "");
+        setTextoPago(plantillas[0].mensaje || "");
+      }
+       if (onActualizarPlantillas) {
+        await onActualizarPlantillas();
+      }
     } catch (error) {
       // Manejo de error (puedes mostrar un toast)
     } finally {
@@ -58,31 +70,31 @@ const Template = ({ saldo, plantillas = [] }) => {
   return (
     <div className=" bg-neutral-100 rounded-lg text-white mt-5">
       <div className="flex justify-start items-center mb-4 gap-3">
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Plantilla
-  </label>
-<SelectWallet
-  options={plantillas.map((p) => ({
-    label: p.nombre,
-    value: p.nombre,
-    idCorreoScript: p.idCorreoScript
-  }))}
-  value={selectedPlantilla}
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Plantilla
+        </label>
+        <SelectWallet
+          options={plantillas.map((p) => ({
+            label: p.nombre,
+            value: p.nombre,
+            idCorreoScript: p.idCorreoScript,
+          }))}
+          value={selectedPlantilla}
           onChange={handleSelectChange}
-/>
-</div>
+        />
+      </div>
 
-      <div className=" bg-jerarquia1 rounded-lg p-4 mt-3">
+      <div className=" bg-gray-700 rounded-lg p-4 mt-3">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-jerarquia4 font-bold text-lg">Texto</span>
+          <span className="text-jerarquia1 font-bold text-lg">Info</span>
         </div>
-        <div className="border-1 p-3 border-background-dashboard rounded-lg min-h-[200px] leading-relaxed">
+        <div className="border-1 p-3 border-jerarquia1 rounded-lg min-h-[200px] leading-relaxed">
           {/* Input para el título */}
           <input
             type="text"
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
-            className=" w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-white"
+            className=" w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-neutral-200"
             placeholder="Nombre"
           />
 
@@ -91,7 +103,7 @@ const Template = ({ saldo, plantillas = [] }) => {
             type="text"
             value={mensaje}
             onChange={(e) => setMensaje(e.target.value)}
-            className="mt-4 w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-gray-300"
+            className="mt-4 w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-neutral-200"
             placeholder="Asunto"
           />
 
@@ -101,15 +113,15 @@ const Template = ({ saldo, plantillas = [] }) => {
               type="text"
               value={textoPago}
               onChange={(e) => setTextoPago(e.target.value)}
-              className="w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-white"
+              className="w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-neutral-200"
               placeholder="Mensaje"
             />
-            <span className="font-bold ml-2 text-jerarquia4">
-              [{saldo || "Saldo"}]
+            <span className=" ml-2 text-neutral-200">
+              {vistaPrevia ? `[${saldo}]` : '["Saldo"]'}
             </span>
           </div>
 
-          <button className="bg-red-600 p-2 mt-5 rounded-md text-white hover:text-red-100 border-red-600 hover:border-red-500 focus:ring-red-500 hover:bg-red-700 hover:shadow-lg hover:shadow-red-600">
+          <button className="bg-red-700 p-2 mt-5 rounded-md text-white hover:text-red-100 border-red-600 hover:border-red-600 focus:ring-red-500 hover:bg-red-600 hover:shadow-lg hover:shadow-red-600">
             Borrar
           </button>
           <div className="flex items-center justify-between text-jerarquia3 mt-4">
@@ -130,7 +142,13 @@ const Template = ({ saldo, plantillas = [] }) => {
             </div>
             {vistaPrevia && (
               <div className="">
-                <ButtonSave loading={loading} onClick={handleSave} />
+                <ButtonSave
+                  loading={loading}
+                  onClick={handleSave}
+                  disabled={
+                    !titulo.trim() || !mensaje.trim() || !textoPago.trim()
+                  }
+                />
               </div>
             )}
           </div>
