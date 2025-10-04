@@ -2,9 +2,14 @@ import React, { useState, useEffect } from "react";
 import SelectWallet from "../screenFields/SelectWallet";
 import ButtonSave from "../ButtonSave";
 import { SaveCreateTemplate } from "../../../../services/LokiServices";
+import { DeleteTemplate } from "../../../../services/LokiServices";
 import { useUserStore } from "../../../../contextGlobal/userStore";
+import { toast } from "sonner";
 
-const Template = ({ saldo, plantillas = [], onActualizarPlantillas}) => {
+const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
+  const [idCorreoScript, setIdCorreoScript] = useState(
+    plantillas[0]?.idCorreoScript ?? null
+  );
   const [loading, setLoading] = useState(false);
   const [titulo, setTitulo] = useState("");
   const [mensaje, setMensaje] = useState("");
@@ -16,6 +21,7 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas}) => {
 
   useEffect(() => {
     setSelectedPlantilla(plantillas[0]?.nombre ?? "");
+    setIdCorreoScript(plantillas[0]?.idCorreoScript ?? null);
   }, [plantillas]);
 
   // Esta función te permite obtener el idCorreoScript de la plantilla seleccionada
@@ -28,7 +34,25 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas}) => {
       setTitulo(plantillaObj.nombre || "");
       setMensaje(plantillaObj.asunto || "");
       setTextoPago(plantillaObj.mensaje || "");
+      setIdCorreoScript(plantillaObj.idCorreoScript || null);
       // Si necesitas guardar el idCorreoScript en un estado, aquí puedes hacerlo
+    }
+  };
+  // Función para borrar plantilla
+  const handleDelete = async () => {
+    if (!idCorreoScript) {
+      toast.error("No se ha seleccionado una plantilla válida para borrar.");
+      return;
+    }
+    try {
+      const data = { idCorreoScript };
+      await DeleteTemplate({ data });
+      toast.success("Plantilla eliminada correctamente.");
+      if (onActualizarPlantillas) {
+        await onActualizarPlantillas();
+      }
+    } catch (error) {
+      toast.error("Error al eliminar la plantilla.");
     }
   };
 
@@ -39,9 +63,19 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas}) => {
   const idProducto = 1;
 
   const handleSave = async () => {
-    
     setLoading(true);
     try {
+      // Validar que no exista una plantilla con el mismo nombre
+      const existeNombre = plantillas.some(
+        (p) => p.nombre.trim().toLowerCase() === titulo.trim().toLowerCase()
+      );
+      if (existeNombre) {
+        toast.warning(
+          "Ya existe una plantilla con ese nombre. Elige otro nombre."
+        );
+        setLoading(false);
+        return;
+      }
       const payload = {
         idProducto,
         nombre: titulo,
@@ -57,7 +91,7 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas}) => {
         setMensaje(plantillas[0].asunto || "");
         setTextoPago(plantillas[0].mensaje || "");
       }
-       if (onActualizarPlantillas) {
+      if (onActualizarPlantillas) {
         await onActualizarPlantillas();
       }
     } catch (error) {
@@ -121,7 +155,12 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas}) => {
             </span>
           </div>
 
-          <button className="bg-red-700 p-2 mt-5 rounded-md text-white hover:text-red-100 border-red-600 hover:border-red-600 focus:ring-red-500 hover:bg-red-600 hover:shadow-lg hover:shadow-red-600">
+          <button
+            className="bg-red-700 p-2 mt-5 rounded-md text-white hover:text-red-100 border-red-600 hover:border-red-600 focus:ring-red-500 hover:bg-red-600 hover:shadow-lg hover:shadow-red-600"
+            onClick={handleDelete}
+            type="button"
+            disabled={!idCorreoScript}
+          >
             Borrar
           </button>
           <div className="flex items-center justify-between text-jerarquia3 mt-4">

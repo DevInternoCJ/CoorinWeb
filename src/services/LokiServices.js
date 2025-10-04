@@ -827,7 +827,7 @@ export const ShowFieldScreen = async (idProducto) => {
   }
 };
 
-export const DeleteTemplate = async () => {
+export const DeleteTemplate = async (data) => {
   try {
     const token = localStorage.getItem('token');
     
@@ -835,11 +835,11 @@ export const DeleteTemplate = async () => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
     
-    console.log('📤 Enviando a /PlantillasCorreo/eliminar-plantillas');
-    console.log('🔑 Parámetros:', {  });
+    console.log('📤 Enviando a /PlantillasCorreo/eliminar-plantillas', data);
+    console.log('🔑 Parámetros:', { data });
     
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
-      const response = await api.delete(`/PlantillasCorreo/eliminar-plantillas`);
+      const response = await api.delete(`/PlantillasCorreo/eliminar-plantillas`, data);
     
     console.log('📥 Respuesta de /PlantillasCorreo/eliminar-plantillas', response.data);
     
