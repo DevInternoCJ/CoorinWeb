@@ -54,80 +54,112 @@ namespace Loki.Mark.Administracion.Carteras.Services
         }
 
         //Metodo para calcular el avance de la campaña
-        public async Task<List<CampañaAvanceDTO>> GetAvanceCompletoCampañas(string servidor, int? idEncargado = null, short? idCartera = null, short? idProducto = null)
+      public async Task<List<CampañaAvanceDTO>> GetAvanceCompletoCampañas(string servidor, int? idEncargado = null, short? idCartera = null, short? idProducto = null)
+{
+    var campañas = await _campaniasDao.GetCampañasEncargado(servidor, idEncargado, idCartera, idProducto);
+    var restantesList = await FilasRestantesPorCampaña(servidor);
+
+    Console.WriteLine("=== DEBUG DETALLADO ===");
+    Console.WriteLine($"Campañas obtenidas: {campañas?.Count}");
+    Console.WriteLine($"Restantes obtenidos: {(restantesList?.ToList().Count ?? 0)}");
+
+    // 1. Verificar QUÉ campañas vienen
+    var idsCampañas = new List<int>();
+    if (campañas != null)
+    {
+        foreach (var campaña in campañas)
         {
-          
-            var campañas = await _campaniasDao.GetCampañasEncargado(servidor, idEncargado, idCartera, idProducto);
-            var restantesList = await FilasRestantesPorCampaña(servidor);
-
-            var restantesDict = new Dictionary<int, int>();
-            if (restantesList != null)
+            var dict = campaña as IDictionary<string, object>;
+            if (dict != null && dict.ContainsKey("idCampaña"))
             {
-                foreach (var item in restantesList)
-                {
-                    var dict = item as IDictionary<string, object>;
-                    if (dict != null && dict.ContainsKey("idCampaña") && dict.ContainsKey("restantes"))
-                    {
-                        int idCampaña = Convert.ToInt32(dict["idCampaña"]);
-                        int restantes = Convert.ToInt32(dict["restantes"]);
-                        restantesDict[idCampaña] = restantes;
-                    }
-                }
+                int id = Convert.ToInt32(dict["idCampaña"]);
+                idsCampañas.Add(id);
+                Console.WriteLine($"Campaña encontrada: {id}");
             }
-
-            var resultado = new List<CampañaAvanceDTO>();
-
-            if (campañas != null)
-            {
-                foreach (var campaña in campañas)
-                {
-                    var dict = campaña as IDictionary<string, object>;
-                    if (dict != null && dict.ContainsKey("idCampaña"))
-                    {
-                        int idCampaña = Convert.ToInt32(dict["idCampaña"]);
-                        double dCuentas = 0;
-                        string[] posiblesColumnas = { "NúmeroCuentas", "NumeroCuentas", "Cuentas", "TotalCuentas" };
-
-                        foreach (var columna in posiblesColumnas)
-                        {
-                            if (dict.ContainsKey(columna))
-                            {
-                                dCuentas = Convert.ToDouble(dict[columna]);
-                                break;
-                            }
-                        }
-
-                        double dRestantes = restantesDict.GetValueOrDefault(idCampaña);
-
-                        if (dCuentas == 0 && dRestantes > 0)
-                        {
-                            dCuentas = dRestantes;
-                        }
-
-                        // Calcular avance
-                        string avance = "";
-                        if (dCuentas > 0)
-                        {
-                            double porcentaje = (dCuentas - dRestantes) / dCuentas * 100;
-                            double procesadas = dCuentas - dRestantes;
-                            avance = $"{porcentaje:N1} % - {procesadas:N0}";
-                        }
-
-                        resultado.Add(new CampañaAvanceDTO
-                        {
-                            idCampaña = idCampaña,
-                            NumeroCuentas = (int)dCuentas,
-                            Restantes = (int)dRestantes,
-                            Avance = avance
-                        });
-                    }
-                }
-            }
-
-            return resultado;
         }
+    }
 
-        public async Task<dynamic?> CargaFilas(int idcampaña, int idcartera, string servidor)
+    // 2. Verificar QUÉ restantes vienen  
+    var restantesDict = new Dictionary<int, int>();
+    if (restantesList != null)
+    {
+        foreach (var item in restantesList)
+        {
+            var dict = item as IDictionary<string, object>;
+            if (dict != null && dict.ContainsKey("idCampaña") && dict.ContainsKey("Restantes"))
+            {
+                int idCampaña = Convert.ToInt32(dict["idCampaña"]);
+                int restantes = Convert.ToInt32(dict["Restantes"]);
+                restantesDict[idCampaña] = restantes;
+                Console.WriteLine($"Restante encontrado: idCampaña={idCampaña}, restantes={restantes}");
+            }
+        }
+    }
+
+    // 3. VERIFICAR COINCIDENCIAS
+    Console.WriteLine("=== COINCIDENCIAS ===");
+    foreach (var idCampaña in idsCampañas)
+    {
+        bool tieneRestantes = restantesDict.ContainsKey(idCampaña);
+        int valorRestantes = restantesDict.GetValueOrDefault(idCampaña);
+        Console.WriteLine($"Campaña {idCampaña}: TieneRestantes={tieneRestantes}, Valor={valorRestantes}");
+    }
+
+    var resultado = new List<CampañaAvanceDTO>();
+
+    if (campañas != null)
+    {
+        foreach (var campaña in campañas)
+        {
+            var dict = campaña as IDictionary<string, object>;
+            if (dict != null && dict.ContainsKey("idCampaña"))
+            {
+                int idCampaña = Convert.ToInt32(dict["idCampaña"]);
+                
+                double dCuentas = 0;
+                if (dict.ContainsKey("NúmeroCuentas"))
+                {
+                    var valor = dict["NúmeroCuentas"];
+                    dCuentas = valor != DBNull.Value ? Convert.ToDouble(valor) : 0;
+                }
+
+                double dRestantes = restantesDict.GetValueOrDefault(idCampaña);
+
+                // DEBUG FINAL POR CAMPAÑA
+                Console.WriteLine($"PROCESANDO: Campaña {idCampaña}, Cuentas={dCuentas}, Restantes={dRestantes}");
+
+                if (dRestantes >= dCuentas)
+                {
+                    dCuentas = dRestantes;
+                }
+
+                string avance = "";
+                if (dCuentas > 0)
+                {
+                    double porcentaje = (dCuentas - dRestantes) / dCuentas * 100;
+                    double procesadas = dCuentas - dRestantes;
+                    avance = $"{porcentaje:N1} % - {procesadas:N0}";
+                }
+
+                resultado.Add(new CampañaAvanceDTO
+                {
+                    idCampaña = idCampaña,
+                    NumeroCuentas = (int)dCuentas,
+                    Restantes = (int)dRestantes,
+                    Avance = avance
+                });
+            }
+        }
+    }
+
+    Console.WriteLine("=== RESULTADO FINAL ===");
+    foreach (var item in resultado)
+    {
+        Console.WriteLine($"DTO: idCampaña={item.idCampaña}, Restantes={item.Restantes}");
+    }
+
+    return resultado;
+}        public async Task<dynamic?> CargaFilas(int idcampaña, int idcartera, string servidor)
         {
             var paramIdCampaña = new SqlParameter("@idCampaña", idcampaña.ToString());
             var paramIdCartera = new SqlParameter("@idCartera", idcartera.ToString());

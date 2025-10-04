@@ -202,10 +202,13 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
         [HttpGet("FilasRestantesPorCampaña")]
         [SwaggerOperation(
-         Summary = "Actualiza avance",
-         Description = "Se obtiene un registro de las filas restantes por idcampaña con avance calculado"
-     )]
-        public async Task<IActionResult> GetFilasRestantesPorCampaña(int? idEncargado = null, short? idCartera = null, short? idProducto = null)
+     Summary = "Actualiza avance",
+     Description = "Se obtiene un registro de las filas restantes por idcampaña con avance calculado"
+ )]
+        public async Task<IActionResult> GetFilasRestantesPorCampaña(
+     [FromQuery] int idEncargado,  // Quitar el "?" y el "= null"
+     [FromQuery] short? idCartera = null,
+     [FromQuery] short? idProducto = null)
         {
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
@@ -261,82 +264,82 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         }
 
 
-        [HttpPost("carga-filas")]
-        [SwaggerOperation(
-            Summary = "Carga Filas",
-            Description = "Carga las filas asociadas a una campaña desde una tabla temporal específica hacia la tabla FilasDeTrabajo, " +
-            "además actualiza el número de cuentas en la campaña y elimina la tabla temporal."
-            )]
-        public async Task<IActionResult> CargaFilas(
-        [FromQuery] int idCampaña,
-        [FromQuery] int idCartera)
-        {
-            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+        //[HttpPost("carga-filas")]
+        //[SwaggerOperation(
+        //    Summary = "Carga Filas",
+        //    Description = "Carga las filas asociadas a una campaña desde una tabla temporal específica hacia la tabla FilasDeTrabajo, " +
+        //    "además actualiza el número de cuentas en la campaña y elimina la tabla temporal."
+        //    )]
+        //public async Task<IActionResult> CargaFilas(
+        //[FromQuery] int idCampaña,
+        //[FromQuery] int idCartera)
+        //{
+        //    string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
-            if (string.IsNullOrWhiteSpace(servidorClaim))
-            {
-                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-            }
+        //    if (string.IsNullOrWhiteSpace(servidorClaim))
+        //    {
+        //        return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+        //    }
            
-            var resultado = await _carterasDao.CargaFilas(idCampaña, idCartera, servidorClaim);
+        //    var resultado = await _carterasDao.CargaFilas(idCampaña, idCartera, servidorClaim);
 
-            if (resultado == null)
-            {
-                return NotFound("No se encontraron resultados.");
-            }
-            return Ok(resultado);
-        }
+        //    if (resultado == null)
+        //    {
+        //        return NotFound("No se encontraron resultados.");
+        //    }
+        //    return Ok(resultado);
+        //}
 
-        [HttpPost("carga-filas-consultas")]
-        [SwaggerOperation(
-        Summary = "Carga consulta filas",
-        Description = "Ejecuta una consulta y procesa los resultados e inserta las " +
-            "filas en la tabla FilasDeTrabajo. Permite incluir opcionalmente los campos idEjecutivo y NúmeroTelefónico. " +
-            "También actualiza el número de cuentas asociadas a la campaña."
-        )]
+        //[HttpPost("carga-filas-consultas")]
+        //[SwaggerOperation(
+        //Summary = "Carga consulta filas",
+        //Description = "Ejecuta una consulta y procesa los resultados e inserta las " +
+        //    "filas en la tabla FilasDeTrabajo. Permite incluir opcionalmente los campos idEjecutivo y NúmeroTelefónico. " +
+        //    "También actualiza el número de cuentas asociadas a la campaña."
+        //)]
 
-        public async Task<IActionResult> CargaFilasConsultas(
-        [FromQuery] int idCampaña,
-        [FromQuery] string consulta,
-        [FromQuery] bool ejecutivo,
-        [FromQuery] bool telefono)
-        {
-            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+        //public async Task<IActionResult> CargaFilasConsultas(
+        //[FromQuery] int idCampaña,
+        //[FromQuery] string consulta,
+        //[FromQuery] bool ejecutivo,
+        //[FromQuery] bool telefono)
+        //{
+        //    string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
-            if (string.IsNullOrWhiteSpace(servidorClaim))
-            {
-                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-            }
-            var resultado = await _carterasDao.CargaFilasConsulta(idCampaña, consulta, ejecutivo, telefono, servidorClaim);
-            if (resultado == null)
-            {
-                return NotFound("No se encontraron resultados.");
-            }
-            return Ok(resultado);
-        }
+        //    if (string.IsNullOrWhiteSpace(servidorClaim))
+        //    {
+        //        return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+        //    }
+        //    var resultado = await _carterasDao.CargaFilasConsulta(idCampaña, consulta, ejecutivo, telefono, servidorClaim);
+        //    if (resultado == null)
+        //    {
+        //        return NotFound("No se encontraron resultados.");
+        //    }
+        //    return Ok(resultado);
+        //}
 
 
-        [HttpPost("crea-tabla-filasTemp")]
-        [SwaggerOperation(
-            Summary = "Carga Archivo Filas",
-            Description = "crea una tabla temporal con el idcampaña especificado la cual a partir de ahi se formará el nombre de la tabla, la cual se almacena en dbmemory"
-            )]
-        public async Task<IActionResult> CreaTablaFilasTemp(
-        [FromQuery] int idCampaña)
-        {
-            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+        //[HttpPost("crea-tabla-filasTemp")]
+        //[SwaggerOperation(
+        //    Summary = "Carga Archivo Filas",
+        //    Description = "crea una tabla temporal con el idcampaña especificado la cual a partir de ahi se formará el nombre de la tabla, la cual se almacena en dbmemory"
+        //    )]
+        //public async Task<IActionResult> CreaTablaFilasTemp(
+        //[FromQuery] int idCampaña)
+        //{
+        //    string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
-            if (string.IsNullOrWhiteSpace(servidorClaim))
-            {
-                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-            }
-            var resultado = await _carterasDao.CreaTablaFilasTemp(idCampaña, servidorClaim);
-            if (resultado == null)
-            {
-                return NotFound("No se encontraron resultados.");
-            }
-            return Ok(resultado);
-        }
+        //    if (string.IsNullOrWhiteSpace(servidorClaim))
+        //    {
+        //        return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+        //    }
+        //    var resultado = await _carterasDao.CreaTablaFilasTemp(idCampaña, servidorClaim);
+        //    if (resultado == null)
+        //    {
+        //        return NotFound("No se encontraron resultados.");
+        //    }
+        //    return Ok(resultado);
+        //}
         [HttpGet("Ejecutivos_en-Campaña")]
         [AllowAnonymous]
         [SwaggerOperation(
