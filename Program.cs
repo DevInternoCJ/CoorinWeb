@@ -95,6 +95,10 @@ using Loki.Mark.Administracion.Carteras.DAOs;
 using Loki.Mark.Administracion.Gespa.CamposPantalla.Interfaces;
 using Loki.Mark.Administracion.Gespa.CamposPantalla.Services;
 using Loki.Mark.Administracion.Gespa.CamposPantalla.DAOs;
+using Loki.Mark.Consulta.Cuenta.Interfaces;
+using Loki.Mark.Consulta.Cuenta.DAOs;
+using Loki.Mark.Consulta.Cuenta.Services;
+using CatalogosService = Loki.Mark.Administracion.Gespa.Catalogos.Services.CatalogosService;
 
 
 
@@ -265,6 +269,8 @@ builder.Services.AddScoped<IHistoricoService, HistoricoService>();
 builder.Services.AddScoped<IHistoricoDao, HistoricoDao>();
 builder.Services.AddScoped<IPlantillasCorreoService, PlantillasCorreoService>();
 builder.Services.AddScoped<IPlantillasCorreoDao, PlantillasCorreoDao>();
+builder.Services.AddScoped<IBusqueda, BusquedasService>();
+builder.Services.AddScoped<EjecutivoDao>();
 // En Program.cs, cambia a:
 builder.Services.AddSingleton<Loki.Global.ExcelGeneratorService>();
 // ===== Registro de servicio para compresión de archivos =====
