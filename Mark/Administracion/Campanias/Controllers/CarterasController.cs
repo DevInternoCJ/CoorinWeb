@@ -1,4 +1,5 @@
-﻿using CoorinWeb.Loki.Global;
+﻿using System.Collections;
+using CoorinWeb.Loki.Global;
 using Loki.DTOs.CampaniasDTOs;
 using Loki.Mark.Administracion.Carteras.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -17,14 +18,16 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         private readonly ICarterasService _carterasService;
         private readonly ICarterasDAOs _carterasDao;
         private readonly IDbContextFactory _dbContFactory;
-
-
-        public CarterasController(ICarterasService campaniasService, ICarterasDAOs carterasDao, IDbContextFactory contextfactory)
+        private readonly IInfoEjecutivoDao _infoEjecutivo;
+        private readonly ILogger<CarterasController> _logger;
+        public CarterasController(ICarterasService campaniasService, ICarterasDAOs carterasDao, IDbContextFactory contextfactory, IInfoEjecutivoDao infoEjecutivo, ILogger<CarterasController> logger)
         {
             _carterasService = campaniasService;
             _carterasDao = carterasDao;
 
             _dbContFactory = contextfactory;
+            _infoEjecutivo = infoEjecutivo;
+            _logger = logger;
         }
         //[HttpGet("get-carteras")]
         //[Authorize]
@@ -263,84 +266,153 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
             }
         }
 
+        [HttpPost("consulta")]
+        [SwaggerOperation(
+            Summary = "consulta",
+            Description = "Carga las filas asociadas a una campaña desde una consulta específica hacia la tabla FilasDeTrabajo, " +
+            "además actualiza el número de cuentas en la campaña."
+        )]
+        public async Task<IActionResult> CargaFilas(
+            [FromQuery] int idCampaña,
+            [FromQuery] int idEjecutivo,
+            [FromQuery] int? idConsulta = null,
+            [FromQuery] string? consultaGeneral = null,
+            [FromQuery] bool ejecutivo = false,
+            [FromQuery] bool telefono = false)
+        {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
-        //[HttpPost("carga-filas")]
-        //[SwaggerOperation(
-        //    Summary = "Carga Filas",
-        //    Description = "Carga las filas asociadas a una campaña desde una tabla temporal específica hacia la tabla FilasDeTrabajo, " +
-        //    "además actualiza el número de cuentas en la campaña y elimina la tabla temporal."
-        //    )]
-        //public async Task<IActionResult> CargaFilas(
-        //[FromQuery] int idCampaña,
-        //[FromQuery] int idCartera)
-        //{
-        //    string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+            {
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+            }
 
-        //    if (string.IsNullOrWhiteSpace(servidorClaim))
-        //    {
-        //        return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-        //    }
-           
-        //    var resultado = await _carterasDao.CargaFilas(idCampaña, idCartera, servidorClaim);
+            dynamic? resultado = null;
 
-        //    if (resultado == null)
-        //    {
-        //        return NotFound("No se encontraron resultados.");
-        //    }
-        //    return Ok(resultado);
-        //}
+            try
+            {
+                string consultaSQL = string.Empty;
 
-        //[HttpPost("carga-filas-consultas")]
-        //[SwaggerOperation(
-        //Summary = "Carga consulta filas",
-        //Description = "Ejecuta una consulta y procesa los resultados e inserta las " +
-        //    "filas en la tabla FilasDeTrabajo. Permite incluir opcionalmente los campos idEjecutivo y NúmeroTelefónico. " +
-        //    "También actualiza el número de cuentas asociadas a la campaña."
-        //)]
+                // Caso 1: Carga por consulta específica del ejecutivo
+                if (idConsulta.HasValue && idConsulta > 0)
+                {
+                    // Obtener las consultas del ejecutivo para validar que existe
+                    var consultas = await _infoEjecutivo.GetConsultasEjecutivo(servidorClaim, idEjecutivo);
 
-        //public async Task<IActionResult> CargaFilasConsultas(
-        //[FromQuery] int idCampaña,
-        //[FromQuery] string consulta,
-        //[FromQuery] bool ejecutivo,
-        //[FromQuery] bool telefono)
-        //{
-        //    string? servidorClaim = User.FindFirst("Servidor")?.Value;
+                    if (consultas == null || !consultas.Any())
+                    {
+                        return NotFound("No se encontraron consultas para el ejecutivo.");
+                    }
 
-        //    if (string.IsNullOrWhiteSpace(servidorClaim))
-        //    {
-        //        return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-        //    }
-        //    var resultado = await _carterasDao.CargaFilasConsulta(idCampaña, consulta, ejecutivo, telefono, servidorClaim);
-        //    if (resultado == null)
-        //    {
-        //        return NotFound("No se encontraron resultados.");
-        //    }
-        //    return Ok(resultado);
-        //}
+                    // Buscar la consulta específica - convertir a tipo concreto para logging
+                    var consultaSeleccionada = consultas.FirstOrDefault(c => c.idConsulta == idConsulta.Value);
+                    if (consultaSeleccionada == null)
+                    {
+                        return NotFound($"No se encontró la consulta con ID {idConsulta.Value}");
+                    }
+
+                    // Convertir a diccionario para poder acceder a las propiedades de forma segura
+                    var consultaDict = (IDictionary<string, object>)consultaSeleccionada;
+                    string nombreConsulta = consultaDict.ContainsKey("NombreConsulta") ? consultaDict["NombreConsulta"]?.ToString() ?? "Sin nombre" : "Sin nombre";
+
+                    Console.WriteLine($"Consulta encontrada: {nombreConsulta}");
+
+                    // Usar ConsultaGenerador para obtener la consulta SQL real
+                    ArrayList columnas = new ArrayList();
+                    Console.WriteLine($"Llamando a ConsultaGenerador.QueryCuentas para idConsulta: {idConsulta.Value}");
+
+                    var consultaData = AccionamientosQueryHelper.ConsultaGenerador.QueryCuentas(idConsulta.Value, ref columnas);
+
+                    Console.WriteLine($"ConsultaData recibida - TieneQuery: {!string.IsNullOrEmpty(consultaData?.Query)}, LongitudQuery: {consultaData?.Query?.Length ?? 0}, ColumnasCount: {columnas?.Count ?? 0}");
+
+                    if (string.IsNullOrWhiteSpace(consultaData?.Query))
+                    {
+                        Console.WriteLine($"No se pudo generar la consulta SQL para idConsulta: {idConsulta.Value}. ConsultaData es null o vacía");
+                        return BadRequest("No se pudo generar la consulta SQL para la consulta seleccionada.");
+                    }
+
+                    consultaSQL = consultaData.Query;
+
+                    Console.WriteLine($"Consulta SQL generada exitosamente. Longitud: {consultaSQL.Length} caracteres");
+                    Console.WriteLine($"Consulta SQL: {consultaSQL}");
+                }
+                // Caso 2: Carga por consulta general
+                else if (!string.IsNullOrWhiteSpace(consultaGeneral))
+                {
+                    Console.WriteLine($"Iniciando carga por consulta general. idCampaña: {idCampaña}, Longitud consulta: {consultaGeneral.Length}");
+                    consultaSQL = consultaGeneral;
+                    Console.WriteLine($"Consulta general: {consultaGeneral}");
+                }
+                else
+                {
+                    Console.WriteLine($"Llamada sin parámetros válidos. idConsulta: {idConsulta}, TieneConsultaGeneral: {!string.IsNullOrEmpty(consultaGeneral)}");
+                    return BadRequest(new { error = "Debe proporcionar idConsulta o consultaGeneral" });
+                }
+
+                // Validar que la consulta no esté vacía
+                if (string.IsNullOrWhiteSpace(consultaSQL))
+                {
+                    Console.WriteLine("La consulta SQL resultante está vacía");
+                    return BadRequest("La consulta está vacía.");
+                }
+
+                Console.WriteLine($"Ejecutando CargaFilasConsulta. idCampaña: {idCampaña}, ejecutivo: {ejecutivo}, telefono: {telefono}");
+
+                resultado = await _carterasDao.CargaFilasConsulta(
+                    idCampaña,
+                    consultaSQL,
+                    ejecutivo,
+                    telefono,
+                    servidorClaim);
+
+                if (resultado == null)
+                {
+                    Console.WriteLine("CargaFilasConsulta devolvió null. No se encontraron resultados.");
+                    return NotFound("No se encontraron resultados.");
+                }
+
+                Console.WriteLine("CargaFilasConsulta ejecutada exitosamente");
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en CargaFilas. idCampaña: {idCampaña}, idEjecutivo: {idEjecutivo}, idConsulta: {idConsulta}");
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { error = "Error interno del servidor", detalles = ex.Message });
+            }
+        }
+
+        [HttpPost("archivo")]
+        [SwaggerOperation(
+        Summary = "archivo",
+        Description = "Ejecuta una consulta y procesa los resultados e inserta las " +
+            "filas en la tabla FilasDeTrabajo. Permite incluir opcionalmente los campos idEjecutivo y NúmeroTelefónico. " +
+            "También actualiza el número de cuentas asociadas a la campaña."
+        )]
+
+        public async Task<IActionResult> CargaFilasConsultas(
+        [FromQuery] int idCampaña,
+        [FromQuery] string consulta,
+        [FromQuery] bool ejecutivo,
+        [FromQuery] bool telefono)
+        {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+            {
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+            }
+            var resultado = await _carterasDao.CargaFilasConsulta(idCampaña, consulta, ejecutivo, telefono, servidorClaim);
+            if (resultado == null)
+            {
+                return NotFound("No se encontraron resultados.");
+            }
+            return Ok(resultado);
+        }
 
 
-        //[HttpPost("crea-tabla-filasTemp")]
-        //[SwaggerOperation(
-        //    Summary = "Carga Archivo Filas",
-        //    Description = "crea una tabla temporal con el idcampaña especificado la cual a partir de ahi se formará el nombre de la tabla, la cual se almacena en dbmemory"
-        //    )]
-        //public async Task<IActionResult> CreaTablaFilasTemp(
-        //[FromQuery] int idCampaña)
-        //{
-        //    string? servidorClaim = User.FindFirst("Servidor")?.Value;
-
-        //    if (string.IsNullOrWhiteSpace(servidorClaim))
-        //    {
-        //        return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-        //    }
-        //    var resultado = await _carterasDao.CreaTablaFilasTemp(idCampaña, servidorClaim);
-        //    if (resultado == null)
-        //    {
-        //        return NotFound("No se encontraron resultados.");
-        //    }
-        //    return Ok(resultado);
-        //}
-        [HttpGet("Ejecutivos_en-Campaña")]
+        [HttpGet("Ejecutivos-en-Campaña")]
         [AllowAnonymous]
         [SwaggerOperation(
            Summary = "Ejecutivos en campaña",
