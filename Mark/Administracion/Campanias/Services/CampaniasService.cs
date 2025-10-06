@@ -22,17 +22,20 @@ namespace Loki.Mark.Administracion.Carteras.Services
 			return resultados;
 		}
 
-		public async Task<List<object>> GetCarterasProductos(string servidor)
-		{
-			var context = _dbContFactory.GetDbContext(servidor, "Collection");
+        public async Task<List<object>> GetCarterasProductos(string servidor)
+        {
+            var context = _dbContFactory.GetDbContext(servidor, "Collection");
 
-			var resultados = await EntityTypeHelper.GetFullEntityTable(context, "vw_CarterasProductos");
+            var resultados = await EntityTypeHelper.GetFullEntityTable(
+                context,
+                "vw_CarterasProductos" 
+            );
 
-			return resultados;
-		}
+            return resultados;
+        }
 
 
 
 
-	}
+    }
 }
