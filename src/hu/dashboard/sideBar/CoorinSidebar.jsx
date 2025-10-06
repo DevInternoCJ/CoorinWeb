@@ -489,7 +489,6 @@ export const CoorinSidebar = ({
             )}
           </ul>
         </div>
-
 <footer className="mt-auto p-2 border-t border-gray-200">
   <div className="hs-dropdown [--strategy:absolute] [--auto-close:inside] relative w-full inline-flex">
     <button
