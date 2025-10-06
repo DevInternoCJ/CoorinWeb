@@ -1,8 +1,11 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import ModalBase from "../../board/ModalBase";
 import { darkListV2 } from "../../../../services/LokiServices";
 
-const DarkList = () => {
+const DarkList = ({ onClose }) => {
+    const modalRef = useRef(null);
+    const { bounce, handleBackdropClick } = ModalBase.useModalLogic();
 
     const [tipo, setTipo] = useState("cuenta");
     const [valor, setValor] = useState("");
@@ -133,8 +136,46 @@ const DarkList = () => {
     }
 
     return (
-        <div>
-            <div style={{ width: '100%', maxWidth: 600, margin: '0 auto', padding: '1.5rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', overflow: 'hidden', minHeight: 400, justifyContent: 'center' }}>
+        <div className="modal-blur-bg">
+                <div className="modal-overlay" onClick={handleBackdropClick} />
+                <div
+                    ref={modalRef}
+                    className={`modal-content modal-xl-container${bounce ? " animate-bounce-modal" : ""}`}
+                    onClick={e => e.stopPropagation()}
+                    style={{
+                        maxWidth: "920px",
+                        minWidth: "690px",
+                        height: "633px",
+                        display: "flex",
+                        flexDirection: "column",
+                        position: "relative"
+                    }}
+                >
+                    {/* Header personalizado para Lista Negra */}
+                    <div style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "1.5rem",
+                        borderBottom: "1px solid #e0e0e0",
+                        paddingBottom: "1rem"
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <img src="/public/logo_coorin_7.svg" alt="Logo Coorin" style={{ height: 36, marginRight: 8 }} />
+                            <h2 className="modal-title">Lista Negra</h2>
+                        </div>
+                        <button
+                            onClick={onClose}
+                            className="modal-btn modal-btn-close ml-4"
+                            aria-label="Cerrar"
+                        >
+                            &times;
+                        </button>
+                    </div>
+
+                    {/* Content específico de Lista Negra */}
+                    <div style={{ flex: 1, overflow: "auto", width: '100%' }}>
+                        <div style={{ width: '100%', maxWidth: 600, margin: '0 auto', padding: '1.5rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', overflow: 'hidden', minHeight: 400, justifyContent: 'center' }}>
             <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 {/* Radio buttons arriba del input */}
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 40, marginBottom: 16, width: '100%' }}>
@@ -212,8 +253,23 @@ const DarkList = () => {
                     )}
                 </div>
             )}
+                    </div>
+                    {/* Footer vacío para mantener el espacio visual, si se requiere */}
+                </div>
             </div>
-            {/* Footer vacío para mantener el espacio visual, si se requiere */}
+            <style>{`
+                @keyframes bounce-modal {
+                    0% { transform: scale(1); }
+                    20% { transform: scale(1.05, 0.95); }
+                    40% { transform: scale(0.95, 1.05); }
+                    60% { transform: scale(1.03, 0.97); }
+                    80% { transform: scale(0.97, 1.03); }
+                    100% { transform: scale(1); }
+                }
+                .animate-bounce-modal {
+                    animation: bounce-modal 0.5s;
+                }
+            `}</style>
         </div>
     );
 }

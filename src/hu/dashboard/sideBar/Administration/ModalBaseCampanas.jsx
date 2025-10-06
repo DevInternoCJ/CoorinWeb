@@ -1,30 +1,14 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useRef } from "react"
+import ModalBase from "../../board/ModalBase";
 import ModalCampanasContent from "./ModalCampanasContent";
 
 const ModalBaseCampanas = ({ open, onClose }) => {
-    const [bounce, setBounce] = useState(false);
     const modalRef = useRef(null);
-
-    useEffect(() => {
-        if (!open) return;
-        const handler = (e) => {
-            if (e.key === "Escape") {
-                setBounce(true);
-                setTimeout(() => setBounce(false), 500);
-                if (onClose) onClose();
-            }
-        };
-        window.addEventListener("keydown", handler);
-        return () => window.removeEventListener("keydown", handler);
-    }, [open, onClose]);
+    
+    // Usando la lógica pura de ModalBase
+    const { bounce, handleBackdropClick } = ModalBase.useModalLogic();
 
     if (!open) return null;
-
-    const handleBackdropClick = () => {
-        setBounce(true);
-        setTimeout(() => setBounce(false), 500);
-        if (onClose) onClose();
-    };
 
     return (
         <div className="modal-blur-bg">

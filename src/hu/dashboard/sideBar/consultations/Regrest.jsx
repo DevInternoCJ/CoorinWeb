@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import ModalBase from "../../board/ModalBase";
 import { getRegrest } from "../../../../services/LokiServices";
 
-const Regrest = () => {
+const Regrest = ({ onClose }) => {
+    const modalRef = useRef(null);
+    const { bounce, handleBackdropClick } = ModalBase.useModalLogic();
+    
     const [valor, setValor] = useState("");
     const [resultados, setResultados] = useState(null); // array de arrepentimientos
     const [loading, setLoading] = useState(false);
@@ -47,87 +51,104 @@ const Regrest = () => {
     };
 
     return (
-        <div style={{ width: '100%', maxWidth: 700, margin: '0 auto', padding: '1.5rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 18, width: '100%' }}>
-                <span className="modal-span-2">Cartera</span>
-                <span style={{ fontWeight: 600 }}>{getIdCartera()}</span>
+        <div className="modal-overlay" onClick={handleBackdropClick}>
+            <div
+                ref={modalRef}
+                className={`modal ${bounce ? "animate-bounce" : ""}`}
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="modal-header">
+                    <h3>Arrepentimientos</h3>
+                    <div className="modal-close" onClick={onClose}>✕</div>
+                </div>
+                <div className="modal-body">
+                    {/* Información de cartera */}
+                    <div style={{ textAlign: 'center', marginBottom: 12, fontSize: 15, color: '#526581' }}>
+                        Cartera: <strong>{getIdCartera()}</strong>
+                    </div>
+                    
+                    <div className="modal-form-row">
+                        <div className="modal-input-group">
+                            <label className="modal-label">Cuenta</label>
+                            <input
+                                type="text"
+                                value={valor}
+                                onChange={e => setValor(e.target.value)}
+                                placeholder="Ingrese número de cuenta"
+                                className="modal-input"
+                                disabled={loading}
+                            />
+                        </div>
+                        <button 
+                            className="modal-button" 
+                            onClick={handleBuscar}
+                            disabled={loading}
+                        >
+                            {loading ? "Buscando..." : "Buscar"}
+                        </button>
+                    </div>
+                    
+                    {error && (
+                        <div style={{ color: 'red', fontSize: 15, textAlign: 'center', marginBottom: 8 }}>{error}</div>
+                    )}
+                    
+                    {!resultados && !error && (
+                        <div className="modal-span-2" style={{ fontSize: 15, marginTop: 8, textAlign: 'center', color: '#526581' }}>
+                            Escriba la cuenta y presione Buscar para mostrar sus arrepentimientos.
+                        </div>
+                    )}
+                    
+                    {resultados && resultados.length > 0 && (
+                        <div
+                            className="modal-table-scroll"
+                            style={{
+                                width: '100%',
+                                maxHeight: 260,
+                                overflowY: 'auto',
+                                overflowX: 'auto',
+                                marginTop: 8
+                            }}
+                        >
+                            <table className="modal-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha/Hora</th>
+                                        <th>Arrepintió</th>
+                                        <th>Concepto</th>
+                                        <th>Dato</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {resultados.map((item, idx) => (
+                                        <tr key={idx}>
+                                            <td>{
+                                                (() => {
+                                                    // Quitar la 'T' y los milisegundos
+                                                    if (!item.fecha_Hora) return '';
+                                                    const [fecha, hora] = item.fecha_Hora.split('T');
+                                                    if (!hora) return fecha;
+                                                    // Quitar milisegundos si existen
+                                                    const horaSinMs = hora.split('.')[0];
+                                                    return `${fecha} ${horaSinMs}`;
+                                                })()
+                                            }</td>
+                                            <td>{item.arrepintio}</td>
+                                            <td>{item.concepto}</td>
+                                            <td>{item.dato}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                    
+                    {resultados && resultados.length === 0 && !error && (
+                        <div style={{ fontSize: 15, marginTop: 8, textAlign: 'center', color: '#526581' }}>
+                            No se encontraron arrepentimientos para la cuenta ingresada.
+                        </div>
+                    )}
+                </div>
             </div>
-            <div style={{ display: 'flex', width: '100%', gap: 8, marginBottom: 18, justifyContent: 'center' }}>
-                <input
-                    className="modal-dropdown-select"
-                    style={{ flex: 1, minWidth: 200, maxWidth: 350, height: 32 }}
-                    type="text"
-                    value={valor}
-                    onChange={e => setValor(e.target.value)}
-                    placeholder="Cuenta"
-                    disabled={loading}
-                />
-                <button
-                    className="modal-btn"
-                    style={{ background: '#8BC48A', color: '#fff', minWidth: 120, height: 32 }}
-                    onClick={handleBuscar}
-                    disabled={loading}
-                >
-                    {loading ? "Buscando..." : "Buscar"}
-                </button>
-            </div>
-            <div style={{ width: '100%', height: 2, background: '#bdbdbd', borderRadius: 2, marginBottom: 18 }} />
-            {error && (
-                <div style={{ color: 'red', fontSize: 15, textAlign: 'center', marginBottom: 8 }}>{error}</div>
-            )}
-            {!resultados && !error && (
-                <div className="modal-span-2" style={{ fontSize: 15, marginTop: 8, textAlign: 'center', color: '#526581' }}>
-                    Escriba la cuenta y presione Buscar para mostrar sus arrepentimientos.
-                </div>
-            )}
-            {resultados && resultados.length > 0 && (
-                <div
-                    className="modal-table-scroll"
-                    style={{
-                        width: '100%',
-                        maxHeight: 260,
-                        overflowY: 'auto',
-                        overflowX: 'auto',
-                        marginTop: 8
-                    }}
-                >
-                    <table className="modal-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha/Hora</th>
-                                <th>Arrepintió</th>
-                                <th>Concepto</th>
-                                <th>Dato</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {resultados.map((item, idx) => (
-                                <tr key={idx}>
-                                    <td>{
-                                        (() => {
-                                            // Quitar la 'T' y los milisegundos
-                                            if (!item.fecha_Hora) return '';
-                                            const [fecha, hora] = item.fecha_Hora.split('T');
-                                            if (!hora) return fecha;
-                                            // Quitar milisegundos si existen
-                                            const horaSinMs = hora.split('.')[0];
-                                            return `${fecha} ${horaSinMs}`;
-                                        })()
-                                    }</td>
-                                    <td>{item.arrepintio}</td>
-                                    <td>{item.concepto}</td>
-                                    <td>{item.dato}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-            {resultados && resultados.length === 0 && !error && (
-                <div style={{ fontSize: 15, marginTop: 8, textAlign: 'center', color: '#526581' }}>
-                    No se encontraron arrepentimientos para la cuenta ingresada.
-                </div>
-            )}
         </div>
     );
 };
