@@ -42,33 +42,30 @@ const CardExecutive = () => {
     }
   };
 
-  return (
+ return (
     <>
       {dataDash.map((catalog) => (
         <div
-          className="card card-sm sm:max-w-sm rounded-2xl p-1 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer shadow-none"
+          className="card card-sm sm:max-w-sm rounded-2xl p-2 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer shadow-none"
           key={catalog.id}
           style={{ backgroundColor: `var(--${catalog.color})` }}
           tabIndex={0}
           role="button"
-          onClick={() => handleCardClick(catalog.title)}
-        >
+          onClick={() => handleCardClick(catalog.title)}>
           {/* Máscara opaca al hacer hover */}
           <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-15 transition-opacity duration-100"></div>
-          <div className="card-header">
+          <div className="card-header p-1">
             <h5
               className="card-title font-weight-600"
-              style={{ color: `var(--${catalog.fontcolor})` }}
-            >
+              style={{ color: `var(--${catalog.fontcolor})` }}>
               {catalog.title}
             </h5>
           </div>
-          <div key={catalog.id} className="card-body p-0 mb-0.5">
+          <div key={catalog.id} className="card-body p-3 mb-0">
             <div className="flex justify-center">
               <div className="avatar avatar-placeholder">
                 <div
-                  className={`bg-neutral-300/${catalog.iconShadow} text-neutral-content w-15 rounded-full`}
-                >
+                  className={`bg-neutral-300/${catalog.iconShadow} text-neutral-content w-15 rounded-full`}>
                   {catalog.title === "Metas" ? (
                     <IconMetas
                       className="size-8"
@@ -112,8 +109,7 @@ const CardExecutive = () => {
           <div className="card-footer text-center">
             <p
               className="group-hover:text-black transition-colors duration-200"
-              style={{ color: `var(--${catalog.fontcolor})` }}
-            >
+              style={{ color: `var(--${catalog.fontcolor})` }}>
               Abrir
             </p>
           </div>
@@ -168,3 +164,4 @@ const CardExecutive = () => {
 };
 
 export default CardExecutive;
+
