@@ -59,7 +59,7 @@ const TableEditFields = ({ idProducto }) => {
   nombreCampo: item.campos,
   formatoCampo: item.formato,
   resaltado: typeof item.resaltado === "number" ? item.resaltado : 1, // Asegura número
-  editar: "true"
+  editar: true
 }));
     const payload = {
       idProducto,

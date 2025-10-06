@@ -3,7 +3,7 @@ import GridExecutives from "./board/executives/GridExecutives";
 import { CoorinSidebar } from "./sideBar/CoorinSidebar";
 import GridConsultations from "./board/consultations/GridConsultations";
 import TablaSesiones from "../dashboard/board/sessions/TablaSesiones";
-import PlantillasCorreoModal from "../administration/gespa/plantillasCorreos/EmailTemplates";
+import PlantillasCorreoModal from "../administration/gespa/emailTemplates/EmailTemplates";
 import RamificacionSesiones from "../dashboard/board/sessions/RamificacionSesiones";
 import ModalBase from "./sideBar/consultations/ModalBase";
 import ModalBaseCampanas from "./sideBar/Administration/ModalBaseCampanas";
