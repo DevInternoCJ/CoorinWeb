@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using System.Collections;
+using System.Data;
+using ClosedXML.Excel;
 using CoorinWeb.Loki.Global;
 using CoorinWeb.Loki.Mark.Auth.DAOs;
 using Dapper;
@@ -7,6 +9,8 @@ using Loki.Mark.Administracion.Campanias.Interfaces;
 using Loki.Mark.Administracion.Carteras.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.Configuration;
 namespace Loki.Mark.Administracion.Carteras.Services
 {
     public class CarterasService : ICarterasService
@@ -14,12 +18,14 @@ namespace Loki.Mark.Administracion.Carteras.Services
         private readonly CustomDbContextFactory _dbContFactory;
         private readonly DaoBase _daoBase;
         private readonly ICampaniasDao _campaniasDao;
+        private readonly ICarterasDAOs _carterasDao;
 
-        public CarterasService(IServiceProvider serviceProvider, DaoBase daoBase, ICampaniasDao campaniasDao)
+        public CarterasService(IServiceProvider serviceProvider, DaoBase daoBase, ICampaniasDao campaniasDao, ICarterasDAOs carterasDao)
         {
             _dbContFactory = new CustomDbContextFactory(serviceProvider);
             _daoBase = daoBase;
             _campaniasDao = campaniasDao;
+            _carterasDao = carterasDao;
         }
 
         public async Task<List<object>> GetCarteras(string servidor, string tipobase)
@@ -230,5 +236,207 @@ namespace Loki.Mark.Administracion.Carteras.Services
 
             return result;
         }
+
+        public async Task<ResultadoCarga> CargarFilasDesdeArchivo(string servidor, int idCampania, int? idCartera, IFormFile archivo)
+        {
+            try
+            {
+                // 1. Crear tabla temporal usando DbContext
+                await _carterasDao.CreaTablaFilasTemp(idCampania, servidor);
+
+                // 2. Procesar archivo Excel y hacer bulk insert
+                var totalRegistros = await ProcesarArchivoExcelYBulkInsert(archivo, servidor, idCampania);
+
+                // 3. Cargar filas desde tabla temporal usando DbContext
+                var filasCargadas = await _carterasDao.CargaFilas(idCampania, idCartera ?? 0, servidor);
+
+                return new ResultadoCarga
+                {
+                    FilasCargadas = Convert.ToInt32(filasCargadas),
+                    TotalRegistros = totalRegistros
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al cargar archivo: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<ResultadoCarga> CargarFilasDesdeConsulta(
+         string servidor, int idCampania, int? idConsulta,
+         string? consultaGeneral, bool incluirUsuario, bool incluirTelefono, int idCartera)
+        {
+            try
+            {
+                dynamic? resultado;
+
+                if (!string.IsNullOrEmpty(consultaGeneral))
+                {
+                    resultado = await _carterasDao.CargaFilasConsulta(
+                        idCampania, consultaGeneral, incluirUsuario, incluirTelefono, servidor);
+                }
+                else if (idConsulta.HasValue)
+                {
+                    var parametros = CoorinWeb.Loki.Global.AccionamientosQueryHelper.Ejecutivo1.TablaParámetros;
+                    var agrupar = CoorinWeb.Loki.Global.AccionamientosQueryHelper.Ejecutivo1.TablaAgrupar;
+
+                    parametros.Rows.Clear();
+                    agrupar.Rows.Clear();
+
+                    // Agregar idCartera como parámetro obligatorio
+                    parametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
+
+                    if (incluirUsuario)
+                        agrupar.Rows.Add("Usuario", "Gestiones");
+                    if (incluirTelefono)
+                        agrupar.Rows.Add("Teléfono", "Teléfonos");
+
+                    ArrayList columnas = new ArrayList();
+                    var queryData = CoorinWeb.Loki.Global.AccionamientosQueryHelper.ConsultaGenerador.QueryCuentas(idConsulta.Value, ref columnas);
+
+                    if (string.IsNullOrEmpty(queryData.Query))
+                        throw new Exception($"No se encontró la consulta predefinida con ID {idConsulta}");
+
+                    resultado = await _carterasDao.CargaFilasConsulta(
+                        idCampania, queryData.Query, incluirUsuario, incluirTelefono, servidor);
+                }
+                else
+                {
+                    throw new ArgumentException("Se debe proporcionar IdConsulta o ConsultaGeneral");
+                }
+
+                return new ResultadoCarga
+                {
+                    FilasCargadas = Convert.ToInt32(resultado)
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al cargar consulta: {ex.Message}", ex);
+            }
+        }
+        private async Task<int> ProcesarArchivoExcelYBulkInsert(IFormFile archivo, string servidor, int idCampania)
+        {
+            // Validar tipo de archivo
+            var extension = Path.GetExtension(archivo.FileName).ToLower();
+            if (extension != ".xlsx" && extension != ".xls")
+            {
+                throw new InvalidOperationException("Solo se permiten archivos Excel (.xlsx, .xls)");
+            }
+
+            // Validar tamaño del archivo (máximo 50MB)
+            if (archivo.Length > 50 * 1024 * 1024)
+            {
+                throw new InvalidOperationException("El archivo no puede ser mayor a 50MB");
+            }
+
+            using var stream = new MemoryStream();
+            await archivo.CopyToAsync(stream);
+
+            using var workbook = new XLWorkbook(stream);
+            var worksheet = workbook.Worksheet(1); // Primera hoja
+
+            // Leer datos del Excel
+            var dataTable = LeerExcelADataTable(worksheet);
+
+            // Validar que el archivo tenga datos
+            if (dataTable.Rows.Count == 0)
+            {
+                throw new InvalidOperationException("El archivo Excel no contiene datos");
+            }
+
+            // Realizar bulk insert usando DbContext
+            await RealizarBulkInsert(dataTable, servidor, idCampania);
+
+            return dataTable.Rows.Count;
+        }
+
+        private DataTable LeerExcelADataTable(IXLWorksheet worksheet)
+        {
+            var dataTable = new DataTable();
+
+            // Leer encabezados (primera fila)
+            var headerRow = worksheet.FirstRow();
+            bool hasHeaders = false;
+
+            foreach (var cell in headerRow.CellsUsed())
+            {
+                var headerName = cell.Value.ToString();
+                if (!string.IsNullOrWhiteSpace(headerName))
+                {
+                    dataTable.Columns.Add(headerName.Trim());
+                    hasHeaders = true;
+                }
+            }
+
+            // Si no hay encabezados válidos, usar nombres genéricos
+            if (!hasHeaders)
+            {
+                for (int i = 0; i < headerRow.CellsUsed().Count(); i++)
+                {
+                    dataTable.Columns.Add($"Columna{i + 1}");
+                }
+            }
+
+            // Leer datos (empezando desde la segunda fila)
+            var dataRows = worksheet.RowsUsed().Skip(1);
+            foreach (var row in dataRows)
+            {
+                var dataRow = dataTable.NewRow();
+                for (int i = 0; i < dataTable.Columns.Count; i++)
+                {
+                    var cellValue = row.Cell(i + 1).Value;
+                    dataRow[i] = cellValue.ToString();
+                }
+                dataTable.Rows.Add(dataRow);
+            }
+
+            return dataTable;
+        }
+
+        private async Task RealizarBulkInsert(DataTable dataTable, string servidor, int idCampania)
+        {
+            // Obtener el DbContext para el servidor específico
+            using var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
+
+            // Obtener la conexión del DbContext
+            var connection = dbContext.Database.GetDbConnection();
+
+            // Verificar si necesitamos abrir la conexión
+            var shouldCloseConnection = connection.State != ConnectionState.Open;
+
+            if (shouldCloseConnection)
+            {
+                await connection.OpenAsync();
+            }
+
+            try
+            {
+                using var bulkCopy = new SqlBulkCopy((SqlConnection)connection)
+                {
+                    DestinationTableName = $"AMS.FilasTemp_{idCampania}",
+                    BulkCopyTimeout = 30 * 60, // 30 minutos
+                    BatchSize = 1000 // Procesar en lotes de 1000 registros
+                };
+
+                // Mapeo automático de columnas
+                foreach (DataColumn column in dataTable.Columns)
+                {
+                    bulkCopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
+                }
+
+                await bulkCopy.WriteToServerAsync(dataTable);
+            }
+            finally
+            {
+                // Solo cerrar la conexión si la abrimos nosotros
+                if (shouldCloseConnection)
+                {
+                    await connection.CloseAsync();
+                }
+            }
+        }
+    
     }
 }
+

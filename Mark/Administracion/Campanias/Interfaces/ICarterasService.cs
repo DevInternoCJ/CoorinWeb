@@ -13,7 +13,10 @@ namespace Loki.Mark.Administracion.Carteras.Interfaces
         Task<List<CampañaAvanceDTO>> GetAvanceCompletoCampañas(string servidor, int? idEncargado = null, short? idCartera = null, short? idProducto = null);
         Task<List<Dictionary<string, object>>> Top100Filas(int idCampaña, string servidor);
         Task<IEnumerable<dynamic>?> EjecutivoDeCampaña(int idCampaña, string servidor);
-
+        Task<ResultadoCarga> CargarFilasDesdeArchivo(string servidor, int idCampania, int? idCartera, IFormFile archivo);
+        Task<ResultadoCarga> CargarFilasDesdeConsulta(
+          string servidor, int idCampania, int? idConsulta,
+          string? consultaGeneral, bool incluirUsuario, bool incluirTelefono, int idCartera);
 
     }
 }
