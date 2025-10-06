@@ -4,7 +4,7 @@ const dataSidebar = {
       id: "1A",
       divider: "Administración",
       dividerIcon: "AdjustmentsHorizontalIcon",
-      collapsetoggle: "ChevronDownIcon",
+      collapsetoggle: "AdjustmentsHorizontalIcon",
       Menu: [
         {
           subMenus: [
@@ -40,7 +40,7 @@ const dataSidebar = {
       id: "1B",
       divider: "Consulta",
       dividerIcon: "MagnifyingGlassIcon",
-      collapsetoggle: "ChevronDownIcon",
+      collapsetoggle: "MagnifyingGlassIcon",
       Menu: [
         {
           subMenus: [
@@ -80,7 +80,7 @@ const dataSidebar = {
       id: "1C",
       divider: "Procesos",
       dividerIcon: "LightBulbIcon",
-      collapsetoggle: "ChevronDownIcon",
+      collapsetoggle: "LightBulbIcon",
       Menu: [
         {
           subMenus: [
@@ -158,10 +158,6 @@ const dataSidebar = {
             { id: "6CC", title: "Supervisor", icon: "UserIcon" },
             { id: "7CC", title: "Domicilios", icon: "UserIcon" },
             { id: "8CC", title: "Amex", icon: "UserIcon" },
-            { id: "9CC", title: "BBVA", icon: "UserIcon" },
-            { id: "10CC", title: "HSBC", icon: "UserIcon" },
-            { id: "11CC", title: "Daimler", icon: "UserIcon" },
-            { id: "12CC", title: "Santander", icon: "UserIcon" },
             { id: "13CC", title: "Metas", icon: "UserIcon" },
           ],
         },
@@ -173,7 +169,7 @@ const dataSidebar = {
       id: "1D",
       divider: "Reportes",
       dividerIcon: "DocumentArrowDownIcon",
-      collapsetoggle: "ChevronDownIcon",
+      collapsetoggle: "DocumentArrowDownIcon",
       Menu: [
         {
           subMenus: [
@@ -193,38 +189,6 @@ const dataSidebar = {
                   icon: "EnvelopeIcon",
                 },
                 { id: "2DDD", title: "Catalogos", icon: "BookOpenIcon" },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ],
-  indice5: [
-    {
-      id: "1E",
-      divider: "Auditoria",
-      dividerIcon: "ShieldCheckIcon",
-      collapsetoggle: "ChevronDownIcon",
-      Menu: [
-        {
-          subMenus: [
-            {
-              id: "1EE",
-              title: "Campañas",
-              icon: "UserIcon",
-            },
-            {
-              id: "2EE",
-              title: "Gespa",
-              icon: "UserGroupIcon",
-              subMenus2: [
-                {
-                  id: "1EEE",
-                  title: "Plantillas Correo",
-                  icon: "EnvelopeIcon",
-                },
-                { id: "2EEE", title: "Catalogos", icon: "BookOpenIcon" },
               ],
             },
           ],

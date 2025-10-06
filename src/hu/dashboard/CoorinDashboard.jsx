@@ -6,7 +6,7 @@ import TablaSesiones from "../dashboard/board/sessions/TablaSesiones";
 import PlantillasCorreoModal from "../administration/gespa/emailTemplates/EmailTemplates";
 import RamificacionSesiones from "../dashboard/board/sessions/RamificacionSesiones";
 import ModalBase from "./sideBar/consultations/ModalBase";
-import ModalBaseCampanas from "./sideBar/Administration/ModalBaseCampanas";
+
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedExecutiveId, setSelectedExecutiveId] = useState(null);
@@ -53,22 +53,18 @@ export default function CoorinDashboard() {
     setSidebarOpen(false);
 
     // Mapeo de IDs del sidebar a opciones del modal - SOLO CONSULTAS
-  const sidebarOptionsMap = {
-  "2BB": "Lista Negra",        // Lista Negra
-  "3BB": "Arrepentimientos",   // Arrepentimientos
-  "1BBB": "Pagos",             // Pagos
-  "2BBB": "Pagos reportados",  // Pagos reportados
-  "3BBB": "Datos Erroneos",    // Datos Erróneos
-  "4BBB": "Domicilios",        // Domicilios
-  "5BBB": "Correos",           // Correos
-  "6BBB": "Búsquedas",         // Búsquedas
-  "7BBB": "Ofrecimientos",     // Ofrecimientos
-  "8BBB": "Comentarios",       // Comentarios
-  "9BBB": "VGP",               // VGP
-  // Campañas en todos los menús
-  "1AA": "Campañas",
-  "1DD": "Campañas",
-  "1EE": "Campañas"
+    const sidebarOptionsMap = {
+      "2BB": "Lista Negra", // Lista Negra
+      "3BB": "Arrepentimientos", // Arrepentimientos
+      "1BBB": "Pagos", // Pagos
+      "2BBB": "Pagos reportados", // Pagos reportados
+      "3BBB": "Datos Erroneos", // Datos Erróneos
+      "4BBB": "Domicilios", // Domicilios
+      "5BBB": "Correos", // Correos
+      "6BBB": "Búsquedas", // Búsquedas
+      "7BBB": "Ofrecimientos", // Ofrecimientos
+      "8BBB": "Comentarios", // Comentarios
+      "9BBB": "VGP", // VGP
     };
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
@@ -82,104 +78,91 @@ export default function CoorinDashboard() {
     }
   };
 
+  // Estado que refleja si la sidebar está en modo minificado (body tiene la clase hs-overlay-minified)
+  const [sidebarMinified, setSidebarMinified] = useState(
+    typeof document !== "undefined" &&
+      document.body.classList.contains("hs-overlay-minified")
+  );
+
+  // Observador de cambios en el atributo 'class' del body para detectar cuando la sidebar entra/sale de modo minificado
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const update = () =>
+      setSidebarMinified(
+        document.body.classList.contains("hs-overlay-minified")
+      );
+    const mo = new MutationObserver(() => update());
+    mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    // llamada inicial por si cambió antes del mount
+    update();
+    return () => mo.disconnect();
+  }, []);
+
   return (
     <>
-      <div ref={sidebarRef}>
-        <CoorinSidebar
-          open={sidebarOpen}
-          onMenuClick={handleSidebarMenuClick}
-          onPlantillasCorreoClick={handlePlantillasCorreoClick}
-        />
-        <PlantillasCorreoModal isOpen={modalOpen} onClose={handleCloseModal} />
-      </div>
-      <div className="relative bg-background-dashboard py-14 sm:py-2 overflow-hidden h-screen">
-        {/* Botón de menú con z-index alto para que siempre esté visible */}
-        <div className="fixed top-4 left-8 z-20">
-          <button
-            ref={buttonRef}
-            className=" p-1 border-1 border-jerarquia2 rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-jerarquia3 focus:ring-opacity-50 bg-background-dashboard shadow-md"
-            aria-expanded={sidebarOpen}
-            aria-controls="overlay-body-scrolling-with-backdrop"
-            data-overlay="#overlay-body-scrolling-with-backdrop"
-            onClick={handleSidebarToggle}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className={`size-8 text-jerarquia3 transition-transform duration-300 ${
-                sidebarOpen ? "transform rotate-90" : ""
-              }`}>
-              {/* Líneas del menú hamburguesa - se ocultan cuando está abierto */}
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                className={`transition-all duration-300 ${
-                  sidebarOpen ? "opacity-0" : "opacity-100"
-                }`}
-              />
-
-              {/* Líneas para formar la X cuando está abierto */}
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-                className={`transition-all duration-300 ${
-                  sidebarOpen ? "opacity-100" : "opacity-0"
-                }`}
-              />
-            </svg>
-          </button>
-        </div>
-
-        <div className="mx-auto max-w-2xl px-2 lg:max-w-screen lg:px-8 relative pt-16">
-          <span
-            className="mx-auto mt-2 text-3xl font-semibold tracking-tight text-balance sm:text-3xl"
-            style={{ color: "var(--color-text-black)" }}>
-            Ejecutivos
-          </span>
-          <div className="mt-2 grid grid-cols-6 gap-4 sm:mt-8 md:mt-8 lg:mt-0 xl:mt-0">
-            <div className="col-span-6">
-              <GridExecutives />
-            </div>
-          </div>
-          <div className="col-span-6 row-start-2 relative">
-            <div className="flex justify-between items-start mb-4 mt-4">
-              <span
-                className="text-3xl font-semibold tracking-tight text-balance sm:text-3xl"
-                style={{ color: "var(--color-text-black)" }}>
-                Consultas
-              </span>
-            </div>
-            <div className="-mt-2">
-              <GridConsultations />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 mt-8 w-full">
-            <div className="relative w-full">
-              <RamificacionSesiones
-                onExecutiveSelect={setSelectedExecutiveId}
-              />
-            </div>
-            <div className="relative w-full">
-              <TablaSesiones selectedExecutiveId={selectedExecutiveId} />
-            </div>
-          </div>
-        </div>
-      </div>
-    
-    {/* Modal Base para Sidebar */}
-    {modalSidebarOpen && selectedSidebarOption === "Campañas" && (
-      <ModalBaseCampanas open={modalSidebarOpen} onClose={() => setModalSidebarOpen(false)} />
-    )}
-    {modalSidebarOpen && selectedSidebarOption !== "Campañas" && (
-      <ModalBase 
-        onClose={() => setModalSidebarOpen(false)} 
-        selectedOption={selectedSidebarOption}
+      <CoorinSidebar
+        onMenuClick={handleSidebarMenuClick}
+        onPlantillasCorreoClick={handlePlantillasCorreoClick}
       />
-    )}
+
+      {/* Contenedor principal que ocupa todo el alto sin generar scroll global */}
+      <main className="flex-1 bg-background-dashboard min-h-0 relative z-0 flex flex-col">
+        {/* Contenedor interno con overflow-auto para permitir scroll solo cuando el contenido excede el área disponible */}
+        <div
+          className="transition-transform duration-200 flex-1 min-h-0 overflow-auto"
+          style={{
+            marginLeft: sidebarMinified ? "2.5rem" : undefined,
+            marginBottom: "0",
+            marginTop: "0",
+          }}
+        >
+          <div className="relative z-0 py-14 sm:py-2">
+            <div className="w-full px-4 lg:px-8 relative pt-8">
+              <span className="text-3xl font-semibold tracking-tight text-balance text-gray-950 sm:text-4xl">
+                Ejecutivos
+              </span>
+
+              <div className="mt-2 grid grid-cols-6 gap-4 sm:mt-8 md:mt-8 lg:mt-0 xl:mt-0">
+                <div className="col-span-6">
+                  <GridExecutives />
+                </div>
+              </div>
+
+              <div className="col-span-6 row-start-2 relative">
+                <div className="flex justify-between items-start mb-4 mt-4">
+                  <span className="text-3xl font-semibold tracking-tight text-balance text-gray-950 sm:text-4xl">
+                    Consultas
+                  </span>
+                </div>
+                <div className="-mt-2">
+                  <GridConsultations />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-8 w-full">
+                <div className="relative w-full">
+                  <RamificacionSesiones
+                    onExecutiveSelect={setSelectedExecutiveId}
+                  />
+                </div>
+                <div className="relative w-full">
+                  <TablaSesiones selectedExecutiveId={selectedExecutiveId} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <PlantillasCorreoModal isOpen={modalOpen} onClose={handleCloseModal} />
+
+        {/* Modal Base para Sidebar */}
+        {modalSidebarOpen && (
+          <ModalBase
+            onClose={() => setModalSidebarOpen(false)}
+            selectedOption={selectedSidebarOption}
+          />
+        )}
+      </main>
     </>
   );
 }

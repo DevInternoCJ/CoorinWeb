@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import { Routes, Route, Link } from 'react-router-dom';
 import './index.css'
 import './App.css'
@@ -10,7 +10,12 @@ import { Toaster} from 'sonner';
 
 function App() {
 
-// const [user, setUser] = useLocalStorage(true);
+ useEffect(() => {
+    // Importar e inicializar Preline después de que React esté montado
+    import("preline").then(() => {
+      console.log("Preline cargado correctamente");
+    });
+  }, []);
 
   return (
     <>

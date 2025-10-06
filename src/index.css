@@ -9,6 +9,18 @@
     font-family: "Montserrat", sans-serif;
   }
 }
+
+body {
+
+  font-family: "Montserrat", sans-serif;
+  /* Evitar que el body haga scroll */
+  overflow: hidden;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-background-dashboard);
+}
+
 :root{
     --color-text-black: #00291a;
     --color-text-terra: #505631;
