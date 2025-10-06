@@ -10,7 +10,7 @@ import {
   IconPantalla,
 } from "./IconesEjecutives";
 import ModalMetasEjecutivos from "./ModalMetasEjecutivos";
-import LampshadeFields from "../../../administration/gespa/screenFields/LampshadeFields"
+import LampshadeFields from "../../sideBar/Administration/gespa/screenFields/LampshadeFields";
 import ModalValidadoresEjecutivos from "./ModalValidadoresEjecutivos";
 import ModalEncargadosEjecutivos from "./ModalEncargadosEjecutivos";
 import ModalCatalogosEjecutivos from "./ModalCatalogosEjecutivos";
@@ -51,13 +51,15 @@ const CardExecutive = () => {
           style={{ backgroundColor: `var(--${catalog.color})` }}
           tabIndex={0}
           role="button"
-          onClick={() => handleCardClick(catalog.title)}>
+          onClick={() => handleCardClick(catalog.title)}
+        >
           {/* Máscara opaca al hacer hover */}
           <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-15 transition-opacity duration-100"></div>
           <div className="card-header">
             <h5
               className="card-title font-weight-600"
-              style={{ color: `var(--${catalog.fontcolor})` }}>
+              style={{ color: `var(--${catalog.fontcolor})` }}
+            >
               {catalog.title}
             </h5>
           </div>
@@ -65,7 +67,8 @@ const CardExecutive = () => {
             <div className="flex justify-center">
               <div className="avatar avatar-placeholder">
                 <div
-                  className={`bg-neutral-300/${catalog.iconShadow} text-neutral-content w-15 rounded-full`}>
+                  className={`bg-neutral-300/${catalog.iconShadow} text-neutral-content w-15 rounded-full`}
+                >
                   {catalog.title === "Metas" ? (
                     <IconMetas
                       className="size-8"
@@ -109,7 +112,8 @@ const CardExecutive = () => {
           <div className="card-footer text-center">
             <p
               className="group-hover:text-black transition-colors duration-200"
-              style={{ color: `var(--${catalog.fontcolor})` }}>
+              style={{ color: `var(--${catalog.fontcolor})` }}
+            >
               Abrir
             </p>
           </div>

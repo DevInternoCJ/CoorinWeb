@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import SelectWallet from "../screenFields/SelectWallet";
 import ButtonSave from "../ButtonSave";
-import { SaveCreateTemplate } from "../../../../services/LokiServices";
-import { DeleteTemplate } from "../../../../services/LokiServices";
-import { useUserStore } from "../../../../contextGlobal/userStore";
+import { SaveCreateTemplate } from "../../../../../../services/LokiServices";
+import { DeleteTemplate } from "../../../../../../services/LokiServices";
+import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import { toast } from "sonner";
 
 const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {

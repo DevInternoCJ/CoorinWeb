@@ -3,9 +3,9 @@ import GridExecutives from "./board/executives/GridExecutives";
 import { CoorinSidebar } from "./sideBar/CoorinSidebar";
 import GridConsultations from "./board/consultations/GridConsultations";
 import TablaSesiones from "../dashboard/board/sessions/TablaSesiones";
-import PlantillasCorreoModal from "../administration/gespa/emailTemplates/EmailTemplates";
 import RamificacionSesiones from "../dashboard/board/sessions/RamificacionSesiones";
 import ModalBase from "./sideBar/consultations/ModalBase";
+import EmailTemplates from "./sideBar/Administration/gespa/emailTemplates/EmailTemplates";
 
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,7 +52,7 @@ export default function CoorinDashboard() {
     // Cerrar sidebar en móviles después del click
     setSidebarOpen(false);
 
-    // Mapeo de IDs del sidebar a opciones del modal - SOLO CONSULTAS
+    // Mapeo de IDs del sidebar a opciones del modal
     const sidebarOptionsMap = {
       "2BB": "Lista Negra", // Lista Negra
       "3BB": "Arrepentimientos", // Arrepentimientos
@@ -65,15 +65,14 @@ export default function CoorinDashboard() {
       "7BBB": "Ofrecimientos", // Ofrecimientos
       "8BBB": "Comentarios", // Comentarios
       "9BBB": "VGP", // VGP
+      "2AAA": "Plantillas Correo", // Plantillas Correo (Administración)
     };
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
     if (sidebarOptionsMap[menuId]) {
       setSelectedSidebarOption(sidebarOptionsMap[menuId]);
       setModalSidebarOpen(true);
-    }
-    // Para otros elementos del menú (NO hacer nada más)
-    else {
+    } else {
       console.log(`Click en menú: ${menuTitle} (ID: ${menuId})`);
     }
   };
@@ -100,10 +99,7 @@ export default function CoorinDashboard() {
 
   return (
     <>
-      <CoorinSidebar
-        onMenuClick={handleSidebarMenuClick}
-        onPlantillasCorreoClick={handlePlantillasCorreoClick}
-      />
+      <CoorinSidebar onMenuClick={handleSidebarMenuClick} />
 
       {/* Contenedor principal que ocupa todo el alto sin generar scroll global */}
       <main className="flex-1 bg-background-dashboard min-h-0 relative z-0 flex flex-col">
@@ -153,7 +149,7 @@ export default function CoorinDashboard() {
           </div>
         </div>
 
-        <PlantillasCorreoModal isOpen={modalOpen} onClose={handleCloseModal} />
+        <EmailTemplates isOpen={modalOpen} onClose={handleCloseModal} />
 
         {/* Modal Base para Sidebar */}
         {modalSidebarOpen && (

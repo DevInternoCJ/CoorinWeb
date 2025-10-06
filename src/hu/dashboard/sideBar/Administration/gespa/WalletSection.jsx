@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
-import LogoCoorin from "../../../assets/logo_coorin_7.svg";
-import CustomSelect from "./screenFields/SelectWallet";
-import { GetVerifyProduct } from "../../../services/LokiServices";
+import LogoCoorin from "../../../../../assets/logo_coorin_7.svg";
+import CustomSelect from "../gespa/screenFields/SelectWallet";
+import { GetVerifyProduct } from "../../../../../services/LokiServices";
 
 const PRODUCT_OPTIONS = [
   { label: "Producto", value: 0 },
   { label: "Amex", value: 1 },
 ];
 const CARTERA_OPTIONS = [
-  { label: "American Express", value: "American Express" }
+  { label: "American Express", value: "American Express" },
 ];
 
 const WalletSection = ({
@@ -18,7 +18,7 @@ const WalletSection = ({
   setVerifyResult,
   loading,
   setLoading,
-  onProductSelect 
+  onProductSelect,
 }) => {
   const servidor = "Albaz";
 
@@ -31,9 +31,9 @@ const WalletSection = ({
   // Efecto separado para la verificación del producto
   useEffect(() => {
     console.log("selectedProduct for verification:", selectedProduct);
-    
+
     if (!selectedProduct || selectedProduct.value !== 1) return;
-    
+
     const fetchVerifyProduct = async () => {
       setLoading(true);
       try {
@@ -45,7 +45,7 @@ const WalletSection = ({
         setLoading(false);
       }
     };
-    
+
     fetchVerifyProduct();
   }, [selectedProduct, servidor, setLoading, setVerifyResult]);
 
@@ -60,11 +60,11 @@ const WalletSection = ({
           <label className="block text-sm font-medium text-jerarquia2 mb-1">
             Cartera
           </label>
-          
-<CustomSelect
-  options={CARTERA_OPTIONS}
-  defaultValue={CARTERA_OPTIONS[0].value}
-/>
+
+          <CustomSelect
+            options={CARTERA_OPTIONS}
+            defaultValue={CARTERA_OPTIONS[0].value}
+          />
         </div>
         {/* Select de Producto */}
         <div>
@@ -72,12 +72,14 @@ const WalletSection = ({
             Producto
           </label>
           <CustomSelect
-  options={PRODUCT_OPTIONS}
-  onChange={(value) => {
-    const found = PRODUCT_OPTIONS.find((opt) => opt.value === Number(value) || opt.value === value);
-    setSelectedProduct(found ? { ...found } : null);
-  }}
-/>
+            options={PRODUCT_OPTIONS}
+            onChange={(value) => {
+              const found = PRODUCT_OPTIONS.find(
+                (opt) => opt.value === Number(value) || opt.value === value
+              );
+              setSelectedProduct(found ? { ...found } : null);
+            }}
+          />
           {loading && (
             <p className="text-xs text-gray-400 mt-1">
               Verificando producto...

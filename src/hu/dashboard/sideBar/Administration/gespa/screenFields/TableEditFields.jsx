@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import OptionFields from "./OptionFields";
-import { GetScreenFields, SaveScreenFields } from "../../../../services/LokiServices";
-import { useUserStore } from "../../../../contextGlobal/userStore";
+import {
+  GetScreenFields,
+  SaveScreenFields,
+} from "../../../../../../services/LokiServices";
+import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import SaveButton from "../ButtonSave";
-
 const TableEditFields = ({ idProducto }) => {
   const [editData, setEditData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +18,7 @@ const TableEditFields = ({ idProducto }) => {
   const idEjecutivo = user?.idEjecutivo;
   console.log("Datos de usuario en el store:", idEjecutivo);
   const Jerarquía = user?.Jerarquía;
-  console.log (" Jerarquia: ", Jerarquía);
+  console.log(" Jerarquia: ", Jerarquía);
 
   useEffect(() => {
     if (!idProducto || idProducto === 0) return;
@@ -45,7 +47,7 @@ const TableEditFields = ({ idProducto }) => {
   }, [servidor, idProducto]);
 
   const handleEditField = (index, field, value) => {
-    setEditData(prev =>
+    setEditData((prev) =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
     );
   };
@@ -53,14 +55,14 @@ const TableEditFields = ({ idProducto }) => {
   const handleSaveAll = async () => {
     setSaving(true);
     setSaveResult(null);
-    const campos = editData.map(item => ({
-  posicion: item.position,
-  alias: item.alias,
-  nombreCampo: item.campos,
-  formatoCampo: item.formato,
-  resaltado: typeof item.resaltado === "number" ? item.resaltado : 1, // Asegura número
-  editar: true
-}));
+    const campos = editData.map((item) => ({
+      posicion: item.position,
+      alias: item.alias,
+      nombreCampo: item.campos,
+      formatoCampo: item.formato,
+      resaltado: typeof item.resaltado === "number" ? item.resaltado : 1, // Asegura número
+      editar: true,
+    }));
     const payload = {
       idProducto,
       idEjecutivo,
@@ -94,12 +96,24 @@ const TableEditFields = ({ idProducto }) => {
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <div className="flex items-center">
             <div className="text-red-400 mr-2">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <div>
-              <h3 className="text-red-800 font-medium">Error al cargar los datos</h3>
+              <h3 className="text-red-800 font-medium">
+                Error al cargar los datos
+              </h3>
               <p className="text-red-600 text-sm">{error}</p>
             </div>
           </div>
@@ -118,7 +132,7 @@ const TableEditFields = ({ idProducto }) => {
         <div className="col-span-2">Formato Campo</div>
         <div className="col-span-2">Resaltado</div>
       </div>
-      
+
       {/* Body con espacio entre filas */}
       <div className="space-y-3">
         {editData.map((item, idx) => (
@@ -129,13 +143,14 @@ const TableEditFields = ({ idProducto }) => {
           />
         ))}
       </div>
-      
+
       {editData.length === 0 && (
         <div className="text-center py-8 text-gray-500">
-          No hay campos de pantalla disponibles para los parámetros especificados
+          No hay campos de pantalla disponibles para los parámetros
+          especificados
         </div>
       )}
-      
+
       <div className="flex justify-end mt-6">
         <SaveButton
           onClick={handleSaveAll}
@@ -146,9 +161,13 @@ const TableEditFields = ({ idProducto }) => {
           className="min-w-[120px]"
         />
         {saveResult && (
-          <span className={`ml-3 text-sm font-medium ${
-            saveResult === "Guardado correctamente" ? "text-green-600" : "text-red-600"
-          }`}>
+          <span
+            className={`ml-3 text-sm font-medium ${
+              saveResult === "Guardado correctamente"
+                ? "text-green-600"
+                : "text-red-600"
+            }`}
+          >
             {saveResult}
           </span>
         )}
