@@ -21,27 +21,43 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
         }
 
 
-        [HttpGet("existe-tabla-producto/{servidor}/{idProducto}")]
+        [HttpGet("existe-tabla-producto/{idProducto}")]
         [SwaggerOperation(
             Summary = "Verificar existencia de tabla de producto",
             Description = "Verifica si existe la tabla Producto_{idProducto} en el servidor especificado."
         )]
         [ProducesResponseType(typeof(bool), 200)]
-        public async Task<IActionResult> ExisteTablaProducto(string servidor, int idProducto)
+        public async Task<IActionResult> ExisteTablaProducto(int idProducto)
         {
-            var existe = await _campService.ObtenerObjectIdProductoAsync(servidor, idProducto);
+			string? servidorClaim = User.FindFirst("Servidor")?.Value;
+			//string? servidorClaim = "Albaz";
+
+			if (string.IsNullOrWhiteSpace(servidorClaim))
+			{
+				return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+			}
+
+			var existe = await _campService.ObtenerObjectIdProductoAsync(servidorClaim, idProducto);
             return Ok(existe.HasValue);
         }
 
-        [HttpGet("campos-pantalla/{servidor}/{idProducto}")]
+        [HttpGet("campos-pantalla/{idProducto}")]
         [SwaggerOperation(
             Summary = "Obtener Campos Pantalla",
             Description = "Obtiene los campos configurados para la pantalla del producto indicado en el servidor especificado."
         )]
         [ProducesResponseType(typeof(List<object>), 200)]
-        public async Task<IActionResult> GetCamposPantalla(string servidor, int idProducto)
+        public async Task<IActionResult> GetCamposPantalla(int idProducto)
         {
-            var campos = await _campService.GetCamposPantalla(servidor, idProducto);
+			string? servidorClaim = User.FindFirst("Servidor")?.Value;
+			//string? servidorClaim = "Albaz";
+
+			if (string.IsNullOrWhiteSpace(servidorClaim))
+			{
+				return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+			}
+
+			var campos = await _campService.GetCamposPantalla(servidorClaim, idProducto);
             return Ok(campos);
         }
 
@@ -50,6 +66,7 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
 			Summary = "Muestra Campos Pantalla",
 			Description = "Muestra los campos traducidos con la información del producto escogido."
 		)]
+        [AllowAnonymous]
 		public async Task<IActionResult> GetProductData(int idProducto)
 		{
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
@@ -65,20 +82,27 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
 		}
 
 
-		[HttpGet("grid-producto-sample/{servidor}/{idProducto}/{porcentaje}/{maximo}")]
+		[HttpGet("grid-producto-sample/{idProducto}/{porcentaje}/{maximo}")]
         [SwaggerOperation(
             Summary = "Grid de Producto",
             Description = "Devuelve la info. para el grid del producto mediante una muestra aleatoria de registros de la tabla Producto_{idProducto} usando porcentaje y/o máximo."
         )]
         [ProducesResponseType(typeof(List<object>), 200)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> GridProductoSample(string servidor, int idProducto, double porcentaje = 70, int? maximo = 5)
+        public async Task<IActionResult> GridProductoSample(int idProducto, double porcentaje = 70, int? maximo = 5)
         {
-            var existe = await _campService.ObtenerObjectIdProductoAsync(servidor, idProducto);
-            if (!existe.HasValue)
-                return NotFound($"Error: No se encuentra la tabla Producto_{idProducto} en el servidor '{servidor}'.");
+			string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
-            var resultado = await _campService.GridProductoTableSample(servidor, idProducto, porcentaje, maximo);
+			if (string.IsNullOrWhiteSpace(servidorClaim))
+			{
+				return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+			}
+
+			var existe = await _campService.ObtenerObjectIdProductoAsync(servidorClaim, idProducto);
+            if (!existe.HasValue)
+                return NotFound($"Error: No se encuentra la tabla Producto_{idProducto} en el servidor '{servidorClaim}'.");
+
+            var resultado = await _campService.GridProductoTableSample(servidorClaim, idProducto, porcentaje, maximo);
             return Ok(resultado);
         }
 
@@ -87,7 +111,7 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
         /// </summary>
         /// <param name="request">Datos del producto y los campos a insertar/actualizar.</param>
         /// <returns>True si se actualizó correctamente.</returns>
-        [HttpPost("guardar-campos-pantalla/{servidor}")]
+        [HttpPost("guardar-campos-pantalla")]
         [SwaggerOperation(
             Summary = "Guardar Campos Pantalla",
             Description = "Permite actualizar o agregar los Campos Pantalla visibles en Gespa para el menú de Cuentas."
