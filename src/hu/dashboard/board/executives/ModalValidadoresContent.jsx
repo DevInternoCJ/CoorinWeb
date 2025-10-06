@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
-import JerarquiaConCheckbox from "./JerarquiaConR/JerarquiaConCheckbox";
-import { obetenerJerarquiaEncargados } from '../../../../services/LokiServices';
+import { obetenerJerarquiaEncargados, ValidatorsNormal, Validatorsregrets, InsertDeletedValidators, InsertDeletedValidatorsRegrets } from '../../../../services/LokiServices';
+import { toast } from "sonner";
 
 // Flecha tipo chevron moderna
 const DropdownArrow = () => (
@@ -25,19 +25,21 @@ const DropdownArrow = () => (
 );
 
 
-const ModalValidadoresContent = () => {
-    // Estados para la jerarquía de ejecutivos (como en ModalMetasContent)
+const ModalValidadoresContent = ({ 
+    onFooterDataChange // Nueva prop para comunicar cambios al padre
+}) => {
+    // Estados principales (idéntico a ModalCampanasEjecutivos)
     const [executiveTree, setExecutiveTree] = useState([]);
-    const [loadingJerarquia, setLoadingJerarquia] = useState(false);
-    const [errorJerarquia, setErrorJerarquia] = useState(null);
-    const [selectedExecutives, setSelectedExecutives] = useState([]); // array de idEjecutivo
-    const [selectedRows, setSelectedRows] = useState([]);
-    const [editValues, setEditValues] = useState({});
-    const [selectedExecutiveNode, setSelectedExecutiveNode] = useState(null);
-    const [allHierarchyIds, setAllHierarchyIds] = useState([]);
+    const [usuariosValidadores, setUsuariosValidadores] = useState([]);
     // Otros estados propios del modal
-    const [producto, setProducto] = useState("Amex");
+    const [producto, setProducto] = useState(""); // Iniciamos vacío para obligar selección
     const [arrepentimientos, setArrepentimientos] = useState(false);
+    const [validadoresFromAPI, setValidadoresFromAPI] = useState([]);
+    const [isLoadingValidadores, setIsLoadingValidadores] = useState(false);
+    const [isProcessingChange, setIsProcessingChange] = useState(false);
+    // Estados para el footer
+    const [lastAction, setLastAction] = useState(null); // 'added' | 'removed' | null
+    const [lastUser, setLastUser] = useState(null);
 
     // Función para obtener idCartera desde localStorage
     const getIdCartera = () => {
@@ -45,44 +47,257 @@ const ModalValidadoresContent = () => {
         return userData?.idCartera || userData?.idcartera || userData?.cartera || 1; // fallback a 1 si no existe
     };
 
-    // Obtener la jerarquía de ejecutivos (idéntico a ModalMetasContent)
+    // Función para obtener validadores del API
+    const fetchValidadores = useCallback(async (idProducto, esArrepentimientos = false) => {
+        if (!idProducto) return;
+        
+        setIsLoadingValidadores(true);
+        try {
+            let response;
+            if (esArrepentimientos) {
+                // Llamar al endpoint de validadores arrepentimientos
+                response = await Validatorsregrets(idProducto);
+            } else {
+                // Llamar al endpoint normal
+                response = await ValidatorsNormal(idProducto);
+            }
+            
+            const validadores = response?.data || [];
+            setValidadoresFromAPI(validadores);
+            
+            return validadores;
+        } catch (error) {
+            toast.error('Error al obtener validadores:', error);
+            setValidadoresFromAPI([]);
+            return [];
+        } finally {
+            setIsLoadingValidadores(false);
+        }
+    }, []);
+
+    // Cargar ejecutivos (idéntico a ModalCampanasEjecutivos)
     useEffect(() => {
-        const fetchExecutiveTree = async () => {
-            setLoadingJerarquia(true);
-            setErrorJerarquia(null);
+        const fetchExecutives = async () => {
             try {
                 const userData = JSON.parse(localStorage.getItem('userData'));
-                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
-                const usuario = userData?.usuario || '';
-                const nombreEjecutivo = userData?.nombre || userData?.nombreEjecutivo || userData?.ejecutivo || '';
-                if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
+                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id;
+                if (!idEjecutivo) return;
                 const data = await obetenerJerarquiaEncargados(idEjecutivo);
-                let tree = [];
-                if (Array.isArray(data)) {
-                    const found = data.find(n => n.idEjecutivo === idEjecutivo);
-                    if (found) {
-                        tree = data;
-                    } else {
-                        // Si no está el propio ejecutivo, lo agregamos como raíz
-                        tree = [{
-                            idEjecutivo: idEjecutivo,
-                            usuario,
-                            nombreEjecutivo,
-                            subordinados: data
-                        }];
-                    }
-                }
-                setExecutiveTree(tree);
+                // Mapeo: estructura completa según el endpoint
+                const mapped = Array.isArray(data) ? data.map(e => ({
+                    usuario: e.usuario || e.Usuario || '',
+                    nombreEjecutivo: e.nombreEjecutivo || '',
+                    subordinados: Array.isArray(e.subordinados) ? e.subordinados : [],
+                    idEjecutivo: e.idEjecutivo || e.idejecutivo || e.id || '',
+                    idEncargado: e.idEncargado || null,
+                    seleccionado: false // Añadimos campo para manejar selección
+                })) : [];
+                
+                setExecutiveTree(mapped);
             } catch (error) {
-                console.error('Error al obtener la jerarquía:', error);
-                setErrorJerarquia('Error al obtener la jerarquía de ejecutivos');
+                toast.error('Error al cargar ejecutivos para validadores:', error);
                 setExecutiveTree([]);
-            } finally {
-                setLoadingJerarquia(false);
             }
         };
-        fetchExecutiveTree();
+        fetchExecutives();
     }, []);
+
+    // Filtrar ejecutivos: Replicar comportamiento exacto de ModalCampanasEjecutivos
+    const usuariosFiltrados = useMemo(() => {
+        if (!executiveTree.length) return [];
+        
+        const usuariosValidadores = [];
+        
+        // Tomar solo los primeros 13 ejecutivos principales
+        const ejecutivosPrincipales = executiveTree.slice(0, 13);
+        
+        ejecutivosPrincipales.forEach(ejecutivo => {
+            // Agregar el ejecutivo principal
+            usuariosValidadores.push({
+                ...ejecutivo,
+                usuario: ejecutivo.usuario || ejecutivo.Usuario || '',
+                nombreEjecutivo: ejecutivo.nombreEjecutivo || '',
+                displayName: `${ejecutivo.usuario || ejecutivo.Usuario || ''} - ${ejecutivo.nombreEjecutivo || ''}`,
+                nivelJerarquia: 1,
+                esSubordinado: false,
+                seleccionado: false
+            });
+            
+            // Agregar sus subordinados si los tiene
+            if (Array.isArray(ejecutivo.subordinados) && ejecutivo.subordinados.length > 0) {
+                ejecutivo.subordinados.forEach(subordinado => {
+                    usuariosValidadores.push({
+                        usuario: subordinado.usuario || subordinado.Usuario || '',
+                        nombreEjecutivo: subordinado.nombreEjecutivo || '',
+                        displayName: `${subordinado.usuario || subordinado.Usuario || ''} - ${subordinado.nombreEjecutivo || ''}`,
+                        idEjecutivo: subordinado.idEjecutivo || subordinado.idejecutivo || subordinado.id || '',
+                        idEncargado: subordinado.idEncargado || ejecutivo.idEjecutivo,
+                        nivelJerarquia: 2,
+                        esSubordinado: true,
+                        encargadoPadre: ejecutivo.usuario,
+                        seleccionado: false
+                    });
+                });
+            }
+        });
+        
+        return usuariosValidadores;
+    }, [executiveTree]);
+
+    // Actualizar usuariosValidadores cuando cambie usuariosFiltrados
+    useEffect(() => {
+        setUsuariosValidadores(usuariosFiltrados);
+    }, [usuariosFiltrados]);
+
+    // Calcular contador de validadores asignados vs total
+    const contadorValidadores = useMemo(() => {
+        const totalValidadores = usuariosValidadores.length;
+        const validadoresAsignados = usuariosValidadores.filter(u => u.seleccionado).length;
+        return { asignados: validadoresAsignados, total: totalValidadores };
+    }, [usuariosValidadores]);
+
+    // Efecto para comunicar cambios al componente padre (para el footer)
+    useEffect(() => {
+        if (onFooterDataChange) {
+            onFooterDataChange({
+                lastAction,
+                lastUser,
+                producto,
+                arrepentimientos,
+                isProcessingChange
+            });
+        }
+    }, [lastAction, lastUser, producto, arrepentimientos, isProcessingChange, onFooterDataChange]);
+
+    // Función para obtener idProducto basado en la selección
+    const getIdProducto = useCallback(() => {
+        switch(producto) {
+            case "Amex":
+                return 1;
+            default:
+                return null;
+        }
+    }, [producto]);
+
+    // Efecto para limpiar el estado de la última acción cuando cambie el tipo de validador
+    useEffect(() => {
+        // Limpiar el estado de la última acción cuando cambie entre normal y arrepentimientos
+        setLastAction(null);
+        setLastUser(null);
+    }, [arrepentimientos]);
+
+    // Efecto para obtener validadores cuando cambie el producto o arrepentimientos
+    useEffect(() => {
+        const idProducto = getIdProducto();
+        if (idProducto && producto) {
+            // Pasar el estado de arrepentimientos como parámetro
+            fetchValidadores(idProducto, arrepentimientos);
+        } else {
+            // Si no hay producto seleccionado, limpiar validadores
+            setValidadoresFromAPI([]);
+        }
+    }, [producto, arrepentimientos, getIdProducto, fetchValidadores]);
+
+    // Efecto para actualizar checkboxes cuando cambien los validadores del API o la jerarquía
+    useEffect(() => {
+        if (validadoresFromAPI.length > 0 && usuariosValidadores.length > 0) {
+            
+            // Crear un Set con los idEjecutivo de los validadores para búsqueda rápida
+            const validadoresIds = new Set(validadoresFromAPI.map(v => v.idEjecutivo));
+            
+            setUsuariosValidadores(prev => {
+                const updated = prev.map(usuario => ({
+                    ...usuario,
+                    seleccionado: validadoresIds.has(usuario.idEjecutivo)
+                }));
+                
+                const selectedCount = updated.filter(u => u.seleccionado).length;
+                console.log(` ${selectedCount} ejecutivos marcados automáticamente`);
+                
+                return updated;
+            });
+        }
+    }, [validadoresFromAPI, usuariosValidadores.length]);
+
+    // Función para enviar cambio de validador al servidor
+    const sendValidatorChange = useCallback(async (idEjecutivo, inserta) => {
+        // Evitar múltiples llamadas simultáneas
+        if (isProcessingChange) {
+            return;
+        }
+
+        const idProducto = getIdProducto();
+        
+        if (!idProducto) {
+            toast.error('No se puede enviar cambio: producto no seleccionado');
+            return;
+        }
+
+        const body = {
+            idEjecutivo: idEjecutivo,
+            idProducto: idProducto,
+            inserta: inserta
+        };
+
+        setIsProcessingChange(true);
+        
+        try {
+            // Usar el endpoint correcto según el tipo de validador
+            const response = arrepentimientos 
+                ? await InsertDeletedValidatorsRegrets(body)
+                : await InsertDeletedValidators(body);
+                
+            console.log(`Cambio de validador ${inserta ? 'insertado' : 'eliminado'} correctamente (${arrepentimientos ? 'ARREPENTIMIENTOS' : 'NORMAL'}):`, response);
+            
+            // Encontrar el nombre del usuario para el mensaje del footer
+            const usuarioData = usuariosValidadores.find(u => u.idEjecutivo === idEjecutivo);
+            const nombreUsuario = usuarioData?.displayName || usuarioData?.usuario || `ID: ${idEjecutivo}`;
+            
+            // Actualizar estados para el footer
+            setLastAction(inserta ? 'added' : 'removed');
+            setLastUser(nombreUsuario);
+            
+            // Solo mostrar toast de éxito en casos específicos si es necesario
+            // toast.success(`Validador ${inserta ? 'agregado' : 'removido'} exitosamente`);
+        } catch (error) {
+            console.error(`Error al ${inserta ? 'insertar' : 'eliminar'} validador (${arrepentimientos ? 'ARREPENTIMIENTOS' : 'NORMAL'}):`, error);
+            // Solo mostrar toast de error, evitando duplicados
+            toast.error(`Error al ${inserta ? 'agregar' : 'remover'} validador`);
+        } finally {
+            // Pequeño delay para evitar cambios muy rápidos
+            setTimeout(() => {
+                setIsProcessingChange(false);
+            }, 300);
+        }
+    }, [getIdProducto, isProcessingChange, arrepentimientos, usuariosValidadores, setLastAction, setLastUser]);
+
+    // Handler para seleccionar/deseleccionar usuarios
+    const handleSeleccionarUsuario = async (usuario, index) => {
+        // Evitar cambios múltiples mientras se procesa
+        if (isProcessingChange) {
+            console.log('Cambio en proceso, esperando...');
+            return;
+        }
+
+        const usuarioActual = usuariosValidadores[index];
+        const nuevoEstado = !usuarioActual.seleccionado;
+        
+        // Actualizar el estado local inmediatamente para mejor UX
+        setUsuariosValidadores(prev => {
+            const updated = prev.map((u, i) => 
+                i === index ? { ...u, seleccionado: nuevoEstado } : u
+            );
+            
+            // Log para debug
+            const selectedUsers = updated.filter(u => u.seleccionado).map(u => u.displayName);
+            console.log('Usuarios seleccionados para validadores:', selectedUsers);
+            
+            return updated;
+        });
+
+        // Enviar cambio al servidor
+        await sendValidatorChange(usuarioActual.idEjecutivo, nuevoEstado);
+    };
 
     return (
         <div style={{
@@ -91,24 +306,107 @@ const ModalValidadoresContent = () => {
             height: "100%",
             gap: "1rem"
         }}>
-            {/* Columna izquierda - Jerarquía de ejecutivos */}
+            {/* Columna izquierda - Tabla de usuarios validadores (estilo original) */}
             <div style={{
                 width: "300px",
                 display: "flex",
                 flexDirection: "column"
             }}>
-                <JerarquiaConCheckbox
-                    executiveTree={executiveTree}
-                    loadingJerarquia={loadingJerarquia}
-                    errorJerarquia={errorJerarquia}
-                    selectedExecutiveNode={selectedExecutiveNode}
-                    allHierarchyIds={allHierarchyIds}
-                    setSelectedExecutives={setSelectedExecutives}
-                    setSelectedRows={setSelectedRows}
-                    setEditValues={setEditValues}
-                    setSelectedExecutiveNode={setSelectedExecutiveNode}
-                    selectedExecutives={selectedExecutives}
-                />
+                <div style={{ 
+                    display: "flex", 
+                    flexDirection: "column",
+                    backgroundColor: "white",
+                    border: "1px solid var(--color-jerarquia1)",
+                    borderRadius: "8px",
+                    padding: "1rem",
+                    height: "100%"
+                }}>
+                    <label className="modal-span-1" style={{ color: "var(--color-jerarquia3)" }}>
+                        Validadores ({contadorValidadores.asignados} / {contadorValidadores.total})
+                        {isLoadingValidadores && (
+                            <span style={{ marginLeft: "0.5rem", color: "var(--color-jerarquia2)", fontSize: "0.8rem" }}>
+                                (Cargando...)
+                            </span>
+                        )}
+                    </label>
+                    <div style={{
+                        border: "1px solid var(--color-jerarquia1)",
+                        borderRadius: "8px",
+                        backgroundColor: "white",
+                        flex: 1,
+                        overflow: "hidden"
+                    }}>
+                        <div
+                            style={{
+                                overflowY: "auto",
+                                height: "100%",
+                                width: "100%",
+                                padding: "0.5rem"
+                            }}
+                            className="scrollbar-gray"
+                        >
+                            {usuariosValidadores.length === 0 ? (
+                                <div style={{ 
+                                    textAlign: 'center', 
+                                    padding: '1rem',
+                                    color: '#666',
+                                    fontStyle: 'italic'
+                                }}>
+                                    {!producto ? 'Selecciona un producto para ver los validadores' : 'No hay usuarios disponibles'}
+                                </div>
+                            ) : (
+                                usuariosValidadores.map((row, i) => (
+                                    <div 
+                                        key={i}
+                                        className="executive-hierarchy-item"
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            paddingLeft: '2px',
+                                            marginBottom: '0.25rem',
+                                            width: 'fit-content',
+                                            minWidth: '100%',
+                                            opacity: !producto ? 0.5 : 1,
+                                            pointerEvents: !producto ? 'none' : 'auto'
+                                        }}
+                                        onClick={() => producto && handleSeleccionarUsuario(row.usuario, i)}
+                                    >
+                                        {row.esSubordinado && (
+                                            <span style={{ 
+                                                color: '#666',
+                                                fontSize: '0.8rem',
+                                                marginRight: '0.25rem'
+                                            }}>
+                                                └─
+                                            </span>
+                                        )}
+                                        <input
+                                            type="checkbox"
+                                            checked={row.seleccionado || false}
+                                            disabled={!producto}
+                                            className="modal-checkbox-small"
+                                            onChange={(e) => {
+                                                e.stopPropagation();
+                                                if (producto) {
+                                                    handleSeleccionarUsuario(row.usuario, i);
+                                                }
+                                            }}
+                                        />
+                                        <span style={{ 
+                                            color: '#000',
+                                            fontSize: row.esSubordinado ? '0.8rem' : '0.85rem',
+                                            fontWeight: row.esSubordinado ? 'normal' : '500',
+                                            whiteSpace: 'nowrap'
+                                        }}>
+                                            {row.displayName}
+                                        </span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Campos del lado derecho */}
@@ -176,8 +474,16 @@ const ModalValidadoresContent = () => {
                             value={producto}
                             onChange={(e) => setProducto(e.target.value)}
                             className="font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
-                            style={{ fontSize: "14px", width: "100%", cursor: "pointer" }}
+                            style={{ 
+                                fontSize: "14px", 
+                                width: "100%", 
+                                cursor: "pointer",
+                                color: producto === "" ? "#999" : "var(--color-jerarquia4)"
+                            }}
                         >
+                            <option value="" disabled style={{ color: "#999" }}>
+                                Selecciona un producto...
+                            </option>
                             <option value="Amex">American Express</option>
                         </select>
                         <DropdownArrow />
@@ -189,12 +495,14 @@ const ModalValidadoresContent = () => {
                     display: "flex",
                     alignItems: "center",
                     gap: "0.5rem",
-                    justifyContent: "center"
+                    justifyContent: "center",
+                    opacity: !producto ? 0.5 : 1
                 }}>
                     <input
                         type="checkbox"
                         id="arrepentimientos"
                         checked={arrepentimientos}
+                        disabled={!producto}
                         onChange={(e) => setArrepentimientos(e.target.checked)}
                         style={{
                             width: "1rem",
@@ -207,7 +515,7 @@ const ModalValidadoresContent = () => {
                         style={{
                             fontSize: "0.875rem",
                             fontWeight: "500",
-                            cursor: "pointer",
+                            cursor: !producto ? "not-allowed" : "pointer",
                             color: "var(--color-jerarquia3)"
                         }}
                     >
@@ -236,6 +544,41 @@ const ModalValidadoresContent = () => {
                     border-radius: 4px;
                 }
                 div[style*="overflowY: auto"]::-webkit-scrollbar-thumb:hover {
+                    background: #888;
+                }
+                /* Estilos para la tabla de usuarios validadores */
+                .modal-table {
+                    width: 100%;
+                    font-size: 0.75rem;
+                    border-collapse: collapse;
+                }
+                .modal-table-th {
+                    border: 1px solid #ddd;
+                    text-align: center;
+                    position: sticky;
+                    top: 0;
+                    z-index: 1;
+                }
+                .modal-table-td {
+                    border: 1px solid #ddd;
+                    border-top: none;
+                }
+                .modal-checkbox-small {
+                    cursor: pointer;
+                }
+                .scrollbar-gray::-webkit-scrollbar {
+                    width: 8px;
+                    height: 8px;
+                }
+                .scrollbar-gray::-webkit-scrollbar-track {
+                    background: #f5f5f5;
+                    border-radius: 4px;
+                }
+                .scrollbar-gray::-webkit-scrollbar-thumb {
+                    background: #b0b0b0;
+                    border-radius: 4px;
+                }
+                .scrollbar-gray::-webkit-scrollbar-thumb:hover {
                     background: #888;
                 }
             `}</style>

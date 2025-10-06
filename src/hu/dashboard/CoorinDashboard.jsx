@@ -6,6 +6,7 @@ import TablaSesiones from "../dashboard/board/sessions/TablaSesiones";
 import RamificacionSesiones from "../dashboard/board/sessions/RamificacionSesiones";
 import ModalBase from "./sideBar/consultations/ModalBase";
 import EmailTemplates from "./sideBar/Administration/gespa/emailTemplates/EmailTemplates";
+import ModalBaseCampanas from "./sideBar/Administration/ModalBaseCampanas";
 
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -65,7 +66,9 @@ export default function CoorinDashboard() {
       "7BBB": "Ofrecimientos", // Ofrecimientos
       "8BBB": "Comentarios", // Comentarios
       "9BBB": "VGP", // VGP
-      "2AAA": "Plantillas Correo", // Plantillas Correo (Administración)
+      "1AA": "Campañas",
+      "1DD": "Campañas",
+      "1EE": "Campañas",
     };
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
@@ -152,12 +155,15 @@ export default function CoorinDashboard() {
         <EmailTemplates isOpen={modalOpen} onClose={handleCloseModal} />
 
         {/* Modal Base para Sidebar */}
-        {modalSidebarOpen && (
-          <ModalBase
-            onClose={() => setModalSidebarOpen(false)}
-            selectedOption={selectedSidebarOption}
-          />
-        )}
+    {modalSidebarOpen && selectedSidebarOption === "Campañas" && (
+      <ModalBaseCampanas open={modalSidebarOpen} onClose={() => setModalSidebarOpen(false)} />
+    )}
+    {modalSidebarOpen && selectedSidebarOption !== "Campañas" && (
+      <ModalBase 
+        onClose={() => setModalSidebarOpen(false)} 
+        selectedOption={selectedSidebarOption}
+      />
+    )}
       </main>
     </>
   );

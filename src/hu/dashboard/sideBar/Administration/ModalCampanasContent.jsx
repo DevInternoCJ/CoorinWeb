@@ -8,6 +8,8 @@ import logoCoorin from "../../../../assets/logo_coorin_7.svg";
 
 
 const ModalCampanas = ({ onClose }) => {
+	const [idCampañaSeleccionada, setIdCampañaSeleccionada] = React.useState(null);
+
 	return (
 		<div className="modal-xl-container" style={{ maxWidth: "98vw", overflowX: "hidden" }}>
 			<ModalCampanasHeader onClose={onClose} />
@@ -47,10 +49,10 @@ const ModalCampanas = ({ onClose }) => {
 				className="scrollbar-gray"
 			>
 				<div style={{ minWidth: 0, flex: 1, display: "flex", flexDirection: "column" }}>
-					<ModalCampanasCampanias />
+					<ModalCampanasCampanias onSeleccionCampaña={setIdCampañaSeleccionada} />
 				</div>
 				<div style={{ minWidth: 0, flex: "0 0 450px", maxWidth: "300px", display: "flex", flexDirection: "column" }}>
-					<ModalCampanasEjecutivos />
+					<ModalCampanasEjecutivos idCampaña={idCampañaSeleccionada} />
 				</div>
 			</div>
 			<div style={{ width: "100%", overflowX: "auto" }}>

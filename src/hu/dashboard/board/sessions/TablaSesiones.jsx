@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getSessions, patchLogoutEjecutive, patchUnlockedEjecutive } from '../../../../services/LokiServices';
+import { getSessions, patchLogoutEjecutive, patchUnlockedEjecutive, ResetPassword } from '../../../../services/LokiServices';
 import { toast } from 'sonner';
 
 // Tabla de sesiones 
@@ -9,6 +9,8 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
     const [error, setError] = useState(null);
     const [loggingOut, setLoggingOut] = useState(null); // Para mostrar estado de logout por ejecutivo
     const [unlocking, setUnlocking] = useState(null); // Para mostrar estado de desbloqueo por ejecutivo
+    const [resettingPassword, setResettingPassword] = useState(null); // Para mostrar estado de reset de contraseña
+    const [passwordReset, setPasswordReset] = useState(new Set()); // Para rastrear qué usuarios ya tienen contraseña reestablecida
     // Función para manejar el desbloqueo del ejecutivo
     const handleUnlockExecutive = async (rowIdEjecutivo) => {
         try {
@@ -59,6 +61,27 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
             toast.error(`Error al cerrar sesión del ejecutivo ID: ${rowIdEjecutivo}. ${error.message || 'Inténtalo de nuevo.'}`);
         } finally {
             setLoggingOut(null);
+        }
+    };
+
+    // Función para manejar el reset de contraseña del ejecutivo
+    const handleResetPassword = async (usuario) => {
+        try {
+            setResettingPassword(usuario);
+            
+            const body = { usuario };
+            const response = await ResetPassword(body);
+            console.log('Reset de contraseña exitoso:', response);
+            
+            // Agregar el usuario al Set de contraseñas reestablecidas
+            setPasswordReset(prevSet => new Set(prevSet).add(usuario));
+            
+            toast.success(`Contraseña reestablecida para usuario ${usuario}`);
+            
+        } catch (error) {
+            toast.error(`Error al restablecer contraseña para usuario ${usuario}. ${error.message || 'Inténtalo de nuevo.'}`);
+        } finally {
+            setResettingPassword(null);
         }
     };
 
@@ -234,8 +257,14 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                                     <button 
                                         className="modal-btn modal-btn-outline"
                                         onClick={() => {
-                                            console.log('Restablecer contraseña para:', session.usuario);
-                                            // Aquí puedes agregar la lógica para restablecer contraseña
+                                            if (!passwordReset.has(session.usuario) && resettingPassword !== session.usuario) {
+                                                handleResetPassword(session.usuario);
+                                            }
+                                        }}
+                                        disabled={passwordReset.has(session.usuario) || resettingPassword === session.usuario}
+                                        style={{ 
+                                            opacity: passwordReset.has(session.usuario) || resettingPassword === session.usuario ? 0.5 : 1,
+                                            cursor: passwordReset.has(session.usuario) || resettingPassword === session.usuario ? 'not-allowed' : 'pointer'
                                         }}
                                     >
                                         RESTABLECER

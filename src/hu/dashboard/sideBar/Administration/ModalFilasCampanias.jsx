@@ -1,8 +1,12 @@
+
 import React, { useState } from "react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import { CreatedTableTempFilas } from "../../../../services/LokiServices";
 
-const ModalFilasCampañas = ({ open, onClose, cartera = "American Express" }) => {
+const ModalFilasCampañas = ({ open, onClose, cartera = "American Express", idCampaña }) => {
+    // Estado para loading del botón cargar
+    const [loading, setLoading] = useState(false);
     const [tipoFilas, setTipoFilas] = useState("archivo");
     const [fileName, setFileName] = useState("");
     const [fileRows, setFileRows] = useState([]);
@@ -107,6 +111,23 @@ const ModalFilasCampañas = ({ open, onClose, cartera = "American Express" }) =>
     // Eliminar fila
     const handleDeleteRow = (rowIdx) => {
         setFileRows(prev => prev.filter((_, i) => i !== rowIdx));
+    };
+
+    // Acción al presionar Cargar (solo modo archivo)
+    const handleCargarArchivo = async () => {
+        if (!idCampaña) {
+            toast.error("No se encontró el id de la campaña.");
+            return;
+        }
+        setLoading(true);
+        try {
+            await CreatedTableTempFilas(idCampaña);
+            toast.success("Tabla temporal creada correctamente.");
+        } catch (err) {
+            toast.error("Error al crear la tabla temporal de filas.", err);
+        } finally {
+            setLoading(false);
+        }
     };
     return open ? (
         <div style={{
@@ -352,8 +373,12 @@ const ModalFilasCampañas = ({ open, onClose, cartera = "American Express" }) =>
                         </div>
                         {/* Columna: botón cargar */}
                         <div style={{ textAlign: 'center' }}>
-                            <button style={{ background: 'var(--color-jerarquia2)', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 32px', fontWeight: 600, fontSize: 15, cursor: 'pointer' }}>
-                                Cargar
+                            <button
+                                style={{ background: 'var(--color-jerarquia2)', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 32px', fontWeight: 600, fontSize: 15, cursor: loading ? 'wait' : 'pointer', opacity: loading ? 0.7 : 1 }}
+                                onClick={handleCargarArchivo}
+                                disabled={loading}
+                            >
+                                {loading ? 'Cargando...' : 'Cargar'}
                             </button>
                         </div>
                         {/* Columna: número de registros */}
@@ -367,7 +392,7 @@ const ModalFilasCampañas = ({ open, onClose, cartera = "American Express" }) =>
                         ? 'Verifique la equivalencia de columnas, si es correcta presione Cargar.'
                         : 'Resultado'}
                 </div>
-            </div>
+            </div>  
         </div>
     ) : null;
 };
