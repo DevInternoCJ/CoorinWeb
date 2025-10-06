@@ -21,9 +21,9 @@ namespace Loki.Mark.Administracion.Ejecutivos.Encargados.DAOs
         public async Task<dynamic?> CambiaEncargadoEjecutivo(string servidor, CambiaEncargadoDto request)
         {
             const string tipoBase = "Collection";
-            var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
+            using var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 
-            var nombreSp = "[dbCollection].[dbo].[1.6.CambiaEncargadoEjecutivo]";
+            var nombreSp = "[dbo].[1.6.CambiaEncargadoEjecutivo]";
 
             return await _daoBase.ExecuteStoredProcedure(
                         sqlConnection,

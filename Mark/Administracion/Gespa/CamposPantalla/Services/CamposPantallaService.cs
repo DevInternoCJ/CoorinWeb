@@ -64,7 +64,20 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Services
             return encargados;
         }
 
-        public async Task<Dictionary<string, ProductDataResponse>> MostrarCamposPantalla(string servidor, int idProducto)
+
+		/// <summary>
+		/// Procesa y prepara los datos de los campos configurados para la pantalla de un producto.
+		/// Este método obtiene la configuración de campos, genera un valor de marcador de posición para cada uno,
+		/// le aplica el formato y el estilo de resaltado correspondiente, y devuelve un diccionario
+		/// con la información lista para ser mostrada en la interfaz de usuario.
+		/// </summary>
+		/// <param name="servidor">El nombre del servidor de donde se obtendrá la configuración.</param>
+		/// <param name="idProducto">El identificador único del producto.</param>
+		/// <returns>
+		/// Un <see cref="Task"/> que resulta en un <see cref="Dictionary{TKey, TValue}"/> donde la clave es el alias del campo
+		/// y el valor es un objeto <see cref="ProductDataResponse"/> con el valor formateado y sus estilos.
+		/// </returns>
+		public async Task<Dictionary<string, ProductDataResponse>> MostrarCamposPantalla(string servidor, int idProducto)
 		{
 			// 1. Obtenemos la configuración de los campos.
 			var camposPantalla = await GetCamposPantalla(servidor, idProducto);
@@ -159,8 +172,7 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Services
 
                 case "4":
                     sTexto = sTexto.Replace("12:00:00 a.m.", "");
-                    DateTime dtTexto = new DateTime();
-                    // TryParseDate es un método que debes tener, lo simulo aquí
+                    DateTime dtTexto = new();
                     if (DateTime.TryParse(sTexto, out dtTexto))
                         sTexto = dtTexto.ToString("dd/MM/yyyy");
                     break;

@@ -85,7 +85,6 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
         /// <summary>
         /// Inserta o actualiza los campos visibles de la pantalla del producto.
         /// </summary>
-        /// <param name="servidor">Nombre del servidor.</param>
         /// <param name="request">Datos del producto y los campos a insertar/actualizar.</param>
         /// <returns>True si se actualizó correctamente.</returns>
         [HttpPost("guardar-campos-pantalla/{servidor}")]

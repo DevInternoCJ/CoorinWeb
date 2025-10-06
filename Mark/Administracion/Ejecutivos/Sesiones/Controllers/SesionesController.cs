@@ -62,8 +62,8 @@ namespace Loki.Mark.Administracion.Ejecutivos.Sesiones.Controllers
 		)]
 		public async Task<IActionResult> ResetearContrasenia([FromBody] UsuarioRequest usuario)
 		{
-			//string? servidorClaim = User.FindFirst("Servidor")?.Value;
-			string? servidorClaim = "Albaz";
+			string? servidorClaim = User.FindFirst("Servidor")?.Value;
+			//string? servidorClaim = "Albaz";
 
 			if (string.IsNullOrWhiteSpace(servidorClaim))
 			{
