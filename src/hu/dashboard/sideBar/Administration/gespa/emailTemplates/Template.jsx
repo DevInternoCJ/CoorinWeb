@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SelectWallet from "../../../../board/screenFields/SelectWallet";
 import ButtonSave from "../ButtonSave";
-import { SaveCreateTemplate } from "../../../../../../services/LokiServices";
+import { SaveCreateTemplate, UpdateTemplate } from "../../../../../../services/LokiServices";
 import { DeleteTemplate } from "../../../../../../services/LokiServices";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import { toast } from "sonner";
@@ -48,6 +48,12 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
       const data = { idCorreoScript };
       await DeleteTemplate({ data });
       toast.success("Plantilla eliminada correctamente.");
+      // Limpiar los inputs después de borrar
+      setTitulo("");
+      setMensaje("");
+      setTextoPago("");
+      setSelectedPlantilla("");
+      setIdCorreoScript(null);
       if (onActualizarPlantillas) {
         await onActualizarPlantillas();
       }
@@ -65,25 +71,40 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Validar que no exista una plantilla con el mismo nombre
-      const existeNombre = plantillas.some(
-        (p) => p.nombre.trim().toLowerCase() === titulo.trim().toLowerCase()
-      );
-      if (existeNombre) {
-        toast.warning(
-          "Ya existe una plantilla con ese nombre. Elige otro nombre."
+      // Si existe idCorreoScript, actualiza la plantilla existente
+      if (idCorreoScript) {
+        const payload = {
+          idCorreoScript,
+          idProducto,
+          nombre: titulo,
+          asunto: mensaje,
+          mensaje: textoPago,
+          idEjecutivo,
+        };
+        await UpdateTemplate(payload);
+        toast.success("Plantilla actualizada correctamente.");
+      } else {
+        // Validar que no exista una plantilla con el mismo nombre
+        const existeNombre = plantillas.some(
+          (p) => p.nombre.trim().toLowerCase() === titulo.trim().toLowerCase()
         );
-        setLoading(false);
-        return;
+        if (existeNombre) {
+          toast.warning(
+            "Ya existe una plantilla con ese nombre. Elige otro nombre."
+          );
+          setLoading(false);
+          return;
+        }
+        const payload = {
+          idProducto,
+          nombre: titulo,
+          asunto: mensaje,
+          mensaje: textoPago,
+          idEjecutivo,
+        };
+        await SaveCreateTemplate(payload);
+        toast.success("Plantilla creada correctamente.");
       }
-      const payload = {
-        idProducto,
-        nombre: titulo,
-        asunto: mensaje,
-        mensaje: textoPago,
-        idEjecutivo,
-      };
-      await SaveCreateTemplate(payload);
       // Puedes mostrar un toast o limpiar los campos aquí
       if (plantillas.length > 0) {
         setSelectedPlantilla(plantillas[0].nombre);

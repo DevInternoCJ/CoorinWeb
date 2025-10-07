@@ -182,7 +182,7 @@ export const UpdatePassword = async (passwordData) => {
 };
 
 // services/LokiServices.js
-export const GetScreenFields = async (servidor, idProducto) => {
+export const GetScreenFields = async (idProducto) => {
   try {
     const token = localStorage.getItem('token');
     
@@ -191,10 +191,10 @@ export const GetScreenFields = async (servidor, idProducto) => {
     }
     
     console.log('📤 Enviando a /CamposPantalla/campos-pantalla');
-    console.log('🔑 Parámetros:', { servidor, idProducto });
+    console.log('🔑 Parámetros:', { idProducto });
     
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
-    const response = await api.get(`/CamposPantalla/campos-pantalla/${servidor}/${idProducto}`);
+    const response = await api.get(`/CamposPantalla/campos-pantalla/${idProducto}`);
     
     console.log('📥 Respuesta de /CamposPantalla/campos-pantalla:', response.data);
     
@@ -220,7 +220,7 @@ export const GetScreenFields = async (servidor, idProducto) => {
   }
 };
 
-export const GetGridFields = async (servidor, idProducto) => {
+export const GetGridFields = async (idProducto) => {
   try {
     const token = localStorage.getItem('token');
     
@@ -229,10 +229,10 @@ export const GetGridFields = async (servidor, idProducto) => {
     }
     
     console.log('📤 Enviando a /CamposPantalla/grid-producto-sample');
-    console.log('🔑 Parámetros:', { servidor, idProducto });
+    console.log('🔑 Parámetros:', {idProducto });
     
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
-    const response = await api.get(`/CamposPantalla/grid-producto-sample/${servidor}/${idProducto}/70/5`);
+    const response = await api.get(`/CamposPantalla/grid-producto-sample/${idProducto}/70/5`);
     
     console.log('📥 Respuesta de /CamposPantalla/grid-producto-sample:', response.data);
     
@@ -258,7 +258,7 @@ export const GetGridFields = async (servidor, idProducto) => {
   }
 };
 
-export const GetVerifyProduct = async (servidor, idProducto) => {
+export const GetVerifyProduct = async (idProducto) => {
   try {
     const token = localStorage.getItem('token');
     
@@ -267,10 +267,10 @@ export const GetVerifyProduct = async (servidor, idProducto) => {
     }
     
     console.log('📤 Enviando a /CamposPantalla/existe-tabla-producto');
-    console.log('🔑 Parámetros:', { servidor, idProducto });
+    console.log('🔑 Parámetros:', {idProducto });
     
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
-    const response = await api.get(`/CamposPantalla/existe-tabla-producto/${servidor}/${idProducto}`);
+    const response = await api.get(`/CamposPantalla/existe-tabla-producto/${idProducto}`);
     
     console.log('📥 Respuesta de /CamposPantalla/existe-tabla-producto:', response.data);
     
@@ -296,7 +296,7 @@ export const GetVerifyProduct = async (servidor, idProducto) => {
   }
 };
 
-export const SaveScreenFields = async (servidor, data) => {
+export const SaveScreenFields = async (data) => {
   try {
     // Verificar que el token existe antes de proceder
     const token = localStorage.getItem('token');
@@ -308,7 +308,7 @@ export const SaveScreenFields = async (servidor, data) => {
     console.log('🔑 Token disponible:', token);
     // ✅ DEJA QUE EL INTERCEPTOR AÑADA EL TOKEN AUTOMÁTICAMENTE
     // NO añadas headers manualmente - el interceptor ya lo hace
-    const response = await api.post(`/CamposPantalla/guardar-campos-pantalla/${servidor}`,data);
+    const response = await api.post(`/CamposPantalla/guardar-campos-pantalla`,data);
     console.log('📥 Respuesta de /CamposPantalla/guardar-campos-pantalla', response.data);
     return response.data;
   } catch (error) {
@@ -1587,6 +1587,44 @@ export const DeleteTemplate = async (data) => {
     return response.data;
   } catch (error) {
      console.error('❌ Error al eliminar plantilla', error);
+    // Manejo específico de errores de autenticación
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    // Mostrar más detalles del error
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+export const UpdateTemplate = async (data) => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    
+    console.log('📤 Enviando a /PlantillasCorreo/actualizar-plantillas', data);
+    console.log('🔑 Parámetros:', { data });
+    
+    // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
+      const response = await api.put(`/PlantillasCorreo/actualizar-plantillas`, data);
+    
+    console.log('📥 Respuesta de PlantillasCorreo/actualizar-plantillas', response.data);
+    
+    return response.data;
+  } catch (error) {
+     console.error('❌ Error al Actualizar plantilla', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('⚠️ Error 401 - Token inválido o expirado');

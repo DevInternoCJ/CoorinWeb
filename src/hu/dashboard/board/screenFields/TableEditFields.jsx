@@ -17,8 +17,8 @@ const TableEditFields = ({ idProducto }) => {
   const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;
   console.log("Datos de usuario en el store:", idEjecutivo);
-  const Jerarquía = user?.Jerarquía;
-  console.log(" Jerarquia: ", Jerarquía);
+  const jerarquia = user?.Jerarquía;
+  console.log(" Jerarquia: ", jerarquia);
 
   useEffect(() => {
     if (!idProducto || idProducto === 0) return;
@@ -26,7 +26,7 @@ const TableEditFields = ({ idProducto }) => {
       try {
         setLoading(true);
         setError(null);
-        const data = await GetScreenFields(servidor, idProducto);
+        const data = await GetScreenFields( idProducto);
         const transformedData = data.map((item, index) => ({
           id: item.id || index + 1,
           position: item.posición,
@@ -66,11 +66,11 @@ const TableEditFields = ({ idProducto }) => {
     const payload = {
       idProducto,
       idEjecutivo,
-      Jerarquía,
+      jerarquia,
       campos,
     };
     try {
-      await SaveScreenFields(servidor, payload);
+      await SaveScreenFields( payload);
       setSaveResult("Guardado correctamente");
     } catch {
       setSaveResult("Error al guardar");

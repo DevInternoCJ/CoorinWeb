@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { GetGridFields } from "../../../../services/LokiServices"; // Ajusta la ruta según tu estructura
 
-const GridLampsFields = ({idProducto}) => {
+const GridLampsFields = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   // Parámetros requeridos por el endpoint
-  const servidor = "Albaz";
-
+  const servidor = "Thor";
+  const idProducto = 14; // Reemplaza con el ID de producto adecuado
   useEffect(() => {
      if (!idProducto || idProducto === 0) return;
     const fetchGridData = async () => {
@@ -16,7 +16,7 @@ const GridLampsFields = ({idProducto}) => {
         setError(null);
         
         // Llamar al servicio con los parámetros
-        const data = await GetGridFields(servidor, idProducto);
+        const data = await GetGridFields( idProducto);
         
         // Transformar los datos si es necesario
         // La API ya devuelve un array de objetos, así que podemos usarlo directamente

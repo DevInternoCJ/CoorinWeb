@@ -79,11 +79,14 @@ const EmailTemplates = ({ onClose }) => {
             setLoading={setLoading}
             onProductSelect={handleProductSelect}
           />
+             {selectedProduct && (
           <Template
             saldo={saldo}
             plantillas={plantillas}
             onActualizarPlantillas={actualizarPlantillas}
+            idProducto={selectedProduct.value} 
           />
+          )}
           {showDataTables && selectedProduct && (
             <div className="mt-6 border-t pt-6">
               <LoadDates

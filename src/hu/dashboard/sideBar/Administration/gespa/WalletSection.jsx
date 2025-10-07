@@ -37,7 +37,7 @@ const WalletSection = ({
     const fetchVerifyProduct = async () => {
       setLoading(true);
       try {
-        const result = await GetVerifyProduct(servidor, selectedProduct.value);
+        const result = await GetVerifyProduct(selectedProduct.value);
         setVerifyResult(result);
       } catch (error) {
         setVerifyResult(null);
