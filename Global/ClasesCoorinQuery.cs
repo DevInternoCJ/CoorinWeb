@@ -121,25 +121,48 @@ namespace CoorinWeb.Loki.Global
                 return result;
             }
 
-            private static void LlenaConsulta(int idConsulta, DataTable tblParámetros, DataTable tblAgrupar, out DateTime dtDesde)
+            //private static void LlenaConsulta(int idConsulta, DataTable tblParámetros, DataTable tblAgrupar, out DateTime dtDesde)
+            //{
+            //    Console.WriteLine($"Llenando consulta para idConsulta: {idConsulta}");
+
+            //    tblParámetros.Rows.Clear();
+            //    tblAgrupar.Rows.Clear();
+            //    dtDesde = DateTime.Today.AddMonths(-1);
+
+            //    if (idConsulta == 1)
+            //    {
+            //        tblParámetros.Rows.Add("Estado", "=", "Activo", "AND", "string");
+            //        tblAgrupar.Rows.Add("Usuario", "Gestiones");
+            //    }
+            //    else if (idConsulta == 2)
+            //    {
+            //        tblParámetros.Rows.Add("Monto", ">", "1000", "AND", "decimal");
+            //        tblAgrupar.Rows.Add("Fecha", "Negociaciones");
+            //    }
+            //}
+
+            public static void LlenaConsulta(int idConsulta, DataTable Parámetros, DataTable Agrupar, out DateTime Desde)
             {
-                Console.WriteLine($"Llenando consulta para idConsulta: {idConsulta}");
 
-                tblParámetros.Rows.Clear();
-                tblAgrupar.Rows.Clear();
-                dtDesde = DateTime.Today.AddMonths(-1);
+                DataRow drConsulta = _Consultas.Tables["Consultas"].Rows.Find(idConsulta);
+                Desde = new DateTime();
 
-                if (idConsulta == 1)
-                {
-                    tblParámetros.Rows.Add("Estado", "=", "Activo", "AND", "string");
-                    tblAgrupar.Rows.Add("Usuario", "Gestiones");
-                }
-                else if (idConsulta == 2)
-                {
-                    tblParámetros.Rows.Add("Monto", ">", "1000", "AND", "decimal");
-                    tblAgrupar.Rows.Add("Fecha", "Negociaciones");
-                }
+                if (drConsulta == null)
+                    return;
+
+                Parámetros.Rows.Clear();
+                DataRow[] drParámetros = drConsulta.GetChildRows("FK_Parámetros");
+                for (int i = 0; i < drParámetros.Length; i++)
+                    Parámetros.ImportRow(drParámetros[i]);
+
+                Agrupar.Rows.Clear();
+                DataRow[] drAgrupar = drConsulta.GetChildRows("FK_Agrupar");
+                for (int i = 0; i < drAgrupar.Length; i++)
+                    Agrupar.ImportRow(drAgrupar[i]);
+
+                DateTime.TryParse(drConsulta["Desde"].ToString(), out Desde);
             }
+
 
             public static string QueryPagos(int idCartera, DateTime Desde, DateTime Hasta, int idConsulta)
             {

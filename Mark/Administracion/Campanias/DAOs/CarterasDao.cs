@@ -154,23 +154,8 @@ namespace Loki.Mark.Administracion.Carteras.DAOs
                 return $"Error: {ex.Message}";
             }
         }
-
-        public async Task<dynamic?> CargaFilas(int idcampaña, int idcartera, string servidor)
-        {
-            var paramIdCampaña = new SqlParameter("@idCampaña", idcampaña.ToString());
-            var paramIdCartera = new SqlParameter("@idCartera", idcartera.ToString());
-
-            var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
-
-            var result = await _daoBase.ExecuteStoredProcedure(
-                dbContext,
-                "[AMS].[CargaFilas]",
-                paramIdCampaña,
-                paramIdCartera
-            );
-            return result;
-        }
-
+        //consulta
+     
         public async Task<dynamic?> CargaFilasConsulta(int idcampaña, string consulta, bool ejecutivo, bool telefono, string servidor)
         {
             var paramIdCampaña = new SqlParameter("@idCampaña", idcampaña.ToString());
@@ -191,7 +176,6 @@ namespace Loki.Mark.Administracion.Carteras.DAOs
             return result;
         }
 
-        //carga filas para parametro de consulta
         public async Task<dynamic?> CargaFilasConsulta(string consulta, string servidor)
         {
             var paramIdConsulta = new SqlParameter("@consulta", consulta.ToString());
@@ -206,6 +190,8 @@ namespace Loki.Mark.Administracion.Carteras.DAOs
 
             return result;
         }
+
+        //archivo
         public async Task<dynamic?> CreaTablaFilasTemp(int idcampaña, string servidor)
         {
             var paramIdCampaña = new SqlParameter("@idCampaña", idcampaña.ToString());
@@ -214,6 +200,21 @@ namespace Loki.Mark.Administracion.Carteras.DAOs
                 dbContext,
                 "[AMS].[CreaTablaFilasTemp]",
                 paramIdCampaña
+            );
+            return result;
+        }
+        public async Task<dynamic?> CargaFilas(int idcampaña, int idcartera, string servidor)
+        {
+            var paramIdCampaña = new SqlParameter("@idCampaña", idcampaña.ToString());
+            var paramIdCartera = new SqlParameter("@idCartera", idcartera.ToString());
+
+            var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
+
+            var result = await _daoBase.ExecuteStoredProcedure(
+                dbContext,
+                "[AMS].[CargaFilas]",
+                paramIdCampaña,
+                paramIdCartera
             );
             return result;
         }

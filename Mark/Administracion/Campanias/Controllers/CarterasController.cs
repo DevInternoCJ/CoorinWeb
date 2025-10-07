@@ -1,4 +1,5 @@
-﻿using CoorinWeb.Loki.Global;
+﻿using System.Collections;
+using CoorinWeb.Loki.Global;
 using Loki.DTOs.CampaniasDTOs;
 using Loki.Mark.Administracion.Carteras.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -17,14 +18,16 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         private readonly ICarterasService _carterasService;
         private readonly ICarterasDAOs _carterasDao;
         private readonly IDbContextFactory _dbContFactory;
-
-
-        public CarterasController(ICarterasService campaniasService, ICarterasDAOs carterasDao, IDbContextFactory contextfactory)
+        private readonly IInfoEjecutivoDao _infoEjecutivo;
+        private readonly ILogger<CarterasController> _logger;
+        public CarterasController(ICarterasService campaniasService, ICarterasDAOs carterasDao, IDbContextFactory contextfactory, IInfoEjecutivoDao infoEjecutivo, ILogger<CarterasController> logger)
         {
             _carterasService = campaniasService;
             _carterasDao = carterasDao;
 
             _dbContFactory = contextfactory;
+            _infoEjecutivo = infoEjecutivo;
+            _logger = logger;
         }
         //[HttpGet("get-carteras")]
         //[Authorize]
@@ -202,10 +205,13 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
         [HttpGet("FilasRestantesPorCampaña")]
         [SwaggerOperation(
-         Summary = "Actualiza avance",
-         Description = "Se obtiene un registro de las filas restantes por idcampaña con avance calculado"
-     )]
-        public async Task<IActionResult> GetFilasRestantesPorCampaña(int? idEncargado = null, short? idCartera = null, short? idProducto = null)
+     Summary = "Actualiza avance",
+     Description = "Se obtiene un registro de las filas restantes por idcampaña con avance calculado"
+ )]
+        public async Task<IActionResult> GetFilasRestantesPorCampaña(
+     [FromQuery] int idEncargado,  // Quitar el "?" y el "= null"
+     [FromQuery] short? idCartera = null,
+     [FromQuery] short? idProducto = null)
         {
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
@@ -260,84 +266,104 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
             }
         }
 
-
-        [HttpPost("carga-filas")]
-        [SwaggerOperation(
-            Summary = "Carga Filas",
-            Description = "Carga las filas asociadas a una campaña desde una tabla temporal específica hacia la tabla FilasDeTrabajo, " +
-            "además actualiza el número de cuentas en la campaña y elimina la tabla temporal."
-            )]
-        public async Task<IActionResult> CargaFilas(
-        [FromQuery] int idCampaña,
-        [FromQuery] int idCartera)
+        [HttpPost("cargar-consulta")]
+        public async Task<IActionResult> CargarFilasDesdeConsulta([FromBody] CargaConsultaRequest request)
         {
-            string? servidorClaim = User.FindFirst("Servidor")?.Value;
-
-            if (string.IsNullOrWhiteSpace(servidorClaim))
+            try
             {
-                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-            }
-           
-            var resultado = await _carterasDao.CargaFilas(idCampaña, idCartera, servidorClaim);
+                string? servidorClaim = User.FindFirst("Servidor")?.Value;
+                if (string.IsNullOrWhiteSpace(servidorClaim))
+                {
+                    return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+                }
 
-            if (resultado == null)
+                if (request.IdCampania <= 0)
+                {
+                    return BadRequest(new { error = "El Id de campaña es requerido." });
+                }
+
+                if (request.IdCartera <= 0) // ← Validar idCartera
+                {
+                    return BadRequest(new { error = "El Id de cartera es requerido." });
+                }
+
+                var resultado = await _carterasService.CargarFilasDesdeConsulta(
+                    servidorClaim,
+                    request.IdCampania,
+                    request.IdConsulta,
+                    request.ConsultaGeneral,
+                    request.IncluirUsuario,
+                    request.IncluirTelefono,
+                    request.IdCartera); // ← Pasar idCartera
+
+                return Ok(new
+                {
+                    mensaje = "Consulta ejecutada correctamente",
+                    filasCargadas = resultado.FilasCargadas
+                });
+            }
+            catch (Exception ex)
             {
-                return NotFound("No se encontraron resultados.");
+                return StatusCode(500, new { error = $"Error al ejecutar consulta: {ex.Message}" });
             }
-            return Ok(resultado);
-        }
-
-        [HttpPost("carga-filas-consultas")]
-        [SwaggerOperation(
-        Summary = "Carga consulta filas",
-        Description = "Ejecuta una consulta y procesa los resultados e inserta las " +
-            "filas en la tabla FilasDeTrabajo. Permite incluir opcionalmente los campos idEjecutivo y NúmeroTelefónico. " +
-            "También actualiza el número de cuentas asociadas a la campaña."
-        )]
-
-        public async Task<IActionResult> CargaFilasConsultas(
-        [FromQuery] int idCampaña,
-        [FromQuery] string consulta,
-        [FromQuery] bool ejecutivo,
-        [FromQuery] bool telefono)
-        {
-            string? servidorClaim = User.FindFirst("Servidor")?.Value;
-
-            if (string.IsNullOrWhiteSpace(servidorClaim))
-            {
-                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-            }
-            var resultado = await _carterasDao.CargaFilasConsulta(idCampaña, consulta, ejecutivo, telefono, servidorClaim);
-            if (resultado == null)
-            {
-                return NotFound("No se encontraron resultados.");
-            }
-            return Ok(resultado);
         }
 
 
-        [HttpPost("crea-tabla-filasTemp")]
+        [HttpPost("cargar-archivo")]
         [SwaggerOperation(
-            Summary = "Carga Archivo Filas",
-            Description = "crea una tabla temporal con el idcampaña especificado la cual a partir de ahi se formará el nombre de la tabla, la cual se almacena en dbmemory"
-            )]
-        public async Task<IActionResult> CreaTablaFilasTemp(
-        [FromQuery] int idCampaña)
+               Summary = "Carga filas de trabajo desde archivo Excel",
+               Description = "Carga filas de trabajo a una campaña desde un archivo Excel (.xlsx, .xls)"
+           )]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CargarFilasDesdeArchivo([FromForm] CargaArchivoRequest request)
         {
-            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            try
+            {
+                string? servidorClaim = User.FindFirst("Servidor")?.Value;
+                if (string.IsNullOrWhiteSpace(servidorClaim))
+                {
+                    return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+                }
 
-            if (string.IsNullOrWhiteSpace(servidorClaim))
-            {
-                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+                if (request.Archivo == null || request.Archivo.Length == 0)
+                {
+                    return BadRequest(new { error = "No se proporcionó archivo o está vacío." });
+                }
+
+                // Validar tipo de archivo
+                var extension = Path.GetExtension(request.Archivo.FileName).ToLower();
+                if (extension != ".xlsx" && extension != ".xls")
+                {
+                    return BadRequest(new { error = "Solo se permiten archivos Excel (.xlsx, .xls)" });
+                }
+
+                if (request.IdCampania <= 0)
+                {
+                    return BadRequest(new { error = "El Id de campaña es requerido." });
+                }
+
+                var resultado = await _carterasService.CargarFilasDesdeArchivo(
+                    servidorClaim,
+                    request.IdCampania,
+                    request.IdCartera,
+                    request.Archivo);
+
+                return Ok(new
+                {
+                    mensaje = "Archivo Excel procesado correctamente",
+                    filasCargadas = resultado.FilasCargadas,
+                    totalRegistros = resultado.TotalRegistros
+                });
             }
-            var resultado = await _carterasDao.CreaTablaFilasTemp(idCampaña, servidorClaim);
-            if (resultado == null)
+            catch (Exception ex)
             {
-                return NotFound("No se encontraron resultados.");
+                return StatusCode(500, new { error = $"Error al procesar archivo: {ex.Message}" });
             }
-            return Ok(resultado);
         }
-        [HttpGet("Ejecutivos_en-Campaña")]
+
+        [HttpGet("Ejecutivos-en-Campaña")]
         [AllowAnonymous]
         [SwaggerOperation(
            Summary = "Ejecutivos en campaña",
