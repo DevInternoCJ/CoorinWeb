@@ -17,7 +17,7 @@ const ModalToponeHundred = ({ open, onClose, idCampaña }) => {
                 .then(data => {
                     setRows(Array.isArray(data) ? data : []);
                     if (Array.isArray(data) && data.length === 0) {
-                        toast.info("No hay datos para mostrar");
+                        toast.info("No hay datos para mostrar del Top 100");
                     } else {
                         toast.success("Datos cargados correctamente (Top 100)");
                     }

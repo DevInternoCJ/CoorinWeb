@@ -4,7 +4,18 @@ import { CoorinSidebar } from "./sideBar/CoorinSidebar";
 import GridConsultations from "./board/consultations/GridConsultations";
 import TablaSesiones from "../dashboard/board/sessions/TablaSesiones";
 import RamificacionSesiones from "../dashboard/board/sessions/RamificacionSesiones";
-import ModalBase from "./sideBar/consultations/ModalBase";
+import ModalBase from "./board/ModalBase";
+import DarkList from "./sideBar/consultations/DarkList";
+import Regrest from "./sideBar/consultations/Regrest";
+import Payments from "./sideBar/consultations/information/Payments";
+import ReportingPayments from "./sideBar/consultations/information/ReportingPayments";
+import Wrongs from "./sideBar/consultations/information/Wrongs";
+import Addresses from "./sideBar/consultations/information/Addresses";
+import Emails from "./sideBar/consultations/information/Emails";
+import Searches from "./sideBar/consultations/information/Searches";
+import Offers from "./sideBar/consultations/information/Offers";
+import Comments from "./sideBar/consultations/information/Comments";
+import VGP from "./sideBar/consultations/information/VGP";
 import EmailTemplates from "./sideBar/Administration/gespa/emailTemplates/EmailTemplates";
 import ModalBaseCampanas from "./sideBar/Administration/ModalBaseCampanas";
 
@@ -13,17 +24,46 @@ export default function CoorinDashboard() {
   const [selectedExecutiveId, setSelectedExecutiveId] = useState(null);
   const sidebarRef = useRef(null);
   const buttonRef = useRef(null);
-  const [modalOpen, setModalOpen] = useState(false);
-
   const [modalSidebarOpen, setModalSidebarOpen] = useState(false);
   const [selectedSidebarOption, setSelectedSidebarOption] = useState("");
-
-  const handleSidebarToggle = () => setSidebarOpen((prev) => !prev);
-  const handlePlantillasCorreoClick = () => {
-    setModalOpen(true);
-    setSidebarOpen(false); // Opcional: cerrar sidebar al abrir modal
+  
+  // Mapeo directo para renderizar cada componente con su propio modal
+  const renderSelectedComponent = () => {
+    const closeModal = () => setModalSidebarOpen(false);
+    
+    switch (selectedSidebarOption) {
+      case "Campañas":
+        return <ModalBaseCampanas open={modalSidebarOpen} onClose={closeModal} />;
+      case "Lista Negra":
+        return <DarkList onClose={closeModal} />;
+      case "Arrepentimientos":
+        return <Regrest onClose={closeModal} />;
+      case "Pagos":
+        return <Payments onClose={closeModal} />;
+      case "Pagos reportados":
+        return <ReportingPayments onClose={closeModal} />;
+      case "Datos Erroneos":
+        return <Wrongs onClose={closeModal} />;
+      case "Domicilios":
+        return <Addresses onClose={closeModal} />;
+      case "Correos":
+        return <Emails onClose={closeModal} />;
+      case "Búsquedas":
+        return <Searches onClose={closeModal} />;
+      case "Ofrecimientos":
+        return <Offers onClose={closeModal} />;
+      case "Comentarios":
+        return <Comments onClose={closeModal} />;
+      case "VGP":
+        return <VGP onClose={closeModal} />;
+      case "Plantillas Correo":
+        return <EmailTemplates onClose={closeModal} />;
+      default:
+        return null;
+    }
   };
-  const handleCloseModal = () => setModalOpen(false);
+
+
   // Efecto para detectar clics fuera del sidebar
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -66,6 +106,7 @@ export default function CoorinDashboard() {
       "7BBB": "Ofrecimientos", // Ofrecimientos
       "8BBB": "Comentarios", // Comentarios
       "9BBB": "VGP", // VGP
+      "2AAA": "Plantillas Correo", // Plantillas Correo
       "1AA": "Campañas",
       "1DD": "Campañas",
       "1EE": "Campañas",
@@ -73,7 +114,9 @@ export default function CoorinDashboard() {
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
     if (sidebarOptionsMap[menuId]) {
-      setSelectedSidebarOption(sidebarOptionsMap[menuId]);
+      const option = sidebarOptionsMap[menuId];
+      console.log(`✅ Abriendo modal para: ${option} (ID: ${menuId})`);
+      setSelectedSidebarOption(option);
       setModalSidebarOpen(true);
     } else {
       console.log(`Click en menú: ${menuTitle} (ID: ${menuId})`);
@@ -102,7 +145,9 @@ export default function CoorinDashboard() {
 
   return (
     <>
-      <CoorinSidebar onMenuClick={handleSidebarMenuClick} />
+      <CoorinSidebar 
+        onMenuClick={handleSidebarMenuClick}
+      />
 
       {/* Contenedor principal que ocupa todo el alto sin generar scroll global */}
       <main className="flex-1 bg-background-dashboard min-h-0 relative z-0 flex flex-col">
@@ -152,18 +197,8 @@ export default function CoorinDashboard() {
           </div>
         </div>
 
-        <EmailTemplates isOpen={modalOpen} onClose={handleCloseModal} />
-
-        {/* Modal Base para Sidebar */}
-    {modalSidebarOpen && selectedSidebarOption === "Campañas" && (
-      <ModalBaseCampanas open={modalSidebarOpen} onClose={() => setModalSidebarOpen(false)} />
-    )}
-    {modalSidebarOpen && selectedSidebarOption !== "Campañas" && (
-      <ModalBase 
-        onClose={() => setModalSidebarOpen(false)} 
-        selectedOption={selectedSidebarOption}
-      />
-    )}
+        {/* Renderizar componente seleccionado */}
+        {modalSidebarOpen && renderSelectedComponent()}
       </main>
     </>
   );

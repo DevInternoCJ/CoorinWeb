@@ -40,7 +40,7 @@ export const loginUser = async (userData) => {
       ip: API_URL,
       aplicacion: "Coorin",
       version: "3.4.2",
-      servidor: "Albaz"
+      servidor: "Thor"
     };
     console.log('📤 Enviando a /Auth/login:', requestData);
     const response = await api.post('/Auth/login', requestData, {
@@ -110,7 +110,7 @@ export const ValidatePassword = async (userData, idEjecutivo) => {
   try {
     const requestData = {
       contrasenia: userData.contrasenia,
-      servidor: "Albaz",
+      servidor: "Thor",
       idEjecutivo
     };
 
@@ -1212,7 +1212,7 @@ export const UsuarioRestante = async (idCampaña) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    const url = `/carteras/Ejecutivos_en-Campaña?idCampaña=${idCampaña}`;
+    const url = `/carteras/Ejecutivos-en-Campaña?idCampaña=${idCampaña}`;
     console.log('Enviando a', url);
     // El interceptor añade el token automáticamente
     const response = await api.get(url, null, {
