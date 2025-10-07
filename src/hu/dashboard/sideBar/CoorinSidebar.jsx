@@ -40,7 +40,6 @@ const RenderSubMenus = ({
   level = 0,
   onItemClick,
   onMenuClick,
-  onPlantillasCorreoClick,
 }) => {
   // level controla el padding/indent para grupos anidados
   const groupClass =
@@ -55,8 +54,6 @@ const RenderSubMenus = ({
         const hasChildren = Object.keys(item).some(
           (k) => k.startsWith("subMenus") && Array.isArray(item[k])
         );
-        // Verificar si es el elemento "Plantillas Correo"
-        const isPlantillasCorreo = item.title === "Plantillas Correo";
         // Si el item tiene hijos, lo renderizamos como acordeón. Si no tiene hijos,
         // renderizamos un <li> simple con <a> para evitar mostrar un toggle vacío.
         if (!hasChildren) {
@@ -67,16 +64,9 @@ const RenderSubMenus = ({
                 href={item.href || "#"}
                 onClick={(e) => {
                   e.preventDefault();
-                  if (isPlantillasCorreo) {
-                    // Solo llamar onPlantillasCorreoClick si es "Plantillas Correo"
-                    if (onPlantillasCorreoClick) {
-                      onPlantillasCorreoClick();
-                    }
-                  } else {
-                    // Para otros elementos, usar onMenuClick
-                    if (onMenuClick) {
-                      onMenuClick(item.id, item.title);
-                    }
+                  // Usar onMenuClick para todos los elementos
+                  if (onMenuClick) {
+                    onMenuClick(item.id, item.title);
                   }
                 }}>
                 {item.icon && iconMap[item.icon] && (
@@ -160,7 +150,6 @@ const RenderSubMenus = ({
                     level={level + 1}
                     onItemClick={onItemClick}
                     onMenuClick={onMenuClick}
-                    onPlantillasCorreoClick={onPlantillasCorreoClick}
                   />
                 );
               })()}
@@ -174,7 +163,6 @@ const RenderSubMenus = ({
 
 export const CoorinSidebar = ({
   onMenuClick,
-  onPlantillasCorreoClick,
 }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -476,7 +464,6 @@ export const CoorinSidebar = ({
                                 subMenus={menu.subMenus}
                                 parentId={`${menuId}-group`}
                                 onMenuClick={onMenuClick}
-                                onPlantillasCorreoClick={onPlantillasCorreoClick}
                                 level={0}
                                 onItemClick={expandSidebar}
                               />

@@ -6,7 +6,7 @@ const GridLampsFields = ({idProducto}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   // Parámetros requeridos por el endpoint
-  const servidor = "Albaz";
+  const servidor = "Thor";
 
   useEffect(() => {
      if (!idProducto || idProducto === 0) return;

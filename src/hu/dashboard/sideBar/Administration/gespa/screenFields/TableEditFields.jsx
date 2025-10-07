@@ -12,7 +12,7 @@ const TableEditFields = ({ idProducto }) => {
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saveResult, setSaveResult] = useState(null);
-  const servidor = "Albaz";
+  const servidor = "Thor";
 
   const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;

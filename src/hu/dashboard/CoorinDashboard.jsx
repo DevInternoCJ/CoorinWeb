@@ -88,11 +88,6 @@ export default function CoorinDashboard() {
     };
   }, [sidebarOpen]);
 
-  // Función específica para manejar Plantillas Correo (mantener eventos separados)
-  const handlePlantillasCorreoClick = () => {
-    handleSidebarMenuClick("2AAA", "Plantillas Correo");
-    };
-
   // Función para manejar clicks del sidebar
   const handleSidebarMenuClick = (menuId, menuTitle) => {
     // Cerrar sidebar en móviles después del click
@@ -152,7 +147,6 @@ export default function CoorinDashboard() {
     <>
       <CoorinSidebar 
         onMenuClick={handleSidebarMenuClick}
-        onPlantillasCorreoClick={handlePlantillasCorreoClick}
       />
 
       {/* Contenedor principal que ocupa todo el alto sin generar scroll global */}
