@@ -51,17 +51,46 @@ const Regrest = ({ onClose }) => {
     };
 
     return (
-        <div className="modal-overlay" onClick={handleBackdropClick}>
+        <div className="modal-blur-bg">
+            <div className="modal-overlay" onClick={handleBackdropClick} />
             <div
                 ref={modalRef}
-                className={`modal ${bounce ? "animate-bounce" : ""}`}
+                className={`modal-content modal-xl-container${bounce ? " animate-bounce-modal" : ""}`}
                 onClick={e => e.stopPropagation()}
+                style={{
+                    maxWidth: "920px",
+                    minWidth: "690px",
+                    height: "633px",
+                    display: "flex",
+                    flexDirection: "column",
+                    position: "relative"
+                }}
             >
-                <div className="modal-header">
-                    <h3>Arrepentimientos</h3>
-                    <div className="modal-close" onClick={onClose}>✕</div>
+                {/* Header personalizado para Regrest */}
+                <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "1.5rem",
+                    borderBottom: "1px solid #e0e0e0",
+                    paddingBottom: "1rem"
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <img src="/public/logo_coorin_7.svg" alt="Logo Coorin" style={{ height: 36, marginRight: 8 }} />
+                        <h2 className="modal-title">Arrepentimientos</h2>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="modal-btn modal-btn-close ml-4"
+                        aria-label="Cerrar"
+                    >
+                        &times;
+                    </button>
                 </div>
-                <div className="modal-body">
+
+                {/* Content específico de Regrest */}
+                <div style={{ flex: 1, overflow: "auto", width: '100%' }}>
+                    <div style={{ width: '100%', padding: '1.5rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     {/* Información de cartera */}
                     <div style={{ textAlign: 'center', marginBottom: 12, fontSize: 15, color: '#526581' }}>
                         Cartera: <strong>{getIdCartera()}</strong>
@@ -142,13 +171,27 @@ const Regrest = ({ onClose }) => {
                         </div>
                     )}
                     
-                    {resultados && resultados.length === 0 && !error && (
-                        <div style={{ fontSize: 15, marginTop: 8, textAlign: 'center', color: '#526581' }}>
-                            No se encontraron arrepentimientos para la cuenta ingresada.
-                        </div>
-                    )}
+                        {resultados && resultados.length === 0 && !error && (
+                            <div style={{ fontSize: 15, marginTop: 8, textAlign: 'center', color: '#526581' }}>
+                                No se encontraron arrepentimientos para la cuenta ingresada.
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
+            <style>{`
+                @keyframes bounce-modal {
+                    0% { transform: scale(1); }
+                    20% { transform: scale(1.05, 0.95); }
+                    40% { transform: scale(0.95, 1.05); }
+                    60% { transform: scale(1.03, 0.97); }
+                    80% { transform: scale(0.97, 1.03); }
+                    100% { transform: scale(1); }
+                }
+                .animate-bounce-modal {
+                    animation: bounce-modal 0.5s;
+                }
+            `}</style>
         </div>
     );
 };
