@@ -32,7 +32,7 @@ const InputField = ({
 }) => (
   <div className="flex">
     <Icon className="size-9.5 border border-jerarquia2 rounded-l-lg bg-jerarquia2" />
-    <div className="input-floating mb-4">
+    <div className="input-floating w-full mb-4">
       <input
         type={type}
         placeholder={placeholder}
@@ -46,13 +46,6 @@ const InputField = ({
         id={id}
         disabled={disabled}
       />
-      <label
-        className={`input-floating-label block text-sm font-medium ${type === "password" ? "text-neutral-500" : "border-0"
-          } mb-1`}
-        htmlFor={id}
-      >
-        {label}
-      </label>
     </div>
   </div>
 );
@@ -215,14 +208,14 @@ const LoginForm = ({ onLoginSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="lg:w-full px-6 text-neutral-900">
-      <h4 className="text-2xl rounded-lg font-bold py-2 opacity-80 text-center px-2 bg-jerarquia1 text-jerarquia4 my-6">
+    <form onSubmit={handleSubmit} className="lg:w-full px-6 text-neutral-900 ">
+      <h4 className="text-3xl font-bold py-2 opacity-80 text-center px-2  text-black my-6">
         Iniciar Sesion
       </h4>
       <InputField
         icon={LoginUser}
         type="text"
-        placeholder="COOR"
+        placeholder="Usuario"
         value={formData.username}
         onChange={(e) => handleInputChange("username", e.target.value)}
         id="floatingInput"
@@ -235,7 +228,7 @@ const LoginForm = ({ onLoginSuccess }) => {
       <InputField
         icon={LoginKey}
         type="password"
-        placeholder="**********"
+        placeholder="Contraseña"
         value={formData.password}
         onChange={(e) => handleInputChange("password", e.target.value)}
         id="password-floating"
