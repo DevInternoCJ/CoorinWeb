@@ -170,7 +170,14 @@ namespace CoorinWeb.Loki.Global
                 DateTime.TryParse(drConsulta["Desde"].ToString(), out Desde);
             }
 
-
+            /// <summary>
+            /// Guarda, actualiza o borra una consulta.
+            /// </summary>
+            /// <param name="idConsulta">idConsulta, 0 si es nueva.</param>
+            /// <param name="Nombre">Nombre de la consulta. "" para borrar.</param>
+            /// <param name="Parámetros">Tabla con los parámetros.</param>
+            /// <param name="Agrupar">Tabla con los campos a agrupar.</param>
+            /// <param name="Desde">Fecha desde para realizar los conteos.</param>
             public async Task<bool> GuardarConsultaAsync(
              int idConsulta,
              string nombre,
@@ -284,9 +291,30 @@ namespace CoorinWeb.Loki.Global
                     return false;
                 }
             }
+            /// <summary>
+            /// Valida que las columnas de la consulta existan en la tabla Producto.
+            /// </summary>
+            /// <param name="Parámetros">Tabla con parámetros.</param>
+            /// <param name="Agrupar">Tabla con columnas a agrupar.</param>
+            /// <returns></returns>
+         
 
-
-
+            /// <summary>
+            /// Devuelve el query de la búsqueda.
+            /// </summary>
+            /// <param name="idProducto">idProducto que se consultará.</param>
+            /// <param name="Parámetros">Tabla con parámetros.</param>
+            /// <param name="Agrupar">Tabla con agrupaciones.</param>
+            /// <param name="Detalle">Indica si se desea detalle o agrupación.</param>
+            /// <param name="Desde">Fecha desde para los conteos.</param>
+            /// <param name="idCartera">Id de la cartera</param>
+            /// <returns></returns>
+            public static string PreparaQueryBúsqueda(int idProducto, DataTable Parámetros, DataTable Agrupar, Resultado Conteo, DateTime Desde, int idCartera)
+            {
+                ArrayList listaColumnas = new ArrayList();
+                var resultado = GeneraQueryCuentas(idProducto, Parámetros, Agrupar, Conteo, Desde, idCartera, ref listaColumnas);
+                return resultado.Query; 
+            }
 
             public static string QueryPagos(int idCartera, DateTime Desde, DateTime Hasta, int idConsulta)
             {
