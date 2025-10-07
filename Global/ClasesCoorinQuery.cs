@@ -3,7 +3,9 @@ using System.Collections;
 using System.Data;
 using System.Linq; // Necesario para Linq si usas .Any() o similar
 using CoorinWeb.Loki.Common;
-using CoorinWeb.Loki.Global; // Se asume que IDbContextFactory está aquí
+using CoorinWeb.Loki.Global;
+using Dapper;
+using Microsoft.Data.SqlClient; // Se asume que IDbContextFactory está aquí
 
 // --- Nuevo Namespace para Enums Comunes ---
 namespace CoorinWeb.Loki.Common // Un buen lugar para enums genéricos
@@ -76,7 +78,12 @@ namespace CoorinWeb.Loki.Global
         public class ConsultaGenerador
         {
             private static DataSet _Consultas = new DataSet();
+            private readonly IDbContextFactory _dbContextFactory;
 
+            public ConsultaGenerador(IDbContextFactory dbContextFactory)
+            {
+                _dbContextFactory = dbContextFactory;
+            }
             static ConsultaGenerador()
             {
                 DataTable dtConsultas = new DataTable("Consultas");
@@ -162,6 +169,123 @@ namespace CoorinWeb.Loki.Global
 
                 DateTime.TryParse(drConsulta["Desde"].ToString(), out Desde);
             }
+
+
+            public async Task<bool> GuardarConsultaAsync(
+             int idConsulta,
+             string nombre,
+             object idProducto,
+             object idCartera,
+             DataTable parametros,
+             DataTable agrupar,
+             DateTime desde,
+             int idEjecutivo,
+             string servidor,
+             string tipoBase)
+
+            {
+                try
+                {
+                    using var conn = _dbContextFactory.GetSqlConnection(servidor, tipoBase);
+                    if (conn.State != ConnectionState.Open)
+                        await conn.OpenAsync();
+
+                    string sNombreConsulta = nombre.Replace("'", "");
+                    string sQuery;
+
+                    DataTable tblConsultas = _Consultas.Tables["Consultas"];
+                    DataRow[] drNombres = tblConsultas.Select("NombreConsulta = '" + sNombreConsulta + "'");
+                    if (drNombres.Length == 1)
+                        idConsulta = Convert.ToInt32(drNombres[0]["idConsulta"]);
+
+                    // DELETE 
+                    if (idConsulta != 0)
+                    {
+                        const string sqlDelete = @"
+                    DELETE Consultas WHERE idConsulta = @idConsulta;";
+
+                        int rows = await conn.ExecuteAsync(sqlDelete, new { idConsulta });
+                        if (rows == 0)
+                            return false;
+
+                        DataRow rowToDelete = tblConsultas.Rows.Find(idConsulta);
+                        if (rowToDelete != null)
+                            rowToDelete.Delete();
+
+                        tblConsultas.AcceptChanges();
+                    }
+
+                    // INSERT 
+                    if (!string.IsNullOrEmpty(sNombreConsulta))
+                    {
+                        sQuery =
+                            "INSERT INTO Consultas (idEjecutivo_Insert, NombreConsulta, idProducto, idCartera, Desde) " +
+                            "VALUES (@idEjecutivo, @Nombre, @idProducto, @idCartera, @Desde); " +
+                            "DECLARE @idConsulta INT = SCOPE_IDENTITY(); ";
+
+                        if (agrupar.Rows.Count > 0)
+                        {
+                            sQuery += "\r\n\r\n INSERT INTO ConsultaAgrupar (idConsulta, Campo, Concepto) VALUES ";
+                            for (int i = 0; i < agrupar.Rows.Count; i++)
+                                sQuery += $"\r\n (@idConsulta, '{agrupar.Rows[i]["Campo"]}', '{agrupar.Rows[i]["Concepto"]}' ), ";
+                            sQuery = sQuery.TrimEnd(',', ' ');
+                        }
+
+                        if (parametros.Rows.Count > 0)
+                        {
+                            sQuery += "\r\n\r\n INSERT INTO ConsultaParámetros (idConsulta, Concepto, Campo, Valores, Parámetros, Dato) VALUES ";
+                            for (int i = 0; i < parametros.Rows.Count; i++)
+                            {
+                                sQuery += $"\r\n (@idConsulta, " +
+                                    $"'{parametros.Rows[i]["Concepto"]}', " +
+                                    $"'{parametros.Rows[i]["Campo"]}', N'" +
+                                    $"{parametros.Rows[i]["Valores"]}', N'" +
+                                    $"{parametros.Rows[i]["Parámetros"].ToString().Replace("'", "''")}', '" +
+                                    $"{parametros.Rows[i]["Dato"]}'), ";
+                            }
+                            sQuery = sQuery.TrimEnd(',', ' ') + "\r\n\r\n SELECT @idConsulta idConsulta";
+                        }
+
+                        // Parámetros de inserción
+                        var parametrosInsert = new
+                        {
+                           idEjecutivo,
+                            Nombre = sNombreConsulta,
+                            idProducto = idProducto ?? DBNull.Value,
+                            idCartera,
+                            Desde = desde
+                        };
+
+                        // Ejecutar el INSERT principal
+                        int newId = await conn.ExecuteScalarAsync<int>(sQuery, parametrosInsert);
+
+                        tblConsultas.Rows.Add(newId, idProducto, idCartera);
+
+                        for (int i = 0; i < agrupar.Rows.Count; i++)
+                        {
+                            agrupar.Rows[i]["idConsulta"] = newId;
+                            _Consultas.Tables["Agrupar"].ImportRow(agrupar.Rows[i]);
+                        }
+
+                        for (int i = 0; i < parametros.Rows.Count; i++)
+                        {
+                            parametros.Rows[i]["idConsulta"] = newId;
+                            _Consultas.Tables["Parámetros"].ImportRow(parametros.Rows[i]);
+                        }
+
+                        tblConsultas.AcceptChanges();
+                    }
+
+                    return true;
+                }
+                catch (SqlException ex)
+                {
+                    Console.WriteLine($"Error al guardar consulta: {ex.Message}");
+                    return false;
+                }
+            }
+
+
 
 
             public static string QueryPagos(int idCartera, DateTime Desde, DateTime Hasta, int idConsulta)
