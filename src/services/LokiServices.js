@@ -40,7 +40,7 @@ export const loginUser = async (userData) => {
       ip: API_URL,
       aplicacion: "Coorin",
       version: "3.4.2",
-      servidor: "Albaz"
+      servidor: "Thor"
     };
     console.log('📤 Enviando a /Auth/login:', requestData);
     const response = await api.post('/Auth/login', requestData, {
@@ -110,7 +110,7 @@ export const ValidatePassword = async (userData, idEjecutivo) => {
   try {
     const requestData = {
       contrasenia: userData.contrasenia,
-      servidor: "Albaz",
+      servidor: "Thor",
       idEjecutivo
     };
 
@@ -563,25 +563,87 @@ export const obetenerDropdownsEncargados = async () => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    console.log('📤 Enviando a /Encargados/ramificacion (sin body)');
+    console.log('Enviando a /Encargados/ramificacion (sin body)');
     // El interceptor añade el token automáticamente
     const response = await api.get('/Encargados/encargados');
-    console.log('📥 Respuesta de /Encargados/ramificacion:', response.data);
+    console.log('Respuesta de /Encargados/ramificacion:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error al obtener la ramificación de encargados:', error);
+    console.error('Error al obtener la ramificación de encargados:', error);
     if (error.response?.status === 401) {
-      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      console.warn('Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
     }
     if (error.response) {
-      console.error('📊 Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
     } else if (error.request) {
-      console.error('❌ No se recibió respuesta del servidor:', error.request);
+      console.error('No se recibió respuesta del servidor:', error.request);
     } else {
-      console.error('❌ Error al configurar la solicitud:', error.message);
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+// Obtener carteras de encargados 
+export const getCarteras = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('Enviando a /Encargados/ramificacion (sin body)');
+    // El interceptor añade el token automáticamente
+    const response = await api.get('/campañas/carteras');
+    console.log('Respuesta de /campañas/carteras:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener carteras encargados:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+// Obtener carteras de encargados 
+export const getCarterasProductos = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('Enviando a /campañas/carteras-productos');
+    // El interceptor añade el token automáticamente
+    const response = await api.get('/campañas/carteras-productos');
+    console.log('Respuesta de /campañas/carteras-productos:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener carteras productos:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
     }
     throw error;
   }

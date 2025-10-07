@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import JerarquiaConR from "./JerarquiaConR/JerarquiaConR";
-import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados } from '../../../../services/LokiServices';
+import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos } from '../../../../services/LokiServices';
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
-import equivalenciasCartera from "../../../../utils/equivalenciasCartera";
-import equivalenciasProducto from "../../../../utils/equivalenciasProducto";
 import { toast } from "sonner";
 // Flecha tipo chevron moderna
 const DropdownArrow = () => (
@@ -32,7 +30,9 @@ const ModalEncargadosContent = () => {
     const [producto, setProducto] = React.useState("");
     const [carteras, setCarteras] = React.useState([]);
     const [productos, setProductos] = React.useState([]);
+    const [carterasProductosData, setCarterasProductosData] = React.useState([]); // Estado para guardar datos completos
     const [encargados, setEncargados] = React.useState([]);
+    const [encargadosFiltrados, setEncargadosFiltrados] = React.useState([]); // Encargados filtrados por cartera/producto
     const [selectedEncargado, setSelectedEncargado] = React.useState(null);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
@@ -47,28 +47,115 @@ const ModalEncargadosContent = () => {
     const [selectedRows, setSelectedRows] = useState([]);
     const [editValues, setEditValues] = useState({});
 
-    // Fetch encargados y setear dropdowns (debe usar obetenerDropdownsEncargados)
+    // Fetch carteras, productos y encargados desde endpoints específicos
     useEffect(() => {
         setLoading(true);
-        obetenerDropdownsEncargados()
-            .then(data => {
-                setEncargados(data);
-                // Get unique carteras y productos
-                const uniqueCarteras = Array.from(new Set(data.map(item => item.idCartera)));
-                setCarteras(uniqueCarteras);
-                setCartera(uniqueCarteras[0] || "");
-                const productosFiltrados = Array.from(new Set(data.filter(item => item.idCartera === (uniqueCarteras[0] || "")).map(item => item.idProducto)));
-                setProductos(productosFiltrados);
-                setProducto(productosFiltrados[0] || "");
-                setSelectedEncargado(
-                    data.find(item => item.idCartera === (uniqueCarteras[0] || "") && item.idProducto === (productosFiltrados[0] || ""))?.idEjecutivo || null
-                );
-            })
-            .catch(err => {
-                toast.error("Error al cargar encargados. Inténtalo de nuevo.", err);
-            })
-            .finally(() => setLoading(false));
+        
+        // Cargar carteras, productos y encargados en paralelo
+        Promise.all([
+            getCarteras(),
+            getCarterasProductos(),
+            obetenerDropdownsEncargados()
+        ])
+        .then(([carterasData, carterasProductosData, encargadosData]) => {
+            // Establecer encargados
+            setEncargados(encargadosData);
+            
+            // Guardar datos completos de carteras-productos para filtrado posterior
+            setCarterasProductosData(carterasProductosData);
+            
+            // Usar las carteras del endpoint específico (solo el valor "cartera") y ordenar alfabéticamente
+            const carterasFromEndpoint = carterasData
+                .map(item => item.cartera)
+                .sort((a, b) => a.localeCompare(b)); // Ordenar alfabéticamente
+            setCarteras(carterasFromEndpoint);
+            setCartera(carterasFromEndpoint[0] || "");
+            
+            // Usar los productos del endpoint carteras-productos filtrados por la primera cartera
+            const productosDelEndpoint = carterasProductosData
+                .filter(item => item.cartera === (carterasFromEndpoint[0] || ""))
+                .map(item => item.producto);
+            
+            // Agregar "-Sin Producto-" como primera opción por defecto
+            const productosConDefault = ["-Sin Producto-", ...productosDelEndpoint];
+            setProductos(productosConDefault);
+            setProducto("-Sin Producto-"); // Seleccionar por defecto "-Sin Producto-"
+            
+            // Inicializar encargados filtrados con todos los encargados disponibles
+            setEncargadosFiltrados(encargadosData);
+            // Establecer el primer encargado disponible o VACIO si no hay ninguno
+            if (encargadosData && encargadosData.length > 0) {
+                setSelectedEncargado(encargadosData[0].idEjecutivo);
+            } else {
+                setSelectedEncargado("VACIO");
+            }
+        })
+        .catch(err => {
+            console.error("Error al cargar datos:", err);
+            toast.error("Error al cargar los datos. Inténtalo de nuevo.");
+        })
+        .finally(() => setLoading(false));
     }, []);
+
+    // Función para filtrar encargados según cartera y producto (basada en el código C# original)
+    const filtrarEncargados = useCallback((carteraSeleccionada, productoSeleccionado) => {
+        
+        if (!encargados.length) return;
+        
+        let encargadosFiltrados = [];
+        
+        if (carteraSeleccionada && productoSeleccionado === "-Sin Producto-") {
+            // Si hay cartera y producto es "-Sin Producto-": filtrar por cartera
+            
+            // Obtener todos los IDs de cartera que corresponden a la cartera seleccionada
+            const idsCarteraRelacionados = carterasProductosData
+                .filter(item => item.cartera === carteraSeleccionada)
+                .map(item => item.idCartera)
+                .filter((id, index, self) => self.indexOf(id) === index); // únicos
+            
+            encargadosFiltrados = encargados.filter(item => {
+                const matchCartera = idsCarteraRelacionados.includes(item.idCartera);
+                const sinProducto = item.idProducto === null || item.idProducto === 0;
+                return matchCartera && sinProducto;
+            });
+            
+        } else if (productoSeleccionado && productoSeleccionado !== "-Sin Producto-") {
+            // Si hay producto seleccionado: filtrar por producto
+            
+            // Obtener todos los IDs de producto que corresponden al producto seleccionado
+            const idsProductoRelacionados = carterasProductosData
+                .filter(item => item.producto === productoSeleccionado)
+                .map(item => item.idProducto)
+                .filter((id, index, self) => self.indexOf(id) === index); // únicos
+            
+            encargadosFiltrados = encargados.filter(item => {
+                const matchProducto = idsProductoRelacionados.includes(item.idProducto);
+                return matchProducto;
+            });
+            
+        } else {
+            // Si no hay filtros específicos: mostrar todos los encargados
+            encargadosFiltrados = encargados;
+        }
+        
+        
+        setEncargadosFiltrados(encargadosFiltrados);
+        
+        // Auto-seleccionar el primer encargado si hay encargados disponibles
+        if (encargadosFiltrados.length > 0) {
+            const primerEncargado = encargadosFiltrados[0];
+            setSelectedEncargado(primerEncargado.idEjecutivo);
+        } else {
+            // Si no hay encargados disponibles, establecer como VACIO
+            setSelectedEncargado("VACIO");
+            console.log('No hay encargados disponibles para los filtros actuales - establecido como VACIO');
+        }
+    }, [encargados, carterasProductosData]);
+
+    // Efectuar el filtrado cuando cambien cartera o producto
+    useEffect(() => {
+        filtrarEncargados(cartera, producto);
+    }, [cartera, producto, encargados, filtrarEncargados]);
 
     // Obtener la jerarquía de encargados (idéntico a ModalMetasContent)
     useEffect(() => {
@@ -212,19 +299,24 @@ const ModalEncargadosContent = () => {
                             value={cartera}
                             onChange={e => {
                                 setCartera(e.target.value);
-                                // Al cambiar cartera, filtrar productos disponibles (solo idProducto)
-                                const productosFiltrados = Array.from(new Set(encargados.filter(item => item.idCartera === e.target.value).map(item => item.idProducto)));
-                                setProductos(productosFiltrados);
-                                setProducto(productosFiltrados[0] || "");
-                                // Reset encargado seleccionado
-                                const encargadosFiltrados = encargados.filter(item => item.idCartera === e.target.value && item.idProducto === (productosFiltrados[0] || ""));
-                                setSelectedEncargado(encargadosFiltrados[0]?.idEjecutivo || null);
+                                // Al cambiar cartera, filtrar productos desde carterasProductosData
+                                const productosFiltrados = carterasProductosData
+                                    .filter(item => item.cartera === e.target.value)
+                                    .map(item => item.producto);
+                                
+                                // Agregar "-Sin Producto-" como primera opción por defecto
+                                const productosConDefault = ["-Sin Producto-", ...productosFiltrados];
+                                setProductos(productosConDefault);
+                                setProducto("-Sin Producto-"); // Seleccionar por defecto "-Sin Producto-"
+                                
+                                // Reset encargado seleccionado (sin filtrar por producto ya que está en "-Sin Producto-")
+                                setSelectedEncargado(null);
                             }}
                             className="font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
                             style={{ fontSize: "14px", width: "100%", cursor: "pointer" }}
                         >
                             {carteras.map(c => (
-                                <option key={c} value={c}>{equivalenciasCartera[c] || c}</option>
+                                <option key={c} value={c}>{c}</option>
                             ))}
                         </select>
                         <DropdownArrow />
@@ -245,15 +337,14 @@ const ModalEncargadosContent = () => {
                             value={producto}
                             onChange={e => {
                                 setProducto(e.target.value);
-                                // Reset encargado seleccionado al cambiar producto
-                                const encargadosFiltrados = encargados.filter(item => item.idCartera === cartera && item.idProducto === e.target.value);
-                                setSelectedEncargado(encargadosFiltrados[0]?.idEjecutivo || null);
+                                // El filtrado y selección de encargado se maneja automáticamente por useEffect
+                                setSelectedEncargado(null);
                             }}
                             className="font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
                             style={{ fontSize: "14px", width: "100%", cursor: "pointer" }}
                         >
                             {productos.map(p => (
-                                <option key={p} value={p}>{equivalenciasProducto[p] || p}</option>
+                                <option key={p} value={p}>{p}</option>
                             ))}
                         </select>
                         <DropdownArrow />
@@ -276,17 +367,26 @@ const ModalEncargadosContent = () => {
                             <div style={{color:'red'}}>{error}</div>
                         ) : (
                             <select
-                                value={selectedEncargado || ""}
+                                value={selectedEncargado || (encargadosFiltrados && encargadosFiltrados.length > 0 ? "" : "VACIO")}
                                 onChange={e => setSelectedEncargado(e.target.value)}
                                 className="font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
                                 style={{ fontSize: "14px", width: "100%", cursor: "pointer" }}
                             >
-                                <option value="">Seleccionar...</option>
-                                {encargados.map(item => (
-                                    <option key={item.idEjecutivo} value={item.idEjecutivo}>
-                                        {item.nombreEjecutivo}
-                                    </option>
-                                ))}
+                                {encargadosFiltrados && encargadosFiltrados.length > 0 ? (
+                                    <>
+                                        <option value="">Seleccionar...</option>
+                                        {encargadosFiltrados.map(item => (
+                                            <option key={item.idEjecutivo} value={item.idEjecutivo}>
+                                                {item.nombreEjecutivo}
+                                            </option>
+                                        ))}
+                                    </>
+                                ) : (
+                                    <>
+                                        <option value="null" disabled></option>
+                                        <option disabled>No hay encargados disponibles</option>
+                                    </>
+                                )}
                             </select>
                         )}
                         <DropdownArrow />
