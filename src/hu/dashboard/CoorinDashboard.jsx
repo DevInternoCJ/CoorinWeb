@@ -24,8 +24,6 @@ export default function CoorinDashboard() {
   const [selectedExecutiveId, setSelectedExecutiveId] = useState(null);
   const sidebarRef = useRef(null);
   const buttonRef = useRef(null);
-  const [modalOpen, setModalOpen] = useState(false);
-
   const [modalSidebarOpen, setModalSidebarOpen] = useState(false);
   const [selectedSidebarOption, setSelectedSidebarOption] = useState("");
   
@@ -58,17 +56,14 @@ export default function CoorinDashboard() {
         return <Comments onClose={closeModal} />;
       case "VGP":
         return <VGP onClose={closeModal} />;
+      case "Plantillas Correo":
+        return <EmailTemplates onClose={closeModal} />;
       default:
         return null;
     }
   };
 
-  const handleSidebarToggle = () => setSidebarOpen((prev) => !prev);
-  const handlePlantillasCorreoClick = () => {
-    setModalOpen(true);
-    setSidebarOpen(false); // Opcional: cerrar sidebar al abrir modal
-  };
-  const handleCloseModal = () => setModalOpen(false);
+
   // Efecto para detectar clics fuera del sidebar
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -93,6 +88,11 @@ export default function CoorinDashboard() {
     };
   }, [sidebarOpen]);
 
+  // Función específica para manejar Plantillas Correo (mantener eventos separados)
+  const handlePlantillasCorreoClick = () => {
+    handleSidebarMenuClick("2AAA", "Plantillas Correo");
+    };
+
   // Función para manejar clicks del sidebar
   const handleSidebarMenuClick = (menuId, menuTitle) => {
     // Cerrar sidebar en móviles después del click
@@ -111,6 +111,7 @@ export default function CoorinDashboard() {
       "7BBB": "Ofrecimientos", // Ofrecimientos
       "8BBB": "Comentarios", // Comentarios
       "9BBB": "VGP", // VGP
+      "2AAA": "Plantillas Correo", // Plantillas Correo
       "1AA": "Campañas",
       "1DD": "Campañas",
       "1EE": "Campañas",
@@ -118,7 +119,9 @@ export default function CoorinDashboard() {
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
     if (sidebarOptionsMap[menuId]) {
-      setSelectedSidebarOption(sidebarOptionsMap[menuId]);
+      const option = sidebarOptionsMap[menuId];
+      console.log(`✅ Abriendo modal para: ${option} (ID: ${menuId})`);
+      setSelectedSidebarOption(option);
       setModalSidebarOpen(true);
     } else {
       console.log(`Click en menú: ${menuTitle} (ID: ${menuId})`);
@@ -147,7 +150,10 @@ export default function CoorinDashboard() {
 
   return (
     <>
-      <CoorinSidebar onMenuClick={handleSidebarMenuClick} />
+      <CoorinSidebar 
+        onMenuClick={handleSidebarMenuClick}
+        onPlantillasCorreoClick={handlePlantillasCorreoClick}
+      />
 
       {/* Contenedor principal que ocupa todo el alto sin generar scroll global */}
       <main className="flex-1 bg-background-dashboard min-h-0 relative z-0 flex flex-col">
@@ -197,10 +203,8 @@ export default function CoorinDashboard() {
           </div>
         </div>
 
-        <EmailTemplates isOpen={modalOpen} onClose={handleCloseModal} />
-
-        {/* Modal Base para Sidebar */}
-    {modalSidebarOpen && renderSelectedComponent()}
+        {/* Renderizar componente seleccionado */}
+        {modalSidebarOpen && renderSelectedComponent()}
       </main>
     </>
   );

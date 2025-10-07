@@ -160,6 +160,7 @@ const RenderSubMenus = ({
                     level={level + 1}
                     onItemClick={onItemClick}
                     onMenuClick={onMenuClick}
+                    onPlantillasCorreoClick={onPlantillasCorreoClick}
                   />
                 );
               })()}
@@ -172,7 +173,6 @@ const RenderSubMenus = ({
 };
 
 export const CoorinSidebar = ({
-  open,
   onMenuClick,
   onPlantillasCorreoClick,
 }) => {
@@ -476,6 +476,7 @@ export const CoorinSidebar = ({
                                 subMenus={menu.subMenus}
                                 parentId={`${menuId}-group`}
                                 onMenuClick={onMenuClick}
+                                onPlantillasCorreoClick={onPlantillasCorreoClick}
                                 level={0}
                                 onItemClick={expandSidebar}
                               />
