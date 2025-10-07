@@ -3,9 +3,9 @@ import OptionFields from "./OptionFields";
 import {
   GetScreenFields,
   SaveScreenFields,
-} from "../../../../../../services/LokiServices";
-import { useUserStore } from "../../../../../../contextGlobal/userStore";
-import SaveButton from "../ButtonSave";
+} from "../../../../services/LokiServices";
+import { useUserStore } from "../../../../contextGlobal/userStore";
+import SaveButton from "../../sideBar/Administration/gespa/ButtonSave";
 const TableEditFields = ({ idProducto }) => {
   const [editData, setEditData] = useState([]);
   const [loading, setLoading] = useState(true);

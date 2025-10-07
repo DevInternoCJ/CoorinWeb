@@ -56,46 +56,20 @@ const EmailTemplates = ({ onClose }) => {
   };
 
   return (
-    <div className="modal-blur-bg">
-      <div className="modal-overlay" onClick={onClose} />
+    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div
         ref={modalRef}
-        className={`modal-content modal-xl-container${bounce ? " animate-bounce-modal" : ""}`}
+        className={`${bounce ? " animate-bounce-modal" : ""} bg-white rounded-lg shadow-2xl w-ful max-w-6xl max-h-[90vh] overflow-hidden border border-gray-300`}
         onClick={e => e.stopPropagation()}
-        style={{
-          maxWidth: "1200px",
-          minWidth: "900px", 
-          height: "600px",
-          display: "flex",
-          flexDirection: "column",
-          position: "relative"
-        }}
       >
-        {/* Header personalizado para EmailTemplates */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "1.5rem",
-          borderBottom: "1px solid #e0e0e0",
-          paddingBottom: "1rem"
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <img src="/public/logo_coorin_7.svg" alt="Logo Coorin" style={{ height: 36, marginRight: 8 }} />
-            <IconTemplate className="inline mr-2" />
-            <h2 className="modal-title">Plantillas Correos</h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="modal-btn modal-btn-close ml-4"
-            aria-label="Cerrar"
-          >
-            &times;
-          </button>
-        </div>
+         <ModalHeader
+          icon={<IconTemplate className="size-6" />}
+          title="Plantillas Correos"
+          onClose={onClose}
+        />
 
         {/* Content específico de EmailTemplates */}
-        <div style={{ flex: 1, overflow: "auto", width: '100%', padding: '0 1rem' }}>
+        <div div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
           <WalletSection
             selectedProduct={selectedProduct}
             setSelectedProduct={setSelectedProduct}
@@ -121,19 +95,6 @@ const EmailTemplates = ({ onClose }) => {
           )}
         </div>
       </div>
-      <style>{`
-        @keyframes bounce-modal {
-          0% { transform: scale(1); }
-          20% { transform: scale(1.05, 0.95); }
-          40% { transform: scale(0.95, 1.05); }
-          60% { transform: scale(1.03, 0.97); }
-          80% { transform: scale(0.97, 1.03); }
-          100% { transform: scale(1); }
-        }
-        .animate-bounce-modal {
-          animation: bounce-modal 0.5s;
-        }
-      `}</style>
     </div>
   );
 };

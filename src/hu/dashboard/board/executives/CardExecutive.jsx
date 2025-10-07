@@ -10,7 +10,7 @@ import {
   IconPantalla,
 } from "./IconesEjecutives";
 import ModalMetasEjecutivos from "./ModalMetasEjecutivos";
-import LampshadeFields from "../../sideBar/Administration/gespa/screenFields/LampshadeFields";
+import LampshadeFields from "../../board/screenFields/LampshadeFields";
 import ModalValidadoresEjecutivos from "./ModalValidadoresEjecutivos";
 import ModalEncargadosEjecutivos from "./ModalEncargadosEjecutivos";
 import ModalCatalogosEjecutivos from "./ModalCatalogosEjecutivos";

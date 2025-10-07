@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ShowFieldScreen } from "../../../../../../services/LokiServices"; // Ajusta la ruta según tu estructura
+import { ShowFieldScreen } from "../../../../services/LokiServices"; // Ajusta la ruta según tu estructura
 
 const InfoSection = ({ idProducto }) => {
   const [infoData, setInfoData] = useState([]);

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import ModalHeader from "../ModalHeader";
-import WalletSection from "../WalletSection";
+import ModalHeader from "../../sideBar/Administration/gespa/ModalHeader";
+import WalletSection from "../../sideBar/Administration/gespa/WalletSection";
 import InfoSection from "./InfoSection";
 import TableEditFields from "./TableEditFields";
 import GridLampsFields from "./GridLampsFields";
-import { IconScreens } from "../IconsTemplates";
+import { IconScreens } from "../../sideBar/Administration/gespa/IconsTemplates";
 
 const LampshadeFields = ({ isOpen, onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);

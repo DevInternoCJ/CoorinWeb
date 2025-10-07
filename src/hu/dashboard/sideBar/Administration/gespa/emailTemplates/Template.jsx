@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import SelectWallet from "../screenFields/SelectWallet";
+import SelectWallet from "../../../../board/screenFields/SelectWallet";
 import ButtonSave from "../ButtonSave";
 import { SaveCreateTemplate } from "../../../../../../services/LokiServices";
 import { DeleteTemplate } from "../../../../../../services/LokiServices";

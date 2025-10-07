@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { GetGridFields } from "../../../../../../services/LokiServices"; // Ajusta la ruta según tu estructura
+import { GetGridFields } from "../../../../services/LokiServices"; // Ajusta la ruta según tu estructura
 
 const GridLampsFields = ({idProducto}) => {
   const [tableData, setTableData] = useState([]);
