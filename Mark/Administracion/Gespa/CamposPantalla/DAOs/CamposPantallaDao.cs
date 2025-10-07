@@ -2,12 +2,13 @@
 using CoorinWeb.Loki.Mark.Auth.DAOs;
 using Loki.DTOs.CamposPantallaDTOs;
 using Loki.DTOs.EncargadosDTOs;
+using Loki.Mark.Administracion.Gespa.CamposPantalla.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Loki.Mark.Administracion.Gespa.CamposPantalla.DAOs
 {
-	public class CamposPantallaDao
+	public class CamposPantallaDao : ICamposPantallaDao
 	{
 		private readonly CustomDbContextFactory _dbContFactory;
 		private readonly DaoBase _daoBase;
@@ -61,55 +62,45 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.DAOs
 		}
 
 
-		public async Task<bool> GuardaCampoPantalla(string servidor, CampoPantallaDto dto)
+		/// <summary>
+		/// Guarda un único campo de pantalla usando una transacción existente.
+		/// </summary>
+		public async Task<bool> GuardaCampoPantalla(CampoPantallaDto dto, SqlConnection connection, SqlTransaction transaction)
 		{
-			const string tipoBase = "Collection";
-			var connection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
-
 			string sqlQuery;
 
 			if (!dto.Editar)
 			{
 				sqlQuery = @"
-			INSERT INTO dbCollection..CamposPantalla
-			(idEjecutivo, Fecha_Update, idProducto, Posición, AliasCampo, NombreCampo, idFormatoCampo, Resaltado)
-			VALUES (@IdEjecutivo, GETDATE(), @idProducto, @Posicion, @Alias, @NombreCampo, @FormatoCampo, @Resaltado)";
-			}
-			else if (dto.Editar)
-			{
-				sqlQuery = @"
-			UPDATE dbCollection..CamposPantalla
-			SET
-				idEjecutivo = @IdEjecutivo,
-				Fecha_Update = GETDATE(),
-				AliasCampo = @Alias,
-				NombreCampo = @NombreCampo,
-				idFormatoCampo = @FormatoCampo,
-				Resaltado = @Resaltado
-			WHERE idProducto = @idProducto AND Posición = @Posicion";
+                    INSERT INTO dbCollection..CamposPantalla (idEjecutivo, Fecha_Update, idProducto, Posición, AliasCampo, NombreCampo, idFormatoCampo, Resaltado)
+                    VALUES (@IdEjecutivo, GETDATE(), @idProducto, @Posicion, @Alias, @NombreCampo, @FormatoCampo, @Resaltado)";
 			}
 			else
 			{
-				throw new InvalidOperationException("Valor inválido en el campo 'Editar'. Debe ser 'Insert' o 'Update'.");
+				sqlQuery = @"
+                    UPDATE dbCollection..CamposPantalla SET
+                    idEjecutivo = @IdEjecutivo, Fecha_Update = GETDATE(), AliasCampo = @Alias,
+                    NombreCampo = @NombreCampo, idFormatoCampo = @FormatoCampo, Resaltado = @Resaltado
+                    WHERE idProducto = @idProducto AND Posición = @Posicion";
 			}
 
+			// Ya no se usa la conexión del factory, sino la que viene por parámetro.
+			// Se pasa también la transacción al método de ejecución.
 			var rowsAffected = await _daoBase.ExecuteNonQueryAsync(
 				connection,
 				sqlQuery,
+				transaction, // Pasar la transacción aquí
 				new SqlParameter("@idEjecutivo", dto.IdEjecutivo),
 				new SqlParameter("@idProducto", dto.IdProducto),
 				new SqlParameter("@Posicion", dto.Posicion),
-				new SqlParameter("@Alias", dto.Alias ?? ""),
-				new SqlParameter("@NombreCampo", dto.NombreCampo ?? ""),
+				new SqlParameter("@Alias", dto.Alias ?? (object)DBNull.Value),
+				new SqlParameter("@NombreCampo", dto.NombreCampo ?? (object)DBNull.Value),
 				new SqlParameter("@FormatoCampo", dto.FormatoCampo),
 				new SqlParameter("@Resaltado", dto.Resaltado)
 			);
 
 			return rowsAffected > 0;
 		}
-
-
-
 
 
 

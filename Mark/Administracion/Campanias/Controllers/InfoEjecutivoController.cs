@@ -25,7 +25,7 @@ namespace Loki.Mark.Administracion.Campanias.Controllers
 
 		[HttpGet("consultas/{idEjecutivo}")]
 		[SwaggerOperation(
-			Summary = "Consultas del Ejecutivo",
+			Summary = "Consultas del Ejecutivo - Yoshi",
 			Description = "Obtiene las consultas generadas anteriormente por el ejecutivo seleccionado en el servidor escogido."
 		)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
