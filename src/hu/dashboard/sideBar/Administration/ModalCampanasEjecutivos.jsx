@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { obetenerJerarquiaEncargados, asignaEjecutivoCampanas, UsuarioRestante } from "../../../../services/LokiServices";
 import { toast } from "sonner";
 
-const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
+const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
     const [executiveTree, setExecutiveTree] = useState([]);
     const [loadingRow, setLoadingRow] = useState(null); // Para mostrar loading en el row
 
@@ -52,13 +52,22 @@ const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
                             ? { ...ej, restantes: encontrado.Restantes, asignado: true }
                             : { ...ej, restantes: 0, asignado: false };
                     }));
+                    
+                    // Mostrar mensaje de éxito cuando se cargan datos para la campaña
+                    if (respuesta.data.length > 0 && nombreCampaña) {
+                        const mensajeExito = `Datos cargados para la campaña "${nombreCampaña}"`;
+                        toast.success(mensajeExito);
+                    }
                 }
             } catch (error) {
                 console.error('Error al consumir UsuarioRestante:', error);
                 
                 // Verificar si es un error 404 (No se encontraron datos)
                 if (error.response?.status === 404) {
-                    toast.error("No se encontraron datos");
+                    const mensajeError = nombreCampaña 
+                        ? `No se encontraron ejecutivos para la campaña "${nombreCampaña}"`
+                        : "No se encontraron datos";
+                    toast.error(mensajeError);
                     
                     // Limpiar todos los checkboxes (resetear asignado y restantes a valores por defecto)
                     setExecutiveTree(prev => prev.map(ej => ({
@@ -70,7 +79,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña }) => {
             }
         };
         fetchRestantes();
-    }, [idCampaña]);
+    }, [idCampaña, nombreCampaña]);
 
     // Mostrar todos los ejecutivos de la jerarquía con hijos al final
     const ejecutivosOrdenados = useMemo(() => {

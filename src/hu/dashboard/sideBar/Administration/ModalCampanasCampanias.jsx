@@ -89,13 +89,22 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                         {sortedCampanas.map((row, i) => (
                             <tr
                                 key={i}
-                                style={{ minHeight: 0, height: '28px', lineHeight: '1.1' }}
+                                style={{ minHeight: 0, height: '28px', lineHeight: '1.1', cursor: 'pointer' }}
                                 onClick={() => {
                                     if (row.idCampaña) {
-                                        console.log('idCampaña', row.idCampaña);
+                                        console.log('idCampaña', row.idCampaña, 'nombre:', row.Campaña);
                                         if (typeof onSeleccionCampaña === 'function') {
-                                            onSeleccionCampaña(row.idCampaña);
+                                            onSeleccionCampaña(row.idCampaña, row.Campaña);
                                         }
+                                    }
+                                }}
+                                onDoubleClick={(e) => {
+                                    // Prevenir el doble clic si es sobre elementos interactivos
+                                    if (e.target.type === 'checkbox' || e.target.tagName === 'BUTTON') {
+                                        return;
+                                    }
+                                    if (row.idCampaña) {
+                                        setModalTop100({ open: true, idCampaña: row.idCampaña });
                                     }
                                 }}
                             >
@@ -132,10 +141,6 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                                 </td>
                                 <td
                                     style={{ textAlign: 'center', height: '28px', lineHeight: '1.1', paddingTop: 0, paddingBottom: 0 }}
-                                    onDoubleClick={e => {
-                                        // Solo abrir si el doble clic NO es sobre el checkbox
-                                        if (e.target.type !== 'checkbox') setModalTop100({ open: true, idCampaña: row.idCampaña });
-                                    }}
                                 >
                                     <input
                                         type="checkbox"
