@@ -1125,7 +1125,7 @@ export const enabledUnenabledCampaign = async (body) => {
     // El interceptor añade el token automáticamente
     const response = await api.patch(url, rest, {
       headers: {
-        'Accept': '/',
+        'Accept': '*/*',
         'Content-Type': 'application/json'
       }
     });
@@ -1667,3 +1667,48 @@ export const DeleteTemplate = async (data) => {
     throw error;
   }
 };
+
+export const AsignaEncargados = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    
+    console.log('📤 Enviando a /Encargados/asignar-encargado-cartera:', body);
+    
+    // El interceptor añade el token automáticamente
+    const response = await api.patch('/Encargados/asignar-encargado-cartera', body, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    console.log('📥 Respuesta de /Encargados/asignar-encargado-cartera:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al asignar encargados:', error);
+    
+    // Manejo específico de errores de autenticación
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    
+    // Mostrar más detalles del error
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    
+    throw error;
+  }
+};
+
+
