@@ -41,7 +41,7 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
             return Ok(existe.HasValue);
         }
 
-        [HttpGet("campos-pantalla/{idProducto}")]
+        [HttpGet("obtener/{idProducto}")]
         [SwaggerOperation(
             Summary = "Obtener Campos Pantalla",
             Description = "Obtiene los campos configurados para la pantalla del producto indicado en el servidor especificado."
@@ -61,12 +61,11 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
             return Ok(campos);
         }
 
-		[HttpGet("muestra-campos/{idProducto}")]
+		[HttpGet("mostrar/{idProducto}")]
 		[SwaggerOperation(
 			Summary = "Muestra Campos Pantalla",
 			Description = "Muestra los campos traducidos con la información del producto escogido."
 		)]
-        [AllowAnonymous]
 		public async Task<IActionResult> GetProductData(int idProducto)
 		{
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
@@ -91,9 +90,11 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> GridProductoSample(int idProducto, double porcentaje = 70, int? maximo = 5)
         {
-			string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            //string? servidorClaim = "Albaz";
 
-			if (string.IsNullOrWhiteSpace(servidorClaim))
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
 			{
 				return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
 			}
@@ -111,7 +112,7 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
         /// </summary>
         /// <param name="request">Datos del producto y los campos a insertar/actualizar.</param>
         /// <returns>True si se actualizó correctamente.</returns>
-        [HttpPost("guardar-campos-pantalla")]
+        [HttpPost("guardar")]
         [SwaggerOperation(
             Summary = "Guardar Campos Pantalla",
             Description = "Permite actualizar o agregar los Campos Pantalla visibles en Gespa para el menú de Cuentas."
@@ -121,6 +122,7 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
         public async Task<IActionResult> GuardarCamposPantalla([FromBody] CampoPantallaRequest request)
         {
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            //string? servidorClaim = "Albaz";
 
             if (string.IsNullOrWhiteSpace(servidorClaim))
             {
@@ -140,10 +142,10 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
             foreach (var (item, index) in request.Campos.Select((val, i) => (val, i + 1)))
             {
                 if (string.IsNullOrWhiteSpace(item.Alias) && !string.IsNullOrWhiteSpace(item.NombreCampo))
-                    return BadRequest($"La posición {index} debe tener un Alias.");
+                    return BadRequest($"El campo {index} debe tener un Alias.");
 
                 if (string.IsNullOrWhiteSpace(item.NombreCampo) && !string.IsNullOrWhiteSpace(item.Alias))
-                    return BadRequest($"La posición {index} debe tener un campo asociado.");
+                    return BadRequest($"El campo {index} debe tener un campo asociado.");
             }
 
             var resultado = await _campService.InsertaActualizaCamposPantalla(servidorClaim, request);

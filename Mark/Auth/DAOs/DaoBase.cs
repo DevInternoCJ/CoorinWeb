@@ -59,72 +59,83 @@ namespace CoorinWeb.Loki.Mark.Auth.DAOs
 			return result.ToList();
 		}
 
-        public async Task<IEnumerable<dynamic>> ExecuteStoredProcedureAsList(SqlConnection sqlConnection, string storedProcedureName, object? parameters = null)
-        {
-          
-            var result = await sqlConnection.QueryAsync<dynamic>(
-                storedProcedureName,
-                parameters,
-                commandType: CommandType.StoredProcedure
-            );
-
-            return result;
-        }
-        public async Task<int> ExecuteNonQueryAsync(SqlConnection connection, string sql, params SqlParameter[] parameters)
+		public async Task<IEnumerable<dynamic>> ExecuteStoredProcedureAsList(SqlConnection sqlConnection, string storedProcedureName, object? parameters = null)
 		{
-			using (var command = new SqlCommand(sql, connection))
+
+			var result = await sqlConnection.QueryAsync<dynamic>(
+				storedProcedureName,
+				parameters,
+				commandType: CommandType.StoredProcedure
+			);
+
+			return result;
+		}
+		public async Task<int> ExecuteNonQueryAsync(SqlConnection connection, string sql, params SqlParameter[] parameters)
+		{
+			using var command = new SqlCommand(sql, connection);
+			// Si la conexión no está abierta, ábrela aquí. Tu _dbContFactory.GetSqlConnection
+			// ya podría estar haciéndolo, pero es buena práctica verificar.
+			if (connection.State != ConnectionState.Open)
 			{
-				// Si la conexión no está abierta, ábrela aquí. Tu _dbContFactory.GetSqlConnection
-				// ya podría estar haciéndolo, pero es buena práctica verificar.
-				if (connection.State != ConnectionState.Open)
-				{
-					await connection.OpenAsync();
-				}
-
-				if (parameters != null && parameters.Length > 0)
-				{
-					command.Parameters.AddRange(parameters);
-				}
-
-				return await command.ExecuteNonQueryAsync();
+				await connection.OpenAsync();
 			}
+
+			if (parameters != null && parameters.Length > 0)
+			{
+				command.Parameters.AddRange(parameters);
+			}
+
+			return await command.ExecuteNonQueryAsync();
+		}
+
+		// NUEVO MÉTODO SOBRECARGADO.
+		public async Task<int> ExecuteNonQueryAsync(SqlConnection connection, string sql, SqlTransaction transaction, params SqlParameter[] parameters)
+		{
+			// La lógica es casi idéntica, pero usamos una transacción existente.
+			using var command = new SqlCommand(sql, connection, transaction); // Asignamos la transacción aquí
+																			  // No es necesario abrir la conexión, porque la capa de servicio ya lo hizo.
+			if (parameters != null && parameters.Length > 0)
+			{
+				command.Parameters.AddRange(parameters);
+			}
+
+			return await command.ExecuteNonQueryAsync();
 		}
 
 		public async Task<T> ExecuteScalarAsync<T>(SqlConnection connection, string sqlQuery, SqlParameter[] parameters)
 		{
-			using (var command = new SqlCommand(sqlQuery, connection))
+			using var command = new SqlCommand(sqlQuery, connection);
+
+			if (parameters != null)
 			{
-				if (parameters != null)
-				{
-					command.Parameters.AddRange(parameters);
-				}
-				// Asegúrate de que la conexión esté abierta
-				if (connection.State != ConnectionState.Open)
-				{
-					await connection.OpenAsync();
-				}
-				object result = await command.ExecuteScalarAsync();
-
-				if (result == null || result == DBNull.Value)
-				{
-					return default(T); // Devuelve el valor por defecto para el tipo T si es nulo o DBNull
-				}
-
-				// Intenta convertir el resultado al tipo T deseado
-				try
-				{
-					return (T)Convert.ChangeType(result, typeof(T));
-				}
-				catch (InvalidCastException)
-				{
-					throw new InvalidCastException($"No se puede convertir el resultado de tipo {result.GetType()} al tipo {typeof(T)}.");
-				}
-				catch (FormatException)
-				{
-					throw new FormatException($"La cadena de entrada no tiene el formato correcto para el tipo {typeof(T)}.");
-				}
-				// Puedes añadir más manejo de errores específicos aquí según tus necesidades
+				command.Parameters.AddRange(parameters);
 			}
+			// Asegúrate de que la conexión esté abierta
+			if (connection.State != ConnectionState.Open)
+			{
+				await connection.OpenAsync();
+			}
+			object result = await command.ExecuteScalarAsync();
+
+			if (result == null || result == DBNull.Value)
+			{
+				return default(T); // Devuelve el valor por defecto para el tipo T si es nulo o DBNull
+			}
+
+			// Intenta convertir el resultado al tipo T deseado
+			try
+			{
+				return (T)Convert.ChangeType(result, typeof(T));
+			}
+			catch (InvalidCastException)
+			{
+				throw new InvalidCastException($"No se puede convertir el resultado de tipo {result.GetType()} al tipo {typeof(T)}.");
+			}
+			catch (FormatException)
+			{
+				throw new FormatException($"La cadena de entrada no tiene el formato correcto para el tipo {typeof(T)}.");
+			}
+			// Puedes añadir más manejo de errores específicos aquí según tus necesidades
 		}
 	}
 }

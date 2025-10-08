@@ -38,7 +38,6 @@ namespace Loki.Mark.Auth.Controllers
 		}
 
 		[HttpPost("login")]
-		[AllowAnonymous]
 		[SwaggerOperation(
 			Summary = "Iniciar Sesión",
 			Description = "Verifica las credenciales proporcionadas y, de ser válidas, " +

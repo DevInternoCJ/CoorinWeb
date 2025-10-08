@@ -112,6 +112,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Sesiones.Services
 					NombreEjecutivo = e.NombreEjecutivo,
 					Usuario = e.Usuario,
 					IdEncargado = e.IdEncargado,
+					Jerarquía = e.Jerarquía,
 					Bloqueado = e.Bloqueado,
 					SesionAbierta = idsConSesionAbierta.Contains(e.IdEjecutivo)
 				})
