@@ -1,0 +1,7 @@
+# Archivos temporales y de build
+obj/
+bin/
+*.cache
+*.editorconfig
+*.g.cs
+
