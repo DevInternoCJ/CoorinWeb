@@ -13,6 +13,8 @@ namespace Loki.DTOs.SesionesDTOs
 		[JsonPropertyOrder(4)]
 		public required int? IdEncargado { get; set; }
 		[JsonPropertyOrder(5)]
+		public required int? Jerarquía { get; set; }
+		[JsonPropertyOrder(6)]
 		public required bool? Bloqueado { get; set; }
 	}
 

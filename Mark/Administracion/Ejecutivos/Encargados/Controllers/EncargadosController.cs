@@ -1,6 +1,7 @@
 ﻿using Loki.DTOs.EncargadosDTOs;
 using Loki.Mark.Administracion.Campanias.Interfaces;
 using Loki.Mark.Administracion.Ejecutivos.Encargados.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -56,6 +57,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Encargados.Controllers
 		public async Task<IActionResult> EjecutivosPropios(int idEjecutivo)
 		{
 			string? servidorClaim = User.FindFirst("Servidor")?.Value;
+			//string? servidorClaim = "Albaz";
 
 			if (string.IsNullOrWhiteSpace(servidorClaim))
 			{
@@ -65,7 +67,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Encargados.Controllers
 			var encargados = await _encargadosService.JerarquiaEjecutivosPropios(servidorClaim, idEjecutivo);
 			if (encargados == null || encargados.Count == 0)
 			{
-				return NotFound(new { error = "No se pudo generar la jerarquía de ejecutivos propios." });
+				return NotFound(new { error = "El encargado no cuenta con ejecutivos bajo su jerarquía" });
 			}
 			return Ok(encargados);
 		}

@@ -66,7 +66,6 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
 			Summary = "Muestra Campos Pantalla",
 			Description = "Muestra los campos traducidos con la información del producto escogido."
 		)]
-        [AllowAnonymous]
 		public async Task<IActionResult> GetProductData(int idProducto)
 		{
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
@@ -91,9 +90,11 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> GridProductoSample(int idProducto, double porcentaje = 70, int? maximo = 5)
         {
-			string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            //string? servidorClaim = "Albaz";
 
-			if (string.IsNullOrWhiteSpace(servidorClaim))
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
 			{
 				return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
 			}
@@ -118,7 +119,6 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
         )]
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(400)]
-        [AllowAnonymous]
         public async Task<IActionResult> GuardarCamposPantalla([FromBody] CampoPantallaRequest request)
         {
             string? servidorClaim = User.FindFirst("Servidor")?.Value;

@@ -95,6 +95,7 @@ using Loki.Mark.Administracion.Carteras.DAOs;
 using Loki.Mark.Administracion.Gespa.CamposPantalla.Interfaces;
 using Loki.Mark.Administracion.Gespa.CamposPantalla.Services;
 using Loki.Mark.Administracion.Gespa.CamposPantalla.DAOs;
+using System.Text.Json;
 
 
 
@@ -267,6 +268,17 @@ builder.Services.AddScoped<IPlantillasCorreoService, PlantillasCorreoService>();
 builder.Services.AddScoped<IPlantillasCorreoDao, PlantillasCorreoDao>();
 // En Program.cs, cambia a:
 builder.Services.AddSingleton<Loki.Global.ExcelGeneratorService>();
+
+// Configuración de JSON para que distinga entre mayúsculas y minúsculas
+builder.Services.AddControllers()
+	.AddJsonOptions(options =>
+	{
+		options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
+		options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+	});
+
+
+
 // ===== Registro de servicio para compresión de archivos =====
 builder.Services.AddResponseCompression(options =>
 {
