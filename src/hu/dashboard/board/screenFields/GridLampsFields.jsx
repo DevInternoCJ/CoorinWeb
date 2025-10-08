@@ -6,8 +6,8 @@ const GridLampsFields = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   // Parámetros requeridos por el endpoint
-  const servidor = "Thor";
-  const idProducto = 14; // Reemplaza con el ID de producto adecuado
+  const servidor = "Albaz";
+  const idProducto = 1; // Reemplaza con el ID de producto adecuado
   useEffect(() => {
      if (!idProducto || idProducto === 0) return;
     const fetchGridData = async () => {

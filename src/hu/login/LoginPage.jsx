@@ -9,7 +9,7 @@ const LoginPage = () => {
 
   return (
     <>
-      <div className="min-h-screen min-w-screen flex justify-center p-4 bg-background-primary">
+      <div className="min-h-screen min-w-screen flex justify-center p-4 bg-background-dashboard">
         <div className="block justify-center items-center my-auto">
           
           {/* LoginCard con ambos contenidos */}

@@ -123,7 +123,7 @@ const TableEditFields = ({ idProducto }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm max-h-80 overflow-auto">
       {/* Header */}
       <div className="bg-background-secondary rounded-md grid grid-cols-12 gap-3 mb-4 py-3 px-3 font-semibold text-white text-sm">
         <div className="col-span-1">Position</div>

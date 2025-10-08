@@ -21,7 +21,7 @@ const PasswordChangeContent = ({ onAccept }) => {
           </h3>
         </div>
       </div>
-      <div className=" text-red-800 w-full text-center mb-2 bg-jerarquia1 p-2 rounded-lg opacity-80">
+      <div className=" text-black w-full text-center mb-2 p-2 rounded-lg opacity-80">
         <h6 className="text-lg font-semibold ">
           Su contraseña expira en {dias} días
         </h6>
