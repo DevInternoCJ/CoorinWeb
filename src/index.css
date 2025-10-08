@@ -1,15 +1,75 @@
+/* === MODAL GLOBAL COORIN === */
+.coorin-modal-blur-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.3);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.coorin-modal-overlay {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
+.coorin-modal-content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 90rem;
+  max-height: 50rem;
+  height: 100%;
+  background: var(--color-bgcolor1);
+  border-radius: 1rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+}
+.coorin-modal-xl-container {
+  width: 100%;
+}
+@keyframes coorin-bounce-modal {
+  0% { transform: scale(1); }
+  20% { transform: scale(1.05, 0.95); }
+  40% { transform: scale(0.95, 1.05); }
+  60% { transform: scale(1.03, 0.97); }
+  80% { transform: scale(0.97, 1.03); }
+  100% { transform: scale(1); }
+}
+.coorin-animate-bounce-modal {
+  animation: coorin-bounce-modal 0.5s;
+}
+.coorin-modal-scroll-gray::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: #f5f5f5;
+}
+.coorin-modal-scroll-gray::-webkit-scrollbar-thumb {
+  background: #b0b0b0;
+  border-radius: 4px;
+}
+.coorin-modal-scroll-gray::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+.coorin-modal-scroll-gray {
+  scrollbar-color: #b0b0b0 #f5f5f5;
+  scrollbar-width: thin;
+}
+
+
+@import "tailwindcss";
+/* Preline UI */
 @source "../node_modules/preline/dist/*.js";
 @import "../node_modules/preline/variants.css";
 /* Preline se usa como plugin de Tailwind (config en tailwind.config.js) y su JS se importa en main.jsx */
 @plugin "@iconify/tailwind4";
-@import "tailwindcss";
-
 @layer base {
   html {
     font-family: "Montserrat", sans-serif;
   }
 }
-
 body {
 
   font-family: "Montserrat", sans-serif;
@@ -20,12 +80,22 @@ body {
   padding: 0;
   background-color: var(--color-background-dashboard);
 }
-
 :root{
     --color-text-black: #00291a;
     --color-text-terra: #505631;
     --color-text-mint: #DEFFB9;
 }
+.coorin-bg {
+  background-image: url("./assets/coorinbg.svg");
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+
+  background-color: var(--color-bgcolor1);
+}
+/* Empujar el contenido principal cuando la sidebar está abierta o minificada (lg+)
+   Usamos transform en el contenedor interno (.p-6) para que la animación sea GPU-accelerated
+   y restamos el padding (p-6 = 1.5rem) para evitar hueco extra entre la minisidebar y el dashboard. */
 
 @theme {
   --color-jerarquia1: #9dc5bc;
@@ -115,10 +185,6 @@ body {
   background: #888;
 }
 
-.sidebar-coorin .divider::after {
-  margin-left: 0.75rem;
-  background-color: var(--color-background-secondary);
-}
 
 .table-border {
   border-collapse: unset;
@@ -248,7 +314,9 @@ input[type="time"]::-ms-input-placeholder {
   color: #111;
 }
 /* === Estilo global para inputs === */
-
+input, input[type="text"], input[type="number"], input[type="time"], input[type="password"], input[type="email"] {
+  color: #111;
+}
 /* === Estilo global para label === */
 label {
   font-weight: 600;
@@ -453,7 +521,7 @@ label {
   border-bottom: 1px solid var(--color-jerarquia1);
   text-align: left;
 }
-.modal-table th                                                                                                                                                                                                                                                                                    {
+.modal-table th {
   background: var(--color-background-secondary);
   color: #fff;
   font-weight: 600;

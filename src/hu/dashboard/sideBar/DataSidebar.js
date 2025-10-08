@@ -25,7 +25,7 @@ const dataSidebar = {
                 },
                 {
                   id: "3AAA",
-                  title: "Catalogos",
+                  title: "Frases",
                   icon: "BookOpenIcon",
                 },
               ],
@@ -57,7 +57,7 @@ const dataSidebar = {
                 { id: "6BBB", title: "Búsquedas", icon: "BookOpenIcon" },
                 { id: "7BBB", title: "Ofrecimientos", icon: "BookOpenIcon" },
                 { id: "8BBB", title: "Comentarios", icon: "BookOpenIcon" },
-                { id: "9BBB", title: "VGP", icon: "BookOpenIcon" },
+            
               ],
             },
             {
@@ -156,8 +156,11 @@ const dataSidebar = {
             },
             { id: "5CC", title: "Gestiones", icon: "UserIcon" },
             { id: "6CC", title: "Supervisor", icon: "UserIcon" },
-            { id: "7CC", title: "Domicilios", icon: "UserIcon" },
-            { id: "8CC", title: "Amex", icon: "UserIcon" },
+     
+         
+
+            // { id: "7CC", title: "Domicilios", icon: "UserIcon" },
+            // { id: "8CC", title: "Amex", icon: "UserIcon" },//comentado por que no se usa Menu Procesos Carteras proceso nuevo
             { id: "13CC", title: "Metas", icon: "UserIcon" },
           ],
         },

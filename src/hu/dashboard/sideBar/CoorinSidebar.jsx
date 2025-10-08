@@ -243,7 +243,7 @@ export const CoorinSidebar = ({
     isMinified ? "hs-overlay-minified " : ""
   }hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 transition-transform duration-150 transform fixed top-0 start-0 bottom-0 z-50 bg-white border-e border-gray-200 ${
     isMinified ? "w-[3.25rem]" : "w-64"
-  } min-h-screen overflow-y-auto overflow-x-hidden ${
+  } min-h-screen flex flex-col overflow-x-hidden ${
     isOpen ? "translate-x-0" : "-translate-x-full hidden"
   }`;
   // Función para expandir la sidebar si está en modo minificado
@@ -319,220 +319,229 @@ export const CoorinSidebar = ({
         className={asideClass}
         role="navigation"
         aria-label="Coorin sidebar">
-        <header className="py-4 px-2 flex justify-between items-center gap-x-2">
-          <a
-            className="flex-none font-semibold text-xl text-black focus:outline-hidden focus:opacity-80 hs-overlay-minified:hidden"
-            href="#"
-            aria-label="Brand">
-            <span className="inline-block transition-all duration-150 overflow-hidden whitespace-nowrap">
-              Coorin
-            </span>
-          </a>
+        <div className="relative flex flex-col h-full max-h-full">
+          {/* Header */}
+          <header className="py-4 px-2 flex justify-between items-center gap-x-2">
+            <a
+              className="flex-none font-semibold text-xl text-black focus:outline-hidden focus:opacity-80 hs-overlay-minified:hidden"
+              href="#"
+              aria-label="Brand">
+              <span className="inline-block transition-all duration-150 overflow-hidden whitespace-nowrap">
+                Coorin
+              </span>
+            </a>
 
-          {/* Mobile close button */}
-          <div className="lg:hidden">
-            <button
-              type="button"
-              className="flex justify-center items-center w-8 h-8 text-gray-600 rounded-full hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
-              onClick={closeMobile}>
-              <svg
-                className="shrink-0 w-4 h-4"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round">
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
-          </div>
+            {/* Mobile close button */}
+            <div className="lg:hidden">
+              <button
+                type="button"
+                className="flex justify-center items-center w-8 h-8 text-gray-600 rounded-full hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
+                onClick={closeMobile}>
+                <svg
+                  className="shrink-0 w-4 h-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round">
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+            </div>
 
-          {/* Desktop minify toggle */}
-          <div className="hidden lg:block">
-            <button
-              type="button"
-              onClick={() => toggleMinify()}
-              aria-pressed={isMinified}
-              className="flex justify-center items-center w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-full focus:outline-hidden focus:bg-gray-100">
-              <svg
-                className="hidden hs-overlay-minified:block shrink-0 w-4 h-4"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round">
-                <rect width="18" height="18" x="3" y="3" rx="2" />
-                <path d="M15 3v18" />
-                <path d="m8 9 3 3-3 3" />
-              </svg>
-              <svg
-                className="hs-overlay-minified:hidden shrink-0 w-4 h-4"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round">
-                <rect width="18" height="18" x="3" y="3" rx="2" />
-                <path d="M15 3v18" />
-                <path d="m10 15-3-3 3-3" />
-              </svg>
-            </button>
-          </div>
-        </header>
+            {/* Desktop minify toggle */}
+            <div className="hidden lg:block">
+              <button
+                type="button"
+                onClick={() => toggleMinify()}
+                aria-pressed={isMinified}
+                className="flex justify-center items-center w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-full focus:outline-hidden focus:bg-gray-100">
+                <svg
+                  className="hidden hs-overlay-minified:block shrink-0 w-4 h-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round">
+                  <rect width="18" height="18" x="3" y="3" rx="2" />
+                  <path d="M15 3v18" />
+                  <path d="m8 9 3 3-3 3" />
+                </svg>
+                <svg
+                  className="hs-overlay-minified:hidden shrink-0 w-4 h-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round">
+                  <rect width="18" height="18" x="3" y="3" rx="2" />
+                  <path d="M15 3v18" />
+                  <path d="m10 15-3-3 3-3" />
+                </svg>
+              </button>
+            </div>
+          </header>
+          {/* End Header */}
 
-        <div className="px-2 pt-2">
-          <ul className="space-y-0.5 p-0 bg-white">
-            {Object.values(dataSidebar).map((indiceArr, indiceIdx) =>
-              indiceArr.map((section, sectionIdx) => (
-                <React.Fragment
-                  key={`indice-${indiceIdx}-section-${sectionIdx}`}>
-                  {section.Menu &&
-                    section.Menu.map((menu, menuIdx) => {
-                      const menuId = `menu-app-${indiceIdx}-${sectionIdx}-${menuIdx}`;
-                      return (
-                        <li className="hs-accordion" id={menuId} key={menuId}>
-                          <button
-                            type="button"
-                            className="hs-accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
-                            aria-expanded="false"
-                            aria-controls={`${menuId}-collapse`}
-                            onClick={expandSidebar}>
-                            {section.collapsetoggle &&
-                              iconMap[section.collapsetoggle] && (
-                                <span className="inline-flex w-6 flex-shrink-0 text-jerarquia3">
-                                  {React.createElement(
-                                    iconMap[section.collapsetoggle],
-                                    { className: "w-5 h-5" }
-                                  )}
-                                </span>
+          {/* Body */}
+          <div className="flex-1 flex flex-col px-2 pt-2 min-h-0 ">
+            <ul className="space-y-0.5 p-0 bg-white flex-1">
+              {Object.values(dataSidebar).map((indiceArr, indiceIdx) =>
+                indiceArr.map((section, sectionIdx) => (
+                  <React.Fragment
+                    key={`indice-${indiceIdx}-section-${sectionIdx}`}>
+                    {section.Menu &&
+                      section.Menu.map((menu, menuIdx) => {
+                        const menuId = `menu-app-${indiceIdx}-${sectionIdx}-${menuIdx}`;
+                        return (
+                          <li className="hs-accordion" id={menuId} key={menuId}>
+                            <button
+                              type="button"
+                              className="hs-accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
+                              aria-expanded="false"
+                              aria-controls={`${menuId}-collapse`}
+                              onClick={expandSidebar}>
+                              {section.collapsetoggle &&
+                                iconMap[section.collapsetoggle] && (
+                                  <span className="inline-flex w-6 flex-shrink-0 text-jerarquia3">
+                                    {React.createElement(
+                                      iconMap[section.collapsetoggle],
+                                      { className: "w-5 h-5" }
+                                    )}
+                                  </span>
+                                )}
+
+                              {/* Usar el divider del índice (section.divider) como encabezado de los submenús */}
+                              <span className="inline-block font-semibold text-sm text-gray-700">
+                                {section.divider || menu.title || "Abrir"}
+                              </span>
+
+                              <svg
+                                className="hs-accordion-active:block ms-auto hidden size-4 text-gray-600 group-hover:text-gray-500"
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round">
+                                <path d="m18 15-6-6-6 6" />
+                              </svg>
+                              <svg
+                                className="hs-accordion-active:hidden ms-auto block size-4 text-gray-600 group-hover:text-gray-500"
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round">
+                                <path d="m6 9 6 6 6-6" />
+                              </svg>
+                            </button>
+
+                            <div
+                              id={`${menuId}-collapse`}
+                              className="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 hidden"
+                              role="region"
+                              aria-labelledby={menuId}>
+                              {/* Renderizamos los subMenus del menu usando la estructura anidada */}
+                              {menu.subMenus && (
+                                <RenderSubMenus
+                                  subMenus={menu.subMenus}
+                                  parentId={`${menuId}-group`}
+                                  onMenuClick={onMenuClick}
+                                  level={0}
+                                  onItemClick={expandSidebar}
+                                />
                               )}
+                            </div>
+                          </li>
+                        );
+                      })}
+                  </React.Fragment>
+                ))
+              )}
+            </ul>
+          </div>
+          {/* End Body */}
 
-                            {/* Usar el divider del índice (section.divider) como encabezado de los submenús */}
-                            <span className="inline-block font-semibold text-sm text-gray-700">
-                              {section.divider || menu.title || "Abrir"}
-                            </span>
+          {/* Footer */}
+          <footer className="mt-auto p-2 border-t border-gray-200">
+            <div className="hs-dropdown [--strategy:absolute] [--auto-close:inside] relative w-full inline-flex">
+              <button
+                id="hs-sidebar-footer-example-with-dropdown"
+                type="button"
+                className="w-full inline-flex shrink-0 items-center gap-x-2 p-2 text-start text-sm text-gray-800 rounded-md hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
+                aria-haspopup="menu"
+                aria-expanded="false"
+                aria-label="Dropdown"
+                onClick={expandSidebar}>
+                <img
+                  className="shrink-0 size-5 rounded-full"
+                  src="https://images.unsplash.com/photo-1734122415415-88cb1d7d5dc0?q=80&w=320&h=320&auto=format&fit=facearea&facepad=3&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  alt="Avatar"
+                />
+                {/* Oculta el nombre y el icono de flecha cuando está minificado */}
+                <span className="hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden whitespace-nowrap">
+                  Chicharron
+                </span>
+                <svg
+                  className="shrink-0 size-3.5 ms-auto hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round">
+                  <path d="m7 15 5 5 5-5" />
+                  <path d="m7 9 5-5 5 5" />
+                </svg>
+              </button>
 
-                            <svg
-                              className="hs-accordion-active:block ms-auto hidden size-4 text-gray-600 group-hover:text-gray-500"
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round">
-                              <path d="m18 15-6-6-6 6" />
-                            </svg>
-                            <svg
-                              className="hs-accordion-active:hidden ms-auto block size-4 text-gray-600 group-hover:text-gray-500"
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round">
-                              <path d="m6 9 6 6 6-6" />
-                            </svg>
-                          </button>
-
-                          <div
-                            id={`${menuId}-collapse`}
-                            className="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 hidden"
-                            role="region"
-                            aria-labelledby={menuId}>
-                            {/* Renderizamos los subMenus del menu usando la estructura anidada */}
-                            {menu.subMenus && (
-                              <RenderSubMenus
-                                subMenus={menu.subMenus}
-                                parentId={`${menuId}-group`}
-                                onMenuClick={onMenuClick}
-                                level={0}
-                                onItemClick={expandSidebar}
-                              />
-                            )}
-                          </div>
-                        </li>
-                      );
-                    })}
-                </React.Fragment>
-              ))
-            )}
-          </ul>
+              {/* Oculta el dropdown cuando está minificado */}
+              <div
+                className="hs-dropdown-menu hs-dropdown-open:opacity-100 w-60 transition-[opacity,margin] duration opacity-0 hidden z-20 bg-white border border-gray-200 rounded-lg shadow-lg hs-overlay-minified:hidden"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="hs-sidebar-footer-example-with-dropdown">
+                <div className="p-1">
+                  <a
+                    className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100"
+                    href="#">
+                    Coordinador
+                  </a>
+                  <a
+                    className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100"
+                    href="#">
+                    Cerrar Sesión
+                  </a>
+                </div>
+              </div>
+            </div>
+          </footer>
+          {/* End Footer */}
         </div>
-<footer className="mt-auto p-2 border-t border-gray-200">
-  <div className="hs-dropdown [--strategy:absolute] [--auto-close:inside] relative w-full inline-flex">
-    <button
-      id="hs-sidebar-footer-example-with-dropdown"
-      type="button"
-      className="w-full inline-flex shrink-0 items-center gap-x-2 p-2 text-start text-sm text-gray-800 rounded-md hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
-      aria-haspopup="menu"
-      aria-expanded="false"
-      aria-label="Dropdown"
-      onClick={expandSidebar}>
-      <img
-        className="shrink-0 size-5 rounded-full"
-        src="https://images.unsplash.com/photo-1734122415415-88cb1d7d5dc0?q=80&w=320&h=320&auto=format&fit=facearea&facepad=3&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        alt="Avatar"
-      />
-      {/* Oculta el nombre y el icono de flecha cuando está minificado */}
-      <span className="hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden whitespace-nowrap">
-        Chicharron
-      </span>
-      <svg
-        className="shrink-0 size-3.5 ms-auto hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden"
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round">
-        <path d="m7 15 5 5 5-5" />
-        <path d="m7 9 5-5 5 5" />
-      </svg>
-    </button>
-
-    {/* Oculta el dropdown cuando está minificado */}
-    <div
-      className="hs-dropdown-menu hs-dropdown-open:opacity-100 w-60 transition-[opacity,margin] duration opacity-0 hidden z-20 bg-white border border-gray-200 rounded-lg shadow-lg hs-overlay-minified:hidden"
-      role="menu"
-      aria-orientation="vertical"
-      aria-labelledby="hs-sidebar-footer-example-with-dropdown">
-      <div className="p-1">
-        <a
-          className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100"
-          href="#">
-          Coordinador
-        </a>
-        <a
-          className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100"
-          href="#">
-          Cerrar Sesión
-        </a>
-      </div>
-    </div>
-  </div>
-</footer>
       </nav>
     </>
   );

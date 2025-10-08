@@ -4,7 +4,7 @@ import CardConsultations from "./CardConsultations";
 const GridConsultations = () => {
     return (
         <>
-            <div className="grid-cols-4 sm:grid md:grid-cols-3 xl:flex xl:w-full xl:gap-4 grid-rows-1 gap-4 sm:pt-8 md:mt-10 xl:mt-0 block [&>*]:xl:flex-1 [&>*]:xl:min-w-[220px]">
+            <div className="mt-2 grid grid-cols-6 gap-4 sm:mt-8 md:mt-8 lg:mt-0 xl:mt-0">
                 <CardConsultations />
             </div>
         </>
