@@ -269,6 +269,34 @@ body {
   background: var(--color-jerarquia1, #e0f7fa);
   color: #2b463c;
 }
+
+/* Comportamiento sticky para el elemento seleccionado - Top */
+.sticky-selected-top {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background: var(--color-jerarquia1, #e0f7fa) !important;
+  color: #2b463c !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Comportamiento sticky para el elemento seleccionado - Bottom */
+.sticky-selected-bottom {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 10 !important;
+  background: var(--color-jerarquia1, #e0f7fa) !important;
+  color: #2b463c !important;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15) !important;
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
 /* Forzar color y visibilidad de los sufijos AM/PM en los inputs type=time */
 input[type="time"]::-webkit-datetime-edit-ampm-field {
   color: #111;

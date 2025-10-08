@@ -4,11 +4,120 @@ import { Toaster, toast } from "sonner";
 import { obetenerTablaMetas, actualizarMetas, obetenerJerarquiaEncargados } from '../../../../services/LokiServices';
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
 
+// Función para inyectar estilos CSS que oculten los controles de incremento
+const injectHideNumberArrowsStyles = () => {
+    if (typeof document !== 'undefined') {
+        const style = document.createElement('style');
+        style.textContent = `
+            input[type=number]::-webkit-outer-spin-button,
+            input[type=number]::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+        `;
+        if (!document.head.querySelector('style[data-hide-number-arrows]')) {
+            style.setAttribute('data-hide-number-arrows', 'true');
+            document.head.appendChild(style);
+        }
+    }
+};
+
+// Funciones para formateo de moneda
+const formatCurrency = (value) => {
+    if (!value || value === '') return '';
+    
+    // Remover todo excepto números y punto decimal
+    const cleanValue = value.toString().replace(/[^\d.]/g, '');
+    
+    // Si no hay números después de limpiar, retornar vacío
+    if (!cleanValue || cleanValue === '' || cleanValue === '.') return '';
+    
+    // Validar que no tenga más de un punto decimal
+    const parts = cleanValue.split('.');
+    if (parts.length > 2) return formatCurrency(parts[0] + '.' + parts[1]);
+    
+    let numberPart = parts[0];
+    let decimalPart = parts[1];
+    
+    // Si la parte entera está vacía pero hay decimales, agregar 0
+    if (!numberPart && decimalPart !== undefined) {
+        numberPart = '0';
+    }
+    
+    // Si no hay parte entera y no hay decimales, retornar vacío
+    if (!numberPart) return '';
+    
+    // Limitar a 9 dígitos enteros máximo (999,999,999)
+    if (numberPart && numberPart.length > 9) {
+        numberPart = numberPart.substring(0, 9);
+    }
+    
+    // Limitar a 2 decimales
+    if (decimalPart && decimalPart.length > 2) {
+        decimalPart = decimalPart.substring(0, 2);
+    }
+    
+    // Formatear la parte entera con separadores de miles
+    const formattedNumber = numberPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    
+    // Construir el valor final
+    let result = '$' + formattedNumber;
+    if (decimalPart !== undefined) {
+        result += '.' + decimalPart;
+    }
+    
+    return result;
+};
+
+// Función específica para formatear moneda en la tabla (siempre 2 decimales)
+const formatCurrencyForDisplay = (value) => {
+    if (!value || value === '') return '$0.00';
+    
+    // Convertir a número y asegurar 2 decimales
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) return '$0.00';
+    
+    // Formatear con 2 decimales y separadores de miles
+    return '$' + numValue.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+};
+
+const parseCurrencyToNumber = (formattedValue) => {
+    if (!formattedValue || formattedValue === '') return '';
+    
+    // Asegurar que sea una cadena
+    const stringValue = formattedValue.toString();
+    
+    // Remover $ y comas, mantener solo números y punto decimal
+    const cleanValue = stringValue.replace(/[$,]/g, '');
+    
+    return cleanValue;
+};
+
+const validateCurrencyInput = (value) => {
+    // Permitir vacío
+    if (value === '') return true;
+    
+    // Remover formato para validar
+    const cleanValue = parseCurrencyToNumber(value);
+    
+    // Validar formato: máximo 9 enteros y 2 decimales
+    const regex = /^\d{0,9}(\.\d{0,2})?$/;
+    return regex.test(cleanValue) && parseFloat(cleanValue) >= 0;
+};
+
 
 const ModalMetasContent = () => {
     const [tablaMetas, setTablaMetas] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    // Inyectar estilos para ocultar los controles de incremento
+    React.useEffect(() => {
+        injectHideNumberArrowsStyles();
+    }, []);
     // Estado para la jerarquía de ejecutivos (lógica separada)
     const [executiveTree, setExecutiveTree] = useState([]);
     const [loadingJerarquia, setLoadingJerarquia] = useState(false);
@@ -16,7 +125,7 @@ const ModalMetasContent = () => {
     // Estado para checkboxes y edición de inputs
     const [selectedRows, setSelectedRows] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
-    const [editValues, setEditValues] = useState({}); // { rowKey: { campo: valor, ... } }
+
     // Estado para los inputs de arriba
     const [inputValues, setInputValues] = useState({
         cuentas: '',
@@ -43,7 +152,7 @@ const ModalMetasContent = () => {
                 const nombreEjecutivo = userData?.nombre || userData?.nombreEjecutivo || userData?.ejecutivo || '';
                 if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
                 const data = await obetenerJerarquiaEncargados(idEjecutivo);
-                console.log('🟢 Respuesta jerarquía ejecutivos:', data);
+                console.log('Respuesta jerarquía ejecutivos:', data);
                 // Si la respuesta NO incluye el nodo raíz, lo agregamos manualmente
                 let tree = [];
                 if (Array.isArray(data)) {
@@ -94,7 +203,6 @@ const ModalMetasContent = () => {
             horaSalida: ''
         });
         setSelectedRows([]);
-        setEditValues({});
         setError(null);
         setTablaMetas([]);
         setLoading(true);
@@ -283,7 +391,8 @@ const ModalMetasContent = () => {
         (async () => {
             try {
                 const data = await obetenerTablaMetas(validIds);
-                setTablaMetas(Array.isArray(data) ? data.filter(Boolean) : []);
+                const processedData = Array.isArray(data) ? data.filter(Boolean) : [];
+                setTablaMetas(processedData);
             } catch {
                 setError('Error al obtener la tabla de metas');
                 setTablaMetas([]);
@@ -324,6 +433,35 @@ const ModalMetasContent = () => {
 
     // Handler para el botón Guardar
     const handleGuardar = async () => {
+        // Validar tipos de datos TinyInt (0-255) para Negociaciones y Cumplimientos
+        const negociaciones = Number(inputValues.negociaciones) || 0;
+        const cumplimientos = Number(inputValues.cumplimientos) || 0;
+        
+        if (negociaciones < 0 || negociaciones > 255) {
+            toast.warning('Las negociaciones deben estar entre 0 y 255');
+            return;
+        }
+        
+        if (cumplimientos < 0 || cumplimientos > 255) {
+            toast.warning('Los cumplimientos deben estar entre 0 y 255');
+            return;
+        }
+        
+        // Validar relación: Los cumplimientos deben ser menor o igual a las negociaciones
+        if (cumplimientos > 0 && negociaciones > 0 && cumplimientos > negociaciones) {
+            toast.warning('Los cumplimientos deben ser menor o igual a las negociaciones');
+            return;
+        }
+        
+        // Validar regla de negocio: Monto Cumplido debe ser menor al Saldo Solucionado
+        const montoCumplido = Number(parseCurrencyToNumber(inputValues.montoCumplido)) || 0;
+        const saldoSolucionado = Number(parseCurrencyToNumber(inputValues.saldoSolucionado)) || 0;
+        
+        if (montoCumplido > 0 && saldoSolucionado > 0 && montoCumplido >= saldoSolucionado) {
+            toast.error('El monto cumplido debe ser menor al saldo solucionado');
+            return;
+        }
+
         // Alta de metas para todos los ejecutivos seleccionados (inputs de arriba)
         if (selectedExecutives.length > 0 && selectedRows.length === 0) {
             try {
@@ -342,8 +480,8 @@ const ModalMetasContent = () => {
                         titulares: Number(inputValues.titulares) || 0,
                         negociaciones: Number(inputValues.negociaciones) || 0,
                         cumplimientos: Number(inputValues.cumplimientos) || 0,
-                        montoCumplido: Number(inputValues.montoCumplido) || 0,
-                        saldoSolucionado: Number(inputValues.saldoSolucionado) || 0,
+                        montoCumplido,
+                        saldoSolucionado,
                         segmento: inputValues.segmento || null,
                         horaEntrada: inputValues.horaEntrada || '',
                         horaSalida: inputValues.horaSalida || '',
@@ -370,6 +508,29 @@ const ModalMetasContent = () => {
         }
         // Edición múltiple de filas seleccionadas en la tabla
         if (selectedRows.length === 0) return;
+        
+        // Validar nuevamente para el caso de actualización de filas
+        if (negociaciones < 0 || negociaciones > 255) {
+            toast.warning('Las negociaciones deben estar entre 0 y 255');
+            return;
+        }
+        
+        if (cumplimientos < 0 || cumplimientos > 255) {
+            toast.warning('Los cumplimientos deben estar entre 0 y 255');
+            return;
+        }
+        
+        // Validar relación: Los cumplimientos deben ser menor o igual a las negociaciones
+        if (cumplimientos > 0 && negociaciones > 0 && cumplimientos > negociaciones) {
+            toast.warning('Los cumplimientos deben ser menor o igual a las negociaciones');
+            return;
+        }
+        
+        if (montoCumplido > 0 && saldoSolucionado > 0 && montoCumplido >= saldoSolucionado) {
+            toast.warning('El monto cumplido debe ser menor al saldo solucionado');
+            return;
+        }
+        
         try {
             for (const rowKey of selectedRows) {
                 const row = tablaMetas.find((r, i) => (r.id || r.usuario || i) === rowKey);
@@ -382,14 +543,15 @@ const ModalMetasContent = () => {
                         nuevoValor = 0;
                     }
                 }
+                // Usar valores de los inputs principales para actualizar la fila seleccionada
                 const payload = {
                     idEjecutivo: row.idEjecutivo || row.id || row.usuario || rowKey,
                     cuentas: Number(inputValues.cuentas) || 0,
                     titulares: Number(inputValues.titulares) || 0,
                     negociaciones: Number(inputValues.negociaciones) || 0,
                     cumplimientos: Number(inputValues.cumplimientos) || 0,
-                    montoCumplido: Number(inputValues.montoCumplido) || 0,
-                    saldoSolucionado: Number(inputValues.saldoSolucionado) || 0,
+                    montoCumplido: Number(parseCurrencyToNumber(inputValues.montoCumplido)) || 0,
+                    saldoSolucionado: Number(parseCurrencyToNumber(inputValues.saldoSolucionado)) || 0,
                     segmento: inputValues.segmento || null,
                     horaEntrada: inputValues.horaEntrada || '',
                     horaSalida: inputValues.horaSalida || '',
@@ -428,7 +590,6 @@ const ModalMetasContent = () => {
                     allHierarchyIds={allHierarchyIds}
                     setSelectedExecutives={setSelectedExecutives}
                     setSelectedRows={setSelectedRows}
-                    setEditValues={setEditValues}
                     setSelectedExecutiveNode={setSelectedExecutiveNode}
                     renderExecutiveTree={renderExecutiveTree}
                 />
@@ -444,8 +605,20 @@ const ModalMetasContent = () => {
                             <label>Cuentas</label>
                             <input
                                 type="number"
+                                min="0"
+                                maxLength="10"
                                 value={inputValues.cuentas}
-                                onChange={e => setInputValues(v => ({ ...v, cuentas: e.target.value }))}
+                                onChange={e => {
+                                    const value = e.target.value;
+                                    if (value === '' || (/^\d+$/.test(value) && parseFloat(value) >= 0 && value.length <= 10)) {
+                                        setInputValues(v => ({ ...v, cuentas: value }));
+                                    }
+                                }}
+                                onKeyDown={e => {
+                                    if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 style={{
                                     backgroundColor: "var(--color-bgcolor2)",
                                     color: "var(--color-jerarquia3)",
@@ -453,7 +626,9 @@ const ModalMetasContent = () => {
                                     borderRadius: "0.25rem",
                                     padding: "0.25rem 0.5rem",
                                     fontSize: "0.75rem",
-                                    fontWeight: "400"
+                                    fontWeight: "400",
+                                    appearance: "textfield",
+                                    MozAppearance: "textfield"
                                 }}
                             />
                         </div>
@@ -463,8 +638,20 @@ const ModalMetasContent = () => {
                             <label>Titulares</label>
                             <input
                                 type="number"
+                                min="0"
+                                maxLength="10"
                                 value={inputValues.titulares}
-                                onChange={e => setInputValues(v => ({ ...v, titulares: e.target.value }))}
+                                onChange={e => {
+                                    const value = e.target.value;
+                                    if (value === '' || (/^\d+$/.test(value) && parseFloat(value) >= 0 && value.length <= 10)) {
+                                        setInputValues(v => ({ ...v, titulares: value }));
+                                    }
+                                }}
+                                onKeyDown={e => {
+                                    if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 style={{
                                     backgroundColor: "var(--color-bgcolor2)",
                                     color: "var(--color-jerarquia3)",
@@ -472,18 +659,41 @@ const ModalMetasContent = () => {
                                     borderRadius: "0.25rem",
                                     padding: "0.25rem 0.5rem",
                                     fontSize: "0.75rem",
-                                    fontWeight: "400"
+                                    fontWeight: "400",
+                                    appearance: "textfield",
+                                    MozAppearance: "textfield"
                                 }}
                             />
                         </div>
 
                         {/* Negociaciones */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 110 }}>
-                            <label>Negociaciones</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 80 }}>
+                            <label>Negcianes</label>
                             <input
                                 type="number"
+                                min="0"
+                                max="255"
                                 value={inputValues.negociaciones}
-                                onChange={e => setInputValues(v => ({ ...v, negociaciones: e.target.value }))}
+                                onChange={e => {
+                                    const value = e.target.value;
+                                    const numValue = parseInt(value);
+                                    if (value === '' || (/^\d+$/.test(value) && numValue >= 0 && numValue <= 255)) {
+                                        setInputValues(v => ({ ...v, negociaciones: value }));
+                                        
+                                        // Validar relación con cumplimientos
+                                        const cumplimientos = Number(inputValues.cumplimientos) || 0;
+                                        if (numValue > 0 && cumplimientos > 0 && cumplimientos > numValue) {
+                                            toast.warning('Los cumplimientos deben ser menor o igual a las negociaciones');
+                                        }
+                                    } else if (numValue > 255) {
+                                        toast.warning('Las negociaciones deben estar entre 0 y 255');
+                                    }
+                                }}
+                                onKeyDown={e => {
+                                    if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 style={{
                                     backgroundColor: "var(--color-bgcolor2)",
                                     color: "var(--color-jerarquia3)",
@@ -491,18 +701,41 @@ const ModalMetasContent = () => {
                                     borderRadius: "0.25rem",
                                     padding: "0.25rem 0.5rem",
                                     fontSize: "0.75rem",
-                                    fontWeight: "400"
+                                    fontWeight: "400",
+                                    appearance: "textfield",
+                                    MozAppearance: "textfield"
                                 }}
                             />
                         </div>
 
                         {/* Cumplimientos */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 110 }}>
-                            <label>Cumplimientos</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 80 }}>
+                            <label>Cmplmtos</label>
                             <input
                                 type="number"
+                                min="0"
+                                max="255"
                                 value={inputValues.cumplimientos}
-                                onChange={e => setInputValues(v => ({ ...v, cumplimientos: e.target.value }))}
+                                onChange={e => {
+                                    const value = e.target.value;
+                                    const numValue = parseInt(value);
+                                    if (value === '' || (/^\d+$/.test(value) && numValue >= 0 && numValue <= 255)) {
+                                        setInputValues(v => ({ ...v, cumplimientos: value }));
+                                        
+                                        // Validar relación con negociaciones
+                                        const negociaciones = Number(inputValues.negociaciones) || 0;
+                                        if (numValue > 0 && negociaciones > 0 && numValue > negociaciones) {
+                                            toast.warning('Los cumplimientos deben ser menor o igual a las negociaciones');
+                                        }
+                                    } else if (numValue > 255) {
+                                        toast.warning('Los cumplimientos deben estar entre 0 y 255');
+                                    }
+                                }}
+                                onKeyDown={e => {
+                                    if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 style={{
                                     backgroundColor: "var(--color-bgcolor2)",
                                     color: "var(--color-jerarquia3)",
@@ -510,19 +743,41 @@ const ModalMetasContent = () => {
                                     borderRadius: "0.25rem",
                                     padding: "0.25rem 0.5rem",
                                     fontSize: "0.75rem",
-                                    fontWeight: "400"
+                                    fontWeight: "400",
+                                    appearance: "textfield",
+                                    MozAppearance: "textfield"
                                 }}
                             />
                         </div>
 
                         {/* Monto Cumplido */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 100 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 120 }}>
                             <label>M. Cumplido</label>
                             <input
-                                type="number"
-                                step="0.01"
+                                type="text"
                                 value={inputValues.montoCumplido}
-                                onChange={e => setInputValues(v => ({ ...v, montoCumplido: e.target.value }))}
+                                onChange={e => {
+                                    const inputValue = e.target.value;
+                                    
+                                    // Si está vacío o solo contiene $ , limpiar completamente
+                                    if (inputValue === '' || inputValue === '$') {
+                                        setInputValues(v => ({ ...v, montoCumplido: '' }));
+                                        return;
+                                    }
+                                    
+                                    // Validar entrada
+                                    if (validateCurrencyInput(inputValue)) {
+                                        // Formatear automáticamente
+                                        const formatted = formatCurrency(inputValue);
+                                        setInputValues(v => ({ ...v, montoCumplido: formatted }));
+                                    }
+                                }}
+                                onKeyDown={e => {
+                                    if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                placeholder="$0.00"
                                 style={{
                                     backgroundColor: "var(--color-bgcolor2)",
                                     color: "var(--color-jerarquia3)",
@@ -539,10 +794,30 @@ const ModalMetasContent = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 120 }}>
                             <label>S. Solucionado</label>
                             <input
-                                type="number"
-                                step="0.01"
+                                type="text"
                                 value={inputValues.saldoSolucionado}
-                                onChange={e => setInputValues(v => ({ ...v, saldoSolucionado: e.target.value }))}
+                                onChange={e => {
+                                    const inputValue = e.target.value;
+                                    
+                                    // Si está vacío o solo contiene $ , limpiar completamente
+                                    if (inputValue === '' || inputValue === '$') {
+                                        setInputValues(v => ({ ...v, saldoSolucionado: '' }));
+                                        return;
+                                    }
+                                    
+                                    // Validar entrada
+                                    if (validateCurrencyInput(inputValue)) {
+                                        // Formatear automáticamente
+                                        const formatted = formatCurrency(inputValue);
+                                        setInputValues(v => ({ ...v, saldoSolucionado: formatted }));
+                                    }
+                                }}
+                                onKeyDown={e => {
+                                    if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                placeholder="$0.00"
                                 style={{
                                     backgroundColor: "var(--color-bgcolor2)",
                                     color: "var(--color-jerarquia3)",
@@ -725,103 +1000,56 @@ const ModalMetasContent = () => {
                                                     {safe(row.ejecutivo) || safe(row.nombreEjecutivo) || safe(row.nombre)}
                                                 </td>
                                                 <td>{safe(row.usuario) || safe(row.usuarioEjecutivo) || safe(row.clave)}</td>
-                                                <td>
-                                                    <input
-                                                        type="number"
-                                                        min={0}
-                                                        value={safe(editValues[rowKey]?.cuentas, safe(row.cuentas, safe(row.totalCuentas, 0)))}
-                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], cuentas: e.target.value } }))}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        style={{ width: 60 }}
-                                                        disabled={!selectedRows.includes(rowKey)}
-                                                    />
+                                                <td style={{ textAlign: 'center', padding: '8px' }}>
+                                                    <span>
+                                                        {safe(row.cuentas, safe(row.totalCuentas, 0))}
+                                                    </span>
                                                 </td>
-                                                <td>
-                                                    <input
-                                                        type="number"
-                                                        min={0}
-                                                        value={safe(editValues[rowKey]?.titulares, safe(row.titulares, safe(row.totalTitulares, 0)))}
-                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], titulares: e.target.value } }))}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        style={{ width: 60 }}
-                                                        disabled={!selectedRows.includes(rowKey)}
-                                                    />
+                                                <td style={{ textAlign: 'center', padding: '8px' }}>
+                                                    <span>
+                                                        {safe(row.titulares, safe(row.totalTitulares, 0))}
+                                                    </span>
                                                 </td>
-                                                <td>
-                                                    <input
-                                                        type="number"
-                                                        min={0}
-                                                        value={safe(editValues[rowKey]?.negociaciones, safe(row.negociaciones, safe(row.totalNegociaciones, 0)))}
-                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], negociaciones: e.target.value } }))}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        style={{ width: 60 }}
-                                                        disabled={!selectedRows.includes(rowKey)}
-                                                    />
+                                                <td style={{ textAlign: 'center', padding: '8px' }}>
+                                                    <span>
+                                                        {safe(row.negociaciones, safe(row.totalNegociaciones, 0))}
+                                                    </span>
                                                 </td>
-                                                <td>
-                                                    <input
-                                                        type="number"
-                                                        min={0}
-                                                        value={safe(editValues[rowKey]?.cumplimientos, safe(row.cumplimientos, safe(row.totalCumplimientos, 0)))}
-                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], cumplimientos: e.target.value } }))}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        style={{ width: 60 }}
-                                                        disabled={!selectedRows.includes(rowKey)}
-                                                    />
+                                                <td style={{ textAlign: 'center', padding: '8px' }}>
+                                                    <span>
+                                                        {safe(row.cumplimientos, safe(row.totalCumplimientos, 0))}
+                                                    </span>
                                                 </td>
-                                                <td>
-                                                    <input
-                                                        type="number"
-                                                        min={0}
-                                                        step={0.01}
-                                                        value={safe(editValues[rowKey]?.montoCumplido, safe(editValues[rowKey]?.monto_cumplido, safe(row.montoCumplido, safe(row.monto_cumplido, 0))))}
-                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], montoCumplido: e.target.value } }))}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        style={{ width: 80 }}
-                                                        disabled={!selectedRows.includes(rowKey)}
-                                                    />
+                                                <td style={{ textAlign: 'center', padding: '8px' }}>
+                                                    <span>
+                                                        {(() => {
+                                                            const originalValue = safe(row.montoCumplido, safe(row.monto_cumplido, 0));
+                                                            return formatCurrencyForDisplay(originalValue);
+                                                        })()}
+                                                    </span>
                                                 </td>
-                                                <td>
-                                                    <input
-                                                        type="number"
-                                                        min={0}
-                                                        step={0.01}
-                                                        value={safe(editValues[rowKey]?.saldoSolucionado, safe(editValues[rowKey]?.saldo_solucionado, safe(row.saldoSolucionado, safe(row.saldo_solucionado, 0))))}
-                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], saldoSolucionado: e.target.value } }))}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        style={{ width: 80 }}
-                                                        disabled={!selectedRows.includes(rowKey)}
-                                                    />
+                                                <td style={{ textAlign: 'center', padding: '8px' }}>
+                                                    <span>
+                                                        {(() => {
+                                                            const originalValue = safe(row.saldoSolucionado, safe(row.saldo_solucionado, 0));
+                                                            return formatCurrencyForDisplay(originalValue);
+                                                        })()}
+                                                    </span>
                                                 </td>
-                                                <td>
-                                                    <input
-                                                        type="text"
-                                                        value={safe(editValues[rowKey]?.segmento, safe(row.segmento, safe(row.nombreSegmento, '')))}
-                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], segmento: e.target.value } }))}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        style={{ width: 80 }}
-                                                        disabled={!selectedRows.includes(rowKey)}
-                                                    />
+                                                <td style={{ textAlign: 'center', padding: '8px' }}>
+                                                    <span>
+                                                        {safe(row.segmento, safe(row.nombreSegmento, '-'))}
+                                                    </span>
                                                 </td>
-                                                <td>
-                                                    <input
-                                                        type="time"
-                                                        value={editValues[rowKey]?.horaEntrada === null ? '' : safe(editValues[rowKey]?.horaEntrada, safe(row.horaEntrada, safe(row.hora_entrada, '')))}
-                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], horaEntrada: e.target.value === '' ? null : e.target.value } }))}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        style={{ width: 120, color: '#111' }}
-                                                        disabled={!selectedRows.includes(rowKey)}
-                                                    />
+                                                <td style={{ textAlign: 'center', padding: '8px' }}>
+                                                    <span>
+                                                        {safe(row.horaEntrada, safe(row.hora_entrada, '-'))}
+                                                    </span>
                                                 </td>
-                                                <td>
-                                                    <input
-                                                        type="time"
-                                                        value={editValues[rowKey]?.horaSalida === null ? '' : safe(editValues[rowKey]?.horaSalida, safe(row.horaSalida, safe(row.hora_salida, '')))}
-                                                        onChange={e => setEditValues(v => ({ ...v, [rowKey]: { ...v[rowKey], horaSalida: e.target.value === '' ? null : e.target.value } }))}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        style={{ width: 120, color: '#111' }}
-                                                        disabled={!selectedRows.includes(rowKey)}
-                                                    />
+                                                <td style={{ textAlign: 'center', padding: '8px' }}>
+                                                    <span>
+                                                        {safe(row.horaSalida, safe(row.hora_salida, '-'))}
+                                                    </span>
                                                 </td>
                                             </tr>
                                         );
@@ -832,14 +1060,50 @@ const ModalMetasContent = () => {
                     </div>
                     {/* Botón Guardar dentro del contenedor de la tabla pero fuera del scroll */}
                     <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: '1rem' }}>
-                        <button
-                            className="modal-btn"
-                            style={{ background: '#2b463c', color: '#fff', minWidth: 140, height: 40, fontWeight: 600, fontSize: 16, borderRadius: 6, opacity: selectedRows.length > 0 ? 1 : 0.5, cursor: selectedRows.length > 0 ? 'pointer' : 'not-allowed', boxShadow: '0 2px 8px #bdbdbb33' }}
-                            onClick={handleGuardar}
-                            disabled={selectedRows.length === 0}
-                        >
-                            Guardar
-                        </button>
+                        {(() => {
+                            const montoCumplido = Number(parseCurrencyToNumber(inputValues.montoCumplido)) || 0;
+                            const saldoSolucionado = Number(parseCurrencyToNumber(inputValues.saldoSolucionado)) || 0;
+                            const negociaciones = Number(inputValues.negociaciones) || 0;
+                            const cumplimientos = Number(inputValues.cumplimientos) || 0;
+                            
+                            const hasMoneyValidationError = montoCumplido > 0 && saldoSolucionado > 0 && montoCumplido >= saldoSolucionado;
+                            const hasTinyIntValidationError = negociaciones > 255 || cumplimientos > 255;
+                            const hasRelationValidationError = cumplimientos > 0 && negociaciones > 0 && cumplimientos > negociaciones;
+                            const hasValidationError = hasMoneyValidationError || hasTinyIntValidationError || hasRelationValidationError;
+                            const isDisabled = selectedRows.length === 0 || hasValidationError;
+
+                            let tooltipText = '';
+                            if (hasMoneyValidationError) {
+                                tooltipText = 'El monto cumplido debe ser menor al saldo solucionado';
+                            } else if (hasTinyIntValidationError) {
+                                tooltipText = 'Negociaciones y cumplimientos deben estar entre 0 y 255';
+                            } else if (hasRelationValidationError) {
+                                tooltipText = 'Los cumplimientos deben ser menor o igual a las negociaciones';
+                            }
+
+                            return (
+                                <button
+                                    className="modal-btn"
+                                    style={{ 
+                                        background: isDisabled ? '#9ca3af' : '#2b463c', 
+                                        color: '#fff', 
+                                        minWidth: 140, 
+                                        height: 40, 
+                                        fontWeight: 600, 
+                                        fontSize: 16, 
+                                        borderRadius: 6, 
+                                        opacity: isDisabled ? 0.5 : 1, 
+                                        cursor: isDisabled ? 'not-allowed' : 'pointer', 
+                                        boxShadow: '0 2px 8px #bdbdbb33' 
+                                    }}
+                                    onClick={handleGuardar}
+                                    disabled={isDisabled}
+                                    title={tooltipText}
+                                >
+                                    Guardar
+                                </button>
+                            );
+                        })()}
                     </div>
                 </div>
             </div>

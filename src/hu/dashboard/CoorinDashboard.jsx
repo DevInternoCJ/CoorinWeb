@@ -5,17 +5,18 @@ import GridConsultations from "./board/consultations/GridConsultations";
 import TablaSesiones from "../dashboard/board/sessions/TablaSesiones";
 import RamificacionSesiones from "../dashboard/board/sessions/RamificacionSesiones";
 import ModalBase from "./board/ModalBase";
-import DarkList from "./sideBar/consultations/DarkList";
-import Regrest from "./sideBar/consultations/Regrest";
-import Payments from "./sideBar/consultations/information/Payments";
-import ReportingPayments from "./sideBar/consultations/information/ReportingPayments";
-import Wrongs from "./sideBar/consultations/information/Wrongs";
-import Addresses from "./sideBar/consultations/information/Addresses";
-import Emails from "./sideBar/consultations/information/Emails";
-import Searches from "./sideBar/consultations/information/Searches";
-import Offers from "./sideBar/consultations/information/Offers";
-import Comments from "./sideBar/consultations/information/Comments";
-import VGP from "./sideBar/consultations/information/VGP";
+import DarkListContent from "./sideBar/consultations/DarkList";
+import RegrestContent from "./sideBar/consultations/Regrest";
+import ModalBaseInformacion from "./sideBar/consultations/information/ModalBaseInformacion";
+import PaymentsContent from "./sideBar/consultations/information/Payments";
+import ReportingPaymentsContent from "./sideBar/consultations/information/ReportingPayments";
+import WrongsContent from "./sideBar/consultations/information/Wrongs";
+import AddressesContent from "./sideBar/consultations/information/Addresses";
+import EmailsContent from "./sideBar/consultations/information/Emails";
+import SearchesContent from "./sideBar/consultations/information/Searches";
+import OffersContent from "./sideBar/consultations/information/Offers";
+import CommentsContent from "./sideBar/consultations/information/Comments";
+import VGPContent from "./sideBar/consultations/information/VGP";
 import EmailTemplates from "./sideBar/Administration/gespa/emailTemplates/EmailTemplates";
 import ModalBaseCampanas from "./sideBar/Administration/ModalBaseCampanas";
 import ModalConsultaEjecutivos from "./board/consultations/Executives/ModalConsultaEjecutivos";
@@ -32,31 +33,65 @@ export default function CoorinDashboard() {
   const renderSelectedComponent = () => {
     const closeModal = () => setModalSidebarOpen(false);
     
+    // Componentes de información que usan el ModalBaseInformacion
+    const informationComponents = [
+      "Lista Negra", "Arrepentimientos",
+      "Pagos", "Pagos reportados", "Datos Erroneos", "Domicilios", 
+      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios", "VGP"
+    ];
+    
+    if (informationComponents.includes(selectedSidebarOption)) {
+      let ContentComponent;
+      
+      switch (selectedSidebarOption) {
+        case "Lista Negra":
+          ContentComponent = DarkListContent;
+          break;
+        case "Arrepentimientos":
+          ContentComponent = RegrestContent;
+          break;
+        case "Pagos":
+          ContentComponent = PaymentsContent;
+          break;
+        case "Pagos reportados":
+          ContentComponent = ReportingPaymentsContent;
+          break;
+        case "Datos Erroneos":
+          ContentComponent = WrongsContent;
+          break;
+        case "Domicilios":
+          ContentComponent = AddressesContent;
+          break;
+        case "Correos":
+          ContentComponent = EmailsContent;
+          break;
+        case "Búsquedas":
+          ContentComponent = SearchesContent;
+          break;
+        case "Ofrecimientos":
+          ContentComponent = OffersContent;
+          break;
+        case "Comentarios":
+          ContentComponent = CommentsContent;
+          break;
+        case "VGP":
+          ContentComponent = VGPContent;
+          break;
+        default:
+          ContentComponent = null;
+      }
+      
+      return (
+        <ModalBaseInformacion onClose={closeModal} tipoInformacion={selectedSidebarOption}>
+          {ContentComponent && <ContentComponent />}
+        </ModalBaseInformacion>
+      );
+    }
+    
+    // Otros componentes que mantienen su lógica original
     switch (selectedSidebarOption) {
       case "Campañas":
         return <ModalBaseCampanas open={modalSidebarOpen} onClose={closeModal} />;
-      case "Lista Negra":
-        return <DarkList onClose={closeModal} />;
-      case "Arrepentimientos":
-        return <Regrest onClose={closeModal} />;
-      case "Pagos":
-        return <Payments onClose={closeModal} />;
-      case "Pagos reportados":
-        return <ReportingPayments onClose={closeModal} />;
-      case "Datos Erroneos":
-        return <Wrongs onClose={closeModal} />;
-      case "Domicilios":
-        return <Addresses onClose={closeModal} />;
-      case "Correos":
-        return <Emails onClose={closeModal} />;
-      case "Búsquedas":
-        return <Searches onClose={closeModal} />;
-      case "Ofrecimientos":
-        return <Offers onClose={closeModal} />;
-      case "Comentarios":
-        return <Comments onClose={closeModal} />;
-      case "VGP":
-        return <VGP onClose={closeModal} />;
       case "Plantillas Correo":
         return <EmailTemplates onClose={closeModal} />;
       case "Ejecutivos":
@@ -118,7 +153,7 @@ export default function CoorinDashboard() {
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
     if (sidebarOptionsMap[menuId]) {
       const option = sidebarOptionsMap[menuId];
-      console.log(`✅ Abriendo modal para: ${option} (ID: ${menuId})`);
+      console.log(`Abriendo modal para: ${option} (ID: ${menuId})`);
       setSelectedSidebarOption(option);
       setModalSidebarOpen(true);
     } else {

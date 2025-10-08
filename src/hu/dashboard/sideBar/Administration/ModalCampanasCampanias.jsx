@@ -10,6 +10,7 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
     const [campanas, setCampanas] = useState([]);
     const [updatingId, setUpdatingId] = useState(null);
     const [modalLimpiar, setModalLimpiar] = useState({ open: false, idCampaña: null, nombre: "" });
+    const [modalEliminar, setModalEliminar] = useState({ open: false, idCampaña: null, nombre: "" });
     const [modalTop100, setModalTop100] = useState({ open: false, idCampaña: null });
     const [modalFilas, setModalFilas] = useState({ open: false, cartera: "American Express", idCampaña: null, nombreCampaña: "" });
     const [tipoFilas, setTipoFilas] = useState("archivo");
@@ -175,16 +176,7 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                                     <button
                                         className="modal-btn modal-btn-close"
                                         style={{ fontSize: 18 }}
-                                        onClick={async () => {
-                                            if (!row.idCampaña) return;
-                                            try {
-                                                await campaignDeleteada({ idCampaña: row.idCampaña });
-                                                toast.success(`Campaña "${row.Campaña}" eliminada`);
-                                                await cargarCampanas();
-                                            } catch (e) {
-                                                toast.error("Error al eliminar campaña", e);
-                                            }
-                                        }}
+                                        onClick={() => setModalEliminar({ open: true, idCampaña: row.idCampaña, nombre: row.Campaña })}
                                     >
                                         &times;
                                     </button>
@@ -244,6 +236,50 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                                 className="modal-btn modal-btn-close"
                                 style={{ minWidth: 60, height: 28, fontSize: 15, color: '#000' }}
                                 onClick={() => setModalLimpiar({ open: false, idCampaña: null, nombre: "" })}
+                            >No</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {modalEliminar.open && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'rgba(0,0,0,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999
+                }}>
+                    <div style={{ background: 'white', borderRadius: 8, padding: 24, minWidth: 320, boxShadow: '0 2px 16px rgba(0,0,0,0.15)' }}>
+                        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 12, color: '#000' }}>Eliminar Campaña</div>
+                        <div style={{ marginBottom: 18, fontSize: 15, color: '#000' }}>
+                            ¿Desea eliminar la campaña "{modalEliminar.nombre}"?
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+                            <button
+                                className="modal-btn modal-btn-primary"
+                                style={{ minWidth: 60, height: 28, fontSize: 15, color: '#000' }}
+                                onClick={async () => {
+                                    try {
+                                        await campaignDeleteada({ idCampaña: modalEliminar.idCampaña });
+                                        toast.success(`Campaña "${modalEliminar.nombre}" eliminada`);
+                                        await cargarCampanas();
+                                    } catch (e) {
+                                        toast.error("Error al eliminar campaña", e);
+                                    } finally {
+                                        setModalEliminar({ open: false, idCampaña: null, nombre: "" });
+                                    }
+                                }}
+                            >Sí</button>
+                            <button
+                                className="modal-btn modal-btn-close"
+                                style={{ minWidth: 60, height: 28, fontSize: 15, color: '#000' }}
+                                onClick={() => setModalEliminar({ open: false, idCampaña: null, nombre: "" })}
                             >No</button>
                         </div>
                     </div>

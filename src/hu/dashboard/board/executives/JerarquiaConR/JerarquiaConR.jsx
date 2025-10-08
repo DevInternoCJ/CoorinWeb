@@ -8,7 +8,6 @@ const JerarquiaConR = ({
     allHierarchyIds,
     setSelectedExecutives,
     setSelectedRows,
-    setEditValues,
     setSelectedExecutiveNode,
     renderExecutiveTree
 }) => {
@@ -48,7 +47,6 @@ const JerarquiaConR = ({
                         console.log('🟢 Enviando estos idEjecutivo al endpoint (sin sesión):', idsSinSesion);
                         setSelectedExecutives(idsSinSesion);
                         setSelectedRows([]); // Limpiar selección de filas
-                        setEditValues({}); // Limpiar edición
                         setSelectedExecutiveNode(Number(idEjecutivoSesion)); // Iluminar el nodo raíz
                         
                         // Hacer autoscroll hacia arriba
