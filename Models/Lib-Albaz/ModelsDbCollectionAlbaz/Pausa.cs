@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace Loki.AlbazLibrary.Collection;
+
+public partial class Pausa
+{
+    public int IdEjecutivo { get; set; }
+
+    public DateOnly FechaInsert { get; set; }
+
+    public TimeOnly SegundoInsert { get; set; }
+
+    public short IdPausa { get; set; }
+
+    public TimeOnly Duración { get; set; }
+
+    public virtual Ejecutivo IdEjecutivoNavigation { get; set; } = null!;
+
+    public virtual ValoresCatálogo IdPausaNavigation { get; set; } = null!;
+}

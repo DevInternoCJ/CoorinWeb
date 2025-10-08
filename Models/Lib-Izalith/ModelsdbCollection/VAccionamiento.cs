@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace Izalith.ModelsdbCollection;
+
+public partial class VAccionamiento
+{
+    public short IdCartera { get; set; }
+
+    public string IdCuenta { get; set; } = null!;
+
+    public DateOnly FechaInsert { get; set; }
+
+    public TimeOnly SegundoInsert { get; set; }
+
+    public TimeOnly SegundoPaquete { get; set; }
+
+    public string Mensaje { get; set; } = null!;
+
+    public long? NúmeroTelefónico { get; set; }
+
+    public bool? Entregado { get; set; }
+
+    public short IdAcercamiento { get; set; }
+
+    public DateOnly? FechaEntrega { get; set; }
+
+    public short? IdTipoMensaje { get; set; }
+}

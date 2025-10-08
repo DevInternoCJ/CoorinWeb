@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace HadesLibrary.ModelsDbCollection;
+
+public partial class TblConversacionWa
+{
+    public string? TicketId { get; set; }
+
+    public string? Chat { get; set; }
+
+    public DateTime? Date { get; set; }
+
+    public string? SendBy { get; set; }
+
+    public string? NameSend { get; set; }
+
+    public string? Message { get; set; }
+
+    public string? Caption { get; set; }
+
+    public string? IdCuenta { get; set; }
+
+    public DateOnly? FechaInsert { get; set; }
+
+    public string? NumeroControl { get; set; }
+
+    public string? Nombre { get; set; }
+
+    public string? Login { get; set; }
+}
