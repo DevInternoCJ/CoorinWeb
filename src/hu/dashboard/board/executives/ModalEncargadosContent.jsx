@@ -326,16 +326,13 @@ const ModalEncargadosContent = () => {
                 return;
             }
 
-            // Validar que hay un encargado seleccionado
-            if (!selectedEncargado || selectedEncargado === "VACIO" || selectedEncargado === "Null") {
-                toast.warning("Selecciona un encargado válido.");
-                return;
-            }
+            // Si no hay encargado seleccionado, se enviará 0 como idEncargado
+            // (El servidor manejará este caso según la lógica de negocio)
 
             // Obtener IDs de cartera y producto
             const idCartera = carterasProductosData.find(item => item.cartera === cartera)?.idCartera;
             const idProducto = producto === "-Sin Producto-" ? 
-                null : 
+                0 : // Cuando se selecciona "--Sin Producto--", el valor enviado es 0 para idProducto
                 carterasProductosData.find(item => item.producto === producto)?.idProducto;
 
             if (!idCartera) {
@@ -347,10 +344,10 @@ const ModalEncargadosContent = () => {
 
             // Crear el cuerpo de la petición - array de objetos CambiaEncargadoDto
             const requestBody = usuariosSeleccionados.map(usuario => ({
-                idEncargado: parseInt(selectedEncargado),
+                idEncargado: (!selectedEncargado || selectedEncargado === "VACIO" || selectedEncargado === "Null" || selectedEncargado === "" || selectedEncargado === " ") ? 0 : parseInt(selectedEncargado),
                 idEjecutivo: parseInt(usuario.idEjecutivo),
                 idCartera: parseInt(idCartera),
-                idProducto: idProducto ? parseInt(idProducto) : null
+                idProducto: idProducto !== null && idProducto !== undefined ? parseInt(idProducto) : 0
             }));
 
             console.log('📤 Enviando asignación de encargados:', requestBody);
@@ -361,7 +358,9 @@ const ModalEncargadosContent = () => {
                 await AsignaEncargados(requestBody);
                 
                 // Si llegamos aquí, la asignación fue exitosa
-                const encargadoSeleccionadoNombre = encargadosFiltrados.find(e => e.idEjecutivo.toString() === selectedEncargado.toString())?.nombreEjecutivo || "Encargado";
+                const encargadoSeleccionadoNombre = (!selectedEncargado || selectedEncargado === "VACIO" || selectedEncargado === "Null" || selectedEncargado === "" || selectedEncargado === " ") ? 
+                    "Sin Encargado" : 
+                    encargadosFiltrados.find(e => e.idEjecutivo.toString() === selectedEncargado.toString())?.nombreEjecutivo || "Encargado";
                 
                 // Formato ordenado del mensaje del toast
                 let mensaje = `${usuariosSeleccionados.length} asignado(s) exitosamente`;
