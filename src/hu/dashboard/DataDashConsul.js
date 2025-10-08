@@ -4,8 +4,9 @@ const dataDashConsul = [
         id: 1,
         title: "Cuentas",
         color: "color-background-secondary",
-        fontcolor: "color-base-200",
-        icon: "ExecutiveChart"
+        fontcolor: "color-text-mint",
+        icon: "ExecutiveChart",
+        iconShadow: "50"
     },
     {
         id: 2,
@@ -25,8 +26,9 @@ const dataDashConsul = [
         id: 4,
         title: "Historicos",
         color: "color-background-secondary",
-        fontcolor: "color-base-200",
-        icon: "ExecutiveChart"
+        fontcolor: "color-text-mint",
+        icon: "ExecutiveChart",
+        iconShadow: "50"
     }
 ];
 

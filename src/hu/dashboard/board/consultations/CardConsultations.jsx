@@ -24,15 +24,15 @@ const CardConsultations = () => {
                 catalog.title === "Cuentas" ? (
                     <div
                         key={catalog.id}
-                        className="card card-sm sm:max-w-sm rounded-xl p-1 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer"
+                        className="card card-sm sm:max-w-sm rounded-2xl p-2 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer shadow-none"
                         style={{ backgroundColor: `var(--${catalog.color})` }}
                         tabIndex={0}
                         role="button"
                         onClick={() => setOpen(true)}
                     >
                         {/* Máscara opaca al hacer hover */}
-                        <div className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-15 transition-opacity duration-100 bg-black"></div>
-                        <div className="card-header">
+                        <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-15 transition-opacity duration-100"></div>
+                        <div className="card-header p-1">
                             <h5
                                 className="card-title font-weight-600"
                                 style={{ color: `var(--${catalog.fontcolor})` }}
@@ -40,21 +40,30 @@ const CardConsultations = () => {
                                 {catalog.title}
                             </h5>
                         </div>
-                        <div className="card-body">
+                        <div className="card-body p-3 mb-0">
                             <div className="flex justify-center">
-                                <IconCuentas
-                                    className="size-8"
-                                    style={{ color: `var(--${catalog.fontcolor})` }}
-                                />
+                                <div className="avatar avatar-placeholder">
+                                    <div className={`bg-neutral-300/${catalog.iconShadow} text-neutral-content w-15 rounded-full flex items-center justify-center`}>
+                                        <IconCuentas
+                                            className="size-8"
+                                            style={{ color: `var(--${catalog.fontcolor})` }}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div className="card-footer text-center">
-                            <p className="text-base-content group-hover:text-black transition-colors duration-200">Abrir</p>
+                            <p
+                                className="group-hover:text-black transition-colors duration-200"
+                                style={{ color: `var(--${catalog.fontcolor})` }}
+                            >
+                                Abrir
+                            </p>
                         </div>
                     </div>
                 ) : (
                     <div
-                        className="card card-sm sm:max-w-sm rounded-xl p-1 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer"
+                        className="card card-sm sm:max-w-sm rounded-2xl p-2 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer shadow-none"
                         key={catalog.id}
                         style={{ backgroundColor: `var(--${catalog.color})` }}
                         onClick={() => {
@@ -72,8 +81,8 @@ const CardConsultations = () => {
                         role="button"
                     >
                         {/* Máscara opaca al hacer hover */}
-                        <div className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-15 transition-opacity duration-100 bg-black"></div>
-                        <div className="card-header">
+                        <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-15 transition-opacity duration-100"></div>
+                        <div className="card-header p-1">
                             <h5
                                 className="card-title font-weight-600"
                                 style={{ color: `var(--${catalog.fontcolor})` }}
@@ -81,33 +90,42 @@ const CardConsultations = () => {
                                 {catalog.title}
                             </h5>
                         </div>
-                        <div className="card-body">
+                        <div className="card-body p-3 mb-0">
                             <div className="flex justify-center">
-                                {catalog.title === "Productividad" ? (
-                                    <IconProductividad
-                                        className="size-8"
-                                        style={{ color: `var(--${catalog.fontcolor})` }}
-                                    />
-                                ) : catalog.title === "Generales" ? (
-                                    <IconGenerales
-                                        className="size-8"
-                                        style={{ color: `var(--${catalog.fontcolor})` }}
-                                    />
-                                ) : catalog.title === "Historicos" ? (
-                                    <IconHistoricos
-                                        className="size-8"
-                                        style={{ color: `var(--${catalog.fontcolor})` }}
-                                    />
-                                ) : (
-                                    <ExecutiveChart
-                                        className="size-8"
-                                        style={{ color: `var(--${catalog.fontcolor})` }}
-                                    />
-                                )}
+                                <div className="avatar avatar-placeholder">
+                                    <div className={`bg-neutral-300/${catalog.iconShadow} text-neutral-content w-15 rounded-full flex items-center justify-center`}>
+                                        {catalog.title === "Productividad" ? (
+                                            <IconProductividad
+                                                className="size-8"
+                                                style={{ color: `var(--${catalog.fontcolor})` }}
+                                            />
+                                        ) : catalog.title === "Generales" ? (
+                                            <IconGenerales
+                                                className="size-8"
+                                                style={{ color: `var(--${catalog.fontcolor})` }}
+                                            />
+                                        ) : catalog.title === "Historicos" ? (
+                                            <IconHistoricos
+                                                className="size-8"
+                                                style={{ color: `var(--${catalog.fontcolor})` }}
+                                            />
+                                        ) : (
+                                            <ExecutiveChart
+                                                className="size-8"
+                                                style={{ color: `var(--${catalog.fontcolor})` }}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div className="card-footer text-center">
-                            <p className="text-base-content group-hover:text-black transition-colors duration-200">Abrir</p>
+                            <p
+                                className="group-hover:text-black transition-colors duration-200"
+                                style={{ color: `var(--${catalog.fontcolor})` }}
+                            >
+                                Abrir
+                            </p>
                         </div>
                     </div>                )
             )}
