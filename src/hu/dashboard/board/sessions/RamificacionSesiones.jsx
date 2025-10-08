@@ -189,7 +189,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     const usuarioSesion = userData?.usuario || '';
 
     return (
-        <div className="relative bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-6 w-[900px] h-82 ramificacion-sesiones">
+        <div className="relative bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-6 w-full h-82 ramificacion-sesiones">
             {/* Header dividido en 3 columnas */}
             <div className="mb-4 grid grid-cols-3 items-center">
                 {/* Columna izquierda - Título */}

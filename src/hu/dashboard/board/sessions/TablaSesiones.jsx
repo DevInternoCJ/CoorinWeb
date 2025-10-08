@@ -152,7 +152,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
             </span>
             Sesiones
         </h3>
-        <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex-1 w-full">
+        <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex-1 w-full overflow-hidden">
             <div
                 style={{
                     overflowX: "auto",
