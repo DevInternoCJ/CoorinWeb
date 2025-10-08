@@ -4,8 +4,10 @@ using System.Data;
 using System.Linq; // Necesario para Linq si usas .Any() o similar
 using CoorinWeb.Loki.Common;
 using CoorinWeb.Loki.Global;
+using CoorinWeb.Loki.Mark.Auth.DAOs;
 using Dapper;
-using Microsoft.Data.SqlClient; // Se asume que IDbContextFactory está aquí
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore; // Se asume que IDbContextFactory está aquí
 
 // --- Nuevo Namespace para Enums Comunes ---
 namespace CoorinWeb.Loki.Common // Un buen lugar para enums genéricos
@@ -61,16 +63,19 @@ namespace CoorinWeb.Loki.Global
 
             static Ejecutivo1()
             {
+                // Actualizar para que coincida con la estructura de la BD
                 TablaParámetros = new DataTable("Parametros");
+                TablaParámetros.Columns.Add("Concepto", typeof(string));
                 TablaParámetros.Columns.Add("Campo", typeof(string));
-                TablaParámetros.Columns.Add("Operador", typeof(string));
-                TablaParámetros.Columns.Add("Valor", typeof(string));
-                TablaParámetros.Columns.Add("Logica", typeof(string));
-                TablaParámetros.Columns.Add("Tipo", typeof(string));
+                TablaParámetros.Columns.Add("Valores", typeof(string));
+                TablaParámetros.Columns.Add("Parámetros", typeof(string));
+                TablaParámetros.Columns.Add("Dato", typeof(string));
 
+                // CORREGIR: Agregar la columna "Origen" que espera el método
                 TablaAgrupar = new DataTable("Agrupar");
+                TablaAgrupar.Columns.Add("Concepto", typeof(string));
                 TablaAgrupar.Columns.Add("Campo", typeof(string));
-                TablaAgrupar.Columns.Add("Origen", typeof(string));
+                TablaAgrupar.Columns.Add("Origen", typeof(string)); // ← Esta es la columna faltante
             }
         }
 
@@ -92,10 +97,107 @@ namespace CoorinWeb.Loki.Global
                 dtConsultas.Columns.Add("idCartera", typeof(int));
                 dtConsultas.PrimaryKey = new DataColumn[] { dtConsultas.Columns["idConsulta"] };
 
+                // Filas hardcodeadas por defecto
                 dtConsultas.Rows.Add(1, 101, 1);
                 dtConsultas.Rows.Add(2, 102, 24);
+
                 _Consultas.Tables.Add(dtConsultas);
             }
+
+            // Método estático async para cargar consultas desde la BD usando Dapper
+            // En tu ConsultaGenerador, verifica que la conexión sea correcta
+            public static async Task CargarDesdeBDAsync(IDbContextFactory dbContextFactory, string servidor)
+            {
+                try
+                {
+                    // Reiniciar el DataSet
+                    _Consultas = new DataSet();
+
+                    // NO usar using aquí - dejar que el caller maneje el ciclo de vida
+                    var dbContext = dbContextFactory.GetDbContext(servidor, "Collection");
+                    var conn = dbContext.Database.GetDbConnection();
+
+                    if (conn.State != System.Data.ConnectionState.Open)
+                        await conn.OpenAsync();
+
+                    // 1. Cargar tabla Consultas
+                    DataTable dtConsultas = new DataTable("Consultas");
+                    dtConsultas.Columns.Add("idConsulta", typeof(int));
+                    dtConsultas.Columns.Add("idProducto", typeof(int));
+                    dtConsultas.Columns.Add("idCartera", typeof(int));
+                    dtConsultas.Columns.Add("NombreConsulta", typeof(string)); // Agregar esta columna
+                    dtConsultas.Columns.Add("Desde", typeof(DateTime)); // Agregar esta columna
+                    dtConsultas.PrimaryKey = new DataColumn[] { dtConsultas.Columns["idConsulta"] };
+
+                    var consultas = await conn.QueryAsync(
+                        "SELECT idConsulta, idProducto, idCartera, NombreConsulta, Desde FROM Consultas");
+
+                    foreach (var c in consultas)
+                    {
+                        dtConsultas.Rows.Add(c.idConsulta, c.idProducto, c.idCartera, c.NombreConsulta, c.Desde);
+                    }
+                    _Consultas.Tables.Add(dtConsultas);
+
+                    // 2. Cargar tabla ConsultaParámetros
+                    DataTable dtParametros = new DataTable("Parámetros");
+                    dtParametros.Columns.Add("idConsulta", typeof(int));
+                    dtParametros.Columns.Add("Concepto", typeof(string));
+                    dtParametros.Columns.Add("Campo", typeof(string));
+                    dtParametros.Columns.Add("Valores", typeof(string));
+                    dtParametros.Columns.Add("Parámetros", typeof(string));
+                    dtParametros.Columns.Add("Dato", typeof(string));
+
+                    var parametros = await conn.QueryAsync(
+                        "SELECT idConsulta, Concepto, Campo, Valores, Parámetros, Dato FROM ConsultaParámetros");
+
+                    foreach (var p in parametros)
+                    {
+                        dtParametros.Rows.Add(p.idConsulta, p.Concepto, p.Campo, p.Valores, p.Parámetros, p.Dato);
+                    }
+                    _Consultas.Tables.Add(dtParametros);
+
+                    // 3. Cargar tabla ConsultaAgrupar
+                    DataTable dtAgrupar = new DataTable("Agrupar");
+                    dtAgrupar.Columns.Add("idConsulta", typeof(int));
+                    dtAgrupar.Columns.Add("Concepto", typeof(string));
+                    dtAgrupar.Columns.Add("Campo", typeof(string));
+
+                    var agrupar = await conn.QueryAsync(
+                        "SELECT idConsulta, Concepto, Campo FROM ConsultaAgrupar");
+
+                    foreach (var a in agrupar)
+                    {
+                        dtAgrupar.Rows.Add(a.idConsulta, a.Concepto, a.Campo);
+                    }
+                    _Consultas.Tables.Add(dtAgrupar);
+
+                    // 4. Crear relaciones
+                    _Consultas.Relations.Add("FK_Parámetros",
+                        _Consultas.Tables["Consultas"].Columns["idConsulta"],
+                        _Consultas.Tables["Parámetros"].Columns["idConsulta"], true);
+
+                    _Consultas.Relations.Add("FK_Agrupar",
+                        _Consultas.Tables["Consultas"].Columns["idConsulta"],
+                        _Consultas.Tables["Agrupar"].Columns["idConsulta"], true);
+
+                    Console.WriteLine($"Se cargaron {dtConsultas.Rows.Count} consultas, {dtParametros.Rows.Count} parámetros, {dtAgrupar.Rows.Count} agrupaciones desde la BD");
+
+                    // Cerrar la conexión pero no disponer el contexto
+                    await conn.CloseAsync();
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Error al cargar consultas desde BD: {ex.Message}", ex);
+                }
+            }
+
+            public static DataRow? ObtenerConsulta(int idConsulta)
+            {
+                if (_Consultas.Tables.Count == 0) return null;
+                return _Consultas.Tables["Consultas"].Rows.Find(idConsulta);
+            }
+        
+
 
             public static SqlQueryData QueryCuentas(int idConsulta, ref ArrayList Columnas)
             {
@@ -150,7 +252,6 @@ namespace CoorinWeb.Loki.Global
 
             public static void LlenaConsulta(int idConsulta, DataTable Parámetros, DataTable Agrupar, out DateTime Desde)
             {
-
                 DataRow drConsulta = _Consultas.Tables["Consultas"].Rows.Find(idConsulta);
                 Desde = new DateTime();
 
@@ -160,16 +261,29 @@ namespace CoorinWeb.Loki.Global
                 Parámetros.Rows.Clear();
                 DataRow[] drParámetros = drConsulta.GetChildRows("FK_Parámetros");
                 for (int i = 0; i < drParámetros.Length; i++)
-                    Parámetros.ImportRow(drParámetros[i]);
+                {
+                    DataRow newRow = Parámetros.NewRow();
+                    newRow["Concepto"] = drParámetros[i]["Concepto"];
+                    newRow["Campo"] = drParámetros[i]["Campo"];
+                    newRow["Valores"] = drParámetros[i]["Valores"];
+                    newRow["Parámetros"] = drParámetros[i]["Parámetros"];
+                    newRow["Dato"] = drParámetros[i]["Dato"];
+                    Parámetros.Rows.Add(newRow);
+                }
 
                 Agrupar.Rows.Clear();
                 DataRow[] drAgrupar = drConsulta.GetChildRows("FK_Agrupar");
                 for (int i = 0; i < drAgrupar.Length; i++)
-                    Agrupar.ImportRow(drAgrupar[i]);
+                {
+                    DataRow newRow = Agrupar.NewRow();
+                    newRow["Concepto"] = drAgrupar[i]["Concepto"];
+                    newRow["Campo"] = drAgrupar[i]["Campo"];
+                    newRow["Origen"] = drAgrupar[i]["Concepto"]; // ← Mapear Concepto a Origen
+                    Agrupar.Rows.Add(newRow);
+                }
 
                 DateTime.TryParse(drConsulta["Desde"].ToString(), out Desde);
             }
-
             /// <summary>
             /// Guarda, actualiza o borra una consulta.
             /// </summary>
@@ -291,14 +405,7 @@ namespace CoorinWeb.Loki.Global
                     return false;
                 }
             }
-            /// <summary>
-            /// Valida que las columnas de la consulta existan en la tabla Producto.
-            /// </summary>
-            /// <param name="Parámetros">Tabla con parámetros.</param>
-            /// <param name="Agrupar">Tabla con columnas a agrupar.</param>
-            /// <returns></returns>
-         
-
+    
             /// <summary>
             /// Devuelve el query de la búsqueda.
             /// </summary>
@@ -315,7 +422,14 @@ namespace CoorinWeb.Loki.Global
                 var resultado = GeneraQueryCuentas(idProducto, Parámetros, Agrupar, Conteo, Desde, idCartera, ref listaColumnas);
                 return resultado.Query; 
             }
-
+            /// <summary>
+            /// Crea el query para realizar la consulta de pagos  de las cuentas con su negociación.
+            /// </summary>
+            /// <param name="idCartera">id de cartera que se va a consultar.</param>
+            /// <param name="Desde">Fecha desde para el periodo de la consulta.</param>
+            /// /// <param name="Hasta">Fecha hasta para el periodo de la consulta.</param>
+            /// <param name="idConsulta">id de la consulta de cuentas.</param>
+            /// <returns></returns>
             public static string QueryPagos(int idCartera, DateTime Desde, DateTime Hasta, int idConsulta)
             {
                 ArrayList alColumnas = new ArrayList();
@@ -336,6 +450,13 @@ namespace CoorinWeb.Loki.Global
                 return sQuery;
             }
 
+            /// <summary>
+            /// Crea el query para realizar la consulta de correos de la cartera.
+            /// </summary>
+            /// <param name="idCartera">id de cartera que se va a consultar.</param>        
+            /// <param name="idConsulta">id de la consulta de cuentas.</param>
+            /// <returns></returns>
+
             public static string QueryCorreos(int idCartera, int idConsulta)
             {
                 ArrayList alColumnas = new ArrayList();
@@ -355,6 +476,13 @@ namespace CoorinWeb.Loki.Global
                 return sQuery;
             }
 
+            /// <summary>
+            /// Crea el query para realizar la consulta de domicilios de las cuentas con su última visita.
+            /// </summary>
+            /// <param name="idCartera">id de cartera que se va a consultar.</param>
+            /// <param name="Desde">Fecha desde para el periodo de la consulta.</param>
+            /// <param name="idConsulta">id de la consulta de cuentas.</param>
+            /// <returns></returns>
             public static string QueryDomicilios(int idCartera, int idConsulta)
             {
                 ArrayList alColumnas = new ArrayList();
@@ -374,6 +502,14 @@ namespace CoorinWeb.Loki.Global
                 return sQuery;
             }
 
+
+            /// <summary>
+            /// Crea el query para realizar la consulta de visitas.
+            /// </summary>
+            /// <param name="idCartera">id de cartera que se va a consultar.</param>
+            /// <param name="idConsulta">id de la consulta de cuentas.</param>
+            /// <param name="Complemento">True si desea sacar visitas de Complemento.</param>
+            /// <returns></returns>
             public static string QueryVisitas(int idCartera, DateTime FechaInicio, DateTime FechaFin, int idConsulta, bool Complemento)
             {
                 ArrayList alColumnas = new ArrayList();
@@ -828,7 +964,14 @@ namespace CoorinWeb.Loki.Global
 
                 return new SqlQueryData(sQuery, alColumnas); // Se devuelve el objeto completo
             }
-
+            /// <summary>
+            /// Crea el query para realizar la consulta de los accionamientos.
+            /// </summary>
+            /// <param name="idCartera">id de cartera que se va a consultar.</param>
+            /// <param name="idConsulta">id de la consulta de cuentas.</param>
+            /// <param name="PorCuentas">Indica si la consulta será por número de accionamientos o número de cuentas.</param>
+            /// <param name="Desde">Fecha a partir de que se genera la consulta.</param>
+            /// <returns></returns>
             public static string QueryAccionamientos(int idCartera, int idConsulta, Resultado Conteo, DateTime Desde, DateTime Hasta, string Base, int iIdAcercamiento)
             {
                 ArrayList alColumnas = new ArrayList();
@@ -1122,7 +1265,14 @@ namespace CoorinWeb.Loki.Global
                 // Este return siempre debe ser alcanzado.
                 return sQuery + " \r\n ";
             }
-
+            /// <summary>
+            /// Crea el query para realizar la consulta de ofrecimientos de la cartera.
+            /// </summary>
+            /// <param name="idCartera">id de cartera que se va a consultar.</param>    
+            /// <param name="Desde">Fecha desde para el periodo de la consulta.</param>
+            /// <param name="Hasta">Fecha hasta para el periodo de la consulta.</param>
+            /// <param name="idConsulta">id de la consulta de cuentas.</param>
+            /// <returns></returns>
             public static string QueryOfrecimientos(int idCartera, DateTime Desde, DateTime Hasta, int idConsulta)
             {
 
@@ -1144,6 +1294,13 @@ namespace CoorinWeb.Loki.Global
 
                 return sQuery;
             }
+            /// <summary>
+            /// Crea el query para realizar la consulta de búsquedas realizadas a las cuentas.
+            /// </summary>
+            /// <param name="idCartera">id de cartera que se va a consultar.</param>
+            /// <param name="Desde">Fecha desde para el periodo de la consulta.</param>
+            /// <param name="idConsulta">id de la consulta de cuentas.</param>
+            /// <returns></returns>
             public static string QueryBúsquedas(int idCartera, DateTime Desde, DateTime Hasta, int idConsulta)
             {
 
@@ -1187,6 +1344,14 @@ namespace CoorinWeb.Loki.Global
                 return sQuery;
             }
 
+            /// <summary>
+            /// Crea el query para realizar la consulta de carteo devuelto.
+            /// </summary>
+            /// <param name="idCartera">id de cartera que se va a consultar.</param>
+            /// <param name="Desde">Fecha desde para el periodo de la consulta.</param>
+            /// <param name="idConsulta">id de la consulta de cuentas.</param>
+            /// <returns></returns>
+
             public static string QueryCarteoDevuelto(int idCartera, DateTime Desde, DateTime Hasta, int idConsulta)
             {
 
@@ -1209,6 +1374,15 @@ namespace CoorinWeb.Loki.Global
                 return sQuery;
             }
 
+
+            /// <summary>
+            /// Query para consultas VGP
+            /// </summary>
+            /// <param name="idCartera"></param>
+            /// <param name="Desde"></param>
+            /// <param name="Hasta"></param>
+            /// <param name="idConsulta"></param>
+            /// <returns></returns>
             public static string QueryVGP(int idCartera, DateTime Desde, DateTime Hasta, int idConsulta)
             {
 
@@ -1229,7 +1403,13 @@ namespace CoorinWeb.Loki.Global
 
                 return sQuery;
             }
-
+            /// <summary>
+            /// Crea el query para realizar la consulta de pagos reportados realizadas a las cuentas.
+            /// </summary>
+            /// <param name="idCartera">id de cartera que se va a consultar.</param>
+            /// <param name="Desde">Fecha desde para el periodo de la consulta.</param>
+            /// <param name="idConsulta">id de la consulta de cuentas.</param>
+            /// <returns></returns>
             public static class ReportePagos
             {
                 public static string QueryPagosReportados(int idCartera, DateTime Desde, DateTime Hasta, int idConsulta)
