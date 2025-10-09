@@ -185,10 +185,7 @@ export default function CoorinDashboard() {
       <CoorinSidebar 
         onMenuClick={handleSidebarMenuClick}
       />
-
-      {/* Contenedor principal que ocupa todo el alto sin generar scroll global */}
       <main className="flex-1 bg-background-dashboard min-h-0 relative z-0 flex flex-col">
-        {/* Contenedor interno con overflow-auto para permitir scroll solo cuando el contenido excede el área disponible */}
         <div
           className="transition-transform duration-200 flex-1 min-h-0 overflow-auto"
           style={{
@@ -233,8 +230,6 @@ export default function CoorinDashboard() {
             </div>
           </div>
         </div>
-
-        {/* Renderizar componente seleccionado */}
         {modalSidebarOpen && renderSelectedComponent()}
       </main>
     </>

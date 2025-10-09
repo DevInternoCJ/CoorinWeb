@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import ModalFilasCampañas from "./ModalFilasCampanias";
-import { campainghInCharge, enabledUnenabledCampaign, campaignDeleteada, campaignCleaning, AvanceCampaing } from "../../../../services/LokiServices";
+import { campainghInCharge, enabledUnenabledCampaign, campaignDeleteada, campaignCleaning, AvanceCampaing } from "../../../../services/mark/albaz/LokiServices";
 import { toast } from "sonner";
 import NewCampaign from "./NewCampaign";
 import ModalToponeHundred from "./ModalToponeHundred";

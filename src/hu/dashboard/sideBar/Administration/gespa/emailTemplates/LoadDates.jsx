@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { PostLoadData } from "../../../../../../services/LokiServices";
+import { PostLoadData } from "../../../../../../services/mark/albaz/LokiServices";
 
 const LoadDates = ({
   selectedProduct,
-  onSaldoChange,
   isModalOpen,
   onPlantillasChange,
+  onDatosDeudorChange,
 }) => {
   const [datosDeudor, setDatosDeudor] = useState({});
   const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
@@ -18,7 +18,7 @@ const LoadDates = ({
     setDatosProductoCompleto({});
     setLoading(true);
     setError(null);
-    onSaldoChange(""); // Resetear el saldo también
+    onDatosDeudorChange({}); // ✅ Limpiar datosDeudor en el padre también
   };
   // Efecto para detectar cuando el modal se cierra y resetear los datos
   useEffect(() => {
@@ -48,13 +48,15 @@ const LoadDates = ({
           const saldoFormateado = response.cuenta.Saldo
             ? `$${response.cuenta.Saldo.toLocaleString()}`
             : "$0.00";
-          setDatosDeudor({
-            nombreDeudor: response.cuenta.NombreDeudor || "No disponible",
-            rfc: response.cuenta.RFC || "No disponible",
-            numeroCliente: response.cuenta.NúmeroCliente || "No disponible",
-            saldo: saldoFormateado,
-          });
-          onSaldoChange(saldoFormateado);
+          const nuevosDatosDeudor = {
+            NombreDeudor: response.cuenta.NombreDeudor || "",
+            RFC: response.cuenta.RFC || "",
+            NúmeroCliente: response.cuenta.NúmeroCliente || "",
+            Saldo: saldoFormateado,
+          };
+
+          setDatosDeudor(nuevosDatosDeudor);
+          onDatosDeudorChange(nuevosDatosDeudor); // ✅ Actualizar datosDeudor en el padre
         }
         // Guardar todos los datos del producto para la vista completa
         setDatosProductoCompleto(response.producto);
@@ -146,36 +148,36 @@ const LoadDates = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
-              label: "Nombre",
-              value: datosDeudor.nombreDeudor,
+              label: "NombreDeudor",
+              value: datosDeudor.NombreDeudor,
               icon: "user",
               color: "gray",
             },
             {
               label: "RFC",
-              value: datosDeudor.rfc,
+              value: datosDeudor.RFC,
               icon: "document",
               color: "blue",
             },
             {
-              label: "Número Cliente",
-              value: datosDeudor.numeroCliente,
+              label: "NúmeroCliente",
+              value: datosDeudor.NúmeroCliente,
               icon: "id",
               color: "gray",
             },
             {
               label: "Saldo",
-              value: datosDeudor.saldo,
+              value: datosDeudor.Saldo,
               icon: "currency",
               color: "green",
             },
           ].map((item, index) => (
             <div
               key={index}
-              className="bg-background-primary p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-200"
+              className="bg-background-tertiary p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-200"
             >
               <div
-                className={`text-xs font-medium text-${item.color}-600 uppercase tracking-wide mb-2`}
+                className={`text-xs font-medium text-${item.color}-600 tracking-wide mb-2`}
               >
                 {item.label}
               </div>

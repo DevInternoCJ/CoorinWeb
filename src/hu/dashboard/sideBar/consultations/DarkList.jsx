@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { darkListV2 } from "../../../../services/LokiServices";
+import { darkListV2 } from "../../../../services/mark/albaz/LokiServices";
 
 const DarkListContent = () => {
 

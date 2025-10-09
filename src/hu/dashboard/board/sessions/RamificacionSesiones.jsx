@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { obetenerJerarquiaEncargados } from '../../../../services/LokiServices';
+import { obetenerJerarquiaEncargados } from "../../../../services/mark/albaz/LokiServices";
 
 const RamificacionSesiones = ({ onExecutiveSelect }) => {
     // Estados para la jerarquía

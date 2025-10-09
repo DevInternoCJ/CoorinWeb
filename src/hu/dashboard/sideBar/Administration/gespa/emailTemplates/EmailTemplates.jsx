@@ -4,18 +4,18 @@ import ModalHeader from "../ModalHeader";
 import Template from "./Template";
 import { IconTemplate } from "../IconsTemplates";
 import LoadDates from "./LoadDates";
-import { PostLoadData } from "../../../../../../services/LokiServices";
-import ModalBase from "../../../../board/ModalBase"
+import { PostLoadData } from "../../../../../../services/mark/albaz/LokiServices";
+import ModalBase from "../../../../board/ModalBase";
 
 const EmailTemplates = ({ onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [verifyResult, setVerifyResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showDataTables, setShowDataTables] = useState(false); // Estado para controlar la visibilidad de las tablas
-  const [saldo, setSaldo] = useState("");
   const [plantillas, setPlantillas] = useState([]);
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
+  const [datosDeudor, setDatosDeudor] = useState({}); // ✅ Nuevo estado para datosDeudor
 
   const actualizarPlantillas = async () => {
     // Puedes usar el mismo requestData que usa LoadDates
@@ -33,6 +33,11 @@ const EmailTemplates = ({ onClose }) => {
       setPlantillas(response.plantillas);
     }
   };
+
+  // ✅ Función para actualizar datosDeudor desde LoadDates
+  const handleDatosDeudorChange = (nuevosDatosDeudor) => {
+    setDatosDeudor(nuevosDatosDeudor);
+  };
   // Limpiar estados cuando el modal se cierra
   useEffect(() => {
     return () => {
@@ -40,7 +45,6 @@ const EmailTemplates = ({ onClose }) => {
       setVerifyResult(null);
       setLoading(false);
       setShowDataTables(false);
-      setSaldo("");
       setPlantillas([]);
     };
   }, []);
@@ -59,17 +63,22 @@ const EmailTemplates = ({ onClose }) => {
     <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div
         ref={modalRef}
-        className={`${bounce ? " animate-bounce-modal" : ""} bg-white rounded-lg shadow-2xl w-ful max-w-6xl max-h-[90vh] overflow-hidden border border-gray-300`}
-        onClick={e => e.stopPropagation()}
+        className={`${
+          bounce ? " animate-bounce-modal" : ""
+        } bg-white rounded-lg shadow-2xl w-ful max-w-6xl max-h-[90vh] overflow-hidden border border-gray-300`}
+        onClick={(e) => e.stopPropagation()}
       >
-         <ModalHeader
+        <ModalHeader
           icon={<IconTemplate className="size-6" />}
           title="Plantillas Correos"
           onClose={onClose}
         />
 
         {/* Content específico de EmailTemplates */}
-        <div div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
+        <div
+          div
+          className="p-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4"
+        >
           <WalletSection
             selectedProduct={selectedProduct}
             setSelectedProduct={setSelectedProduct}
@@ -79,20 +88,20 @@ const EmailTemplates = ({ onClose }) => {
             setLoading={setLoading}
             onProductSelect={handleProductSelect}
           />
-             {selectedProduct && (
-          <Template
-            saldo={saldo}
-            plantillas={plantillas}
-            onActualizarPlantillas={actualizarPlantillas}
-            idProducto={selectedProduct.value} 
-          />
+          {selectedProduct && (
+            <Template
+              plantillas={plantillas}
+              onActualizarPlantillas={actualizarPlantillas}
+              idProducto={selectedProduct.value}
+              datosDeudor={datosDeudor}
+            />
           )}
           {showDataTables && selectedProduct && (
             <div className="mt-6 border-t pt-6">
               <LoadDates
                 selectedProduct={selectedProduct}
-                onSaldoChange={setSaldo}
                 onPlantillasChange={setPlantillas}
+                onDatosDeudorChange={handleDatosDeudorChange} // ✅ Nueva prop
               />
             </div>
           )}

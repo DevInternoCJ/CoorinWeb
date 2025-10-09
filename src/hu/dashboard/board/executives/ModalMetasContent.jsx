@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
+// import { Input, Label } from 'preline'
 import JerarquiaConR from "./JerarquiaConR/JerarquiaConR";
 import { Toaster, toast } from "sonner";
-import { obetenerTablaMetas, actualizarMetas, obetenerJerarquiaEncargados } from '../../../../services/LokiServices';
+import { obetenerTablaMetas, actualizarMetas, obetenerJerarquiaEncargados } from "../../../../services/mark/albaz/LokiServices";
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
 
 // Función para inyectar estilos CSS que oculten los controles de incremento
@@ -172,7 +173,7 @@ const ModalMetasContent = () => {
                 }
                 setExecutiveTree(tree);
             } catch (e) {
-                setErrorJerarquia('Error al obtener la jerarquía de ejecutivos');
+                setErrorJerarquia('Error al obtener la jerarquía de ejecutivos',e);
                 setExecutiveTree([]);
             } finally {
                 setLoadingJerarquia(false);
@@ -351,7 +352,7 @@ const ModalMetasContent = () => {
         if (validIds.length > 0) {
             console.log('🟢 Ids enviados a obetenerTablaMetas:', validIds, '| Usuario seleccionado:', selectedExecutives);
         } else {
-            console.log('⚠️ No se enviaron ids válidos a obetenerTablaMetas. selectedExecutives:', selectedExecutives);
+            console.log('No se enviaron ids válidos a obetenerTablaMetas. selectedExecutives:', selectedExecutives);
         }
 
         // // Lógica para ocultar la info de un subordinado directo o de un subordinado de un subordinado directo ("nieto") sin subordinados, solo cuando se selecciona uno a uno

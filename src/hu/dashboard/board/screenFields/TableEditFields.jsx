@@ -3,7 +3,7 @@ import OptionFields from "./OptionFields";
 import {
   GetScreenFields,
   SaveScreenFields,
-} from "../../../../services/LokiServices";
+} from "../../../../services/mark/albaz/LokiServices";
 import { useUserStore } from "../../../../contextGlobal/userStore";
 import SaveButton from "../../sideBar/Administration/gespa/ButtonSave";
 const TableEditFields = ({ idProducto }) => {
@@ -26,7 +26,7 @@ const TableEditFields = ({ idProducto }) => {
       try {
         setLoading(true);
         setError(null);
-        const data = await GetScreenFields( idProducto);
+        const data = await GetScreenFields(idProducto);
         const transformedData = data.map((item, index) => ({
           id: item.id || index + 1,
           position: item.posición,
@@ -70,7 +70,7 @@ const TableEditFields = ({ idProducto }) => {
       campos,
     };
     try {
-      await SaveScreenFields( payload);
+      await SaveScreenFields(payload);
       setSaveResult("Guardado correctamente");
     } catch {
       setSaveResult("Error al guardar");
@@ -123,8 +123,7 @@ const TableEditFields = ({ idProducto }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-      {/* Header */}
+    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm max-h-80 overflow-auto">
       <div className="bg-background-secondary rounded-md grid grid-cols-12 gap-3 mb-4 py-3 px-3 font-semibold text-white text-sm">
         <div className="col-span-1">Position</div>
         <div className="col-span-3">Alias</div>
@@ -132,8 +131,6 @@ const TableEditFields = ({ idProducto }) => {
         <div className="col-span-2">Formato Campo</div>
         <div className="col-span-2">Resaltado</div>
       </div>
-
-      {/* Body con espacio entre filas */}
       <div className="space-y-3">
         {editData.map((item, idx) => (
           <OptionFields

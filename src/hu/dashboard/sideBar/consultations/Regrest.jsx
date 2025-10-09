@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getRegrest } from "../../../../services/LokiServices";
+import { getRegrest } from "../../../../services/mark/albaz/LokiServices";
 
 const RegrestContent = () => {
     

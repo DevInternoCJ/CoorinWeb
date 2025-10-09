@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { loginUser, ValidatePassword } from "../../services/LokiServices";
+import { ValidatePassword } from "../../services/mark/albaz/LokiServices";
+import { loginUser } from "../../services/mark/login/AuthServices";
 import ButtonLogin from "./ButtonLogin";
 import { LoginUser, LoginKey } from "./LoginIcons";
 import { useUserStore } from "../../contextGlobal/userStore";
@@ -23,7 +24,7 @@ const InputField = ({
   placeholder,
   value,
   onChange,
-  id,
+  id="hs-floating-input-email",
   label,
   minLength,
   maxLength,
@@ -32,11 +33,17 @@ const InputField = ({
 }) => (
   <div className="flex">
     <Icon className="size-9.5 border border-jerarquia2 rounded-l-lg bg-jerarquia2" />
-    <div className="input-floating w-full mb-4">
+    <div className="relative input-floating w-full mb-4">
       <input
         type={type}
         placeholder={placeholder}
-        className="w-full px-3 text-neutral-900 py-2 text-sm bg-neutral-100 border rounded-r-lg border-jerarquia2 focus:ring-2 focus:ring-jerarquia2 focus:outline-none"
+        className="peer p-2 block w-full bg-background-dashboard border border-gray-200 rounded-e-lg sm:text-sm placeholder:text-transparent focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none
+    focus:pt-3
+    focus:pb-1
+    not-placeholder-shown:pt-3
+    not-placeholder-shown:pb-1
+    autofill:pt-3
+    autofill:pb-1"
         value={value}
         onChange={onChange}
         minLength={minLength}
@@ -46,6 +53,15 @@ const InputField = ({
         id={id}
         disabled={disabled}
       />
+      <label htmlFor="hs-floating-input-email-value" className="absolute top-0 start-0 p-2 h-full sm:text-sm truncate pointer-events-none transition ease-in-out duration-100  origin-[0_0] peer-disabled:opacity-50 peer-disabled:pointer-events-none
+      peer-focus:scale-90
+      peer-focus:translate-x-0.5
+      peer-focus:-translate-y-3
+      peer-focus:text-gray-500 
+      peer-not-placeholder-shown:scale-90
+      peer-not-placeholder-shown:translate-x-0.5
+      peer-not-placeholder-shown:-translate-y-3
+      peer-not-placeholder-shown:text-gray-500  ">{label}</label>
     </div>
   </div>
 );
@@ -121,7 +137,7 @@ const LoginForm = ({ onLoginSuccess }) => {
   const processSuccessfulLogin = useCallback(
     (response, passwordValidation, onLoginSuccess, navigate) => {
       if (passwordValidation) {
-        toast.info("Por favor, actualiza tu contraseña.");
+        toast.info("Contraseña válida.");
         onLoginSuccess?.();
       } else {
         toast.success("¡Inicio de sesión exitoso!");
@@ -223,7 +239,7 @@ const LoginForm = ({ onLoginSuccess }) => {
         maxLength={4}
         required
         disabled={loading}
-        autoComplete="off"
+
       />
       <InputField
         icon={LoginKey}
@@ -237,7 +253,7 @@ const LoginForm = ({ onLoginSuccess }) => {
         maxLength={50}
         required
         disabled={loading}
-        autoComplete="off"
+        autoComplete
       />
       {passwordError && (
         <p className="text-red-400 text-xs mt-1 mb-2">{passwordError}</p>

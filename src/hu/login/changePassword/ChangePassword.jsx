@@ -4,7 +4,7 @@ import { EyeOpen, ArrowSync, LockSync } from "./PasswordIcons";
 import PASSWORD_REQUIREMENTS from "./Validations";
 import ButtonLogin from "../ButtonLogin";
 import EyeClose from "../../../assets/eye-close.svg";
-import { UpdatePassword } from "../../../services/LokiServices";
+import { UpdatePassword } from "../../../services/mark/albaz/LokiServices";
 import { useUserStore } from "../../../contextGlobal/userStore";
 
 const ChangePassword = ({ onClose }) => {

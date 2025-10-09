@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getSessions, patchLogoutEjecutive, patchUnlockedEjecutive, ResetPassword } from '../../../../services/LokiServices';
+import { getSessions, patchLogoutEjecutive, patchUnlockedEjecutive, ResetPassword } from "../../../../services/mark/albaz/LokiServices";
 import { toast } from 'sonner';
 
 // Tabla de sesiones 
@@ -57,7 +57,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
             toast.success(`Cierre exitoso para Ejecutivo: ${rowIdEjecutivo}`);
             
         } catch (error) {
-            console.error('❌ Error al cerrar sesión:', error);
+            console.error('Error al cerrar sesión:', error);
             toast.error(`Error al cerrar sesión del ejecutivo ID: ${rowIdEjecutivo}. ${error.message || 'Inténtalo de nuevo.'}`);
         } finally {
             setLoggingOut(null);

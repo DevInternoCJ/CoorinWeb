@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos, AsignaEncargados } from '../../../../services/LokiServices';
+import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos, AsignaEncargados } from "../../../../services/mark/albaz/LokiServices";
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
 import { toast } from "sonner";
 // Flecha tipo chevron moderna
@@ -350,9 +350,9 @@ const ModalEncargadosContent = () => {
                 idProducto: idProducto !== null && idProducto !== undefined ? parseInt(idProducto) : 0
             }));
 
-            console.log('📤 Enviando asignación de encargados:', requestBody);
+            console.log('Enviando asignación de encargados:', requestBody);
             console.log('👥 Usuarios seleccionados:', usuariosSeleccionados.map(u => u.displayName));
-            console.log('📊 Array de asignaciones:', `${requestBody.length} asignación(es) a procesar`);
+            console.log('Array de asignaciones:', `${requestBody.length} asignación(es) a procesar`);
             
             try {
                 await AsignaEncargados(requestBody);
