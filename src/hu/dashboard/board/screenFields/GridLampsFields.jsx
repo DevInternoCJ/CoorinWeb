@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { GetGridFields } from "../../../../services/LokiServices"; // Ajusta la ruta según tu estructura
+import { GetGridFields } from "../../../../services/mark/albaz/LokiServices"; // Ajusta la ruta según tu estructura
 
 const GridLampsFields = () => {
   const [tableData, setTableData] = useState([]);
@@ -9,15 +9,15 @@ const GridLampsFields = () => {
   const servidor = "Albaz";
   const idProducto = 1; // Reemplaza con el ID de producto adecuado
   useEffect(() => {
-     if (!idProducto || idProducto === 0) return;
+    if (!idProducto || idProducto === 0) return;
     const fetchGridData = async () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         // Llamar al servicio con los parámetros
-        const data = await GetGridFields( idProducto);
-        
+        const data = await GetGridFields(idProducto);
+
         // Transformar los datos si es necesario
         // La API ya devuelve un array de objetos, así que podemos usarlo directamente
         setTableData(data);
@@ -52,12 +52,24 @@ const GridLampsFields = () => {
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <div className="flex items-center">
             <div className="text-red-400 mr-2">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <div>
-              <h3 className="text-red-800 font-medium">Error al cargar los datos</h3>
+              <h3 className="text-red-800 font-medium">
+                Error al cargar los datos
+              </h3>
               <p className="text-red-600 text-sm">{error}</p>
             </div>
           </div>
@@ -76,64 +88,74 @@ const GridLampsFields = () => {
     );
   }
 
-
   return (
-  <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-    <div className="overflow-x-auto border rounded-lg max-h-96">
-      <table className="min-w-full bg-white">
-        <thead className=" ">
-          <tr className=" bg-background-secondary border-b">
-            {Object.keys(tableData[0]).map((key) => (
-              <th
-                key={key}
-                className="py-2 px-3 text-left text-xs font-bold text-neutral-100 uppercase whitespace-nowrap"
-              >
-                {key}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {tableData.map((row, index) => (
-            <tr
-              key={index}
-              className={index % 2 === 0 ? "bg-white border-b-jerarquia4" : "bg-gray-100 border-b-jerarquia4"}
-            >
-              {Object.values(row).map((value, i) => (
-                <td
-                  key={i}
-                  className={`py-2 px-3 text-sm border-b-jerarquia4 whitespace-nowrap ${
-                    // Aplicar estilos especiales a ciertas columnas
-                    typeof value === 'number' ? 'text-right font-medium' : 'text-left'
-                  } ${
-                    // Colorear valores monetarios
-                    Object.keys(row)[i] === 'currentbalance' || 
-                    Object.keys(row)[i] === 'initialbalance'
-                      ? 'text-green-700'
-                      : 'text-gray-800'
-                  }`}
+    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+      <div className="overflow-x-auto border rounded-lg max-h-96">
+        <table className="min-w-full bg-white">
+          <thead className=" ">
+            <tr className=" bg-background-secondary border-b">
+              {Object.keys(tableData[0]).map((key) => (
+                <th
+                  key={key}
+                  className="py-2 px-3 text-left text-xs font-bold text-neutral-100 uppercase whitespace-nowrap"
                 >
-                  {value === null || value === 'NULL' 
-                    ? 'N/A' 
-                    : typeof value === 'number'
-                      ? value.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                      : value.toString().trim()}
-                </td>
+                  {key}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {tableData.map((row, index) => (
+              <tr
+                key={index}
+                className={
+                  index % 2 === 0
+                    ? "bg-white border-b-jerarquia4"
+                    : "bg-gray-100 border-b-jerarquia4"
+                }
+              >
+                {Object.values(row).map((value, i) => (
+                  <td
+                    key={i}
+                    className={`py-2 px-3 text-sm border-b-jerarquia4 whitespace-nowrap ${
+                      // Aplicar estilos especiales a ciertas columnas
+                      typeof value === "number"
+                        ? "text-right font-medium"
+                        : "text-left"
+                    } ${
+                      // Colorear valores monetarios
+                      Object.keys(row)[i] === "currentbalance" ||
+                      Object.keys(row)[i] === "initialbalance"
+                        ? "text-green-700"
+                        : "text-gray-800"
+                    }`}
+                  >
+                    {value === null || value === "NULL"
+                      ? "N/A"
+                      : typeof value === "number"
+                      ? value.toLocaleString("es-MX", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })
+                      : value.toString().trim()}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-    <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-md p-2">
-      <p className="text-xs text-yellow-800">
-        <span className="font-medium">Desplaza horizontalmente para ver todas las columnas.</span> 
-        Se están mostrando {Object.keys(tableData[0]).length} columnas.
-      </p>
+      <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-md p-2">
+        <p className="text-xs text-yellow-800">
+          <span className="font-medium">
+            Desplaza horizontalmente para ver todas las columnas.
+          </span>
+          Se están mostrando {Object.keys(tableData[0]).length} columnas.
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default GridLampsFields;

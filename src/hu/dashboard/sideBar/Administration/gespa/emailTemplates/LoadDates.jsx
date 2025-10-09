@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { PostLoadData } from "../../../../../../services/LokiServices";
+import { PostLoadData } from "../../../../../../services/mark/albaz/LokiServices";
 
 const LoadDates = ({
   selectedProduct,
-  onSaldoChange,
   isModalOpen,
   onPlantillasChange,
-  onDatosDeudorChange, 
+  onDatosDeudorChange,
 }) => {
   const [datosDeudor, setDatosDeudor] = useState({});
   const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
@@ -19,7 +18,6 @@ const LoadDates = ({
     setDatosProductoCompleto({});
     setLoading(true);
     setError(null);
-    onSaldoChange(""); // Resetear el saldo también
     onDatosDeudorChange({}); // ✅ Limpiar datosDeudor en el padre también
   };
   // Efecto para detectar cuando el modal se cierra y resetear los datos
@@ -50,15 +48,14 @@ const LoadDates = ({
           const saldoFormateado = response.cuenta.Saldo
             ? `$${response.cuenta.Saldo.toLocaleString()}`
             : "$0.00";
-             const nuevosDatosDeudor = {
+          const nuevosDatosDeudor = {
             NombreDeudor: response.cuenta.NombreDeudor || "",
             RFC: response.cuenta.RFC || "",
             NúmeroCliente: response.cuenta.NúmeroCliente || "",
             Saldo: saldoFormateado,
           };
-          
+
           setDatosDeudor(nuevosDatosDeudor);
-          onSaldoChange(saldoFormateado);
           onDatosDeudorChange(nuevosDatosDeudor); // ✅ Actualizar datosDeudor en el padre
         }
         // Guardar todos los datos del producto para la vista completa

@@ -3,7 +3,7 @@ import OptionFields from "./OptionFields";
 import {
   GetScreenFields,
   SaveScreenFields,
-} from "../../../../services/LokiServices";
+} from "../../../../services/mark/albaz/LokiServices";
 import { useUserStore } from "../../../../contextGlobal/userStore";
 import SaveButton from "../../sideBar/Administration/gespa/ButtonSave";
 const TableEditFields = ({ idProducto }) => {
@@ -26,7 +26,7 @@ const TableEditFields = ({ idProducto }) => {
       try {
         setLoading(true);
         setError(null);
-        const data = await GetScreenFields( idProducto);
+        const data = await GetScreenFields(idProducto);
         const transformedData = data.map((item, index) => ({
           id: item.id || index + 1,
           position: item.posición,
@@ -70,7 +70,7 @@ const TableEditFields = ({ idProducto }) => {
       campos,
     };
     try {
-      await SaveScreenFields( payload);
+      await SaveScreenFields(payload);
       setSaveResult("Guardado correctamente");
     } catch {
       setSaveResult("Error al guardar");

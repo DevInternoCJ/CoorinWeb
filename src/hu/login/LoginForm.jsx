@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { loginUser, ValidatePassword } from "../../services/LokiServices";
+import { ValidatePassword } from "../../services/mark/albaz/LokiServices";
+import { loginUser } from "../../services/mark/login/AuthServices";
 import ButtonLogin from "./ButtonLogin";
 import { LoginUser, LoginKey } from "./LoginIcons";
 import { useUserStore } from "../../contextGlobal/userStore";

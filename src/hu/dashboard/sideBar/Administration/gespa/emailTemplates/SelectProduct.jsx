@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import LogoCoorin from "../../../../assets/logo_coorin_3.svg";
 import SelectWallet from "./SelectWallet";
-import { GetVerifyProduct } from "../../../../services/LokiServices";
+import { GetVerifyProduct } from "../../../../../../services/mark/albaz/LokiServices";
 
 const PRODUCT_OPTIONS = [
   { label: "Producto", value: 0 },

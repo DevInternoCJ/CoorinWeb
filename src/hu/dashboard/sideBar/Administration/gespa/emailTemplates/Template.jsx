@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import SelectWallet from "../../../../board/screenFields/SelectWallet";
 import ButtonSave from "../ButtonSave";
-import { SaveCreateTemplate, UpdateTemplate } from "../../../../../../services/LokiServices";
-import { DeleteTemplate } from "../../../../../../services/LokiServices";
+import {
+  SaveCreateTemplate,
+  UpdateTemplate,
+} from "../../../../../../services/mark/albaz/LokiServices";
+import { DeleteTemplate } from "../../../../../../services/mark/albaz/LokiServices";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import { toast } from "sonner";
 
-const Template = ({ plantillas = [], onActualizarPlantillas, datosDeudor}) => {
+const Template = ({ plantillas = [], onActualizarPlantillas, datosDeudor }) => {
   const [idCorreoScript, setIdCorreoScript] = useState(
     plantillas[0]?.idCorreoScript ?? null
   );
@@ -24,27 +27,27 @@ const Template = ({ plantillas = [], onActualizarPlantillas, datosDeudor}) => {
     setIdCorreoScript(plantillas[0]?.idCorreoScript ?? null);
   }, [plantillas]);
 
-    // Función para reemplazar los placeholders por valores reales
+  // Función para reemplazar los placeholders por valores reales
   const generarVistaPrevia = (texto) => {
-  if (!vistaPrevia) return texto;
-  console.log("datosDeudor en Template:", datosDeudor);
-  
-  const reemplazos = {
-    '\\[Saldo\\]': datosDeudor?.Saldo || '',
-    '\\[NombreDeudor\\]': datosDeudor?.NombreDeudor || '',
-    '\\[RFC\\]': datosDeudor?.RFC || '',
-    '\\[NúmeroCliente\\]': datosDeudor?.NúmeroCliente || '',
-  };
-  
-  let textoConReemplazos = texto;
-  
-  Object.entries(reemplazos).forEach(([placeholder, valor]) => {
-    const regex = new RegExp(placeholder, 'gi');
-    textoConReemplazos = textoConReemplazos.replace(regex, valor);
-  });
+    if (!vistaPrevia) return texto;
+    console.log("datosDeudor en Template:", datosDeudor);
 
-  return textoConReemplazos;
-};
+    const reemplazos = {
+      "\\[Saldo\\]": datosDeudor?.Saldo || "",
+      "\\[NombreDeudor\\]": datosDeudor?.NombreDeudor || "",
+      "\\[RFC\\]": datosDeudor?.RFC || "",
+      "\\[NúmeroCliente\\]": datosDeudor?.NúmeroCliente || "",
+    };
+
+    let textoConReemplazos = texto;
+
+    Object.entries(reemplazos).forEach(([placeholder, valor]) => {
+      const regex = new RegExp(placeholder, "gi");
+      textoConReemplazos = textoConReemplazos.replace(regex, valor);
+    });
+
+    return textoConReemplazos;
+  };
   // Esta función te permite obtener el idCorreoScript de la plantilla seleccionada
   const handleSelectChange = (nombreSeleccionado) => {
     setSelectedPlantilla(nombreSeleccionado);
@@ -106,8 +109,8 @@ const Template = ({ plantillas = [], onActualizarPlantillas, datosDeudor}) => {
         toast.success("Plantilla actualizada correctamente.");
       } else {
         // Validar que no exista una plantilla con el mismo nombre
-        const existeNombre = plantillas.some(
-          (p) => p.nombre.trim().toLowerCase()
+        const existeNombre = plantillas.some((p) =>
+          p.nombre.trim().toLowerCase()
         );
         if (existeNombre) {
           toast.warning(
@@ -174,8 +177,7 @@ const Template = ({ plantillas = [], onActualizarPlantillas, datosDeudor}) => {
             placeholder="Nombre"
           />
 
-
-           <input
+          <input
             type="text"
             value={asunto}
             onChange={(e) => setAsunto(e.target.value)}
@@ -183,7 +185,7 @@ const Template = ({ plantillas = [], onActualizarPlantillas, datosDeudor}) => {
             placeholder="Asunto"
           />
 
-         {/* Input para el texto de pago */}
+          {/* Input para el texto de pago */}
           <div className="mt-4 flex items-center">
             <input
               type="text"
@@ -223,9 +225,7 @@ const Template = ({ plantillas = [], onActualizarPlantillas, datosDeudor}) => {
                 <ButtonSave
                   loading={loading}
                   onClick={handleSave}
-                  disabled={
-                    !nombre.trim() || !asunto.trim() || !mensaje.trim()
-                  }
+                  disabled={!nombre.trim() || !asunto.trim() || !mensaje.trim()}
                 />
               </div>
             )}
