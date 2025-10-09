@@ -197,6 +197,7 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                 cartera={modalFilas.cartera}
                 idCampaña={modalFilas.idCampaña}
                 nombreCampaña={modalFilas.nombreCampaña}
+                onSuccess={cargarCampanas}
             />
             {modalLimpiar.open && (
                 <div style={{

@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
-import { CreatedTableTempFilas } from "../../../../services/mark/albaz/LokiServices";
+import { CreatedTableTempFilas, infoEjecutivo, CargarFilasConsulta, campainghInCharge } from "../../../../services/mark/albaz/LokiServices";
 
 const ModalFilasCampañas = ({
   open,
   onClose,
   cartera = "American Express",
   idCampaña,
+  onSuccess, // Callback para ejecutar después del éxito
 }) => {
   // Estado para loading del botón cargar
   const [loading, setLoading] = useState(false);
@@ -18,6 +19,16 @@ const ModalFilasCampañas = ({
   const [fileHeaders, setFileHeaders] = useState([]);
   const [sortConfig, setSortConfig] = useState({ col: null, direction: null });
   const [originalRows, setOriginalRows] = useState([]);
+  
+  // Estados para las consultas
+  const [consultas, setConsultas] = useState([]);
+  const [loadingConsultas, setLoadingConsultas] = useState(false);
+  const [selectedConsulta, setSelectedConsulta] = useState("");
+  
+  // Estados para el resultado de carga de consulta
+  const [consultaCargada, setConsultaCargada] = useState(false);
+  const [filasCargadas, setFilasCargadas] = useState(0);
+  const [mensajeCarga, setMensajeCarga] = useState("");
 
   // Limpiar estados al cerrar el modal
   React.useEffect(() => {
@@ -29,8 +40,60 @@ const ModalFilasCampañas = ({
       setFileHeaders([]);
       setSortConfig({ col: null, direction: null });
       setOriginalRows([]);
+      setConsultas([]);
+      setSelectedConsulta("");
+      setConsultaCargada(false);
+      setFilasCargadas(0);
+      setMensajeCarga("");
     }
   }, [open]);
+
+  // Cargar consultas cuando se abre el modal
+  useEffect(() => {
+    const cargarConsultas = async () => {
+      if (open) {
+        try {
+          setLoadingConsultas(true);
+          
+          // Obtener el idEjecutivo del localStorage
+          const userData = JSON.parse(localStorage.getItem('userData'));
+          const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+          
+          if (!idEjecutivo) {
+            toast.error("No se pudo obtener el ID del ejecutivo");
+            return;
+          }
+
+          // Llamar al endpoint
+          console.log("Llamando a infoEjecutivo con idEjecutivo:", idEjecutivo);
+          const response = await infoEjecutivo(idEjecutivo);
+          console.log("Respuesta recibida:", response);
+          
+          // Verificar si la respuesta es un array o un objeto único
+          const consultasArray = Array.isArray(response) ? response : [response];
+          console.log("Consultas procesadas:", consultasArray);
+          
+          setConsultas(consultasArray);
+          
+          // Si hay consultas, seleccionar la primera por defecto
+          if (consultasArray.length > 0) {
+            setSelectedConsulta(consultasArray[0].idConsulta.toString());
+            console.log("Consulta seleccionada por defecto:", consultasArray[0].NombreConsulta);
+          }
+          
+        } catch (error) {
+          console.error("Error al cargar consultas:", error);
+          toast.error("Error al cargar las consultas disponibles");
+        } finally {
+          setLoadingConsultas(false);
+        }
+      }
+    };
+
+    cargarConsultas();
+  }, [open]);
+
+
   // Procesar archivo CSV
   // Ordenamiento
   const handleSort = (colIdx, type) => {
@@ -137,6 +200,123 @@ const ModalFilasCampañas = ({
       setLoading(false);
     }
   };
+
+  // Función para obtener idCartera desde localStorage
+  const getIdCartera = () => {
+    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+    return userData?.idCartera || userData?.idcartera || userData?.cartera || 1; // fallback a 1 si no existe
+  };
+
+  // Función para obtener idEncargado (idEjecutivo) desde localStorage
+  const getIdEncargado = () => {
+    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+    return userData?.idEjecutivo || userData?.idejecutivo || userData?.id || 1; // fallback a 1 si no existe
+  };
+
+  // Función para obtener idProducto desde localStorage
+  const getIdProducto = () => {
+    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+    return userData?.idProducto || userData?.idproducto || userData?.producto || 1; // fallback a 1 si no existe
+  };
+
+  // Acción al presionar Cargar (modo consulta)
+  const handleCargarConsulta = async () => {
+    if (!selectedConsulta) {
+      toast.error("Por favor selecciona una consulta.");
+      return;
+    }
+    
+    if (!idCampaña) {
+      toast.error("No se encontró el id de la campaña.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Obtener idCartera del localStorage
+      const idCartera = getIdCartera();
+      
+      // Preparar el payload para el endpoint
+      const payload = {
+        idCampania: idCampaña,
+        idConsulta: parseInt(selectedConsulta),
+        idCartera: idCartera
+      };
+      
+      console.log("Enviando a CargarFilasConsulta con payload:", payload);
+      
+      // Llamar al endpoint
+      const response = await CargarFilasConsulta(payload);
+      console.log("Respuesta recibida:", response);
+      
+      // Manejar la respuesta exitosa
+      const { mensaje, filasCargadas } = response;
+      
+      // Obtener el número de filas cargadas (el valor del objeto filasCargadas)
+      const totalFilas = filasCargadas ? Object.values(filasCargadas)[0] || 0 : 0;
+      
+      // Mostrar toast de éxito con el mensaje del servidor
+      toast.success(mensaje || "Consulta cargada correctamente");
+      
+      // Actualizar los estados para mostrar en el footer
+      setConsultaCargada(true);
+      setFilasCargadas(totalFilas);
+      setMensajeCarga(`${totalFilas} filas cargadas exitosamente`);
+      
+      // Llamar al endpoint campainghInCharge después del éxito
+      try {
+        const idEncargado = getIdEncargado();
+        const idProducto = getIdProducto();
+        
+        console.log("Llamando a campainghInCharge con:", { idEncargado, idCartera, idProducto });
+        
+        const campainResponse = await campainghInCharge({ 
+          idEncargado, 
+          idCartera, 
+          idProducto 
+        });
+        
+        console.log("Respuesta de campainghInCharge:", campainResponse);
+        
+        // Llamar al callback de éxito para actualizar la tabla de campañas
+        if (typeof onSuccess === 'function') {
+          // Pequeño delay para que el usuario vea el toast de éxito
+          setTimeout(async () => {
+            try {
+              console.log("Actualizando tabla de campañas...");
+              await onSuccess();
+              console.log("Tabla de campañas actualizada");
+            } catch (refreshError) {
+              console.error("Error al actualizar tabla:", refreshError);
+            }
+          }, 1000); // 1 segundo de delay
+        }
+        
+      } catch (campainError) {
+        console.error("Error en campainghInCharge (no crítico):", campainError);
+        // No mostramos error al usuario ya que la carga principal fue exitosa
+        
+        // Aún así, intentamos actualizar la tabla (fallback)
+        if (typeof onSuccess === 'function') {
+          setTimeout(async () => {
+            try {
+              console.log("Actualizando tabla de campañas (fallback)...");
+              await onSuccess();
+              console.log("Tabla de campañas actualizada (fallback)");
+            } catch (refreshError) {
+              console.error("Error al actualizar tabla (fallback):", refreshError);
+            }
+          }, 1000);
+        }
+      }
+      
+    } catch (err) {
+      console.error("❌ Error al cargar la consulta:", err);
+      toast.error(err.message || "Error al cargar la consulta");
+    } finally {
+      setLoading(false);
+    }
+  };
   return open ? (
     <div
       style={{
@@ -195,6 +375,7 @@ const ModalFilasCampañas = ({
             alignItems: "center",
             marginBottom: 10,
             width: "100%",
+            minHeight: 380,
           }}
         >
           <div
@@ -537,7 +718,9 @@ const ModalFilasCampañas = ({
                   flexDirection: "column",
                   alignItems: "center",
                   width: "100%",
-                  marginTop: 24,
+                  marginTop: 60,
+                  justifyContent: "center",
+                  height: 280,
                 }}
               >
                 <div
@@ -545,34 +728,62 @@ const ModalFilasCampañas = ({
                     display: "flex",
                     alignItems: "center",
                     gap: 12,
-                    marginBottom: 18,
+                    marginBottom: 80,
+                    marginTop: -30,
+                    justifyContent: "center",
                   }}
                 >
                   <label
                     style={{ fontWeight: 500, color: "#000", marginRight: 8 }}
                   >
-                    CFP
+                    Consulta
                   </label>
-                  <select className="modal-dropdown-select">
-                    <option value="">Selecciona CFP</option>
-                    <option value="cfp1">CFP 1</option>
-                    <option value="cfp2">CFP 2</option>
+                  <select 
+                    className="py-3 px-4 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:pointer-events-none min-w-60"
+                    value={selectedConsulta}
+                    onChange={(e) => {
+                      setSelectedConsulta(e.target.value);
+                      console.log("Consulta seleccionada:", e.target.value);
+                    }}
+                    disabled={loadingConsultas}
+                  >
+                    {loadingConsultas ? (
+                      <option value="">Cargando consultas...</option>
+                    ) : (
+                      <>
+                        {consultas.map((consulta) => (
+                          <option 
+                            key={consulta.idConsulta} 
+                            value={consulta.idConsulta.toString()}
+                          >
+                            {consulta.NombreConsulta}
+                          </option>
+                        ))}
+                      </>
+                    )}
                   </select>
                 </div>
-                <button
-                  style={{
-                    background: "var(--color-jerarquia3)",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 4,
-                    padding: "8px 32px",
-                    fontWeight: 500,
-                    fontSize: 17,
-                    marginTop: 18,
-                  }}
-                >
-                  Cargar
-                </button>
+      
+                {!consultaCargada && (
+                  <button
+                    style={{
+                      background: "var(--color-jerarquia3)",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: 4,
+                      padding: "10px 40px",
+                      fontWeight: 500,
+                      fontSize: 17,
+                      marginTop: 80,
+                      cursor: loading ? "wait" : "pointer",
+                      opacity: loading ? 0.7 : 1,
+                    }}
+                    onClick={handleCargarConsulta}
+                    disabled={loading || !selectedConsulta}
+                  >
+                    {loading ? "Cargando..." : "Cargar"}
+                  </button>
+                )}
               </div>
             </>
           )}
@@ -636,7 +847,9 @@ const ModalFilasCampañas = ({
             textAlign: "left",
           }}
         >
-          {fileRows.length > 0
+          {tipoFilas === "consulta" && consultaCargada && mensajeCarga 
+            ? mensajeCarga
+            : fileRows.length > 0
             ? "Verifique la equivalencia de columnas, si es correcta presione Cargar."
             : "Resultado"}
         </div>
