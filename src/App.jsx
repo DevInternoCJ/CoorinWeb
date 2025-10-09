@@ -10,12 +10,7 @@ import { Toaster} from 'sonner';
 
 function App() {
 
- useEffect(() => {
-    // Importar e inicializar Preline después de que React esté montado
-    import("preline").then(() => {
-      console.log("Preline cargado correctamente");
-    });
-  }, []);
+
 
   return (
     <>
