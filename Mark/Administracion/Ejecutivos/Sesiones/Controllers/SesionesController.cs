@@ -55,7 +55,6 @@ namespace Loki.Mark.Administracion.Ejecutivos.Sesiones.Controllers
 
 
 		[HttpPost("reset-password-ejecutivo")]
-		[AllowAnonymous]
 		[SwaggerOperation(
 			Summary = "Resetear Contraseña",
 			Description = "Reinicia la contraseña del usuario a 4 letras solicitado para que la cambie desde la pantalla de login."
@@ -80,7 +79,6 @@ namespace Loki.Mark.Administracion.Ejecutivos.Sesiones.Controllers
 		}
 
 		[HttpPatch("logout-ejecutivo/{idEjecutivo}")]
-		[AllowAnonymous]
 		[SwaggerOperation(
 			Summary = "Logout Ejecutivo",
 			Description = "Cierra una sesión abierta en Coorin o Gespa del ejecutivo especificado."

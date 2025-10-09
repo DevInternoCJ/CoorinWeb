@@ -62,6 +62,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Encargados.Services
 				NombreEjecutivo = e.NombreEjecutivo,
 				Usuario = e.Usuario,
 				IdEncargado = e.IdEncargado,
+				Jerarquía= e.Jerarquía,
 				Bloqueado = e.Bloqueado,
 				SesionAbierta = false, // si no vas a calcular sesiones
 				Subordinados = []
