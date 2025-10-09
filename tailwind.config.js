@@ -1,12 +1,16 @@
+import preline from "preline/plugin";
+import tailwindcssForms from "@tailwindcss/forms";
+import iconify from "@iconify/tailwind4";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
     // Para Vite + React
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+     './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
 
     // Para Preline UI
-    "node_modules/preline/dist/*.js",
+       'node_modules/preline/dist/*.js',
   ],
   theme: {
     extend: {
@@ -19,7 +23,8 @@ export default {
     },
   },
   plugins: [
-    // Plugin de Preline UI
-    require("preline/plugin"),
+    preline,
+    tailwindcssForms,
+    iconify,
   ],
 };

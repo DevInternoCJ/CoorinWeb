@@ -18,7 +18,7 @@ import Comments from "./sideBar/consultations/information/Comments";
 import VGP from "./sideBar/consultations/information/VGP";
 import EmailTemplates from "./sideBar/Administration/gespa/emailTemplates/EmailTemplates";
 import ModalBaseCampanas from "./sideBar/Administration/ModalBaseCampanas";
-import ModalConsultaEjecutivos from "./board/consultations/Executives/ModalConsultaEjecutivos";
+
 
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -59,8 +59,6 @@ export default function CoorinDashboard() {
         return <VGP onClose={closeModal} />;
       case "Plantillas Correo":
         return <EmailTemplates onClose={closeModal} />;
-      case "Ejecutivos":
-        return <ModalConsultaEjecutivos open={modalSidebarOpen} onClose={closeModal}/>; 
       default:
         return null;
     }
@@ -113,6 +111,7 @@ export default function CoorinDashboard() {
       "1AA": "Campañas",
       "1DD": "Campañas",
       "1EE": "Campañas",
+
     };
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
