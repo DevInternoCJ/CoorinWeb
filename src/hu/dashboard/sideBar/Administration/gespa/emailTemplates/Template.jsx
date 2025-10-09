@@ -6,14 +6,14 @@ import { DeleteTemplate } from "../../../../../../services/LokiServices";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import { toast } from "sonner";
 
-const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
+const Template = ({ plantillas = [], onActualizarPlantillas, datosDeudor}) => {
   const [idCorreoScript, setIdCorreoScript] = useState(
     plantillas[0]?.idCorreoScript ?? null
   );
   const [loading, setLoading] = useState(false);
-  const [titulo, setTitulo] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [asunto, setAsunto] = useState("");
   const [mensaje, setMensaje] = useState("");
-  const [textoPago, setTextoPago] = useState("");
   const [vistaPrevia, setVistaPrevia] = useState(false);
   const [selectedPlantilla, setSelectedPlantilla] = useState(
     plantillas[0]?.nombre ?? ""
@@ -24,6 +24,27 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
     setIdCorreoScript(plantillas[0]?.idCorreoScript ?? null);
   }, [plantillas]);
 
+    // Función para reemplazar los placeholders por valores reales
+  const generarVistaPrevia = (texto) => {
+  if (!vistaPrevia) return texto;
+  console.log("datosDeudor en Template:", datosDeudor);
+  
+  const reemplazos = {
+    '\\[Saldo\\]': datosDeudor?.Saldo || '',
+    '\\[NombreDeudor\\]': datosDeudor?.NombreDeudor || '',
+    '\\[RFC\\]': datosDeudor?.RFC || '',
+    '\\[NúmeroCliente\\]': datosDeudor?.NúmeroCliente || '',
+  };
+  
+  let textoConReemplazos = texto;
+  
+  Object.entries(reemplazos).forEach(([placeholder, valor]) => {
+    const regex = new RegExp(placeholder, 'gi');
+    textoConReemplazos = textoConReemplazos.replace(regex, valor);
+  });
+
+  return textoConReemplazos;
+};
   // Esta función te permite obtener el idCorreoScript de la plantilla seleccionada
   const handleSelectChange = (nombreSeleccionado) => {
     setSelectedPlantilla(nombreSeleccionado);
@@ -31,9 +52,9 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
       (p) => p.nombre === nombreSeleccionado
     );
     if (plantillaObj) {
-      setTitulo(plantillaObj.nombre || "");
-      setMensaje(plantillaObj.asunto || "");
-      setTextoPago(plantillaObj.mensaje || "");
+      setNombre(plantillaObj.nombre || "");
+      setAsunto(plantillaObj.asunto || "");
+      setMensaje(plantillaObj.mensaje || "");
       setIdCorreoScript(plantillaObj.idCorreoScript || null);
       // Si necesitas guardar el idCorreoScript en un estado, aquí puedes hacerlo
     }
@@ -49,9 +70,9 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
       await DeleteTemplate({ data });
       toast.success("Plantilla eliminada correctamente.");
       // Limpiar los inputs después de borrar
-      setTitulo("");
+      setNombre("");
+      setAsunto("");
       setMensaje("");
-      setTextoPago("");
       setSelectedPlantilla("");
       setIdCorreoScript(null);
       if (onActualizarPlantillas) {
@@ -76,9 +97,9 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
         const payload = {
           idCorreoScript,
           idProducto,
-          nombre: titulo,
-          asunto: mensaje,
-          mensaje: textoPago,
+          nombre: nombre,
+          asunto: asunto,
+          mensaje: mensaje,
           idEjecutivo,
         };
         await UpdateTemplate(payload);
@@ -86,7 +107,7 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
       } else {
         // Validar que no exista una plantilla con el mismo nombre
         const existeNombre = plantillas.some(
-          (p) => p.nombre.trim().toLowerCase() === titulo.trim().toLowerCase()
+          (p) => p.nombre.trim().toLowerCase()
         );
         if (existeNombre) {
           toast.warning(
@@ -97,9 +118,9 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
         }
         const payload = {
           idProducto,
-          nombre: titulo,
-          asunto: mensaje,
-          mensaje: textoPago,
+          nombre: nombre,
+          asunto: asunto,
+          mensaje: mensaje,
           idEjecutivo,
         };
         await SaveCreateTemplate(payload);
@@ -108,9 +129,9 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
       // Puedes mostrar un toast o limpiar los campos aquí
       if (plantillas.length > 0) {
         setSelectedPlantilla(plantillas[0].nombre);
-        setTitulo(plantillas[0].nombre || "");
-        setMensaje(plantillas[0].asunto || "");
-        setTextoPago(plantillas[0].mensaje || "");
+        setNombre(plantillas[0].nombre || "");
+        setAsunto(plantillas[0].asunto || "");
+        setMensaje(plantillas[0].mensaje || "");
       }
       if (onActualizarPlantillas) {
         await onActualizarPlantillas();
@@ -147,33 +168,30 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
           {/* Input para el título */}
           <input
             type="text"
-            value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
             className=" w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-neutral-200"
             placeholder="Nombre"
           />
 
-          {/* Input para el mensaje */}
-          <input
+
+           <input
             type="text"
-            value={mensaje}
-            onChange={(e) => setMensaje(e.target.value)}
+            value={asunto}
+            onChange={(e) => setAsunto(e.target.value)}
             className="mt-4 w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-neutral-200"
             placeholder="Asunto"
           />
 
-          {/* Input para el texto de pago */}
+         {/* Input para el texto de pago */}
           <div className="mt-4 flex items-center">
             <input
               type="text"
-              value={textoPago}
-              onChange={(e) => setTextoPago(e.target.value)}
+              value={vistaPrevia ? generarVistaPrevia(mensaje) : mensaje}
+              onChange={(e) => setMensaje(e.target.value)}
               className="w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-neutral-200"
               placeholder="Mensaje"
             />
-            <span className=" ml-2 text-neutral-200">
-              {vistaPrevia ? `[${saldo}]` : '["Saldo"]'}
-            </span>
           </div>
 
           <button
@@ -206,7 +224,7 @@ const Template = ({ saldo, plantillas = [], onActualizarPlantillas }) => {
                   loading={loading}
                   onClick={handleSave}
                   disabled={
-                    !titulo.trim() || !mensaje.trim() || !textoPago.trim()
+                    !nombre.trim() || !asunto.trim() || !mensaje.trim()
                   }
                 />
               </div>

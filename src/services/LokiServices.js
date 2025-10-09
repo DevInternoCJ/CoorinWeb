@@ -190,13 +190,13 @@ export const GetScreenFields = async (idProducto) => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
     
-    console.log('📤 Enviando a /CamposPantalla/campos-pantalla');
+    console.log('📤 Enviando a /CamposPantalla/obtener');
     console.log('🔑 Parámetros:', { idProducto });
     
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
-    const response = await api.get(`/CamposPantalla/campos-pantalla/${idProducto}`);
+    const response = await api.get(`/CamposPantalla/obtener/${idProducto}`);
     
-    console.log('📥 Respuesta de /CamposPantalla/campos-pantalla:', response.data);
+    console.log('📥 Respuesta de /CamposPantalla/obtener:', response.data);
     
     return response.data;
   } catch (error) {
@@ -1538,13 +1538,13 @@ export const ShowFieldScreen = async (idProducto) => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
     
-    console.log('📤 Enviando a /CamposPantalla/muestra-campos/');
+    console.log('📤 Enviando a /CamposPantalla/mostrar/');
     console.log('🔑 Parámetros:', { idProducto });
     
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
-      const response = await api.get(`/CamposPantalla/muestra-campos/${idProducto}`);
+      const response = await api.get(`/CamposPantalla/mostrar/${idProducto}`);
     
-    console.log('📥 Respuesta de /CamposPantalla/muestra-campos/', response.data);
+    console.log('📥 Respuesta de /CamposPantalla/mostrar/', response.data);
     
     return response.data;
   } catch (error) {

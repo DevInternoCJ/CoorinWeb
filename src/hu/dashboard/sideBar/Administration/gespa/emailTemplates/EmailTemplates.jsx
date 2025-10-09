@@ -7,7 +7,7 @@ import LoadDates from "./LoadDates";
 import { PostLoadData } from "../../../../../../services/LokiServices";
 import ModalBase from "../../../../board/ModalBase"
 
-const EmailTemplates = ({ onClose }) => {
+const EmailTemplates = ({ onClose}) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [verifyResult, setVerifyResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,6 +16,7 @@ const EmailTemplates = ({ onClose }) => {
   const [plantillas, setPlantillas] = useState([]);
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
+  const [datosDeudor, setDatosDeudor] = useState({}); // ✅ Nuevo estado para datosDeudor
 
   const actualizarPlantillas = async () => {
     // Puedes usar el mismo requestData que usa LoadDates
@@ -32,6 +33,11 @@ const EmailTemplates = ({ onClose }) => {
     if (response && response.plantillas) {
       setPlantillas(response.plantillas);
     }
+  };
+
+   // ✅ Función para actualizar datosDeudor desde LoadDates
+  const handleDatosDeudorChange = (nuevosDatosDeudor) => {
+    setDatosDeudor(nuevosDatosDeudor);
   };
   // Limpiar estados cuando el modal se cierra
   useEffect(() => {
@@ -81,10 +87,10 @@ const EmailTemplates = ({ onClose }) => {
           />
              {selectedProduct && (
           <Template
-            saldo={saldo}
             plantillas={plantillas}
             onActualizarPlantillas={actualizarPlantillas}
             idProducto={selectedProduct.value} 
+            datosDeudor={datosDeudor} 
           />
           )}
           {showDataTables && selectedProduct && (
@@ -93,6 +99,7 @@ const EmailTemplates = ({ onClose }) => {
                 selectedProduct={selectedProduct}
                 onSaldoChange={setSaldo}
                 onPlantillasChange={setPlantillas}
+                onDatosDeudorChange={handleDatosDeudorChange} // ✅ Nueva prop
               />
             </div>
           )}

@@ -52,7 +52,7 @@ const InputField = ({
         id={id}
         disabled={disabled}
       />
-      <label htmlForFor="hs-floating-input-email-value" className="absolute top-0 start-0 p-2 h-full sm:text-sm truncate pointer-events-none transition ease-in-out duration-100  origin-[0_0] peer-disabled:opacity-50 peer-disabled:pointer-events-none
+      <label htmlFor="hs-floating-input-email-value" className="absolute top-0 start-0 p-2 h-full sm:text-sm truncate pointer-events-none transition ease-in-out duration-100  origin-[0_0] peer-disabled:opacity-50 peer-disabled:pointer-events-none
       peer-focus:scale-90
       peer-focus:translate-x-0.5
       peer-focus:-translate-y-3
