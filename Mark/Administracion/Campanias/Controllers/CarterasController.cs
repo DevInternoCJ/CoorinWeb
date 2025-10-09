@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Swashbuckle.AspNetCore.Annotations;
+using static CoorinWeb.Loki.Global.AccionamientosQueryHelper;
 
 namespace Loki.Mark.Administracion.Carteras.Controllers
 {
@@ -20,7 +21,8 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         private readonly IDbContextFactory _dbContFactory;
         private readonly IInfoEjecutivoDao _infoEjecutivo;
         private readonly ILogger<CarterasController> _logger;
-        public CarterasController(ICarterasService campaniasService, ICarterasDAOs carterasDao, IDbContextFactory contextfactory, IInfoEjecutivoDao infoEjecutivo, ILogger<CarterasController> logger)
+        private readonly IDbContextFactory dbContextFactory;
+        public CarterasController(ICarterasService campaniasService, ICarterasDAOs carterasDao, IDbContextFactory contextfactory, IInfoEjecutivoDao infoEjecutivo, ILogger<CarterasController> logger, IDbContextFactory dbContextFactory)
         {
             _carterasService = campaniasService;
             _carterasDao = carterasDao;
@@ -28,6 +30,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
             _dbContFactory = contextfactory;
             _infoEjecutivo = infoEjecutivo;
             _logger = logger;
+            this.dbContextFactory = dbContextFactory;
         }
         //[HttpGet("get-carteras")]
         //[Authorize]
@@ -277,37 +280,60 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
                     return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
                 }
 
-                if (request.IdCampania <= 0)
+                _logger.LogInformation($"Iniciando carga de consulta: Campaña={request.IdCampania}, Consulta={request.IdConsulta}");
+
+                // ✅ Cargar consultas desde la BD antes de usarlas
+                await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidorClaim);
+
+                //// Debug: verificar qué se cargó
+                //var consultasTable = ConsultaGenerador._Consultas.Tables["Consultas"];
+                //var parametrosTable = ConsultaGenerador._Consultas.Tables["Parámetros"];
+                //var agruparTable = ConsultaGenerador.Tables["Agrupar"];
+
+                //_logger.LogInformation($"Tablas cargadas: Consultas={consultasTable?.Rows.Count}, Parámetros={parametrosTable?.Rows.Count}, Agrupar={agruparTable?.Rows.Count}");
+
+                // Verificar si existe la consulta específica
+                var consultaEspecifica = ConsultaGenerador.ObtenerConsulta(request.IdConsulta.Value);
+                if (consultaEspecifica == null)
                 {
-                    return BadRequest(new { error = "El Id de campaña es requerido." });
+                    return BadRequest(new { error = $"No se encontró la consulta con ID {request.IdConsulta.Value}" });
                 }
 
-                if (request.IdCartera <= 0) // ← Validar idCartera
+                _logger.LogInformation($"Consulta encontrada: {consultaEspecifica["NombreConsulta"]}");
+
+                ArrayList columnas = new ArrayList();
+                var queryData = ConsultaGenerador.QueryCuentas(request.IdConsulta.Value, ref columnas);
+
+                if (string.IsNullOrEmpty(queryData.Query))
                 {
-                    return BadRequest(new { error = "El Id de cartera es requerido." });
+                    return BadRequest(new { error = "No se pudo generar la consulta SQL" });
                 }
 
-                var resultado = await _carterasService.CargarFilasDesdeConsulta(
-                    servidorClaim,
+                _logger.LogInformation($"Query generada: {queryData.Query}");
+
+                // Ejecutar la consulta
+                var resultado = await _carterasDao.CargaFilasConsulta(
                     request.IdCampania,
-                    request.IdConsulta,
-                    request.ConsultaGeneral,
+                    queryData.Query,
                     request.IncluirUsuario,
                     request.IncluirTelefono,
-                    request.IdCartera); // ← Pasar idCartera
+                    servidorClaim
+                );
 
                 return Ok(new
                 {
                     mensaje = "Consulta ejecutada correctamente",
-                    filasCargadas = resultado.FilasCargadas
+                    filasCargadas = resultado,
+                    columnasGeneradas = columnas,
+                    queryGenerada = queryData.Query // Para debugging
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error al ejecutar consulta");
                 return StatusCode(500, new { error = $"Error al ejecutar consulta: {ex.Message}" });
             }
         }
-
 
         [HttpPost("cargar-archivo")]
         [SwaggerOperation(

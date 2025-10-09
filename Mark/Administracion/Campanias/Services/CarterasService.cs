@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Data;
 using ClosedXML.Excel;
+using CoorinWeb.Loki.Common;
 using CoorinWeb.Loki.Global;
 using CoorinWeb.Loki.Mark.Auth.DAOs;
 using Dapper;
@@ -11,6 +12,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
+using static CoorinWeb.Loki.Global.AccionamientosQueryHelper;
 namespace Loki.Mark.Administracion.Carteras.Services
 {
     public class CarterasService : ICarterasService
@@ -263,27 +265,37 @@ namespace Loki.Mark.Administracion.Carteras.Services
         }
 
         public async Task<ResultadoCarga> CargarFilasDesdeConsulta(
-         string servidor, int idCampania, int? idConsulta,
-         string? consultaGeneral, bool incluirUsuario, bool incluirTelefono, int idCartera)
+    string servidor, int idCampania, int? idConsulta,
+    string? consultaGeneral, bool incluirUsuario, bool incluirTelefono, int idCartera)
         {
             try
             {
+                // ✅ Cargar consultas desde BD antes de usarlas
+                await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidor);
+
                 dynamic? resultado;
 
                 if (!string.IsNullOrEmpty(consultaGeneral))
                 {
+                    // Ejecuta consulta general directamente
                     resultado = await _carterasDao.CargaFilasConsulta(
                         idCampania, consultaGeneral, incluirUsuario, incluirTelefono, servidor);
                 }
                 else if (idConsulta.HasValue)
                 {
-                    var parametros = CoorinWeb.Loki.Global.AccionamientosQueryHelper.Ejecutivo1.TablaParámetros;
-                    var agrupar = CoorinWeb.Loki.Global.AccionamientosQueryHelper.Ejecutivo1.TablaAgrupar;
+                    // Obtener la consulta desde ConsultaGenerador
+                    var consultaRow = ConsultaGenerador.ObtenerConsulta(idConsulta.Value);
+                    if (consultaRow == null)
+                        throw new Exception($"No se encontró la consulta con ID {idConsulta.Value}");
+
+                    // Usar el método PreparaQueryBúsqueda para generar el query correctamente
+                    var parametros = AccionamientosQueryHelper.Ejecutivo1.TablaParámetros;
+                    var agrupar = AccionamientosQueryHelper.Ejecutivo1.TablaAgrupar;
 
                     parametros.Rows.Clear();
                     agrupar.Rows.Clear();
 
-                    // Agregar idCartera como parámetro obligatorio
+                    // Agregar parámetros básicos
                     parametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
 
                     if (incluirUsuario)
@@ -291,14 +303,24 @@ namespace Loki.Mark.Administracion.Carteras.Services
                     if (incluirTelefono)
                         agrupar.Rows.Add("Teléfono", "Teléfonos");
 
-                    ArrayList columnas = new ArrayList();
-                    var queryData = CoorinWeb.Loki.Global.AccionamientosQueryHelper.ConsultaGenerador.QueryCuentas(idConsulta.Value, ref columnas);
+                    // Generar el query usando PreparaQueryBúsqueda
+                    int idProducto = Convert.ToInt32(consultaRow["idProducto"]);
+                    DateTime desde = DateTime.Today.AddMonths(-1); // O usa la fecha de la consulta si está disponible
 
-                    if (string.IsNullOrEmpty(queryData.Query))
-                        throw new Exception($"No se encontró la consulta predefinida con ID {idConsulta}");
+                    string query = ConsultaGenerador.PreparaQueryBúsqueda(
+                        idProducto,
+                        parametros,
+                        agrupar,
+                        Resultado.Cuentas,
+                        desde,
+                        idCartera
+                    );
+
+                    if (string.IsNullOrEmpty(query))
+                        throw new Exception("No se pudo generar el query para la consulta");
 
                     resultado = await _carterasDao.CargaFilasConsulta(
-                        idCampania, queryData.Query, incluirUsuario, incluirTelefono, servidor);
+                        idCampania, query, incluirUsuario, incluirTelefono, servidor);
                 }
                 else
                 {
@@ -315,6 +337,7 @@ namespace Loki.Mark.Administracion.Carteras.Services
                 throw new Exception($"Error al cargar consulta: {ex.Message}", ex);
             }
         }
+
         private async Task<int> ProcesarArchivoExcelYBulkInsert(IFormFile archivo, string servidor, int idCampania)
         {
             // Validar tipo de archivo
