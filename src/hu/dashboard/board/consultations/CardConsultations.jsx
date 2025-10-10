@@ -7,8 +7,7 @@ import ModalBaseCuentas from "./counts/ModalBaseCuentas";
 import ProductivityModal from "./Productivity/ModalProductivityModal";
 import ModalConsultaGenerales from "./Generals/ModalConsultaGenerales";
 import ModalBaseGenerales from "./Generals/ModalBaseGenerales";
-import ModalConsultaHistoricos from "./Historical/ModalConsultaHistoricos";
-import ModalBaseHistoricos from "./Historical/ModalBaseHistoricos";
+import HistoricosModal from "./Historical/ModalHistoricosModal";
 import ModalConsultaEjecutivos from "./Executives/ModalConsultaEjecutivos";
 import ModalBaseEjecutivos from "./Executives/ModaBaseEjecutivos";
 const CardConsultations = ({ onModalOpen, onModalClose }) => {
@@ -156,10 +155,12 @@ const CardConsultations = ({ onModalOpen, onModalClose }) => {
             <ModalBaseGenerales open={openGenerales} onClose={() => handleCloseModal(setOpenGenerales)}>
                 <ModalConsultaGenerales onClose={() => handleCloseModal(setOpenGenerales)} />
             </ModalBaseGenerales>
-            <ModalBaseHistoricos open={openHistoricos} onClose={() => handleCloseModal(setOpenHistoricos)}>
-                <ModalConsultaHistoricos onClose={() => handleCloseModal(setOpenHistoricos)} />
-
-            </ModalBaseHistoricos>
+            
+            {/* Modal de Históricos */}
+            <HistoricosModal 
+                isOpen={openHistoricos}
+                onClose={() => handleCloseModal(setOpenHistoricos)}
+            />
             <ModalBaseEjecutivos open={openEjecutivos} onClose={() => handleCloseModal(setOpenEjecutivos)}>
                 <ModalConsultaEjecutivos onClose={() => handleCloseModal(setOpenEjecutivos)} />
             </ModalBaseEjecutivos>

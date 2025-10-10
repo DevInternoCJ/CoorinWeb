@@ -21,6 +21,7 @@ const MODAL_SIZES = {
     catalogos: "w-full max-w-[90vw] sm:max-w-[80vw] md:max-w-[76vw]", // Modal catálogos 76% -> responsive
     validadores: "w-full max-w-[95vw] sm:max-w-[75vw] md:max-w-[35vw]", // Modal validadores 60% viewport -> responsive
     encargados: "w-full max-w-[95vw] sm:max-w-[75vw] md:max-w-[35vw]", // Modal encargados idéntico a validadores -> responsive
+    historicos: "w-full max-w-[95vw] sm:max-w-[80vw] md:max-w-[45vw]", // Modal históricos 60% viewport -> responsive
     custom: ""  // Permite pasar tamaño personalizado en modalClassName
 };
 
