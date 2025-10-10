@@ -29,6 +29,10 @@ const ModalFilasCampañas = ({
   const [consultaCargada, setConsultaCargada] = useState(false);
   const [filasCargadas, setFilasCargadas] = useState(0);
   const [mensajeCarga, setMensajeCarga] = useState("");
+  
+  // Estado para controlar si el formato de headers es válido
+  const [formatoValido, setFormatoValido] = useState(true);
+  const [mensajeValidacion, setMensajeValidacion] = useState("");
 
   // Limpiar estados al cerrar el modal
   React.useEffect(() => {
@@ -45,6 +49,8 @@ const ModalFilasCampañas = ({
       setConsultaCargada(false);
       setFilasCargadas(0);
       setMensajeCarga("");
+      setFormatoValido(true);
+      setMensajeValidacion("");
     }
   }, [open]);
 
@@ -93,6 +99,137 @@ const ModalFilasCampañas = ({
     cargarConsultas();
   }, [open]);
 
+  // Función para determinar si mostrar "F2" en lugar de "Expr1001" 
+  const shouldShowF2ForColumn2 = () => {
+    // Solo si tenemos exactamente 3 columnas
+    if (fileHeaders.length !== 3) return false;
+    
+    // Limpiar headers
+    const cleanHeaders = fileHeaders.map(header => 
+      header ? header.toString().trim().replace(/[\r\n]/g, '') : ''
+    );
+    
+    // Función local para normalizar
+    const normalize = (text) => {
+      if (!text) return '';
+      return text.toString().toLowerCase()
+        .replace(/[áàäâ]/g, 'a')
+        .replace(/[éèëê]/g, 'e')
+        .replace(/[íìïî]/g, 'i')
+        .replace(/[óòöô]/g, 'o')
+        .replace(/[úùüû]/g, 'u')
+        .replace(/ñ/g, 'n');
+    };
+    
+    // Verificar si posición 1 es "Cuenta" y posición 3 es "Teléfono"/"Telefono"
+    const pos1Valid = normalize(cleanHeaders[0]) === 'cuenta';
+    const pos3Valid = ['telefono'].includes(normalize(cleanHeaders[2]));
+    const pos2Empty = !cleanHeaders[1] || cleanHeaders[1].trim() === '';
+    
+    console.log("🔍 Evaluando F2:", { pos1Valid, pos2Empty, pos3Valid, headers: cleanHeaders });
+    
+    return pos1Valid && pos2Empty && pos3Valid;
+  };
+
+  // Validar formato de headers
+  const validateHeaders = (headers) => {
+    // Verificar que tengamos exactamente 3 columnas
+    if (headers.length !== 3) {
+      return {
+        valid: false,
+        message: "El archivo debe tener exactamente 3 columnas"
+      };
+    }
+
+    // Limpiar los headers de espacios en blanco y caracteres especiales
+    const cleanHeaders = headers.map(header => 
+      header ? header.toString().trim().replace(/[\r\n]/g, '') : ''
+    );
+    
+    // Debug: mostrar los headers recibidos
+    console.log("Headers recibidos:", cleanHeaders);
+    console.log("Headers originales:", headers);
+    console.log("Headers detallados:", cleanHeaders.map((h, i) => `[${i}]: "${h}" ${h === '' ? '(VACÍO)' : '(OK)'}`));
+
+    // Función para normalizar texto (quitar tildes y convertir a minúsculas para comparación)
+    const normalizeText = (text) => {
+      // Manejar casos donde text es null, undefined o vacío
+      if (!text || text === null || text === undefined) {
+        return '';
+      }
+      
+      return text.toString().toLowerCase()
+        .replace(/[áàäâ]/g, 'a')
+        .replace(/[éèëê]/g, 'e')
+        .replace(/[íìïî]/g, 'i')
+        .replace(/[óòöô]/g, 'o')
+        .replace(/[úùüû]/g, 'u')
+        .replace(/ñ/g, 'n');
+    };
+
+
+
+    // Definir variaciones aceptables para cada posición
+    const validHeaders = [
+      // Posición 1: Cuenta
+      ['cuenta'],
+      // Posición 2: Usuario  
+      ['usuario'],
+      // Posición 3: Teléfono (con y sin tilde)
+      ['telefono', 'teléfono']
+    ];
+
+    let errores = [];
+    let hasValidFormat = true;
+
+    // Verificar si tenemos exactamente 3 columnas
+    if (headers.length !== 3) {
+      hasValidFormat = false;
+      if (headers.length < 3) {
+        errores.push(`Faltan ${3 - headers.length} columna(s). Se requieren 3 columnas: Cuenta, Usuario, Teléfono`);
+      } else {
+        errores.push(`Hay ${headers.length - 3} columna(s) de más. Se requieren exactamente 3 columnas: Cuenta, Usuario, Teléfono`);
+      }
+    }
+
+    // Verificar cada posición disponible (máximo 3)
+    const maxCheck = Math.min(cleanHeaders.length, 3);
+    for (let i = 0; i < maxCheck; i++) {
+      const headerNormalizado = normalizeText(cleanHeaders[i]);
+      const validOptions = validHeaders[i];
+      
+      // Si el header está vacío
+      if (!cleanHeaders[i] || cleanHeaders[i].trim() === '') {
+        hasValidFormat = false;
+        const expectedOptions = validHeaders[i].map(option => `"${option}"`).join(' o ');
+        errores.push(`Posición ${i + 1}: Header vacío. Se esperaba ${expectedOptions}`);
+        continue;
+      }
+      
+      // Verificar si el header actual coincide con alguna opción válida
+      const isValid = validOptions.some(option => 
+        normalizeText(option) === headerNormalizado
+      );
+      
+      if (!isValid) {
+        hasValidFormat = false;
+        const expectedOptions = validHeaders[i].map(option => `"${option}"`).join(' o ');
+        errores.push(`Posición ${i + 1}: Se esperaba ${expectedOptions}, pero se recibió "${cleanHeaders[i]}"`);
+      }
+    }
+
+    if (hasValidFormat) {
+      console.log("✅ Headers válidos - formato correcto");
+      return { valid: true };
+    } else {
+      const mensajeError = `El formato del documento es incorrecto. ${errores.join('. ')}`;
+      console.log("Headers inválidos:", errores);
+      return {
+        valid: false,
+        message: mensajeError
+      };
+    }
+  };
 
   // Procesar archivo CSV
   // Ordenamiento
@@ -145,15 +282,41 @@ const ModalFilasCampañas = ({
         let rows = [];
         if (lines.length > 0) {
           headers = lines[0].split(",");
+          
+          // Debug: mostrar información del archivo
+          console.log("🔍 Procesando archivo CSV:");
+          console.log("- Total de líneas:", lines.length);
+          console.log("- Headers:", headers);
+          console.log("- Número de columnas:", headers.length);
+          
+          // Validar formato de headers
+          const validation = validateHeaders(headers);
+          if (!validation.valid) {
+            toast.error(validation.message);
+            setFormatoValido(false);
+            setMensajeValidacion(validation.message);
+          } else {
+            setFormatoValido(true);
+            setMensajeValidacion("");
+          }
+          
           rows = lines.slice(1).map((line) => {
             const cols = line.split(",");
             return cols;
           });
+          
+          console.log("- Filas de datos:", rows.length);
+          console.log("- Primeras 3 filas:", rows.slice(0, 3));
         }
         setFileHeaders(headers);
         setFileCols(headers.length);
         setFileRows(rows);
         setOriginalRows(rows);
+        
+        console.log("✅ Estados actualizados:");
+        console.log("- fileHeaders:", headers);
+        console.log("- fileCols:", headers.length);
+        console.log("- fileRows length:", rows.length);
       };
       reader.readAsText(file);
     } else if (ext === "xlsx") {
@@ -168,12 +331,38 @@ const ModalFilasCampañas = ({
         let rows = [];
         if (json.length > 0) {
           headers = json[0];
+          
+          // Debug: mostrar información del archivo
+          console.log("🔍 Procesando archivo XLSX:");
+          console.log("- Total de filas JSON:", json.length);
+          console.log("- Headers:", headers);
+          console.log("- Número de columnas:", headers.length);
+          
+          // Validar formato de headers
+          const validation = validateHeaders(headers);
+          if (!validation.valid) {
+            toast.error(validation.message);
+            setFormatoValido(false);
+            setMensajeValidacion(validation.message);
+          } else {
+            setFormatoValido(true);
+            setMensajeValidacion("");
+          }
+          
           rows = json.slice(1);
+          
+          console.log("- Filas de datos:", rows.length);
+          console.log("- Primeras 3 filas:", rows.slice(0, 3));
         }
         setFileHeaders(headers);
         setFileCols(headers.length);
         setFileRows(rows);
         setOriginalRows(rows);
+        
+        console.log("✅ Estados XLSX actualizados:");
+        console.log("- fileHeaders:", headers);
+        console.log("- fileCols:", headers.length);
+        console.log("- fileRows length:", rows.length);
       };
       reader.readAsArrayBuffer(file);
     }
@@ -190,6 +379,32 @@ const ModalFilasCampañas = ({
       toast.error("No se encontró el id de la campaña.");
       return;
     }
+
+    // Validar formato antes de cargar
+    if (!formatoValido) {
+      toast.error("El formato del documento es incorrecto. No se puede procesar la carga.");
+      return;
+    }
+
+    // Validar que haya datos cargados
+    if (fileRows.length === 0) {
+      toast.error("No hay datos para cargar. Por favor seleccione un archivo válido.");
+      return;
+    }
+
+    // Validar que los campos requeridos no estén vacíos (Cuenta y Teléfono)
+    // Usuario puede estar vacío
+    const filasConErrores = fileRows.filter(row => 
+      !row[0] || row[0].toString().trim() === '' || // Cuenta vacía
+      !row[2] || row[2].toString().trim() === ''    // Teléfono vacío
+      // row[1] (Usuario) puede estar vacío - no se valida
+    );
+
+    if (filasConErrores.length > 0) {
+      toast.error(`Hay ${filasConErrores.length} fila(s) con datos requeridos vacíos. Los campos Cuenta y Teléfono son obligatorios.`);
+      return;
+    }
+
     setLoading(true);
     try {
       await CreatedTableTempFilas(idCampaña);
@@ -526,6 +741,13 @@ const ModalFilasCampañas = ({
                 </table>
               </div>
               {/* Tabla cargada desde archivo */}
+              {(() => {
+                console.log("🎯 Evaluando renderizado de tabla:");
+                console.log("- fileRows.length:", fileRows.length);
+                console.log("- tipoFilas:", tipoFilas);
+                console.log("- Debe mostrar tabla:", fileRows.length > 0);
+                return null;
+              })()}
               {fileRows.length > 0 && (
                 <div
                   className="scrollbar-gray"
@@ -573,6 +795,16 @@ const ModalFilasCampañas = ({
                           {fileCols >= 1
                             ? fileHeaders[0] || "Expr1000"
                             : "Expr1000"}
+                          {/* Indicador de error si el header no es correcto */}
+                          {!formatoValido && fileCols >= 1 && fileHeaders[0] && 
+                           !fileHeaders[0].toLowerCase().includes("cuenta") && (
+                            <span 
+                              style={{ marginLeft: 4, color: "#ff4444", fontSize: 12 }}
+                              title="Se esperaba 'Cuenta'"
+                            >
+                              ❌
+                            </span>
+                          )}
                           {typeof fileHeaders[0] === "string" &&
                             !fileHeaders[0].includes("Expr") && (
                               <span style={{ marginLeft: 6, fontSize: 14 }}>
@@ -615,7 +847,7 @@ const ModalFilasCampañas = ({
                           }}
                         >
                           {fileCols >= 2
-                            ? fileHeaders[1] || "Expr1001"
+                            ? fileHeaders[1] || (shouldShowF2ForColumn2() ? "F2" : "Expr1001")
                             : "Expr1001"}
                           {typeof fileHeaders[1] === "string" &&
                             !fileHeaders[1].includes("Expr") && (
@@ -677,10 +909,11 @@ const ModalFilasCampañas = ({
                     <tbody>
                       {fileRows.map((row, idx) => (
                         <tr key={idx}>
-                          {/* Columna 1 */}
+                          {/* Columna 1 - Cuenta */}
                           <td style={{ textAlign: "center" }}>
                             {row[0] ? row[0] : ""}
-                            {fileCols < 3 && !row[0] && (
+                            {/* Mostrar indicador de error solo si el formato es válido y el campo requerido está vacío */}
+                            {formatoValido && (!row[0] || row[0].toString().trim() === '') && (
                               <span
                                 style={{
                                   border: "1px solid red",
@@ -692,35 +925,22 @@ const ModalFilasCampañas = ({
                                   fontSize: 16,
                                   marginLeft: 4,
                                 }}
+                                title="Campo requerido"
                               >
                                 &#10006;
                               </span>
                             )}
                           </td>
-                          {/* Columna 2 */}
+                          {/* Columna 2 - Usuario */}
                           <td style={{ textAlign: "center" }}>
                             {row[1] ? row[1] : ""}
-                            {fileCols < 3 && !row[1] && (
-                              <span
-                                style={{
-                                  border: "1px solid red",
-                                  background: "#fff",
-                                  color: "red",
-                                  fontWeight: "bold",
-                                  borderRadius: 2,
-                                  padding: "0 2px",
-                                  fontSize: 16,
-                                  marginLeft: 4,
-                                }}
-                              >
-                                &#10006;
-                              </span>
-                            )}
+                            {/* Usuario puede estar vacío - no mostrar error */}
                           </td>
-                          {/* Columna 3 */}
+                          {/* Columna 3 - Teléfono */}
                           <td style={{ textAlign: "center" }}>
                             {row[2] ? row[2] : ""}
-                            {fileCols < 3 && !row[2] && (
+                            {/* Mostrar indicador de error solo si el formato es válido y el campo requerido está vacío */}
+                            {formatoValido && (!row[2] || row[2].toString().trim() === '') && (
                               <span
                                 style={{
                                   border: "1px solid red",
@@ -732,6 +952,7 @@ const ModalFilasCampañas = ({
                                   fontSize: 16,
                                   marginLeft: 4,
                                 }}
+                                title="Campo requerido"
                               >
                                 &#10006;
                               </span>
@@ -846,18 +1067,18 @@ const ModalFilasCampañas = ({
             <div style={{ textAlign: "center" }}>
               <button
                 style={{
-                  background: "var(--color-jerarquia2)",
+                  background: !formatoValido ? "#ccc" : "var(--color-jerarquia2)",
                   color: "#fff",
                   border: "none",
                   borderRadius: 4,
                   padding: "6px 32px",
                   fontWeight: 600,
                   fontSize: 15,
-                  cursor: loading ? "wait" : "pointer",
-                  opacity: loading ? 0.7 : 1,
+                  cursor: loading || !formatoValido ? "not-allowed" : "pointer",
+                  opacity: loading || !formatoValido ? 0.7 : 1,
                 }}
                 onClick={handleCargarArchivo}
-                disabled={loading}
+                disabled={loading || !formatoValido}
               >
                 {loading ? "Cargando..." : "Cargar"}
               </button>
@@ -872,18 +1093,21 @@ const ModalFilasCampañas = ({
         )}
         <div
           style={{
-            color: "#444",
+            color: !formatoValido && fileRows.length > 0 ? "#ff4444" : "#444",
             fontSize: 13,
             marginTop: "auto",
             paddingTop: 18,
             width: "100%",
             textAlign: "left",
+            fontWeight: !formatoValido && fileRows.length > 0 ? "600" : "normal",
           }}
         >
           {tipoFilas === "consulta" && consultaCargada && mensajeCarga 
             ? mensajeCarga
             : fileRows.length > 0
-            ? "Verifique la equivalencia de columnas, si es correcta presione Cargar."
+            ? (!formatoValido 
+              ? `${mensajeValidacion || "El formato del documento es incorrecto. Los headers deben ser: Cuenta, Usuario, Teléfono"}` 
+              : "Verifique la equivalencia de columnas, si es correcta presione Cargar.")
             : "Resultado"}
         </div>
       </div>
