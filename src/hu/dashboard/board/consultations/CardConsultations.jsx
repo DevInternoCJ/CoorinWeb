@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import DataDashConsul from "../../DataDashConsul";
 import { ExecutiveChart } from "../../DashboardIcons";
-import { IconCuentas, IconProductividad, IconGenerales, IconHistoricos } from "./IconesConsultations";
+import { IconCuentas, IconProductividad, IconGenerales, IconHistoricos,IconExecutive,IconDayExecutive } from "./IconesConsultations";
 import ModalConsultaCuentas from "./counts/ModalConsultaCuentas";
 import ModalBaseCuentas from "./counts/ModalBaseCuentas";
 import ModalConsultaProductividad from "./Productivity/ModalConsultaProductividad";
@@ -115,7 +115,20 @@ const CardConsultations = () => {
                                                 className="size-8"
                                                 style={{ color: `var(--${catalog.fontcolor})` }}
                                             />
-                                        ) : (
+                                        ) : catalog.title === "Ejecutivos" ? (
+                                            <IconExecutive
+                                                className="size-8"
+                                                style={{ color: `var(--${catalog.fontcolor})` }}
+                                            />
+                                        ) : catalog.title === "Dia del Ejecutivo" ? (  
+                                            <IconDayExecutive
+                                                className="size-8"
+                                                style={{ color: `var(--${catalog.fontcolor})` }}
+                                            />
+                                        ) :
+
+
+                                        (
                                             <ExecutiveChart
                                                 className="size-8"
                                                 style={{ color: `var(--${catalog.fontcolor})` }}

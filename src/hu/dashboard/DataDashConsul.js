@@ -20,7 +20,7 @@ const dataDashConsul = [
         id: 3,
         title: "Generales",
         color: "color-background-primary",
-        fontcolor: "color-base-200",
+        fontcolor: "color-text-terra",
         icon: "ExecutiveChart"
     },
     {
@@ -35,7 +35,7 @@ const dataDashConsul = [
         id: 5,
        title: "Ejecutivos",
        color: "color-background-primary",
-        fontcolor: "color-base-200",
+        fontcolor: "color-text-terra",
         icon: "ExecutiveChart",
         iconShadow: "50"
     },

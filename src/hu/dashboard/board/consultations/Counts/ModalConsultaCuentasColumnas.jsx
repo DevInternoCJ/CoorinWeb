@@ -5,7 +5,7 @@ const ModalConsultaCuentasColumnas = () => (
         <div className="flex items-center mb-2 w-full">
             <span className="modal-span-1 pl-1" style={{ color: "var(--color-jerarquia2)", minWidth: 80 }}>Columnas</span>
             <div className="flex-1 flex justify-center">
-                <button className="modal-btn modal-btn-primary">
+                <button className="btn-info">
                     Agregar
                 </button>
             </div>

@@ -11,9 +11,9 @@ const ModalConsultaCuentasFooter = () => {
                     {/* Botón Consultar centrado, alineado con la tabla Filtros (3/4) */}
                     <div className="flex justify-center items-center" style={{ width: "67%" }}>
                         <button
-                            className="modal-btn modal-btn-primary flex items-center gap-2"
+                            className="btn-success"
                         >
-                            Consultar table_view
+                            Consultar
                             <span className="material-icons text-base align-middle"></span>
                         </button>
                         <IconCustomTable
