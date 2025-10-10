@@ -365,84 +365,79 @@ namespace Loki.Mark.Administracion.Carteras.Services
         {
             var dataTable = new DataTable();
 
-            // Leer encabezados (primera fila)
-            var headerRow = worksheet.FirstRow();
-            bool hasHeaders = false;
+            // 🔹 Nombres esperados en la tabla SQL (ajusta si difieren)
+            var expectedColumns = new List<string> { "idCuenta", "Usuario", "NúmeroTelefónico" };
 
-            foreach (var cell in headerRow.CellsUsed())
+            // Leer encabezados del Excel
+            var headerRow = worksheet.FirstRowUsed();
+            var excelHeaders = headerRow.CellsUsed().Select(c => c.Value.ToString().Trim()).ToList();
+
+            // 🔹 Normalizar encabezados (sin tildes, espacios, guiones o mayúsculas)
+            for (int i = 0; i < excelHeaders.Count; i++)
             {
-                var headerName = cell.Value.ToString();
-                if (!string.IsNullOrWhiteSpace(headerName))
-                {
-                    dataTable.Columns.Add(headerName.Trim());
-                    hasHeaders = true;
-                }
+                //excelHeaders[i] = RemoveAccents(excelHeaders[i])
+                //    .Replace(" ", "")
+                //    .Replace("_", "")
+                //    .Replace("-", "")
+                //    .ToLower();
             }
 
-            // Si no hay encabezados válidos, usar nombres genéricos
-            if (!hasHeaders)
+            // 🔹 Crear columnas con los nombres esperados (para coincidir con SQL)
+            foreach (var col in expectedColumns)
             {
-                for (int i = 0; i < headerRow.CellsUsed().Count(); i++)
-                {
-                    dataTable.Columns.Add($"Columna{i + 1}");
-                }
+                dataTable.Columns.Add(col);
             }
 
-            // Leer datos (empezando desde la segunda fila)
-            var dataRows = worksheet.RowsUsed().Skip(1);
-            foreach (var row in dataRows)
+            // 🔹 Leer filas de datos (desde segunda fila)
+            foreach (var row in worksheet.RowsUsed().Skip(1))
             {
                 var dataRow = dataTable.NewRow();
-                for (int i = 0; i < dataTable.Columns.Count; i++)
+
+                // Asignar valores por posición: primera col → idCuenta, etc.
+                for (int i = 0; i < expectedColumns.Count && i < excelHeaders.Count; i++)
                 {
-                    var cellValue = row.Cell(i + 1).Value;
-                    dataRow[i] = cellValue.ToString();
+                    dataRow[i] = row.Cell(i + 1).Value.ToString() ?? string.Empty;
                 }
+
                 dataTable.Rows.Add(dataRow);
             }
 
             return dataTable;
         }
 
+
         private async Task RealizarBulkInsert(DataTable dataTable, string servidor, int idCampania)
         {
-
             using var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
-
             var connection = dbContext.Database.GetDbConnection();
-
             var shouldCloseConnection = connection.State != ConnectionState.Open;
 
             if (shouldCloseConnection)
-            {
                 await connection.OpenAsync();
-            }
 
             try
             {
                 using var bulkCopy = new SqlBulkCopy((SqlConnection)connection)
                 {
                     DestinationTableName = $"AMS.FilasTemp_{idCampania}",
-                    BulkCopyTimeout = 30 * 60, 
-                    BatchSize = 1000 
+                    BulkCopyTimeout = 30 * 60,
+                    BatchSize = 1000
                 };
 
-                foreach (DataColumn column in dataTable.Columns)
-                {
-                    bulkCopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
-                }
+                // 🔹 Mapeo manual (seguro)
+                bulkCopy.ColumnMappings.Add("idCuenta", "idCuenta");
+                bulkCopy.ColumnMappings.Add("Usuario", "Usuario");
+                bulkCopy.ColumnMappings.Add("NúmeroTelefónico", "NúmeroTelefónico");
 
                 await bulkCopy.WriteToServerAsync(dataTable);
             }
             finally
             {
                 if (shouldCloseConnection)
-                {
                     await connection.CloseAsync();
-                }
             }
         }
-    
+
     }
 }
 

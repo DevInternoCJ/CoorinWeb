@@ -1,5 +1,6 @@
 using CoorinWeb.DTOs.AuthDTOs;
 using CoorinWeb.Loki.DTOs.AuthDTOs;
+using Loki.DTOs.AuthDTOs;
 
 namespace CoorinWeb.Loki.Mark.Auth.Interfaces
 {
@@ -10,5 +11,7 @@ namespace CoorinWeb.Loki.Mark.Auth.Interfaces
 		Task<dynamic?> ValidatePasswordEjecutivoAsync(ValidatePasswordEjecutivoRequest request);
 		Task<int?> ValidateExistingSessionAsync(string servidor, int idEjecutivo);
 		Task<dynamic?> ResetPasswordAsync(string servidor, ReseteaContra request);
-	}
+		Task<bool> Logout(logout request, string servidor);
+
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using CoorinWeb.DTOs.AuthDTOs;
 using CoorinWeb.Loki.DTOs.AuthDTOs;
 using CoorinWeb.Loki.Mark.Auth.Interfaces;
+using Loki.DTOs.AuthDTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -279,5 +280,32 @@ namespace Loki.Mark.Auth.Controllers
 			return token;
 		}
 
-	}
+        [HttpPut("cerrar-sesión")]
+        [Authorize]
+        [SwaggerOperation(
+          Summary = "cerrar-sesión -irene",
+          Description = "cierra del ejecutivo"
+          )]
+        public async Task<IActionResult> Logout([FromBody] logout request)
+        {
+            try
+            {
+                string? servidor = User.FindFirst("Servidor")?.Value;
+                if (string.IsNullOrWhiteSpace(servidor))
+                {
+                    return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+                }
+
+                var result = await _authService.Logout(request, servidor);
+
+                return Ok(new { mensaje = "Sesión cerrada correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = $"Error interno del servidor: {ex.Message}" });
+            }
+        }
+
+
+    }
 }

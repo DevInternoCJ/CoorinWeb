@@ -6,6 +6,7 @@ using CoorinWeb.Loki.DTOs.AuthDTOs;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using CoorinWeb.Loki.Global;
+using Loki.DTOs.AuthDTOs;
 
 namespace CoorinWeb.Loki.Mark.Auth.DAOs.AuthDAOs
 {
@@ -149,6 +150,41 @@ namespace CoorinWeb.Loki.Mark.Auth.DAOs.AuthDAOs
 			);
 		}
 
+        public async Task<bool> Logout(logout request, string servidor)
+        {
+            const string tipoBase = "Memory";
 
-	}
+            var dbContext = _dbContFactory.GetDbContext(servidor, tipoBase);
+            var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
+
+            // Ejecutar SP CierraSesión
+            var nombreSp = "dbMemory.PS.CierraSesión";
+            var resultado = await _daoBase.ExecuteStoredProcedure(
+                dbContext,
+                nombreSp,
+                new SqlParameter("@idEjecutivo", request.IdEjecutivo ?? (object)DBNull.Value),
+                new SqlParameter("@idLogIngreso", request.IdLogIngreso ?? (object)DBNull.Value)
+            );
+
+
+            if (resultado == null)
+            {
+                const string updateQuery = @"
+            UPDATE dbCollection..LogIngreso
+            SET Segundo_Salida = GETDATE()
+            WHERE idLogIngreso = @idLogIngreso;
+        ";
+
+                using var command = new SqlCommand(updateQuery, sqlConnection);
+                command.Parameters.Add(new SqlParameter("@idLogIngreso", request.IdLogIngreso ?? (object)DBNull.Value));
+
+                await command.ExecuteNonQueryAsync();
+            }
+
+            sqlConnection.Close();
+
+            return true;
+        }
+
+    }
 }
