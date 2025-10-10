@@ -9,11 +9,11 @@ import {
   IconScripts,
   IconPantalla,
 } from "./IconesEjecutives";
-import MetasModal from "./MetasModal";
+import MetasModal from "./ModalMetasModal";
 import LampshadeFields from "../../board/screenFields/LampshadeFields";
 import ModalValidadoresEjecutivos from "./ModalValidadoresEjecutivos";
 import ModalEncargadosEjecutivos from "./ModalEncargadosEjecutivos";
-import ModalCatalogosEjecutivos from "./ModalCatalogosEjecutivos";
+import CatalogosModal from "./ModalCatalogosModal";
 import ModalScriptsEjecutivos from "./ModalScriptsEjecutivos";
 
 const CardExecutive = ({ onModalOpen, onModalClose }) => {
@@ -157,11 +157,10 @@ const CardExecutive = ({ onModalOpen, onModalClose }) => {
       )}
 
       {/* Modal de Catálogos */}
-      {showCatalogosModal && (
-        <ModalCatalogosEjecutivos
-          onClose={() => handleCloseModal(setShowCatalogosModal)}
-        />
-      )}
+      <CatalogosModal 
+        isOpen={showCatalogosModal}
+        onClose={() => handleCloseModal(setShowCatalogosModal)}
+      />
 
       {/* Modal de Scripts */}
       {showScriptsModal && (

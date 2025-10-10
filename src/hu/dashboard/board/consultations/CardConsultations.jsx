@@ -4,8 +4,7 @@ import { ExecutiveChart } from "../../DashboardIcons";
 import { IconCuentas, IconProductividad, IconGenerales, IconHistoricos } from "./IconesConsultations";
 import ModalConsultaCuentas from "./counts/ModalConsultaCuentas";
 import ModalBaseCuentas from "./counts/ModalBaseCuentas";
-import ModalConsultaProductividad from "./Productivity/ModalConsultaProductividad";
-import ModalBaseProductividad from "./productivity/ModalBaseProductividad";
+import ProductivityModal from "./Productivity/ModalProductivityModal";
 import ModalConsultaGenerales from "./Generals/ModalConsultaGenerales";
 import ModalBaseGenerales from "./Generals/ModalBaseGenerales";
 import ModalConsultaHistoricos from "./Historical/ModalConsultaHistoricos";
@@ -150,9 +149,10 @@ const CardConsultations = ({ onModalOpen, onModalClose }) => {
             <ModalBaseCuentas open={open} onClose={() => handleCloseModal(setOpen)}>
                 <ModalConsultaCuentas onClose={() => handleCloseModal(setOpen)} />
             </ModalBaseCuentas>
-            <ModalBaseProductividad open={openProductividad} onClose={() => handleCloseModal(setOpenProductividad)}>
-                <ModalConsultaProductividad onClose={() => handleCloseModal(setOpenProductividad)} />
-            </ModalBaseProductividad>
+            <ProductivityModal 
+                isOpen={openProductividad} 
+                onClose={() => handleCloseModal(setOpenProductividad)}
+            />
             <ModalBaseGenerales open={openGenerales} onClose={() => handleCloseModal(setOpenGenerales)}>
                 <ModalConsultaGenerales onClose={() => handleCloseModal(setOpenGenerales)} />
             </ModalBaseGenerales>

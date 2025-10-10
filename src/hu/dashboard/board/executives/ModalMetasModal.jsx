@@ -1,30 +1,76 @@
 import React from "react";
 import ReusableModal from "../modalGlobalReboot/ReusableModal";
-import ModalMetasHeader from "./ModalMetasHeader";
 import ModalMetasContent from "./ModalMetasContent";
-import ModalMetasFooter from "./ModalMetasFooter";
+import { IconMetas } from "./IconesEjecutives";
 
 const MetasModal = ({
     isOpen,
     onClose,
     // Props opcionales para personalizar
-    size = "metas", // 70% del viewport (reducido del 80% original)
-    showCustomHeader = true,
-    showCustomFooter = true,
+    size = "metas", // 76% del viewport 
     enableBounce = true,
     enableShakeOnBackdropClick = true,
     closeOnBackdropClick = false,
     ...props
 }) => {
+    // Header personalizado con estilos verdes usando DefaultModalHeader structure
+    const CustomHeader = ({ onClose }) => (
+        <div className="px-3 pt-4 pb-3 sm:px-4 sm:pt-5 sm:pb-4 md:px-6 md:pt-6 md:pb-4 
+                       bg-white border-b-2 flex items-center justify-between gap-3"
+             style={{ borderColor: "var(--color-jerarquia1)" }}>
+            {/* Sección izquierda: Ícono y título */}
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <IconMetas 
+                    className="size-5 sm:size-6 flex-shrink-0"
+                    style={{ color: "var(--color-jerarquia3)" }}
+                />
+                <div className="min-w-0">
+                    <h2 className="text-base sm:text-lg md:text-xl font-bold truncate sm:whitespace-normal leading-tight"
+                        style={{ color: "var(--color-jerarquia3)" }}>
+                        <span className="hidden sm:inline">Metas diarias ejecutivos - Coorin</span>
+                        <span className="sm:hidden">Metas Ejecutivos</span>
+                    </h2>
+                </div>
+            </div>
+            
+            {/* Botón de cerrar */}
+            <div className="flex-shrink-0">
+                <button
+                    onClick={onClose}
+                    className="transition-colors duration-200 rounded-full p-1 sm:p-1.5 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-300"
+                    style={{ color: "var(--color-jerarquia3)", fontSize: "1.25rem", lineHeight: 1 }}
+                    onMouseEnter={(e) => e.target.style.color = "#dc2626"}
+                    onMouseLeave={(e) => e.target.style.color = "var(--color-jerarquia3)"}
+                    aria-label="Cerrar modal"
+                >
+                    &times;
+                </button>
+            </div>
+        </div>
+    );
+
+    // Footer personalizado con estilos verdes usando DefaultModalFooter structure
+    const CustomFooter = () => (
+        <div className="px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-4 
+                       flex flex-col sm:flex-row justify-between items-start sm:items-center 
+                       border-t-2 gap-2 sm:gap-0 bg-gray-50"
+             style={{ borderColor: "var(--color-jerarquia1)" }}>
+            <div className="text-xs sm:text-sm md:text-sm font-medium leading-relaxed"
+                 style={{ color: "var(--color-jerarquia3)" }}>
+                Seleccione los ejecutivos para guardar sus Metas Diarias
+            </div>
+        </div>
+    );
+
     return (
         <ReusableModal
             isOpen={isOpen}
             onClose={onClose}
             size={size}
-            showHeader={showCustomHeader}
-            headerComponent={showCustomHeader ? ModalMetasHeader : null}
-            showFooter={showCustomFooter}
-            footerComponent={showCustomFooter ? ModalMetasFooter : null}
+            headerComponent={CustomHeader}
+            footerComponent={CustomFooter}
+            showHeader={true}
+            showFooter={true}
             enableBounce={enableBounce}
             enableShakeOnBackdropClick={enableShakeOnBackdropClick}
             closeOnBackdropClick={closeOnBackdropClick}
