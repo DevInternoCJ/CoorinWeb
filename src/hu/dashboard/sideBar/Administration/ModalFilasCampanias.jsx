@@ -249,19 +249,28 @@ const ModalFilasCampañas = ({
       const response = await CargarFilasConsulta(payload);
       console.log("Respuesta recibida:", response);
       
+      // Validar que la respuesta tenga la estructura esperada
+      if (!response) {
+        throw new Error("No se recibió respuesta del servidor");
+      }
+      
       // Manejar la respuesta exitosa
       const { mensaje, filasCargadas } = response;
       
       // Obtener el número de filas cargadas (el valor del objeto filasCargadas)
       const totalFilas = filasCargadas ? Object.values(filasCargadas)[0] || 0 : 0;
       
-      // Mostrar toast de éxito con el mensaje del servidor
-      toast.success(mensaje || "Consulta cargada correctamente");
+      // Mostrar toast de éxito con información específica
+      if (totalFilas > 0) {
+        toast.success(`${mensaje || "Se cargaron correctamente"} - ${totalFilas} filas`);
+      } else {
+        toast.warning(`${mensaje || "Consulta procesada"} - 0 filas cargadas`);
+      }
       
       // Actualizar los estados para mostrar en el footer
       setConsultaCargada(true);
       setFilasCargadas(totalFilas);
-      setMensajeCarga(`${totalFilas} filas cargadas exitosamente`);
+      setMensajeCarga(`${totalFilas} filas cargadas`);
       
       // Llamar al endpoint campainghInCharge después del éxito
       try {
@@ -312,7 +321,32 @@ const ModalFilasCampañas = ({
       
     } catch (err) {
       console.error("❌ Error al cargar la consulta:", err);
-      toast.error(err.message || "Error al cargar la consulta");
+      
+      // Mensaje de error específico y claro para el usuario
+      let errorMessage = "No se pudo realizar la carga de filas";
+      
+      // Personalizar mensaje según el tipo de error
+      if (err.response?.status === 401) {
+        errorMessage = "Sesión expirada. Por favor, inicia sesión nuevamente";
+      } else if (err.response?.status === 404) {
+        errorMessage = "No se encontró la consulta o campaña especificada";
+      } else if (err.response?.status === 500) {
+        errorMessage = "Error interno del servidor. Intenta nuevamente";
+      } else if (err.message?.includes("token")) {
+        errorMessage = "Error de autenticación. Verifica tu sesión";
+      } else if (err.message?.includes("Network")) {
+        errorMessage = "Error de conexión. Verifica tu conexión a internet";
+      } else if (err.message?.includes("timeout")) {
+        errorMessage = "La operación tardó demasiado. Intenta nuevamente";
+      } else if (err.response?.data?.message) {
+        // Si el servidor envía un mensaje específico, usarlo
+        errorMessage = `No se pudo cargar: ${err.response.data.message}`;
+      } else if (err.message) {
+        // Usar el mensaje del error si existe
+        errorMessage = `Error: ${err.message}`;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -767,16 +801,15 @@ const ModalFilasCampañas = ({
                 {!consultaCargada && (
                   <button
                     style={{
-                      background: "var(--color-jerarquia3)",
+                      background: "var(--color-jerarquia2)",
                       color: "#fff",
                       border: "none",
                       borderRadius: 4,
-                      padding: "10px 40px",
+                      padding: "4px 18px",
                       fontWeight: 500,
-                      fontSize: 17,
-                      marginTop: 80,
                       cursor: loading ? "wait" : "pointer",
                       opacity: loading ? 0.7 : 1,
+                      marginTop: 80,
                     }}
                     onClick={handleCargarConsulta}
                     disabled={loading || !selectedConsulta}

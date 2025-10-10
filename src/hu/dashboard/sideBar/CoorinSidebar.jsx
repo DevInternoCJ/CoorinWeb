@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import dataSidebar from "./DataSidebar";
 import {
   AcademicCapIcon,
@@ -163,6 +163,8 @@ const RenderSubMenus = ({
 
 export const CoorinSidebar = ({
   onMenuClick,
+  isModalOpen = false, // Nuevo prop para controlar si hay un modal abierto
+  onRegisterCloseFunction, // Función para registrar la función de cierre del sidebar
 }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -197,6 +199,77 @@ export const CoorinSidebar = ({
   };
 
   const closeMobile = () => isMobile && setIsOpen(false);
+
+  // Ref para el contenedor del sidebar
+  const sidebarRef = useRef(null);
+
+  // Efecto para detectar clics fuera del sidebar
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Solo cerrar en móviles o cuando el sidebar esté abierto y no minificado en desktop
+      const shouldClose = (isMobile && isOpen) || (!isMobile && isOpen && !isMinified);
+      
+      if (shouldClose && 
+          sidebarRef.current && 
+          !sidebarRef.current.contains(event.target)) {
+        
+        // Verificar que el clic no sea en el botón hamburger
+        const hamburgerButton = document.querySelector('[data-hs-overlay="#hs-coorin-sidebar"], [aria-controls="hs-sidebar-content-push-to-mini-sidebar"]');
+        if (hamburgerButton && hamburgerButton.contains(event.target)) {
+          return; // No cerrar si se hizo clic en el botón hamburger
+        }
+        
+        if (isMobile) {
+          setIsOpen(false);
+        } else if (!isMinified) {
+          // En desktop, minificar el sidebar
+          setIsMinified(true);
+          try {
+            if (typeof window !== "undefined") {
+              document.body.classList.add("hs-overlay-minified");
+              document.body.classList.remove("hs-overlay-open");
+            }
+          } catch {
+            // ignore
+          }
+        }
+      }
+    };
+
+    // Agregar el event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    
+    // Limpiar el event listener
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobile, isOpen, isMinified]);
+
+  // Registrar la función de cierre en el componente padre
+  useEffect(() => {
+    // Función para cerrar el sidebar (usado por el dashboard cuando se abren modales de cards)
+    const closeSidebar = () => {
+      if (isMobile) {
+        setIsOpen(false);
+      }
+      // En desktop, solo aplicamos el minificado si no está ya minificado
+      if (!isMobile && !isMinified) {
+        setIsMinified(true);
+        try {
+          if (typeof window !== "undefined") {
+            document.body.classList.add("hs-overlay-minified");
+            document.body.classList.remove("hs-overlay-open");
+          }
+        } catch {
+          // ignore
+        }
+      }
+    };
+
+    if (onRegisterCloseFunction) {
+      onRegisterCloseFunction(() => closeSidebar);
+    }
+  }, [onRegisterCloseFunction, isMobile, isMinified, setIsOpen, setIsMinified]);
 
   // Preline: ensure accordion/overlay/collapse are initialized when this component mounts.
   // In SPA the library may have registered auto-init on window.load which already fired,
@@ -241,11 +314,13 @@ export const CoorinSidebar = ({
 
   const asideClass = `${
     isMinified ? "hs-overlay-minified " : ""
-  }hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 transition-transform duration-150 transform fixed top-0 start-0 bottom-0 z-50 bg-white border-e border-gray-200 ${
+  }hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 transition-transform duration-150 transform fixed top-0 start-0 bottom-0 ${
+    isModalOpen ? "z-30" : "z-50"
+  } bg-white border-e border-gray-200 ${
     isMinified ? "w-[3.25rem]" : "w-64"
   } min-h-screen flex flex-col overflow-x-hidden ${
     isOpen ? "translate-x-0" : "-translate-x-full hidden"
-  }`;
+  } ${isModalOpen ? "pointer-events-none opacity-50" : ""}`.trim();
   // Función para expandir la sidebar si está en modo minificado
   const expandSidebar = () => {
     if (isMinified) {
@@ -271,13 +346,16 @@ export const CoorinSidebar = ({
       {/* Mobile hamburger button */}
       <button
         type="button"
-        className="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-start bg-gray-800 border-none text-white text-sm font-medium rounded-lg shadow-2xs align-middle hover:bg-gray-950 focus:outline-hidden focus:bg-gray-900 dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200 dark:focus:bg-neutral-200"
+        className={`py-2 px-3 inline-flex justify-center items-center gap-x-2 text-start bg-gray-800 border-none text-white text-sm font-medium rounded-lg shadow-2xs align-middle hover:bg-gray-950 focus:outline-hidden focus:bg-gray-900 dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200 dark:focus:bg-neutral-200 ${
+          isModalOpen ? "opacity-50 pointer-events-none" : ""
+        }`}
         aria-haspopup="dialog"
         aria-expanded="false"
         aria-controls="hs-sidebar-content-push-to-mini-sidebar"
         aria-label="Toggle navigation"
         data-hs-overlay="#hs-sidebar-content-push-to-mini-sidebar"
-        onClick={toggleOpen}>
+        disabled={isModalOpen}
+        onClick={isModalOpen ? undefined : toggleOpen}>
         <svg
           className="hidden hs-overlay-minified:block shrink-0 w-4 h-4"
           xmlns="http://www.w3.org/2000/svg"
@@ -315,6 +393,7 @@ export const CoorinSidebar = ({
       )}
 
       <nav
+        ref={sidebarRef}
         id="hs-coorin-sidebar"
         className={asideClass}
         role="navigation"

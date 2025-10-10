@@ -29,6 +29,20 @@ export default function CoorinDashboard() {
   const [modalSidebarOpen, setModalSidebarOpen] = useState(false);
   const [selectedSidebarOption, setSelectedSidebarOption] = useState("");
   
+  // Estados para controlar modales de las cards
+  const [executiveModalOpen, setExecutiveModalOpen] = useState(false);
+  const [consultationModalOpen, setConsultationModalOpen] = useState(false);
+  
+  // Función para cerrar el sidebar (será pasada al CoorinSidebar)
+  const [closeSidebarFn, setCloseSidebarFn] = useState(null);
+
+  // Efecto para cerrar el sidebar cuando se abran modales de las cards
+  useEffect(() => {
+    if ((executiveModalOpen || consultationModalOpen) && closeSidebarFn) {
+      closeSidebarFn();
+    }
+  }, [executiveModalOpen, consultationModalOpen, closeSidebarFn]);
+
   // Mapeo directo para renderizar cada componente con su propio modal
   const renderSelectedComponent = () => {
     const closeModal = () => setModalSidebarOpen(false);
@@ -184,14 +198,17 @@ export default function CoorinDashboard() {
     <>
       <CoorinSidebar 
         onMenuClick={handleSidebarMenuClick}
+        isModalOpen={executiveModalOpen || consultationModalOpen}
+        onRegisterCloseFunction={setCloseSidebarFn}
       />
-      <main className="flex-1 bg-background-dashboard min-h-0 relative z-0 flex flex-col">
+      <main className="flex-1 bg-background-dashboard h-screen relative z-0 flex flex-col overflow-hidden">
         <div
-          className="transition-transform duration-200 flex-1 min-h-0 overflow-auto"
+          className="transition-transform duration-200 flex-1 overflow-y-auto overflow-x-hidden"
           style={{
             marginLeft: sidebarMinified ? "2.5rem" : undefined,
             marginBottom: "0",
             marginTop: "0",
+            maxHeight: "100vh"
           }}
         >
           <div className="relative z-0 py-14 sm:py-2">
@@ -202,7 +219,10 @@ export default function CoorinDashboard() {
 
               <div className="mt-2 grid grid-cols-6 gap-4 sm:mt-8 md:mt-8 lg:mt-0 xl:mt-0">
                 <div className="col-span-6">
-                  <GridExecutives />
+                  <GridExecutives 
+                    onModalOpen={() => setExecutiveModalOpen(true)}
+                    onModalClose={() => setExecutiveModalOpen(false)}
+                  />
                 </div>
               </div>
 
@@ -213,11 +233,14 @@ export default function CoorinDashboard() {
                   </span>
                 </div>
                 <div className="-mt-2">
-                  <GridConsultations />
+                  <GridConsultations 
+                    onModalOpen={() => setConsultationModalOpen(true)}
+                    onModalClose={() => setConsultationModalOpen(false)}
+                  />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mt-8 w-full">
+              <div className="grid grid-cols-2 gap-4 mt-8 w-full mb-8">
                 <div className="relative w-full">
                   <RamificacionSesiones
                     onExecutiveSelect={setSelectedExecutiveId}

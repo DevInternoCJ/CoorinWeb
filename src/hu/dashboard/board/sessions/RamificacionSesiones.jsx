@@ -190,55 +190,110 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
 
     return (
         <div className="relative bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-6 w-full h-82 ramificacion-sesiones">
-            {/* Header dividido en 3 columnas */}
-            <div className="mb-4 grid grid-cols-3 items-center">
-                {/* Columna izquierda - Título */}
-                <div className="flex items-center text-gray-800">
-                    <span className="mr-2">
-                        {/* Icono de ramificación */}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="inline-block w-6 h-6 text-gray-700"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M7 7a3 3 0 11-6 0 3 3 0 016 0zm0 0v10a3 3 0 006 0V7m0 10a3 3 0 006 0V7a3 3 0 10-6 0"
-                            />
-                        </svg>
-                    </span>
-                    <h3 className="text-lg font-semibold">Ramificación</h3>
+            {/* Header responsive */}
+            <div className="mb-4">
+                {/* Layout para pantallas grandes (md y superiores) */}
+                <div className="hidden md:grid grid-cols-3 items-center">
+                    {/* Columna izquierda - Título */}
+                    <div className="flex items-center text-gray-800">
+                        <span className="mr-2">
+                            {/* Icono de ramificación */}
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="inline-block w-6 h-6 text-gray-700"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M7 7a3 3 0 11-6 0 3 3 0 016 0zm0 0v10a3 3 0 006 0V7m0 10a3 3 0 006 0V7a3 3 0 10-6 0"
+                                />
+                            </svg>
+                        </span>
+                        <h3 className="text-lg font-semibold">Ramificación</h3>
+                    </div>
+                    
+                    {/* Columna centro - Ejecutivo de la sesión */}
+                    <div className="flex justify-center">
+                        {idEjecutivoSesion && (
+                            <div
+                                className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? ' selected' : ''} text-sm truncate max-w-full`}
+                                title="Ejecutivo de la sesión actual"
+                                onClick={() => {
+                                    setSelectedExecutiveNode(Number(idEjecutivoSesion));
+                                    if (onExecutiveSelect) {
+                                        onExecutiveSelect(Number(idEjecutivoSesion));
+                                    }
+                                    
+                                    // Hacer autoscroll hacia arriba
+                                    setTimeout(() => {
+                                        scrollToTop();
+                                    }, 100);
+                                }}
+                                style={{ position: 'static', margin: 0 }}
+                            >
+                                {usuarioSesion} - {nombreSesion}
+                            </div>
+                        )}
+                    </div>
+                    
+                    {/* Columna derecha - Vacía por ahora */}
+                    <div></div>
                 </div>
-                
-                {/* Columna centro - Ejecutivo de la sesión */}
-                <div className="flex justify-center">
+
+                {/* Layout para pantallas pequeñas (móviles y tablets) */}
+                <div className="md:hidden">
+                    {/* Fila 1 - Título */}
+                    <div className="flex items-center text-gray-800 mb-2">
+                        <span className="mr-2">
+                            {/* Icono de ramificación */}
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="inline-block w-5 h-5 text-gray-700"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M7 7a3 3 0 11-6 0 3 3 0 016 0zm0 0v10a3 3 0 006 0V7m0 10a3 3 0 006 0V7a3 3 0 10-6 0"
+                                />
+                            </svg>
+                        </span>
+                        <h3 className="text-base font-semibold">Ramificación</h3>
+                    </div>
+                    
+                    {/* Fila 2 - Ejecutivo de la sesión */}
                     {idEjecutivoSesion && (
-                        <div
-                            className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? ' selected' : ''}`}
-                            title="Ejecutivo de la sesión actual"
-                            onClick={() => {
-                                setSelectedExecutiveNode(Number(idEjecutivoSesion));
-                                if (onExecutiveSelect) {
-                                    onExecutiveSelect(Number(idEjecutivoSesion));
-                                }
-                                
-                                // Hacer autoscroll hacia arriba
-                                setTimeout(() => {
-                                    scrollToTop();
-                                }, 100);
-                            }}
-                            style={{ position: 'static', margin: 0 }}
-                        >
-                            {usuarioSesion} - {nombreSesion}
+                        <div className="flex justify-center">
+                            <div
+                                className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? ' selected' : ''} text-xs px-2 py-1 rounded-md bg-gray-50 border text-center max-w-full truncate`}
+                                title={`Ejecutivo de la sesión actual: ${usuarioSesion} - ${nombreSesion}`}
+                                onClick={() => {
+                                    setSelectedExecutiveNode(Number(idEjecutivoSesion));
+                                    if (onExecutiveSelect) {
+                                        onExecutiveSelect(Number(idEjecutivoSesion));
+                                    }
+                                    
+                                    // Hacer autoscroll hacia arriba
+                                    setTimeout(() => {
+                                        scrollToTop();
+                                    }, 100);
+                                }}
+                                style={{ position: 'static', margin: 0 }}
+                            >
+                                <div className="truncate">
+                                    <span className="font-medium">{usuarioSesion}</span>
+                                    <br className="sm:hidden" />
+                                    <span className="sm:before:content-['-'] sm:before:mx-1">{nombreSesion}</span>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
-                
-                {/* Columna derecha - Vacía por ahora */}
-                <div></div>
             </div>
             
             {/* Contenedor de la ramificación con estilos de JerarquiaConR */}

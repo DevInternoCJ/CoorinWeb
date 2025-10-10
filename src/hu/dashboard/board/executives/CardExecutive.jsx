@@ -16,7 +16,7 @@ import ModalEncargadosEjecutivos from "./ModalEncargadosEjecutivos";
 import ModalCatalogosEjecutivos from "./ModalCatalogosEjecutivos";
 import ModalScriptsEjecutivos from "./ModalScriptsEjecutivos";
 
-const CardExecutive = () => {
+const CardExecutive = ({ onModalOpen, onModalClose }) => {
   const [showMetasModal, setShowMetasModal] = useState(false);
   const [showValidadoresModal, setShowValidadoresModal] = useState(false);
   const [showEncargadosModal, setShowEncargadosModal] = useState(false);
@@ -24,19 +24,30 @@ const CardExecutive = () => {
   const [showScriptsModal, setShowScriptsModal] = useState(false);
   const [showPantallaModal, setShowPantallaModal] = useState(false);
 
+  // Funciones para manejar la apertura y cierre de modales
+  const handleOpenModal = (modalSetter) => {
+    modalSetter(true);
+    if (onModalOpen) onModalOpen();
+  };
+
+  const handleCloseModal = (modalSetter) => {
+    modalSetter(false);
+    if (onModalClose) onModalClose();
+  };
+
   const handleCardClick = (title) => {
     if (title === "Metas") {
-      setShowMetasModal(true);
+      handleOpenModal(setShowMetasModal);
     } else if (title === "Validadores") {
-      setShowValidadoresModal(true);
+      handleOpenModal(setShowValidadoresModal);
     } else if (title === "Encargados") {
-      setShowEncargadosModal(true);
+      handleOpenModal(setShowEncargadosModal);
     } else if (title === "Catalogos") {
-      setShowCatalogosModal(true);
+      handleOpenModal(setShowCatalogosModal);
     } else if (title === "Scripts") {
-      setShowScriptsModal(true);
+      handleOpenModal(setShowScriptsModal);
     } else if (title === "Pantalla") {
-      setShowPantallaModal(true);
+      handleOpenModal(setShowPantallaModal);
     } else {
       alert(`Click en ${title}`);
     }
@@ -118,46 +129,46 @@ const CardExecutive = () => {
 
       {/* Modal de Metas */}
       {showMetasModal && (
-        <ModalMetasEjecutivos onClose={() => setShowMetasModal(false)} />
+        <ModalMetasEjecutivos onClose={() => handleCloseModal(setShowMetasModal)} />
       )}
 
       {/* Modal de Pantalla */}
       {showPantallaModal && (
         <LampshadeFields
           isOpen={showPantallaModal}
-          onClose={() => setShowPantallaModal(false)}
+          onClose={() => handleCloseModal(setShowPantallaModal)}
         />
       )}
 
       {/* Modal de Validadores */}
       {showValidadoresModal && (
         <ModalValidadoresEjecutivos
-          onClose={() => setShowValidadoresModal(false)}
+          onClose={() => handleCloseModal(setShowValidadoresModal)}
         />
       )}
 
       {/* Modal de Encargados */}
       {showEncargadosModal && (
         <ModalEncargadosEjecutivos
-          onClose={() => setShowEncargadosModal(false)}
+          onClose={() => handleCloseModal(setShowEncargadosModal)}
         />
       )}
 
       {/* Modal de Catálogos */}
       {showCatalogosModal && (
         <ModalCatalogosEjecutivos
-          onClose={() => setShowCatalogosModal(false)}
+          onClose={() => handleCloseModal(setShowCatalogosModal)}
         />
       )}
 
       {/* Modal de Scripts */}
       {showScriptsModal && (
-        <ModalScriptsEjecutivos onClose={() => setShowScriptsModal(false)} />
+        <ModalScriptsEjecutivos onClose={() => handleCloseModal(setShowScriptsModal)} />
       )}
 
       {/* Modal de Pantalla */}
       {showPantallaModal && (
-        <LampshadeFields onClose={() => setShowPantallaModal(false)} />
+        <LampshadeFields onClose={() => handleCloseModal(setShowPantallaModal)} />
       )}
     </>
   );

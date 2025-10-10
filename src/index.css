@@ -22,6 +22,16 @@ body {
     --color-text-black: #00291a;
     --color-text-terra: #505631;
     --color-text-mint: #DEFFB9;
+    --color-bgsuccess: #87D4C1;
+    --color-jerarquia1: #9dc5bc;
+    --color-jerarquia2: #3eac91;
+    --color-jerarquia3: #147f5e;
+    --color-jerarquia4: #2b463c; 
+    --color-bgcolor1: #efefef;
+    --color-background-primary: #ddddb9;
+    --color-background-secondary: #2b463c;
+    --color-background-dashboard: #DEE5E5;
+    --color-background-tertiary: #f5f5f5;
 }
 .coorin-bg {
   background-image: url("./assets/coorinbg.svg");
@@ -35,18 +45,7 @@ body {
    Usamos transform en el contenedor interno (.p-6) para que la animación sea GPU-accelerated
    y restamos el padding (p-6 = 1.5rem) para evitar hueco extra entre la minisidebar y el dashboard. */
 
-@theme {
-  --color-bgsuccess: #87D4C1;
-  --color-jerarquia1: #9dc5bc;
-  --color-jerarquia2: #3eac91;
-  --color-jerarquia3: #147f5e;
-  --color-jerarquia4: #2b463c; 
-  --color-bgcolor1: #efefef;
-  --color-background-primary: #ddddb9;
-  --color-background-secondary: #2b463c;
-  --color-background-dashboard: #DEE5E5;
-  --color-background-tertiary: #f5f5f5;
-  }
+
 
 .perspective {
   perspective: 1000px;
