@@ -67,11 +67,8 @@ namespace Loki.Mark.Administracion.Carteras.Services
     var campañas = await _campaniasDao.GetCampañasEncargado(servidor, idEncargado, idCartera, idProducto);
     var restantesList = await FilasRestantesPorCampaña(servidor);
 
-    Console.WriteLine("=== DEBUG DETALLADO ===");
-    Console.WriteLine($"Campañas obtenidas: {campañas?.Count}");
-    Console.WriteLine($"Restantes obtenidos: {(restantesList?.ToList().Count ?? 0)}");
 
-    // 1. Verificar QUÉ campañas vienen
+    // 1. Verificar campañas
     var idsCampañas = new List<int>();
     if (campañas != null)
     {
@@ -87,7 +84,7 @@ namespace Loki.Mark.Administracion.Carteras.Services
         }
     }
 
-    // 2. Verificar QUÉ restantes vienen  
+    // 2. Verificar restantes
     var restantesDict = new Dictionary<int, int>();
     if (restantesList != null)
     {
@@ -104,8 +101,6 @@ namespace Loki.Mark.Administracion.Carteras.Services
         }
     }
 
-    // 3. VERIFICAR COINCIDENCIAS
-    Console.WriteLine("=== COINCIDENCIAS ===");
     foreach (var idCampaña in idsCampañas)
     {
         bool tieneRestantes = restantesDict.ContainsKey(idCampaña);
@@ -133,9 +128,6 @@ namespace Loki.Mark.Administracion.Carteras.Services
 
                 double dRestantes = restantesDict.GetValueOrDefault(idCampaña);
 
-                // DEBUG FINAL POR CAMPAÑA
-                Console.WriteLine($"PROCESANDO: Campaña {idCampaña}, Cuentas={dCuentas}, Restantes={dRestantes}");
-
                 if (dRestantes >= dCuentas)
                 {
                     dCuentas = dRestantes;
@@ -160,14 +152,15 @@ namespace Loki.Mark.Administracion.Carteras.Services
         }
     }
 
-    Console.WriteLine("=== RESULTADO FINAL ===");
     foreach (var item in resultado)
     {
-        Console.WriteLine($"DTO: idCampaña={item.idCampaña}, Restantes={item.Restantes}");
+
     }
 
     return resultado;
-}        public async Task<dynamic?> CargaFilas(int idcampaña, int idcartera, string servidor)
+}        
+        
+    public async Task<dynamic?> CargaFilas(int idcampaña, int idcartera, string servidor)
         {
             var paramIdCampaña = new SqlParameter("@idCampaña", idcampaña.ToString());
             var paramIdCartera = new SqlParameter("@idCartera", idcartera.ToString());
@@ -183,17 +176,6 @@ namespace Loki.Mark.Administracion.Carteras.Services
             return result;
         }
 
-        //public async Task<IEnumerable<dynamic>?> top100filas(int idcampaña, string servidor)
-        //{
-        //    using var conn = _dbContFactory.GetSqlConnection(servidor, "memory");
-        //    await conn.OpenAsync();
-        //    const string storedprocedurename = "[ams].[top100filas]";
-        //    return await conn.QueryAsync(
-        //        storedprocedurename,
-        //        param: new { idcampaña = idcampaña },
-        //        commandType: System.Data.CommandType.StoredProcedure
-        //    );
-        //}
 
         public async Task<List<Dictionary<string, object>>> Top100Filas(int idCampaña, string servidor)
         {
@@ -202,7 +184,7 @@ namespace Loki.Mark.Administracion.Carteras.Services
             using var command = connection.CreateCommand();
             command.CommandText = "[AMS].[Top100Filas]";
             command.CommandType = CommandType.StoredProcedure;
-            // Agrega el parámetro
+
             var paramIdCampaña = new SqlParameter("@idCampaña", SqlDbType.Int)
             {
                 Value = idCampaña
@@ -224,6 +206,7 @@ namespace Loki.Mark.Administracion.Carteras.Services
             }
             return resultado;
         }
+
         public async Task<IEnumerable<dynamic>?> EjecutivoDeCampaña(int idCampaña, string servidor)
         {
             var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
@@ -233,44 +216,20 @@ namespace Loki.Mark.Administracion.Carteras.Services
             var result = await _daoBase.ExecuteStoredProcedureAsList(
                 connection,
                 "[AMS].[EjecutivosEnCampaña]",
-                new { idCampaña } // Pasar el parámetro al stored procedure
+                new { idCampaña } 
             );
 
             return result;
         }
 
-        public async Task<ResultadoCarga> CargarFilasDesdeArchivo(string servidor, int idCampania, int? idCartera, IFormFile archivo)
-        {
-            try
-            {
-                // 1. Crear tabla temporal usando DbContext
-                await _carterasDao.CreaTablaFilasTemp(idCampania, servidor);
-
-                // 2. Procesar archivo Excel y hacer bulk insert
-                var totalRegistros = await ProcesarArchivoExcelYBulkInsert(archivo, servidor, idCampania);
-
-                // 3. Cargar filas desde tabla temporal usando DbContext
-                var filasCargadas = await _carterasDao.CargaFilas(idCampania, idCartera ?? 0, servidor);
-
-                return new ResultadoCarga
-                {
-                    FilasCargadas = Convert.ToInt32(filasCargadas),
-                    TotalRegistros = totalRegistros
-                };
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al cargar archivo: {ex.Message}", ex);
-            }
-        }
+        //carga filas desde consulta
 
         public async Task<ResultadoCarga> CargarFilasDesdeConsulta(
-    string servidor, int idCampania, int? idConsulta,
-    string? consultaGeneral, bool incluirUsuario, bool incluirTelefono, int idCartera)
+           string servidor, int idCampania, int? idConsulta,
+           string? consultaGeneral, bool incluirUsuario, bool incluirTelefono, int idCartera)
         {
             try
             {
-                // ✅ Cargar consultas desde BD antes de usarlas
                 await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidor);
 
                 dynamic? resultado;
@@ -305,7 +264,7 @@ namespace Loki.Mark.Administracion.Carteras.Services
 
                     // Generar el query usando PreparaQueryBúsqueda
                     int idProducto = Convert.ToInt32(consultaRow["idProducto"]);
-                    DateTime desde = DateTime.Today.AddMonths(-1); // O usa la fecha de la consulta si está disponible
+                    DateTime desde = DateTime.Today.AddMonths(-1); 
 
                     string query = ConsultaGenerador.PreparaQueryBúsqueda(
                         idProducto,
@@ -338,7 +297,35 @@ namespace Loki.Mark.Administracion.Carteras.Services
             }
         }
 
-        private async Task<int> ProcesarArchivoExcelYBulkInsert(IFormFile archivo, string servidor, int idCampania)
+        //carga filas desde archivo
+        public async Task<ResultadoCarga> CargarFilasDesdeArchivo(string servidor, int idCampania, int? idCartera, IFormFile archivo)
+        {
+            try
+            {
+                // 1. Crear tabla temporal 
+                await _carterasDao.CreaTablaFilasTemp(idCampania, servidor);
+
+                // 2. Procesar archivo Excel y hacer bulk insert
+                var totalRegistros = await ProcesarArchivoExcelYBulkInsert(archivo, servidor, idCampania);
+
+                // 3. Cargar filas desde tabla temporal 
+                var filasCargadas = await _carterasDao.CargaFilas(idCampania, idCartera ?? 0, servidor);
+
+                return new ResultadoCarga
+                {
+                    FilasCargadas = Convert.ToInt32(filasCargadas),
+                    TotalRegistros = totalRegistros
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al cargar archivo: {ex.Message}", ex);
+            }
+        }
+
+       
+
+        public async Task<int> ProcesarArchivoExcelYBulkInsert(IFormFile archivo, string servidor, int idCampania)
         {
             // Validar tipo de archivo
             var extension = Path.GetExtension(archivo.FileName).ToLower();
@@ -357,7 +344,7 @@ namespace Loki.Mark.Administracion.Carteras.Services
             await archivo.CopyToAsync(stream);
 
             using var workbook = new XLWorkbook(stream);
-            var worksheet = workbook.Worksheet(1); // Primera hoja
+            var worksheet = workbook.Worksheet(1); 
 
             // Leer datos del Excel
             var dataTable = LeerExcelADataTable(worksheet);
@@ -419,13 +406,11 @@ namespace Loki.Mark.Administracion.Carteras.Services
 
         private async Task RealizarBulkInsert(DataTable dataTable, string servidor, int idCampania)
         {
-            // Obtener el DbContext para el servidor específico
+
             using var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
 
-            // Obtener la conexión del DbContext
             var connection = dbContext.Database.GetDbConnection();
 
-            // Verificar si necesitamos abrir la conexión
             var shouldCloseConnection = connection.State != ConnectionState.Open;
 
             if (shouldCloseConnection)
@@ -438,11 +423,10 @@ namespace Loki.Mark.Administracion.Carteras.Services
                 using var bulkCopy = new SqlBulkCopy((SqlConnection)connection)
                 {
                     DestinationTableName = $"AMS.FilasTemp_{idCampania}",
-                    BulkCopyTimeout = 30 * 60, // 30 minutos
-                    BatchSize = 1000 // Procesar en lotes de 1000 registros
+                    BulkCopyTimeout = 30 * 60, 
+                    BatchSize = 1000 
                 };
 
-                // Mapeo automático de columnas
                 foreach (DataColumn column in dataTable.Columns)
                 {
                     bulkCopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
@@ -452,7 +436,6 @@ namespace Loki.Mark.Administracion.Carteras.Services
             }
             finally
             {
-                // Solo cerrar la conexión si la abrimos nosotros
                 if (shouldCloseConnection)
                 {
                     await connection.CloseAsync();

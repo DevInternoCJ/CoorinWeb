@@ -270,6 +270,10 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         }
 
         [HttpPost("cargar-consulta")]
+        [SwaggerOperation(
+               Summary = "cargar-consulta-Irene",
+               Description = "Carga filas de trabajo a una campaña"
+           )]
         public async Task<IActionResult> CargarFilasDesdeConsulta([FromBody] CargaConsultaRequest request)
         {
             try
@@ -282,17 +286,9 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
                 _logger.LogInformation($"Iniciando carga de consulta: Campaña={request.IdCampania}, Consulta={request.IdConsulta}");
 
-                // ✅ Cargar consultas desde la BD antes de usarlas
+
                 await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidorClaim);
 
-                //// Debug: verificar qué se cargó
-                //var consultasTable = ConsultaGenerador._Consultas.Tables["Consultas"];
-                //var parametrosTable = ConsultaGenerador._Consultas.Tables["Parámetros"];
-                //var agruparTable = ConsultaGenerador.Tables["Agrupar"];
-
-                //_logger.LogInformation($"Tablas cargadas: Consultas={consultasTable?.Rows.Count}, Parámetros={parametrosTable?.Rows.Count}, Agrupar={agruparTable?.Rows.Count}");
-
-                // Verificar si existe la consulta específica
                 var consultaEspecifica = ConsultaGenerador.ObtenerConsulta(request.IdConsulta.Value);
                 if (consultaEspecifica == null)
                 {
@@ -325,7 +321,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
                     mensaje = "Consulta ejecutada correctamente",
                     filasCargadas = resultado,
                     columnasGeneradas = columnas,
-                    queryGenerada = queryData.Query // Para debugging
+                    queryGenerada = queryData.Query 
                 });
             }
             catch (Exception ex)
@@ -337,9 +333,9 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
         [HttpPost("cargar-archivo")]
         [SwaggerOperation(
-               Summary = "Carga filas de trabajo desde archivo Excel",
-               Description = "Carga filas de trabajo a una campaña desde un archivo Excel (.xlsx, .xls)"
-           )]
+        Summary = "Cargar archivo - irene",
+        Description = "Carga filas de trabajo a una campaña desde un archivo Excel (.xlsx, .xls)"
+    )]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -347,40 +343,43 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         {
             try
             {
+                // 1. Validar claims y datos
                 string? servidorClaim = User.FindFirst("Servidor")?.Value;
                 if (string.IsNullOrWhiteSpace(servidorClaim))
-                {
                     return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-                }
 
                 if (request.Archivo == null || request.Archivo.Length == 0)
-                {
                     return BadRequest(new { error = "No se proporcionó archivo o está vacío." });
-                }
-
-                // Validar tipo de archivo
-                var extension = Path.GetExtension(request.Archivo.FileName).ToLower();
-                if (extension != ".xlsx" && extension != ".xls")
-                {
-                    return BadRequest(new { error = "Solo se permiten archivos Excel (.xlsx, .xls)" });
-                }
 
                 if (request.IdCampania <= 0)
-                {
                     return BadRequest(new { error = "El Id de campaña es requerido." });
-                }
 
-                var resultado = await _carterasService.CargarFilasDesdeArchivo(
+                var extension = Path.GetExtension(request.Archivo.FileName).ToLower();
+                if (extension != ".xlsx" && extension != ".xls")
+                    return BadRequest(new { error = "Solo se permiten archivos Excel (.xlsx, .xls)" });
+
+                // 2. Crear tabla temporal para filas
+                await _carterasDao.CreaTablaFilasTemp(request.IdCampania, servidorClaim);
+
+                // 3. Procesar archivo Excel y hacer BulkInsert
+                var totalRegistros = await _carterasService.ProcesarArchivoExcelYBulkInsert(
+                    request.Archivo,
                     servidorClaim,
+                    request.IdCampania
+                );
+
+                // 4. Cargar filas desde tabla temporal
+                var filasCargadas = await _carterasDao.CargaFilas(
                     request.IdCampania,
-                    request.IdCartera,
-                    request.Archivo);
+                    request.IdCartera ?? 0,
+                    servidorClaim
+                );
 
                 return Ok(new
                 {
                     mensaje = "Archivo Excel procesado correctamente",
-                    filasCargadas = resultado.FilasCargadas,
-                    totalRegistros = resultado.TotalRegistros
+                    filasCargadas = Convert.ToInt32(filasCargadas),
+                    totalRegistros
                 });
             }
             catch (Exception ex)

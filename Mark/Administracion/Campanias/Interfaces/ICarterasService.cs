@@ -17,6 +17,6 @@ namespace Loki.Mark.Administracion.Carteras.Interfaces
         Task<ResultadoCarga> CargarFilasDesdeConsulta(
           string servidor, int idCampania, int? idConsulta,
           string? consultaGeneral, bool incluirUsuario, bool incluirTelefono, int idCartera);
-
+        Task<int> ProcesarArchivoExcelYBulkInsert(IFormFile archivo, string servidor, int idCampania);
     }
 }
