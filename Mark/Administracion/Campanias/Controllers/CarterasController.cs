@@ -319,7 +319,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
                 return Ok(new
                 {
                     mensaje = "Consulta ejecutada correctamente",
-                    filasCargadas = resultado,
+                    //filasCargadas = resultado,
                     columnasGeneradas = columnas,
                     queryGenerada = queryData.Query 
                 });
@@ -368,8 +368,8 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
                 return Ok(new
                 {
-                    mensaje = "Archivo Excel procesado correctamente",
-                    filasCargadas = resultado.FilasCargadas,
+                    mensaje = "carga filas procesadas correctamente",
+                    //filasCargadas = resultado.FilasCargadas,
                     totalRegistros = resultado.TotalRegistros
                 });
             }
@@ -380,7 +380,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         }
 
 
-        [HttpGet("Ejecutivos-en-Campaña")]
+        [HttpGet("ejecutivos-campaña")]
         [AllowAnonymous]
         [SwaggerOperation(
            Summary = "Ejecutivos en campaña",

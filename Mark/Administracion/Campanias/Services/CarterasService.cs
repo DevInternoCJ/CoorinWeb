@@ -7,6 +7,7 @@ using CoorinWeb.Loki.Common;
 using CoorinWeb.Loki.Global;
 using CoorinWeb.Loki.Mark.Auth.DAOs;
 using Dapper;
+using DocumentFormat.OpenXml.Drawing;
 using Loki.DTOs.CampaniasDTOs;
 using Loki.Mark.Administracion.Campanias.Interfaces;
 using Loki.Mark.Administracion.Carteras.Interfaces;
@@ -302,7 +303,7 @@ namespace Loki.Mark.Administracion.Carteras.Services
         }
 
         //carga filas desde archivo
-  
+
         public async Task<ResultadoCarga> CargarFilasDesdeArchivo(string servidor, int idCampania, int? idCartera, IFormFile archivo)
         {
             if (archivo == null || archivo.Length == 0)
@@ -318,35 +319,37 @@ namespace Loki.Mark.Administracion.Carteras.Services
             // Leer Excel a DataTable
             var dt = LeerExcelADataTable(archivo);
 
-            var colsEsperadas = new[] { "idCuenta", "Usuario", "NúmeroTelefónico" };
+            if (dt.Columns.Count < 3)
+                throw new InvalidOperationException("El archivo Excel debe tener al menos 3 columnas: idCuenta, Usuario, Número de teléfono");
 
-            _logger.LogInformation("Columnas leídas del Excel: {Excel}", string.Join(", ", dt.Columns.Cast<DataColumn>().Select(c => c.ColumnName)));
-
-    
-            var colsExcel = dt.Columns.Cast<DataColumn>().Select(c => NormalizarColumna(c.ColumnName)).ToList();
-
-
-            foreach (var col in colsEsperadas)
+            // Validar número de teléfono
+            var filasInvalidas = new List<int>();
+            for (int i = dt.Rows.Count - 1; i >= 0; i--)
             {
-                if (!colsExcel.Contains(NormalizarColumna(col)))
-                    _logger.LogError("No se encontró la columna esperada: {ColumnaEsperada}", col);
+                var telefono = dt.Rows[i][2]?.ToString().Trim();
+                if (string.IsNullOrWhiteSpace(telefono) || telefono.Length != 10)
+                {
+                    filasInvalidas.Add(i + 1);
+                    dt.Rows.RemoveAt(i);
+                }
             }
 
-            foreach (var col in colsEsperadas)
-            {
-                if (!colsExcel.Contains(NormalizarColumna(col)))
-                    throw new InvalidOperationException($"El archivo Excel no contiene la columna requerida: {col}");
-            }
+            if (filasInvalidas.Any())
+                _logger.LogWarning("Se eliminaron {Cantidad} filas por teléfono inválido: filas {Filas}", filasInvalidas.Count, string.Join(", ", filasInvalidas));
 
-            // Bulk insert
-            await RealizarBulkInsert(dt, servidor, idCampania, colsEsperadas);
+            // Mapear columnas por posición 
+            var columnasDestino = new[] { dt.Columns[0].ColumnName, dt.Columns[1].ColumnName, dt.Columns[2].ColumnName };
+
+            _logger.LogInformation("Columnas Excel detectadas: {Excel}", string.Join(", ", dt.Columns.Cast<DataColumn>().Select(c => c.ColumnName)));
+            _logger.LogInformation("Columnas destino para BulkInsert: {Destino}", string.Join(", ", columnasDestino));
+
+            // Bulk insert usando columnas por posición
+            await RealizarBulkInsertPorPosicion(dt, servidor, idCampania);
 
             // Cargar filas desde tabla temporal
             var filasCargadasResult = await _carterasDao.CargaFilas(idCampania, idCartera ?? 0, servidor);
 
-
             int filasCargadasInt = 0;
-
             if (filasCargadasResult is IEnumerable<Dictionary<string, object>> list && list.Any())
             {
                 var firstRow = list.First();
@@ -359,35 +362,9 @@ namespace Loki.Mark.Administracion.Carteras.Services
                 FilasCargadas = filasCargadasInt,
                 TotalRegistros = dt.Rows.Count
             };
-
         }
 
-        // Leer Excel a DataTable desde IFormFile
-        private DataTable LeerExcelADataTable(IFormFile archivo)
-        {
-            using var stream = new MemoryStream();
-            archivo.CopyTo(stream);
-            using var workbook = new XLWorkbook(stream);
-            var ws = workbook.Worksheet(1);
-            var dt = new DataTable();
-
-            // Encabezados
-            foreach (var c in ws.FirstRow().CellsUsed())
-                dt.Columns.Add(c.Value.ToString().Trim());
-
-            // Filas
-            foreach (var r in ws.RowsUsed().Skip(1))
-            {
-                var dr = dt.NewRow();
-                for (int i = 0; i < dt.Columns.Count; i++)
-                    dr[i] = r.Cell(i + 1).Value.ToString() ?? "";
-                dt.Rows.Add(dr);
-            }
-            return dt;
-        }
-
-
-        private async Task RealizarBulkInsert(DataTable dt, string servidor, int idCampania, string[] columnasDestino)
+        private async Task RealizarBulkInsertPorPosicion(DataTable dt, string servidor, int idCampania)
         {
             var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
             var conn = dbContext.Database.GetDbConnection();
@@ -402,23 +379,15 @@ namespace Loki.Mark.Administracion.Carteras.Services
                     BatchSize = 1000
                 };
 
-                foreach (DataColumn col in dt.Columns)
-                {
-                    var match = columnasDestino.FirstOrDefault(c => NormalizarColumna(c) == NormalizarColumna(col.ColumnName));
-                    if (match != null)
-                        bulk.ColumnMappings.Add(col.ColumnName, match);
-                    else
-                        _logger.LogWarning("Columna Excel '{ColumnaExcel}' no tiene mapeo en tabla destino", col.ColumnName);
-                }
+                // Columnas destino
+                var columnasDestino = new[] { "idCuenta", "Usuario", "NúmeroTelefónico" };
 
-                _logger.LogInformation("Columnas destino: {Destino}", string.Join(", ", columnasDestino));
+                // Mapea por índice
+                for (int i = 0; i < 3; i++)
+                    bulk.ColumnMappings.Add(i, columnasDestino[i]);
+
                 await bulk.WriteToServerAsync(dt);
                 _logger.LogInformation("Bulk insert completado para AMS.FilasTemp_{IdCampania}", idCampania);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error durante BulkInsert: {Mensaje}", ex.Message);
-                throw;
             }
             finally
             {
@@ -426,16 +395,41 @@ namespace Loki.Mark.Administracion.Carteras.Services
             }
         }
 
-        private string NormalizarColumna(string columna)
+
+        // Leer Excel a DataTable 
+        private DataTable LeerExcelADataTable(IFormFile archivo)
         {
-            if (string.IsNullOrWhiteSpace(columna)) return string.Empty;
-            var normalized = columna.Normalize(NormalizationForm.FormD);
-            var sb = new StringBuilder();
-            foreach (var c in normalized)
-                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
-                    sb.Append(c);
-            return sb.ToString().Replace(" ", "").ToLower();
+            using var stream = new MemoryStream();
+            archivo.CopyTo(stream);
+            using var workbook = new XLWorkbook(stream);
+            var ws = workbook.Worksheet(1);
+            var dt = new DataTable();
+
+            var firstRow = ws.FirstRow().CellsUsed().ToList();
+            for (int i = 0; i < 3; i++) 
+            {
+                string nombreColumna;
+                if (i < firstRow.Count)
+                    nombreColumna = string.IsNullOrWhiteSpace(firstRow[i].Value.ToString())
+                        ? $"Col{i + 1}"
+                        : firstRow[i].Value.ToString().Trim();
+                else
+                    nombreColumna = $"Col{i + 1}";
+
+                dt.Columns.Add(nombreColumna);
+            }
+
+            // Filas
+            foreach (var r in ws.RowsUsed().Skip(1))
+            {
+                var dr = dt.NewRow();
+                for (int i = 0; i < dt.Columns.Count; i++)
+                    dr[i] = r.Cell(i + 1).Value.ToString() ?? "";
+                dt.Rows.Add(dr);
+            }
+            return dt;
         }
+
 
 
     }
