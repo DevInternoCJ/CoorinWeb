@@ -12,7 +12,7 @@ import {
 import MetasModal from "./ModalMetasModal";
 import LampshadeFields from "../../board/screenFields/LampshadeFields";
 import ValidadoresModal from "./ModalValidadoresModal";
-import ModalEncargadosEjecutivos from "./ModalEncargadosEjecutivos";
+import EncargadosModal from "./ModalEncargadosModal";
 import CatalogosModal from "./ModalCatalogosModal";
 import ModalScriptsEjecutivos from "./ModalScriptsEjecutivos";
 
@@ -149,11 +149,10 @@ const CardExecutive = ({ onModalOpen, onModalClose }) => {
       />
 
       {/* Modal de Encargados */}
-      {showEncargadosModal && (
-        <ModalEncargadosEjecutivos
-          onClose={() => handleCloseModal(setShowEncargadosModal)}
-        />
-      )}
+      <EncargadosModal 
+        isOpen={showEncargadosModal}
+        onClose={() => handleCloseModal(setShowEncargadosModal)}
+      />
 
       {/* Modal de Catálogos */}
       <CatalogosModal 
