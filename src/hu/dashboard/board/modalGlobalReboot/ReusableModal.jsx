@@ -94,10 +94,12 @@ const ReusableModal = ({
 
     return (
         <div
-            className={`fixed inset-0 ${overlayClassName || 'bg-gray-500 bg-opacity-30'} 
-                       flex items-center justify-center z-[1000] 
-                       p-2 sm:p-4 md:p-6 lg:p-8
-                       ${backdropBlur ? 'backdrop-blur-md' : ''}`}
+            className={`fixed inset-0 flex items-center justify-center z-[1000] 
+                       p-2 sm:p-4 md:p-6 lg:p-8 ${overlayClassName || ''}`}
+            style={{
+                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                backdropFilter: backdropBlur ? "blur(5px)" : "none"
+            }}
             onClick={handleBackdropClick}
             {...props}
         >

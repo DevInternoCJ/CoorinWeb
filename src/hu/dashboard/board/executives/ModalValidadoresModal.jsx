@@ -116,7 +116,6 @@ const ValidadoresModal = ({
             closeOnBackdropClick={closeOnBackdropClick}
             contentClassName="flex flex-col gap-4 h-full !overflow-hidden"
             modalClassName="border-0 shadow-2xl h-[60vh] overflow-hidden"
-            overlayClassName="modal-blur-bg"
             {...props}
         >
             {/* Contenido principal con filtros */}
@@ -128,28 +127,6 @@ const ValidadoresModal = ({
 
             {/* Agregar estilos específicos del modal de validadores */}
             <style jsx global>{`
-                /* Estilo personalizado para el backdrop del modal - transparente con blur suave */
-                .modal-blur-bg {
-                  background: rgba(255, 255, 255, 0.15) !important;
-                  backdrop-filter: blur(6px) saturate(180%) !important;
-                  -webkit-backdrop-filter: blur(6px) saturate(180%) !important;
-                  animation: fadeInBackdrop 0.3s ease-out;
-                }
-                
-                /* Animación suave para la aparición del backdrop */
-                @keyframes fadeInBackdrop {
-                  from {
-                    background: rgba(255, 255, 255, 0);
-                    backdrop-filter: blur(0px);
-                    -webkit-backdrop-filter: blur(0px);
-                  }
-                  to {
-                    background: rgba(255, 255, 255, 0.15);
-                    backdrop-filter: blur(6px) saturate(180%);
-                    -webkit-backdrop-filter: blur(6px) saturate(180%);
-                  }
-                }
-                
                 /* Forzar scroll solo en el contenedor de la jerarquía */
                 .scrollbar-gray {
                   overflow-y: auto !important;

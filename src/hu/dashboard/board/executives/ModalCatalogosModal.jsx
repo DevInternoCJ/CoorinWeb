@@ -47,7 +47,6 @@ const CatalogosModal = ({ isOpen, onClose }) => {
             headerComponent={CustomHeader}
             showHeader={true}
             showFooter={true}
-            overlayClassName="modal-blur-bg"
             contentClassName="flex flex-col gap-4 h-full overflow-hidden"
             modalClassName="max-h-[90vh]"
             // Footer con mensaje informativo usando children

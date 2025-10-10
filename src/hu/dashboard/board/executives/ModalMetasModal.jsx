@@ -76,7 +76,6 @@ const MetasModal = ({
             closeOnBackdropClick={closeOnBackdropClick}
             contentClassName="modal-scroll-gray"
             modalClassName="border-0 shadow-2xl"
-            overlayClassName="modal-blur-bg"
             {...props}
         >
             <ModalMetasContent />

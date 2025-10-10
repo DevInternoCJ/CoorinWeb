@@ -151,7 +151,6 @@ const ProductivityModal = ({
             enableBounce={enableBounce}
             enableShakeOnBackdropClick={enableShakeOnBackdropClick}
             closeOnBackdropClick={closeOnBackdropClick}
-            overlayClassName="modal-blur-bg"
             contentClassName="p-0" // Sin padding para el contenido personalizado
             {...props}
         >
