@@ -6,11 +6,13 @@ const LoadDates = ({
   isModalOpen,
   onPlantillasChange,
   onDatosDeudorChange,
+  onDatosProductoCompletoChange 
 }) => {
   const [datosDeudor, setDatosDeudor] = useState({});
   const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [draggedLabel, setDraggedLabel] = useState(""); // Estado para el label/header que se está arrastrando
 
   // Función para resetear todos los estados
   const resetAllData = () => {
@@ -18,8 +20,10 @@ const LoadDates = ({
     setDatosProductoCompleto({});
     setLoading(true);
     setError(null);
-    onDatosDeudorChange({}); // ✅ Limpiar datosDeudor en el padre también
+    onDatosDeudorChange({});
+    onDatosProductoCompletoChange({});
   };
+
   // Efecto para detectar cuando el modal se cierra y resetear los datos
   useEffect(() => {
     if (!isModalOpen) {
@@ -56,10 +60,11 @@ const LoadDates = ({
           };
 
           setDatosDeudor(nuevosDatosDeudor);
-          onDatosDeudorChange(nuevosDatosDeudor); // ✅ Actualizar datosDeudor en el padre
+          onDatosDeudorChange(nuevosDatosDeudor);
         }
         // Guardar todos los datos del producto para la vista completa
         setDatosProductoCompleto(response.producto);
+        onDatosProductoCompletoChange(response.producto);
       }
       setLoading(false);
     } catch (error) {
@@ -76,13 +81,28 @@ const LoadDates = ({
       fetchData(selectedProduct.value);
     }
   }, [selectedProduct]);
+
+  // ========== FUNCIONES DE DRAG AND DROP ==========
+  
+  // Cuando comienza el arrastre del label o header
+  const handleDragStart = (e, labelText) => {
+    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.setData('text/plain', `[${labelText}]`);
+    setDraggedLabel(labelText);
+  };
+
+  // Cuando termina el arrastre
+  const handleDragEnd = () => {
+    setDraggedLabel('');
+  };
+
+  // ===============================================
+
   // Función para formatear valores vacíos o undefined
   const formatValue = (value, key) => {
-    // Caso especial para el campo "Notas"
     if (key === "Notas") {
       return "Texto Grande";
     }
-    // Caso especial para el campo "idCuenta" - tratarlo como string, no como número
     if (key === "idCuenta") {
       return value !== null && value !== undefined && value !== ""
         ? String(value)
@@ -91,17 +111,14 @@ const LoadDates = ({
     if (value === null || value === undefined || value === "") {
       return "N/A";
     }
-    // Si es un objeto vacío
     if (typeof value === "object" && Object.keys(value).length === 0) {
       return "N/A";
     }
-    // Si es un número, formatear como moneda (excepto para campos específicos)
     if (
       (typeof value === "number" ||
         (!isNaN(parseFloat(value)) && isFinite(value))) &&
       key !== "idCuenta"
     ) {
-      // Excluir idCuenta del formateo numérico
       return `$${parseFloat(value).toLocaleString()}`;
     }
     return value;
@@ -109,7 +126,6 @@ const LoadDates = ({
 
   // Función para determinar la clase de estilo basada en el valor
   const getValueClass = (value, key) => {
-    // Caso especial para el campo "Notas"
     if (key === "Notas") {
       return "text-red-600 font-semibold";
     }
@@ -123,14 +139,12 @@ const LoadDates = ({
       return "text-gray-400 italic";
     }
 
-    // Para valores numéricos importantes (excepto idCuenta)
     if (
       (typeof value === "number" || !isNaN(parseFloat(value))) &&
       key !== "idCuenta"
     ) {
       return "font-mono text-blue-700";
     }
-    // Para fechas
     if (typeof value === "string" && value.match(/\d{2}\/\d{2}\/\d{4}/)) {
       return "text-green-700";
     }
@@ -176,39 +190,96 @@ const LoadDates = ({
               key={index}
               className="bg-background-tertiary p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-200"
             >
+              {/* Label con drag and drop */}
               <div
-                className={`text-xs font-medium text-${item.color}-600 tracking-wide mb-2`}
+                draggable="true"
+                onDragStart={(e) => handleDragStart(e, item.label)}
+                onDragEnd={handleDragEnd}
+                className={`hs-tooltip [--placement:auto] inline-block
+                  text-xs font-medium text-${item.color}-600 tracking-wide mb-2
+                  cursor-grabbing select-none
+                  hover:bg-gray-100 hover:text-${item.color}-700
+                  active:opacity-50
+                  px-2 py-1 rounded-md inline-block
+                  transition-all duration-150
+                  ${draggedLabel === item.label ? 'opacity-50 scale-95' : ''}
+                `}
+                title="Arrastra el elemento al campo mensaje"
               >
-                {item.label}
+                <span className="inline-flex items-center gap-1 rounded-lg">
+                  {/* Icono de drag */}
+                  <svg 
+                    className="w-3 h-3 opacity-50" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M4 8h16M4 16h16" 
+                    />
+                  </svg>
+                  {item.label}
+                </span>
               </div>
               <div className={`text-sm font-semibold text-${item.color}-700`}>
                 {item.value}
               </div>
+              
             </div>
           ))}
         </div>
       </div>
 
-      {/* Vista de tabla horizontal - TODOS los campos en una sola fila con mejor estilo */}
+      {/* Vista de tabla horizontal - Encabezados TAMBIÉN arrastrables */}
       <div className="mt-8">
-        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+           <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
           <table className="bg-white min-w-full">
             <tbody>
-              {/* Fila de encabezados */}
-              <tr className="bg-background-secondary">
+              {/* Fila de encabezados - AHORA ARRASTRABLES */}
+              <tr className="bg-ba">
                 {Object.keys(datosProductoCompleto).map((key) => (
                   <th
                     key={key}
-                    className="py-3 w-auto px-4 border-b border-r-background-secondary text-xs font-semibold text-neutral-100 uppercase tracking-wider whitespace-nowrap align-top"
+                    draggable="true"
+                    onDragStart={(e) => handleDragStart(e, key)}
+                    onDragEnd={handleDragEnd}
+                    className={`
+                      py-3 w-auto px-4 border-b border-r-background-secondary 
+                      text-xs font-semibold text-neutral-100 uppercase tracking-wider 
+                      whitespace-nowrap align-top
+                      cursor-grabbing select-none
+                      hover:bg-slate-600 active:bg-slate-500
+                      transition-all duration-150
+                      ${draggedLabel === key ? 'opacity-50 scale-95 bg-slate-500' : ''}
+                    `}
+                    title="Arrastra el elemento al campo mensaje"
                   >
-                    {key
-                      .replace(/([A-Z])/g, " $1")
-                      .replace(/^./, (str) => str.toUpperCase())}
+                    <span className="inline-flex items-center gap-2">
+                      <svg 
+                        className="w-3 h-3 text-neutral-300" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2} 
+                          d="M4 8h16M4 16h16" 
+                        />
+                      </svg>
+                      {key
+                        .replace(/([A-Z])/g, " $1")
+                        .replace(/^./, (str) => str.toUpperCase())}
+                    </span>
                   </th>
                 ))}
               </tr>
 
-              {/* Fila de valores - CORRECCIÓN: Pasar el key a las funciones */}
+              {/* Fila de valores */}
               <tr className="hover:bg-gray-50">
                 {Object.entries(datosProductoCompleto).map(
                   ([key, value], index) => (
@@ -229,7 +300,7 @@ const LoadDates = ({
         </div>
 
         <div className="mt-2 text-xs text-gray-500 text-center">
-          Desliza horizontalmente para ver todos los campos →
+          Desliza horizontalmente para ver todos los campos → | Los encabezados también son arrastrables
         </div>
       </div>
     </div>
