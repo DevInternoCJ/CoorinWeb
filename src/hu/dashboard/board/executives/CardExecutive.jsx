@@ -9,7 +9,7 @@ import {
   IconScripts,
   IconPantalla,
 } from "./IconesEjecutives";
-import ModalMetasEjecutivos from "./ModalMetasEjecutivos";
+import MetasModal from "./MetasModal";
 import LampshadeFields from "../../board/screenFields/LampshadeFields";
 import ModalValidadoresEjecutivos from "./ModalValidadoresEjecutivos";
 import ModalEncargadosEjecutivos from "./ModalEncargadosEjecutivos";
@@ -128,9 +128,11 @@ const CardExecutive = ({ onModalOpen, onModalClose }) => {
       ))}
 
       {/* Modal de Metas */}
-      {showMetasModal && (
-        <ModalMetasEjecutivos onClose={() => handleCloseModal(setShowMetasModal)} />
-      )}
+      <MetasModal 
+        isOpen={showMetasModal}
+        onClose={() => handleCloseModal(setShowMetasModal)}
+        // size por defecto es ahora "3xl" (más angosto que el original)
+      />
 
       {/* Modal de Pantalla */}
       {showPantallaModal && (
