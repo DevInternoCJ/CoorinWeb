@@ -309,39 +309,40 @@ namespace Loki.Mark.Administracion.Carteras.Services
             if (archivo == null || archivo.Length == 0)
                 throw new InvalidOperationException("No se proporcionó archivo o está vacío");
 
-            var ext = Path.GetExtension(archivo.FileName).ToLower();
+            var ext = System.IO.Path.GetExtension(archivo.FileName).ToLower();
             if (ext != ".xlsx" && ext != ".xls")
                 throw new InvalidOperationException("Solo se permiten archivos Excel (.xlsx, .xls)");
 
-            // Crear tabla temporal
             await _carterasDao.CreaTablaFilasTemp(idCampania, servidor);
 
-            // Leer Excel a DataTable
             var dt = LeerExcelADataTable(archivo);
 
             if (dt.Columns.Count < 3)
                 throw new InvalidOperationException("El archivo Excel debe tener al menos 3 columnas: idCuenta, Usuario, Número de teléfono");
 
-            // Validar número de teléfono
+            // Validar filas
             var filasInvalidas = new List<int>();
             for (int i = dt.Rows.Count - 1; i >= 0; i--)
             {
-                var telefono = dt.Rows[i][2]?.ToString().Trim();
-                if (string.IsNullOrWhiteSpace(telefono) || telefono.Length != 10)
+                // Validar cuenta
+                var cuenta = dt.Rows[i][0]?.ToString().Trim() ?? "";
+                bool cuentaInvalida = cuenta.Length != 15 || !cuenta.All(char.IsDigit);
+
+                // Validar teléfono
+                var telefono = dt.Rows[i][2]?.ToString().Trim() ?? "";
+                bool telefonoInvalido = telefono.Length != 10 || !telefono.All(char.IsDigit);
+
+                if (cuentaInvalida || telefonoInvalido)
                 {
-                    filasInvalidas.Add(i + 1);
+                    filasInvalidas.Add(i + 1); 
                     dt.Rows.RemoveAt(i);
                 }
             }
 
             if (filasInvalidas.Any())
-                _logger.LogWarning("Se eliminaron {Cantidad} filas por teléfono inválido: filas {Filas}", filasInvalidas.Count, string.Join(", ", filasInvalidas));
+                _logger.LogWarning("Se eliminaron {Cantidad} filas por datos inválidos: filas {Filas}", filasInvalidas.Count, string.Join(", ", filasInvalidas));
 
-            // Mapear columnas por posición 
             var columnasDestino = new[] { dt.Columns[0].ColumnName, dt.Columns[1].ColumnName, dt.Columns[2].ColumnName };
-
-            _logger.LogInformation("Columnas Excel detectadas: {Excel}", string.Join(", ", dt.Columns.Cast<DataColumn>().Select(c => c.ColumnName)));
-            _logger.LogInformation("Columnas destino para BulkInsert: {Destino}", string.Join(", ", columnasDestino));
 
             // Bulk insert usando columnas por posición
             await RealizarBulkInsertPorPosicion(dt, servidor, idCampania);
