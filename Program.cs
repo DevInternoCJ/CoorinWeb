@@ -274,6 +274,7 @@ builder.Services.AddScoped<IBusqueda, BusquedasService>();
 builder.Services.AddScoped<EjecutivoDao>();
 // En Program.cs, cambia a:
 builder.Services.AddSingleton<Loki.Global.ExcelGeneratorService>();
+builder.Services.AddScoped<AccionamientosQueryHelper>();
 
 // Configuración de JSON para que distinga entre mayúsculas y minúsculas
 builder.Services.AddControllers()

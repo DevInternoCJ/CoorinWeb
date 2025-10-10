@@ -9,6 +9,7 @@ using Loki.DTOs.BusquedaDTOs; // Corregido a BusquedasDTOs (anteriormente era Bu
 using System;
 using System.IO;
 using Dapper;
+using static CoorinWeb.Loki.Global.AccionamientosQueryHelper;
 
 namespace Loki.Mark.Consulta.Cuenta.Services
 {
@@ -18,13 +19,14 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         private readonly DaoBase _daoBase;
         private readonly EjecutivoDao _ejecutivoDao;
         private readonly ExcelGeneratorService _excelGeneratorService; // Inyecta el nuevo servicio
-
-        public BusquedasService(IDbContextFactory dbContFactory, DaoBase daoBase, EjecutivoDao ejecutivoDao, ExcelGeneratorService excelGeneratorService)
+        private readonly AccionamientosQueryHelper _accionamientosQueryHelper;
+        public BusquedasService(IDbContextFactory dbContFactory, DaoBase daoBase, EjecutivoDao ejecutivoDao, ExcelGeneratorService excelGeneratorService, AccionamientosQueryHelper accionamientosQueryHelper)
         {
             _dbContFactory = dbContFactory;
             _daoBase = daoBase;
             _ejecutivoDao = ejecutivoDao;
             _excelGeneratorService = excelGeneratorService;
+            this._accionamientosQueryHelper = accionamientosQueryHelper;
         }
 
         public async Task<SearchResultDto> RealizarBusquedaAsync(SearchCriteriaDto criteria)
@@ -186,5 +188,48 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             public static void ColumnaPorcentaje(ref DataTable table, string columnName) { /* Implementación real */ }
             public static void FilaTotales(ref DataTable table) { /* Implementación real */ }
         }
+
+        public async Task<string> GuardarConsulta(
+         string nombreConsulta,
+         int idProducto,
+         int idCartera,
+         DataTable parametros,
+         DataTable agrupar,
+         DateTime desde,
+         int idEjecutivo,
+         string servidor,
+         string tipoBase)
+        {
+            try
+            {
+                int idConsulta = 0; // siempre nueva
+
+                var consultaGenerador = new AccionamientosQueryHelper.ConsultaGenerador(_dbContFactory);
+
+                bool resultado = await consultaGenerador.GuardarConsulta(
+                    idConsulta,
+                    nombreConsulta,
+                    idProducto == 0 ? DBNull.Value : idProducto,
+                    idCartera == 0 ? DBNull.Value : idCartera,
+                    parametros ?? new DataTable(),
+                    agrupar ?? new DataTable(),
+                    desde,
+                    idEjecutivo,
+                    servidor,
+                    tipoBase
+                );
+
+                if (!resultado)
+                    return "Error: No se pudo guardar la consulta.";
+
+                return $"Consulta '{nombreConsulta}' guardada correctamente (idEjecutivo: {idEjecutivo}).";
+            }
+            catch (Exception ex)
+            {
+                return $"Error: {ex.Message}";
+            }
+        }
+
+
     }
 }

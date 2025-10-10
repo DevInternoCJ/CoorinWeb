@@ -100,6 +100,8 @@ namespace CoorinWeb.Loki.Global
                 dtConsultas.Columns.Add("idConsulta", typeof(int));
                 dtConsultas.Columns.Add("idProducto", typeof(int));
                 dtConsultas.Columns.Add("idCartera", typeof(int));
+                dtConsultas.Columns.Add("NombreConsulta", typeof(string)); // ✅ Agregar
+                dtConsultas.Columns.Add("Desde", typeof(DateTime));
                 dtConsultas.PrimaryKey = new DataColumn[] { dtConsultas.Columns["idConsulta"] };
 
                 // Filas hardcodeadas por defecto
@@ -293,7 +295,7 @@ namespace CoorinWeb.Loki.Global
             /// <param name="Parámetros">Tabla con los parámetros.</param>
             /// <param name="Agrupar">Tabla con los campos a agrupar.</param>
             /// <param name="Desde">Fecha desde para realizar los conteos.</param>
-            public async Task<bool> GuardarConsultaAsync(
+            public async Task<bool> GuardarConsulta(
              int idConsulta,
              string nombre,
              object idProducto,

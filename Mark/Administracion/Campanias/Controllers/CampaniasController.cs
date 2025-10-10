@@ -25,7 +25,7 @@ namespace Loki.Mark.Administracion.Campanias.Controllers
 
 		[HttpGet("carteras")]
 		[SwaggerOperation(
-			Summary = "Carteras",
+			Summary = "carteras - ramón",
 			Description = "Devuelve todas las carteras del servidor donde se haya iniciado sesión."
 		)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -50,7 +50,7 @@ namespace Loki.Mark.Administracion.Campanias.Controllers
 
 		[HttpGet("carteras-productos")]
 		[SwaggerOperation(
-			Summary = "Carteras productos",
+			Summary = "carteras productos ",
 			Description = "Devuelve todas las carteras activas actualmente en el servidor."
 		)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
@@ -76,7 +76,7 @@ namespace Loki.Mark.Administracion.Campanias.Controllers
 
 		[HttpGet("campañas-encargado/{idEncargado}/{idCartera}/{idProducto}")]
 		[SwaggerOperation(
-			Summary = "Campañas del Encargado",
+			Summary = "Campañas del Encargado - yoshi",
 			Description = "Obtiene las campañas del encargado según la cartera y producto al que pertenezca."
 		)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
@@ -107,7 +107,7 @@ namespace Loki.Mark.Administracion.Campanias.Controllers
 		[HttpPatch("habilitar-deshabilitar/{idCampaña}")]
 		[AllowAnonymous]
 		[SwaggerOperation(
-			Summary = "Habilitar/Deshabilitar Campañas",
+			Summary = "Habilitar/Deshabilitar Campañas - Ramón",
 			Description = "Permite elegir qué campañas están activas en el servidor respectivo."
 		)]
 		[ProducesResponseType(StatusCodes.Status200OK)]

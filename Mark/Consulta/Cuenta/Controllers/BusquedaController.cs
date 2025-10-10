@@ -5,7 +5,10 @@ using Microsoft.AspNetCore.Authorization; // Para el atributo [Authorize]
 using System.IO; // Para Path
 using System.Net.Mime; // Para MediaTypeNames
 using System.Threading.Tasks; // Para Task
-using Microsoft.AspNetCore.Http; // Para StatusCodes
+using Microsoft.AspNetCore.Http;
+using Swashbuckle.AspNetCore.Annotations;
+using Loki.Global;
+using System.Data; // Para StatusCodes
 
 namespace Loki.Controllers
 {
@@ -15,6 +18,7 @@ namespace Loki.Controllers
     public class BusquedasController : ControllerBase
     {
         private readonly IBusqueda _busquedasService; // Inyecta la interfaz del servicio de búsquedas
+ 
 
         public BusquedasController(IBusqueda busquedasService)
         {
@@ -100,5 +104,59 @@ namespace Loki.Controllers
             // Para archivos Excel XLSX, puedes usar "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".
             return File(fileStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
         }
+
+        [HttpPost("guardar-consulta")]
+        [AllowAnonymous]
+        [SwaggerOperation(
+           Summary = "guardar consulta - irene",
+           Description = "Se genera una consulta personalizada para reutilizarla posteriormente"
+        )]
+        public async Task<ActionResult<string>> GuardarConsulta(
+        [FromQuery] string nombreConsulta,
+        [FromQuery] int idProducto,
+        [FromQuery] int idCartera,
+        [FromQuery] DateTime desde,
+        [FromQuery] int idEjecutivo
+    )
+        {
+            // Recuperar el servidor del token
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+
+            // Tablas vacías (pueden venir del body si luego quieres)
+            var parametros = new DataTable();
+            parametros.Columns.Add("Concepto", typeof(string));
+            parametros.Columns.Add("Campo", typeof(string));
+            parametros.Columns.Add("Valores", typeof(string));
+            parametros.Columns.Add("Parámetros", typeof(string));
+            parametros.Columns.Add("Dato", typeof(string));
+
+            var agrupar = new DataTable();
+            agrupar.Columns.Add("Campo", typeof(string));
+            agrupar.Columns.Add("Concepto", typeof(string));
+
+            // Valor fijo para tipoBase
+            string tipoBaseValor = "Collection";
+
+            var result = await _busquedasService.GuardarConsulta(
+                nombreConsulta,
+                idProducto,
+                idCartera,
+                parametros,
+                agrupar,
+                desde,
+                idEjecutivo,
+                servidorClaim,
+                tipoBaseValor
+            );
+
+            if (result.StartsWith("Error:", StringComparison.OrdinalIgnoreCase))
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
     }
+
 }

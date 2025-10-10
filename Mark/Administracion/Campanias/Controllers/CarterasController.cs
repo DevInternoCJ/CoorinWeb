@@ -85,7 +85,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         [HttpPost("nueva-campania")]
         [Authorize]
         [SwaggerOperation(
-            Summary = "Inserta campaña",
+            Summary = "inserta campaña - irene",
             Description = "Crear una nueva campaña"
             )]
        
@@ -128,7 +128,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         [HttpDelete("eliminar-campania")]
         [Authorize]
         [SwaggerOperation(
-            Summary = "Eliminar Campaña",
+            Summary = "eliminar campaña - irene",
             Description = "Elimina una campaña de la db memory "
         //Description = ""
         )]
@@ -155,7 +155,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         [HttpPut("limpiar-campania")]
         [Authorize]
         [SwaggerOperation(
-        Summary = "Limpiar campaña",
+        Summary = "limpiar campaña - irene",
             Description = "Elimina el numero de cuentas de la campaña correspondiente reseteandolo a 0"
         )]
         public async Task<ActionResult<string>> LimpiarCampaña([FromQuery] int idCampaña)
@@ -179,10 +179,10 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
 
 
-        [HttpPost("Asigna-ejecutivos-campaña")]
+        [HttpPost("asigna-ejecutivos-campaña")]
         [AllowAnonymous]
         [SwaggerOperation(
-           Summary = "Asigna ejecutivos",
+           Summary = "asigna ejecutivos - irene",
             Description = "Se asigna un ejecutivo a la campaña indicada"
            )]
         public async Task<ActionResult<string>> AsignaEjecutivoCampaña([FromQuery] bool inserta, int idCampaña, [FromQuery] int idEjecutivo)
@@ -208,7 +208,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
         [HttpGet("FilasRestantesPorCampaña")]
         [SwaggerOperation(
-     Summary = "Actualiza avance",
+     Summary = "actualiza avance - irene",
      Description = "Se obtiene un registro de las filas restantes por idcampaña con avance calculado"
  )]
         public async Task<IActionResult> GetFilasRestantesPorCampaña(
@@ -239,7 +239,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         [HttpGet("Top100Filas")]
         [AllowAnonymous]
         [SwaggerOperation(
-            Summary = "Top 100 filas",
+            Summary = "top 100 filas - irene",
             Description = "Se obtiene un conjunto de registros de la tabla FilasDeTrabajo correspondientes a la campaña seleccionada"
             //Descripcion = ""
             )]
@@ -271,7 +271,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
         [HttpPost("cargar-consulta")]
         [SwaggerOperation(
-               Summary = "cargar-consulta-Irene",
+               Summary = "cargar-consulta- irene",
                Description = "Carga filas de trabajo a una campaña"
            )]
         public async Task<IActionResult> CargarFilasDesdeConsulta([FromBody] CargaConsultaRequest request)
@@ -333,7 +333,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
         [HttpPost("cargar-archivo")]
         [SwaggerOperation(
-         Summary = "Cargar archivo - irene",
+         Summary = "cargar archivo - irene",
          Description = "Carga filas de trabajo a una campaña desde un archivo Excel (.xlsx, .xls)"
      )]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -383,7 +383,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
         [HttpGet("ejecutivos-campaña")]
         [AllowAnonymous]
         [SwaggerOperation(
-           Summary = "Ejecutivos en campaña",
+           Summary = "ejecutivos en campaña - irene",
            Description = "lista de los ejecutivos existentes en una campaña"
            //Descripcion = ""
            )]
