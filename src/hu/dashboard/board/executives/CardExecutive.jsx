@@ -11,7 +11,7 @@ import {
 } from "./IconesEjecutives";
 import MetasModal from "./ModalMetasModal";
 import LampshadeFields from "../../board/screenFields/LampshadeFields";
-import ModalValidadoresEjecutivos from "./ModalValidadoresEjecutivos";
+import ValidadoresModal from "./ModalValidadoresModal";
 import ModalEncargadosEjecutivos from "./ModalEncargadosEjecutivos";
 import CatalogosModal from "./ModalCatalogosModal";
 import ModalScriptsEjecutivos from "./ModalScriptsEjecutivos";
@@ -143,11 +143,10 @@ const CardExecutive = ({ onModalOpen, onModalClose }) => {
       )}
 
       {/* Modal de Validadores */}
-      {showValidadoresModal && (
-        <ModalValidadoresEjecutivos
-          onClose={() => handleCloseModal(setShowValidadoresModal)}
-        />
-      )}
+      <ValidadoresModal 
+        isOpen={showValidadoresModal}
+        onClose={() => handleCloseModal(setShowValidadoresModal)}
+      />
 
       {/* Modal de Encargados */}
       {showEncargadosModal && (

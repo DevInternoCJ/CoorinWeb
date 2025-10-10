@@ -18,7 +18,8 @@ const MODAL_SIZES = {
     "metas-md": "w-full max-w-[90vw] sm:max-w-[80vw] md:max-w-[70vw]", // Modal metas mediano responsive
     "metas-sm": "w-full max-w-[85vw] sm:max-w-[70vw] md:max-w-[60vw]", // Modal metas pequeño responsive
     productivity: "w-full max-w-[95vw] sm:max-w-[85vw] md:max-w-[76vw]", // Modal productividad 76% -> responsive
-    catalogos: "w-full max-w-[90vw] sm:max-w-[80vw] md:max-w-[76vw]", // Modal catálogos 70% -> responsive
+    catalogos: "w-full max-w-[90vw] sm:max-w-[80vw] md:max-w-[76vw]", // Modal catálogos 76% -> responsive
+    validadores: "w-full max-w-[95vw] sm:max-w-[75vw] md:max-w-[35vw]", // Modal validadores 60% viewport -> responsive
     custom: ""  // Permite pasar tamaño personalizado en modalClassName
 };
 
