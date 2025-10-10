@@ -29,12 +29,12 @@ namespace Loki.Mark.Administracion.Metas.Controllers
         }
         [HttpPost("metas-productividad")]
         [SwaggerOperation(
-        Summary = "Metas Productividad",
+        Summary = "metas productividad - irene",
         Description = "Obtiene las metas completas de productividad del ejecutivo incluyendo todos los campos." +
         "Nota: Insertar como parámetro en el json el idEjecutivo"
         )]
         public async Task<ActionResult<IEnumerable<ProductividadDTO>>> ObtenerMetasCompleto(
-    [FromBody] List<int> ejecutivoIdsPropios)
+        [FromBody] List<int> ejecutivoIdsPropios)
         {
             if (ejecutivoIdsPropios == null || !ejecutivoIdsPropios.Any())
             {
@@ -78,9 +78,9 @@ namespace Loki.Mark.Administracion.Metas.Controllers
         }
         [HttpPost("establecer-metasproductividad")]
         [SwaggerOperation(
-Summary = "Establecer metas productividad",
-Description = "Define datos para la meta del ejecutivo."
-)]
+        Summary = "establecer metas productividad - irene",
+        Description = "Define datos para la meta del ejecutivo."
+        )]
         [Authorize]
         public async Task<IActionResult> EstablecerMetasEjecutivos([FromBody] EjecutivosMetasDto model)
         {

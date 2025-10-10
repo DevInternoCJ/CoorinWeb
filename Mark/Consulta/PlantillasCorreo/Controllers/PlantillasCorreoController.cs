@@ -26,7 +26,7 @@ namespace Loki.Mark.Consulta.PlantillasCorreo.Controllers
 
         
         [HttpPut("actualizar-plantillas")]
-        [SwaggerOperation(Summary = "Actualizar plantillas correo",
+        [SwaggerOperation(Summary = "actualizar plantillas correo - irene",
         Description = "Actualiza las plantillas de correos existentes")]
         public async Task<IActionResult> ActualizarPlantilla([FromBody] PlantillaCorreoDto plantilla) // ← Quitar el parámetro id
         {
@@ -54,7 +54,7 @@ namespace Loki.Mark.Consulta.PlantillasCorreo.Controllers
         }
 
         [HttpPost("crear-plantilla")]
-        [SwaggerOperation(Summary = "Insertar plantilla",
+        [SwaggerOperation(Summary = "insertar plantilla - irene",
         Description = "Crea una nueva plantilla de correo con los datos proporcionados")]
         public async Task<IActionResult> CrearPlantilla([FromBody] PlantillaCorreoInsert plantilla)
         {
@@ -92,7 +92,7 @@ namespace Loki.Mark.Consulta.PlantillasCorreo.Controllers
         }
 
         [HttpDelete("eliminar-plantillas")]
-        [SwaggerOperation(Summary = "Eliminar plantilla",
+        [SwaggerOperation(Summary = "eliminar plantilla - irene",
         Description = "Elimina una plantilla de correo por su ID")]
         public async Task<IActionResult> EliminarPlantilla([FromBody] EliminarPlantillaRequest request)
         {
@@ -121,7 +121,7 @@ namespace Loki.Mark.Consulta.PlantillasCorreo.Controllers
         }
         //carga datos
         [HttpPost("carga-datos")]
-        [SwaggerOperation(Summary = "Carga datos",
+        [SwaggerOperation(Summary = "carga datos - irene",
            Description = "Retorna plantillas, datos de producto y cuenta")]
         public async Task<IActionResult> CargarDatosCompletos([FromBody] CargaDatosRequest request)
         {

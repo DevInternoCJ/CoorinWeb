@@ -23,7 +23,7 @@ namespace Loki.Mark.Consulta.Productividad.Controllers
 
         [HttpPost("get-productividad")]
         [SwaggerOperation(
-            Summary = "Consulta de Productividad",
+            Summary = "consulta productividad - irene",
             Description = "Obtiene la productividad de uno o más ejecutivos."
         )]
         public async Task<IActionResult> obtieneProductividad([FromBody] ProductividadRequest request)

@@ -3,6 +3,7 @@ using Loki.Mark.Consulta.Histórico.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -28,6 +29,10 @@ namespace Loki.Mark.Consulta.Histórico.Controllers
         }
 
         [HttpPost("individual")]
+        [SwaggerOperation(
+            Summary = "individual - irene",
+            Description = "Obtiene el histórico"
+        )]
         [ProducesResponseType(typeof(FileContentResult), 200)]
         [ProducesResponseType(typeof(BadRequestObjectResult), 400)]
         [ProducesResponseType(typeof(UnauthorizedObjectResult), 401)]
@@ -86,7 +91,11 @@ namespace Loki.Mark.Consulta.Histórico.Controllers
 
 
         [HttpPost("archivo")]
-        
+        [SwaggerOperation(
+         Summary = "archivo - irene",
+         Description = "Obtiene historico a traves de archivo de cuentas"
+     )]
+
         public async Task<IActionResult> BuscarPorArchivo([FromForm] HistoricoArchivo request)
         {
             try
