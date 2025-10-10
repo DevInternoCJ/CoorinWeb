@@ -333,9 +333,9 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
         [HttpPost("cargar-archivo")]
         [SwaggerOperation(
-        Summary = "Cargar archivo - irene",
-        Description = "Carga filas de trabajo a una campaña desde un archivo Excel (.xlsx, .xls)"
-    )]
+         Summary = "Cargar archivo - irene",
+         Description = "Carga filas de trabajo a una campaña desde un archivo Excel (.xlsx, .xls)"
+     )]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -358,28 +358,19 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
                 if (extension != ".xlsx" && extension != ".xls")
                     return BadRequest(new { error = "Solo se permiten archivos Excel (.xlsx, .xls)" });
 
-                // 2. Crear tabla temporal para filas
-                await _carterasDao.CreaTablaFilasTemp(request.IdCampania, servidorClaim);
-
-                // 3. Procesar archivo Excel y hacer BulkInsert
-                var totalRegistros = await _carterasService.ProcesarArchivoExcelYBulkInsert(
-                    request.Archivo,
+                // 2. Procesar archivo y cargar filas
+                var resultado = await _carterasService.CargarFilasDesdeArchivo(
                     servidorClaim,
-                    request.IdCampania
-                );
-
-                // 4. Cargar filas desde tabla temporal
-                var filasCargadas = await _carterasDao.CargaFilas(
                     request.IdCampania,
-                    request.IdCartera ?? 0,
-                    servidorClaim
+                    request.IdCartera,
+                    request.Archivo
                 );
 
                 return Ok(new
                 {
                     mensaje = "Archivo Excel procesado correctamente",
-                    filasCargadas = Convert.ToInt32(filasCargadas),
-                    totalRegistros
+                    filasCargadas = resultado.FilasCargadas,
+                    totalRegistros = resultado.TotalRegistros
                 });
             }
             catch (Exception ex)
@@ -387,6 +378,7 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
                 return StatusCode(500, new { error = $"Error al procesar archivo: {ex.Message}" });
             }
         }
+
 
         [HttpGet("Ejecutivos-en-Campaña")]
         [AllowAnonymous]

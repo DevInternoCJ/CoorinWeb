@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Data;
+using System.Globalization;
+using System.Text;
 using ClosedXML.Excel;
 using CoorinWeb.Loki.Common;
 using CoorinWeb.Loki.Global;
@@ -18,16 +20,18 @@ namespace Loki.Mark.Administracion.Carteras.Services
     public class CarterasService : ICarterasService
     {
         private readonly CustomDbContextFactory _dbContFactory;
+        private readonly ILogger<CarterasService> _logger;
         private readonly DaoBase _daoBase;
         private readonly ICampaniasDao _campaniasDao;
         private readonly ICarterasDAOs _carterasDao;
 
-        public CarterasService(IServiceProvider serviceProvider, DaoBase daoBase, ICampaniasDao campaniasDao, ICarterasDAOs carterasDao)
+        public CarterasService(IServiceProvider serviceProvider, DaoBase daoBase, ICampaniasDao campaniasDao, ICarterasDAOs carterasDao, ILogger<CarterasService> logger)
         {
             _dbContFactory = new CustomDbContextFactory(serviceProvider);
             _daoBase = daoBase;
             _campaniasDao = campaniasDao;
             _carterasDao = carterasDao;
+            _logger = logger;
         }
 
         public async Task<List<object>> GetCarteras(string servidor, string tipobase)
@@ -298,145 +302,141 @@ namespace Loki.Mark.Administracion.Carteras.Services
         }
 
         //carga filas desde archivo
+  
         public async Task<ResultadoCarga> CargarFilasDesdeArchivo(string servidor, int idCampania, int? idCartera, IFormFile archivo)
         {
-            try
-            {
-                // 1. Crear tabla temporal 
-                await _carterasDao.CreaTablaFilasTemp(idCampania, servidor);
+            if (archivo == null || archivo.Length == 0)
+                throw new InvalidOperationException("No se proporcionó archivo o está vacío");
 
-                // 2. Procesar archivo Excel y hacer bulk insert
-                var totalRegistros = await ProcesarArchivoExcelYBulkInsert(archivo, servidor, idCampania);
-
-                // 3. Cargar filas desde tabla temporal 
-                var filasCargadas = await _carterasDao.CargaFilas(idCampania, idCartera ?? 0, servidor);
-
-                return new ResultadoCarga
-                {
-                    FilasCargadas = Convert.ToInt32(filasCargadas),
-                    TotalRegistros = totalRegistros
-                };
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al cargar archivo: {ex.Message}", ex);
-            }
-        }
-
-       
-
-        public async Task<int> ProcesarArchivoExcelYBulkInsert(IFormFile archivo, string servidor, int idCampania)
-        {
-            // Validar tipo de archivo
-            var extension = Path.GetExtension(archivo.FileName).ToLower();
-            if (extension != ".xlsx" && extension != ".xls")
-            {
+            var ext = Path.GetExtension(archivo.FileName).ToLower();
+            if (ext != ".xlsx" && ext != ".xls")
                 throw new InvalidOperationException("Solo se permiten archivos Excel (.xlsx, .xls)");
-            }
 
-            // Validar tamaño del archivo (máximo 50MB)
-            if (archivo.Length > 50 * 1024 * 1024)
+            // Crear tabla temporal
+            await _carterasDao.CreaTablaFilasTemp(idCampania, servidor);
+
+            // Leer Excel a DataTable
+            var dt = LeerExcelADataTable(archivo);
+
+            var colsEsperadas = new[] { "idCuenta", "Usuario", "NúmeroTelefónico" };
+
+            _logger.LogInformation("Columnas leídas del Excel: {Excel}", string.Join(", ", dt.Columns.Cast<DataColumn>().Select(c => c.ColumnName)));
+
+    
+            var colsExcel = dt.Columns.Cast<DataColumn>().Select(c => NormalizarColumna(c.ColumnName)).ToList();
+
+
+            foreach (var col in colsEsperadas)
             {
-                throw new InvalidOperationException("El archivo no puede ser mayor a 50MB");
+                if (!colsExcel.Contains(NormalizarColumna(col)))
+                    _logger.LogError("No se encontró la columna esperada: {ColumnaEsperada}", col);
             }
 
+            foreach (var col in colsEsperadas)
+            {
+                if (!colsExcel.Contains(NormalizarColumna(col)))
+                    throw new InvalidOperationException($"El archivo Excel no contiene la columna requerida: {col}");
+            }
+
+            // Bulk insert
+            await RealizarBulkInsert(dt, servidor, idCampania, colsEsperadas);
+
+            // Cargar filas desde tabla temporal
+            var filasCargadasResult = await _carterasDao.CargaFilas(idCampania, idCartera ?? 0, servidor);
+
+
+            int filasCargadasInt = 0;
+
+            if (filasCargadasResult is IEnumerable<Dictionary<string, object>> list && list.Any())
+            {
+                var firstRow = list.First();
+                if (firstRow.ContainsKey("FilasCargadas") && firstRow["FilasCargadas"] != null)
+                    filasCargadasInt = Convert.ToInt32(firstRow["FilasCargadas"]);
+            }
+
+            return new ResultadoCarga
+            {
+                FilasCargadas = filasCargadasInt,
+                TotalRegistros = dt.Rows.Count
+            };
+
+        }
+
+        // Leer Excel a DataTable desde IFormFile
+        private DataTable LeerExcelADataTable(IFormFile archivo)
+        {
             using var stream = new MemoryStream();
-            await archivo.CopyToAsync(stream);
-
+            archivo.CopyTo(stream);
             using var workbook = new XLWorkbook(stream);
-            var worksheet = workbook.Worksheet(1); 
+            var ws = workbook.Worksheet(1);
+            var dt = new DataTable();
 
-            // Leer datos del Excel
-            var dataTable = LeerExcelADataTable(worksheet);
+            // Encabezados
+            foreach (var c in ws.FirstRow().CellsUsed())
+                dt.Columns.Add(c.Value.ToString().Trim());
 
-            // Validar que el archivo tenga datos
-            if (dataTable.Rows.Count == 0)
+            // Filas
+            foreach (var r in ws.RowsUsed().Skip(1))
             {
-                throw new InvalidOperationException("El archivo Excel no contiene datos");
+                var dr = dt.NewRow();
+                for (int i = 0; i < dt.Columns.Count; i++)
+                    dr[i] = r.Cell(i + 1).Value.ToString() ?? "";
+                dt.Rows.Add(dr);
             }
-
-            // Realizar bulk insert usando DbContext
-            await RealizarBulkInsert(dataTable, servidor, idCampania);
-
-            return dataTable.Rows.Count;
-        }
-
-        private DataTable LeerExcelADataTable(IXLWorksheet worksheet)
-        {
-            var dataTable = new DataTable();
-
-            // 🔹 Nombres esperados en la tabla SQL (ajusta si difieren)
-            var expectedColumns = new List<string> { "idCuenta", "Usuario", "NúmeroTelefónico" };
-
-            // Leer encabezados del Excel
-            var headerRow = worksheet.FirstRowUsed();
-            var excelHeaders = headerRow.CellsUsed().Select(c => c.Value.ToString().Trim()).ToList();
-
-            // 🔹 Normalizar encabezados (sin tildes, espacios, guiones o mayúsculas)
-            for (int i = 0; i < excelHeaders.Count; i++)
-            {
-                //excelHeaders[i] = RemoveAccents(excelHeaders[i])
-                //    .Replace(" ", "")
-                //    .Replace("_", "")
-                //    .Replace("-", "")
-                //    .ToLower();
-            }
-
-            // 🔹 Crear columnas con los nombres esperados (para coincidir con SQL)
-            foreach (var col in expectedColumns)
-            {
-                dataTable.Columns.Add(col);
-            }
-
-            // 🔹 Leer filas de datos (desde segunda fila)
-            foreach (var row in worksheet.RowsUsed().Skip(1))
-            {
-                var dataRow = dataTable.NewRow();
-
-                // Asignar valores por posición: primera col → idCuenta, etc.
-                for (int i = 0; i < expectedColumns.Count && i < excelHeaders.Count; i++)
-                {
-                    dataRow[i] = row.Cell(i + 1).Value.ToString() ?? string.Empty;
-                }
-
-                dataTable.Rows.Add(dataRow);
-            }
-
-            return dataTable;
+            return dt;
         }
 
 
-        private async Task RealizarBulkInsert(DataTable dataTable, string servidor, int idCampania)
+        private async Task RealizarBulkInsert(DataTable dt, string servidor, int idCampania, string[] columnasDestino)
         {
-            using var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
-            var connection = dbContext.Database.GetDbConnection();
-            var shouldCloseConnection = connection.State != ConnectionState.Open;
-
-            if (shouldCloseConnection)
-                await connection.OpenAsync();
+            var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
+            var conn = dbContext.Database.GetDbConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             try
             {
-                using var bulkCopy = new SqlBulkCopy((SqlConnection)connection)
+                using var bulk = new SqlBulkCopy((SqlConnection)conn)
                 {
                     DestinationTableName = $"AMS.FilasTemp_{idCampania}",
-                    BulkCopyTimeout = 30 * 60,
+                    BulkCopyTimeout = 1800,
                     BatchSize = 1000
                 };
 
-                // 🔹 Mapeo manual (seguro)
-                bulkCopy.ColumnMappings.Add("idCuenta", "idCuenta");
-                bulkCopy.ColumnMappings.Add("Usuario", "Usuario");
-                bulkCopy.ColumnMappings.Add("NúmeroTelefónico", "NúmeroTelefónico");
+                foreach (DataColumn col in dt.Columns)
+                {
+                    var match = columnasDestino.FirstOrDefault(c => NormalizarColumna(c) == NormalizarColumna(col.ColumnName));
+                    if (match != null)
+                        bulk.ColumnMappings.Add(col.ColumnName, match);
+                    else
+                        _logger.LogWarning("Columna Excel '{ColumnaExcel}' no tiene mapeo en tabla destino", col.ColumnName);
+                }
 
-                await bulkCopy.WriteToServerAsync(dataTable);
+                _logger.LogInformation("Columnas destino: {Destino}", string.Join(", ", columnasDestino));
+                await bulk.WriteToServerAsync(dt);
+                _logger.LogInformation("Bulk insert completado para AMS.FilasTemp_{IdCampania}", idCampania);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error durante BulkInsert: {Mensaje}", ex.Message);
+                throw;
             }
             finally
             {
-                if (shouldCloseConnection)
-                    await connection.CloseAsync();
+                if (conn.State == ConnectionState.Open) await conn.CloseAsync();
             }
         }
+
+        private string NormalizarColumna(string columna)
+        {
+            if (string.IsNullOrWhiteSpace(columna)) return string.Empty;
+            var normalized = columna.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+            foreach (var c in normalized)
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    sb.Append(c);
+            return sb.ToString().Replace(" ", "").ToLower();
+        }
+
 
     }
 }

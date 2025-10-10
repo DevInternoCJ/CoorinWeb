@@ -4,6 +4,5 @@
     {
         public int FilasCargadas { get; set; }
         public int TotalRegistros { get; set; }
-        public string Mensaje { get; set; } = string.Empty;
     }
 }
