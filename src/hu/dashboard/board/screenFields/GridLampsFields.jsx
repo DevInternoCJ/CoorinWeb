@@ -97,7 +97,7 @@ const GridLampsFields = () => {
               {Object.keys(tableData[0]).map((key) => (
                 <th
                   key={key}
-                  className="py-2 px-3 text-left text-xs font-bold text-neutral-100 uppercase whitespace-nowrap"
+                  className="py-2 px-3 text-left text-xs font-bold text-neutral-100 whitespace-nowrap"
                 >
                   {key}
                 </th>
