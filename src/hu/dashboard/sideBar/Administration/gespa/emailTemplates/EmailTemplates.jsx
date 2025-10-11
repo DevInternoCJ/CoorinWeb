@@ -16,6 +16,7 @@ const EmailTemplates = ({ onClose }) => {
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
   const [datosDeudor, setDatosDeudor] = useState({}); // ✅ Nuevo estado para datosDeudor
+  const [datosProductoCompleto, setDatosProductoCompleto] = useState({}); 
 
   const actualizarPlantillas = async () => {
     // Puedes usar el mismo requestData que usa LoadDates
@@ -34,10 +35,14 @@ const EmailTemplates = ({ onClose }) => {
     }
   };
 
-  // ✅ Función para actualizar datosDeudor desde LoadDates
+  // Función para actualizar datosDeudor desde LoadDates
   const handleDatosDeudorChange = (nuevosDatosDeudor) => {
     setDatosDeudor(nuevosDatosDeudor);
   };
+  // ✅ NUEVA FUNCIÓN: Actualizar datosProductoCompleto desde LoadDates
+  const handleDatosProductoCompletoChange = (nuevosDatosProducto) => {
+    setDatosProductoCompleto(nuevosDatosProducto);
+  }
   // Limpiar estados cuando el modal se cierra
   useEffect(() => {
     return () => {
@@ -46,6 +51,7 @@ const EmailTemplates = ({ onClose }) => {
       setLoading(false);
       setShowDataTables(false);
       setPlantillas([]);
+       setDatosProductoCompleto({});
     };
   }, []);
 
@@ -94,6 +100,7 @@ const EmailTemplates = ({ onClose }) => {
               onActualizarPlantillas={actualizarPlantillas}
               idProducto={selectedProduct.value}
               datosDeudor={datosDeudor}
+              datosProductoCompleto={datosProductoCompleto} 
             />
           )}
           {showDataTables && selectedProduct && (
@@ -101,7 +108,8 @@ const EmailTemplates = ({ onClose }) => {
               <LoadDates
                 selectedProduct={selectedProduct}
                 onPlantillasChange={setPlantillas}
-                onDatosDeudorChange={handleDatosDeudorChange} // ✅ Nueva prop
+                onDatosDeudorChange={handleDatosDeudorChange} 
+                onDatosProductoCompletoChange={handleDatosProductoCompletoChange}
               />
             </div>
           )}
