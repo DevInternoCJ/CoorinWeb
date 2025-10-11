@@ -111,44 +111,45 @@ namespace Loki.Controllers
            Summary = "guardar consulta - irene",
            Description = "Se genera una consulta personalizada para reutilizarla posteriormente"
         )]
-        public async Task<ActionResult<string>> GuardarConsulta(
-        [FromQuery] string nombreConsulta,
-        [FromQuery] int idProducto,
-        [FromQuery] int idCartera,
-        [FromQuery] DateTime desde,
-        [FromQuery] int idEjecutivo
-    )
+      
+        public async Task<ActionResult<string>> GuardarConsulta([FromBody] GuardarConsultaRequest request)
         {
-            // Recuperar el servidor del token
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
             if (string.IsNullOrWhiteSpace(servidorClaim))
                 return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
 
-            // Tablas vacías (pueden venir del body si luego quieres)
+            // Convertir las listas en DataTables
             var parametros = new DataTable();
+           
             parametros.Columns.Add("Concepto", typeof(string));
             parametros.Columns.Add("Campo", typeof(string));
             parametros.Columns.Add("Valores", typeof(string));
             parametros.Columns.Add("Parámetros", typeof(string));
             parametros.Columns.Add("Dato", typeof(string));
 
+            foreach (var p in request.Parametros)
+                parametros.Rows.Add(p.Concepto, p.Campo, p.Valores, p.Parámetros, p.Dato);
+
             var agrupar = new DataTable();
+           
             agrupar.Columns.Add("Campo", typeof(string));
             agrupar.Columns.Add("Concepto", typeof(string));
 
-            // Valor fijo para tipoBase
-            string tipoBaseValor = "Collection";
+            foreach (var a in request.Agrupar)
+                agrupar.Rows.Add(a.Campo, a.Concepto);
+
+            string tipoBase = "Collection";
 
             var result = await _busquedasService.GuardarConsulta(
-                nombreConsulta,
-                idProducto,
-                idCartera,
+                request.NombreConsulta,
+                request.IdProducto,
+                request.IdCartera,
                 parametros,
                 agrupar,
-                desde,
-                idEjecutivo,
+                request.Desde,
+                request.IdEjecutivo,
                 servidorClaim,
-                tipoBaseValor
+                tipoBase
             );
 
             if (result.StartsWith("Error:", StringComparison.OrdinalIgnoreCase))
@@ -156,6 +157,7 @@ namespace Loki.Controllers
 
             return Ok(result);
         }
+
 
     }
 
