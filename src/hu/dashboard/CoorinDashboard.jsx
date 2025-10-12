@@ -240,7 +240,7 @@ export default function CoorinDashboard() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mt-8 w-full mb-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-8 w-full mb-8">
                 <div className="relative w-full">
                   <RamificacionSesiones
                     onExecutiveSelect={setSelectedExecutiveId}

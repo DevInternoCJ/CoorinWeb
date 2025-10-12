@@ -11,6 +11,9 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     // Estados para el comportamiento sticky
     const [stickyDirection, setStickyDirection] = useState('none'); // 'none', 'top', 'bottom'
     const [lastScrollTop, setLastScrollTop] = useState(0);
+
+    // Estado para expandir/colapsar nodos
+    const [collapsedNodes, setCollapsedNodes] = useState({});
     
     // Ref para el contenedor de scroll
     const ramificacionRef = useRef(null);
@@ -139,42 +142,104 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
         }
     };
 
-    // Función para renderizar el árbol de ejecutivos
+    // Función para expandir/colapsar un nodo
+    const toggleCollapse = (id) => {
+        setCollapsedNodes(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
+    // Renderizar líneas y jerarquía
     const renderExecutiveTree = (tree, level = 0) => {
         if (!Array.isArray(tree)) return null;
-        return tree.map((node, idx) => {
+    return tree.map((node, idx) => {
             const isSelected = node.idEjecutivo === selectedExecutiveNode;
-            
-            // Determinar la clase sticky según la dirección del scroll
-            const getStickyClass = () => {
-                if (!isSelected || stickyDirection === 'none') return '';
-                return stickyDirection === 'top' ? ' sticky-selected-top' : ' sticky-selected-bottom';
-            };
-            
+            const isCollapsed = collapsedNodes[node.idEjecutivo];
+            const hasSub = Array.isArray(node.subordinados) && node.subordinados.length > 0;
+            // Para líneas de árbol: saber si es el último hijo
+            const isLast = tree.length - 1 === idx;
+            // Espaciado para separar líneas del texto (ajustado para no separar demasiado)
+            const lineSpace = 20;
             return (
                 <React.Fragment key={node.usuario || node.id || idx}>
-                    <div
-                        className={`executive-hierarchy-item${isSelected ? ' selected' : ''}${getStickyClass()}`}
-                        style={{
-                            paddingLeft: level * 18,
-                            marginBottom: 2,
-                            fontWeight: 500,
-                            fontSize: 13,
-                            color: isSelected ? '#2b463c' : undefined,
-                            userSelect: 'none',
-                            cursor: 'pointer'
-                        }}
-                        onClick={() => {
-                            setSelectedExecutiveNode(node.idEjecutivo);
-                            if (onExecutiveSelect) {
-                                onExecutiveSelect(node.idEjecutivo);
-                            }
-                        }}
-                        title="Seleccionar ejecutivo"
-                    >
-                        {node.usuario || ''} - {node.nombreEjecutivo || ''}
+                    <div className="flex items-start relative group w-full" style={{ minHeight: 32, borderRadius: 6 }}>
+                        {/* Líneas de árbol: vertical y horizontal (z-0 para que siempre estén debajo) */}
+                        {level > 0 && (
+                            <>
+                                <span
+                                    className="absolute border-l-2 border-black z-0"
+                                    style={{
+                                        left: (level-1)*lineSpace+12,
+                                        top: 0,
+                                        height: isLast ? '16px' : '100%'
+                                    }}
+                                ></span>
+                                <span
+                                    className="absolute border-t-2 border-black z-0"
+                                    style={{
+                                        left: (level-1)*lineSpace+12,
+                                        top: 14,
+                                        width: lineSpace
+                                    }}
+                                ></span>
+                            </>
+                        )}
+                        {/* Fondo de selección y hover solo en el contenido, no en el contenedor de líneas */}
+                        <div
+                            className={`executive-hierarchy-item flex items-center w-full z-10`}
+                            style={{
+                                paddingLeft: level * lineSpace + (level > 0 ? lineSpace : 0),
+                                marginBottom: 2,
+                                fontWeight: 400,
+                                fontSize: 13,
+                                color: isSelected ? '#fff' : '#2b463c',
+                                userSelect: 'none',
+                                cursor: 'pointer',
+                                minHeight: 32,
+                                borderRadius: 6,
+                                transition: 'background 0.15s',
+                                background: isSelected ? 'rgba(20,127,94,0.18)' : undefined
+                            }}
+                            onMouseEnter={e => { if (!isSelected) { e.currentTarget.style.background = 'rgba(0,0,0,0.07)'; e.currentTarget.style.fontWeight = '400'; } }}
+                            onMouseLeave={e => { if (!isSelected) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.fontWeight = '400'; } }}
+                            onClick={() => {
+                                setSelectedExecutiveNode(node.idEjecutivo);
+                                if (onExecutiveSelect) {
+                                    onExecutiveSelect(node.idEjecutivo);
+                                }
+                            }}
+                            onDoubleClick={() => { if (hasSub) toggleCollapse(node.idEjecutivo); }}
+                            title="Seleccionar ejecutivo o expandir/colapsar con doble click"
+                        >
+                            <span className="flex items-center w-full" style={{ fontWeight: 400, fontFamily: 'inherit', letterSpacing: 0 }}>
+                                {/* Botón expandir/colapsar */}
+                                {hasSub && (
+                                    <button
+                                        type="button"
+                                        className="mr-1 flex items-center justify-center w-5 h-5 rounded hover:bg-gray-200 focus:outline-none"
+                                        onClick={e => { e.stopPropagation(); toggleCollapse(node.idEjecutivo); }}
+                                        tabIndex={-1}
+                                        aria-label={isCollapsed ? 'Expandir subordinados' : 'Colapsar subordinados'}
+                                    >
+                                        {isCollapsed ? (
+                                            // Heroicon: ChevronDown
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-gray-500">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        ) : (
+                                            // Heroicon: ChevronUp
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-gray-500">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                )}
+                                <span className="truncate w-full" style={{ fontWeight: 400, fontFamily: 'inherit', letterSpacing: 0 }}>
+                                    {node.usuario || ''} - {node.nombreEjecutivo || ''}
+                                </span>
+                            </span>
+                        </div>
                     </div>
-                    {Array.isArray(node.subordinados) && node.subordinados.length > 0 && (
+                    {/* Renderizar subordinados si no está colapsado */}
+                    {hasSub && !isCollapsed && (
                         renderExecutiveTree(node.subordinados, level + 1)
                     )}
                 </React.Fragment>
@@ -189,11 +254,11 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     const usuarioSesion = userData?.usuario || '';
 
     return (
-        <div className="relative bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-6 w-full h-82 ramificacion-sesiones">
+        <div className="relative bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64 ramificacion-sesiones">
             {/* Header responsive */}
             <div className="mb-4">
                 {/* Layout para pantallas grandes (md y superiores) */}
-                <div className="hidden md:grid grid-cols-3 items-center">
+                <div className="hidden lg:grid grid-cols-3 items-center">
                     {/* Columna izquierda - Título */}
                     <div className="flex items-center text-gray-800">
                         <span className="mr-2">
@@ -212,7 +277,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                                 />
                             </svg>
                         </span>
-                        <h3 className="text-lg font-semibold">Ramificación</h3>
+                        <h3 className="text-base lg:text-lg font-semibold">Ramificación</h3>
                     </div>
                     
                     {/* Columna centro - Ejecutivo de la sesión */}
@@ -244,7 +309,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                 </div>
 
                 {/* Layout para pantallas pequeñas (móviles y tablets) */}
-                <div className="md:hidden">
+                <div className="xl:hidden">
                     {/* Fila 1 - Título */}
                     <div className="flex items-center text-gray-800 mb-2">
                         <span className="mr-2">
@@ -263,7 +328,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                                 />
                             </svg>
                         </span>
-                        <h3 className="text-base font-semibold">Ramificación</h3>
+                        <h3 className="text-sm xl:text-base font-semibold">Ramificación</h3>
                     </div>
                     
                     {/* Fila 2 - Ejecutivo de la sesión */}
@@ -299,17 +364,16 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
             {/* Contenedor de la ramificación con estilos de JerarquiaConR */}
             <div 
                 ref={ramificacionRef}
-                className="productividad-branch flex-1" 
+                className="productividad-branch flex-1 h-[40vh] xl:h-[56vh]" 
                 style={{ 
                     overflowX: 'auto', 
                     overflowY: 'auto', 
-                    height: '56vh', 
                     width: '100%', 
-                    maxWidth: '850px',
+                    maxWidth: '100%',
                     background: '#ffffff', 
                     borderRadius: 8, 
                     border: '1px solid #e0e0e0', 
-                    padding: 8 
+                    padding: 6 
                 }}
             >
                     {/* Contenido de la jerarquía */}

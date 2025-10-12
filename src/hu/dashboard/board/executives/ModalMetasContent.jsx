@@ -669,7 +669,7 @@ const ModalMetasContent = () => {
 
                         {/* Negociaciones */}
                         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 80 }}>
-                            <label>Negcianes</label>
+                            <label>Negocians</label>
                             <input
                                 type="number"
                                 min="0"
@@ -853,57 +853,43 @@ const ModalMetasContent = () => {
                         {/* Hora Entrada */}
                         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 110, position: 'relative' }}>
                             <label>H. Entrada</label>
-                            <div style={{ position: 'relative', width: '100%' }}>
-                                <input
-                                    type="time"
-                                    value={inputValues.horaEntrada === null ? '' : inputValues.horaEntrada}
-                                    onChange={e => setInputValues(v => ({ ...v, horaEntrada: e.target.value === '' ? null : e.target.value }))}
-                                    style={{
-                                        backgroundColor: "var(--color-bgcolor2)",
-                                        color: "#111",
-                                        border: "1px solid var(--color-jerarquia1)",
-                                        borderRadius: "0.25rem",
-                                        padding: "0.25rem 2.2rem 0.25rem 0.5rem",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "400",
-                                        width: '100%'
-                                    }}
-                                />
-                                <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <polyline points="12 6 12 12 16 14" />
-                                    </svg>
-                                </span>
-                            </div>
+                            <input
+                                type="time"
+                                value={inputValues.horaEntrada === null ? '' : inputValues.horaEntrada}
+                                onChange={e => setInputValues(v => ({ ...v, horaEntrada: e.target.value === '' ? null : e.target.value }))}
+                                className="large-time-input"
+                                style={{
+                                    backgroundColor: "var(--color-bgcolor2)",
+                                    color: "#111",
+                                    border: "1px solid var(--color-jerarquia1)",
+                                    borderRadius: "0.25rem",
+                                    padding: "0.25rem 0.5rem",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "400",
+                                    width: '100%'
+                                }}
+                            />
                         </div>
 
                         {/* Hora Salida */}
                         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 110, position: 'relative' }}>
                             <label>H. Salida</label>
-                            <div style={{ position: 'relative', width: '100%' }}>
-                                <input
-                                    type="time"
-                                    value={inputValues.horaSalida === null ? '' : inputValues.horaSalida}
-                                    onChange={e => setInputValues(v => ({ ...v, horaSalida: e.target.value === '' ? null : e.target.value }))}
-                                    style={{
-                                        backgroundColor: "var(--color-bgcolor2)",
-                                        color: "#111",
-                                        border: "1px solid var(--color-jerarquia1)",
-                                        borderRadius: "0.25rem",
-                                        padding: "0.25rem 2.2rem 0.25rem 0.5rem",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "400",
-                                        width: '100%'
-                                    }}
-                                />
-                                <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <polyline points="12 6 12 12 16 14" />
-                                    </svg>
-                                </span>
-                            </div>
+                            <input
+                                type="time"
+                                value={inputValues.horaSalida === null ? '' : inputValues.horaSalida}
+                                onChange={e => setInputValues(v => ({ ...v, horaSalida: e.target.value === '' ? null : e.target.value }))}
+                                className="large-time-input"
+                                style={{
+                                    backgroundColor: "var(--color-bgcolor2)",
+                                    color: "#111",
+                                    border: "1px solid var(--color-jerarquia1)",
+                                    borderRadius: "0.25rem",
+                                    padding: "0.25rem 0.5rem",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "400",
+                                    width: '100%'
+                                }}
+                            />
                         </div>
                     </div>
                 </div>
@@ -935,8 +921,8 @@ const ModalMetasContent = () => {
                                     <th>Monto Cumplido</th>
                                     <th>Saldo Solucionado</th>
                                     <th>Segmento</th>
-                                    <th>Hora Entrada</th>
-                                    <th>Hora Salida</th>
+                                    <th>H.Entrada</th>
+                                    <th>H.Salida</th>
                                 </tr>
                             </thead>
                             <tbody>
