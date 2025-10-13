@@ -108,7 +108,7 @@ namespace Loki.Controllers
         [HttpPost("guardar-consulta")]
         [AllowAnonymous]
         [SwaggerOperation(
-           Summary = "guardar consulta - irene",
+           Summary = "guardar/eliminar consulta - irene",
            Description = "Se genera una consulta personalizada para reutilizarla posteriormente"
         )]
 

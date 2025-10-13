@@ -11,60 +11,60 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         private readonly IDbContextFactory _dbContFactory;
         private const string TipoBase = "Collection";
         private static readonly DataSet _dsTablas = new DataSet();
-        public static DataSet ObtenerDataSet() => _dsTablas;
+        public DataSet ObtenerDataSet() => _dsTablas;
         public CatalogosService(IDbContextFactory dbContFactory)
         {
             _dbContFactory = dbContFactory;
         }
 
-        public  async Task<bool> ActualizaTodosCatálogosAsync(IDbContextFactory dbContextFactory, string servidor, string tipoBase, bool chkSanta = true)
+        //public  async Task<bool> ActualizaTodosCatálogosAsync(IDbContextFactory dbContextFactory, string servidor, string tipoBase, bool chkSanta = true)
+        //{
+        //    try
+        //    {
+        //        bool cargaCarteras = await CargarCarterasProductosAsync(dbContextFactory, servidor, tipoBase);
+        //        bool cargaCatalogos = await CargarCatalogosAsync(dbContextFactory, servidor, tipoBase);
+        //        bool cargaVersiones = await CargarVersionamientoAsync(dbContextFactory, servidor, tipoBase);
+
+        //        if (!cargaCarteras || !cargaCatalogos || !cargaVersiones)
+        //        {
+        //           // Console.WriteLine($"Falló al obtener información fundamental para la aplicación. Id de error: {_idLogError:N0}");
+        //            return false; // El llamador puede decidir mostrar mensaje o cerrar la app
+        //        }
+
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Error al actualizar catálogos: {ex.Message}");
+        //        return false;
+        //    }
+        //}
+
+        public async Task<bool> CargarCarterasProductosAsync(string servidor, string tipoBase)
         {
             try
             {
-                bool cargaCarteras = await CargarCarterasProductosAsync(dbContextFactory, servidor, tipoBase);
-                bool cargaCatalogos = await CargarCatalogosAsync(dbContextFactory, servidor, tipoBase);
-                bool cargaVersiones = await CargarVersionamientoAsync(dbContextFactory, servidor, tipoBase);
+                using var conn = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 
-                if (!cargaCarteras || !cargaCatalogos || !cargaVersiones)
-                {
-                   // Console.WriteLine($"Falló al obtener información fundamental para la aplicación. Id de error: {_idLogError:N0}");
-                    return false; // El llamador puede decidir mostrar mensaje o cerrar la app
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al actualizar catálogos: {ex.Message}");
-                return false;
-            }
-        }
-
-        public async Task<bool> CargarCarterasProductosAsync(IDbContextFactory dbContextFactory, string servidor, string tipoBase)
-        {
-            try
-            {
-                using var conn = dbContextFactory.GetSqlConnection(servidor, tipoBase);
-
-                // --- 1. Rechazo ---
+                // Rechazo
                 var tblRechazo = await EjecutarConsultaAsync(conn, "SELECT * FROM Rechazo", "Rechazo");
                 tblRechazo.PrimaryKey = new DataColumn[] { tblRechazo.Columns["idMotivos"] };
                 tblRechazo.DefaultView.Sort = "Tipo";
                 _dsTablas.Tables.Add(tblRechazo);
 
-                // --- 2. Carteras ---
+                // Carteras
                 var tblCarteras = await EjecutarConsultaAsync(conn, "SELECT * FROM vw_CarterasActivas", "Carteras");
                 tblCarteras.PrimaryKey = new DataColumn[] { tblCarteras.Columns["idCartera"] };
                 tblCarteras.DefaultView.Sort = "Cartera";
                 _dsTablas.Tables.Add(tblCarteras);
 
-                // --- 3. Productos ---
+                // Productos
                 var tblProductos = await EjecutarConsultaAsync(conn, "SELECT * FROM dbCollection..vw_CarterasProductos", "Productos");
                 tblProductos.PrimaryKey = new DataColumn[] { tblProductos.Columns["idProducto"] };
                 tblProductos.DefaultView.Sort = "Producto";
                 _dsTablas.Tables.Add(tblProductos);
 
-                // --- 4. (Opcional) Relación entre Carteras y Productos ---
+                // Relación Carteras-Productos
                 if (_dsTablas.Relations["CarterasProducto"] == null)
                 {
                     var drCarterasProducto = new DataRelation(
@@ -84,8 +84,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 return false;
             }
         }
-
-        public  async Task<DataTable> EjecutarConsultaAsync(SqlConnection conn, string query, string nombreTabla)
+        public async Task<DataTable> EjecutarConsultaAsync(SqlConnection conn, string query, string nombreTabla)
         {
             var dt = new DataTable(nombreTabla);
             using var cmd = new SqlCommand(query, conn);
@@ -98,9 +97,9 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             return dt;
         }
 
-       
 
-        public  async Task<bool> CargarCatalogosAsync(IDbContextFactory dbContextFactory, string servidor, string tipoBase)
+
+        public async Task<bool> CargarCatalogosAsync(IDbContextFactory dbContextFactory, string servidor, string tipoBase)
         {
             try
             {
@@ -188,8 +187,14 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 using var conn = dbContextFactory.GetSqlConnection(servidor, tipoBase);
 
                 // --- 1. Obtener idEjecutivo ---
-                const string queryId = "SELECT idEjecutivo FROM dbCollection..Ejecutivos WHERE Usuario = @Usuario";
+                const string queryId = @"
+                SELECT idEjecutivo 
+                FROM dbCollection..Ejecutivos 
+                WHERE LOWER(Usuario) = LOWER(@Usuario)";
+
                 int idEjecutivo = 0;
+                Console.WriteLine($"idEjecutivo encontrado para '{usuarioRH}': {idEjecutivo}");
+
 
                 using (var cmd = new SqlCommand(queryId, conn))
                 {
@@ -287,7 +292,13 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         /// </summary>
         /// <param name="idProducto">id del producto.</param>
         /// 
-        public async Task CargarColumnasProductoAsync(IDbContextFactory dbContextFactory, string servidor, string tipoBase, object idProducto, object? idCartera = null, bool chkSanta = true)
+        public async Task CargarColumnasProductoAsync(
+    IDbContextFactory dbContextFactory,
+    string servidor,
+    string tipoBase,
+    object idProducto,
+    object? idCartera = null,
+    bool chkSanta = true)
         {
             if (idProducto == null && idCartera == null)
                 return;
@@ -296,24 +307,20 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             {
                 using var conn = dbContextFactory.GetSqlConnection(servidor, tipoBase);
 
-                // Determina el nombre de la tabla según el parámetro recibido
                 string tableName = idCartera != null
                     ? $"Cartera_{idCartera}"
                     : $"Producto_{idProducto}";
 
-                // Si ya existe en el DataSet, la eliminamos
                 if (_dsTablas.Tables.Contains(tableName))
                     _dsTablas.Tables.Remove(tableName);
 
-                // Consulta los nombres de las columnas
-                string query = @"
-                    SELECT LOWER(name) AS name
-                    FROM dbCollection.sys.columns
-                    WHERE OBJECT_ID(@obj) = [object_id]";
+                // Construimos la consulta SQL correctamente
+                string query = $@"
+            SELECT LOWER(name) AS name
+            FROM dbCollection.sys.columns
+            WHERE object_id = OBJECT_ID('Y.{tableName}')";
 
                 using var cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@obj", $"Y.{tableName}");
-
                 var dt = new DataTable(tableName);
                 using var da = new SqlDataAdapter(cmd);
 
@@ -322,18 +329,20 @@ namespace Loki.Mark.Consulta.Cuenta.Services
 
                 da.Fill(dt);
 
-                // Lógica específica (como la del chkSanta del WinForm)
-                if (tableName == "Cartera_4" && !chkSanta)
+                // Aplicamos filtro chkSanta solo si hay datos
+                if (!chkSanta && tableName.StartsWith("Cartera_"))
                 {
-                    dt.Clear();
+                    dt.Clear(); // opcional según tu lógica
                 }
 
-                // Si hay datos válidos, los agregamos al DataSet
-                if (dt.Columns.Contains("name") && dt.Rows.Count > 0)
+                // Agregamos la tabla siempre, aunque esté vacía
+                _dsTablas.Tables.Add(dt);
+
+                // Ordenamos y filtramos columnas específicas
+                if (dt.Columns.Contains("name"))
                 {
-                    _dsTablas.Tables.Add(dt);
-                    _dsTablas.Tables[tableName].DefaultView.Sort = "name";
-                    _dsTablas.Tables[tableName].DefaultView.RowFilter = "name <> 'idCuenta'";
+                    dt.DefaultView.Sort = "name";
+                    dt.DefaultView.RowFilter = "name <> 'idcuenta'";
                 }
             }
             catch (Exception ex)
@@ -341,13 +350,14 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 Console.WriteLine($"Error al cargar columnas de producto/cartera: {ex.Message}");
             }
         }
+
         /// <summary>
         /// Obtiene una hashtable con los catálogos y valores que se relacionan con el id.
         /// </summary>        
         /// <param name="idValor2">Id que se buscará en la relación</param>
         /// <returns>HashTable con el nombre del catálogo y el valor.</returns>
         /// 
-        public  Hashtable RelacionesCatalogo(int idValor2)
+        public Hashtable RelacionesCatalogo(int idValor2)
         {
             var htRelaciones = new Hashtable();
 
@@ -474,7 +484,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         /// <param name="idCatálogo">id del catálogo</param>
         /// <returns></returns>
         /// 
-        public static DataTable ValoresDelCatalogo(int idCatalogo)
+        public DataTable ValoresDelCatalogo(int idCatalogo)
         {
             var tblValores = new DataTable();
 
@@ -510,7 +520,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         /// <param name="idValor2Relación">id del valor de la relación</param>
         /// <returns></returns>
         /// 
-        public static DataTable ValoresDelCatalogo(int idCatalogo1, int idValor2Relacion)
+        public  DataTable ValoresDelCatalogo(int idCatalogo1, int idValor2Relacion)
         {
             var tblRelacion = new DataTable();
 
@@ -582,12 +592,13 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             }
         }
         /// <summary>
-        /// Devuelve el idCartera del producto.
+        /// Devuelve el 
+        /// ra del producto.
         /// </summary>
         /// <param name="idProducto">idProducto</param>
         /// <returns></returns>
         /// 
-        public static int IdCartera(int idProducto)
+        public int IdCartera(int idProducto)
         {
             try
             {
@@ -697,7 +708,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         /// <returns></returns>
         /// 
 
-        public static string Valor(object idValor)
+        public string Valor(int idValor)
         {
             try
             {
