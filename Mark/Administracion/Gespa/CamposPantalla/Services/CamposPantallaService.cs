@@ -1,4 +1,5 @@
 ﻿using CoorinWeb.Loki.Global;
+using Dapper;
 using Loki.DTOs.CamposPantallaDTOs;
 using Loki.Mark.Administracion.Ejecutivos.Encargados.DAOs;
 using Loki.Mark.Administracion.Ejecutivos.Encargados.Interfaces;
@@ -197,31 +198,41 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Services
 		/// <param name="porcentaje">Porcentaje de registros a seleccionar (ej. 70).</param>
 		/// <param name="maximo">Número máximo de registros a devolver.</param>
 		/// <returns>Lista de registros aleatorios de la tabla dinámica.</returns>
-		public async Task<List<object>> GridProductoTableSample(
+		public async Task<IEnumerable<dynamic>> GridProductoTableSample(
 			string servidor,
 			int idProducto,
 			double porcentaje = 70,
 			int? maximo = 5)
 		{
-			string nombreModelo = $"Producto{idProducto}";
-			var context = _dbContFactory.GetDbContext(servidor, "Collection");
-			var tipoEntidad = GetModelTypeByContext(context, nombreModelo);
+			// Usamos el factory para obtener una conexión SQL directa
+			using var connection = _dbContFactory.GetSqlConnection(servidor, "Collection");
 
-			var dbSet = context.GetType()
-				.GetMethod("Set", Type.EmptyTypes)!
-				.MakeGenericMethod(tipoEntidad)
-				.Invoke(context, null) as IQueryable;
+			// 1. Contamos el total de registros de forma segura
+			var countSql = $"SELECT COUNT(*) FROM Y.Producto_{idProducto};";
+			var total = await connection.ExecuteScalarAsync<int>(countSql);
 
-			var total = await CountAsyncDinamico(dbSet);
+			if (total == 0)
+			{
+				return new List<dynamic>();
+			}
 
+			// 2. Calculamos la cantidad de filas a obtener
 			var cantidad = (int)Math.Ceiling(total * (porcentaje / 100.0));
 			if (maximo.HasValue && cantidad > maximo)
+			{
 				cantidad = maximo.Value;
+			}
 
-			var resultados = await dbSet
-				//.OrderBy("Guid.NewGuid()")
-				.Take(cantidad)
-				.ToDynamicListAsync();
+			// 3. Construimos la consulta SQL final de forma dinámica pero segura
+			// OJO: El 'idProducto' es un 'int', por lo que inyectarlo aquí es seguro.
+			// El 'cantidad' lo pasamos como parámetro para máxima seguridad.
+			// La consulta de orden aleatorio varía según el motor de BD. Para SQL Server es NEWID().
+			var querySql = $"SELECT TOP (@takeAmount) * FROM Y.Producto_{idProducto} ORDER BY NEWID();";
+
+			// 4. Ejecutamos la consulta con Dapper
+			// Dapper devuelve una lista de objetos dinámicos (ExpandoObject)
+			// donde cada propiedad coincide EXACTAMENTE con el nombre de la columna en la BD.
+			var resultados = await connection.QueryAsync<dynamic>(querySql, new { takeAmount = cantidad });
 
 			return resultados;
 		}
