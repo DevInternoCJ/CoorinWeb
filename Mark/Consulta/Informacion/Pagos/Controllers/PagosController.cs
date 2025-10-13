@@ -1,0 +1,47 @@
+﻿using Loki.DTOs.Informacion.PagosDTOs;
+using Loki.Mark.Consulta.Informacion.Pagos.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
+
+namespace Loki.Mark.Consulta.Informacion.Pagos.Controllers
+{
+	[Route("api/[controller]")]
+	[ApiController]
+	public class PagosController : ControllerBase
+	{
+		private readonly IPagosService _pagosService;
+
+		public PagosController(IPagosService pagosService)
+		{
+			_pagosService = pagosService;
+		}
+
+		[HttpPost("consultar")]
+		[AllowAnonymous]
+		[SwaggerOperation(
+			Summary = "Consultar Pagos - Yoshi",
+			Description = "Obtiene la lista de pagos de la cartera y producto especificados en el rango de fechas deseado"
+		)]
+		public async Task<IActionResult> ConsultarPagos([FromBody] ConsultaPagosRequest request)
+		{
+			//string? servidorClaim = User.FindFirst("Servidor")?.Value;
+			string? servidorClaim = "Albaz";
+
+			if (string.IsNullOrWhiteSpace(servidorClaim))
+			{
+				return Unauthorized(new { error = "Claim 'Servidor' no encontrado o inválido." });
+			}
+
+			var resultados = await _pagosService.ConsultarPagosAsync(servidorClaim, request);
+
+			if (!resultados.Any())
+			{
+				return NotFound(new { message = "No se encontraron resultados." });
+			}
+			return Ok(resultados);
+
+		}
+	}
+}

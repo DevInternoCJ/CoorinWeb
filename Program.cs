@@ -99,37 +99,41 @@ using System.Text.Json;
 using Loki.Mark.Consulta.Cuenta.Interfaces;
 using Loki.Mark.Consulta.Cuenta.Services;
 using CatalogosService = Loki.Mark.Administracion.Gespa.Catalogos.Services.CatalogosService;
+using Loki.Mark.Consulta.Informacion.Pagos.Interfaces;
+using Loki.Mark.Consulta.Informacion.Pagos.Services;
+using Loki.Mark.Consulta.Informacion.Pagos.DAOs;
+using Loki.Global.DAOs;
 
 
 
 
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console() // Log to the console
-    .WriteTo.File("Logs/Lokita.txt", rollingInterval: RollingInterval.Hour) // Log to a file
-    .Enrich.FromLogContext() // Adds contextual information to logs
-    .Enrich.WithMachineName()
-    .Enrich.WithEnvironmentUserName()
-    .MinimumLevel.Information() // Set the minimum logging level
-    .CreateLogger();
+	.WriteTo.Console() // Log to the console
+	.WriteTo.File("Logs/Lokita.txt", rollingInterval: RollingInterval.Hour) // Log to a file
+	.Enrich.FromLogContext() // Adds contextual information to logs
+	.Enrich.WithMachineName()
+	.Enrich.WithEnvironmentUserName()
+	.MinimumLevel.Information() // Set the minimum logging level
+	.CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ===== Configuraciones adicionales de JWT =====
 var additionalIssuers = builder.Configuration.GetSection("JwtSettings:AdditionalIssuers").Exists()
-    ? builder.Configuration.GetSection("JwtSettings:AdditionalIssuers").Get<string[]>() ?? []
-    : [];
+	? builder.Configuration.GetSection("JwtSettings:AdditionalIssuers").Get<string[]>() ?? []
+	: [];
 
 var additionalAudiences = builder.Configuration.GetSection("JwtSettings:AdditionalAudiences").Exists()
-    ? builder.Configuration.GetSection("JwtSettings:AdditionalAudiences").Get<string[]>() ?? []
-    : [];
+	? builder.Configuration.GetSection("JwtSettings:AdditionalAudiences").Get<string[]>() ?? []
+	: [];
 
 // ===== Configurar CORS =====
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("PermitirTodo",
-        policy => policy.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
+	options.AddPolicy("PermitirTodo",
+		policy => policy.AllowAnyOrigin()
+						.AllowAnyMethod()
+						.AllowAnyHeader());
 });
 
 // ===== Agregar Controllers =====
@@ -138,50 +142,50 @@ builder.Services.AddControllers();
 // ===== Configurar Autenticación JWT =====
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuers = new[] { builder.Configuration["JwtSettings:Issuer"] }.Concat(additionalIssuers),
-        ValidAudiences = new[] { builder.Configuration["JwtSettings:Audience"] }.Concat(additionalAudiences),
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
-    };
+	options.TokenValidationParameters = new TokenValidationParameters
+	{
+		ValidateIssuer = false,
+		ValidateAudience = false,
+		ValidateLifetime = true,
+		ValidateIssuerSigningKey = true,
+		ValidIssuers = new[] { builder.Configuration["JwtSettings:Issuer"] }.Concat(additionalIssuers),
+		ValidAudiences = new[] { builder.Configuration["JwtSettings:Audience"] }.Concat(additionalAudiences),
+		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
+	};
 });
 
 // ===== Configurar Swagger con JWT Bearer =====
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Loki(ta) API", Version = "v1" });
+	options.SwaggerDoc("v1", new OpenApiInfo { Title = "Loki(ta) API", Version = "v1" });
 
-    options.EnableAnnotations(); // <-- Perú es clave.🏳️‍🌈
+	options.EnableAnnotations(); // <-- Perú es clave.🏳️‍🌈
 
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Ingrese el token en el formato: Bearer {su_token}"
-    });
+	options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+	{
+		Name = "Authorization",
+		Type = SecuritySchemeType.Http,
+		Scheme = "Bearer",
+		BearerFormat = "JWT",
+		In = ParameterLocation.Header,
+		Description = "Ingrese el token en el formato: Bearer {su_token}"
+	});
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+	options.AddSecurityRequirement(new OpenApiSecurityRequirement
+	{
+		{
+			new OpenApiSecurityScheme
+			{
+				Reference = new OpenApiReference
+				{
+					Type = ReferenceType.SecurityScheme,
+					Id = "Bearer"
+				}
+			},
+			Array.Empty<string>()
+		}
+	});
 });
 
 // ===== Agregar Contextos de Bases de Datos =====
@@ -235,11 +239,11 @@ builder.Services.AddDbContext<DbMemoryContextAlbaz>(o => o.UseSqlServer(builder.
 
 
 // ===== Servicios personalizados =====
-builder.Services.AddScoped<CoorinWeb.Loki.Mark.Auth.DAOs.DaoBase>();
+builder.Services.AddScoped<DaoBase>();
 builder.Services.AddScoped<AuthDAOs>();
 builder.Services.AddScoped<IDbContextFactory, CustomDbContextFactory>();
 builder.Services.AddScoped<IAuthInterfaces,
-    AuthDAOs>();
+	AuthDAOs>();
 builder.Services.AddScoped<IArrepentimientosService, ArrepentimientosService>();
 builder.Services.AddScoped<IProductividadService, ProductividadService>();
 builder.Services.AddScoped<ICampaniasService, CampaniasService>();
@@ -264,13 +268,19 @@ builder.Services.AddScoped<IHistoricoService, HistoricoService>();
 builder.Services.AddScoped<CustomDbContextFactory>();
 
 
-
 builder.Services.AddScoped<TuAplicacion.Services.ReporteGeneradorService>();
 builder.Services.AddScoped<IHistoricoService, HistoricoService>();
 builder.Services.AddScoped<IHistoricoDao, HistoricoDao>();
 builder.Services.AddScoped<IPlantillasCorreoService, PlantillasCorreoService>();
 builder.Services.AddScoped<IPlantillasCorreoDao, PlantillasCorreoDao>();
 builder.Services.AddScoped<IBusqueda, BusquedasService>();
+
+
+builder.Services.AddScoped<IPagosService, PagosService>();
+builder.Services.AddScoped<IPagosDAO, PagosDAO>();
+builder.Services.AddScoped<IQueryGeneratorService, QueryGeneratorService>();
+builder.Services.AddScoped<IConsultaConfigDAO, ConsultaConfigDAO>(); // <-- AÑADIR ESTA LÍNEA
+
 builder.Services.AddScoped<EjecutivoDao>();
 
 //catalogos
@@ -283,23 +293,23 @@ builder.Services.AddScoped<AccionamientosQueryHelper>();
 
 // Configuración de JSON para que distinga entre mayúsculas y minúsculas
 builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    });
+	.AddJsonOptions(options =>
+	{
+		options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
+		options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+	});
 
 
 
 // ===== Registro de servicio para compresión de archivos =====
 builder.Services.AddResponseCompression(options =>
 {
-    options.EnableForHttps = true;
-    options.Providers.Add<GzipCompressionProvider>();
+	options.EnableForHttps = true;
+	options.Providers.Add<GzipCompressionProvider>();
 });
 builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 {
-    options.Level = System.IO.Compression.CompressionLevel.Fastest; // O Optimal
+	options.Level = System.IO.Compression.CompressionLevel.Fastest; // O Optimal
 });
 
 
@@ -312,19 +322,19 @@ var app = builder.Build();
 // Middleware
 app.UseSwagger(options =>
 {
-    options.RouteTemplate = "/openapi/{documentName}.json";
+	options.RouteTemplate = "/openapi/{documentName}.json";
 });
 
 app.MapScalarApiReference(options =>
 {
-    options
-        .WithPreferredScheme("Bearer")
-        .WithTitle("Loki(ta)API")
-        //.WithTheme(ScalarTheme.Mars)
-        .WithTheme(ScalarTheme.BluePlanet)
-        //.WithTheme(ScalarTheme.DeepSpace)
-        .WithDarkMode(true)
-        .WithSidebar(true);
+	options
+		.WithPreferredScheme("Bearer")
+		.WithTitle("Loki(ta)API")
+		//.WithTheme(ScalarTheme.Mars)
+		.WithTheme(ScalarTheme.BluePlanet)
+		//.WithTheme(ScalarTheme.DeepSpace)
+		.WithDarkMode(true)
+		.WithSidebar(true);
 });
 
 app.UseHttpsRedirection();

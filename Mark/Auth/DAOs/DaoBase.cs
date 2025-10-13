@@ -8,7 +8,25 @@ namespace CoorinWeb.Loki.Mark.Auth.DAOs
 {
     public class DaoBase
     {
-        public async Task<dynamic?> ExecuteStoredProcedure(DbContext context, string storedProcedureName, params SqlParameter[] parameters)
+		/// <summary>
+		/// Ejecuta una consulta de texto SQL (no un Stored Procedure) y mapea los resultados.
+		/// </summary>
+		public async Task<IEnumerable<T>> ExecuteQueryAsync<T>(SqlConnection connection, string sql, object? parameters = null)
+		{
+			if (connection.State != ConnectionState.Open)
+			{
+				await connection.OpenAsync();
+			}
+
+			// La única diferencia con los otros métodos es 'CommandType.Text'
+			return await connection.QueryAsync<T>(
+				sql,
+				parameters,
+				commandType: CommandType.Text
+			);
+		}
+
+		public async Task<dynamic?> ExecuteStoredProcedure(DbContext context, string storedProcedureName, params SqlParameter[] parameters)
         {
             var result = new Dictionary<string, object>();
             var connection = context.Database.GetDbConnection();

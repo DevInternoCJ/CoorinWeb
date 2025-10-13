@@ -44,6 +44,30 @@
     <Folder Include="Mark\Consulta\Histórico\Controllers\" />
     <Folder Include="Mark\Consulta\Histórico\Interfaces\" />
     <Folder Include="Mark\Consulta\Histórico\Services\" />
+    <Folder Include="Mark\Consulta\Informacion\Comentarios\Controllers\" />
+    <Folder Include="Mark\Consulta\Informacion\Comentarios\DAOs\" />
+    <Folder Include="Mark\Consulta\Informacion\Comentarios\Interfaces\" />
+    <Folder Include="Mark\Consulta\Informacion\Comentarios\Services\" />
+    <Folder Include="Mark\Consulta\Informacion\Ofrecimientos\Controllers\" />
+    <Folder Include="Mark\Consulta\Informacion\Ofrecimientos\DAOs\" />
+    <Folder Include="Mark\Consulta\Informacion\Ofrecimientos\Interfaces\" />
+    <Folder Include="Mark\Consulta\Informacion\Ofrecimientos\Services\" />
+    <Folder Include="Mark\Consulta\Informacion\Busquedas\Controllers\" />
+    <Folder Include="Mark\Consulta\Informacion\Busquedas\DAOs\" />
+    <Folder Include="Mark\Consulta\Informacion\Busquedas\Interfaces\" />
+    <Folder Include="Mark\Consulta\Informacion\Busquedas\Services\" />
+    <Folder Include="Mark\Consulta\Informacion\Correos\Controllers\" />
+    <Folder Include="Mark\Consulta\Informacion\Correos\DAOs\" />
+    <Folder Include="Mark\Consulta\Informacion\Correos\Interfaces\" />
+    <Folder Include="Mark\Consulta\Informacion\Correos\Services\" />
+    <Folder Include="Mark\Consulta\Informacion\DatosErroneos\Controllers\" />
+    <Folder Include="Mark\Consulta\Informacion\DatosErroneos\DAOs\" />
+    <Folder Include="Mark\Consulta\Informacion\DatosErroneos\Interfaces\" />
+    <Folder Include="Mark\Consulta\Informacion\DatosErroneos\Services\" />
+    <Folder Include="Mark\Consulta\Informacion\PagosReportados\Controllers\" />
+    <Folder Include="Mark\Consulta\Informacion\PagosReportados\DAOs\" />
+    <Folder Include="Mark\Consulta\Informacion\PagosReportados\Interfaces\" />
+    <Folder Include="Mark\Consulta\Informacion\PagosReportados\Services\" />
   </ItemGroup>
 
   

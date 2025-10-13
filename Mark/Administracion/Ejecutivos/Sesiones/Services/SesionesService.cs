@@ -63,6 +63,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Sesiones.Services
 				"Usuario",
 				"idEncargado",
 				"Bloqueado",
+				"Jerarquía",
 				"false as SesionAbierta" // Campo auxiliar inicializado en falso
 			};
 

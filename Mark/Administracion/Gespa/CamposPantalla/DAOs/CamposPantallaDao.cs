@@ -13,10 +13,10 @@ namespace Loki.Mark.Administracion.Gespa.CamposPantalla.DAOs
         private readonly CustomDbContextFactory _dbContFactory;
         private readonly DaoBase _daoBase;
 
-        public CamposPantallaDao(CustomDbContextFactory dbContFactory)
+        public CamposPantallaDao(CustomDbContextFactory dbContFactory, DaoBase daoBase)
         {
             _dbContFactory = dbContFactory;
-            _daoBase = new DaoBase();
+            _daoBase = daoBase;
         }
 
         public async Task<dynamic?> CambiaEncargadoEjecutivo(string servidor, CambiaEncargadoDto request)
