@@ -118,11 +118,10 @@ namespace Loki.Controllers
             if (string.IsNullOrWhiteSpace(servidorClaim))
                 return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
 
-            // ============================
             // Preparar DataTable de parámetros
-            // ============================
+ 
             var parametros = new DataTable();
-            parametros.Columns.Add("idConsulta", typeof(int)); // primero
+            parametros.Columns.Add("idConsulta", typeof(int)); 
             parametros.Columns.Add("Concepto", typeof(string));
             parametros.Columns.Add("Campo", typeof(string));
             parametros.Columns.Add("Valores", typeof(string));
@@ -140,11 +139,9 @@ namespace Loki.Controllers
                 parametros.Rows.Add(row);
             }
 
-            // ============================
             // Preparar DataTable de agrupar
-            // ============================
             var agrupar = new DataTable();
-            agrupar.Columns.Add("idConsulta", typeof(int)); // primero
+            agrupar.Columns.Add("idConsulta", typeof(int)); 
             agrupar.Columns.Add("Campo", typeof(string));
             agrupar.Columns.Add("Concepto", typeof(string));
 

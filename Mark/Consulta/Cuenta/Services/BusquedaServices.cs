@@ -10,6 +10,7 @@ using System;
 using System.IO;
 using Dapper;
 using static CoorinWeb.Loki.Global.AccionamientosQueryHelper;
+using CoorinWeb.Loki.Common;
 
 namespace Loki.Mark.Consulta.Cuenta.Services
 {
@@ -190,21 +191,19 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         }
 
         public async Task<string> GuardarConsulta(
-         int idConsulta,
-         string nombreConsulta,
-         int idProducto,
-         int idCartera,
-         DataTable parametros,
-         DataTable agrupar,
-         DateTime desde,
-         int idEjecutivo,
-         string servidor,
-         string tipoBase)
+          int idConsulta,
+          string nombreConsulta,
+          int idProducto,
+          int idCartera,
+          DataTable parametros,
+          DataTable agrupar,
+          DateTime desde,
+          int idEjecutivo,
+          string servidor,
+          string tipoBase)
         {
             try
             {
-
-                // Asegurar columnas idConsulta
 
                 if (parametros == null)
                     parametros = new DataTable();
@@ -216,11 +215,10 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 if (!agrupar.Columns.Contains("idConsulta"))
                     agrupar.Columns.Add("idConsulta", typeof(int));
 
-                // Crear instancia del generador
-
+                // instancia del generador
                 var consultaGenerador = new AccionamientosQueryHelper.ConsultaGenerador(_dbContFactory);
 
-                bool resultado = await consultaGenerador.GuardarConsulta(
+                OperacionConsulta operacion = await consultaGenerador.GuardarConsulta(
                     idConsulta,
                     nombreConsulta,
                     idProducto == 0 ? DBNull.Value : idProducto,
@@ -233,17 +231,19 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     tipoBase
                 );
 
-                if (!resultado)
-                    return "Error: No se pudo guardar la consulta.";
-
-                return $"Consulta '{idConsulta}' eliminada correctamente (idEjecutivo: {idEjecutivo}).";
+                return operacion switch
+                {
+                    OperacionConsulta.Insert => $"Consulta '{nombreConsulta}' guardada correctamente (idEjecutivo: {idEjecutivo}).",
+                    OperacionConsulta.Update => $"Consulta '{nombreConsulta}' actualizada correctamente (idEjecutivo: {idEjecutivo}).",
+                    OperacionConsulta.Delete => $"Consulta '{idConsulta}' eliminada correctamente (idEjecutivo: {idEjecutivo}).",
+                    OperacionConsulta.Error or _ => "Error: No se pudo completar la operación."
+                };
             }
             catch (Exception ex)
             {
-                return $"Error: {ex.Message}";
+                return $"❌ Error: {ex.Message}";
             }
         }
-
 
 
     }

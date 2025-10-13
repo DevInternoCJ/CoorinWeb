@@ -25,6 +25,14 @@ namespace CoorinWeb.Loki.Common // Un buen lugar para enums genéricos
         Contar,
         ContarAccionamientos,
     }
+    public enum OperacionConsulta
+    {
+        Insert,
+        Update,
+        Delete,
+        Error
+    }
+
 }
 
 // --- Namespace para Clases de Ayuda Globales de Loki ---
@@ -102,11 +110,12 @@ namespace CoorinWeb.Loki.Global
                 dtConsultas.Columns.Add("idCartera", typeof(int));
                 dtConsultas.Columns.Add("NombreConsulta", typeof(string)); 
                 dtConsultas.Columns.Add("Desde", typeof(DateTime));
+                dtConsultas.Columns.Add("idEjecutivo_Insert", typeof(int));
                 dtConsultas.PrimaryKey = new DataColumn[] { dtConsultas.Columns["idConsulta"] };
 
-                // Filas hardcodeadas por defecto
-                dtConsultas.Rows.Add(1, 101, 1);
-                dtConsultas.Rows.Add(2, 102, 24);
+                //// Filas hardcodeadas por defecto
+                //dtConsultas.Rows.Add(1, 101, 1);
+                //dtConsultas.Rows.Add(2, 102, 24);
 
                 _Consultas.Tables.Add(dtConsultas);
             }
@@ -295,7 +304,7 @@ namespace CoorinWeb.Loki.Global
             /// <param name="Parámetros">Tabla con los parámetros.</param>
             /// <param name="Agrupar">Tabla con los campos a agrupar.</param>
             /// <param name="Desde">Fecha desde para realizar los conteos.</param>
-            public async Task<bool> GuardarConsulta(
+            public async Task<OperacionConsulta> GuardarConsulta(
              int idConsulta,
              string nombre,
              object idProducto,
@@ -313,10 +322,9 @@ namespace CoorinWeb.Loki.Global
                     if (conn.State != ConnectionState.Open)
                         await conn.OpenAsync();
 
-                    string sNombreConsulta = nombre.Replace("'", "");
+                    string sNombreConsulta = nombre?.Replace("'", "") ?? "";
 
-                    // Inicializar DataTables locales
-
+                    // Inicializar DataTables locales si no existen
                     if (!_Consultas.Tables.Contains("Consultas"))
                     {
                         var dt = new DataTable("Consultas");
@@ -355,28 +363,25 @@ namespace CoorinWeb.Loki.Global
                     var tblConsultas = _Consultas.Tables["Consultas"];
                     var tblParametros = _Consultas.Tables["Parámetros"];
                     var tblAgrupar = _Consultas.Tables["Agrupar"];
-   
+
+                    // Verificar si ya existe por nombre
                     var drExist = tblConsultas.Select($"NombreConsulta = '{sNombreConsulta}'");
                     if (drExist.Length == 1)
                         idConsulta = Convert.ToInt32(drExist[0]["idConsulta"]);
 
-
                     // DELETE 
-
-                    if (idConsulta != 0)
+                    if (idConsulta != 0 && string.IsNullOrWhiteSpace(sNombreConsulta))
                     {
                         await conn.ExecuteAsync("DELETE FROM Consultas WHERE idConsulta = @idConsulta;", new { idConsulta });
                         var rowToDelete = tblConsultas.Rows.Find(idConsulta);
                         rowToDelete?.Delete();
                         tblConsultas.AcceptChanges();
+                        return OperacionConsulta.Delete;
                     }
 
-
-                    // INSERT 
-
+                    // INSERT
                     if (!string.IsNullOrEmpty(sNombreConsulta))
                     {
-
                         if (!parametros.Columns.Contains("idConsulta"))
                             parametros.Columns.Add("idConsulta", typeof(int));
                         if (!agrupar.Columns.Contains("idConsulta"))
@@ -387,6 +392,7 @@ namespace CoorinWeb.Loki.Global
                         VALUES (@idEjecutivo, @Nombre, @idProducto, @idCartera, @Desde);
                         DECLARE @idConsulta INT = SCOPE_IDENTITY();";
 
+                        // INSERT Agrupar
                         if (agrupar.Rows.Count > 0)
                         {
                             sQuery += "\nINSERT INTO ConsultaAgrupar (idConsulta, Campo, Concepto) VALUES ";
@@ -398,8 +404,7 @@ namespace CoorinWeb.Loki.Global
                             sQuery += ";";
                         }
 
-
-                        // INSERT para Parámetros (CORREGIDO - incluye idConsulta)
+                        // INSERT Parámetros
                         if (parametros.Rows.Count > 0)
                         {
                             sQuery += "\nINSERT INTO ConsultaParámetros (idConsulta, Concepto, Campo, Valores, Parámetros, Dato) VALUES ";
@@ -416,7 +421,6 @@ namespace CoorinWeb.Loki.Global
                             sQuery += ";";
                         }
 
-
                         sQuery += "\nSELECT @idConsulta;";
 
                         var paramInsert = new
@@ -430,20 +434,20 @@ namespace CoorinWeb.Loki.Global
 
                         int newId = await conn.ExecuteScalarAsync<int>(sQuery, paramInsert);
 
+                        // Actualizar DataTables locales
                         foreach (DataRow row in agrupar.Rows)
                             row["idConsulta"] = newId;
                         foreach (DataRow row in parametros.Rows)
                             row["idConsulta"] = newId;
 
-                   
                         tblAgrupar.Clear();
                         tblParametros.Clear();
-
                         foreach (DataRow row in agrupar.Rows)
                             tblAgrupar.ImportRow(row);
                         foreach (DataRow row in parametros.Rows)
                             tblParametros.ImportRow(row);
 
+                        // Agregar o actualizar consulta
                         var existingRow = tblConsultas.Rows.Find(newId);
                         if (existingRow != null)
                         {
@@ -452,23 +456,34 @@ namespace CoorinWeb.Loki.Global
                             existingRow["NombreConsulta"] = sNombreConsulta;
                             existingRow["Desde"] = desde;
                             existingRow["idEjecutivo_Insert"] = idEjecutivo;
+                            tblConsultas.AcceptChanges();
+                            return OperacionConsulta.Update;
                         }
                         else
                         {
-                            tblConsultas.Rows.Add(newId, idProducto ?? DBNull.Value, idCartera ?? DBNull.Value, sNombreConsulta, desde, idEjecutivo);
+                            var newRow = tblConsultas.NewRow();
+                            newRow["idConsulta"] = newId;
+                            newRow["idProducto"] = idProducto ?? DBNull.Value;
+                            newRow["idCartera"] = idCartera ?? DBNull.Value;
+                            newRow["NombreConsulta"] = sNombreConsulta;
+                            newRow["Desde"] = desde;
+                            newRow["idEjecutivo_Insert"] = idEjecutivo;
+                            tblConsultas.Rows.Add(newRow);
+                            tblConsultas.AcceptChanges();
+                            return OperacionConsulta.Insert;
                         }
-
-                        tblConsultas.AcceptChanges();
                     }
 
-                    return true;
+                    return OperacionConsulta.Error;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error GuardarConsulta: {ex.Message}");
-                    return false;
+                    return OperacionConsulta.Error;
                 }
             }
+
+
 
 
             /// <summary>
