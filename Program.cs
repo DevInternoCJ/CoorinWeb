@@ -97,9 +97,9 @@ using Loki.Mark.Administracion.Gespa.CamposPantalla.Services;
 using Loki.Mark.Administracion.Gespa.CamposPantalla.DAOs;
 using System.Text.Json;
 using Loki.Mark.Consulta.Cuenta.Interfaces;
-using Loki.Mark.Consulta.Cuenta.DAOs;
 using Loki.Mark.Consulta.Cuenta.Services;
 using CatalogosService = Loki.Mark.Administracion.Gespa.Catalogos.Services.CatalogosService;
+
 
 
 
@@ -272,6 +272,12 @@ builder.Services.AddScoped<IPlantillasCorreoService, PlantillasCorreoService>();
 builder.Services.AddScoped<IPlantillasCorreoDao, PlantillasCorreoDao>();
 builder.Services.AddScoped<IBusqueda, BusquedasService>();
 builder.Services.AddScoped<EjecutivoDao>();
+
+//catalogos
+builder.Services.AddScoped<ICatalogosService, CatalogosService>();
+builder.Services.AddScoped<Loki.Mark.Consulta.Cuenta.Interfaces.ICatalogosServiceRe,
+                   Loki.Mark.Consulta.Cuenta.Services.CatalogosService>();
+
 // En Program.cs, cambia a:
 builder.Services.AddSingleton<Loki.Global.ExcelGeneratorService>();
 builder.Services.AddScoped<AccionamientosQueryHelper>();
