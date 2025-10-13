@@ -190,6 +190,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         }
 
         public async Task<string> GuardarConsulta(
+         int idConsulta,
          string nombreConsulta,
          int idProducto,
          int idCartera,
@@ -202,7 +203,20 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         {
             try
             {
-                int idConsulta = 0; // siempre nueva
+
+                // Asegurar columnas idConsulta
+
+                if (parametros == null)
+                    parametros = new DataTable();
+                if (!parametros.Columns.Contains("idConsulta"))
+                    parametros.Columns.Add("idConsulta", typeof(int));
+
+                if (agrupar == null)
+                    agrupar = new DataTable();
+                if (!agrupar.Columns.Contains("idConsulta"))
+                    agrupar.Columns.Add("idConsulta", typeof(int));
+
+                // Crear instancia del generador
 
                 var consultaGenerador = new AccionamientosQueryHelper.ConsultaGenerador(_dbContFactory);
 
@@ -211,8 +225,8 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     nombreConsulta,
                     idProducto == 0 ? DBNull.Value : idProducto,
                     idCartera == 0 ? DBNull.Value : idCartera,
-                    parametros ?? new DataTable(),
-                    agrupar ?? new DataTable(),
+                    parametros,
+                    agrupar,
                     desde,
                     idEjecutivo,
                     servidor,
@@ -222,13 +236,14 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 if (!resultado)
                     return "Error: No se pudo guardar la consulta.";
 
-                return $"Consulta '{nombreConsulta}' guardada correctamente (idEjecutivo: {idEjecutivo}).";
+                return $"Consulta '{idConsulta}' eliminada correctamente (idEjecutivo: {idEjecutivo}).";
             }
             catch (Exception ex)
             {
                 return $"Error: {ex.Message}";
             }
         }
+
 
 
     }

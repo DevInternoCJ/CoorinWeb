@@ -111,16 +111,18 @@ namespace Loki.Controllers
            Summary = "guardar consulta - irene",
            Description = "Se genera una consulta personalizada para reutilizarla posteriormente"
         )]
-      
+
         public async Task<ActionResult<string>> GuardarConsulta([FromBody] GuardarConsultaRequest request)
         {
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
             if (string.IsNullOrWhiteSpace(servidorClaim))
                 return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
 
-            // Convertir las listas en DataTables
+            // ============================
+            // Preparar DataTable de parámetros
+            // ============================
             var parametros = new DataTable();
-           
+            parametros.Columns.Add("idConsulta", typeof(int)); // primero
             parametros.Columns.Add("Concepto", typeof(string));
             parametros.Columns.Add("Campo", typeof(string));
             parametros.Columns.Add("Valores", typeof(string));
@@ -128,19 +130,36 @@ namespace Loki.Controllers
             parametros.Columns.Add("Dato", typeof(string));
 
             foreach (var p in request.Parametros)
-                parametros.Rows.Add(p.Concepto, p.Campo, p.Valores, p.Parámetros, p.Dato);
+            {
+                var row = parametros.NewRow();
+                row["Concepto"] = p.Concepto;
+                row["Campo"] = p.Campo;
+                row["Valores"] = p.Valores;
+                row["Parámetros"] = p.Parámetros;
+                row["Dato"] = p.Dato;
+                parametros.Rows.Add(row);
+            }
 
+            // ============================
+            // Preparar DataTable de agrupar
+            // ============================
             var agrupar = new DataTable();
-           
+            agrupar.Columns.Add("idConsulta", typeof(int)); // primero
             agrupar.Columns.Add("Campo", typeof(string));
             agrupar.Columns.Add("Concepto", typeof(string));
 
             foreach (var a in request.Agrupar)
-                agrupar.Rows.Add(a.Campo, a.Concepto);
+            {
+                var row = agrupar.NewRow();
+                row["Campo"] = a.Campo;
+                row["Concepto"] = a.Concepto;
+                agrupar.Rows.Add(row);
+            }
 
             string tipoBase = "Collection";
 
             var result = await _busquedasService.GuardarConsulta(
+                request.idConsulta,          
                 request.NombreConsulta,
                 request.IdProducto,
                 request.IdCartera,
@@ -157,7 +176,6 @@ namespace Loki.Controllers
 
             return Ok(result);
         }
-
 
     }
 

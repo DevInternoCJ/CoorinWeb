@@ -306,7 +306,6 @@ namespace CoorinWeb.Loki.Global
              int idEjecutivo,
              string servidor,
              string tipoBase)
-
             {
                 try
                 {
@@ -315,86 +314,145 @@ namespace CoorinWeb.Loki.Global
                         await conn.OpenAsync();
 
                     string sNombreConsulta = nombre.Replace("'", "");
-                    string sQuery;
 
-                    DataTable tblConsultas = _Consultas.Tables["Consultas"];
-                    DataRow[] drNombres = tblConsultas.Select("NombreConsulta = '" + sNombreConsulta + "'");
-                    if (drNombres.Length == 1)
-                        idConsulta = Convert.ToInt32(drNombres[0]["idConsulta"]);
+                    // Inicializar DataTables locales
+
+                    if (!_Consultas.Tables.Contains("Consultas"))
+                    {
+                        var dt = new DataTable("Consultas");
+                        dt.Columns.Add("idConsulta", typeof(int));
+                        dt.Columns.Add("idProducto", typeof(object));
+                        dt.Columns.Add("idCartera", typeof(object));
+                        dt.Columns.Add("NombreConsulta", typeof(string));
+                        dt.Columns.Add("Desde", typeof(DateTime));
+                        dt.Columns.Add("idEjecutivo_Insert", typeof(int));
+                        dt.PrimaryKey = new DataColumn[] { dt.Columns["idConsulta"] };
+                        _Consultas.Tables.Add(dt);
+                    }
+
+                    if (!_Consultas.Tables.Contains("Parámetros"))
+                    {
+                        var dt = new DataTable("Parámetros");
+                        dt.Columns.Add("idConsulta", typeof(int));
+                        dt.Columns.Add("Concepto", typeof(string));
+                        dt.Columns.Add("Campo", typeof(string));
+                        dt.Columns.Add("Valores", typeof(string));
+                        dt.Columns.Add("Parámetros", typeof(string));
+                        dt.Columns.Add("Dato", typeof(string));
+                        _Consultas.Tables.Add(dt);
+                    }
+
+                    if (!_Consultas.Tables.Contains("Agrupar"))
+                    {
+                        var dt = new DataTable("Agrupar");
+                        dt.Columns.Add("idConsulta", typeof(int));
+                        dt.Columns.Add("Campo", typeof(string));
+                        dt.Columns.Add("Concepto", typeof(string));
+                        dt.Columns.Add("Origen", typeof(string));
+                        _Consultas.Tables.Add(dt);
+                    }
+
+                    var tblConsultas = _Consultas.Tables["Consultas"];
+                    var tblParametros = _Consultas.Tables["Parámetros"];
+                    var tblAgrupar = _Consultas.Tables["Agrupar"];
+   
+                    var drExist = tblConsultas.Select($"NombreConsulta = '{sNombreConsulta}'");
+                    if (drExist.Length == 1)
+                        idConsulta = Convert.ToInt32(drExist[0]["idConsulta"]);
+
 
                     // DELETE 
+
                     if (idConsulta != 0)
                     {
-                        const string sqlDelete = @"
-                    DELETE Consultas WHERE idConsulta = @idConsulta;";
-
-                        int rows = await conn.ExecuteAsync(sqlDelete, new { idConsulta });
-                        if (rows == 0)
-                            return false;
-
-                        DataRow rowToDelete = tblConsultas.Rows.Find(idConsulta);
-                        if (rowToDelete != null)
-                            rowToDelete.Delete();
-
+                        await conn.ExecuteAsync("DELETE FROM Consultas WHERE idConsulta = @idConsulta;", new { idConsulta });
+                        var rowToDelete = tblConsultas.Rows.Find(idConsulta);
+                        rowToDelete?.Delete();
                         tblConsultas.AcceptChanges();
                     }
 
+
                     // INSERT 
+
                     if (!string.IsNullOrEmpty(sNombreConsulta))
                     {
-                        sQuery =
-                            "INSERT INTO Consultas (idEjecutivo_Insert, NombreConsulta, idProducto, idCartera, Desde) " +
-                            "VALUES (@idEjecutivo, @Nombre, @idProducto, @idCartera, @Desde); " +
-                            "DECLARE @idConsulta INT = SCOPE_IDENTITY(); ";
+
+                        if (!parametros.Columns.Contains("idConsulta"))
+                            parametros.Columns.Add("idConsulta", typeof(int));
+                        if (!agrupar.Columns.Contains("idConsulta"))
+                            agrupar.Columns.Add("idConsulta", typeof(int));
+
+                        string sQuery = @"
+                        INSERT INTO Consultas (idEjecutivo_Insert, NombreConsulta, idProducto, idCartera, Desde)
+                        VALUES (@idEjecutivo, @Nombre, @idProducto, @idCartera, @Desde);
+                        DECLARE @idConsulta INT = SCOPE_IDENTITY();";
 
                         if (agrupar.Rows.Count > 0)
                         {
-                            sQuery += "\r\n\r\n INSERT INTO ConsultaAgrupar (idConsulta, Campo, Concepto) VALUES ";
+                            sQuery += "\nINSERT INTO ConsultaAgrupar (idConsulta, Campo, Concepto) VALUES ";
                             for (int i = 0; i < agrupar.Rows.Count; i++)
-                                sQuery += $"\r\n (@idConsulta, '{agrupar.Rows[i]["Campo"]}', '{agrupar.Rows[i]["Concepto"]}' ), ";
-                            sQuery = sQuery.TrimEnd(',', ' ');
+                            {
+                                sQuery += $"(@idConsulta, '{agrupar.Rows[i]["Campo"]?.ToString().Replace("'", "''")}', '{agrupar.Rows[i]["Concepto"]?.ToString().Replace("'", "''")}')";
+                                if (i < agrupar.Rows.Count - 1) sQuery += ",";
+                            }
+                            sQuery += ";";
                         }
 
+                     
                         if (parametros.Rows.Count > 0)
                         {
-                            sQuery += "\r\n\r\n INSERT INTO ConsultaParámetros (idConsulta, Concepto, Campo, Valores, Parámetros, Dato) VALUES ";
+                            sQuery += "\nINSERT INTO ConsultaParámetros (Concepto, Campo, Valores, Parámetros, Dato) VALUES ";
                             for (int i = 0; i < parametros.Rows.Count; i++)
                             {
-                                sQuery += $"\r\n (@idConsulta, " +
-                                    $"'{parametros.Rows[i]["Concepto"]}', " +
-                                    $"'{parametros.Rows[i]["Campo"]}', N'" +
-                                    $"{parametros.Rows[i]["Valores"]}', N'" +
-                                    $"{parametros.Rows[i]["Parámetros"].ToString().Replace("'", "''")}', '" +
-                                    $"{parametros.Rows[i]["Dato"]}'), ";
+                                sQuery += $"('{parametros.Rows[i]["Concepto"]?.ToString().Replace("'", "''")}', " +
+                                          $"'{parametros.Rows[i]["Campo"]?.ToString().Replace("'", "''")}', " +
+                                          $"N'{parametros.Rows[i]["Valores"]?.ToString().Replace("'", "''")}', " +
+                                          $"N'{parametros.Rows[i]["Parámetros"]?.ToString().Replace("'", "''")}', " +
+                                          $"'{parametros.Rows[i]["Dato"]?.ToString().Replace("'", "''")}')";
+                                if (i < parametros.Rows.Count - 1) sQuery += ",";
                             }
-                            sQuery = sQuery.TrimEnd(',', ' ') + "\r\n\r\n SELECT @idConsulta idConsulta";
+                            sQuery += ";";
                         }
 
-                        // Parámetros de inserción
-                        var parametrosInsert = new
+                        sQuery += "\nSELECT @idConsulta;";
+
+                        var paramInsert = new
                         {
                             idEjecutivo,
                             Nombre = sNombreConsulta,
                             idProducto = idProducto ?? DBNull.Value,
-                            idCartera,
+                            idCartera = idCartera ?? DBNull.Value,
                             Desde = desde
                         };
 
-                        // Ejecutar el INSERT principal
-                        int newId = await conn.ExecuteScalarAsync<int>(sQuery, parametrosInsert);
+                        int newId = await conn.ExecuteScalarAsync<int>(sQuery, paramInsert);
 
-                        tblConsultas.Rows.Add(newId, idProducto, idCartera);
+                        foreach (DataRow row in agrupar.Rows)
+                            row["idConsulta"] = newId;
+                        foreach (DataRow row in parametros.Rows)
+                            row["idConsulta"] = newId;
 
-                        for (int i = 0; i < agrupar.Rows.Count; i++)
+                   
+                        tblAgrupar.Clear();
+                        tblParametros.Clear();
+
+                        foreach (DataRow row in agrupar.Rows)
+                            tblAgrupar.ImportRow(row);
+                        foreach (DataRow row in parametros.Rows)
+                            tblParametros.ImportRow(row);
+
+                        var existingRow = tblConsultas.Rows.Find(newId);
+                        if (existingRow != null)
                         {
-                            agrupar.Rows[i]["idConsulta"] = newId;
-                            _Consultas.Tables["Agrupar"].ImportRow(agrupar.Rows[i]);
+                            existingRow["idProducto"] = idProducto ?? DBNull.Value;
+                            existingRow["idCartera"] = idCartera ?? DBNull.Value;
+                            existingRow["NombreConsulta"] = sNombreConsulta;
+                            existingRow["Desde"] = desde;
+                            existingRow["idEjecutivo_Insert"] = idEjecutivo;
                         }
-
-                        for (int i = 0; i < parametros.Rows.Count; i++)
+                        else
                         {
-                            parametros.Rows[i]["idConsulta"] = newId;
-                            _Consultas.Tables["Parámetros"].ImportRow(parametros.Rows[i]);
+                            tblConsultas.Rows.Add(newId, idProducto ?? DBNull.Value, idCartera ?? DBNull.Value, sNombreConsulta, desde, idEjecutivo);
                         }
 
                         tblConsultas.AcceptChanges();
@@ -402,12 +460,13 @@ namespace CoorinWeb.Loki.Global
 
                     return true;
                 }
-                catch (SqlException ex)
+                catch (Exception ex)
                 {
-                    Console.WriteLine($"Error al guardar consulta: {ex.Message}");
+                    Console.WriteLine($"Error GuardarConsulta: {ex.Message}");
                     return false;
                 }
             }
+
 
             /// <summary>
             /// Devuelve el query de la búsqueda.
