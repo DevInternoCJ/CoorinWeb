@@ -275,8 +275,7 @@ builder.Services.AddScoped<EjecutivoDao>();
 
 //catalogos
 builder.Services.AddScoped<ICatalogosService, CatalogosService>();
-builder.Services.AddScoped<Loki.Mark.Consulta.Cuenta.Interfaces.ICatalogosServiceRe,
-                   Loki.Mark.Consulta.Cuenta.Services.CatalogosService>();
+builder.Services.AddScoped<ICatalogosServiceRe, Loki.Mark.Consulta.Cuenta.Services.CatalogosService>();
 
 // En Program.cs, cambia a:
 builder.Services.AddSingleton<Loki.Global.ExcelGeneratorService>();
