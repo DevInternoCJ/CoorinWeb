@@ -1,25 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { GetGridFields } from "../../../../services/mark/albaz/LokiServices"; // Ajusta la ruta según tu estructura
+import { GetGridFields } from "../../../../services/mark/albaz/LokiServices";
+import useSelectedRowStore from "./selectedRowStore";
 
 const GridLampsFields = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // Parámetros requeridos por el endpoint
+  const [draggedHeader, setDraggedHeader] = useState(""); // Estado para el header que se arrastra
+  
   const servidor = "Albaz";
-  const idProducto = 1; // Reemplaza con el ID de producto adecuado
+  const idProducto = 1;
+  const { setSelectedRow, selectedRowIndex } = useSelectedRowStore();
+
   useEffect(() => {
     if (!idProducto || idProducto === 0) return;
     const fetchGridData = async () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Llamar al servicio con los parámetros
         const data = await GetGridFields(idProducto);
-
-        // Transformar los datos si es necesario
-        // La API ya devuelve un array de objetos, así que podemos usarlo directamente
         setTableData(data);
       } catch (err) {
         console.error("Error fetching grid data:", err);
@@ -28,9 +27,31 @@ const GridLampsFields = () => {
         setLoading(false);
       }
     };
-
     fetchGridData();
   }, [servidor, idProducto]);
+
+  // ========== FUNCIONES DE DRAG AND DROP ==========
+  
+  // Cuando comienza el arrastre del header
+  const handleDragStart = (e, headerName) => {
+    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.setData('text/plain', `[${headerName}]`);
+    setDraggedHeader(headerName);
+    console.log(`Arrastrando header: [${headerName}]`);
+  };
+
+  // Cuando termina el arrastre
+  const handleDragEnd = () => {
+    setDraggedHeader('');
+  };
+
+  // ===============================================
+
+  // Manejar click en fila usando el store
+  const handleRowClick = (row, index) => {
+    console.log("GridLampsFields - Click en fila:", index, row);
+    setSelectedRow(row, index);
+  };
 
   if (loading) {
     return (
@@ -92,14 +113,40 @@ const GridLampsFields = () => {
     <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
       <div className="overflow-x-auto border rounded-lg max-h-96">
         <table className="min-w-full bg-white">
-          <thead className=" ">
-            <tr className=" bg-background-secondary border-b">
-              {Object.keys(tableData[0]).map((key) => (
+          <thead>
+            <tr className="bg-background-secondary border-b">
+              {Object.keys(tableData[0] || {}).map((key) => (
                 <th
                   key={key}
-                  className="py-2 px-3 text-left text-xs font-bold text-neutral-100 uppercase whitespace-nowrap"
+                  draggable="true"
+                  onDragStart={(e) => handleDragStart(e, key)}
+                  onDragEnd={handleDragEnd}
+                  className={`
+                    py-2 px-3 text-left text-xs font-bold text-neutral-100 whitespace-nowrap
+                    cursor-move select-none
+                    hover:bg-slate-600 active:bg-slate-500
+                    transition-all duration-150
+                    ${draggedHeader === key ? 'opacity-50 scale-95 bg-slate-500' : ''}
+                  `}
+                  title="Arrastra este encabezado a Alias o Campos"
                 >
-                  {key}
+                  <span className="inline-flex items-center gap-2">
+                    {/* Icono de drag */}
+                    <svg 
+                      className="w-3 h-3 text-neutral-300" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M4 8h16M4 16h16" 
+                      />
+                    </svg>
+                    {key}
+                  </span>
                 </th>
               ))}
             </tr>
@@ -108,22 +155,22 @@ const GridLampsFields = () => {
             {tableData.map((row, index) => (
               <tr
                 key={index}
-                className={
-                  index % 2 === 0
-                    ? "bg-white border-b-jerarquia4"
-                    : "bg-gray-100 border-b-jerarquia4"
-                }
+                className={`
+                  ${index % 2 === 0 ? "bg-white" : "bg-gray-100"} 
+                  border-b-jerarquia4 
+                  cursor-pointer 
+                  transition-colors 
+                  duration-200
+                  ${selectedRowIndex === index ? 'bg-blue-100 border-blue-500 border-2' : 'hover:bg-gray-200'}
+                `}
+                onClick={() => handleRowClick(row, index)}
               >
                 {Object.values(row).map((value, i) => (
                   <td
                     key={i}
                     className={`py-2 px-3 text-sm border-b-jerarquia4 whitespace-nowrap ${
-                      // Aplicar estilos especiales a ciertas columnas
-                      typeof value === "number"
-                        ? "text-right font-medium"
-                        : "text-left"
+                      typeof value === "number" ? "text-right font-medium" : "text-left"
                     } ${
-                      // Colorear valores monetarios
                       Object.keys(row)[i] === "currentbalance" ||
                       Object.keys(row)[i] === "initialbalance"
                         ? "text-green-700"
@@ -151,8 +198,19 @@ const GridLampsFields = () => {
           <span className="font-medium">
             Desplaza horizontalmente para ver todas las columnas.
           </span>
-          Se están mostrando {Object.keys(tableData[0]).length} columnas.
+          Se están mostrando {Object.keys(tableData[0] || {}).length} columnas.
         </p>
+        <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          Arrastra los encabezados a los campos de "Alias" o "Campos"
+        </p>
+        {selectedRowIndex !== null && (
+          <p className="text-xs text-blue-800 mt-1">
+            Fila {selectedRowIndex + 1} seleccionada - Haz click en cualquier fila para seleccionar
+          </p>
+        )}
       </div>
     </div>
   );

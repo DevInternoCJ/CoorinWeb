@@ -234,16 +234,18 @@ const LoadDates = ({
                     onDragEnd={handleDragEnd}
                     className={`
                       py-3 w-auto px-4 border-b border-r-background-secondary 
-                      text-xs font-semibold text-neutral-100 uppercase tracking-wider 
+                      text-xs font-semibold  tracking-wider 
                       whitespace-nowrap align-top
                       cursor-grabbing select-none
-                      hover:bg-slate-600 active:bg-slate-500
+                      hover:bg-jerarquia4 active:bg-slate-500
                       transition-all duration-150
+                      bg-background-dashboard
+                      hover:text-background-tertiary 
                       ${draggedLabel === key ? 'opacity-50 scale-95 bg-slate-500' : ''}
                     `}
                     title="Arrastra el texto al campo mensaje"
                   >
-                    <span className="inline-flex items-center gap-2">
+                    <span className="inline-flex items-center text-neutral-800 gap-2">
                       {key
                         .replace(/([A-Z])/g, " $1")
                         .replace(/^./, (str) => str.toUpperCase())}

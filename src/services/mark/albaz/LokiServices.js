@@ -198,12 +198,12 @@ export const SaveScreenFields = async (data) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    console.log('📤 Enviando a /CamposPantalla/guardar-campos-pantalla:', data);
+    console.log('📤 Enviando a /CamposPantalla/guardar:', data);
     console.log('🔑 Token disponible:', token);
     // ✅ DEJA QUE EL INTERCEPTOR AÑADA EL TOKEN AUTOMÁTICAMENTE
     // NO añadas headers manualmente - el interceptor ya lo hace
-    const response = await api.post(`/CamposPantalla/guardar-campos-pantalla`,data);
-    console.log('📥 Respuesta de /CamposPantalla/guardar-campos-pantalla', response.data);
+    const response = await api.post(`/CamposPantalla/guardar`,data);
+    console.log('📥 Respuesta de /CamposPantalla/guardar', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ Error al guardar campos pantalla', error);
@@ -225,8 +225,6 @@ export const SaveScreenFields = async (data) => {
     throw error;
   }
 };
-
-
 
 // Nuevo endpoint para Lista Negra con parámetros
 export const darkListV2 = async ({ idCartera, selector, dato }) => {

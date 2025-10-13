@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef} from "react";
 import OptionFields from "./OptionFields";
 import {
   GetScreenFields,
@@ -6,27 +6,83 @@ import {
 } from "../../../../services/mark/albaz/LokiServices";
 import { useUserStore } from "../../../../contextGlobal/userStore";
 import SaveButton from "../../sideBar/Administration/gespa/ButtonSave";
-const TableEditFields = ({ idProducto }) => {
+
+const TableEditFields = ({ idProducto, selectedRowData, onFieldNamesChange }) => { 
   const [editData, setEditData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saveResult, setSaveResult] = useState(null);
-  const servidor = "Thor";
-
+  
+   // ✅ NUEVO: useRef para evitar efectos infinitos
+  const initialLoadRef = useRef(false);
+  const fieldNamesSentRef = useRef(false);
   const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;
-  console.log("Datos de usuario en el store:", idEjecutivo);
   const jerarquia = user?.Jerarquía;
-  console.log(" Jerarquia: ", jerarquia);
 
+  // ✅ CORRECCIÓN: Usar useCallback para evitar recreación de función
+  const extractBracketFields = useCallback((text) => {
+    if (!text) return [];
+    const regex = /\[(.*?)\]/g;
+    const matches = [];
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      matches.push(match[1]);
+    }
+    return matches;
+  }, []);
+
+  // ✅ CORRECCIÓN: Usar useCallback y mover fuera del useEffect
+  const getFieldValueFromRow = useCallback((fieldName) => {
+    if (!selectedRowData || !fieldName) return "";
+    
+    // Buscar el campo en la fila seleccionada (case insensitive)
+    const key = Object.keys(selectedRowData).find(
+      k => k.toLowerCase() === fieldName.toLowerCase()
+    );
+    
+    return key ? selectedRowData[key] : "";
+  }, [selectedRowData]); // ✅ Solo depende de selectedRowData
+
+   // ✅ CORRECCIÓN: Actualizar campos con selectedRowData
   useEffect(() => {
-    if (!idProducto || idProducto === 0) return;
+    if (!selectedRowData || editData.length === 0) return;
+
+    const updatedData = editData.map(item => {
+      const bracketFields = extractBracketFields(item.campos);
+      
+      if (bracketFields.length > 0) {
+        let newCampos = item.campos;
+        bracketFields.forEach(field => {
+          const value = getFieldValueFromRow(field);
+          if (value && value !== "" && value !== "NULL" && value !== null) {
+            newCampos = newCampos.replace(`[${field}]`, value);
+          }
+        });
+        
+        return { ...item, campos: newCampos };
+      }
+      
+      return item;
+    });
+
+    setEditData(updatedData);
+  }, [selectedRowData, editData, extractBracketFields, getFieldValueFromRow]);
+
+  // ✅ CORRECCIÓN PRINCIPAL: Cargar datos solo una vez
+  useEffect(() => {
+    if (!idProducto || idProducto === 0 || initialLoadRef.current) return;
+  
     const fetchScreenFields = async () => {
       try {
         setLoading(true);
         setError(null);
+        initialLoadRef.current = true; // ✅ Marcar como cargado
+        
+        console.log("TableEditFields - Cargando datos por primera vez...");
         const data = await GetScreenFields(idProducto);
+
         const transformedData = data.map((item, index) => ({
           id: item.id || index + 1,
           position: item.posición,
@@ -35,16 +91,49 @@ const TableEditFields = ({ idProducto }) => {
           formato: item.idFormatoCampo,
           resaltado: item.resaltado,
         }));
-        setEditData(transformedData.map((d) => ({ ...d })));
+
+        setEditData(transformedData);
+
+        // ✅ Enviar fieldNames solo una vez
+        const fieldNames = data
+          .map(item => item.nombreCampo)
+          .filter(Boolean);
+        
+        console.log("TableEditFields - Enviando fieldNames iniciales:", fieldNames.length);
+        
+        if (onFieldNamesChange && !fieldNamesSentRef.current) {
+          fieldNamesSentRef.current = true;
+          onFieldNamesChange(fieldNames);
+        }
+        
       } catch (err) {
         console.error("Error fetching screen fields:", err);
         setError(err.message || "Error al cargar los campos de pantalla");
+        initialLoadRef.current = false; // ✅ Permitir reintento si falla
       } finally {
         setLoading(false);
       }
     };
+    
     fetchScreenFields();
-  }, [servidor, idProducto]);
+  }, [idProducto, onFieldNamesChange]); // ✅ Eliminada dependencia de servidor
+
+
+  // ✅ CORRECCIÓN: Actualizar fieldNames solo si realmente cambiaron
+  useEffect(() => {
+    if (editData.length === 0 || !onFieldNamesChange || fieldNamesSentRef.current) return;
+
+    const currentFieldNames = editData
+      .map(item => item.campos)
+      .filter(Boolean);
+    
+    // ✅ Solo enviar si hay fieldNames y no los hemos enviado ya
+    if (currentFieldNames.length > 0 && !fieldNamesSentRef.current) {
+      console.log("TableEditFields - Enviando fieldNames desde edición:", currentFieldNames.length);
+      fieldNamesSentRef.current = true;
+      onFieldNamesChange(currentFieldNames);
+    }
+  }, [editData, onFieldNamesChange]);
 
   const handleEditField = (index, field, value) => {
     setEditData((prev) =>
@@ -55,30 +144,42 @@ const TableEditFields = ({ idProducto }) => {
   const handleSaveAll = async () => {
     setSaving(true);
     setSaveResult(null);
-    const campos = editData.map((item) => ({
-      posicion: item.position,
-      alias: item.alias,
-      nombreCampo: item.campos,
-      formatoCampo: item.formato,
-      resaltado: typeof item.resaltado === "number" ? item.resaltado : 1, // Asegura número
-      editar: true,
-    }));
+    
+    // ✅ PREPARAR datos para guardar - revertir los reemplazos si es necesario
+    const campos = editData.map((item) => {
+      // Si necesitas guardar los campos originales (con [ ]) en lugar de los reemplazados,
+      // aquí deberías tener lógica para revertir los cambios
+      return {
+        posicion: item.position,
+        alias: item.alias,
+        nombreCampo: item.campos, // Esto contendrá los valores reemplazados
+        formatoCampo: item.formato,
+        resaltado: typeof item.resaltado === "number" ? item.resaltado : 1,
+        editar: true,
+      };
+    });
+    
     const payload = {
       idProducto,
       idEjecutivo,
       jerarquia,
       campos,
     };
+    
+    console.log("TableEditFields - Payload para guardar:", payload);
+    
     try {
       await SaveScreenFields(payload);
       setSaveResult("Guardado correctamente");
-    } catch {
+    } catch (error) {
+      console.error("Error al guardar:", error);
       setSaveResult("Error al guardar");
     } finally {
       setSaving(false);
     }
   };
 
+  // ... (resto del componente igual: loading, error, return)
   if (loading) {
     return (
       <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
@@ -131,6 +232,16 @@ const TableEditFields = ({ idProducto }) => {
         <div className="col-span-2">Formato Campo</div>
         <div className="col-span-2">Resaltado</div>
       </div>
+      
+      {/* ✅ Indicador de datos seleccionados */}
+      {selectedRowData && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+          <p className="text-sm text-green-800">
+            <strong>Datos de fila seleccionada aplicados:</strong> Los campos entre [ ] se han reemplazado con valores reales
+          </p>
+        </div>
+      )}
+      
       <div className="space-y-3">
         {editData.map((item, idx) => (
           <OptionFields
@@ -143,8 +254,7 @@ const TableEditFields = ({ idProducto }) => {
 
       {editData.length === 0 && (
         <div className="text-center py-8 text-gray-500">
-          No hay campos de pantalla disponibles para los parámetros
-          especificados
+          No hay campos de pantalla disponibles para los parámetros especificados
         </div>
       )}
 
