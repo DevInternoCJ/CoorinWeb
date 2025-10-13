@@ -100,7 +100,7 @@ namespace CoorinWeb.Loki.Global
                 dtConsultas.Columns.Add("idConsulta", typeof(int));
                 dtConsultas.Columns.Add("idProducto", typeof(int));
                 dtConsultas.Columns.Add("idCartera", typeof(int));
-                dtConsultas.Columns.Add("NombreConsulta", typeof(string)); // ✅ Agregar
+                dtConsultas.Columns.Add("NombreConsulta", typeof(string)); 
                 dtConsultas.Columns.Add("Desde", typeof(DateTime));
                 dtConsultas.PrimaryKey = new DataColumn[] { dtConsultas.Columns["idConsulta"] };
 
@@ -398,13 +398,15 @@ namespace CoorinWeb.Loki.Global
                             sQuery += ";";
                         }
 
-                     
+
+                        // INSERT para Parámetros (CORREGIDO - incluye idConsulta)
                         if (parametros.Rows.Count > 0)
                         {
-                            sQuery += "\nINSERT INTO ConsultaParámetros (Concepto, Campo, Valores, Parámetros, Dato) VALUES ";
+                            sQuery += "\nINSERT INTO ConsultaParámetros (idConsulta, Concepto, Campo, Valores, Parámetros, Dato) VALUES ";
                             for (int i = 0; i < parametros.Rows.Count; i++)
                             {
-                                sQuery += $"('{parametros.Rows[i]["Concepto"]?.ToString().Replace("'", "''")}', " +
+                                sQuery += $"(@idConsulta, " +
+                                          $"'{parametros.Rows[i]["Concepto"]?.ToString().Replace("'", "''")}', " +
                                           $"'{parametros.Rows[i]["Campo"]?.ToString().Replace("'", "''")}', " +
                                           $"N'{parametros.Rows[i]["Valores"]?.ToString().Replace("'", "''")}', " +
                                           $"N'{parametros.Rows[i]["Parámetros"]?.ToString().Replace("'", "''")}', " +
@@ -413,6 +415,7 @@ namespace CoorinWeb.Loki.Global
                             }
                             sQuery += ";";
                         }
+
 
                         sQuery += "\nSELECT @idConsulta;";
 
