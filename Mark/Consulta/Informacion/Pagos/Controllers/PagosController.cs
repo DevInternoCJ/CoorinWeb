@@ -1,13 +1,13 @@
 ﻿using Loki.DTOs.Informacion.PagosDTOs;
 using Loki.Mark.Consulta.Informacion.Pagos.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Loki.Mark.Consulta.Informacion.Pagos.Controllers
 {
-	[Route("api/[controller]")]
+	[Authorize]
+	[Route("api/informacion/[controller]")]
 	[ApiController]
 	public class PagosController : ControllerBase
 	{
@@ -19,15 +19,14 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Controllers
 		}
 
 		[HttpPost("consultar")]
-		[AllowAnonymous]
 		[SwaggerOperation(
 			Summary = "Consultar Pagos - Yoshi",
-			Description = "Obtiene la lista de pagos de la cartera y producto especificados en el rango de fechas deseado"
+			Description = "Obtiene la lista de pagos de la cartera y producto especificados en el rango de fechas deseado."
 		)]
 		public async Task<IActionResult> ConsultarPagos([FromBody] ConsultaPagosRequest request)
 		{
-			//string? servidorClaim = User.FindFirst("Servidor")?.Value;
-			string? servidorClaim = "Albaz";
+			string? servidorClaim = User.FindFirst("Servidor")?.Value;
+			//string? servidorClaim = "Albaz";
 
 			if (string.IsNullOrWhiteSpace(servidorClaim))
 			{

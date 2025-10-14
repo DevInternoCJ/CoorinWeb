@@ -1,0 +1,47 @@
+﻿using Dapper;
+using Loki.DTOs.Global;
+using Loki.DTOs.Informacion.ComentariosDTOs;
+using Loki.DTOs.Informacion.PagosDTOs;
+using Loki.Global;
+using Loki.Mark.Consulta.Informacion.Comentarios.DAOs;
+
+namespace Loki.Mark.Consulta.Informacion.Comentarios.Services
+{
+	public class ComentariosService : IComentariosService
+	{
+		private readonly IComentariosDAO _dao;
+		private readonly IQueryGeneratorService _queryGenerator;
+
+		public ComentariosService(IComentariosDAO dao, IQueryGeneratorService queryGenerator)
+		{
+			_dao = dao;
+			_queryGenerator = queryGenerator;
+		}
+
+		/// <summary>
+		/// Orquesta la consulta de comentarios de cuentas, aplicando filtros dinámicos.
+		/// </summary>
+		public async Task<IEnumerable<ComentarioDto>> ConsultarComentariosAsync(string servidor, ConsultaPagosRequest request)
+		{
+			var queryOptions = new QueryGenerationOptions { IdConsulta = request.IdConsulta, IdCartera = request.IdCartera };
+			var subQueryResult = await _queryGenerator.GenerarQueryCuentas(servidor, queryOptions);
+
+			string sqlPrincipal = "FROM dbCollection.dbo.fn_Comentarios(@Desde, @Hasta, @IdCartera) Z";
+			string columnasDinamicas = subQueryResult.Columns.Cast<string>()
+				.Aggregate("", (current, col) => current + $", CC.[{col}]");
+
+			string sqlFinal = $"SELECT Z.* {columnasDinamicas} {sqlPrincipal}";
+
+			var parametros = new DynamicParameters(subQueryResult.Parameters);
+			parametros.Add("Desde", request.Desde);
+			parametros.Add("Hasta", request.Hasta);
+
+			if (!string.IsNullOrEmpty(subQueryResult.Sql))
+			{
+				sqlFinal += $" INNER JOIN ({subQueryResult.Sql}) CC ON Z.Cuenta = CC.idCuenta";
+			}
+
+			return await _dao.ObtenerDatosAsync<ComentarioDto>(servidor, sqlFinal, parametros);
+		}
+	}
+}
