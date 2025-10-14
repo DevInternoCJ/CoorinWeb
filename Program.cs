@@ -103,6 +103,22 @@ using Loki.Mark.Consulta.Informacion.Pagos.Interfaces;
 using Loki.Mark.Consulta.Informacion.Pagos.Services;
 using Loki.Mark.Consulta.Informacion.Pagos.DAOs;
 using Loki.Global.DAOs;
+using Loki.Mark.Consulta.Informacion.PagosReportados.Interfaces;
+using Loki.Mark.Consulta.Informacion.PagosReportados.Services;
+using Loki.Mark.Consulta.Informacion.PagosReportados.DAOs;
+using Loki.Mark.Consulta.Informacion.DatosErroneos.DAOs;
+using Loki.Mark.Consulta.Informacion.DatosErroneos.Interfaces;
+using Loki.Mark.Consulta.Informacion.DatosErroneos.Services;
+using Loki.Mark.Consulta.Informacion.Domicilios.DAOs;
+using Loki.Mark.Consulta.Informacion.Domicilios.Interfaces;
+using Loki.Mark.Consulta.Informacion.Domicilios.Services;
+using Loki.Mark.Consulta.Informacion.Correos.DAOs;
+using Loki.Mark.Consulta.Informacion.Correos.Interfaces;
+using Loki.Mark.Consulta.Informacion.Correos.Services;
+using Loki.Mark.Consulta.Informacion.Ofrecimientos.Services;
+using Loki.Mark.Consulta.Informacion.Ofrecimientos.DAOs;
+using Loki.Mark.Consulta.Informacion.Comentarios.DAOs;
+using Loki.Mark.Consulta.Informacion.Comentarios.Services;
 
 
 
@@ -275,11 +291,33 @@ builder.Services.AddScoped<IPlantillasCorreoService, PlantillasCorreoService>();
 builder.Services.AddScoped<IPlantillasCorreoDao, PlantillasCorreoDao>();
 builder.Services.AddScoped<IBusqueda, BusquedasService>();
 
+#region Información
 
 builder.Services.AddScoped<IPagosService, PagosService>();
 builder.Services.AddScoped<IPagosDAO, PagosDAO>();
+
+builder.Services.AddScoped<IPagosReportadosService, PagosReportadosService>();
+builder.Services.AddScoped<IPagosReportadosDAO, PagosReportadosDAO>();
+
+builder.Services.AddScoped<IDatosErroneosService, DatosErroneosService>();
+builder.Services.AddScoped<IDatosErroneosDAO, DatosErroneosDAO>();
+
+builder.Services.AddScoped<IDomiciliosService, DomiciliosService>();
+builder.Services.AddScoped<IDomiciliosDAO, DomiciliosDAO>();
+
+builder.Services.AddScoped<ICorreosService, CorreosService>();
+builder.Services.AddScoped<ICorreosDAO, CorreosDAO>();
+
+builder.Services.AddScoped<IOfrecimientosService, OfrecimientosService>();
+builder.Services.AddScoped<IOfrecimientosDAO, OfrecimientosDAO>();
+
+builder.Services.AddScoped<IComentariosService, ComentariosService>();
+builder.Services.AddScoped<IComentariosDAO, ComentariosDAO>();
+#endregion
+
+
 builder.Services.AddScoped<IQueryGeneratorService, QueryGeneratorService>();
-builder.Services.AddScoped<IConsultaConfigDAO, ConsultaConfigDAO>(); // <-- AÑADIR ESTA LÍNEA
+builder.Services.AddScoped<IConsultaConfigDAO, ConsultaConfigDAO>();
 
 builder.Services.AddScoped<EjecutivoDao>();
 
