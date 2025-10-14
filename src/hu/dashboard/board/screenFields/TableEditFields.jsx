@@ -213,7 +213,7 @@ useEffect(() => {
     );
   }
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm max-h-80 overflow-auto">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm max-h-72 overflow-auto">
       <div className="bg-background-secondary rounded-md grid grid-cols-12 gap-3 mb-4 py-2 px-3 font-semibold text-white text-sm">
         <div className="col-span-1">Position</div>
         <div className="col-span-3">Alias</div>

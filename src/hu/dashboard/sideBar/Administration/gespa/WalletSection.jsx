@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect} from "react";
 import LogoCoorin from "../../../../../assets/logo_coorin_7.svg";
 import CustomSelect from "../../../board/screenFields/SelectWallet";
 import { GetVerifyProduct } from "../../../../../services/mark/albaz/LokiServices";
@@ -52,7 +52,7 @@ const WalletSection = ({
   return (
     <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex justify-evenly items-center">
       <div>
-        <img src={LogoCoorin} alt="logo-conjur" className="h-20" />
+        <img src={LogoCoorin} alt="logo-conjur" className="h-10" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Select de Cartera */}

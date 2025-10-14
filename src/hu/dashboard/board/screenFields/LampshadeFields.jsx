@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
 import ModalHeader from "../../sideBar/Administration/gespa/ModalHeader";
-import WalletSection from "../../sideBar/Administration/gespa/WalletSection";
 import InfoSection from "./InfoSection";
 import TableEditFields from "./TableEditFields";
 import GridLampsFields from "./GridLampsFields";
@@ -8,10 +7,10 @@ import { IconScreens } from "../../sideBar/Administration/gespa/IconsTemplates";
 
 const LampshadeFields = ({ isOpen, onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [verifyResult, setVerifyResult] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
   const [fieldNames, setFieldNames] = useState([]);
+  const [verifyResult, setVerifyResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
    const handleRowSelect = useCallback((rowData) => {
     console.log("LampshadeFields - Fila seleccionada:", rowData);
@@ -70,16 +69,14 @@ const LampshadeFields = ({ isOpen, onClose }) => {
           icon={<IconScreens className="size-6" />}
           title="Campos Pantalla"
           onClose={onClose}
+          selectedProduct={selectedProduct}
+    setSelectedProduct={setSelectedProduct} // <-- ¡Verifica que esta línea sea idéntica!
+    verifyResult={verifyResult}
+    setVerifyResult={setVerifyResult}
+    loading={loading}
+    setLoading={setLoading}
         />
         <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
-          <WalletSection
-            selectedProduct={selectedProduct}
-            setSelectedProduct={setSelectedProduct}
-            verifyResult={verifyResult}
-            setVerifyResult={setVerifyResult}
-            loading={loading}
-            setLoading={setLoading}
-          />
           {memoizedInfoSection}
           {selectedProduct && selectedProduct.value !== 0 && (
             <>
