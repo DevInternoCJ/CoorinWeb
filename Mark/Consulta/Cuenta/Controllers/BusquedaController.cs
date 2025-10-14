@@ -36,38 +36,21 @@ namespace Loki.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SearchResultDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<SearchResultDto>> RealizarBusqueda([FromBody] SearchCriteriaDto criteria)
+     
+        public async Task<IActionResult> RealizarBusqueda([FromBody] SearchCriteriaDto criteria)
         {
-            // Valida el modelo recibido del cliente
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState); // Retorna errores de validación del modelo automáticamente
-            }
-
             try
             {
-                // Llama al servicio de búsquedas para ejecutar la lógica principal
                 var result = await _busquedasService.RealizarBusquedaAsync(criteria);
-
-                // Si el servicio ya ha detectado un error de negocio o de base de datos
-                if (result.EsError)
-                {
-                    // Puedes decidir si es un BadRequest (problema con la entrada del usuario)
-                    // o un InternalServerError (problema en el servidor).
-                    // Aquí lo manejamos como BadRequest si el servicio lo marca como error.
-                    return BadRequest(result);
-                }
-
-                // Si la búsqueda fue exitosa, devuelve el resultado con un código 200 OK
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                // Captura cualquier excepción no manejada en el servicio y la relanza.
-                // Tu middleware GlobalErrorHandler se encargará de loguearla y formatear la respuesta HTTP 500.
-                throw;
+                // Aquí puedes usar un middleware global para errores
+                return StatusCode(500, new { error = ex.Message });
             }
         }
+
 
         /// <summary>
         /// Permite la descarga de un archivo Excel previamente generado por una búsqueda de detalle.
@@ -82,27 +65,15 @@ namespace Loki.Controllers
         public IActionResult DownloadExcel([FromQuery] string filename)
         {
             if (string.IsNullOrWhiteSpace(filename))
-            {
-                return BadRequest("El nombre del archivo es obligatorio para la descarga.");
-            }
+                return BadRequest("El nombre del archivo es obligatorio.");
 
-            // Define la carpeta donde se guardan los archivos Excel exportados.
-            // ¡Asegúrate de que esta ruta coincida con la usada en ExcelGeneratorService!
-            string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports");
-            string filePath = Path.Combine(uploadsFolder, filename);
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports", filename);
 
-            // Verifica si el archivo existe en el servidor
             if (!System.IO.File.Exists(filePath))
-            {
-                return NotFound($"El archivo '{filename}' no fue encontrado en el servidor.");
-            }
+                return NotFound("El archivo no existe o ya fue eliminado.");
 
-            // Prepara el archivo para ser devuelto como un flujo de bytes
-            var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-
-            // Devuelve el archivo. El tipo de contenido (MediaTypeNames.Application.Octet) es un tipo genérico para datos binarios.
-            // Para archivos Excel XLSX, puedes usar "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".
-            return File(fileStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+            var fileBytes = System.IO.File.ReadAllBytes(filePath);
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
         }
 
         [HttpPost("guardar-consulta")]

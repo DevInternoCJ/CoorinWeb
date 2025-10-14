@@ -32,23 +32,24 @@ namespace Loki.Mark.Consulta.Cuenta.Services
 
         public async Task<SearchResultDto> RealizarBusquedaAsync(SearchCriteriaDto criteria)
         {
-            // Validaciones básicas de entrada
+            // === Validaciones básicas ===
             if (string.IsNullOrWhiteSpace(criteria.Servidor))
-            {
                 return new SearchResultDto { Mensaje = "El nombre del servidor es obligatorio.", EsError = true };
-            }
+
             if (criteria.IdCartera <= 0)
-            {
                 return new SearchResultDto { Mensaje = "El ID de la cartera es inválido.", EsError = true };
-            }
 
             DataTable tblParametros = ConvertParameterDtosToDataTable(criteria.Parametros);
             DataTable tblAgrupar = ConvertParameterDtosToDataTable(criteria.Agrupar);
 
-            Ejecutivo.Resultado conteoType = criteria.EsDetalleResultado ? Ejecutivo.Resultado.Detalle : Ejecutivo.Resultado.Contar;
+            CoorinWeb.Loki.Common.Resultado conteoType = criteria.EsDetalleResultado
+             ? CoorinWeb.Loki.Common.Resultado.Detalle
+             : CoorinWeb.Loki.Common.Resultado.Contar;
 
+
+            // === Construcción del query ===
             string sQuery = "WAITFOR DELAY '00:00:00'; USE dbCollection SET DATEFORMAT YMD \r\n" +
-                            _ejecutivoDao.PreparaQueryBusqueda(
+                           ConsultaGenerador.PreparaQueryBúsqueda(
                                 criteria.IdProducto,
                                 tblParametros,
                                 tblAgrupar,
@@ -57,14 +58,15 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                                 criteria.IdCartera
                             );
 
-            DataTable tblCuentas = new DataTable("Cuentas");
+            DataTable tblCuentas = new("Cuentas");
+
+            // === Ejecución SQL ===
             using (var sqlConnection = _dbContFactory.GetSqlConnection(criteria.Servidor, "Collection"))
             {
                 try
                 {
                     await sqlConnection.OpenAsync();
-                    // Usar Dapper para llenar el DataTable es más simple que SqlCommand manual para consultas
-                    // Se necesita el using Dapper al inicio del archivo para usar ExecuteReaderAsync
+
                     using (var reader = await sqlConnection.ExecuteReaderAsync(sQuery))
                     {
                         tblCuentas.Load(reader);
@@ -72,7 +74,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 }
                 catch (SqlException ex)
                 {
-                    // Delegar el manejo de errores al middleware global
                     throw new Exception($"Error en la base de datos al realizar la búsqueda: {ex.Message}", ex);
                 }
                 catch (Exception ex)
@@ -81,6 +82,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 }
             }
 
+            // === DETALLE (Excel export) ===
             if (criteria.EsDetalleResultado)
             {
                 if (tblCuentas.Rows.Count == 0)
@@ -92,94 +94,100 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                         TotalFilasEncontradas = 0
                     };
                 }
-                else
+
+                // Ruta destino
+                string fileName = $"Cuentas_{Guid.NewGuid():N}.xlsx";
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports");
+                Directory.CreateDirectory(uploadsFolder);
+                string filePath = Path.Combine(uploadsFolder, fileName);
+
+                // Exportar a Excel con el servicio global
+                string sResultado = _excelGeneratorService.ExportToExcelSAX(ref tblCuentas, filePath);
+                if (!string.IsNullOrEmpty(sResultado))
                 {
-                    string fileName = $"Cuentas_{Guid.NewGuid().ToString("N")}.xlsx";
-                    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports");
-                    if (!Directory.Exists(uploadsFolder))
-                    {
-                        Directory.CreateDirectory(uploadsFolder);
-                    }
-                    string filePath = Path.Combine(uploadsFolder, fileName);
-
-                    // === Usar el nuevo ExcelGeneratorService ===
-                    string sResultado = _excelGeneratorService.ExportToExcelSAX(ref tblCuentas, filePath);
-
-                    if (!string.IsNullOrEmpty(sResultado))
-                    {
-                        return new SearchResultDto { Mensaje = sResultado, EsError = true };
-                    }
-
-                    return new SearchResultDto
-                    {
-                        Mensaje = $"Consulta terminada. Libro de Excel generado con {tblCuentas.Rows.Count} cuentas.",
-                        EsError = false,
-                        RutaDescargaExcel = $"/api/busquedas/download-excel?filename={fileName}",
-                        TotalFilasEncontradas = tblCuentas.Rows.Count
-                    };
-                }
-            }
-            else // Resultado de Conteo
-            {
-                if (tblCuentas.Rows.Count == 0)
-                {
-                    return new SearchResultDto
-                    {
-                        Mensaje = "No se encontraron cuentas con dichos criterios.",
-                        EsError = false,
-                        TotalFilasEncontradas = 0,
-                        Datos = new List<Dictionary<string, object>>()
-                    };
-                }
-
-                // Lógica de ordenamiento y totales (asegúrate de que Funciones esté disponible)
-                string sSort = "";
-                for (int iCol = 2; iCol < tblCuentas.Columns.Count; iCol++)
-                {
-                    sSort += $"[{tblCuentas.Columns[iCol].ColumnName}],";
-                }
-                sSort += "Cuentas";
-                // Asumiendo que Funciones.ColumnaPorcentaje y Funciones.FilaTotales existen y funcionan con DataTable
-                // Si no existen, deberás implementarlas en una clase de utilidades o aquí mismo.
-                // Funciones.ColumnaPorcentaje(ref tblCuentas, "Cuentas");
-                // Funciones.ColumnaPorcentaje(ref tblCuentas, "Saldo");
-                // Funciones.FilaTotales(ref tblCuentas);
-
-                var datosResultado = new List<Dictionary<string, object>>();
-                foreach (DataRow row in tblCuentas.Rows)
-                {
-                    var item = new Dictionary<string, object>();
-                    foreach (DataColumn col in tblCuentas.Columns)
-                    {
-                        item[col.ColumnName] = row[col];
-                    }
-                    datosResultado.Add(item);
+                    return new SearchResultDto { Mensaje = sResultado, EsError = true };
                 }
 
                 return new SearchResultDto
                 {
-                    Mensaje = "Búsqueda terminada.",
+                    Mensaje = $"Consulta terminada. Libro de Excel generado con {tblCuentas.Rows.Count} cuentas.",
                     EsError = false,
-                    TotalFilasEncontradas = tblCuentas.Rows.Count,
-                    Datos = datosResultado
+                    RutaDescargaExcel = $"/api/busquedas/download-excel?filename={fileName}",
+                    TotalFilasEncontradas = tblCuentas.Rows.Count
                 };
             }
+
+            // === CONTEO (resumen con totales) ===
+            if (tblCuentas.Rows.Count == 0)
+            {
+                return new SearchResultDto
+                {
+                    Mensaje = "No se encontraron cuentas con dichos criterios.",
+                    EsError = false,
+                    TotalFilasEncontradas = 0,
+                    Datos = new List<Dictionary<string, object>>()
+                };
+            }
+
+            // === Ordenamiento ===
+            string sSort = "";
+            for (int iCol = 2; iCol < tblCuentas.Columns.Count; iCol++)
+                sSort += $"[{tblCuentas.Columns[iCol].ColumnName}],";
+            sSort += "Cuentas";
+
+            tblCuentas.DefaultView.Sort = sSort;
+            tblCuentas = tblCuentas.DefaultView.ToTable();
+
+            // === Totales ===
+            try
+            {
+                Funciones.ColumnaPorcentaje(ref tblCuentas, "Cuentas");
+                Funciones.ColumnaPorcentaje(ref tblCuentas, "Saldo");
+                Funciones.FilaTotales(ref tblCuentas);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Advertencia: no se pudieron calcular los totales: {ex.Message}");
+            }
+
+            // === Convertir DataTable a lista de diccionarios ===
+            var datosResultado = new List<Dictionary<string, object>>();
+            foreach (DataRow row in tblCuentas.Rows)
+            {
+                var item = new Dictionary<string, object>();
+                foreach (DataColumn col in tblCuentas.Columns)
+                {
+                    item[col.ColumnName] = row[col];
+                }
+                datosResultado.Add(item);
+            }
+
+            return new SearchResultDto
+            {
+                Mensaje = "Búsqueda terminada.",
+                EsError = false,
+                TotalFilasEncontradas = tblCuentas.Rows.Count,
+                Datos = datosResultado
+            };
         }
 
-        private DataTable ConvertParameterDtosToDataTable(List<ParameterDto> parameters)
+        // === 🔸 Helper privado para convertir parámetros ===
+        private DataTable ConvertParameterDtosToDataTable(IEnumerable<ParameterDto> parametros)
         {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Concepto", typeof(string));
-            dt.Columns.Add("Campo", typeof(string));
-            dt.Columns.Add("Valores", typeof(string));
-            dt.Columns.Add("Parámetros", typeof(string));
-            dt.Columns.Add("Dato", typeof(string));
+            var table = new DataTable();
+            table.Columns.Add("Concepto", typeof(string));
+            table.Columns.Add("Campo", typeof(string));
+            table.Columns.Add("Signo", typeof(string));
+            table.Columns.Add("Valor", typeof(string));
 
-            foreach (var p in parameters)
+            if (parametros == null) return table;
+
+            foreach (var p in parametros)
             {
-                dt.Rows.Add(p.Concepto, p.Campo, p.Valor, p.Simbolo, p.Dato);
+                table.Rows.Add(p.Concepto, p.Campo, p.Signo, p.Valor);
             }
-            return dt;
+
+            return table;
         }
 
         // Si estas clases son parte de tu proyecto, elimínalas de aquí.
@@ -190,17 +198,10 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             public static void FilaTotales(ref DataTable table) { /* Implementación real */ }
         }
 
+
+        //guardar eliminar consulta
         public async Task<string> GuardarConsulta(
-          int idConsulta,
-          string nombreConsulta,
-          int idProducto,
-          int idCartera,
-          DataTable parametros,
-          DataTable agrupar,
-          DateTime desde,
-          int idEjecutivo,
-          string servidor,
-          string tipoBase)
+          int idConsulta,string nombreConsulta, int idProducto,int idCartera,DataTable parametros,DataTable agrupar, DateTime desde, int idEjecutivo,string servidor,string tipoBase)
         {
             try
             {
