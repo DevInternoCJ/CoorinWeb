@@ -8,21 +8,47 @@ const DropdownArrow = () => (
     </span>
 );
 
-const ModalConsultaCuentasFiltros = () => {
+const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions }) => {
     const [cuenta, setCuenta] = useState("cuenta1");
     const [situacion, setSituacion] = useState("situacion1");
     const [operador, setOperador] = useState("=");
     const [niegan, setNiegan] = useState("niegan1");
 
+    const situacionOptions = [
+        { value: "situacion1", label: "Situación 1" },
+        { value: "situacion2", label: "Situación 2" },
+        { value: "situacion3", label: "Situación 3" },
+        { value: "situacion4", label: "Situación 4" }
+    ];
+
+    // Función para obtener la opción seleccionada
+    const getSelectedSituacion = () => {
+        return situacionOptions.find(option => option.value === situacion);
+    };
+
+    React.useEffect(() => {
+        if (onGetSituacionOptions) {
+            const selectedOption = getSelectedSituacion();
+            if (selectedOption) {
+                onGetSituacionOptions([selectedOption]); // Enviar solo la seleccionada como array
+            }
+        }
+    }, [situacion, onGetSituacionOptions]); // Actualizar cuando cambie la situación seleccionada
+
     return (
         <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col" style={{ minWidth: 0 }}>
-            <span className="modal-span-1 pl-1 mr-4" style={{ color: "var(--color-jerarquia2)" }}>Filtros</span>
+            <div className="flex items-center justify-between mb-2">
+                <span className="modal-span-1 pl-1 mr-4" style={{ color: "var(--color-jerarquia2)" }}>Filtros</span>
+                <button className="btn-success">
+                    Agregar
+                </button>
+            </div>
             {/* Selects en columnas y responsivo */}
             <div className="flex flex-col sm:flex-row items-stretch gap-2 mb-2 w-full">
                 {/* Cuenta */}
                 <div className="relative flex-1">
                     <select
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
+                        className="peer p-4 pe-9 block w-full bg-gray-100 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
                             focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         value={cuenta}
                         onChange={e => setCuenta(e.target.value)}
@@ -44,15 +70,16 @@ const ModalConsultaCuentasFiltros = () => {
                 {/* Situación */}
                 <div className="relative flex-1">
                     <select
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
+                        className="peer p-4 pe-9 block w-full bg-gray-100 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
                             focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         value={situacion}
                         onChange={e => setSituacion(e.target.value)}
                         id="situacion-select"
                     >
                         <option value="" disabled hidden></option>
-                        <option value="situacion1">Situación 1</option>
-                        <option value="situacion2">Situación 2</option>
+                        {situacionOptions.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
                     </select>
                     <label
                         htmlFor="situacion-select"
@@ -66,7 +93,7 @@ const ModalConsultaCuentasFiltros = () => {
                 {/* Operador */}
                 <div className="relative flex-1">
                     <select
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
+                        className="peer p-4 pe-9 block w-full bg-gray-100 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
                             focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 font-bold"
                         value={operador}
                         onChange={e => setOperador(e.target.value)}
@@ -87,7 +114,7 @@ const ModalConsultaCuentasFiltros = () => {
                 {/* Niegan Acreditado */}
                 <div className="relative flex-1">
                     <select
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
+                        className="peer p-4 pe-9 block w-full bg-gray-100 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
                             focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         value={niegan}
                         onChange={e => setNiegan(e.target.value)}
@@ -107,11 +134,7 @@ const ModalConsultaCuentasFiltros = () => {
                     </label>
                 </div>
             </div>
-            <div className="flex justify-end mb-2">
-                <button className="btn-success">
-                    Agregar
-                </button>
-            </div>
+           
             <div
                 style={{
                     overflowX: "auto",
