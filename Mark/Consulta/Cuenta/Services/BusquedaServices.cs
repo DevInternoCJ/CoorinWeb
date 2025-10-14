@@ -32,12 +32,12 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         }
 
         public async Task<SearchResultDto> RealizaBusqueda(
-     int idProducto,
-     int idCartera,
-     string servidor,
-     bool esDetalleResultado,
-     int? idConsulta = null,
-     IEnumerable<ParametroDto>? parametrosExtra = null)
+         int idProducto,
+         int idCartera,
+         string servidor,
+         bool esDetalleResultado,
+         int? idConsulta = null,
+         IEnumerable<ParametroDto>? parametrosExtra = null)
         {
             try
             {
@@ -62,8 +62,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     // Parámetro básico de cartera
                     tblParametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
 
-                    // Si tu consulta tiene otros parámetros guardados, aquí los puedes agregar
-                    // Ejemplo: foreach(var p in consultaRow["Parametros"]) { tblParametros.Rows.Add(...); }
+                 
                 }
                 else
                 {
@@ -165,13 +164,117 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             }
         }
 
-        // Si estas clases son parte de tu proyecto, elimínalas de aquí.
-        // Solo las incluí para que el código compilara antes.
-        private class Funciones
+        public static class Funciones
         {
-            public static void ColumnaPorcentaje(ref DataTable table, string columnName) { /* Implementación real */ }
-            public static void FilaTotales(ref DataTable table) { /* Implementación real */ }
+            //  Agrega columna de porcentaje (solo si la columna es numérica)
+            public static void ColumnaPorcentaje(ref DataTable tblTabla, string NombreColumna)
+            {
+                if (!tblTabla.Columns.Contains(NombreColumna))
+                    return;
+
+                DataColumn col = tblTabla.Columns[NombreColumna];
+
+                // Solo permitir columnas numéricas
+                if (col.DataType != typeof(int) && col.DataType != typeof(double) && col.DataType != typeof(decimal))
+                    return;
+
+                string sTotal = tblTabla.Compute("SUM([" + NombreColumna + "])", "").ToString();
+                double total = string.IsNullOrEmpty(sTotal) ? 0 : Convert.ToDouble(sTotal);
+
+
+                string nuevaColumna = NombreColumna + " %";
+                if (!tblTabla.Columns.Contains(nuevaColumna))
+                {
+                    tblTabla.Columns.Add(
+                        nuevaColumna,
+                        typeof(double),
+                        total == 0 ? "0" : NombreColumna + " / " + total + " * 100"
+                    );
+                }
+            }
+
+            // (divide entre 2, multiplica por 100)
+            public static void ColumnaPorcentaje2(ref DataTable tblTabla, string NombreColumna)
+            {
+                if (!tblTabla.Columns.Contains(NombreColumna))
+                    return;
+
+                DataColumn col = tblTabla.Columns[NombreColumna];
+                if (col.DataType != typeof(int) && col.DataType != typeof(double) && col.DataType != typeof(decimal))
+                    return;
+
+                string sTotal = tblTabla.Compute("SUM([" + NombreColumna + "])", "").ToString();
+                double total = string.IsNullOrEmpty(sTotal) ? 0 : Convert.ToDouble(sTotal) / 2;
+
+                string nuevaColumna = NombreColumna + " %";
+                if (!tblTabla.Columns.Contains(nuevaColumna))
+                {
+                    tblTabla.Columns.Add(
+                        nuevaColumna,
+                        typeof(double),
+                        total == 0 ? "0" : NombreColumna + " / " + total + " * 100"
+                    );
+                }
+            }
+
+            // Agregar fila de totales (solo suma columnas numéricas)
+            public static void FilaTotales(ref DataTable tblTabla)
+            {
+                if (tblTabla.Rows.Count == 0) return;
+
+                DataRow totalRow = tblTabla.NewRow();
+
+                foreach (DataColumn col in tblTabla.Columns)
+                {
+                    if (col.DataType == typeof(int) || col.DataType == typeof(double) || col.DataType == typeof(decimal))
+                    {
+                        totalRow[col.ColumnName] = tblTabla.Compute("SUM([" + col.ColumnName + "])", "");
+                    }
+                    else
+                    {
+                        totalRow[col.ColumnName] = DBNull.Value; // Evita errores con strings o fechas
+                    }
+                }
+
+                tblTabla.Rows.Add(totalRow);
+            }
+
+            // Ordenar DataTable dinámicamente
+            public static void OrdenarTabla(ref DataTable tblTabla)
+            {
+                if (tblTabla.Columns.Count < 2) return;
+
+                string sSort = "";
+
+                // Construye orden dinámico (omite columnas que no existen)
+                for (int iCol = 2; iCol < tblTabla.Columns.Count; iCol++)
+                    sSort += "[" + tblTabla.Columns[iCol].ColumnName + "],";
+
+                // Usa "Cuenta" si existe (evita error si no)
+                if (tblTabla.Columns.Contains("Cuenta"))
+                    sSort += "[Cuenta]";
+                else if (tblTabla.Columns.Contains("Cuentas"))
+                    sSort += "[Cuentas]";
+                else
+                    sSort = sSort.TrimEnd(',');
+
+                tblTabla.DefaultView.Sort = sSort;
+                tblTabla = tblTabla.DefaultView.ToTable();
+            }
+
+            // Detecta automáticamente columnas numéricas y agrega % a todas
+            public static void AgregarPorcentajesAutomaticos(ref DataTable tblTabla)
+            {
+                foreach (DataColumn col in tblTabla.Columns)
+                {
+                    if (col.DataType == typeof(int) || col.DataType == typeof(double) || col.DataType == typeof(decimal))
+                    {
+                        ColumnaPorcentaje(ref tblTabla, col.ColumnName);
+                    }
+                }
+            }
         }
+
 
 
         //guardar eliminar consulta

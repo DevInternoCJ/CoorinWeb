@@ -33,6 +33,11 @@ namespace Loki.Controllers
         /// <param name="criteria">DTO con los criterios de búsqueda (filtros, agrupaciones, tipo de resultado, etc.).</param>
         /// <returns>Un SearchResultDto con el mensaje de resultado, datos (si es conteo) o ruta de descarga (si es detalle).</returns>
         [HttpPost("realizar-busqueda")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "realizar busqueda - irene",
+            Description = "realiza una busqueda por medio de idconsulta o parametros y agrupamientos"
+            )]
         public async Task<IActionResult> RealizarBusqueda([FromBody] SearchCriteriaDto criteria)
         {
             try
@@ -69,6 +74,11 @@ namespace Loki.Controllers
         /// <param name="filename">El nombre del archivo Excel a descargar (sin ruta, solo el nombre).</param>
         /// <returns>El archivo Excel como un flujo de bytes para descarga.</returns>
         [HttpGet("download-excel")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "descargar excel - Ramón",
+            Description = "descarga en un excel los datos obtenidos de la busqueda"
+            )]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
