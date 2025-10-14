@@ -36,20 +36,36 @@ namespace Loki.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SearchResultDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-     
+
         public async Task<IActionResult> RealizarBusqueda([FromBody] SearchCriteriaDto criteria)
         {
             try
             {
-                var result = await _busquedasService.RealizarBusquedaAsync(criteria);
+                // Validaciones básicas
+                if (criteria.IdProducto == null || criteria.IdCartera == null)
+                    return BadRequest(new { error = "Debe proporcionar IdProducto y IdCartera." });
+
+                // 🔹 Obtener servidor desde el token
+                string? servidorClaim = User.FindFirst("Servidor")?.Value;
+                if (string.IsNullOrWhiteSpace(servidorClaim))
+                    return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+
+                // 🔹 Llamar al servicio con el servidor incluido
+                var result = await _busquedasService.RealizaBusqueda(
+                    criteria.IdProducto,
+                    criteria.IdCartera,
+                    servidorClaim
+                );
+
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                // Aquí puedes usar un middleware global para errores
+                // 🔹 Manejo centralizado de errores
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+
 
 
         /// <summary>

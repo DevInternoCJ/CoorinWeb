@@ -30,164 +30,106 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             this._accionamientosQueryHelper = accionamientosQueryHelper;
         }
 
-        public async Task<SearchResultDto> RealizarBusquedaAsync(SearchCriteriaDto criteria)
+        public async Task<SearchResultDto> RealizaBusqueda(object idProducto, object idCartera, string servidor)
         {
-            // === Validaciones básicas ===
-            if (string.IsNullOrWhiteSpace(criteria.Servidor))
-                return new SearchResultDto { Mensaje = "El nombre del servidor es obligatorio.", EsError = true };
-
-            if (criteria.IdCartera <= 0)
-                return new SearchResultDto { Mensaje = "El ID de la cartera es inválido.", EsError = true };
-
-            DataTable tblParametros = ConvertParameterDtosToDataTable(criteria.Parametros);
-            DataTable tblAgrupar = ConvertParameterDtosToDataTable(criteria.Agrupar);
-
-            CoorinWeb.Loki.Common.Resultado conteoType = criteria.EsDetalleResultado
-             ? CoorinWeb.Loki.Common.Resultado.Detalle
-             : CoorinWeb.Loki.Common.Resultado.Contar;
-
-
-            // === Construcción del query ===
-            string sQuery = "WAITFOR DELAY '00:00:00'; USE dbCollection SET DATEFORMAT YMD \r\n" +
-                           ConsultaGenerador.PreparaQueryBúsqueda(
-                                criteria.IdProducto,
-                                tblParametros,
-                                tblAgrupar,
-                                conteoType,
-                                criteria.DesdeFecha,
-                                criteria.IdCartera
-                            );
-
-            DataTable tblCuentas = new("Cuentas");
-
-            // === Ejecución SQL ===
-            using (var sqlConnection = _dbContFactory.GetSqlConnection(criteria.Servidor, "Collection"))
+            try
             {
-                try
+                // Cargar consultas desde BD si aún no se han cargado
+                await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidor);
+
+                var tblParametros = AccionamientosQueryHelper.Ejecutivo1.TablaParámetros;
+                var tblAgrupar = AccionamientosQueryHelper.Ejecutivo1.TablaAgrupar;
+
+                tblParametros.Rows.Clear();
+                tblAgrupar.Rows.Clear();
+
+                // Asignar idCartera como parámetro
+                tblParametros.Rows.Add("idCartera", "=", idCartera?.ToString(), "AND", "int");
+
+                DateTime desde = DateTime.Today.AddMonths(-1);
+
+                // Generar el query
+                string sQuery = "WAITFOR DELAY '00:00:00'; USE dbCollection SET DATEFORMAT YMD \r\n" +
+                                ConsultaGenerador.PreparaQueryBúsqueda(
+                                    Convert.ToInt32(idProducto),
+                                    tblParametros,
+                                    tblAgrupar,
+                                    Resultado.Cuentas,
+                                    desde,
+                                    Convert.ToInt32(idCartera)
+                                );
+
+                // === 🔹 Logger para inspeccionar el query ===
+                Console.WriteLine("===== QUERY GENERADO =====");
+                Console.WriteLine(sQuery);
+                Console.WriteLine("=========================");
+
+                DataTable tblCuentas = new("Cuentas");
+
+                using (var sqlConnection = _dbContFactory.GetSqlConnection(servidor, "Collection"))
                 {
                     await sqlConnection.OpenAsync();
-
                     using (var reader = await sqlConnection.ExecuteReaderAsync(sQuery))
                     {
                         tblCuentas.Load(reader);
                     }
                 }
-                catch (SqlException ex)
+
+                // === Exportar a Excel ===
+                string rutaExcel = null;
+                if (tblCuentas.Rows.Count > 0)
                 {
-                    throw new Exception($"Error en la base de datos al realizar la búsqueda: {ex.Message}", ex);
+                    string fileName = $"Cuentas_{Guid.NewGuid():N}.xlsx";
+                    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports");
+                    Directory.CreateDirectory(uploadsFolder);
+                    string filePath = Path.Combine(uploadsFolder, fileName);
+
+                    string sResultado = _excelGeneratorService.ExportToExcelSAX(ref tblCuentas, filePath);
+                    if (!string.IsNullOrEmpty(sResultado))
+                    {
+                        return new SearchResultDto { Mensaje = sResultado, EsError = true };
+                    }
+
+                    rutaExcel = $"/api/busquedas/download-excel?filename={fileName}";
+                }
+
+                try
+                {
+                    Funciones.ColumnaPorcentaje(ref tblCuentas, "Cuentas");
+                    Funciones.ColumnaPorcentaje(ref tblCuentas, "Saldo");
+                    Funciones.FilaTotales(ref tblCuentas);
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"Error inesperado al ejecutar la consulta: {ex.Message}", ex);
-                }
-            }
-
-            // === DETALLE (Excel export) ===
-            if (criteria.EsDetalleResultado)
-            {
-                if (tblCuentas.Rows.Count == 0)
-                {
-                    return new SearchResultDto
-                    {
-                        Mensaje = "Consulta terminada. Ninguna cuenta obtenida de la consulta.",
-                        EsError = false,
-                        TotalFilasEncontradas = 0
-                    };
+                    Console.WriteLine($"Advertencia: no se pudieron calcular los totales: {ex.Message}");
                 }
 
-                // Ruta destino
-                string fileName = $"Cuentas_{Guid.NewGuid():N}.xlsx";
-                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports");
-                Directory.CreateDirectory(uploadsFolder);
-                string filePath = Path.Combine(uploadsFolder, fileName);
-
-                // Exportar a Excel con el servicio global
-                string sResultado = _excelGeneratorService.ExportToExcelSAX(ref tblCuentas, filePath);
-                if (!string.IsNullOrEmpty(sResultado))
+                var datosResultado = new List<Dictionary<string, object>>();
+                foreach (DataRow row in tblCuentas.Rows)
                 {
-                    return new SearchResultDto { Mensaje = sResultado, EsError = true };
+                    var item = new Dictionary<string, object>();
+                    foreach (DataColumn col in tblCuentas.Columns)
+                        item[col.ColumnName] = row[col];
+                    datosResultado.Add(item);
                 }
 
                 return new SearchResultDto
                 {
-                    Mensaje = $"Consulta terminada. Libro de Excel generado con {tblCuentas.Rows.Count} cuentas.",
+                    Mensaje = "Búsqueda terminada.",
                     EsError = false,
-                    RutaDescargaExcel = $"/api/busquedas/download-excel?filename={fileName}",
-                    TotalFilasEncontradas = tblCuentas.Rows.Count
+                    TotalFilasEncontradas = tblCuentas.Rows.Count,
+                    Datos = datosResultado,
+                    RutaDescargaExcel = rutaExcel
                 };
-            }
-
-            // === CONTEO (resumen con totales) ===
-            if (tblCuentas.Rows.Count == 0)
-            {
-                return new SearchResultDto
-                {
-                    Mensaje = "No se encontraron cuentas con dichos criterios.",
-                    EsError = false,
-                    TotalFilasEncontradas = 0,
-                    Datos = new List<Dictionary<string, object>>()
-                };
-            }
-
-            // === Ordenamiento ===
-            string sSort = "";
-            for (int iCol = 2; iCol < tblCuentas.Columns.Count; iCol++)
-                sSort += $"[{tblCuentas.Columns[iCol].ColumnName}],";
-            sSort += "Cuentas";
-
-            tblCuentas.DefaultView.Sort = sSort;
-            tblCuentas = tblCuentas.DefaultView.ToTable();
-
-            // === Totales ===
-            try
-            {
-                Funciones.ColumnaPorcentaje(ref tblCuentas, "Cuentas");
-                Funciones.ColumnaPorcentaje(ref tblCuentas, "Saldo");
-                Funciones.FilaTotales(ref tblCuentas);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Advertencia: no se pudieron calcular los totales: {ex.Message}");
-            }
-
-            // === Convertir DataTable a lista de diccionarios ===
-            var datosResultado = new List<Dictionary<string, object>>();
-            foreach (DataRow row in tblCuentas.Rows)
-            {
-                var item = new Dictionary<string, object>();
-                foreach (DataColumn col in tblCuentas.Columns)
+                return new SearchResultDto
                 {
-                    item[col.ColumnName] = row[col];
-                }
-                datosResultado.Add(item);
+                    Mensaje = $"Error al realizar la búsqueda: {ex.Message}",
+                    EsError = true
+                };
             }
-
-            return new SearchResultDto
-            {
-                Mensaje = "Búsqueda terminada.",
-                EsError = false,
-                TotalFilasEncontradas = tblCuentas.Rows.Count,
-                Datos = datosResultado
-            };
-        }
-
-        // === 🔸 Helper privado para convertir parámetros ===
-        private DataTable ConvertParameterDtosToDataTable(IEnumerable<ParameterDto> parametros)
-        {
-            var table = new DataTable();
-            table.Columns.Add("Concepto", typeof(string));
-            table.Columns.Add("Campo", typeof(string));
-            table.Columns.Add("Signo", typeof(string));
-            table.Columns.Add("Valor", typeof(string));
-
-            if (parametros == null) return table;
-
-            foreach (var p in parametros)
-            {
-                table.Rows.Add(p.Concepto, p.Campo, p.Signo, p.Valor);
-            }
-
-            return table;
         }
 
         // Si estas clases son parte de tu proyecto, elimínalas de aquí.
