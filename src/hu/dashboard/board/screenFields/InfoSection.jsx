@@ -2,123 +2,128 @@ import React, { useEffect, useState } from "react";
 import { ShowFieldScreen } from "../../../../services/mark/albaz/LokiServices";
 import useSelectedRowStore from "./selectedRowStore";
 
-const InfoSection = ({ idProducto, fieldNames = [] }) => {
+const InfoSection = ({
+  idProducto,
+  fieldNames = { fieldNames: [], aliasNames: [] },
+}) => {
   // ✅ Recibir fieldNames como prop
   const [infoData, setInfoData] = useState(null);
   const [defaultData, setDefaultData] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // ✅ Usar el store de Zustand
   const { selectedRowData, selectedRowIndex } = useSelectedRowStore();
+  const camposArray = fieldNames.fieldNames || [];
+  const aliasArray = fieldNames.aliasNames || [];
 
-  // ✅ DEBUG: Verificar qué está llegando
-  console.log("InfoSection - Props recibidas:", {
-    idProducto,
-    fieldNames,
-    fieldNamesCount: fieldNames.length,
-    selectedRowData: !!selectedRowData,
-    selectedRowIndex,
-  });
-  // Cargar datos por defecto una vez
+  // En el useEffect que carga datos por defecto (PARA ASEGURAR QUE DEFAULTDATA SEA UN ARRAY ORDENADO)
   useEffect(() => {
     if (!idProducto) return;
-
     const fetchDefaultInfo = async () => {
       try {
         setLoading(true);
         const response = await ShowFieldScreen(idProducto);
-        console.log("InfoSection - Datos por defecto:", response);
-        setDefaultData(response);
-        setInfoData(response);
+        console.log(
+          "InfoSection - Datos por defecto (Objeto original):",
+          response
+        );
+
+        // ✅ CAMBIO 1: Convertir la respuesta inicial (objeto) a un Array de objetos
+        const initialArrayData = Object.keys(response).map((key, index) => ({
+          originalKey: key, // Clave estática original (para referencia)
+          label: response[key].alias || key, // Usar la clave original como etiqueta inicial
+          valueObject: response[key],
+          orderIndex: index, // Guardamos el índice original
+        }));
+
+        setDefaultData(initialArrayData); // Guardamos el array ordenado como defaultData
+        setInfoData(initialArrayData); // Usamos el array ordenado como infoData inicial
       } catch (error) {
-        console.error("Error fetching default info:", error);
-        setDefaultData(null);
-        setInfoData(null);
+        // ... (manejo de error)
       } finally {
         setLoading(false);
       }
     };
-
     fetchDefaultInfo();
   }, [idProducto]);
 
- const processFieldValue = (fieldName, rowData) => {
-  if (!fieldName || !rowData) {
-    console.log(`processFieldValue - Datos faltantes: fieldName=${fieldName}, rowData=`, rowData);
-    return "N/A";
-  }
-  
-  console.log(`Procesando fieldName: "${fieldName}"`);
-  
-  // ✅ MEJORA: Manejar múltiples campos separados por ; o \
-  if (fieldName.includes('[') && fieldName.includes(']')) {
-    const regex = /\[(.*?)\]/g;
-    let processedValue = fieldName;
-    let match;
-    let replacements = [];
-    
-    while ((match = regex.exec(fieldName)) !== null) {
-      const fieldInBrackets = match[1];
-      const actualValue = findValueInRow(rowData, fieldInBrackets);
-      const formattedValue = formatValue(actualValue, fieldInBrackets);
-      
-      console.log(`Reemplazando [${fieldInBrackets}] con:`, formattedValue, "(valor crudo:", actualValue, ")");
-      
-      // ✅ CORRECCIÓN: Reemplazar SIEMPRE, incluso si es "N/A" o vacío
-      processedValue = processedValue.replace(
-        `[${fieldInBrackets}]`, 
+  const processFieldValue = (fieldName, rowData) => {
+    if (!fieldName || !rowData) {
+      console.log(
+        `processFieldValue - Datos faltantes: fieldName=${fieldName}, rowData=`,
+        rowData
+      );
+      return "N/A";
+    }
+
+    console.log(`Procesando fieldName: "${fieldName}"`);
+    // ✅ MEJORA: Manejar múltiples campos separados por ; o \
+    if (fieldName.includes("[") && fieldName.includes("]")) {
+      const regex = /\[(.*?)\]/g;
+      let processedValue = fieldName;
+      let match;
+      let replacements = [];
+      while ((match = regex.exec(fieldName)) !== null) {
+        const fieldInBrackets = match[1];
+        const actualValue = findValueInRow(rowData, fieldInBrackets);
+        const formattedValue = formatValue(actualValue, fieldInBrackets);
+        console.log(
+          `Reemplazando [${fieldInBrackets}] con:`,
+          formattedValue,
+          "(valor crudo:",
+          actualValue,
+          ")"
+        );
+        // ✅ CORRECCIÓN: Reemplazar SIEMPRE, incluso si es "N/A" o vacío
+        processedValue = processedValue.replace(
+          `[${fieldInBrackets}]`,
+          formattedValue
+        );
+
+        if (formattedValue !== "N/A" && formattedValue !== "") {
+          replacements.push(formattedValue);
+        }
+      }
+      // ✅ MEJORA: Si después del reemplazo solo quedan caracteres especiales, limpiar
+      const cleanValue = processedValue.replace(/\[\];\\?]/g, "").trim();
+      if (cleanValue === "") {
+        if (replacements.length > 0) {
+          processedValue = replacements[0];
+        } else {
+          processedValue = ""; // ✅ Devolver string vacío en lugar de "N/A"
+        }
+      } else {
+        processedValue = cleanValue;
+      }
+      console.log(`Resultado procesado: "${processedValue}"`);
+      return processedValue;
+    } else {
+      // Si es un fieldName directo, buscar el valor
+      const value = findValueInRow(rowData, fieldName);
+      const formattedValue = formatValue(value, fieldName);
+      console.log(
+        `FieldName directo "${fieldName}" -> valor:`,
+        value,
+        "formateado:",
         formattedValue
       );
-      
-      if (formattedValue !== "N/A" && formattedValue !== "") {
-        replacements.push(formattedValue);
-      }
+      return formattedValue;
     }
-    
-    // ✅ MEJORA: Si después del reemplazo solo quedan caracteres especiales, limpiar
-    const cleanValue = processedValue.replace(/\[\];\\?]/g, '').trim();
-    
-    // ✅ CORRECCIÓN: Si queda vacío después de limpiar caracteres especiales
-    if (cleanValue === '') {
-      if (replacements.length > 0) {
-        processedValue = replacements[0];
-      } else {
-        processedValue = ""; // ✅ Devolver string vacío en lugar de "N/A"
-      }
-    } else {
-      processedValue = cleanValue;
-    }
-    
-    console.log(`Resultado procesado: "${processedValue}"`);
-    return processedValue;
-  } else {
-    // Si es un fieldName directo, buscar el valor
-    const value = findValueInRow(rowData, fieldName);
-    const formattedValue = formatValue(value, fieldName);
-    console.log(`FieldName directo "${fieldName}" -> valor:`, value, "formateado:", formattedValue);
-    return formattedValue;
-  }
-};
-
+  };
   // ✅ Función para buscar valores en la fila seleccionada
   const findValueInRow = (rowData, fieldName) => {
     if (!rowData || !fieldName) {
       console.log(`findValueInRow - Datos faltantes: fieldName=${fieldName}`);
       return "";
     }
-
     // Buscar coincidencia exacta primero
     if (rowData.hasOwnProperty(fieldName)) {
       const value = rowData[fieldName];
       console.log(`Coincidencia exacta encontrada para "${fieldName}":`, value);
       return value;
     }
-
     // Buscar coincidencia case insensitive
     const key = Object.keys(rowData).find(
       (k) => k.toLowerCase() === fieldName.toLowerCase()
     );
-
     if (key) {
       const value = rowData[key];
       console.log(
@@ -127,127 +132,131 @@ const InfoSection = ({ idProducto, fieldNames = [] }) => {
       );
       return value;
     }
-
     console.log(`No se encontró coincidencia para "${fieldName}"`);
     return "";
   };
 
- // ✅ MEJORAR la función formatValue para devolver "" en lugar de "N/A" cuando sea apropiado
-const formatValue = (value, fieldName = "") => {
-  if (value === null || value === "NULL" || value === undefined) {
-    return ""; // ✅ Cambiar a string vacío en lugar de "N/A"
-  }
-  
-  if (value === "" || value === " ") {
-    return ""; // ✅ Mantener string vacío
-  }
-  
-  // Detectar campos monetarios por nombre
-  const isMonetaryField = fieldName.toLowerCase().includes('balance') || 
-                         fieldName.toLowerCase().includes('saldo') ||
-                         fieldName.toLowerCase().includes('amount') ||
-                         fieldName.toLowerCase().includes('monto') ||
-                         fieldName.toLowerCase().includes('pago') ||
-                         fieldName.toLowerCase().includes('income');
-  
-  if (isMonetaryField) {
-    const numValue = typeof value === 'string' ? parseFloat(value) : value;
-    if (!isNaN(numValue) && numValue !== 0) {
-      return `$${numValue.toLocaleString("es-MX", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })}`;
+  // ✅ MEJORAR la función formatValue para devolver "" en lugar de "N/A" cuando sea apropiado
+  const formatValue = (value, fieldName = "") => {
+    if (value === null || value === "NULL" || value === undefined) {
+      return ""; // ✅ Cambiar a string vacío en lugar de "N/A"
     }
-    return ""; // ✅ Si no es un número válido, devolver vacío
-  }
-  
-  // Formatear números
-  if (typeof value === "number") {
-    return value.toLocaleString("es-MX", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  }
-  
-  // Manejar valores booleanos o específicos
-  if (value === true) return "Sí";
-  if (value === false) return "No";
-  if (value === "Yes") return "Sí";
-  if (value === "No") return "No";
-  
-  return value.toString().trim();
-};
+    if (value === "" || value === " ") {
+      return ""; // ✅ Mantener string vacío
+    }
+    // Detectar campos monetarios por nombre
+    const isMonetaryField =
+      fieldName.toLowerCase().includes("balance") ||
+      fieldName.toLowerCase().includes("saldo") ||
+      fieldName.toLowerCase().includes("amount") ||
+      fieldName.toLowerCase().includes("monto") ||
+      fieldName.toLowerCase().includes("pago") ||
+      fieldName.toLowerCase().includes("income");
 
-  // En el useEffect de InfoSection.jsx - AGREGAR más logging
+    if (isMonetaryField) {
+      const numValue = typeof value === "string" ? parseFloat(value) : value;
+      if (!isNaN(numValue) && numValue !== 0) {
+        return `$${numValue.toLocaleString("es-MX", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`;
+      }
+      return ""; // ✅ Si no es un número válido, devolver vacío
+    }
+    // Formatear números
+    if (typeof value === "number") {
+      return value.toLocaleString("es-MX", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+    // Manejar valores booleanos o específicos
+    if (value === true) return "Sí";
+    if (value === false) return "No";
+    if (value === "Yes") return "Sí";
+    if (value === "No") return "No";
+    return value.toString().trim();
+  }; // En el useEffect de InfoSection.jsx - AGREGAR más logging
+
   useEffect(() => {
-    console.log("InfoSection - useEffect triggered:", {
-      hasDefaultData: !!defaultData,
-      hasSelectedRowData: !!selectedRowData,
-      hasFieldNames: fieldNames.length > 0,
-      selectedRowIndex,
-    });
-
+    // ... (logging y verificación de defaultData)
     if (!defaultData) {
       console.log("InfoSection - No defaultData disponible");
       return;
     }
 
-    if (selectedRowData && selectedRowIndex !== null && fieldNames.length > 0) {
+    const shouldProcessRowData =
+      selectedRowData && selectedRowIndex !== null && camposArray.length > 0;
+
+    if (shouldProcessRowData) {
       console.log(
         "InfoSection - Procesando fila seleccionada con fieldNames:",
-        fieldNames
+        camposArray
       );
 
-      const updatedData = { ...defaultData };
+      // ✅ CAMBIO 2: Trabajamos sobre una copia del array infoData (que ya está ordenado)
+      let updatedArrayData = infoData.map((item, index) => {
+        const dynamicAlias = aliasArray[index];
+        const correspondingFieldName = camposArray[index]; // Asumimos que camposArray y aliasArray están alineados por índice
 
-      Object.keys(updatedData).forEach((key, index) => {
-        if (updatedData[key] && typeof updatedData[key] === "object") {
-          const correspondingFieldName = fieldNames[index] || key;
-          console.log(
-            `Procesando campo ${key} con fieldName: ${correspondingFieldName}`
-          );
+        // Procesar el valor usando el campo (camposArray)
+        const processedValue = processFieldValue(
+          correspondingFieldName,
+          selectedRowData
+        );
 
-          const processedValue = processFieldValue(
-            correspondingFieldName,
-            selectedRowData
-          );
+        // Crear el nuevo objeto de valor para el campo 'valor'
+        const newObj = {
+          ...item.valueObject,
+          valor: processedValue,
+        };
 
-          updatedData[key] = {
-            ...updatedData[key],
-            valor: processedValue,
-          };
-
-          console.log(`Campo ${key} procesado: "${processedValue}"`);
-        }
+        return {
+          ...item,
+          label: dynamicAlias || item.originalKey, // Actualizamos solo la etiqueta (ALIAS)
+          valueObject: newObj,
+        };
       });
 
-      console.log("InfoSection - Datos actualizados:", updatedData);
-      setInfoData(updatedData);
+      console.log(
+        "InfoSection - Datos actualizados (Array ordenado):",
+        updatedArrayData
+      );
+      setInfoData(updatedArrayData);
     } else {
+      // ✅ Restauración a defaultData (que ahora es el array ordenado inicial)
       let reason = "Razón: ";
       if (!selectedRowData) reason += "sin selectedRowData, ";
       if (selectedRowIndex === null) reason += "sin selectedRowIndex, ";
-      if (fieldNames.length === 0) reason += "sin fieldNames";
-
-      console.log("InfoSection - Restaurando datos por defecto. " + reason);
-      setInfoData(defaultData);
+      if (camposArray.length === 0) reason += "sin fieldNames";
+      console.log(
+        "InfoSection - Restaurando datos por defecto (Array ordenado). " +
+          reason
+      );
+      setInfoData(defaultData); // defaultData ahora es el array ordenado
     }
-  }, [selectedRowData, selectedRowIndex, defaultData, fieldNames]);
+  }, [
+    selectedRowData,
+    selectedRowIndex,
+    defaultData,
+    camposArray,
+    aliasArray,
+  ]); // Agregamos infoData a las dependencias
 
-  // ✅ Convertir el objeto a array para renderizar
-  const getInfoArray = () => {
-    if (!infoData || typeof infoData !== "object") return [];
-
-    return Object.entries(infoData).map(([label, obj]) => ({
-      label,
-      valor: obj?.valor || "",
-      fontWeight: obj?.fontWeight || "font-weight-normal",
-      color: obj?.color || "FFFFFF",
+  // ✅ CAMBIO 3: Simplificar getInfoArray para usar el array de estado
+const getInfoArray = () => {
+    // Si infoData es el array, lo devolvemos, mapeando para el formato final
+    if (!infoData || !Array.isArray(infoData)) return [];
+    
+    return infoData.map(item => ({
+        label: item.label, // Ya contiene el alias actualizado
+        valor: item.valueObject?.valor || "",
+        fontWeight: item.valueObject?.fontWeight || "font-weight-normal",
+        color: item.valueObject?.color || "FFFFFF",
     }));
-  };
+};
 
   const infoArray = getInfoArray();
-
   // Función para dividir los datos en filas de 4 columnas
   const getRows = () => {
     const rows = [];
@@ -285,10 +294,7 @@ const formatValue = (value, fieldName = "") => {
 
   return (
     <div className="bg-gray-700 p-4 rounded-lg shadow-sm">
-      <h3 className="text-lg text-jerarquia1 font-bold mb-3">
-        Info
-      </h3>
-
+      <h3 className="text-lg text-jerarquia1 font-bold -mb-1">Info</h3>
       <div className="overflow-x-auto">
         <table className="table-border border border-jerarquia1 rounded-lg text-background-dashboard w-full">
           <tbody>
@@ -333,5 +339,4 @@ const formatValue = (value, fieldName = "") => {
     </div>
   );
 };
-
 export default InfoSection;

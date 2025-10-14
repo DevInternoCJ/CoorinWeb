@@ -36,7 +36,6 @@ const LampshadeFields = ({ isOpen, onClose }) => {
       />
     );
   }, [selectedProduct, selectedRowData, handleFieldNamesChange]);
-
   
   const memoizedGridLampsFields = useMemo(() => {
     if (!selectedProduct || selectedProduct.value === 0) return null;
@@ -64,7 +63,6 @@ const LampshadeFields = ({ isOpen, onClose }) => {
 
    if (!isOpen) return null;
 
-
   return (
     <div className=" modal-blur-bg fixed inset-0 bg-opacity-70 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl max-w-6xl max-h-[90vh] overflow-hidden border border-gray-300">
@@ -83,14 +81,6 @@ const LampshadeFields = ({ isOpen, onClose }) => {
             setLoading={setLoading}
           />
           {memoizedInfoSection}
-{/* selectedProduct && !fieldNamesLoaded && (
-  <div className="bg-gray-700 p-4 rounded-lg shadow-sm">
-    <div className="flex justify-center items-center py-4">
-      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400"></div>
-      <span className="ml-3 text-white">Cargando configuración de campos...</span>
-    </div>
-  </div>
-) */}
           {selectedProduct && selectedProduct.value !== 0 && (
             <>
               {memoizedTableEditFields}

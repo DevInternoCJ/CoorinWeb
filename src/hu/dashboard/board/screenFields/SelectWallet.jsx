@@ -4,7 +4,7 @@ const SelectWallet = ({ options, value, defaultValue, className = "", onChange, 
   <div className="relative">
     <select
       defaultValue={defaultValue}
-      className={`w-full ps-2 pe-7 py-2 border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 appearance-none ${className}`}
+      className={`w-full ps-2 pe-7 py-1 border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 appearance-none ${className}`}
        onChange={e => onChange(e.target.value)}
       value={value}
        {...props}

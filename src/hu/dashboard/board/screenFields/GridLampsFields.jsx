@@ -7,7 +7,6 @@ const GridLampsFields = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [draggedHeader, setDraggedHeader] = useState(""); // Estado para el header que se arrastra
-  
   const servidor = "Albaz";
   const idProducto = 1;
   const { setSelectedRow, selectedRowIndex } = useSelectedRowStore();
@@ -29,8 +28,6 @@ const GridLampsFields = () => {
     };
     fetchGridData();
   }, [servidor, idProducto]);
-
-  // ========== FUNCIONES DE DRAG AND DROP ==========
   
   // Cuando comienza el arrastre del header
   const handleDragStart = (e, headerName) => {
@@ -44,8 +41,6 @@ const GridLampsFields = () => {
   const handleDragEnd = () => {
     setDraggedHeader('');
   };
-
-  // ===============================================
 
   // Manejar click en fila usando el store
   const handleRowClick = (row, index) => {
@@ -63,7 +58,6 @@ const GridLampsFields = () => {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
@@ -98,7 +92,6 @@ const GridLampsFields = () => {
       </div>
     );
   }
-
   if (tableData.length === 0) {
     return (
       <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
@@ -110,8 +103,8 @@ const GridLampsFields = () => {
   }
 
   return (
-    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-      <div className="overflow-x-auto border rounded-lg max-h-96">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+      <div className="overflow-x-auto border border-background-primary rounded-lg max-h-96">
         <table className="min-w-full bg-white">
           <thead>
             <tr className="bg-background-secondary border-b">
@@ -123,28 +116,14 @@ const GridLampsFields = () => {
                   onDragEnd={handleDragEnd}
                   className={`
                     py-2 px-3 text-left text-xs font-bold text-neutral-100 whitespace-nowrap
-                    cursor-move select-none
+                    cursor-grabbing select-none
                     hover:bg-slate-600 active:bg-slate-500
                     transition-all duration-150
                     ${draggedHeader === key ? 'opacity-50 scale-95 bg-slate-500' : ''}
                   `}
                   title="Arrastra este encabezado a Alias o Campos"
                 >
-                  <span className="inline-flex items-center gap-2">
-                    {/* Icono de drag */}
-                    <svg 
-                      className="w-3 h-3 text-neutral-300" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M4 8h16M4 16h16" 
-                      />
-                    </svg>
+                  <span className="inline-flex items-center gap-2">   
                     {key}
                   </span>
                 </th>
@@ -192,28 +171,10 @@ const GridLampsFields = () => {
           </tbody>
         </table>
       </div>
-
-      <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-md p-2">
-        <p className="text-xs text-yellow-800">
-          <span className="font-medium">
-            Desplaza horizontalmente para ver todas las columnas.
-          </span>
-          Se están mostrando {Object.keys(tableData[0] || {}).length} columnas.
-        </p>
-        <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
-          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-          </svg>
-          Arrastra los encabezados a los campos de "Alias" o "Campos"
-        </p>
-        {selectedRowIndex !== null && (
-          <p className="text-xs text-blue-800 mt-1">
-            Fila {selectedRowIndex + 1} seleccionada - Haz click en cualquier fila para seleccionar
-          </p>
-        )}
-      </div>
     </div>
   );
 };
 
 export default GridLampsFields;
+
+
