@@ -15,6 +15,7 @@ const MODAL_SIZES = {
     full: "w-full max-w-full",  // 100% -> responsive
     // Tamaños especiales para casos específicos con responsive
     metas: "w-full max-w-[95vw] sm:max-w-[85vw] md:max-w-[76vw]", // 76% viewport -> responsive
+    ejecutivos: "w-full max-w-[95vw] sm:max-w-[80vw] md:max-w-[45vw]", // Modal ejecutivos igual a metas (personalizable)
     "metas-md": "w-full max-w-[90vw] sm:max-w-[80vw] md:max-w-[70vw]", // Modal metas mediano responsive
     "metas-sm": "w-full max-w-[85vw] sm:max-w-[70vw] md:max-w-[60vw]", // Modal metas pequeño responsive
     productivity: "w-full max-w-[95vw] sm:max-w-[85vw] md:max-w-[76vw]", // Modal productividad 76% -> responsive
@@ -139,7 +140,7 @@ const ReusableModal = ({
 
                 {/* Contenido del modal - Responsive con scroll mejorado y grid */}
                 <div
-                    className={`p-3 sm:p-4 md:p-6 
+                    className={`pt-1 pb-3 px-3 sm:pt-2 sm:pb-4 sm:px-4 md:pt-2 md:pb-6 md:px-6
                                overflow-y-auto overflow-x-hidden 
                                scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100
                                hover:scrollbar-thumb-gray-400 transition-colors

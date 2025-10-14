@@ -142,7 +142,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
     }, [selectedExecutiveId, idEjecutivoSesion]);
 
     return (
-    <div className="relative bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64">
+    <div className=" bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64">
         <h3 className="text-base lg:text-lg font-semibold mb-4 flex items-center text-gray-800">
             <span className="mr-2">
                 {/* Icono personalizado para Sesiones */}

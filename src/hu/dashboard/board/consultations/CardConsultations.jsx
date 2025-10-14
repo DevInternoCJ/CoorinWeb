@@ -8,8 +8,7 @@ import ProductivityModal from "./Productivity/ModalProductivityModal";
 import ModalConsultaGenerales from "./Generals/ModalConsultaGenerales";
 import ModalBaseGenerales from "./Generals/ModalBaseGenerales";
 import HistoricosModal from "./Historical/ModalHistoricosModal";
-import ModalConsultaEjecutivos from "./Executives/ModalConsultaEjecutivos";
-import ModalBaseEjecutivos from "./Executives/ModaBaseEjecutivos";
+import ModalConsultaEjecutivosModal from "./Executives/ModalConsultaEjecutivosModal";
 const CardConsultations = ({ onModalOpen, onModalClose }) => {
     const [open, setOpen] = useState(false);
     const [openProductividad, setOpenProductividad] = useState(false);
@@ -161,9 +160,10 @@ const CardConsultations = ({ onModalOpen, onModalClose }) => {
                 isOpen={openHistoricos}
                 onClose={() => handleCloseModal(setOpenHistoricos)}
             />
-            <ModalBaseEjecutivos open={openEjecutivos} onClose={() => handleCloseModal(setOpenEjecutivos)}>
-                <ModalConsultaEjecutivos onClose={() => handleCloseModal(setOpenEjecutivos)} />
-            </ModalBaseEjecutivos>
+            <ModalConsultaEjecutivosModal 
+                isOpen={openEjecutivos}
+                onClose={() => handleCloseModal(setOpenEjecutivos)}
+            />
         </>
     );
 };

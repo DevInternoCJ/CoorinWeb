@@ -25,16 +25,17 @@ const DefaultModalHeader = ({
 
     // Header por defecto con título, ícono y botón de cerrar
     return (
-        <div className={`px-3 pt-4 pb-3 sm:px-4 sm:pt-5 sm:pb-4 md:px-6 md:pt-6 md:pb-4 
-                         bg-white border-b border-gray-200 
-                         flex items-center justify-between 
-                         gap-3 ${className}`} {...props}>
+    <div className={`px-3 pt-4 pb-1 sm:px-4 sm:pt-5 sm:pb-2 md:px-6 md:pt-6 md:pb-2 
+             bg-white border-b border-gray-200 
+             flex items-center justify-between 
+             gap-3 ${className}`} {...props}>
             
             {/* Sección izquierda: Ícono y título */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 {Icon && (
                     <Icon 
-                        className={`size-5 sm:size-6 flex-shrink-0 text-gray-600 ${iconClassName}`}
+                        className={`size-5 sm:size-6 flex-shrink-0 ${iconClassName}`}
+                        style={{ color: iconClassName?.includes('#147f5e') ? '#147f5e' : undefined }}
                     />
                 )}
                 {title && (
@@ -54,13 +55,12 @@ const DefaultModalHeader = ({
                 <div className="flex-shrink-0">
                     <button
                         onClick={onClose}
-                        className={`text-gray-400 hover:text-gray-600 
-                                   transition-colors duration-200 
+                        className={`transition-colors duration-200 
                                    rounded-full p-1 sm:p-1.5
-                                   hover:bg-gray-100 focus:bg-gray-100
-                                   focus:outline-none focus:ring-2 focus:ring-blue-300
+                                   hover:bg-[#147f5e] focus:bg-[#147f5e]
+                                   focus:outline-none focus:ring-2 focus:ring-[#147f5e]
                                    ${closeButtonClassName}`}
-                        style={{ fontSize: "1.25rem", lineHeight: 1 }}
+                        style={{ fontSize: "1.25rem", lineHeight: 1, color: '#147f5e' }}
                         aria-label="Cerrar modal"
                     >
                         <svg 

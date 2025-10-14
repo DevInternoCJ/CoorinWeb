@@ -31,7 +31,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                 if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
                 
                 const data = await obetenerJerarquiaEncargados(idEjecutivo);
-                console.log('🟢 Respuesta jerarquía ejecutivos:', data);
+                console.log('Respuesta jerarquía ejecutivos:', data);
                 
                 // Si la respuesta NO incluye el nodo raíz, lo agregamos manualmente
                 let tree = [];
@@ -147,102 +147,79 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
         setCollapsedNodes(prev => ({ ...prev, [id]: !prev[id] }));
     };
 
-    // Renderizar líneas y jerarquía
-    const renderExecutiveTree = (tree, level = 0) => {
+    // Renderizar la jerarquía usando el Tree View de Preline
+    const renderExecutiveTree = (tree, level = 0, parentKey = '') => {
         if (!Array.isArray(tree)) return null;
-    return tree.map((node, idx) => {
+        return tree.map((node, idx) => {
             const isSelected = node.idEjecutivo === selectedExecutiveNode;
             const isCollapsed = collapsedNodes[node.idEjecutivo];
             const hasSub = Array.isArray(node.subordinados) && node.subordinados.length > 0;
-            // Para líneas de árbol: saber si es el último hijo
-            const isLast = tree.length - 1 === idx;
-            // Espaciado para separar líneas del texto (ajustado para no separar demasiado)
-            const lineSpace = 20;
+            const nodeKey = `${parentKey}${node.idEjecutivo || node.usuario || idx}`;
+            const headingId = `hs-checkbox-tree-heading-${nodeKey}`;
+            const collapseId = `hs-checkbox-tree-collapse-${nodeKey}`;
             return (
-                <React.Fragment key={node.usuario || node.id || idx}>
-                    <div className="flex items-start relative group w-full" style={{ minHeight: 32, borderRadius: 6 }}>
-                        {/* Líneas de árbol: vertical y horizontal (z-0 para que siempre estén debajo) */}
-                        {level > 0 && (
-                            <>
-                                <span
-                                    className="absolute border-l-2 border-black z-0"
-                                    style={{
-                                        left: (level-1)*lineSpace+12,
-                                        top: 0,
-                                        height: isLast ? '16px' : '100%'
-                                    }}
-                                ></span>
-                                <span
-                                    className="absolute border-t-2 border-black z-0"
-                                    style={{
-                                        left: (level-1)*lineSpace+12,
-                                        top: 14,
-                                        width: lineSpace
-                                    }}
-                                ></span>
-                            </>
+                <div
+                    key={nodeKey}
+                    className={`hs-accordion hs-dragged:bg-blue-100 hs-dragged:rounded nested-2-${level + 1}${isSelected ? ' hs-tree-view-selected:bg-gray-100' : ''}`}
+                    role="treeitem"
+                    aria-expanded={hasSub ? !isCollapsed : undefined}
+                    id={headingId}
+                    data-hs-tree-view-item={JSON.stringify({
+                        value: node.usuario || node.nombreEjecutivo || node.idEjecutivo,
+                        isDir: hasSub
+                    })}
+                >
+                    {/* Heading */}
+                    <div
+                        className="hs-accordion-heading py-0.5 rounded-md flex items-center gap-x-0.5 w-full"
+                        style={isSelected ? { background: 'var(--color-jerarquia1)', color: '#2b463c' } : {}}
+                    >
+                        {hasSub && (
+                            <button
+                                className="hs-accordion-toggle size-6 flex justify-center items-center hover:bg-gray-100 rounded-md focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+                                aria-expanded={!isCollapsed}
+                                aria-controls={collapseId}
+                                type="button"
+                                onClick={e => { e.stopPropagation(); toggleCollapse(node.idEjecutivo); }}
+                            >
+                                <svg className="size-4 text-gray-800 dark:text-neutral-200" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M5 12h14"></path>
+                                    <path className={!isCollapsed ? 'hs-accordion-active:hidden block' : ''} d="M12 5v14"></path>
+                                </svg>
+                            </button>
                         )}
-                        {/* Fondo de selección y hover solo en el contenido, no en el contenedor de líneas */}
                         <div
-                            className={`executive-hierarchy-item flex items-center w-full z-10`}
-                            style={{
-                                paddingLeft: level * lineSpace + (level > 0 ? lineSpace : 0),
-                                marginBottom: 2,
-                                fontWeight: 400,
-                                fontSize: 13,
-                                color: isSelected ? '#fff' : '#2b463c',
-                                userSelect: 'none',
-                                cursor: 'pointer',
-                                minHeight: 32,
-                                borderRadius: 6,
-                                transition: 'background 0.15s',
-                                background: isSelected ? 'rgba(20,127,94,0.18)' : undefined
-                            }}
-                            onMouseEnter={e => { if (!isSelected) { e.currentTarget.style.background = 'rgba(0,0,0,0.07)'; e.currentTarget.style.fontWeight = '400'; } }}
-                            onMouseLeave={e => { if (!isSelected) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.fontWeight = '400'; } }}
+                            className={`grow rounded-md cursor-pointer flex items-center`}
                             onClick={() => {
                                 setSelectedExecutiveNode(node.idEjecutivo);
                                 if (onExecutiveSelect) {
                                     onExecutiveSelect(node.idEjecutivo);
                                 }
                             }}
-                            onDoubleClick={() => { if (hasSub) toggleCollapse(node.idEjecutivo); }}
-                            title="Seleccionar ejecutivo o expandir/colapsar con doble click"
+                            onDoubleClick={() => {
+                                if (hasSub) toggleCollapse(node.idEjecutivo);
+                            }}
+                            title={node.usuario + ' - ' + node.nombreEjecutivo}
                         >
-                            <span className="flex items-center w-full" style={{ fontWeight: 400, fontFamily: 'inherit', letterSpacing: 0 }}>
-                                {/* Botón expandir/colapsar */}
-                                {hasSub && (
-                                    <button
-                                        type="button"
-                                        className="mr-1 flex items-center justify-center w-5 h-5 rounded hover:bg-gray-200 focus:outline-none"
-                                        onClick={e => { e.stopPropagation(); toggleCollapse(node.idEjecutivo); }}
-                                        tabIndex={-1}
-                                        aria-label={isCollapsed ? 'Expandir subordinados' : 'Colapsar subordinados'}
-                                    >
-                                        {isCollapsed ? (
-                                            // Heroicon: ChevronDown
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-gray-500">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        ) : (
-                                            // Heroicon: ChevronUp
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-gray-500">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-                                            </svg>
-                                        )}
-                                    </button>
-                                )}
-                                <span className="truncate w-full" style={{ fontWeight: 400, fontFamily: 'inherit', letterSpacing: 0 }}>
-                                    {node.usuario || ''} - {node.nombreEjecutivo || ''}
-                                </span>
+                            <span className="text-sm font-medium w-full" style={{color: isSelected ? '#2b463c' : '#147f5e', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block'}}>
+                                {node.usuario} - {node.nombreEjecutivo}
                             </span>
                         </div>
                     </div>
-                    {/* Renderizar subordinados si no está colapsado */}
+                    {/* Collapse */}
                     {hasSub && !isCollapsed && (
-                        renderExecutiveTree(node.subordinados, level + 1)
+                        <div
+                            id={collapseId}
+                            className="hs-accordion-content w-full overflow-hidden transition-[height] duration-300"
+                            role="group"
+                            aria-labelledby={headingId}
+                        >
+                            <div className="ps-7 relative before:absolute before:top-0 before:start-3 before:w-0.5 before:-ms-px before:h-full before:bg-gray-100 dark:before:bg-neutral-700">
+                                {renderExecutiveTree(node.subordinados, level + 1, nodeKey)}
+                            </div>
+                        </div>
                     )}
-                </React.Fragment>
+                </div>
             );
         });
     };
@@ -254,7 +231,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     const usuarioSesion = userData?.usuario || '';
 
     return (
-        <div className="relative bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64 ramificacion-sesiones">
+        <div className=" bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64 ramificacion-sesiones">
             {/* Header responsive */}
             <div className="mb-4">
                 {/* Layout para pantallas grandes (md y superiores) */}
@@ -362,60 +339,69 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
             </div>
             
             {/* Contenedor de la ramificación con estilos de JerarquiaConR */}
-            <div 
+            <div
                 ref={ramificacionRef}
-                className="productividad-branch flex-1 h-[40vh] xl:h-[56vh]" 
-                style={{ 
-                    overflowX: 'auto', 
-                    overflowY: 'auto', 
-                    width: '100%', 
+                className="productividad-branch flex-1 h-[40vh] xl:h-[56vh]"
+                style={{
+                    overflowX: 'auto',
+                    overflowY: 'auto',
+                    width: '100%',
                     maxWidth: '100%',
-                    background: '#ffffff', 
-                    borderRadius: 8, 
-                    border: '1px solid #e0e0e0', 
-                    padding: 6 
+                    background: '#ffffff',
+                    borderRadius: 8,
+                    border: '1px solid #e0e0e0',
+                    padding: 6
                 }}
             >
-                    {/* Contenido de la jerarquía */}
-                    {loadingJerarquia ? (
-                        <div style={{ 
-                            color: '#2b463c', 
-                            fontWeight: 500, 
-                            fontSize: 15, 
-                            textAlign: 'center', 
-                            marginTop: 30, 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            alignItems: 'center', 
-                            gap: 10 
-                        }}>
-                            <div className="spinner-sonner" style={{ marginBottom: 8 }}>
-                                <svg width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" stroke="#2b463c">
-                                    <g fill="none" fillRule="evenodd">
-                                        <g transform="translate(1 1)" strokeWidth="3">
-                                            <circle strokeOpacity=".3" cx="18" cy="18" r="18" />
-                                            <path d="M36 18c0-9.94-8.06-18-18-18">
-                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite" />
-                                            </path>
-                                        </g>
+                {/* Contenido de la jerarquía con Preline Tree View */}
+                {loadingJerarquia ? (
+                    <div style={{
+                        color: '#2b463c',
+                        fontWeight: 500,
+                        fontSize: 15,
+                        textAlign: 'center',
+                        marginTop: 30,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 10
+                    }}>
+                        <div className="spinner-sonner" style={{ marginBottom: 8 }}>
+                            <svg width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" stroke="#2b463c">
+                                <g fill="none" fillRule="evenodd">
+                                    <g transform="translate(1 1)" strokeWidth="3">
+                                        <circle strokeOpacity=".3" cx="18" cy="18" r="18" />
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite" />
+                                        </path>
                                     </g>
-                                </svg>
-                            </div>
-                            <span>Cargando jerarquía...</span>
+                                </g>
+                            </svg>
                         </div>
-                    ) : errorJerarquia ? (
-                        <div style={{ 
-                            color: '#b71c1c', 
-                            fontWeight: 500, 
-                            fontSize: 14, 
-                            textAlign: 'center', 
-                            marginTop: 30 
-                        }}>
-                            {errorJerarquia}
+                        <span>Cargando jerarquía...</span>
+                    </div>
+                ) : errorJerarquia ? (
+                    <div style={{
+                        color: '#b71c1c',
+                        fontWeight: 500,
+                        fontSize: 14,
+                        textAlign: 'center',
+                        marginTop: 30
+                    }}>
+                        {errorJerarquia}
+                    </div>
+                ) : (
+                    <div
+                        id="hs-tree-view-checkbox"
+                        role="tree"
+                        aria-orientation="vertical"
+                        data-hs-tree-view='{"controlBy": "checkbox", "autoSelectChildren": true}'
+                    >
+                        <div data-hs-nested-draggable="">
+                            {renderExecutiveTree(executiveTree)}
                         </div>
-                    ) : (
-                        renderExecutiveTree(executiveTree)
-                    )}
+                    </div>
+                )}
             </div>
         </div>
     );
