@@ -44,19 +44,25 @@ export default function CoorinDashboard() {
   }, [executiveModalOpen, consultationModalOpen, closeSidebarFn]);
 
   // Mapeo directo para renderizar cada componente con su propio modal
+  // Estado para controlar si la tabla de Pagos reportados está visible
+  const [mostrarTablaPagosReportados, setMostrarTablaPagosReportados] = useState(false);
+
   const renderSelectedComponent = () => {
-    const closeModal = () => setModalSidebarOpen(false);
-    
+    const closeModal = () => {
+      setModalSidebarOpen(false);
+      setMostrarTablaPagosReportados(false); // Reiniciar al cerrar
+    };
+
     // Componentes de información que usan el ModalBaseInformacion
     const informationComponents = [
       "Lista Negra", "Arrepentimientos",
       "Pagos", "Pagos reportados", "Datos Erroneos", "Domicilios", 
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios", "VGP"
     ];
-    
+
     if (informationComponents.includes(selectedSidebarOption)) {
       let ContentComponent;
-      
+
       switch (selectedSidebarOption) {
         case "Lista Negra":
           ContentComponent = DarkListContent;
@@ -68,7 +74,13 @@ export default function CoorinDashboard() {
           ContentComponent = PaymentsContent;
           break;
         case "Pagos reportados":
-          ContentComponent = ReportingPaymentsContent;
+          ContentComponent = (props) => (
+            <ReportingPaymentsContent
+              mostrarTabla={mostrarTablaPagosReportados}
+              setMostrarTabla={setMostrarTablaPagosReportados}
+              {...props}
+            />
+          );
           break;
         case "Datos Erroneos":
           ContentComponent = WrongsContent;
@@ -94,9 +106,26 @@ export default function CoorinDashboard() {
         default:
           ContentComponent = null;
       }
-      
+
+      // Tamaño base del modal
+      let modalSize = {};
+      if (selectedSidebarOption === "Pagos reportados") {
+        // Tamaño compacto por defecto, 20% más grande cuando mostrarTablaPagosReportados es true
+        modalSize = mostrarTablaPagosReportados
+          ? {
+              maxWidth: "1104px", // 920px * 1.2
+              minWidth: "828px",  // 690px * 1.2
+              height: "760px"     // 633px * 1.2
+            }
+          : {
+              maxWidth: "920px",
+              minWidth: "690px",
+              height: "633px"
+            };
+      }
+
       return (
-        <ModalBaseInformacion onClose={closeModal} tipoInformacion={selectedSidebarOption}>
+        <ModalBaseInformacion onClose={closeModal} tipoInformacion={selectedSidebarOption} modalSize={modalSize}>
           {ContentComponent && <ContentComponent />}
         </ModalBaseInformacion>
       );

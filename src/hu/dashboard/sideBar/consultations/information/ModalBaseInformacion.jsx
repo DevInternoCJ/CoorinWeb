@@ -1,10 +1,10 @@
 import React, { useRef } from "react";
 import ModalBase from "../../../board/ModalBase";
 
-const ModalBaseInformacion = ({ onClose, tipoInformacion, children }) => {
+const ModalBaseInformacion = ({ onClose, tipoInformacion, children, modalSize = {} }) => {
     const modalRef = useRef(null);
     const { bounce } = ModalBase.useModalLogic();
-    
+
     // Función personalizada para manejar el click del backdrop
     const handleCustomBackdropClick = (e) => {
         if (e.target === e.currentTarget) {
@@ -29,6 +29,17 @@ const ModalBaseInformacion = ({ onClose, tipoInformacion, children }) => {
 
     const titulo = titulos[tipoInformacion] || "Información";
 
+    // Tamaño por defecto
+    const defaultModalStyle = {
+        maxWidth: "920px",
+        minWidth: "690px",
+        height: "633px",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative"
+    };
+    const mergedModalStyle = { ...defaultModalStyle, ...modalSize };
+
     return (
         <div className="modal-blur-bg">
             <div className="modal-overlay" onClick={handleCustomBackdropClick} />
@@ -36,23 +47,18 @@ const ModalBaseInformacion = ({ onClose, tipoInformacion, children }) => {
                 ref={modalRef}
                 className={`modal-content modal-xl-container${bounce ? " animate-bounce-modal" : ""}`}
                 onClick={e => e.stopPropagation()}
-                style={{
-                    maxWidth: "920px",
-                    minWidth: "690px", 
-                    height: "633px",
-                    display: "flex",
-                    flexDirection: "column",
-                    position: "relative"
-                }}
+                style={mergedModalStyle}
             >
                 {/* Header común para todos los componentes de información */}
                 <div style={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    marginBottom: "1.5rem",
+                    marginBottom: "0.5rem",
                     borderBottom: "1px solid #e0e0e0",
-                    paddingBottom: "1rem"
+                    paddingBottom: "0.3rem",
+                    paddingTop: "0.3rem",
+                    minHeight: 0
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <img src="/public/logo_coorin_7.svg" alt="Logo Coorin" style={{ height: 36, marginRight: 8 }} />
