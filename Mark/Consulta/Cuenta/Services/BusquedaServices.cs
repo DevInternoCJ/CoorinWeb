@@ -11,6 +11,7 @@ using System.IO;
 using Dapper;
 using static CoorinWeb.Loki.Global.AccionamientosQueryHelper;
 using CoorinWeb.Loki.Common;
+using System.Collections;
 
 namespace Loki.Mark.Consulta.Cuenta.Services
 {
@@ -30,42 +31,74 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             this._accionamientosQueryHelper = accionamientosQueryHelper;
         }
 
-        public async Task<SearchResultDto> RealizaBusqueda(object idProducto, object idCartera, string servidor)
+        public async Task<SearchResultDto> RealizaBusqueda(
+     int idProducto,
+     int idCartera,
+     string servidor,
+     bool esDetalleResultado,
+     int? idConsulta = null)
         {
             try
             {
-                // Cargar consultas desde BD si aún no se han cargado
+                // === Cargar consultas si aplica ===
                 await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidor);
 
+                // === Crear tablas de parámetros y agrupaciones ===
                 var tblParametros = AccionamientosQueryHelper.Ejecutivo1.TablaParámetros;
                 var tblAgrupar = AccionamientosQueryHelper.Ejecutivo1.TablaAgrupar;
-
                 tblParametros.Rows.Clear();
                 tblAgrupar.Rows.Clear();
 
-                // Asignar idCartera como parámetro
-                tblParametros.Rows.Add("idCartera", "=", idCartera?.ToString(), "AND", "int");
+                // === Mapear parámetros y agrupaciones desde idConsulta si existe ===
+                if (idConsulta.HasValue)
+                {
+                    var consultaRow = ConsultaGenerador.ObtenerConsulta(idConsulta.Value);
+                    if (consultaRow == null)
+                        throw new Exception($"No se encontró la consulta con ID {idConsulta.Value}");
 
-                DateTime desde = DateTime.Today.AddMonths(-1);
+                    // Agregar parámetro básico de cartera
+                    tblParametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
 
-                // Generar el query
-                string sQuery = "WAITFOR DELAY '00:00:00'; USE dbCollection SET DATEFORMAT YMD \r\n" +
-                                ConsultaGenerador.PreparaQueryBúsqueda(
-                                    Convert.ToInt32(idProducto),
-                                    tblParametros,
-                                    tblAgrupar,
-                                    Resultado.Cuentas,
-                                    desde,
-                                    Convert.ToInt32(idCartera)
-                                );
+                    // Puedes mapear más parámetros de consultaRow si es necesario
+                    idProducto = Convert.ToInt32(consultaRow["idProducto"]);
+                }
+                else
+                {
+                    // Parámetro básico de cartera
+                    tblParametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
+                }
 
-                // === 🔹 Logger para inspeccionar el query ===
-                Console.WriteLine("===== QUERY GENERADO =====");
-                Console.WriteLine(sQuery);
-                Console.WriteLine("=========================");
+                // === Agrupaciones de ejemplo (puedes ajustar según tu DTO) ===
+                tblAgrupar.Rows.Add("Cuenta", "Situación");
+                tblAgrupar.Rows.Add("Producto", "120");
+                tblAgrupar.Rows.Add("Conteos", "Gestiones");
+                tblAgrupar.Rows.Add("Fechas", "Activación");
 
+                // === Determinar tipo de resultado ===
+                var conteo = esDetalleResultado ? Resultado.Detalle : Resultado.Contar;
+
+                // === Generar query completo ===
+                ArrayList listaColumnas = new ArrayList();
+                var queryData = ConsultaGenerador.GeneraQueryCuentas(
+                    idProducto,
+                    tblParametros,
+                    tblAgrupar,
+                    conteo,
+                    DateTime.Today.AddMonths(-1),
+                    idCartera,
+                    ref listaColumnas
+                );
+
+                string sQuery = "WAITFOR DELAY '00:00:00'; USE dbCollection SET DATEFORMAT YMD \r\n" + queryData.Query;
+
+                // === Logging para debug ===
+                Console.WriteLine("=== Conteo usado: " + conteo);
+                Console.WriteLine("=== Parámetros: " + tblParametros.Rows.Count);
+                Console.WriteLine("=== Agrupaciones: " + tblAgrupar.Rows.Count);
+                Console.WriteLine("=== Query generado ===\n" + sQuery);
+
+                // === Ejecutar query ===
                 DataTable tblCuentas = new("Cuentas");
-
                 using (var sqlConnection = _dbContFactory.GetSqlConnection(servidor, "Collection"))
                 {
                     await sqlConnection.OpenAsync();
@@ -75,7 +108,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     }
                 }
 
-                // === Exportar a Excel ===
+                // === Exportar a Excel si hay resultados ===
                 string rutaExcel = null;
                 if (tblCuentas.Rows.Count > 0)
                 {
@@ -93,23 +126,15 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     rutaExcel = $"/api/busquedas/download-excel?filename={fileName}";
                 }
 
-                try
-                {
-                    Funciones.ColumnaPorcentaje(ref tblCuentas, "Cuentas");
-                    Funciones.ColumnaPorcentaje(ref tblCuentas, "Saldo");
-                    Funciones.FilaTotales(ref tblCuentas);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Advertencia: no se pudieron calcular los totales: {ex.Message}");
-                }
-
+                // === Convertir a lista de diccionarios ===
                 var datosResultado = new List<Dictionary<string, object>>();
                 foreach (DataRow row in tblCuentas.Rows)
                 {
                     var item = new Dictionary<string, object>();
                     foreach (DataColumn col in tblCuentas.Columns)
+                    {
                         item[col.ColumnName] = row[col];
+                    }
                     datosResultado.Add(item);
                 }
 

@@ -33,39 +33,33 @@ namespace Loki.Controllers
         /// <param name="criteria">DTO con los criterios de búsqueda (filtros, agrupaciones, tipo de resultado, etc.).</param>
         /// <returns>Un SearchResultDto con el mensaje de resultado, datos (si es conteo) o ruta de descarga (si es detalle).</returns>
         [HttpPost("realizar-busqueda")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SearchResultDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
         public async Task<IActionResult> RealizarBusqueda([FromBody] SearchCriteriaDto criteria)
         {
             try
             {
                 // Validaciones básicas
+                if (string.IsNullOrWhiteSpace(criteria.Servidor))
+                    return BadRequest(new { error = "Debe proporcionar el nombre del servidor." });
+
                 if (criteria.IdProducto == null || criteria.IdCartera == null)
                     return BadRequest(new { error = "Debe proporcionar IdProducto y IdCartera." });
 
-                // 🔹 Obtener servidor desde el token
-                string? servidorClaim = User.FindFirst("Servidor")?.Value;
-                if (string.IsNullOrWhiteSpace(servidorClaim))
-                    return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-
-                // 🔹 Llamar al servicio con el servidor incluido
+                // Llamada al servicio de búsqueda
                 var result = await _busquedasService.RealizaBusqueda(
-                    criteria.IdProducto,
-                    criteria.IdCartera,
-                    servidorClaim
-                );
+                  criteria.IdProducto,
+                  criteria.IdCartera,
+                  criteria.Servidor,
+                  esDetalleResultado: criteria.EsDetalleResultado
+              );
 
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                // 🔹 Manejo centralizado de errores
+                // Manejo centralizado de errores
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-
 
 
         /// <summary>
