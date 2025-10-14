@@ -36,11 +36,12 @@ namespace Loki.Mark.Consulta.Cuenta.Services
      int idCartera,
      string servidor,
      bool esDetalleResultado,
-     int? idConsulta = null)
+     int? idConsulta = null,
+     IEnumerable<ParametroDto>? parametrosExtra = null)
         {
             try
             {
-                // === Cargar consultas si aplica ===
+                // === Cargar consultas desde BD ===
                 await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidor);
 
                 // === Crear tablas de parámetros y agrupaciones ===
@@ -49,18 +50,20 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 tblParametros.Rows.Clear();
                 tblAgrupar.Rows.Clear();
 
-                // === Mapear parámetros y agrupaciones desde idConsulta si existe ===
+                // === Mapear idConsulta si existe ===
                 if (idConsulta.HasValue)
                 {
                     var consultaRow = ConsultaGenerador.ObtenerConsulta(idConsulta.Value);
                     if (consultaRow == null)
                         throw new Exception($"No se encontró la consulta con ID {idConsulta.Value}");
 
-                    // Agregar parámetro básico de cartera
+                    idProducto = Convert.ToInt32(consultaRow["idProducto"]);
+
+                    // Parámetro básico de cartera
                     tblParametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
 
-                    // Puedes mapear más parámetros de consultaRow si es necesario
-                    idProducto = Convert.ToInt32(consultaRow["idProducto"]);
+                    // Si tu consulta tiene otros parámetros guardados, aquí los puedes agregar
+                    // Ejemplo: foreach(var p in consultaRow["Parametros"]) { tblParametros.Rows.Add(...); }
                 }
                 else
                 {
@@ -68,7 +71,16 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     tblParametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
                 }
 
-                // === Agrupaciones de ejemplo (puedes ajustar según tu DTO) ===
+                // === Agregar parámetros extra desde el DTO ===
+                if (parametrosExtra != null)
+                {
+                    foreach (var p in parametrosExtra)
+                    {
+                        tblParametros.Rows.Add(p.Concepto, p.Campo, p.Valores, "AND", p.Dato);
+                    }
+                }
+
+                // === Definir agrupaciones de ejemplo ===
                 tblAgrupar.Rows.Add("Cuenta", "Situación");
                 tblAgrupar.Rows.Add("Producto", "120");
                 tblAgrupar.Rows.Add("Conteos", "Gestiones");
@@ -119,9 +131,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
 
                     string sResultado = _excelGeneratorService.ExportToExcelSAX(ref tblCuentas, filePath);
                     if (!string.IsNullOrEmpty(sResultado))
-                    {
                         return new SearchResultDto { Mensaje = sResultado, EsError = true };
-                    }
 
                     rutaExcel = $"/api/busquedas/download-excel?filename={fileName}";
                 }
@@ -132,9 +142,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 {
                     var item = new Dictionary<string, object>();
                     foreach (DataColumn col in tblCuentas.Columns)
-                    {
                         item[col.ColumnName] = row[col];
-                    }
                     datosResultado.Add(item);
                 }
 

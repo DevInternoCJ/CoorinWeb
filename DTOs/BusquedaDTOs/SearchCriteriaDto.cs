@@ -7,6 +7,7 @@
         public int IdProducto { get; set; }
         public DateTime DesdeFecha { get; set; }
         public bool EsDetalleResultado { get; set; }
+        public int? IdConsulta { get; set; }
         public IEnumerable<ParametroDto> Parametros { get; set; }
         public IEnumerable<AgruparDto> Agrupar { get; set; }
     }
