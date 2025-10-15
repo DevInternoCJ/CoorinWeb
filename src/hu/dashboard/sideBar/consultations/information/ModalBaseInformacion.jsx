@@ -30,14 +30,26 @@ const ModalBaseInformacion = ({ onClose, tipoInformacion, children, modalSize = 
     const titulo = titulos[tipoInformacion] || "Información";
 
     // Tamaño por defecto
-    const defaultModalStyle = {
-        maxWidth: "920px",
-        minWidth: "690px",
-        height: "633px",
+    let defaultModalStyle = {
+        maxWidth: "60vw", // 920px ~ 60vw
+        minWidth: "40vw", // 690px ~ 40vw
+        height: "70vh",   // 633px ~ 70vh
         display: "flex",
         flexDirection: "column",
         position: "relative"
     };
+
+    // Si es Payments, usar dimensiones fijas (sin responsividad)
+    if (tipoInformacion === "Pagos" || tipoInformacion === "Payments") {
+        defaultModalStyle = {
+            ...defaultModalStyle,
+            maxWidth: "644px", // 920 * 0.7
+            minWidth: "483px", // 690 * 0.7
+            width: "483px",
+            height: "506px",    // 633 * 0.8
+            maxHeight: "506px"
+        };
+    }
     const mergedModalStyle = { ...defaultModalStyle, ...modalSize };
 
     return (
@@ -74,7 +86,7 @@ const ModalBaseInformacion = ({ onClose, tipoInformacion, children, modalSize = 
                 </div>
 
                 {/* Contenido específico del componente */}
-                <div style={{ flex: 1, overflow: "auto", width: '100%' }}>
+                <div style={{ flex: 1, width: '100%', overflow: 'visible', height: '100%' }}>
                     {children}
                 </div>
             </div>

@@ -1,13 +1,119 @@
-
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
+import { infoEjecutivo, getPaymentsInformation } from "../../../../../services/mark/albaz/LokiServices";
+
 
 const PaymentsContent = () => {
-    const [cartera, setCartera] = useState("american_express");
+    // Obtener datos de usuario desde localStorage
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    const idCartera = userData?.idCartera || 1;
+    const idProducto = userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
+    const jerarquia = userData?.jerarquia ?? userData?.Jerarquia ?? 4;
+    const idEjecutivo = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.ejecutivo ?? null;
+
+
+    // El valor mostrado en el dropdown es idCartera
+    const [cartera, setCartera] = useState(idCartera);
     const [consulta, setConsulta] = useState("");
     const [desde, setDesde] = useState(new Date().toISOString().slice(0, 10));
     const [hasta, setHasta] = useState(new Date().toISOString().slice(0, 10));
+    const [consultasOptions, setConsultasOptions] = useState([]);
+    const [loadingConsultas, setLoadingConsultas] = useState(false);
+    const [errorConsultas, setErrorConsultas] = useState(null);
+    const [loadingExcel, setLoadingExcel] = useState(false);
+    const [errorExcel, setErrorExcel] = useState(null);
+
+    useEffect(() => {
+        if (!idEjecutivo) return;
+        setLoadingConsultas(true);
+        setErrorConsultas(null);
+        infoEjecutivo(idEjecutivo)
+            .then((data) => {
+                // Filtrar por idCartera e idProducto
+                let filtered = Array.isArray(data)
+                    ? data.filter(
+                        (item) =>
+                            String(item.idCartera) === String(idCartera) &&
+                            String(item.idProducto) === String(idProducto)
+                    )
+                    : [];
+                setConsultasOptions(filtered);
+            })
+            .catch(() => {
+                setErrorConsultas("Error al cargar las consultas");
+                setConsultasOptions([]);
+            })
+            .finally(() => setLoadingConsultas(false));
+    }, [idCartera, idProducto, idEjecutivo]);
+
+    // Función para consumir el endpoint y descargar el Excel
+    const handleDownloadExcel = async () => {
+        setLoadingExcel(true);
+        setErrorExcel(null);
+        try {
+            const params = {
+                idCartera: cartera,
+                idConsulta: consulta,
+                idProducto,
+                desde,
+                hasta,
+                jerarquia
+            };
+            const response = await getPaymentsInformation(params);
+            // response.data es un Blob
+            if (response && response.data instanceof Blob) {
+                // Leer el contenido del blob como texto
+                const text = await response.data.text();
+                let csvContent = text;
+                // Si parece JSON, convertir a CSV
+                try {
+                    const json = JSON.parse(text);
+                    if (Array.isArray(json) && json.length > 0 && typeof json[0] === 'object') {
+                        const headers = Object.keys(json[0]);
+                        const rows = json.map(obj => headers.map(h => {
+                            let value = obj[h];
+                            // Formato especial para cada campo
+                            if (h.toLowerCase() === 'cuenta' && typeof value === 'number') {
+                                // Forzar a string para evitar notación científica
+                                value = `'${value.toString()}`;
+                            } else if (h.toLowerCase() === 'cuenta' && typeof value === 'string') {
+                                value = `'${value}`;
+                            }
+                            if (h.toLowerCase() === 'fechapago' && typeof value === 'string') {
+                                value = value.replace(/T00:00:00$/, '');
+                            }
+                            if (h.toLowerCase() === 'montopago' && value !== undefined && value !== null) {
+                                value = `$${value}`;
+                            }
+                            // Quitar comas internas para no romper el CSV
+                            if (typeof value === 'string') value = value.replace(/,/g, '');
+                            return value;
+                        }).join(","));
+                        csvContent = headers.join(",") + "\n" + rows.join("\n");
+                    }
+                } catch (e) {
+                    console.error('Error al convertir a CSV:', e);
+                    // No es JSON, dejar como está
+                }
+                // Descargar como CSV limpio
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `pagos_${desde}_a_${hasta}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } else {
+                setErrorExcel('No se pudo descargar el archivo.');
+            }
+        } catch (err) {
+            setErrorExcel('Error al obtener los pagos.',err);
+        } finally {
+            setLoadingExcel(false);
+        }
+    };
 
     return (
         <div className="w-full max-w-xs mx-auto py-6 flex flex-col items-center">
@@ -16,44 +122,54 @@ const PaymentsContent = () => {
                 <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
             </div>
             <div className="w-full mb-6 relative" style={{ minHeight: 320 }}>
-                {/* Cartera ocupa todo el ancho */}
-                <div className="relative w-full mb-3">
-                    <select
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                        value={cartera}
-                        onChange={e => setCartera(e.target.value)}
-                        id="cartera-select-payments"
-                    >
-                        <option value="" disabled hidden></option>
-                        <option value="american_express">American Express</option>
-                        <option value="hsbc">HSBC</option>
-                        <option value="santander">Santander</option>
-                    </select>
-                    <label
-                        htmlFor="cartera-select-payments"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                    >
-                        Cartera
-                    </label>
-                </div>
-                {/* Consulta en un row abajo, mismo ancho que Cartera */}
-                <div className="relative w-full mb-3">
-                    <select
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                        value={consulta}
-                        onChange={e => setConsulta(e.target.value)}
-                        id="consulta-select-payments"
-                    >
-                        <option value="">- Todas -</option>
-                        <option value="pagadas">Pagadas</option>
-                        <option value="pendientes">Pendientes</option>
-                    </select>
-                    <label
-                        htmlFor="consulta-select-payments"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                    >
-                        Consulta
-                    </label>
+                {/* Cartera y Consulta en el mismo row */}
+                <div className="flex flex-row gap-3 w-full mb-3">
+                    {/* Cartera */}
+                    <div className="relative w-1/2">
+                        <select
+                            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                            value={cartera}
+                            onChange={e => setCartera(e.target.value)}
+                            id="cartera-select-payments"
+                        >
+                            <option value={idCartera}>{`Cartera ${idCartera}`}</option>
+                        </select>
+                        <label
+                            htmlFor="cartera-select-payments"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        >
+                            Cartera
+                        </label>
+                    </div>
+                    {/* Consulta */}
+                    <div className="relative w-1/2">
+                        <select
+                            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                            value={consulta}
+                            onChange={e => setConsulta(e.target.value)}
+                            id="consulta-select-payments"
+                            disabled={loadingConsultas || errorConsultas}
+                        >
+                            <option value="">- Todas -</option>
+                            {consultasOptions.map((item) => (
+                                <option key={item.idConsulta || item.NombreConsulta} value={item.idConsulta}>
+                                    {item.NombreConsulta}
+                                </option>
+                            ))}
+                        </select>
+                        <label
+                            htmlFor="consulta-select-payments"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        >
+                            Consulta
+                        </label>
+                        {loadingConsultas && (
+                            <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                        )}
+                        {errorConsultas && (
+                            <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                        )}
+                    </div>
                 </div>
                 {/* Fechas */}
                 <div className="flex gap-3 mb-3">
@@ -78,15 +194,22 @@ const PaymentsContent = () => {
                         />
                     </div>
                 </div>
-                <div className="flex justify-center items-end w-full mt-2 mb-2">
+                {/* Espacio extra antes del botón */}
+                <div style={{ height: '2.5rem' }} />
+                <div className="flex justify-center items-end w-full mb-6">
                     <button
                         type="button"
                         className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
                         style={{ margin: '0 auto', display: 'block' }}
+                        onClick={handleDownloadExcel}
+                        disabled={loadingExcel || !consulta}
                     >
-                        Guardar Excel
+                        {loadingExcel ? "Descargando..." : "Guardar Excel"}
                     </button>
                 </div>
+                {errorExcel && (
+                    <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>
+                )}
             </div>
             {/* Footer con mensaje en la esquina inferior izquierda */}
             <div className="modal-span-2 text-sm text-left absolute left-0 bottom-0 mb-2 ml-2">
