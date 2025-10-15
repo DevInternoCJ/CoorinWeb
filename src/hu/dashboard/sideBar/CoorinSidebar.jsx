@@ -14,6 +14,7 @@ import {
   DocumentArrowDownIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
+import Logout from "../../logout/Logout"
 
 // Mapeo de nombres a componentes de Heroicons
 const iconMap = {
@@ -564,60 +565,7 @@ export const CoorinSidebar = ({
 
           {/* Footer */}
           <footer className="mt-auto p-2 border-t border-gray-200">
-            <div className="hs-dropdown [--strategy:absolute] [--auto-close:inside] relative w-full inline-flex">
-              <button
-                id="hs-sidebar-footer-example-with-dropdown"
-                type="button"
-                className="w-full inline-flex shrink-0 items-center gap-x-2 p-2 text-start text-sm text-gray-800 rounded-md hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
-                aria-haspopup="menu"
-                aria-expanded="false"
-                aria-label="Dropdown"
-                onClick={expandSidebar}>
-                <img
-                  className="shrink-0 size-5 rounded-full"
-                  src="https://images.unsplash.com/photo-1734122415415-88cb1d7d5dc0?q=80&w=320&h=320&auto=format&fit=facearea&facepad=3&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                  alt="Avatar"
-                />
-                {/* Oculta el nombre y el icono de flecha cuando está minificado */}
-                <span className="hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden whitespace-nowrap">
-                  Chicharron
-                </span>
-                <svg
-                  className="shrink-0 size-3.5 ms-auto hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round">
-                  <path d="m7 15 5 5 5-5" />
-                  <path d="m7 9 5-5 5 5" />
-                </svg>
-              </button>
-
-              {/* Oculta el dropdown cuando está minificado */}
-              <div
-                className="hs-dropdown-menu hs-dropdown-open:opacity-100 w-60 transition-[opacity,margin] duration opacity-0 hidden z-20 bg-white border border-gray-200 rounded-lg shadow-lg hs-overlay-minified:hidden"
-                role="menu"
-                aria-orientation="vertical"
-                aria-labelledby="hs-sidebar-footer-example-with-dropdown">
-                <div className="p-1">
-                  <a
-                    className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100"
-                    href="#">
-                    Coordinador
-                  </a>
-                  <a
-                    className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100"
-                    href="#">
-                    Cerrar Sesión
-                  </a>
-                </div>
-              </div>
-            </div>
+            <Logout/>
           </footer>
           {/* End Footer */}
         </div>

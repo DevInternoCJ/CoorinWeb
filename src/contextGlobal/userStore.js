@@ -1,9 +1,20 @@
 import { create } from 'zustand';
 
-//estato global del usuario de inicio de sesion(store )
 export const useUserStore = create((set) => ({
   user: null,
-  setUser: (user) => set({ user }),
-  logout: () => set({ user: null }),
-})); 
-
+  isAuthenticated: false,
+  
+  setUser: (user) => set({ user, isAuthenticated: !!user }),
+  
+  logout: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+    set({ user: null, isAuthenticated: false });
+  },
+  
+  clearUserData: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+    set({ user: null, isAuthenticated: false });
+  }
+}));

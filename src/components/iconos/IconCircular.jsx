@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 const IconCircular = ({ 
   children, 
@@ -10,15 +10,37 @@ const IconCircular = ({
   tooltip = "",
   tooltipPlacement = "top"
 }) => {
+  const tooltipRef = useRef(null);
+
+  useEffect(() => {
+    if (tooltip && tooltipRef.current && typeof window !== 'undefined') {
+      // Importar dinámicamente HSTooltip si está disponible
+      import('preline/preline').then(() => {
+        if (window.HSTooltip) {
+          window.HSTooltip.autoInit();
+        }
+      }).catch(() => {
+        // Si falla la importación, intentar inicializar directamente
+        if (window.HSStaticMethods) {
+          window.HSStaticMethods.autoInit(['tooltip']);
+        }
+      });
+    }
+  }, [tooltip]);
+
   if (tooltip) {
     return (
-      <div className={`hs-tooltip [--placement:${tooltipPlacement}] inline-block`}>
+      <div 
+        ref={tooltipRef}
+        className="hs-tooltip inline-block"
+        style={{ '--placement': tooltipPlacement }}
+      >
         <span 
           className={`hs-tooltip-toggle modal-span-1 inline-flex justify-center items-center ${size} rounded-full ${borderWidth} ${borderColor} ${bgColor} ${textColor} cursor-pointer`}
         >
           {children}
           <span
-            className="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-xs font-medium text-white rounded-md shadow-sm"
+            className="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-xs font-medium text-white rounded-md shadow-sm whitespace-nowrap"
             role="tooltip"
           >
             {tooltip}

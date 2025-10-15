@@ -70,11 +70,11 @@ const LampshadeFields = ({ isOpen, onClose }) => {
           title="Campos Pantalla"
           onClose={onClose}
           selectedProduct={selectedProduct}
-    setSelectedProduct={setSelectedProduct} // <-- ¡Verifica que esta línea sea idéntica!
-    verifyResult={verifyResult}
-    setVerifyResult={setVerifyResult}
-    loading={loading}
-    setLoading={setLoading}
+          setSelectedProduct={setSelectedProduct} // <-- ¡Verifica que esta línea sea idéntica!
+          verifyResult={verifyResult}
+          setVerifyResult={setVerifyResult}
+          loading={loading}
+          setLoading={setLoading}
         />
         <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
           {memoizedInfoSection}

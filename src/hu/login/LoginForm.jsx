@@ -186,7 +186,7 @@ const LoginForm = ({ onLoginSuccess }) => {
         Extensión: userInfo.Extensión,
         Encargado: userInfo.Encargado,
         idEncargado: userInfo.idEncargado,
-        idLoginIngresado: userInfo.idLoginIngresado,
+        idLogIngreso: userInfo.idLogIngreso,
         idProducto: userInfo.idProducto,
         Segmento: userInfo.Segmento,
       });
