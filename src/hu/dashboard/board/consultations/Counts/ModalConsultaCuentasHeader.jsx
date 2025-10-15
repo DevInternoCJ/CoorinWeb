@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { IconCuentas } from "../IconesConsultations";
 
 // Flecha tipo chevron moderna
@@ -22,43 +22,104 @@ const DropdownArrow = () => (
     </span>
 );
 
-const ModalConsultaCuentasHeader = ({ onClose }) => (
-    <div className="flex items-center gap-4 mb-2 w-full">
-        {/* Título alineado a la izquierda */}
-        <h2 className="modal-title">
-            <IconCuentas className="modal-title-icon" />
-            Consulta cuentas - Coorin
-        </h2>
-        {/* Elementos centrados en el modal */}
-        <div className="flex-1 flex flex-row items-center justify-center">
-            <div className="flex items-center gap-8">
-                <span className="modal-span-1">Cartera</span>
-                <span className="modal-span-2">American Express</span>
-                <span className="modal-span-1 ml-8">Producto</span>
-                <div className="relative">
-                    <select className="modal-dropdown-select appearance-none">
-                        <option>Amex</option>
-                    </select>
-                    <DropdownArrow />
-                </div>
-                <span className="modal-span-1 ml-8">Consulta</span>
-                <div className="relative">
-                    <select className="modal-dropdown-select appearance-none">
-                        <option value=""> </option>
-                    </select>
-                    <DropdownArrow />
+const ModalConsultaCuentasHeader = ({ onClose }) => {
+    const [cartera, setCartera] = useState("american_express");
+    const [producto, setProducto] = useState("amex");
+    const [consulta, setConsulta] = useState("");
+
+    return (
+        <div className="flex items-center gap-4 mb-2 w-full">
+            {/* Título alineado a la izquierda */}
+            <h2 className="modal-title">
+                <IconCuentas className="modal-title-icon" />
+                Consulta cuentas
+            </h2>
+            {/* Elementos centrados en el modal */}
+            <div className="flex-1 flex flex-row items-center justify-center">
+                <div className="flex items-center gap-4">
+                    {/* Cartera */}
+                    <div className="relative min-w-[180px]">
+                        <select
+                            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
+                                focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                            value={cartera}
+                            onChange={(e) => setCartera(e.target.value)}
+                            id="cartera-select"
+                        >
+                            <option value="" disabled hidden></option>
+                            <option value="american_express">American Express</option>
+                            <option value="hsbc">HSBC</option>
+                            <option value="santander">Santander</option>
+                        </select>
+                        <label
+                            htmlFor="cartera-select"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
+                                peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500
+                                peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        >
+                            Cartera
+                        </label>
+                        
+                    </div>
+                    {/* Producto */}
+                    <div className="relative min-w-[150px]">
+                        <select
+                            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
+                                focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                            value={producto}
+                            onChange={(e) => setProducto(e.target.value)}
+                            id="producto-select"
+                        >
+                            <option value="" disabled hidden></option>
+                            <option value="amex">Amex</option>
+                            <option value="visa">Visa</option>
+                            <option value="mastercard">Mastercard</option>
+                        </select>
+                        <label
+                            htmlFor="producto-select"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
+                                peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500
+                                peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        >
+                            Producto
+                        </label>
+                       
+                    </div>
+                    {/* Consulta */}
+                    <div className="relative min-w-[150px]">
+                        <select
+                            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
+                                focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                            value={consulta}
+                            onChange={(e) => setConsulta(e.target.value)}
+                            id="consulta-select"
+                        >
+                            <option value="" disabled hidden></option>
+                            <option value="general">General</option>
+                            <option value="detalle">Detalle</option>
+                        </select>
+                        <label
+                            htmlFor="consulta-select"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
+                                peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500
+                                peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        >
+                            Consulta
+                        </label>
+                        
+                    </div>
                 </div>
             </div>
+            {/* Botón de cierre */}
+            <button
+                onClick={onClose}
+                className="modal-btn modal-btn-close ml-4"
+                aria-label="Cerrar"
+            >
+                &times;
+            </button>
         </div>
-        {/* Botón de cierre */}
-        <button
-            onClick={onClose}
-            className="modal-btn modal-btn-close ml-4"
-            aria-label="Cerrar"
-        >
-            &times;
-        </button>
-    </div>
-);
+    );
+};
 
 export default ModalConsultaCuentasHeader;

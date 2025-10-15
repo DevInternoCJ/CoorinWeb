@@ -241,11 +241,11 @@ export const CoorinSidebar = ({
 
   const asideClass = `${
     isMinified ? "hs-overlay-minified " : ""
-  }hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 transition-transform duration-150 transform fixed top-0 start-0 bottom-0 z-50 bg-white border-e border-gray-200 ${
+  }hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 transition-transform duration-150 transform fixed top-0 start-0 bottom-0 bg-white border-e border-gray-200 ${
     isMinified ? "w-[3.25rem]" : "w-64"
   } min-h-screen flex flex-col overflow-x-hidden ${
     isOpen ? "translate-x-0" : "-translate-x-full hidden"
-  }`;
+  }${isMinified ? " z-40" : " z-50"}`;
   // Función para expandir la sidebar si está en modo minificado
   const expandSidebar = () => {
     if (isMinified) {
