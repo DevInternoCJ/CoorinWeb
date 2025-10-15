@@ -164,7 +164,7 @@ namespace Loki.Mark.Auth.Controllers
 
 		[HttpGet("validar-sesion")]
 		[SwaggerOperation(
-			Summary = "Verificar Sesión Activa",
+			Summary = "Verificar Sesión Activa - Yoshi",
 			Description = "Consulta si un ejecutivo tiene una sesión activa actualmente en el servidor indicado."
 		)]
 		[ProducesResponseType(typeof(object), StatusCodes.Status200OK)] // Devuelve un objeto anónimo { TieneSesionActiva = true/false }
@@ -197,7 +197,7 @@ namespace Loki.Mark.Auth.Controllers
 
 		[HttpGet("auth-tester")]
 		[SwaggerOperation(
-			Summary = "Probar Autenticación",
+			Summary = "Probar Autenticación - Yoshi",
 			Description = "Verifica que el token JWT sea válido. Solo retorna un mensaje de éxito si el JWT es correcto."
 		)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
@@ -211,7 +211,7 @@ namespace Loki.Mark.Auth.Controllers
 		[HttpPost("restablecer-contrasenia")]
 		[AllowAnonymous]
 		[SwaggerOperation(
-			Summary = "Restablecer Contraseña",
+			Summary = "Restablecer Contraseña - Yoshi",
 			Description = "Ejecuta un procedimiento almacenado para restablecer la contraseña de un ejecutivo en el servidor indicado."
 		)]
 		[ProducesResponseType(typeof(object), StatusCodes.Status200OK)] // Depende del tipo de resultado que retorne el servicio
@@ -280,32 +280,38 @@ namespace Loki.Mark.Auth.Controllers
 			return token;
 		}
 
-        [HttpPut("cerrar-sesión")]
-        [Authorize]
-        [SwaggerOperation(
-          Summary = "cerrar-sesión -irene",
-          Description = "cierra del ejecutivo"
-          )]
-        public async Task<IActionResult> Logout([FromBody] logout request)
-        {
-            try
-            {
-                string? servidor = User.FindFirst("Servidor")?.Value;
-                if (string.IsNullOrWhiteSpace(servidor))
-                {
-                    return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-                }
+		[HttpPut("cerrar-sesion")]
+		[Authorize]
+		[SwaggerOperation(
+			Summary = "Cerrar Sesión de Ejecutivo - Irene", // Resumen más profesional
+			Description = "Cierra una sesión activa de un ejecutivo seleccionado."
+		)]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(typeof(object), 400)]
+		[ProducesResponseType(typeof(object), 404)]
+		public async Task<IActionResult> Logout([FromBody] logout request)
+		{
 
-                var result = await _authService.Logout(request, servidor);
+			string? servidor = User.FindFirst("Servidor")?.Value;
+			if (string.IsNullOrWhiteSpace(servidor))
+			{
+				return BadRequest(new { error = "Claim 'Servidor' inválido o no encontrado en el token." });
+			}
 
-                return Ok(new { mensaje = "Sesión cerrada correctamente." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = $"Error interno del servidor: {ex.Message}" });
-            }
-        }
+			var fueExitoso = await _authService.Logout(request, servidor);
+
+			if (!fueExitoso)
+			{
+				// 404 Not Found si la sesión a cerrar no se encontró
+				return NotFound(new { message = "La sesión a cerrar no fue encontrada o ya estaba inactiva." });
+			}
+
+			// 204 No Content es el estándar para una acción exitosa que no necesita devolver datos
+			return Ok(new { mensaje = "Sesión cerrada correctamente." });
 
 
-    }
+		}
+
+
+	}
 }

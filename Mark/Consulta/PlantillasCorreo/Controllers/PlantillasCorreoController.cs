@@ -1,5 +1,5 @@
 ﻿using Loki.DTOs.PlantillasCorreoDTOs;
-using Loki.Mark.Consulta.Histórico.Interfaces;
+using Loki.Mark.Consulta.Historico.Interfaces;
 using Loki.Mark.Consulta.PlantillasCorreo.Interfaces;
 using Loki.Mark.Consulta.PlantillasCorreo.Services;
 using Microsoft.AspNetCore.Authorization;

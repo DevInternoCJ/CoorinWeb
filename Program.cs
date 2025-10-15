@@ -78,9 +78,9 @@ using Loki.Mark.Administracion.Ejecutivos.Metas.Services;
 using Loki.Mark.Consulta.ListaNegra.DAOs;
 using Loki.Mark.Consulta.ListaNegra.Interfaces;
 using Loki.Mark.Consulta.ListaNegra.Services;
-using Loki.Mark.Consulta.Histórico.Interfaces;
-using Loki.Mark.Consulta.Histórico.Services;
-//using Loki.Mark.Consulta.Histórico.DAOs;
+using Loki.Mark.Consulta.Historico.Interfaces;
+using Loki.Mark.Consulta.Historico.Services;
+//using Loki.Mark.Consulta.Historico.DAOs;
 using Loki.Mark.Consulta.PlantillasCorreo.Interfaces;
 using Loki.Mark.Consulta.PlantillasCorreo.Services;
 using Loki.Mark.Consulta.PlantillasCorreo.DAOs;
@@ -89,7 +89,7 @@ using Loki.Mark.Administracion.Consulta.Arrepentimientos.Interfaces;
 using Loki.Mark.Consulta.Arrepentimientos.Services;
 using Loki.Mark.Consulta.Productividad.Services;
 using Loki.Mark.Consulta.Productividad.Interfaces;
-using Loki.Mark.Consulta.Histórico.DAOs;
+using Loki.Mark.Consulta.Historico.DAOs;
 using Loki.Mark.Administracion.Carteras.Interfaces;
 using Loki.Mark.Administracion.Carteras.DAOs;
 using Loki.Mark.Administracion.Gespa.CamposPantalla.Interfaces;
@@ -119,6 +119,8 @@ using Loki.Mark.Consulta.Informacion.Ofrecimientos.Services;
 using Loki.Mark.Consulta.Informacion.Ofrecimientos.DAOs;
 using Loki.Mark.Consulta.Informacion.Comentarios.DAOs;
 using Loki.Mark.Consulta.Informacion.Comentarios.Services;
+using Loki.Mark.Reportes.Ejecutivos.DAOs;
+using Loki.Mark.Reportes.Ejecutivos.Services;
 
 
 
@@ -313,6 +315,15 @@ builder.Services.AddScoped<IOfrecimientosDAO, OfrecimientosDAO>();
 
 builder.Services.AddScoped<IComentariosService, ComentariosService>();
 builder.Services.AddScoped<IComentariosDAO, ComentariosDAO>();
+
+#endregion
+
+
+#region Reportes
+
+builder.Services.AddScoped<IReporteEjecutivosService, ReporteEjecutivosService>();
+builder.Services.AddScoped<IReporteEjecutivosDAO, ReporteEjecutivosDAO>();
+
 #endregion
 
 

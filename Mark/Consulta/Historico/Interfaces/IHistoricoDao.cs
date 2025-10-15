@@ -3,7 +3,7 @@ using System.Data;
 using System.Data.Common;
 using static Loki.DTOs.HistoricoDTOs.Consulta;
 
-namespace Loki.Mark.Consulta.Histórico.Interfaces
+namespace Loki.Mark.Consulta.Historico.Interfaces
 {
     public interface IHistoricoDao
     {
