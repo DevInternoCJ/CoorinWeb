@@ -1,7 +1,7 @@
 ﻿using Loki.DTOs.Informacion.BusquedasDTOs;
 using Loki.DTOs.Informacion.PagosDTOs; // Reutilizamos el DTO de Pagos
 
-namespace Loki.Mark.Consulta.Informacion.Busquedas.Services
+namespace Loki.Mark.Consulta.Informacion.Busquedas.Interfaces
 {
 	public interface IBusquedasService
 	{
