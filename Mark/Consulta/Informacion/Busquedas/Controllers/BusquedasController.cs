@@ -1,5 +1,6 @@
 ﻿using Loki.DTOs.Informacion.BusquedasDTOs;
 using Loki.DTOs.Informacion.PagosDTOs;
+using Loki.Mark.Consulta.Informacion.Busquedas.Interfaces;
 using Loki.Mark.Consulta.Informacion.Busquedas.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

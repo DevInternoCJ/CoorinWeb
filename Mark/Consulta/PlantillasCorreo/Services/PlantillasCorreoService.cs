@@ -1,6 +1,6 @@
 ﻿using CoorinWeb.Loki.Global;
 using Loki.DTOs.PlantillasCorreoDTOs;
-using Loki.Mark.Consulta.Histórico.Interfaces;
+using Loki.Mark.Consulta.Historico.Interfaces;
 using Loki.Mark.Consulta.PlantillasCorreo.DAOs;
 using Loki.Mark.Consulta.PlantillasCorreo.Interfaces;
 using Microsoft.Data.SqlClient;

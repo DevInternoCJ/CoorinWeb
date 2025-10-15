@@ -41,10 +41,6 @@
 
   <ItemGroup>
     <Folder Include="Mark\Consulta\Arrepentimientos\DAOs\" />
-    <Folder Include="Mark\Consulta\Histórico\Controllers\" />
-    <Folder Include="Mark\Consulta\Histórico\Interfaces\" />
-    <Folder Include="Mark\Consulta\Histórico\Services\" />
-    <Folder Include="Mark\Consulta\Informacion\Comentarios\Controllers\" />
   </ItemGroup>
 
   
