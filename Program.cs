@@ -263,8 +263,6 @@ builder.Services.AddScoped<ICamposPantallaService, CamposPantallaService>();
 builder.Services.AddScoped<IHistoricoService, HistoricoService>();
 builder.Services.AddScoped<CustomDbContextFactory>();
 
-
-
 builder.Services.AddScoped<TuAplicacion.Services.ReporteGeneradorService>();
 builder.Services.AddScoped<IHistoricoService, HistoricoService>();
 builder.Services.AddScoped<IHistoricoDao, HistoricoDao>();
@@ -277,7 +275,9 @@ builder.Services.AddScoped<EjecutivoDao>();
 builder.Services.AddScoped<ICatalogosService, CatalogosService>();
 builder.Services.AddScoped<Loki.Mark.Consulta.Cuenta.Interfaces.ICatalogosServiceRe,
                    Loki.Mark.Consulta.Cuenta.Services.CatalogosService>();
-
+//generales
+builder.Services.AddScoped<Loki.Mark.Consulta.Generales.Interfaces.IGenerales,
+                   Loki.Mark.Consulta.Generales.Services.GeneralesServices>();
 // En Program.cs, cambia a:
 builder.Services.AddSingleton<Loki.Global.ExcelGeneratorService>();
 builder.Services.AddScoped<AccionamientosQueryHelper>();
