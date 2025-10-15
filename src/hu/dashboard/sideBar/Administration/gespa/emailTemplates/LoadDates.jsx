@@ -157,8 +157,8 @@ const LoadDates = ({
     return <div className="text-center py-8 text-red-500">Error: {error}</div>;
 
   return (
-    <div className="max-w-6xl mx-auto p-4 bg-white rounded-lg shadow-md border border-gray-200">
-      <div className="mb-8">
+    <div className="max-w-6xl mx-auto rounded-lg ">
+      <div className="">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
@@ -220,7 +220,7 @@ const LoadDates = ({
       </div>
 
       {/* Vista de tabla horizontal - Encabezados TAMBIÉN arrastrables */}
-      <div className="mt-8">
+      <div className="mt-4">
            <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
           <table className="bg-white min-w-full">
             <tbody>
@@ -273,13 +273,11 @@ const LoadDates = ({
             </tbody>
           </table>
         </div>
-
-        <div className="mt-2 text-xs text-gray-500 text-center">
-          Desliza horizontalmente para ver todos los campos → | Los encabezados también son arrastrables
-        </div>
       </div>
     </div>
   );
 };
 
 export default LoadDates;
+
+

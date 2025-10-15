@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import WalletSection from "../WalletSection";
 import ModalHeader from "../ModalHeader";
 import Template from "./Template";
-import { IconTemplate } from "../IconsTemplates";
 import LoadDates from "./LoadDates";
 import { PostLoadData } from "../../../../../../services/mark/albaz/LokiServices";
 import ModalBase from "../../../../board/ModalBase";
+import { IconScreens } from "../IconsTemplates";
 
 const EmailTemplates = ({ onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -16,7 +15,7 @@ const EmailTemplates = ({ onClose }) => {
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
   const [datosDeudor, setDatosDeudor] = useState({}); // ✅ Nuevo estado para datosDeudor
-  const [datosProductoCompleto, setDatosProductoCompleto] = useState({}); 
+  const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
 
   const actualizarPlantillas = async () => {
     // Puedes usar el mismo requestData que usa LoadDates
@@ -55,15 +54,6 @@ const EmailTemplates = ({ onClose }) => {
     };
   }, []);
 
-  const handleProductSelect = (product) => {
-    setSelectedProduct(product);
-    // Mostrar las tablas de datos cuando se selecciona Amex (value = 1)
-    if (product && product.value === 1) {
-      setShowDataTables(true);
-    } else {
-      setShowDataTables(false);
-    }
-  };
 
   return (
     <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -75,25 +65,20 @@ const EmailTemplates = ({ onClose }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
-          icon={<IconTemplate className="size-6" />}
-          title="Plantillas Correos"
+          icon={<IconScreens className="size-6" />}
+          title="Plantillas de Correo"
           onClose={onClose}
+          selectedProduct={selectedProduct}
+          setSelectedProduct={setSelectedProduct}
+          verifyResult={verifyResult}
+          setVerifyResult={setVerifyResult}
+          loading={loading}
+          setLoading={setLoading}
+          setShowDataTables={setShowDataTables}
         />
-
-        {/* Content específico de EmailTemplates */}
         <div
-          div
-          className="p-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4"
+          className="px-6 pb-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4"
         >
-          <WalletSection
-            selectedProduct={selectedProduct}
-            setSelectedProduct={setSelectedProduct}
-            verifyResult={verifyResult}
-            setVerifyResult={setVerifyResult}
-            loading={loading}
-            setLoading={setLoading}
-            onProductSelect={handleProductSelect}
-          />
           {selectedProduct && (
             <Template
               plantillas={plantillas}
@@ -104,7 +89,7 @@ const EmailTemplates = ({ onClose }) => {
             />
           )}
           {showDataTables && selectedProduct && (
-            <div className="mt-6 border-t pt-6">
+            <div >
               <LoadDates
                 selectedProduct={selectedProduct}
                 onPlantillasChange={setPlantillas}
@@ -120,3 +105,4 @@ const EmailTemplates = ({ onClose }) => {
 };
 
 export default EmailTemplates;
+
