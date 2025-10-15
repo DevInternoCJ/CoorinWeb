@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import ModalConsultaCuentasHeader from "./ModalConsultaCuentasHeader";
 import ModalConsultaCuentasFiltros from "./ModalConsultaCuentasFiltros";
 import ModalConsultaCuentasColumnas from "./ModalConsultaCuentasColumnas";
@@ -7,9 +7,9 @@ import ModalConsultaCuentasFooter from "./ModalConsultaCuentasFooter";
 const ModalConsultaCuentas = ({ onClose }) => {
     const [situacionOptions, setSituacionOptions] = useState([]);
 
-    const handleGetSituacionOptions = (options) => {
+    const handleGetSituacionOptions = useCallback((options) => {
         setSituacionOptions(options);
-    };
+    }, []);
 
     return (
         <div className="modal-xl-container" style={{ maxWidth: "98vw", overflowX: "hidden" }}>

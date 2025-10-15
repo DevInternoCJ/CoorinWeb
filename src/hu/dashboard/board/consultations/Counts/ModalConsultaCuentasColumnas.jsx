@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import IconCircular from "../../../../../components/iconos/IconCircular";
 const ModalConsultaCuentasColumnas = ({ situacionOptions = [] }) => {
   const [columnas, setColumnas] = useState([]);
 
@@ -28,15 +28,49 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [] }) => {
       className="bg-white rounded-lg p-2 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col"
       style={{ minWidth: 0 }}
     >
-      <div className="flex items-center mb-2 w-full">
-        <span
-          className="modal-span-1 pl-1"
-          style={{ color: "var(--color-jerarquia2)", minWidth: 80 }}
-        >
-          Columnas
-        </span>
-        <div className="flex-1 flex justify-center">
-          <button 
+      <div className="grid grid-cols-3 items-center gap-2 mb-2 w-full">
+          <IconCircular 
+              bgColor="bg-iconCircular" 
+              textColor="text-gray-800" 
+              borderColor="border-gray-50"
+              size="size-8"
+              borderWidth="border-4"
+              tooltip="Columnas"
+              tooltipPlacement="right"
+            >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="0.88em" height="1em" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96c0-35.3 28.7-64 64-64h320c35.3 0 64 28.7 64 64v320c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64zm64 64v256h128V160zm320 0H256v256h128z"/></svg>
+
+            </IconCircular>
+     
+        <div className="flex justify-center items-center gap-1 col-span-1">
+          <label className="flex items-center gap-1.5 px-1.5 py-0.5 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10] transition-colors">
+            <input
+              type="radio"
+              name="tipo"
+              defaultChecked
+              className="modal-radio"
+            />
+            <span className="whitespace-nowrap text-xs font-semibold" style={{ color: "var(--color-jerarquia4)" }}>Contar</span>
+          </label>
+          <label className="flex items-center gap-1.5 px-1.5 py-0.5 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10] transition-colors">
+            <input 
+              type="radio" 
+              name="tipo" 
+              className="modal-radio" 
+            />
+            <span className="whitespace-nowrap text-xs font-semibold" style={{ color: "var(--color-jerarquia4)" }}>Detalle</span>
+          </label>
+          <label className="flex items-center gap-1.5 px-1.5 py-0.5 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10] transition-colors">
+            <input 
+              type="radio" 
+              name="tipo" 
+              className="modal-radio" 
+            />
+            <span className="whitespace-nowrap text-xs font-semibold" style={{ color: "var(--color-jerarquia4)" }}>Cuentas</span>
+          </label>
+        </div>
+        <div className="flex justify-end items-center col-span-1">
+          <button
             className="btn-info"
             onClick={agregarColumna}
             disabled={situacionOptions.length === 0}
@@ -65,7 +99,14 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [] }) => {
           <tbody>
             {columnas.length === 0 ? (
               <tr>
-                <td colSpan="2" style={{ textAlign: "center", color: "#666", fontStyle: "italic" }}>
+                <td
+                  colSpan="2"
+                  style={{
+                    textAlign: "center",
+                    color: "#666",
+                    fontStyle: "italic",
+                  }}
+                >
                   No hay columnas agregadas
                 </td>
               </tr>
