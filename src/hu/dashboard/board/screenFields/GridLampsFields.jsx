@@ -1,25 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { GetGridFields } from "../../../../services/mark/albaz/LokiServices"; // Ajusta la ruta según tu estructura
+import { GetGridFields } from "../../../../services/mark/albaz/LokiServices";
+import useSelectedRowStore from "./selectedRowStore";
 
 const GridLampsFields = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // Parámetros requeridos por el endpoint
+  const [draggedHeader, setDraggedHeader] = useState(""); // Estado para el header que se arrastra
   const servidor = "Albaz";
-  const idProducto = 1; // Reemplaza con el ID de producto adecuado
+  const idProducto = 1;
+  const { setSelectedRow, selectedRowIndex } = useSelectedRowStore();
+
   useEffect(() => {
     if (!idProducto || idProducto === 0) return;
     const fetchGridData = async () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Llamar al servicio con los parámetros
         const data = await GetGridFields(idProducto);
-
-        // Transformar los datos si es necesario
-        // La API ya devuelve un array de objetos, así que podemos usarlo directamente
         setTableData(data);
       } catch (err) {
         console.error("Error fetching grid data:", err);
@@ -28,9 +26,27 @@ const GridLampsFields = () => {
         setLoading(false);
       }
     };
-
     fetchGridData();
   }, [servidor, idProducto]);
+  
+  // Cuando comienza el arrastre del header
+  const handleDragStart = (e, headerName) => {
+    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.setData('text/plain', `[${headerName}]`);
+    setDraggedHeader(headerName);
+    console.log(`Arrastrando header: [${headerName}]`);
+  };
+
+  // Cuando termina el arrastre
+  const handleDragEnd = () => {
+    setDraggedHeader('');
+  };
+
+  // Manejar click en fila usando el store
+  const handleRowClick = (row, index) => {
+    console.log("GridLampsFields - Click en fila:", index, row);
+    setSelectedRow(row, index);
+  };
 
   if (loading) {
     return (
@@ -42,7 +58,6 @@ const GridLampsFields = () => {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
@@ -77,7 +92,6 @@ const GridLampsFields = () => {
       </div>
     );
   }
-
   if (tableData.length === 0) {
     return (
       <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
@@ -89,17 +103,29 @@ const GridLampsFields = () => {
   }
 
   return (
-    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-      <div className="overflow-x-auto border rounded-lg max-h-96">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+      <div className="overflow-x-auto border border-background-primary rounded-lg max-h-96">
         <table className="min-w-full bg-white">
-          <thead className=" ">
-            <tr className=" bg-background-secondary border-b">
-              {Object.keys(tableData[0]).map((key) => (
+          <thead>
+            <tr className="bg-background-secondary border-b">
+              {Object.keys(tableData[0] || {}).map((key) => (
                 <th
                   key={key}
-                  className="py-2 px-3 text-left text-xs font-bold text-neutral-100 whitespace-nowrap"
+                  draggable="true"
+                  onDragStart={(e) => handleDragStart(e, key)}
+                  onDragEnd={handleDragEnd}
+                  className={`
+                    py-2 px-3 text-left text-xs font-bold text-neutral-100 whitespace-nowrap
+                    cursor-grabbing select-none
+                    hover:bg-slate-600 active:bg-slate-500
+                    transition-all duration-150
+                    ${draggedHeader === key ? 'opacity-50 scale-95 bg-slate-500' : ''}
+                  `}
+                  title="Arrastra este encabezado a Alias o Campos"
                 >
-                  {key}
+                  <span className="inline-flex items-center gap-2">   
+                    {key}
+                  </span>
                 </th>
               ))}
             </tr>
@@ -108,22 +134,22 @@ const GridLampsFields = () => {
             {tableData.map((row, index) => (
               <tr
                 key={index}
-                className={
-                  index % 2 === 0
-                    ? "bg-white border-b-jerarquia4"
-                    : "bg-gray-100 border-b-jerarquia4"
-                }
+                className={`
+                  ${index % 2 === 0 ? "bg-white" : "bg-gray-100"} 
+                  border-b-jerarquia4 
+                  cursor-pointer 
+                  transition-colors 
+                  duration-200
+                  ${selectedRowIndex === index ? 'bg-blue-100 border-blue-500 border-2' : 'hover:bg-gray-200'}
+                `}
+                onClick={() => handleRowClick(row, index)}
               >
                 {Object.values(row).map((value, i) => (
                   <td
                     key={i}
                     className={`py-2 px-3 text-sm border-b-jerarquia4 whitespace-nowrap ${
-                      // Aplicar estilos especiales a ciertas columnas
-                      typeof value === "number"
-                        ? "text-right font-medium"
-                        : "text-left"
+                      typeof value === "number" ? "text-right font-medium" : "text-left"
                     } ${
-                      // Colorear valores monetarios
                       Object.keys(row)[i] === "currentbalance" ||
                       Object.keys(row)[i] === "initialbalance"
                         ? "text-green-700"
@@ -145,17 +171,10 @@ const GridLampsFields = () => {
           </tbody>
         </table>
       </div>
-
-      <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-md p-2">
-        <p className="text-xs text-yellow-800">
-          <span className="font-medium">
-            Desplaza horizontalmente para ver todas las columnas.
-          </span>
-          Se están mostrando {Object.keys(tableData[0]).length} columnas.
-        </p>
-      </div>
     </div>
   );
 };
 
 export default GridLampsFields;
+
+

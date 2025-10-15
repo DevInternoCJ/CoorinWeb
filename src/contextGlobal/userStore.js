@@ -6,3 +6,4 @@ export const useUserStore = create((set) => ({
   setUser: (user) => set({ user }),
   logout: () => set({ user: null }),
 })); 
+
