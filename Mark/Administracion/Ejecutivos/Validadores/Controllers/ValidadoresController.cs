@@ -27,7 +27,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
             _daobase = daobase;
         }
         [HttpGet("validadores")]
-        [SwaggerOperation(Summary = "Obtiene validadores",
+        [SwaggerOperation(Summary = "validadores - irene",
         Description = "obtiene una lista de validadores al ingresar el idproducto y tipobase, la cual retorna una lista de idEejecutivo correspondiente")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<ValidadoresDTO>>> ObtieneValidadores(int idProducto)
@@ -52,7 +52,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
 
 
         [HttpGet("validadores-arrepentimientos")]
-        [SwaggerOperation(Summary = "validadores arrepentimientos",
+        [SwaggerOperation(Summary = "validadores arrepentimientos - irene",
             Description = "obtiene los idEjecutivo de acuerdo al id del producto especificado extrayendo de la tabla validadoresArrepentimientos")]
         [Authorize] 
         public async Task<ActionResult<IEnumerable<ValidadoresDTO>>> ObtieneValidadoresArrepentimientos(int idProducto)
@@ -78,7 +78,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
         [HttpPost("inserta-elimina-validador")]
         [Authorize]
         [SwaggerOperation(
-            summary: "inserta elimina validadores",
+            summary: "inserta elimina validadores - irene",
             Description = "Inserta un validador en la tabla validadores, de existir hace una eliminación del validador que coincida con el especificado en dbcollection")]
 
         public async Task<ActionResult> InsertaEliminaValidadores([FromBody] ValidadoresRequest dto)
@@ -103,7 +103,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
         [HttpPost("inserta-elimina-validadores-arrepentimientos")]
         [Authorize]
         [SwaggerOperation(
-            Summary = "inserta elimina Validadores Arrepentimientos",
+            Summary = "inserta elimina Validadores arrepentimientos - irene",
             Description = "Inserta un validador arrepentimiento y en caso de existir lo elimina")]
         public async Task<ActionResult> InsertaEliminaValidadoresArrepentimientos([FromBody] ValidadoresRequest dto)
         {
