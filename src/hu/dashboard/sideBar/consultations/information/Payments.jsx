@@ -116,12 +116,12 @@ const PaymentsContent = () => {
     };
 
     return (
-        <div className="w-full max-w-xs mx-auto py-6 flex flex-col items-center">
+    <div className="w-full max-w-xs mx-auto flex flex-col items-center" style={{ minHeight: 0, height: 'auto' }}>
             {/* Logo centrado arriba de Cartera */}
             <div className="flex justify-center mb-4 w-full">
                 <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
             </div>
-            <div className="w-full mb-6 relative" style={{ minHeight: 320 }}>
+            <div className="w-full relative">
                 {/* Cartera y Consulta en el mismo row */}
                 <div className="flex flex-row gap-3 w-full mb-3">
                     {/* Cartera */}
@@ -194,9 +194,7 @@ const PaymentsContent = () => {
                         />
                     </div>
                 </div>
-                {/* Espacio extra antes del botón */}
-                <div style={{ height: '2.5rem' }} />
-                <div className="flex justify-center items-end w-full mb-6">
+                <div className="flex justify-center items-end w-full">
                     <button
                         type="button"
                         className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
@@ -211,9 +209,11 @@ const PaymentsContent = () => {
                     <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>
                 )}
             </div>
-            {/* Footer con mensaje en la esquina inferior izquierda */}
-            <div className="modal-span-2 text-sm text-left absolute left-0 bottom-0 mb-2 ml-2">
-                Elija la consulta de las cuentas que desee los pagos y el periodo de los pagos.
+            {/* Footer informativo */}
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginTop: 52 }}>
+                <span className="text-gray-600 text-sm pl-2">
+                    Elija la consulta de las cuentas que desee los pagos y el periodo de los pagos.
+                </span>
             </div>
         </div>
     );

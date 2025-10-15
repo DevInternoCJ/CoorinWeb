@@ -87,7 +87,7 @@ const dataEjemplo = [
 const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
     // El tamaño del modal ahora lo controla el padre, así que solo usamos mostrarTabla/setMostrarTabla
     return (
-        <div style={{ width: '100%', height: '100%' }} className="flex flex-col items-center min-h-[400px]">
+        <div style={{ width: '100%' }} className="flex flex-col items-center">
             {/* Logo centrado arriba de los campos */}
             <div className="flex flex-col items-center w-full">
                 <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
@@ -97,7 +97,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                 className="flex flex-col items-center w-full"
                 style={{
                     flex: 1,
-                    marginTop: mostrarTabla ? '2.2rem' : '1.2rem', // más espacio cuando la tabla está visible
+                    marginTop: mostrarTabla ? '2.2rem' : '1.2rem',
                     transition: 'margin-top 0.2s',
                 }}
             >
@@ -140,7 +140,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                         Consulta
                     </label>
                 </div>
-                <div className="flex gap-3 w-full max-w-xs justify-center" style={{ marginBottom: '0.7rem' }}>
+                <div className="flex gap-3 w-full max-w-xs justify-center">
                     <button
                         type="button"
                         className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
@@ -192,7 +192,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                 </div>
             )}
             {/* Footer informativo */}
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', minHeight: 32, marginTop: 8 }}>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginTop: 52 }}>
                 {!mostrarTabla ? (
                     <span className="text-gray-600 text-sm pl-2">
                         Seleccione un intervalo para mostrar los pagos reportados y dé click en "Buscar".

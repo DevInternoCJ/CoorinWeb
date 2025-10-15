@@ -107,25 +107,14 @@ export default function CoorinDashboard() {
           ContentComponent = null;
       }
 
-      // Tamaño base del modal
-      let modalSize = {};
+      // Usar size='pagos' por default y size='pagos-xl' cuando mostrarTablaPagosReportados sea true
+      let size = undefined;
       if (selectedSidebarOption === "Pagos reportados") {
-        // Tamaño compacto por defecto, 20% más grande cuando mostrarTablaPagosReportados es true
-        modalSize = mostrarTablaPagosReportados
-          ? {
-              maxWidth: "1104px", // 920px * 1.2
-              minWidth: "828px",  // 690px * 1.2
-              height: "760px"     // 633px * 1.2
-            }
-          : {
-              maxWidth: "920px",
-              minWidth: "690px",
-              height: "633px"
-            };
+        size = mostrarTablaPagosReportados ? "pagos-xl" : "pagos";
       }
 
       return (
-        <ModalBaseInformacion onClose={closeModal} tipoInformacion={selectedSidebarOption} modalSize={modalSize}>
+        <ModalBaseInformacion onClose={closeModal} tipoInformacion={selectedSidebarOption} size={size}>
           {ContentComponent && <ContentComponent />}
         </ModalBaseInformacion>
       );
