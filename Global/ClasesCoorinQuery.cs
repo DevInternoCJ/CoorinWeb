@@ -1066,13 +1066,20 @@ namespace CoorinWeb.Loki.Global
                     ? 0 // valor por defecto si es necesario
                     : Convert.ToInt32(idCarteraParam);
 
+                //string sQuery = "SELECT \r\n",
+                //       sSelect = Conteo == Resultado.Detalle
+                //           ? "\t.idCuenta Cuenta, Car.Abreviación + CONVERT(VARCHAR(10),C.Expediente) \r\n"
+                //           : "\t COUNT(C.idCuenta) AS 'Cuentas', ISNULL(SUM(C.Saldo) ,0) AS 'Saldo' \r\n",
+                //       sFrom = " FROM dbCollection..Cuentas C WITH (NOLOCK) \r\n",
+                //       sWhere = " WHERE C.CuentaActiva = 1 AND C.idCartera = " + idCartera + (idProducto == null ? "" : " AND C.idProducto = " + idProducto) + " \r\n",
+                //       sGroupBy = "";
                 string sQuery = "SELECT \r\n",
-                       sSelect = Conteo == Resultado.Detalle
-                           ? "\t.idCuenta Cuenta, Car.Abreviación + CONVERT(VARCHAR(10),C.Expediente) \r\n"
-                           : "\t COUNT(C.idCuenta) AS 'Cuentas', ISNULL(SUM(C.Saldo) ,0) AS 'Saldo' \r\n",
-                       sFrom = " FROM dbCollection..Cuentas C WITH (NOLOCK) \r\n",
-                       sWhere = " WHERE C.CuentaActiva = 1 AND C.idCartera = " + idCartera + (idProducto == null ? "" : " AND C.idProducto = " + idProducto) + " \r\n",
-                       sGroupBy = "";
+                     sSelect = Conteo == Resultado.Detalle
+                       ? "\tC.idCuenta AS Cuenta, Car.Abreviación + CONVERT(VARCHAR(10),C.Expediente) AS Expediente \r\n"
+                       : "\t COUNT(C.idCuenta) AS 'Cuentas', ISNULL(SUM(C.Saldo) ,0) AS 'Saldo' \r\n",
+                      sFrom = " FROM dbCollection..Cuentas C WITH (NOLOCK) \r\n",
+                      sWhere = " WHERE C.CuentaActiva = 1 AND C.idCartera = " + idCartera + (idProducto == null ? "" : " AND C.idProducto = " + idProducto) + " \r\n",
+                      sGroupBy = "";
 
                 //if ( idCarteraParam > 0 )
                 if (Conteo == Resultado.Cuentas || Conteo == Resultado.FilaDeTrabajo)

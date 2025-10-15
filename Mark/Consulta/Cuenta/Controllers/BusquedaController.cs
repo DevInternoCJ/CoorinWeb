@@ -33,41 +33,39 @@ namespace Loki.Controllers
         /// <param name="criteria">DTO con los criterios de búsqueda (filtros, agrupaciones, tipo de resultado, etc.).</param>
         /// <returns>Un SearchResultDto con el mensaje de resultado, datos (si es conteo) o ruta de descarga (si es detalle).</returns>
         [HttpPost("realizar-busqueda")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SearchResultDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<SearchResultDto>> RealizarBusqueda([FromBody] SearchCriteriaDto criteria)
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "realizar busqueda - irene",
+            Description = "realiza una busqueda por medio de idconsulta o parametros y agrupamientos"
+            )]
+        public async Task<IActionResult> RealizarBusqueda([FromBody] SearchCriteriaDto criteria)
         {
-            // Valida el modelo recibido del cliente
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState); // Retorna errores de validación del modelo automáticamente
-            }
-
             try
             {
-                // Llama al servicio de búsquedas para ejecutar la lógica principal
-                var result = await _busquedasService.RealizarBusquedaAsync(criteria);
+                // Validaciones básicas
+                if (string.IsNullOrWhiteSpace(criteria.Servidor))
+                    return BadRequest(new { error = "Debe proporcionar el nombre del servidor." });
 
-                // Si el servicio ya ha detectado un error de negocio o de base de datos
-                if (result.EsError)
-                {
-                    // Puedes decidir si es un BadRequest (problema con la entrada del usuario)
-                    // o un InternalServerError (problema en el servidor).
-                    // Aquí lo manejamos como BadRequest si el servicio lo marca como error.
-                    return BadRequest(result);
-                }
+                if (criteria.IdProducto == null || criteria.IdCartera == null)
+                    return BadRequest(new { error = "Debe proporcionar IdProducto y IdCartera." });
 
-                // Si la búsqueda fue exitosa, devuelve el resultado con un código 200 OK
+                // Llamada al servicio de búsqueda
+                var result = await _busquedasService.RealizaBusqueda(
+                  criteria.IdProducto,
+                  criteria.IdCartera,
+                  criteria.Servidor,
+                  esDetalleResultado: criteria.EsDetalleResultado
+              );
+
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                // Captura cualquier excepción no manejada en el servicio y la relanza.
-                // Tu middleware GlobalErrorHandler se encargará de loguearla y formatear la respuesta HTTP 500.
-                throw;
+                // Manejo centralizado de errores
+                return StatusCode(500, new { error = ex.Message });
             }
         }
+
 
         /// <summary>
         /// Permite la descarga de un archivo Excel previamente generado por una búsqueda de detalle.
@@ -76,39 +74,32 @@ namespace Loki.Controllers
         /// <param name="filename">El nombre del archivo Excel a descargar (sin ruta, solo el nombre).</param>
         /// <returns>El archivo Excel como un flujo de bytes para descarga.</returns>
         [HttpGet("download-excel")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "descargar excel - Ramón",
+            Description = "descarga en un excel los datos obtenidos de la busqueda"
+            )]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult DownloadExcel([FromQuery] string filename)
         {
             if (string.IsNullOrWhiteSpace(filename))
-            {
-                return BadRequest("El nombre del archivo es obligatorio para la descarga.");
-            }
+                return BadRequest("El nombre del archivo es obligatorio.");
 
-            // Define la carpeta donde se guardan los archivos Excel exportados.
-            // ¡Asegúrate de que esta ruta coincida con la usada en ExcelGeneratorService!
-            string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports");
-            string filePath = Path.Combine(uploadsFolder, filename);
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports", filename);
 
-            // Verifica si el archivo existe en el servidor
             if (!System.IO.File.Exists(filePath))
-            {
-                return NotFound($"El archivo '{filename}' no fue encontrado en el servidor.");
-            }
+                return NotFound("El archivo no existe o ya fue eliminado.");
 
-            // Prepara el archivo para ser devuelto como un flujo de bytes
-            var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-
-            // Devuelve el archivo. El tipo de contenido (MediaTypeNames.Application.Octet) es un tipo genérico para datos binarios.
-            // Para archivos Excel XLSX, puedes usar "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".
-            return File(fileStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+            var fileBytes = System.IO.File.ReadAllBytes(filePath);
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
         }
 
         [HttpPost("guardar-consulta")]
         [AllowAnonymous]
         [SwaggerOperation(
-           Summary = "guardar consulta - irene",
+           Summary = "guardar/eliminar consulta - irene",
            Description = "Se genera una consulta personalizada para reutilizarla posteriormente"
         )]
 
