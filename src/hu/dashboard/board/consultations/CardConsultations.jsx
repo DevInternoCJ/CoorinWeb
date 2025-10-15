@@ -4,20 +4,29 @@ import { ExecutiveChart } from "../../DashboardIcons";
 import { IconCuentas, IconProductividad, IconGenerales, IconHistoricos,IconExecutive,IconDayExecutive } from "./IconesConsultations";
 import ModalConsultaCuentas from "./counts/ModalConsultaCuentas";
 import ModalBaseCuentas from "./counts/ModalBaseCuentas";
-import ModalConsultaProductividad from "./Productivity/ModalConsultaProductividad";
-import ModalBaseProductividad from "./productivity/ModalBaseProductividad";
+import ProductivityModal from "./Productivity/ModalProductivityModal";
 import ModalConsultaGenerales from "./Generals/ModalConsultaGenerales";
 import ModalBaseGenerales from "./Generals/ModalBaseGenerales";
-import ModalConsultaHistoricos from "./Historical/ModalConsultaHistoricos";
-import ModalBaseHistoricos from "./Historical/ModalBaseHistoricos";
-import ModalConsultaEjecutivos from "./Executives/ModalConsultaEjecutivos";
-import ModalBaseEjecutivos from "./Executives/ModaBaseEjecutivos";
-const CardConsultations = () => {
+import HistoricosModal from "./Historical/ModalHistoricosModal";
+import ModalConsultaEjecutivosModal from "./Executives/ModalConsultaEjecutivosModal";
+const CardConsultations = ({ onModalOpen, onModalClose }) => {
     const [open, setOpen] = useState(false);
     const [openProductividad, setOpenProductividad] = useState(false);
     const [openGenerales, setOpenGenerales] = useState(false);
     const [openHistoricos, setOpenHistoricos] = useState(false);
     const [openEjecutivos, setOpenEjecutivos] = useState(false);
+
+    // Funciones para manejar la apertura de modales
+    const handleOpenModal = (modalSetter) => {
+        modalSetter(true);
+        if (onModalOpen) onModalOpen();
+    };
+
+    // Función para manejar el cierre de modales
+    const handleCloseModal = (modalSetter) => {
+        modalSetter(false);
+        if (onModalClose) onModalClose();
+    };
 
     return (
         <>
@@ -30,7 +39,7 @@ const CardConsultations = () => {
                         style={{ backgroundColor: `var(--${catalog.color})` }}
                         tabIndex={0}
                         role="button"
-                        onClick={() => setOpen(true)}
+                        onClick={() => handleOpenModal(setOpen)}
                     >
                         {/* Máscara opaca al hacer hover */}
                         <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-15 transition-opacity duration-100"></div>
@@ -70,13 +79,13 @@ const CardConsultations = () => {
                         style={{ backgroundColor: `var(--${catalog.color})` }}
                         onClick={() => {
                             if (catalog.title === "Productividad") {
-                                setOpenProductividad(true);
+                                handleOpenModal(setOpenProductividad);
                             } else if (catalog.title === "Generales") {
-                                setOpenGenerales(true);
+                                handleOpenModal(setOpenGenerales);
                             } else if (catalog.title === "Historicos") {
-                                setOpenHistoricos(true);
+                                handleOpenModal(setOpenHistoricos);
                             }else if (catalog.title === "Ejecutivos") {
-                                setOpenEjecutivos(true);
+                                handleOpenModal(setOpenEjecutivos);
                             } 
                             
                             else {
@@ -148,22 +157,26 @@ const CardConsultations = () => {
                         </div>
                     </div>                )
             )}
-            <ModalBaseCuentas open={open} onClose={() => setOpen(false)}>
-                <ModalConsultaCuentas onClose={() => setOpen(false)} />
+            <ModalBaseCuentas open={open} onClose={() => handleCloseModal(setOpen)}>
+                <ModalConsultaCuentas onClose={() => handleCloseModal(setOpen)} />
             </ModalBaseCuentas>
-            <ModalBaseProductividad open={openProductividad} onClose={() => setOpenProductividad(false)}>
-                <ModalConsultaProductividad onClose={() => setOpenProductividad(false)} />
-            </ModalBaseProductividad>
-            <ModalBaseGenerales open={openGenerales} onClose={() => setOpenGenerales(false)}>
-                <ModalConsultaGenerales onClose={() => setOpenGenerales(false)} />
+            <ProductivityModal 
+                isOpen={openProductividad} 
+                onClose={() => handleCloseModal(setOpenProductividad)}
+            />
+            <ModalBaseGenerales open={openGenerales} onClose={() => handleCloseModal(setOpenGenerales)}>
+                <ModalConsultaGenerales onClose={() => handleCloseModal(setOpenGenerales)} />
             </ModalBaseGenerales>
-            <ModalBaseHistoricos open={openHistoricos} onClose={() => setOpenHistoricos(false)}>
-                <ModalConsultaHistoricos onClose={() => setOpenHistoricos(false)} />
-
-            </ModalBaseHistoricos>
-            <ModalBaseEjecutivos open={openEjecutivos} onClose={() => setOpenEjecutivos(false)}>
-                <ModalConsultaEjecutivos onClose={() => setOpenEjecutivos(false)} />
-            </ModalBaseEjecutivos>
+            
+            {/* Modal de Históricos */}
+            <HistoricosModal 
+                isOpen={openHistoricos}
+                onClose={() => handleCloseModal(setOpenHistoricos)}
+            />
+            <ModalConsultaEjecutivosModal 
+                isOpen={openEjecutivos}
+                onClose={() => handleCloseModal(setOpenEjecutivos)}
+            />
         </>
     );
 };

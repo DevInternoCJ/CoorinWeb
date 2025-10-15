@@ -29,20 +29,40 @@ export default function CoorinDashboard() {
   const [modalSidebarOpen, setModalSidebarOpen] = useState(false);
   const [selectedSidebarOption, setSelectedSidebarOption] = useState("");
   
+  // Estados para controlar modales de las cards
+  const [executiveModalOpen, setExecutiveModalOpen] = useState(false);
+  const [consultationModalOpen, setConsultationModalOpen] = useState(false);
+  
+  // Función para cerrar el sidebar (será pasada al CoorinSidebar)
+  const [closeSidebarFn, setCloseSidebarFn] = useState(null);
+
+  // Efecto para cerrar el sidebar cuando se abran modales de las cards
+  useEffect(() => {
+    if ((executiveModalOpen || consultationModalOpen) && closeSidebarFn) {
+      closeSidebarFn();
+    }
+  }, [executiveModalOpen, consultationModalOpen, closeSidebarFn]);
+
   // Mapeo directo para renderizar cada componente con su propio modal
+  // Estado para controlar si la tabla de Pagos reportados está visible
+  const [mostrarTablaPagosReportados, setMostrarTablaPagosReportados] = useState(false);
+
   const renderSelectedComponent = () => {
-    const closeModal = () => setModalSidebarOpen(false);
-    
+    const closeModal = () => {
+      setModalSidebarOpen(false);
+      setMostrarTablaPagosReportados(false); // Reiniciar al cerrar
+    };
+
     // Componentes de información que usan el ModalBaseInformacion
     const informationComponents = [
       "Lista Negra", "Arrepentimientos",
       "Pagos", "Pagos reportados", "Datos Erroneos", "Domicilios", 
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios", "VGP"
     ];
-    
+
     if (informationComponents.includes(selectedSidebarOption)) {
       let ContentComponent;
-      
+
       switch (selectedSidebarOption) {
         case "Lista Negra":
           ContentComponent = DarkListContent;
@@ -54,7 +74,13 @@ export default function CoorinDashboard() {
           ContentComponent = PaymentsContent;
           break;
         case "Pagos reportados":
-          ContentComponent = ReportingPaymentsContent;
+          ContentComponent = (props) => (
+            <ReportingPaymentsContent
+              mostrarTabla={mostrarTablaPagosReportados}
+              setMostrarTabla={setMostrarTablaPagosReportados}
+              {...props}
+            />
+          );
           break;
         case "Datos Erroneos":
           ContentComponent = WrongsContent;
@@ -80,9 +106,15 @@ export default function CoorinDashboard() {
         default:
           ContentComponent = null;
       }
-      
+
+      // Usar size='pagos' por default y size='pagos-xl' cuando mostrarTablaPagosReportados sea true
+      let size = undefined;
+      if (selectedSidebarOption === "Pagos reportados") {
+        size = mostrarTablaPagosReportados ? "pagos-xl" : "pagos";
+      }
+
       return (
-        <ModalBaseInformacion onClose={closeModal} tipoInformacion={selectedSidebarOption}>
+        <ModalBaseInformacion onClose={closeModal} tipoInformacion={selectedSidebarOption} size={size}>
           {ContentComponent && <ContentComponent />}
         </ModalBaseInformacion>
       );
@@ -184,14 +216,17 @@ export default function CoorinDashboard() {
     <>
       <CoorinSidebar 
         onMenuClick={handleSidebarMenuClick}
+        isModalOpen={executiveModalOpen || consultationModalOpen}
+        onRegisterCloseFunction={setCloseSidebarFn}
       />
-      <main className="flex-1 bg-background-dashboard min-h-0 relative z-0 flex flex-col">
+      <main className="flex-1 bg-background-dashboard h-screen relative z-0 flex flex-col overflow-hidden">
         <div
-          className="transition-transform duration-200 flex-1 min-h-0 overflow-auto"
+          className="transition-transform duration-200 flex-1 overflow-y-auto overflow-x-hidden"
           style={{
             marginLeft: sidebarMinified ? "2.5rem" : undefined,
             marginBottom: "0",
             marginTop: "0",
+            maxHeight: "100vh"
           }}
         >
           <div className="relative z-0 py-14 sm:py-2">
@@ -202,7 +237,10 @@ export default function CoorinDashboard() {
 
               <div className="mt-2 grid grid-cols-6 gap-4 sm:mt-8 md:mt-8 lg:mt-0 xl:mt-0">
                 <div className="col-span-6">
-                  <GridExecutives />
+                  <GridExecutives 
+                    onModalOpen={() => setExecutiveModalOpen(true)}
+                    onModalClose={() => setExecutiveModalOpen(false)}
+                  />
                 </div>
               </div>
 
@@ -213,11 +251,14 @@ export default function CoorinDashboard() {
                   </span>
                 </div>
                 <div className="-mt-2">
-                  <GridConsultations />
+                  <GridConsultations 
+                    onModalOpen={() => setConsultationModalOpen(true)}
+                    onModalClose={() => setConsultationModalOpen(false)}
+                  />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mt-8 w-full">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-8 w-full mb-8">
                 <div className="relative w-full">
                   <RamificacionSesiones
                     onExecutiveSelect={setSelectedExecutiveId}

@@ -1,0 +1,104 @@
+/* 
+ * Estilos de Backdrop para Modales Reutilizables
+ * Diferentes efectos de fondo para los modales
+ */
+
+/* Backdrop por defecto - Gris transparente con blur suave */
+.modal-backdrop-default {
+  background: rgba(107, 114, 128, 0.25) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+/* Backdrop transparente con blur - Como el original */
+.modal-blur-bg {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(6px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(6px) saturate(180%) !important;
+  animation: fadeInBackdrop 0.3s ease-out;
+}
+
+/* Backdrop ligero - Muy sutil */
+.modal-backdrop-light {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+}
+
+/* Backdrop oscuro - Para modales importantes */
+.modal-backdrop-dark {
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+}
+
+/* Backdrop sin blur - Solo transparencia */
+.modal-backdrop-simple {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Backdrop con efecto de cristal */
+.modal-backdrop-glass {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1), 
+    rgba(255, 255, 255, 0.05)
+  ) !important;
+  backdrop-filter: blur(8px) brightness(110%) !important;
+  -webkit-backdrop-filter: blur(8px) brightness(110%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Animaciones para los backdrops */
+@keyframes fadeInBackdrop {
+  from {
+    background: rgba(255, 255, 255, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(6px) saturate(180%);
+    -webkit-backdrop-filter: blur(6px) saturate(180%);
+  }
+}
+
+@keyframes fadeInDark {
+  from {
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+}
+
+@keyframes fadeInGlass {
+  from {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0), 
+      rgba(255, 255, 255, 0)
+    );
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.1), 
+      rgba(255, 255, 255, 0.05)
+    );
+    backdrop-filter: blur(8px) brightness(110%);
+    -webkit-backdrop-filter: blur(8px) brightness(110%);
+  }
+}
+
+/* Aplicar animaciones específicas */
+.modal-backdrop-dark {
+  animation: fadeInDark 0.3s ease-out;
+}
+
+.modal-backdrop-glass {
+  animation: fadeInGlass 0.3s ease-out;
+}

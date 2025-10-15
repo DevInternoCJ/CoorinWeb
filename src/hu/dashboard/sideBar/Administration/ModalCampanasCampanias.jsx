@@ -7,6 +7,7 @@ import NewCampaign from "./NewCampaign";
 import ModalToponeHundred from "./ModalToponeHundred";
 
 const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
+    const [selectedId, setSelectedId] = useState(null);
     const [campanas, setCampanas] = useState([]);
     const [updatingId, setUpdatingId] = useState(null);
     const [modalLimpiar, setModalLimpiar] = useState({ open: false, idCampaña: null, nombre: "" });
@@ -93,7 +94,7 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                                 style={{ minHeight: 0, height: '28px', lineHeight: '1.1', cursor: 'pointer' }}
                                 onClick={() => {
                                     if (row.idCampaña) {
-                                        console.log('idCampaña', row.idCampaña, 'nombre:', row.Campaña);
+                                        setSelectedId(row.idCampaña);
                                         if (typeof onSeleccionCampaña === 'function') {
                                             onSeleccionCampaña(row.idCampaña, row.Campaña);
                                         }
@@ -108,6 +109,7 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                                         setModalTop100({ open: true, idCampaña: row.idCampaña });
                                     }
                                 }}
+                                className={selectedId === row.idCampaña ? "selected-campaign-row" : ""}
                             >
                                 <td style={{ textAlign: 'center', height: '28px', lineHeight: '1.1', paddingTop: 0, paddingBottom: 0 }}>
                                     <button
@@ -197,6 +199,7 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                 cartera={modalFilas.cartera}
                 idCampaña={modalFilas.idCampaña}
                 nombreCampaña={modalFilas.nombreCampaña}
+                onSuccess={cargarCampanas}
             />
             {modalLimpiar.open && (
                 <div style={{

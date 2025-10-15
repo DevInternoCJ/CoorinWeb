@@ -142,28 +142,27 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
     }, [selectedExecutiveId, idEjecutivoSesion]);
 
     return (
-    <div className="relative bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-6 w-full h-82">
-        <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-800">
+    <div className=" bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64">
+        <h3 className="text-base lg:text-lg font-semibold mb-4 flex items-center text-gray-800">
             <span className="mr-2">
                 {/* Icono personalizado para Sesiones */}
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="inline-block w-6 h-6 text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="inline-block w-5 h-5 lg:w-6 lg:h-6 text-gray-700">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
                 </svg>
             </span>
             Sesiones
         </h3>
-        <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex-1 w-full overflow-hidden">
+        <div className="bg-white rounded-lg p-2 lg:p-3 shadow border border-[var(--color-jerarquia1)] flex-1 w-full overflow-hidden">
             <div
                 style={{
                     overflowX: "auto",
                     overflowY: "auto",
-                    maxHeight: "22vh",
                     scrollbarColor: "#b0b0b0 #f5f5f5",
                     scrollbarWidth: "thin"
                 }}
-                className="scrollbar-gray w-full"
+                className="scrollbar-gray w-full max-h-[30vh] lg:max-h-[22vh]"
             >
-                <table className="modal-table">
+                <table className="modal-table text-xs lg:text-sm" style={{ minWidth: '100%' }}>
                     <thead>
                         <tr>
                             <th>Ejecutivo</th>
@@ -255,7 +254,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                                 </td>
                                 <td>
                                     <button 
-                                        className="modal-btn modal-btn-outline"
+                                        className="modal-btn modal-btn-outline text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-2"
                                         onClick={() => {
                                             if (!passwordReset.has(session.usuario) && resettingPassword !== session.usuario) {
                                                 handleResetPassword(session.usuario);
