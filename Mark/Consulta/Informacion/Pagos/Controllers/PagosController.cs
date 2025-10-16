@@ -26,8 +26,8 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Controllers
 		[AllowAnonymous]
 		public async Task<IActionResult> ConsultarPagos([FromBody] ConsultaPagosRequest request)
 		{
-			//string? servidorClaim = User.FindFirst("Servidor")?.Value;
-			string? servidorClaim = "Albaz";
+			string? servidorClaim = User.FindFirst("Servidor")?.Value;
+			//string? servidorClaim = "Albaz";
 
 			if (string.IsNullOrWhiteSpace(servidorClaim))
 			{
