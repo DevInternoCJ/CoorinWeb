@@ -157,33 +157,36 @@ namespace CoorinWeb.Loki.Mark.Auth.DAOs.AuthDAOs
             var dbContext = _dbContFactory.GetDbContext(servidor, tipoBase);
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 
-            // Ejecutar SP CierraSesión
-            var nombreSp = "dbMemory.PS.CierraSesión";
-            var resultado = await _daoBase.ExecuteStoredProcedure(
-                dbContext,
-                nombreSp,
-                new SqlParameter("@idEjecutivo", request.IdEjecutivo ?? (object)DBNull.Value),
-                new SqlParameter("@idLogIngreso", request.IdLogIngreso ?? (object)DBNull.Value)
-            );
-
-
-            if (resultado == null)
+            if (request.IdEjecutivo == null || request.IdLogIngreso == null)
             {
-                const string updateQuery = @"
-            UPDATE dbCollection..LogIngreso
-            SET Segundo_Salida = GETDATE()
-            WHERE idLogIngreso = @idLogIngreso;
-        ";
-
-                using var command = new SqlCommand(updateQuery, sqlConnection);
-                command.Parameters.Add(new SqlParameter("@idLogIngreso", request.IdLogIngreso ?? (object)DBNull.Value));
-
-                await command.ExecuteNonQueryAsync();
+                throw new ArgumentException("Se requieren ambos parámetros: IdEjecutivo e IdLogIngreso");
             }
+            var nombreSp = "dbMemory.PS.CierraSesión";
 
-            sqlConnection.Close();
+            try
+            {
+                var resultado = await _daoBase.ExecuteStoredProcedure(
+                    dbContext,
+                    nombreSp,
+                    new SqlParameter("@idEjecutivo", request.IdEjecutivo),
+                    new SqlParameter("@idLogIngreso", request.IdLogIngreso)
+                );
 
-            return true;
+                return true;
+            }
+            catch (SqlException ex)
+            {
+
+                if (ex.Message.Contains("expects parameter") || ex.Number == 201)
+                {
+                    throw new ArgumentException($"Error en parámetros del stored procedure: {ex.Message}");
+                }
+                throw;
+            }
+            finally
+            {
+                sqlConnection?.Close();
+            }
         }
 
     }

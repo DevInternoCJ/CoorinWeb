@@ -293,61 +293,43 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         /// <param name="idProducto">id del producto.</param>
         /// 
         public async Task CargarColumnasProductoAsync(
-    IDbContextFactory dbContextFactory,
-    string servidor,
-    string tipoBase,
-    object idProducto,
-    object? idCartera = null,
-    bool chkSanta = true)
+      IDbContextFactory dbContextFactory,
+      string servidor,
+      string tipoBase,
+      int idProducto) // Cambiado de object a int
         {
-            if (idProducto == null && idCartera == null)
-                return;
+            if (idProducto <= 0) return;
 
-            try
+            string tableName = $"Producto_{idProducto}";
+
+            using var conn = dbContextFactory.GetSqlConnection(servidor, tipoBase);
+
+            string query = @"
+SELECT LOWER(name) AS name 
+FROM dbCollection.sys.columns 
+WHERE object_id = OBJECT_ID('Y.' + @TableName)";
+
+            using var cmd = new SqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@TableName", tableName);
+
+            if (conn.State != ConnectionState.Open)
+                await conn.OpenAsync();
+
+            var dt = new DataTable(tableName);
+            using var da = new SqlDataAdapter(cmd);
+            da.Fill(dt);
+
+            // Solo agregar si hay columnas
+            if (dt.Columns.Contains("name") && dt.Rows.Count > 0)
             {
-                using var conn = dbContextFactory.GetSqlConnection(servidor, tipoBase);
-
-                string tableName = idCartera != null
-                    ? $"Cartera_{idCartera}"
-                    : $"Producto_{idProducto}";
+                dt.DefaultView.Sort = "name";
+                dt.DefaultView.RowFilter = "name <> 'idcuenta'";
+                dt = dt.DefaultView.ToTable();
 
                 if (_dsTablas.Tables.Contains(tableName))
                     _dsTablas.Tables.Remove(tableName);
 
-                // Construimos la consulta SQL correctamente
-                string query = $@"
-            SELECT LOWER(name) AS name
-            FROM dbCollection.sys.columns
-            WHERE object_id = OBJECT_ID('Y.{tableName}')";
-
-                using var cmd = new SqlCommand(query, conn);
-                var dt = new DataTable(tableName);
-                using var da = new SqlDataAdapter(cmd);
-
-                if (conn.State != ConnectionState.Open)
-                    await conn.OpenAsync();
-
-                da.Fill(dt);
-
-                // Aplicamos filtro chkSanta solo si hay datos
-                if (!chkSanta && tableName.StartsWith("Cartera_"))
-                {
-                    dt.Clear(); // opcional según tu lógica
-                }
-
-                // Agregamos la tabla siempre, aunque esté vacía
                 _dsTablas.Tables.Add(dt);
-
-                // Ordenamos y filtramos columnas específicas
-                if (dt.Columns.Contains("name"))
-                {
-                    dt.DefaultView.Sort = "name";
-                    dt.DefaultView.RowFilter = "name <> 'idcuenta'";
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al cargar columnas de producto/cartera: {ex.Message}");
             }
         }
 
@@ -561,24 +543,18 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         /// <param name="idProducto">id del producto</param>
         /// <returns></returns>
         /// 
-        public  async Task<DataTable> ProductoColumnasAsync(
-        IDbContextFactory dbContextFactory,
-        string servidor,
-        string tipoBase,
-        object idProducto,
-        object? idCartera = null,
-        bool chkSanta = true)
-            {
+        public async Task<DataTable> ProductoColumnasAsync(
+     IDbContextFactory dbContextFactory,
+     string servidor,
+     string tipoBase,
+     int idProducto)
+        {
             try
             {
                 // Llamamos al método asíncrono que carga columnas
-                await CargarColumnasProductoAsync(dbContextFactory, servidor, tipoBase, idProducto, idCartera, chkSanta);
+                await CargarColumnasProductoAsync(dbContextFactory, servidor, tipoBase, idProducto);
 
-                string nombreCartera = idCartera != null ? $"Cartera_{idCartera}" : null;
                 string nombreProducto = $"Producto_{idProducto}";
-
-                if (!string.IsNullOrEmpty(nombreCartera) && _dsTablas.Tables.Contains(nombreCartera))
-                    return _dsTablas.Tables[nombreCartera];
 
                 if (_dsTablas.Tables.Contains(nombreProducto))
                     return _dsTablas.Tables[nombreProducto];
@@ -587,7 +563,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al obtener columnas de producto/idCartera: {ex.Message}");
+                Console.WriteLine($"Error al obtener columnas de producto: {ex.Message}");
                 return new DataTable();
             }
         }

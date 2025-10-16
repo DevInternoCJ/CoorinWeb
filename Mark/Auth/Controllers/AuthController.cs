@@ -280,38 +280,44 @@ namespace Loki.Mark.Auth.Controllers
 			return token;
 		}
 
-		[HttpPut("cerrar-sesion")]
-		[Authorize]
-		[SwaggerOperation(
-			Summary = "Cerrar Sesión de Ejecutivo - Irene", // Resumen más profesional
-			Description = "Cierra una sesión activa de un ejecutivo seleccionado."
-		)]
-		[ProducesResponseType(200)]
-		[ProducesResponseType(typeof(object), 400)]
-		[ProducesResponseType(typeof(object), 404)]
-		public async Task<IActionResult> Logout([FromBody] logout request)
-		{
+        [HttpPut("cerrar-sesión")]
+        [Authorize]
+        [SwaggerOperation(
+      Summary = "cerrar-sesión -irene",
+      Description = "cierra del ejecutivo"
+  )]
+        public async Task<IActionResult> Logout([FromBody] logout request)
+        {
+            try
+            {
+                // Validación individual para IdEjecutivo
+                if (request.IdEjecutivo == null)
+                {
+                    return BadRequest(new { error = "El parámetro IdEjecutivo es requerido" });
+                }
 
-			string? servidor = User.FindFirst("Servidor")?.Value;
-			if (string.IsNullOrWhiteSpace(servidor))
-			{
-				return BadRequest(new { error = "Claim 'Servidor' inválido o no encontrado en el token." });
-			}
+                // Validación individual para IdLogIngreso
+                if (request.IdLogIngreso == null)
+                {
+                    return BadRequest(new { error = "El parámetro IdLogIngreso es requerido" });
+                }
 
-			var fueExitoso = await _authService.Logout(request, servidor);
+                string? servidor = User.FindFirst("Servidor")?.Value;
+                if (string.IsNullOrWhiteSpace(servidor))
+                {
+                    return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+                }
 
-			if (!fueExitoso)
-			{
-				// 404 Not Found si la sesión a cerrar no se encontró
-				return NotFound(new { message = "La sesión a cerrar no fue encontrada o ya estaba inactiva." });
-			}
+                var result = await _authService.Logout(request, servidor);
 
-			// 204 No Content es el estándar para una acción exitosa que no necesita devolver datos
-			return Ok(new { mensaje = "Sesión cerrada correctamente." });
+                return Ok(new { mensaje = "Sesión cerrada correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = $"Error interno del servidor: {ex.Message}" });
+            }
+        }
 
+    }
 
-		}
-
-
-	}
 }
