@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { infoEjecutivo, getExportReportPayments } from "../../../../../services/mark/albaz/LokiServices";
 
@@ -8,15 +8,17 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
     // Obtener datos de usuario
     const userData = JSON.parse(localStorage.getItem("userData"));
     const idCartera = userData?.idCartera || 1;
-    const idProducto = userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
-    const jerarquia = userData?.jerarquia ?? userData?.Jerarquia ?? 4;
     const idEjecutivo = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.ejecutivo ?? null;
+    const idProductoDefault = userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
+    const jerarquiaDefault = userData?.jerarquia ?? userData?.Jerarquia ?? 4;
 
     // Estados para filtros y datos
     const [cartera, setCartera] = useState(idCartera);
     const [consulta, setConsulta] = useState("");
     const [desde, setDesde] = useState(new Date().toISOString().slice(0, 10));
     const [hasta, setHasta] = useState(new Date().toISOString().slice(0, 10));
+    const [idProducto, setIdProducto] = useState(idProductoDefault);
+    const [jerarquia, setJerarquia] = useState(jerarquiaDefault);
     const [consultasOptions, setConsultasOptions] = useState([]);
     const [loadingConsultas, setLoadingConsultas] = useState(false);
     const [errorConsultas, setErrorConsultas] = useState(null);
@@ -47,23 +49,34 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
             .finally(() => setLoadingConsultas(false));
     }, [idCartera, idProducto, idEjecutivo]);
 
-    // Buscar pagos reportados
-    const handleBuscar = async () => {
+
+    // Estado para guardar los parámetros usados en la primera solicitud (persistente)
+    const [paramsGuardados, setParamsGuardados] = useState(() => {
+        const saved = localStorage.getItem('reportingPaymentsParams');
+        return saved ? JSON.parse(saved) : null;
+    });
+
+    // Memorizar los parámetros actuales
+    const searchParams = useMemo(() => ({
+        idCartera: cartera,
+        idConsulta: consulta,
+        idProducto,
+        desde,
+        hasta,
+        jerarquia
+    }), [cartera, consulta, idProducto, desde, hasta, jerarquia]);
+
+
+    // Callback para solicitar los datos usando los parámetros guardados si existen
+    const fetchPagosReportados = useCallback(async () => {
         setLoadingTabla(true);
         setErrorTabla(null);
         setTablaData([]);
+        // Usar los parámetros guardados si existen, si no los actuales
+        const params = paramsGuardados || searchParams;
         try {
-            const params = {
-                idCartera: cartera,
-                idConsulta: consulta,
-                idProducto,
-                desde,
-                hasta,
-                jerarquia
-            };
-            console.log('📤 Enviando a getExportReportPayments:', params);
+            console.log('Enviando a getExportReportPayments:', params);
             const response = await getExportReportPayments(params);
-            // La respuesta puede estar en response.data o response.data.data
             let data = response?.data ?? response;
             if (Array.isArray(data)) {
                 setTablaData(data);
@@ -73,13 +86,41 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                 setTablaData([]);
                 setErrorTabla("No se encontraron resultados.");
             }
-            setMostrarTabla(true);
         } catch (err) {
             setErrorTabla("Error al obtener los pagos reportados.", err);
         } finally {
             setLoadingTabla(false);
         }
-    };
+    }, [searchParams, paramsGuardados]);
+
+
+    // El primer click expande el modal y guarda los parámetros, el segundo hace la búsqueda con esos parámetros
+    const handleBuscar = useCallback(() => {
+        console.log('🔎 searchParams (useMemo) al hacer clic en Buscar:', searchParams);
+        if (!mostrarTabla) {
+            setParamsGuardados(searchParams); // Guardar los parámetros actuales
+            localStorage.setItem('reportingPaymentsParams', JSON.stringify(searchParams));
+            setMostrarTabla(true);
+        } else {
+            fetchPagosReportados();
+            localStorage.removeItem('reportingPaymentsParams');
+        }
+    }, [mostrarTabla, fetchPagosReportados, setMostrarTabla, searchParams]);
+
+    // Cuando se expande el modal, restaurar los parámetros guardados y hacer la búsqueda
+    useEffect(() => {
+        if (mostrarTabla && paramsGuardados) {
+            // Restaurar los valores visuales de los campos controlados
+            if (paramsGuardados.desde !== undefined) setDesde(paramsGuardados.desde);
+            if (paramsGuardados.hasta !== undefined) setHasta(paramsGuardados.hasta);
+            if (paramsGuardados.idConsulta !== undefined) setConsulta(paramsGuardados.idConsulta);
+            if (paramsGuardados.idCartera !== undefined) setCartera(paramsGuardados.idCartera);
+            if (paramsGuardados.idProducto !== undefined) setIdProducto(paramsGuardados.idProducto);
+            if (paramsGuardados.jerarquia !== undefined) setJerarquia(paramsGuardados.jerarquia);
+            fetchPagosReportados();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mostrarTabla, paramsGuardados]);
 
     // Exportar a Excel (CSV)
     const handleExportar = () => {
@@ -137,6 +178,8 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                     className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                                     value={desde}
                                     onChange={e => setDesde(e.target.value)}
+                                        min={new Date(new Date().setFullYear(new Date().getFullYear() - 6)).toISOString().slice(0, 10)}
+                                        max={new Date().toISOString().slice(0, 10)}
                                 />
                             </div>
                             <div className="hs-input-group w-full">
@@ -146,6 +189,8 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                     className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                                     value={hasta}
                                     onChange={e => setHasta(e.target.value)}
+                                        min={new Date(new Date().setFullYear(new Date().getFullYear() - 6)).toISOString().slice(0, 10)}
+                                        max={new Date().toISOString().slice(0, 10)}
                                 />
                             </div>
                         </div>
@@ -278,49 +323,79 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                             Exportar
                         </button>
                     </div>
-                    <div style={{ width: '100%', maxWidth: 1000, marginTop: 0, marginBottom: 12, borderRadius: 8, border: '1px solid #e0e0e0', background: '#fff', overflow: 'hidden' }}>
-                        <div style={{ width: '100%', overflow: 'hidden' }}>
-                            <table className="modal-table" style={{ minWidth: 900, width: '100%', tableLayout: 'fixed', borderCollapse: 'separate' }}>
-                                <thead style={{ position: 'sticky', top: 0, zIndex: 2, background: '#fff' }}>
+                    <div style={{ width: '100%', maxWidth: 1100, minHeight: 500, maxHeight: 500, marginTop: 0, marginBottom: 0, borderRadius: 8, border: '1px solid #e0e0e0', background: '#fff', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+                        <div style={{ width: '100%', height: '100%', overflowY: 'auto', flex: 1 }}>
+                            <table className="modal-table" style={{ minWidth: 900, width: '100%', height: '100%', tableLayout: 'auto', borderCollapse: 'separate' }}>
+                                <thead style={{ position: 'sticky', top: 0, background: '#fff' }}>
                                     <tr>
-                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '12.5%' }}>Cartera</th>
-                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '12.5%' }}>Cuenta</th>
-                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '15%' }}>Nombre Ejecutivo</th>
-                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '12.5%' }}>Fecha Pago</th>
-                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '12.5%' }}>Hora</th>
-                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '12.5%' }}>Monto Pago</th>
-                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '12.5%' }}>Referencia</th>
-                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '10%' }}>Sucursal</th>
+                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>Cartera</th>
+                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>Cuenta</th>
+                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>Nombre Ejecutivo</th>
+                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>Fecha Pago</th>
+                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>Hora</th>
+                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>Monto Pago</th>
+                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>Referencia</th>
+                                        <th style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>Sucursal</th>
                                     </tr>
                                 </thead>
-                            </table>
-                        </div>
-                        <div style={{ width: '100%', maxHeight: 400, overflowY: 'auto', overflowX: 'hidden' }}>
-                            <table className="modal-table" style={{ minWidth: 900, width: '100%', tableLayout: 'fixed', borderCollapse: 'separate' }}>
-                                <tbody>
-                                    {tablaData.length === 0 && !loadingTabla && (
-                                        <tr><td colSpan={8} className="text-center text-gray-500">Sin resultados</td></tr>
+                                <tbody style={{ background: '#b6d6f6' }}>
+                                    {loadingTabla && (
+                                        <tr>
+                                            <td colSpan={8} style={{ textAlign: 'center', height: 320, verticalAlign: 'middle' }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                                                    <div className="animate-spin" style={{ border: '4px solid #e0e0e0', borderTop: '4px solid #3b82f6', borderRadius: '50%', width: 48, height: 48, marginBottom: 12 }}></div>
+                                                    <span className="text-gray-500">Cargando...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     )}
-                                    {tablaData.map((row, idx) => (
+                                    {!loadingTabla && tablaData.length === 0 && (
+                                        <tr>
+                                            <td colSpan={8} style={{ textAlign: 'center', height: 320, verticalAlign: 'middle' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                                                    <span className="text-gray-500" style={{ fontSize: 18 }}>Aún no hay registros</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                    {!loadingTabla && tablaData.map((row, idx) => (
                                         <tr key={idx}>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '12.5%' }}>{row.cartera}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '12.5%' }}>{row.cuenta}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '15%' }}>{row.nombreEjecutivo}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '12.5%' }}>{row.fechaPago ? row.fechaPago.replace(/T00:00:00$/, "") : ""}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '12.5%' }}>{row.hora}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '12.5%' }}>{row.montoPago !== undefined && row.montoPago !== null ? `$${row.montoPago}` : ""}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '12.5%' }}>{row.referencia}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '10%' }}>{row.sucursal}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.cartera}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.cuenta}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.nombreEjecutivo}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.fechaPago ? row.fechaPago.replace(/T00:00:00$/, "") : ""}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.hora}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.montoPago !== undefined && row.montoPago !== null ? `$${row.montoPago}` : ""}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.referencia}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.sucursal}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
+                        {/* Spinner animación CSS */}
+                        <style>{`
+                            .animate-spin {
+                                animation: spin 1s linear infinite;
+                            }
+                            @keyframes spin {
+                                0% { transform: rotate(0deg); }
+                                100% { transform: rotate(360deg); }
+                            }
+                        `}</style>
                     </div>
                     {errorTabla && <div className="text-red-500 text-xs text-center mt-1">{errorTabla}</div>}
                 </>
             )}
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginTop: 52 }}>
+            <div
+                style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    marginTop: !mostrarTabla ? 52 : 0
+                }}
+            >
                 {!mostrarTabla ? (
                     <span className="text-gray-600 text-sm pl-2">
                         Seleccione un intervalo y la consulta para mostrar los pagos reportados y dé click en "Buscar".
