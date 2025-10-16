@@ -178,9 +178,11 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         /// 
 
 
-        public  async Task<DataTable> CargarUsuariosRHAsync(IDbContextFactory dbContextFactory, string servidor, string tipoBase, string usuarioRH)
+        public async Task<(DataTable dt, int idEjecutivo, string mensaje)> CargarUsuariosRHAsync(IDbContextFactory dbContextFactory, string servidor, string tipoBase, string usuarioRH)
         {
             var dtUsuariosRH = new DataTable("UsuariosRH");
+            int idEjecutivo = 0;
+            string mensaje = string.Empty;
 
             try
             {
@@ -188,13 +190,9 @@ namespace Loki.Mark.Consulta.Cuenta.Services
 
                 // --- 1. Obtener idEjecutivo ---
                 const string queryId = @"
-                SELECT idEjecutivo 
-                FROM dbCollection..Ejecutivos 
-                WHERE LOWER(Usuario) = LOWER(@Usuario)";
-
-                int idEjecutivo = 0;
-                Console.WriteLine($"idEjecutivo encontrado para '{usuarioRH}': {idEjecutivo}");
-
+        SELECT idEjecutivo 
+        FROM dbCollection..Ejecutivos 
+        WHERE LOWER(Usuario) = LOWER(@Usuario)";
 
                 using (var cmd = new SqlCommand(queryId, conn))
                 {
@@ -205,10 +203,13 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     idEjecutivo = result != null ? Convert.ToInt32(result) : 0;
                 }
 
+                Console.WriteLine($"idEjecutivo encontrado para '{usuarioRH}': {idEjecutivo}");
+
                 if (idEjecutivo == 0)
                 {
-                    Console.WriteLine($"⚠ No se encontró idEjecutivo para el usuario {usuarioRH}");
-                    return dtUsuariosRH; // regresa tabla vacía
+                    mensaje = $"No se encontró idEjecutivo para el usuario '{usuarioRH}'";
+                    Console.WriteLine($"⚠ {mensaje}");
+                    return (dtUsuariosRH, idEjecutivo, mensaje);
                 }
 
                 // --- 2. Obtener datos de Usuarios RH ---
@@ -222,12 +223,16 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     da.Fill(dtUsuariosRH);
                 }
 
-                return dtUsuariosRH;
+                mensaje = $"Se encontraron {dtUsuariosRH.Rows.Count} registros para el idEjecutivo {idEjecutivo}";
+                Console.WriteLine($"✅ {mensaje}");
+
+                return (dtUsuariosRH, idEjecutivo, mensaje);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al cargar usuarios RH: {ex.Message}");
-                return dtUsuariosRH;
+                mensaje = $"Error al cargar usuarios RH: {ex.Message}";
+                Console.WriteLine(mensaje);
+                return (dtUsuariosRH, idEjecutivo, mensaje);
             }
         }
         /// <summary>
