@@ -25,8 +25,9 @@ const ProductivityModal = ({
     onClose,
     // Props opcionales para personalizar
     size = "productivity", // 76% del viewport
-    enableBounce = true,
+    enableBounce = false,
     enableShakeOnBackdropClick = true,
+    enableBounceOnBackdropOrEscape = true,
     closeOnBackdropClick = false,
     ...props
 }) => {
@@ -112,46 +113,15 @@ const ProductivityModal = ({
             onClose={onClose}
             size={size}
             showHeader={true}
-            headerComponent={({ onClose }) => (
-                <div className="px-3 pt-4 pb-3 sm:px-4 sm:pt-5 sm:pb-4 md:px-6 md:pt-6 md:pb-4 
-                        flex items-center justify-between 
-                        border-b-2 border-[var(--color-jerarquia1)]
-                        gap-3">
-                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                        <IconProductividad
-                            className="size-5 sm:size-6 flex-shrink-0"
-                            style={{ color: "var(--color-jerarquia3)" }}
-                        />
-                        <div className="min-w-0">
-                            <h2 className="text-base sm:text-lg md:text-xl font-bold 
-                             text-[var(--color-jerarquia3)] 
-                             truncate sm:whitespace-normal
-                             leading-tight">
-                                Productividad en Línea - Coorin
-                            </h2>
-                        </div>
-                    </div>
-
-                    <div className="flex-shrink-0">
-                        <button
-                            onClick={onClose}
-                            className="text-[var(--color-jerarquia3)] hover:text-red-600 
-                         transition-colors duration-200 
-                         rounded-full p-1 sm:p-1.5
-                         hover:bg-gray-100 focus:bg-gray-100
-                         focus:outline-none focus:ring-2 focus:ring-red-300"
-                            style={{ fontSize: "1.25rem", lineHeight: 1 }}
-                            aria-label="Cerrar modal"
-                        >
-                            &times;
-                        </button>
-                    </div>
-                </div>
-            )}
+            title="Productividad en Línea - Coorin"
+            icon={IconProductividad}
+            iconClassName="text-jerarquia3"
+            headerProps={{ titleClassName: "text-jerarquia3" }}
             enableBounce={enableBounce}
             enableShakeOnBackdropClick={enableShakeOnBackdropClick}
+            enableBounceOnBackdropOrEscape={enableBounceOnBackdropOrEscape}
             closeOnBackdropClick={closeOnBackdropClick}
-            contentClassName="p-0" // Sin padding para el contenido personalizado
+            contentClassName="p-0"
             {...props}
         >
             <div className="space-y-4">
@@ -236,44 +206,6 @@ const ProductivityModal = ({
                 </div>
             </div>
 
-            {/* Estilos CSS idénticos al modal de sesiones */}
-            <style jsx global>{`
-        /* Estilo personalizado para el backdrop del modal - transparente con blur suave */
-        .modal-blur-bg {
-          background: rgba(255, 255, 255, 0.15) !important;
-          backdrop-filter: blur(6px) saturate(180%) !important;
-          -webkit-backdrop-filter: blur(6px) saturate(180%) !important;
-          animation: fadeInBackdrop 0.3s ease-out;
-        }
-        
-        /* Animación suave para la aparición del backdrop */
-        @keyframes fadeInBackdrop {
-          from {
-            background: rgba(255, 255, 255, 0);
-            backdrop-filter: blur(0px);
-            -webkit-backdrop-filter: blur(0px);
-          }
-          to {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(6px) saturate(180%);
-            -webkit-backdrop-filter: blur(6px) saturate(180%);
-          }
-        }
-
-        /* Scroll personalizado */
-        .scrollbar-gray::-webkit-scrollbar {
-          height: 8px;
-          width: 8px;
-          background: #f5f5f5;
-        }
-        .scrollbar-gray::-webkit-scrollbar-thumb {
-          background: #b0b0b0;
-          border-radius: 4px;
-        }
-        .scrollbar-gray::-webkit-scrollbar-thumb:hover {
-          background: #888;
-        }
-      `}</style>
         </ReusableModal>
     );
 };

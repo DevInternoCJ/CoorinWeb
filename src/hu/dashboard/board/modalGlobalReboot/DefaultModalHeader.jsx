@@ -9,7 +9,6 @@ const DefaultModalHeader = ({
     className = "",
     titleClassName = "",
     iconClassName = "",
-    closeButtonClassName = "",
     ...props
 }) => {
     // Si se pasan children, usar esos en lugar del header por defecto
@@ -51,31 +50,15 @@ const DefaultModalHeader = ({
             </div>
             
             {/* Botón de cerrar */}
-            {showCloseButton && onClose && (
+            {showCloseButton && (
                 <div className="flex-shrink-0">
                     <button
                         onClick={onClose}
-                        className={`transition-colors duration-200 
-                                   rounded-full p-1 sm:p-1.5
-                                   hover:bg-[#147f5e] focus:bg-[#147f5e]
-                                   focus:outline-none focus:ring-2 focus:ring-[#147f5e]
-                                   ${closeButtonClassName}`}
-                        style={{ fontSize: "1.25rem", lineHeight: 1, color: '#147f5e' }}
+                        className="text-jerarquia3 hover:bg-background-dashboard hover:text-red-600 text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors"
                         aria-label="Cerrar modal"
+                        type="button"
                     >
-                        <svg 
-                            className="w-5 h-5 sm:w-6 sm:h-6" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            viewBox="0 0 24 24"
-                        >
-                            <path 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth={2} 
-                                d="M6 18L18 6M6 6l12 12" 
-                            />
-                        </svg>
+                        &times;
                     </button>
                 </div>
             )}

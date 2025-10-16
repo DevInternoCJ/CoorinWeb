@@ -88,108 +88,188 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
     // El tamaño del modal ahora lo controla el padre, así que solo usamos mostrarTabla/setMostrarTabla
     return (
         <div style={{ width: '100%' }} className="flex flex-col items-center">
-            {/* Logo centrado arriba de los campos */}
-            <div className="flex flex-col items-center w-full">
-                <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
-            </div>
-            {/* Contenedor centralizado para los campos y botones */}
-            <div
-                className="flex flex-col items-center w-full"
-                style={{
-                    flex: 1,
-                    marginTop: mostrarTabla ? '2.2rem' : '1.2rem',
-                    transition: 'margin-top 0.2s',
-                }}
-            >
-                <div
-                    className="flex gap-3 w-full max-w-xs justify-center"
-                    style={{ marginBottom: mostrarTabla ? '1.2rem' : '1.2rem' }}
-                >
-                    <div className="hs-input-group w-full">
-                        <span className="hs-input-group-text min-w-[90px]">Desde</span>
-                        <input
-                            type="date"
-                            className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
-                            defaultValue={new Date().toISOString().slice(0, 10)}
-                        />
+            {/* Layout dinámico según mostrarTabla (modo pagos-xl) */}
+            {!mostrarTabla && (
+                <>
+                    {/* Logo centrado arriba de los campos */}
+                    <div className="flex flex-col items-center w-full">
+                        <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
                     </div>
-                    <div className="hs-input-group w-full">
-                        <span className="hs-input-group-text min-w-[90px]">Hasta</span>
-                        <input
-                            type="date"
-                            className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
-                            defaultValue={new Date().toISOString().slice(0, 10)}
-                        />
+                    {/* Contenedor centralizado para los campos y botones */}
+                    <div
+                        className="flex flex-col items-center w-full"
+                        style={{
+                            flex: 1,
+                            marginTop: '1.2rem',
+                            transition: 'margin-top 0.2s',
+                        }}
+                    >
+                        <div
+                            className="flex gap-3 w-full max-w-xs justify-center"
+                            style={{ marginBottom: '1.2rem' }}
+                        >
+                            <div className="hs-input-group w-full">
+                                <span className="hs-input-group-text min-w-[90px]">Desde</span>
+                                <input
+                                    type="date"
+                                    className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                    defaultValue={new Date().toISOString().slice(0, 10)}
+                                />
+                            </div>
+                            <div className="hs-input-group w-full">
+                                <span className="hs-input-group-text min-w-[90px]">Hasta</span>
+                                <input
+                                    type="date"
+                                    className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                    defaultValue={new Date().toISOString().slice(0, 10)}
+                                />
+                            </div>
+                        </div>
+                        {/* Dropdown Consulta con estilos de Preline */}
+                        <div className="relative w-full max-w-xs" style={{ marginBottom: '0.7rem' }}>
+                            <select
+                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                defaultValue=""
+                                id="consulta-select-reporting"
+                            >
+                                <option value="">- Todas -</option>
+                                <option value="pagadas">Pagadas</option>
+                                <option value="pendientes">Pendientes</option>
+                            </select>
+                            <label
+                                htmlFor="consulta-select-reporting"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                            >
+                                Consulta
+                            </label>
+                        </div>
+                        <div className="flex gap-3 w-full max-w-xs justify-center">
+                            <button
+                                type="button"
+                                className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                                style={{ margin: '0 auto', display: 'block' }}
+                                onClick={() => setMostrarTabla(true)}
+                            >
+                                Buscar
+                            </button>
+                            <button
+                                type="button"
+                                className="btn-info w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                                style={{ margin: '0 auto', display: 'block' }}
+                                disabled={!mostrarTabla}
+                            >
+                                Exportar
+                            </button>
+                        </div>
                     </div>
-                </div>
-                {/* Dropdown Consulta con estilos de Preline */}
-                <div className="relative w-full max-w-xs" style={{ marginBottom: '0.7rem' }}>
-                    <select
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                        defaultValue=""
-                        id="consulta-select-reporting"
-                    >
-                        <option value="">- Todas -</option>
-                        <option value="pagadas">Pagadas</option>
-                        <option value="pendientes">Pendientes</option>
-                    </select>
-                    <label
-                        htmlFor="consulta-select-reporting"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                    >
-                        Consulta
-                    </label>
-                </div>
-                <div className="flex gap-3 w-full max-w-xs justify-center">
-                    <button
-                        type="button"
-                        className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
-                        style={{ margin: '0 auto', display: 'block' }}
-                        onClick={() => setMostrarTabla(true)}
-                    >
-                        Buscar
-                    </button>
-                    <button
-                        type="button"
-                        className="btn-info w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
-                        style={{ margin: '0 auto', display: 'block' }}
-                        disabled={!mostrarTabla}
-                    >
-                        Exportar
-                    </button>
-                </div>
-            </div>
+                </>
+            )}
             {mostrarTabla && (
-                <div style={{ width: '100%', maxWidth: 1000, marginTop: 0, marginBottom: 12, borderRadius: 8, border: '1px solid #e0e0e0', background: '#fff', overflow: 'visible' }}>
-                    <table className="modal-table" style={{ minWidth: 900, width: '100%', maxWidth: '100%' }}>
-                        <thead>
-                            <tr>
-                                <th>Cartera</th>
-                                <th>Cuenta</th>
-                                <th>NombreEje...</th>
-                                <th>Fecha Pago</th>
-                                <th>Hora</th>
-                                <th>Monto Pago</th>
-                                <th>Referencia</th>
-                                <th>Sucursal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {dataEjemplo.map((row, idx) => (
-                                <tr key={idx}>
-                                    <td>{row.cartera}</td>
-                                    <td>{row.cuenta}</td>
-                                    <td>{row.nombre}</td>
-                                    <td>{row.fecha}</td>
-                                    <td>{row.hora}</td>
-                                    <td>{row.monto}</td>
-                                    <td>{row.referencia}</td>
-                                    <td>{row.sucursal}</td>
+                <>
+                    {/* Grid row: logo en columna 2, campos en 3, 4, 5, consulta en 5, columna 6 vacía */}
+                    <div className="w-full grid grid-cols-6 gap-4 items-center mb-4 max-w-5xl">
+                        {/* Columna 1 vacía */}
+                        <div></div>
+                        {/* Columna 2: Logo */}
+                        <div className="flex justify-center">
+                            <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain" />
+                        </div>
+                        {/* Columna 3: Desde */}
+                        <div>
+                            <div className="hs-input-group w-full">
+                                <span className="hs-input-group-text min-w-[90px]">Desde</span>
+                                <input
+                                    type="date"
+                                    className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                    defaultValue={new Date().toISOString().slice(0, 10)}
+                                />
+                            </div>
+                        </div>
+                        {/* Columna 4: Hasta */}
+                        <div>
+                            <div className="hs-input-group w-full">
+                                <span className="hs-input-group-text min-w-[90px]">Hasta</span>
+                                <input
+                                    type="date"
+                                    className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                    defaultValue={new Date().toISOString().slice(0, 10)}
+                                />
+                            </div>
+                        </div>
+                        {/* Columna 5: Consulta */}
+                        <div>
+                            <div className="relative w-full">
+                                <select
+                                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                    defaultValue=""
+                                    id="consulta-select-reporting"
+                                >
+                                    <option value="">- Todas -</option>
+                                    <option value="pagadas">Pagadas</option>
+                                    <option value="pendientes">Pendientes</option>
+                                </select>
+                                <label
+                                    htmlFor="consulta-select-reporting"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                                >
+                                    Consulta
+                                </label>
+                            </div>
+                        </div>
+                        {/* Columna 6 vacía */}
+                        <div></div>
+                    </div>
+                    {/* Row de botones centrados */}
+                    <div className="flex gap-3 w-full justify-center mb-4">
+                        <button
+                            type="button"
+                            className="btn-success w-full sm:w-auto min-w-[120px] max-w-xs px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                            style={{ margin: '0 auto', display: 'block' }}
+                            onClick={() => setMostrarTabla(true)}
+                        >
+                            Buscar
+                        </button>
+                        <button
+                            type="button"
+                            className="btn-info w-full sm:w-auto min-w-[120px] max-w-xs px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                            style={{ margin: '0 auto', display: 'block' }}
+                            disabled={!mostrarTabla}
+                        >
+                            Exportar
+                        </button>
+                    </div>
+                    {/* Tabla de resultados expandida */}
+                    <div style={{ width: '100%', maxWidth: 1000, marginTop: 0, marginBottom: 12, borderRadius: 8, border: '1px solid #e0e0e0', background: '#fff', overflowY: 'auto', maxHeight: 650 }}>
+                        <table className="modal-table" style={{ minWidth: 900, width: '100%', maxWidth: '100%' }}>
+                            <thead>
+                                <tr>
+                                    <th>Cartera</th>
+                                    <th>Cuenta</th>
+                                    <th>NombreEje...</th>
+                                    <th>Fecha Pago</th>
+                                    <th>Hora</th>
+                                    <th>Monto Pago</th>
+                                    <th>Referencia</th>
+                                    <th>Sucursal</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {dataEjemplo.map((row, idx) => (
+                                    <tr key={idx}>
+                                        <td>{row.cartera}</td>
+                                        <td>{row.cuenta}</td>
+                                        <td>{row.nombre}</td>
+                                        <td>{row.fecha}</td>
+                                        <td>{row.hora}</td>
+                                        <td>{row.monto}</td>
+                                        <td>{row.referencia}</td>
+                                        <td>{row.sucursal}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
             )}
             {/* Footer informativo */}
             <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginTop: 52 }}>

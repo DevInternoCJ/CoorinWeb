@@ -52,6 +52,10 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                 },
             }}
             contentClassName="h-[60vh] overflow-y-auto"
+            enableBounce={false}
+            enableBounceOnBackdropOrEscape={true}
+            closeOnBackdropClick={false}
+            closeOnEscape={false}
         >
             <div className="coorin-modal-xl-container" style={{ maxWidth: "98vw", overflowX: "hidden" }}>
                 {/* Header y formulario */}
