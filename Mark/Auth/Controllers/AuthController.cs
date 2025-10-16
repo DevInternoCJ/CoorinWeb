@@ -283,13 +283,25 @@ namespace Loki.Mark.Auth.Controllers
         [HttpPut("cerrar-sesión")]
         [Authorize]
         [SwaggerOperation(
-          Summary = "cerrar-sesión -irene",
-          Description = "cierra del ejecutivo"
-          )]
+      Summary = "cerrar-sesión -irene",
+      Description = "cierra del ejecutivo"
+  )]
         public async Task<IActionResult> Logout([FromBody] logout request)
         {
             try
             {
+                // Validación individual para IdEjecutivo
+                if (request.IdEjecutivo == null)
+                {
+                    return BadRequest(new { error = "El parámetro IdEjecutivo es requerido" });
+                }
+
+                // Validación individual para IdLogIngreso
+                if (request.IdLogIngreso == null)
+                {
+                    return BadRequest(new { error = "El parámetro IdLogIngreso es requerido" });
+                }
+
                 string? servidor = User.FindFirst("Servidor")?.Value;
                 if (string.IsNullOrWhiteSpace(servidor))
                 {
@@ -305,7 +317,6 @@ namespace Loki.Mark.Auth.Controllers
                 return StatusCode(500, new { error = $"Error interno del servidor: {ex.Message}" });
             }
         }
-
 
     }
 }

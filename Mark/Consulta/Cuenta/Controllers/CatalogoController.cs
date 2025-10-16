@@ -164,30 +164,25 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
 
         [HttpGet("ColumnasProducto")]
         [Authorize]
-        [SwaggerOperation(
-        Summary = "columnas producto - irene",
-        Description = ""
-    )]
-        public async Task<IActionResult> ColumnasProducto([FromQuery] object idProducto, [FromQuery] object? idCartera = null, [FromQuery] bool chkSanta = true)
+        [SwaggerOperation(Summary = "columnas producto - irene", Description = "")]
+        public async Task<IActionResult> ColumnasProducto([FromQuery] int idProducto) // Cambiado de object a int
         {
-            const string tipoBase = "Collection";
-
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
             if (string.IsNullOrWhiteSpace(servidorClaim))
                 return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
 
-            if (idProducto == null && idCartera == null)
-                return BadRequest(new { error = "Debe enviar idProducto o idCartera." });
+            if (idProducto <= 0) // Validación más específica
+                return BadRequest(new { error = "Debe enviar un idProducto válido." });
 
             try
             {
-                await _catalogosService.CargarColumnasProductoAsync(_dbContFactory, servidorClaim, tipoBase, idProducto, idCartera, chkSanta);
+                await _catalogosService.CargarColumnasProductoAsync(_dbContFactory, servidorClaim, "Collection", idProducto);
 
-                string tableName = idCartera != null ? $"Cartera_{idCartera}" : $"Producto_{idProducto}";
+                string tableName = $"Producto_{idProducto}";
                 var ds = _catalogosService.ObtenerDataSet();
 
-                if (!ds.Tables.Contains(tableName))
-                    return NotFound(new { error = $"No se encontraron columnas para {(idCartera != null ? "la cartera" : "el producto")}." });
+                if (!ds.Tables.Contains(tableName) || ds.Tables[tableName].Rows.Count == 0)
+                    return NotFound(new { error = $"No se encontraron columnas para el producto {idProducto}." });
 
                 return Ok(DataTableToList(ds.Tables[tableName]));
             }
@@ -196,6 +191,5 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
                 return StatusCode(500, new { error = $"Error al obtener columnas: {ex.Message}" });
             }
         }
-
     }
 }
