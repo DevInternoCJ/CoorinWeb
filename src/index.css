@@ -536,6 +536,16 @@ label {
   background: #f5f5f5;
 }
 
+/* Resaltar la fila (campaña) seleccionada con el color verde jerarquía 1 */
+.selected-campaign-row,
+.selected-campaign-row td {
+  background: var(--color-jerarquia1) !important;
+}
+.selected-campaign-row:hover,
+.selected-campaign-row td:hover {
+  background: var(--color-jerarquia1) !important;
+}
+
 /* === MODAL GLOBAL COORIN === */
 .coorin-modal-blur-bg {
   position: fixed;

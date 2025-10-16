@@ -8,7 +8,6 @@ const MetasModal = ({
     onClose,
     // Props opcionales para personalizar
     size = "metas", // 76% del viewport 
-    enableBounce = true,
     enableShakeOnBackdropClick = true,
     closeOnBackdropClick = false,
     ...props
