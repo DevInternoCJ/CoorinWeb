@@ -6,7 +6,6 @@ import { loginUser } from "../../services/mark/login/AuthServices";
 import ButtonLogin from "./ButtonLogin";
 import { LoginUser, LoginKey } from "./LoginIcons";
 import { useUserStore } from "../../contextGlobal/userStore";
-
 // Constantes para mensajes de error
 const ERROR_MESSAGES = {
   PASSWORD_LENGTH: "La contraseña debe tener al menos 8 caracteres.",
@@ -16,7 +15,6 @@ const ERROR_MESSAGES = {
     "Error al validar la contraseña. Por favor, contacta al administrador.",
   LOGIN_ERROR: "Error al iniciar sesión. Verifica tus credenciales.",
 };
-
 // Componente InputField separado (fuera de LoginForm)
 const InputField = ({
   icon: Icon,
@@ -68,7 +66,6 @@ const InputField = ({
 
 const LoginForm = ({ onLoginSuccess }) => {
   const setUser = useUserStore((state) => state.setUser);
-
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -142,6 +139,7 @@ const LoginForm = ({ onLoginSuccess }) => {
       } else {
         toast.success("¡Inicio de sesión exitoso!");
         saveUserData(response);
+        onLoginSuccess?.(); 
         navigate("/dashboardPage");
       }
     },
@@ -239,7 +237,6 @@ const LoginForm = ({ onLoginSuccess }) => {
         maxLength={4}
         required
         disabled={loading}
-
       />
       <InputField
         icon={LoginKey}
@@ -276,5 +273,4 @@ const LoginForm = ({ onLoginSuccess }) => {
     </form>
   );
 };
-
 export default LoginForm;

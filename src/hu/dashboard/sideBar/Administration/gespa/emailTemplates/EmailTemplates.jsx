@@ -5,6 +5,7 @@ import LoadDates from "./LoadDates";
 import { PostLoadData } from "../../../../../../services/mark/albaz/LokiServices";
 import ModalBase from "../../../../board/ModalBase";
 import { IconScreens } from "../IconsTemplates";
+import { useWalletProducts } from "../../../../../login/WalletProduct"; 
 
 const EmailTemplates = ({ onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -16,6 +17,7 @@ const EmailTemplates = ({ onClose }) => {
   const { bounce } = ModalBase.useModalLogic();
   const [datosDeudor, setDatosDeudor] = useState({}); // ✅ Nuevo estado para datosDeudor
   const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
+ 
 
   const actualizarPlantillas = async () => {
     // Puedes usar el mismo requestData que usa LoadDates

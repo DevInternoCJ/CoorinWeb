@@ -1,102 +1,133 @@
 import React, { useState, useEffect } from "react";
 import { PostLoadData } from "../../../../../../services/mark/albaz/LokiServices";
+import { useWalletProducts } from "../../../../../login/WalletProduct"; // Importa el hook
 
 const LoadDates = ({
-  selectedProduct,
   isModalOpen,
   onPlantillasChange,
   onDatosDeudorChange,
-  onDatosProductoCompletoChange 
+  onDatosProductoCompletoChange,
 }) => {
   const [datosDeudor, setDatosDeudor] = useState({});
   const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [draggedLabel, setDraggedLabel] = useState(""); // Estado para el label/header que se está arrastrando
+  const [draggedLabel, setDraggedLabel] = useState("");
+    // ✅ Hook corregido
+  const { walletProducts, isLoading: isLoadingStore, error: errorStore } = useWalletProducts();
+  // Extraer IDs con validación
+  const idProducto = walletProducts?.[0]?.idProducto;
+  const idCartera = walletProducts?.[0]?.idCartera;
 
-  // Función para resetear todos los estados
+  console.log("Wallet Products:", walletProducts);
+  console.log("idProducto:", idProducto);
+  console.log("idCartera:", idCartera);
+
+  // Reset function
   const resetAllData = () => {
     setDatosDeudor({});
     setDatosProductoCompleto({});
     setLoading(true);
     setError(null);
-    onDatosDeudorChange({});
-    onDatosProductoCompletoChange({});
+    onDatosDeudorChange?.({});
+    onDatosProductoCompletoChange?.({});
   };
 
-  // Efecto para detectar cuando el modal se cierra y resetear los datos
+  // Reset cuando se cierra el modal
   useEffect(() => {
     if (!isModalOpen) {
       resetAllData();
     }
   }, [isModalOpen]);
 
-  const fetchData = async (productId = 1) => {
+  // Manejar errores del store
+  useEffect(() => {
+    if (errorStore) {
+      setError(`Error al cargar productos: ${errorStore}`);
+      setLoading(false);
+    }
+  }, [errorStore]);
+
+  // Fetch data function
+  const fetchData = async () => {
+    if (!idCartera || !idProducto) {
+      setLoading(false);
+      setError("Faltan datos necesarios (idCartera o idProducto)");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    
     try {
-      const data = { idCartera: 1, idProducto: productId };
-      console.log(
-        "Body enviado a PostLoadData:",
-        data,
-        typeof data,
-        Array.isArray(data)
-      );
+      const data = { idCartera, idProducto };
+      console.log("Body enviado a PostLoadData:", data);
 
       const response = await PostLoadData(data);
 
-      if (response && response.exito) {
+      if (response?.exito) {
+        // Procesar plantillas
         if (response.plantillas && onPlantillasChange) {
           onPlantillasChange(response.plantillas);
         }
-        // Datos del deudor
+        
+        // Procesar cuenta/deudor
         if (response.cuenta) {
           const saldoFormateado = response.cuenta.Saldo
             ? `$${response.cuenta.Saldo.toLocaleString()}`
             : "$0.00";
+          
           const nuevosDatosDeudor = {
             NombreDeudor: response.cuenta.NombreDeudor || "",
             RFC: response.cuenta.RFC || "",
             NúmeroCliente: response.cuenta.NúmeroCliente || "",
             Saldo: saldoFormateado,
           };
-
+          
           setDatosDeudor(nuevosDatosDeudor);
-          onDatosDeudorChange(nuevosDatosDeudor);
+          onDatosDeudorChange?.(nuevosDatosDeudor);
         }
-        // Guardar todos los datos del producto para la vista completa
-        setDatosProductoCompleto(response.producto);
-        onDatosProductoCompletoChange(response.producto);
+        
+        // Procesar producto
+        if (response.producto) {
+          setDatosProductoCompleto(response.producto);
+          onDatosProductoCompletoChange?.(response.producto);
+        }
+      } else {
+        setError("No se pudieron cargar los datos del servidor");
       }
+      
       setLoading(false);
     } catch (error) {
       console.error("Error al obtener los datos:", error);
-      setError(error.message);
+      setError(error.message || "Error al cargar los datos");
       setLoading(false);
     }
   };
 
+  // Efecto principal para cargar datos
   useEffect(() => {
-    // Cuando cambia el producto seleccionado, cargar nuevos datos
-    if (selectedProduct && selectedProduct.value) {
+    if (idCartera && idProducto) {
+      fetchData();
+    } else if (isLoadingStore) {
       setLoading(true);
-      fetchData(selectedProduct.value);
+    } else if (walletProducts === null && !isLoadingStore) {
+      setLoading(false);
+      setError("No se encontraron datos del producto en el store");
     }
-  }, [selectedProduct]);
+  }, [idCartera, idProducto, isLoadingStore, walletProducts]);
 
-  // ========== FUNCIONES DE DRAG AND DROP ==========
-  
   // Cuando comienza el arrastre del label o header
   const handleDragStart = (e, labelText) => {
-    e.dataTransfer.effectAllowed = 'copy';
-    e.dataTransfer.setData('text/plain', `[${labelText}]`);
+    e.dataTransfer.effectAllowed = "copy";
+    e.dataTransfer.setData("text/plain", `[${labelText}]`);
     setDraggedLabel(labelText);
   };
 
   // Cuando termina el arrastre
   const handleDragEnd = () => {
-    setDraggedLabel('');
+    setDraggedLabel("");
   };
-
-  // ===============================================
 
   // Función para formatear valores vacíos o undefined
   const formatValue = (value, key) => {
@@ -152,9 +183,22 @@ const LoadDates = ({
     return "text-gray-800";
   };
 
-  if (loading) return <div className="text-center py-8">Cargando datos...</div>;
-  if (error)
-    return <div className="text-center py-8 text-red-500">Error: {error}</div>;
+  // ✅ Mejorar los estados de carga para ser más específicos
+  if (isLoadingStore && !walletProducts) {
+    return <div className="text-center py-8">Cargando productos del portafolio...</div>;
+  }
+
+  if (loading) return <div className="text-center py-8">Cargando datos del producto...</div>;
+  
+  if (error) return <div className="text-center py-8 text-red-500">Error: {error}</div>;
+
+  if (!idCartera || !idProducto) {
+    return (
+      <div className="text-center py-8 text-yellow-600">
+        No se encontraron datos del producto. Por favor, verifica que haya productos disponibles.
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto rounded-lg ">
@@ -202,18 +246,17 @@ const LoadDates = ({
                   active:opacity-50
                   py-1 rounded-md inline-block
                   transition-all duration-150
-                  ${draggedLabel === item.label ? 'opacity-50 scale-95' : ''}
+                  ${draggedLabel === item.label ? "opacity-50 scale-95" : ""}
                 `}
                 title="Arrastra el texto al campo mensaje"
               >
-                <span className="inline-flex items-center text-sm font-semibold gap-1 rounded-lg">   
+                <span className="inline-flex items-center text-sm font-semibold gap-1 rounded-lg">
                   {item.label}
                 </span>
               </div>
               <div className={`text-sm text-${item.color}-700`}>
                 {item.value}
               </div>
-              
             </div>
           ))}
         </div>
@@ -221,7 +264,7 @@ const LoadDates = ({
 
       {/* Vista de tabla horizontal - Encabezados TAMBIÉN arrastrables */}
       <div className="mt-4">
-           <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
           <table className="bg-white min-w-full">
             <tbody>
               {/* Fila de encabezados - AHORA ARRASTRABLES */}
@@ -241,7 +284,11 @@ const LoadDates = ({
                       transition-all duration-150
                       bg-background-dashboard
                       hover:text-background-tertiary 
-                      ${draggedLabel === key ? 'opacity-50 scale-95 bg-slate-500' : ''}
+                      ${
+                        draggedLabel === key
+                          ? "opacity-50 scale-95 bg-slate-500"
+                          : ""
+                      }
                     `}
                     title="Arrastra el texto al campo mensaje"
                   >
@@ -279,5 +326,3 @@ const LoadDates = ({
 };
 
 export default LoadDates;
-
-

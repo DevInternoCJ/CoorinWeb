@@ -22,6 +22,7 @@ const ModalHeader = ({
   setLoading,
   setShowDataTables,
 }) => {
+
   const servidor = "Thor"; // ✅ Efecto para la verificación del producto (MOVIDO DESDE WalletSection)
   useEffect(() => {
     console.log("selectedProduct for verification:", selectedProduct);
@@ -59,7 +60,7 @@ const ModalHeader = ({
   }, [selectedProduct, servidor, setLoading, setVerifyResult]);
 
   return (
-    <div className="p-3 w-full flex gap-5 justify-between items-start border-b border-gray-200">
+    <div className="px-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-gray-200">
       <div className="block md:flex items-start justify-between w-3/4 gap-3">
         <div className="flex items-center gap-2 text-jerarquia3">
           {icon}
@@ -75,7 +76,6 @@ const ModalHeader = ({
                 <CustomSelect
                   options={CARTERA_OPTIONS}
                   defaultValue={CARTERA_OPTIONS[0].value}
-                  disabled // Opcional: Deshabilitar si siempre es fijo // ✅ APLICAMOS EL LABEL FLOTANTE
                   label="Cartera"
                 />
               </div>
