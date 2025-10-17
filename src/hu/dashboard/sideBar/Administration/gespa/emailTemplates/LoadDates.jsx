@@ -12,17 +12,15 @@ const LoadDates = ({
   const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [draggedLabel, setDraggedLabel] = useState("");
-    // ✅ Hook corregido
-  const { walletProducts, isLoading: isLoadingStore, error: errorStore } = useWalletProducts();
+  const [draggedLabel, setDraggedLabel] = useState(""); 
+  // ✅ Hook corregido
+  const { walletProducts, isLoading: isLoadingStore, error: errorStore } = useWalletProducts(); 
   // Extraer IDs con validación
   const idProducto = walletProducts?.[0]?.idProducto;
   const idCartera = walletProducts?.[0]?.idCartera;
-
   console.log("Wallet Products:", walletProducts);
   console.log("idProducto:", idProducto);
   console.log("idCartera:", idCartera);
-
   // Reset function
   const resetAllData = () => {
     setDatosDeudor({});
@@ -32,14 +30,12 @@ const LoadDates = ({
     onDatosDeudorChange?.({});
     onDatosProductoCompletoChange?.({});
   };
-
   // Reset cuando se cierra el modal
   useEffect(() => {
     if (!isModalOpen) {
       resetAllData();
     }
   }, [isModalOpen]);
-
   // Manejar errores del store
   useEffect(() => {
     if (errorStore) {
@@ -47,7 +43,6 @@ const LoadDates = ({
       setLoading(false);
     }
   }, [errorStore]);
-
   // Fetch data function
   const fetchData = async () => {
     if (!idCartera || !idProducto) {
@@ -55,39 +50,31 @@ const LoadDates = ({
       setError("Faltan datos necesarios (idCartera o idProducto)");
       return;
     }
-
     setLoading(true);
-    setError(null);
-    
+    setError(null);  
     try {
       const data = { idCartera, idProducto };
       console.log("Body enviado a PostLoadData:", data);
-
       const response = await PostLoadData(data);
-
       if (response?.exito) {
         // Procesar plantillas
         if (response.plantillas && onPlantillasChange) {
           onPlantillasChange(response.plantillas);
-        }
-        
+        }      
         // Procesar cuenta/deudor
         if (response.cuenta) {
           const saldoFormateado = response.cuenta.Saldo
             ? `$${response.cuenta.Saldo.toLocaleString()}`
-            : "$0.00";
-          
+            : "$0.00";      
           const nuevosDatosDeudor = {
             NombreDeudor: response.cuenta.NombreDeudor || "",
             RFC: response.cuenta.RFC || "",
             NúmeroCliente: response.cuenta.NúmeroCliente || "",
             Saldo: saldoFormateado,
-          };
-          
+          };        
           setDatosDeudor(nuevosDatosDeudor);
           onDatosDeudorChange?.(nuevosDatosDeudor);
-        }
-        
+        }      
         // Procesar producto
         if (response.producto) {
           setDatosProductoCompleto(response.producto);
@@ -95,8 +82,7 @@ const LoadDates = ({
         }
       } else {
         setError("No se pudieron cargar los datos del servidor");
-      }
-      
+      }    
       setLoading(false);
     } catch (error) {
       console.error("Error al obtener los datos:", error);
@@ -104,7 +90,6 @@ const LoadDates = ({
       setLoading(false);
     }
   };
-
   // Efecto principal para cargar datos
   useEffect(() => {
     if (idCartera && idProducto) {
@@ -116,19 +101,16 @@ const LoadDates = ({
       setError("No se encontraron datos del producto en el store");
     }
   }, [idCartera, idProducto, isLoadingStore, walletProducts]);
-
   // Cuando comienza el arrastre del label o header
   const handleDragStart = (e, labelText) => {
     e.dataTransfer.effectAllowed = "copy";
     e.dataTransfer.setData("text/plain", `[${labelText}]`);
     setDraggedLabel(labelText);
   };
-
   // Cuando termina el arrastre
   const handleDragEnd = () => {
     setDraggedLabel("");
   };
-
   // Función para formatear valores vacíos o undefined
   const formatValue = (value, key) => {
     if (key === "Notas") {
@@ -154,13 +136,11 @@ const LoadDates = ({
     }
     return value;
   };
-
   // Función para determinar la clase de estilo basada en el valor
   const getValueClass = (value, key) => {
     if (key === "Notas") {
       return "text-red-600 font-semibold";
     }
-
     if (
       value === null ||
       value === undefined ||
@@ -169,7 +149,6 @@ const LoadDates = ({
     ) {
       return "text-gray-400 italic";
     }
-
     if (
       (typeof value === "number" || !isNaN(parseFloat(value))) &&
       key !== "idCuenta"
@@ -179,27 +158,63 @@ const LoadDates = ({
     if (typeof value === "string" && value.match(/\d{2}\/\d{2}\/\d{4}/)) {
       return "text-green-700";
     }
-
     return "text-gray-800";
   };
 
-  // ✅ Mejorar los estados de carga para ser más específicos
+  // 🎯 Componente Spinner de Preline
+  const SpinnerLoader = ({ message = "Cargando..." }) => (
+    <div className="min-h-60 flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl ">
+      <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
+        <div className="flex justify-center">
+          <div 
+            className="animate-spin inline-block size-6 border-[3px] border-current border-t-transparent text-blue-600 rounded-full dark:text-blue-500" 
+            role="status" 
+            aria-label="loading"
+          >
+            <span className="sr-only">Loading...</span>
+          </div>
+        </div>
+        <p className="mt-4 text-sm text-gray-600 dark:text-neutral-400">{message}</p>
+      </div>
+    </div>
+  );
+  // ✅ Mejorar los estados de carga con el spinner
   if (isLoadingStore && !walletProducts) {
-    return <div className="text-center py-8">Cargando productos del portafolio...</div>;
+    return <SpinnerLoader message="Cargando productos del portafolio..." />;
   }
-
-  if (loading) return <div className="text-center py-8">Cargando datos del producto...</div>;
-  
-  if (error) return <div className="text-center py-8 text-red-500">Error: {error}</div>;
-
-  if (!idCartera || !idProducto) {
+  if (loading) {
+    return <SpinnerLoader message="Cargando datos del producto..." />;
+  }  
+  if (error) {
     return (
-      <div className="text-center py-8 text-yellow-600">
-        No se encontraron datos del producto. Por favor, verifica que haya productos disponibles.
+      <div className="min-h-60 flex flex-col bg-white border border-red-200 shadow-2xs rounded-xl">
+        <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
+          <div className="text-red-500 text-center">
+            <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="font-semibold">Error</p>
+            <p className="text-sm mt-2">{error}</p>
+          </div>
+        </div>
       </div>
     );
   }
-
+  if (!idCartera || !idProducto) {
+    return (
+      <div className="min-h-60 flex flex-col bg-white border border-yellow-200 shadow-2xs rounded-xl">
+        <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
+          <div className="text-yellow-600 text-center">
+            <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p className="font-semibold">Sin datos disponibles</p>
+            <p className="text-sm mt-2">No se encontraron datos del producto. Por favor, verifica que haya productos disponibles.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="max-w-6xl mx-auto rounded-lg ">
       <div className="">
@@ -261,7 +276,6 @@ const LoadDates = ({
           ))}
         </div>
       </div>
-
       {/* Vista de tabla horizontal - Encabezados TAMBIÉN arrastrables */}
       <div className="mt-4">
         <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
@@ -300,7 +314,6 @@ const LoadDates = ({
                   </th>
                 ))}
               </tr>
-
               {/* Fila de valores */}
               <tr className="hover:bg-gray-50">
                 {Object.entries(datosProductoCompleto).map(

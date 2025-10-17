@@ -296,7 +296,7 @@ const getInfoArray = () => {
     <div className="bg-gray-700 p-4 rounded-lg shadow-sm">
       <h3 className="text-lg text-jerarquia1 font-bold -mb-1">Info</h3>
       <div className="overflow-x-auto">
-        <table className="table-border border border-jerarquia1 rounded-lg text-background-dashboard w-full">
+        <table className="table-border text-sm border border-jerarquia1 rounded-lg text-background-dashboard w-full">
           <tbody>
             {rows.map((rowItems, rowIdx) => (
               <tr
@@ -305,11 +305,11 @@ const getInfoArray = () => {
               >
                 {rowItems.map((item, colIdx) => (
                   <React.Fragment key={`${rowIdx}-${colIdx}`}>
-                    <td className="py-2 px-2 font-semibold whitespace-nowrap text-white">
+                    <td className="py-1 px-1 font-semibold whitespace-nowrap text-white">
                       {item?.label || ""}
                     </td>
                     <td
-                      className="py-2 px-2 whitespace-nowrap"
+                      className="py-1 px-1 "
                       style={{
                         fontWeight:
                           item?.fontWeight === "font-weight-bold"

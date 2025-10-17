@@ -31,7 +31,7 @@ const PasswordChangeContent = ({ onAccept }) => {
       <div className="flex justify-between w-full gap-4">
         <button
           onClick={handleNoClick}
-          className=" w-full btn rounded-lg bg-red-700 border border-red-700 hover:border-jerarquia4 text-background-dashboard hover:text-jerarquia4 hover:bg-red-600 hover:shadow-lg hover:shadow-red-700 transition-all duration-200 py-3 font-medium"
+          className=" w-full btn rounded-lg bg-red-700 border border-red-700 hover:border-jerarquia4 text-background-dashboard hover:text-jerarquia4 hover:bg-red-600 hover:shadow-lg hover:shadow-red-700 transition-all duration-200 font-medium"
         >
           No
         </button>

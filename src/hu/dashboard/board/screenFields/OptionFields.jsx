@@ -99,7 +99,7 @@ const OptionFields = ({ data, onEdit }) => {
       </td>
 
       {/* Alias - Editable CON DROP ZONE */}
-      <td className="col-span-3 relative">
+      <td className="col-span-3 relative w-full">
         <input
           type="text"
           value={data.alias || ""}

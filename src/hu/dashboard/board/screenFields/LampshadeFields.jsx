@@ -76,7 +76,7 @@ const LampshadeFields = ({ isOpen, onClose }) => {
           loading={loading}
           setLoading={setLoading}
         />
-        <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
+        <div className="p-4 overflow-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
           {memoizedInfoSection}
           {selectedProduct && selectedProduct.value !== 0 && (
             <>

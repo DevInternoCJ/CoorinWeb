@@ -210,16 +210,16 @@ useEffect(() => {
           </div>
         </div>
       </div>
-    );
+    ); 
   }
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm max-h-72 overflow-auto">
       <div className="bg-background-secondary rounded-md grid grid-cols-12 gap-3 mb-4 py-2 px-3 font-semibold text-white text-sm">
-        <div className="col-span-1">Position</div>
-        <div className="col-span-3">Alias</div>
-        <div className="col-span-4">Campos</div>
-        <div className="col-span-2">Formato Campo</div>
-        <div className="col-span-2">Resaltado</div>
+        <div className="col-span-1 w-full">Position</div>
+        <div className="col-span-3 w-full">Alias</div>
+        <div className="col-span-4 w-full">Campos</div>
+        <div className="col-span-2 w-full">Formato Campo</div>
+        <div className="col-span-2 w-full">Resaltado</div>
       </div>
       {/* ✅ Indicador de datos seleccionados */}
       {selectedRowData && (
