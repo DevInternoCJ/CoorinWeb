@@ -1740,3 +1740,33 @@ export const getPaymentsInformation = async (body) => {
     throw error;
   }
 };
+//Endponts de Consultas para Reportes de Campañas
+export const getColumsProduct = async (Data) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+console.log('Enviando a /Catalogo/ColumnasProducto con:', Data);
+    const response = await api.get('/Catalogo/ColumnasProducto', Data);
+    return response.data;
+  }
+  catch (error) {
+    console.error('Error al obtener columnas del producto:', error);
+
+  }
+};
+
+export const chargueCatalog = async (data) => {
+  try {
+ 
+    const response = await api.get('Catalogo/cargaCatalogos', data);
+  
+    return response.data;
+  }
+  catch (error) {
+    console.error('Error al obtener columnas de los catálogos:', error);
+
+  }
+};
+
