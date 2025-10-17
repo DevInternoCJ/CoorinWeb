@@ -4,13 +4,6 @@ import { infoEjecutivo, getAddress } from "../../../../../services/mark/albaz/Lo
 const AddressesContent = ({ mostrarTabla }) => {
     // Mensaje de footer dinámico
     const [footerMsg, setFooterMsg] = useState("Elija la consulta de las cuentas que desee los domicilios.");
-
-    // Al abrir el modal (cuando se monta el componente o cambia mostrarTabla a true), mostrar mensaje inicial
-    useEffect(() => {
-        if (mostrarTabla) {
-            setFooterMsg("Elija la consulta de las cuentas que desee los domicilios.");
-        }
-    }, [mostrarTabla]);
     const [loadingExcel, setLoadingExcel] = useState(false);
     const [errorExcel, setErrorExcel] = useState(null);
 
@@ -26,6 +19,13 @@ const AddressesContent = ({ mostrarTabla }) => {
     const [consultasOptions, setConsultasOptions] = useState([]);
     const [loadingConsultas, setLoadingConsultas] = useState(false);
     const [errorConsultas, setErrorConsultas] = useState(null);
+
+        // Al abrir el modal (cuando se monta el componente o cambia mostrarTabla a true), mostrar mensaje inicial
+    useEffect(() => {
+        if (mostrarTabla) {
+            setFooterMsg("Elija la consulta de las cuentas que desee los domicilios.");
+        }
+    }, [mostrarTabla]);
 
 
     // Cargar opciones de consulta

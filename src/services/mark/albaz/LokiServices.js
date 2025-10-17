@@ -1822,3 +1822,38 @@ export const getAddress = async (idCartera, idConsulta) => {
     throw error;
   }
 };
+
+
+export const getEmailsInfo = async (idCartera, idConsulta) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+  const url = `/informacion/Correos/consultar?idCartera=${idCartera}&idConsulta=${idConsulta}`;
+    // El interceptor añade el token automáticamente
+    const response = await api.get(url, {
+      headers: {
+        'Accept': '*/*'
+      }
+    });
+    console.log('Respuesta de', url + ':', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener Correos:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
