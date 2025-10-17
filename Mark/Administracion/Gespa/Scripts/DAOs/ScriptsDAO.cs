@@ -19,7 +19,7 @@ namespace Loki.Mark.Administracion.Gespa.Scripts.DAOs
 			_daoBase = daoBase;
 		}
 
-		public async Task<int> InsertScript(string servidor, ScriptsDTO request, int idProducto, int idEjecutivo)
+		public async Task<int> InsertScript(string servidor, guardarScriptsDTO request, int idProducto, int idEjecutivo)
 		{
 			// Validaciones básicas: Asegúrate de que los IDs y el nombre/script no estén vacíos.
 			if (idProducto <= 0)
@@ -65,7 +65,7 @@ namespace Loki.Mark.Administracion.Gespa.Scripts.DAOs
 			}
 		}
 
-		public async Task<int> UpdateScript(string servidor, ScriptsDTO request)
+		public async Task<int> UpdateScript(string servidor, actualizarScriptDTO request)
 		{
 			// 1. Validaciones básicas (opcional pero recomendado)
 			if (request.IdScript <= 0)

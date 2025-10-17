@@ -139,6 +139,8 @@ using Loki.Mark.Procesos.Gespa.Estados_de_cuenta.DAOs;
 using Loki.Mark.Procesos.Gespa.Estados_de_cuenta.Interfaces;
 using Loki.Mark.Reportes.DiaDelEjecutivo.DAOs;
 using Loki.Mark.Reportes.DiaDelEjecutivo.Interfaces;
+using Loki.Mark.Administracion.Gespa.Scripts.Interfaces;
+using Loki.Mark.Administracion.Gespa.Frases.Interfaces;
 
 
 
@@ -352,6 +354,15 @@ builder.Services.AddScoped<IComentariosDAO, ComentariosDAO>();
 builder.Services.AddScoped<IReporteEjecutivosService, ReporteEjecutivosService>();
 builder.Services.AddScoped<IReporteEjecutivosDAO, ReporteEjecutivosDAO>();
 
+#endregion
+
+
+#region scripts
+builder.Services.AddScoped<IScriptsDAO, Loki.Mark.Administracion.Gespa.Scripts.DAOs.ScriptsDAO>();
+#endregion
+
+#region Frases
+builder.Services.AddScoped<IFrases, Loki.Mark.Administracion.Gespa.Frases.DAOs.FrasesDao>();
 #endregion
 
 

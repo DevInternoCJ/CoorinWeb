@@ -16,48 +16,32 @@ namespace Loki.Mark.Administracion.Gespa.Frases.DAOs
 		}
 
 
-		public async Task<bool> GuardaFrasesAsync(FrasesDTO pFrases, string servidor)
-		{
-			// Validación del texto de la frase
-			if (string.IsNullOrEmpty(pFrases.TextoFrase))
-			{
-				Console.WriteLine("Introduce una frase por favor. La frase no puede estar vacía.");
-				return false;
-			}
+        public async Task<bool> GuardaFrasesAsync(FrasesDTO pFrases, string servidor)
+        {
+            if (string.IsNullOrEmpty(pFrases.TextoFrase))
+                throw new ArgumentException("Introduce una frase por favor. La frase no puede estar vacía.");
 
-			const string tipoBase = "Memory"; 
+            const string tipoBase = "Collection";
 
-			if (servidor?.Contains('_') == true) throw new ArgumentException($"Servidor '{servidor}' inválido.");
+            if (servidor?.Contains('_') == true)
+                throw new ArgumentException($"Servidor '{servidor}' inválido.");
 
-			using var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
-			try
-			{
-				await sqlConnection.OpenAsync();
+            using var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
+            await sqlConnection.OpenAsync();
 
-				string sqlCommand = "EXEC [dbo].[GuardaFrasesMotivacionales] @idEjecutivo, @idCartera, @idProducto, @Texto";
-				using var cmd = new SqlCommand(sqlCommand, sqlConnection);
+            string sqlCommand = "EXEC [dbo].[GuardaFrasesMotivacionales] @idEjecutivo, @idCartera, @idProducto, @Texto";
+            using var cmd = new SqlCommand(sqlCommand, sqlConnection);
 
-				cmd.Parameters.Add("@idEjecutivo", SqlDbType.NVarChar).Value = pFrases.IdEjecutivo ?? (object)DBNull.Value;
-				cmd.Parameters.Add("@idCartera", SqlDbType.NVarChar).Value = pFrases.IdCartera ?? (object)DBNull.Value;
-				cmd.Parameters.Add("@idProducto", SqlDbType.NVarChar).Value = pFrases.IdProducto ?? (object)DBNull.Value;
-				cmd.Parameters.Add("@Texto", SqlDbType.NVarChar).Value = pFrases.TextoFrase ?? (object)DBNull.Value;
+            cmd.Parameters.Add("@idEjecutivo", SqlDbType.Int).Value = pFrases.IdEjecutivo ?? (object)DBNull.Value;
+            cmd.Parameters.Add("@idCartera", SqlDbType.Int).Value = pFrases.IdCartera ?? (object)DBNull.Value;
+            cmd.Parameters.Add("@idProducto", SqlDbType.Int).Value = pFrases.IdProducto ?? (object)DBNull.Value;
+            cmd.Parameters.Add("@Texto", SqlDbType.NVarChar).Value = pFrases.TextoFrase ?? (object)DBNull.Value;
 
-				int rowsAffected = await cmd.ExecuteNonQueryAsync();
-				return rowsAffected > 0;
-			}
-			catch (SqlException ex)
-			{
-				Console.WriteLine($"SQL Error al guardar frase: {ex.Message}");
-				throw;
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Error inesperado al guardar frase: {ex.Message}");
-				throw; 
-			}
-		
-		}
+            int rowsAffected = await cmd.ExecuteNonQueryAsync();
+            return rowsAffected > 0;
+        }
 
 
-	}
+
+    }
 }

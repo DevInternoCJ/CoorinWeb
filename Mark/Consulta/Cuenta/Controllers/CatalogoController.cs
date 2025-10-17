@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Loki.Mark.Consulta.Cuenta.Interfaces;
 using CoorinWeb.Loki.Global;
 using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.Data.SqlClient;
 
 namespace Loki.Mark.Consulta.Cuenta.Controllers
 {
@@ -22,11 +23,11 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
             _dbContFactory = dbContFactory;
         }
 
-        private bool ValidarClaimServidor(out string servidorClaim)
-        {
-            servidorClaim = User.FindFirst("Servidor")?.Value ?? string.Empty;
-            return !string.IsNullOrWhiteSpace(servidorClaim);
-        }
+        //private bool ValidarClaimServidor(out string servidorClaim)
+        //{
+        //    servidorClaim = User.FindFirst("Servidor")?.Value ?? string.Empty;
+        //    return !string.IsNullOrWhiteSpace(servidorClaim);
+        //}
 
         private List<Dictionary<string, object>> DataTableToList(DataTable dt)
         {
@@ -80,32 +81,59 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
             Summary = "usuarios RH - irene",
             Description = ""
             )]
-       
-        public async Task<IActionResult> ObtenerUsuariosRH([FromQuery] string usuarioRH)
-        {
-            const string tipoBase = "Collection"; // valor fijo
 
-            string? servidorClaim = User.FindFirst("Servidor")?.Value;
-            if (string.IsNullOrWhiteSpace(servidorClaim))
-            {
-                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-            }
+        public async Task<(DataTable dt, int idEjecutivo, string mensaje)> CargarUsuariosRHAsync(IDbContextFactory dbContextFactory, string servidor, string tipoBase, string usuarioRH)
+        {
+            var dtUsuariosRH = new DataTable("UsuariosRH");
+            int idEjecutivo = 0;
+            string mensaje = string.Empty;
 
             try
             {
-                var dt = await _catalogosService.CargarUsuariosRHAsync(_dbContFactory, servidorClaim, tipoBase, usuarioRH);
+                using var conn = dbContextFactory.GetSqlConnection(servidor, tipoBase);
 
-                if (dt.Rows.Count == 0)
-                    return NotFound(new { mensaje = $"No se encontró información para el usuario '{usuarioRH}'" });
+                // --- 1. Obtener idEjecutivo ---
+                const string queryId = @"
+        SELECT idEjecutivo 
+        FROM dbCollection..Ejecutivos 
+        WHERE LOWER(Usuario) = LOWER(@Usuario)";
 
-                return Ok(DataTableToList(dt));
+                using (var cmd = new SqlCommand(queryId, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Usuario", usuarioRH);
+
+                    await conn.OpenAsync();
+                    var result = await cmd.ExecuteScalarAsync();
+                    idEjecutivo = result != null ? Convert.ToInt32(result) : 0;
+                }
+
+                if (idEjecutivo == 0)
+                {
+                    mensaje = $"No se encontró idEjecutivo para el usuario '{usuarioRH}'";
+                    return (dtUsuariosRH, idEjecutivo, mensaje);
+                }
+
+                // --- 2. Obtener datos de Usuarios RH ---
+                const string queryUsuarios = "SELECT IdEjecutivo AS Num_Empleado, Nombreejecutivo AS Nombre_Ejecutivo FROM [dbCollection].[dbo].[fn_Encuesta2da] (@IdEjecutivo)";
+
+                using (var cmd = new SqlCommand(queryUsuarios, conn))
+                {
+                    cmd.Parameters.AddWithValue("@IdEjecutivo", idEjecutivo);
+
+                    using var da = new SqlDataAdapter(cmd);
+                    da.Fill(dtUsuariosRH);
+                }
+
+                mensaje = $"Se encontraron {dtUsuariosRH.Rows.Count} registros para el idEjecutivo {idEjecutivo}";
+
+                return (dtUsuariosRH, idEjecutivo, mensaje);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                mensaje = $"Error al cargar usuarios RH: {ex.Message}";
+                return (dtUsuariosRH, idEjecutivo, mensaje);
             }
         }
-
 
         //[HttpGet("Evidencia")]
         //[Authorize]
