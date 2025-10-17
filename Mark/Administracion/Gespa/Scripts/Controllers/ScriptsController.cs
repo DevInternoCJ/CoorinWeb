@@ -27,7 +27,6 @@ namespace Loki.Mark.Administracion.Gespa.Scripts.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // 🔹 Obtener servidor del token
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
             if (string.IsNullOrWhiteSpace(servidorClaim))
                 return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
