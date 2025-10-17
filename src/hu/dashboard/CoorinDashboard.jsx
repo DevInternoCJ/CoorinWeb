@@ -44,8 +44,11 @@ export default function CoorinDashboard() {
   }, [executiveModalOpen, consultationModalOpen, closeSidebarFn]);
 
   // Mapeo directo para renderizar cada componente con su propio modal
+
   // Estado para controlar si la tabla de Pagos reportados está visible
   const [mostrarTablaPagosReportados, setMostrarTablaPagosReportados] = useState(false);
+  // Estado para controlar si la tabla de Domicilios está visible
+  const [mostrarTablaDomicilios, setMostrarTablaDomicilios] = useState(false);
 
   const renderSelectedComponent = () => {
     const closeModal = () => {
@@ -86,7 +89,13 @@ export default function CoorinDashboard() {
           ContentComponent = WrongsContent;
           break;
         case "Domicilios":
-          ContentComponent = AddressesContent;
+          ContentComponent = (props) => (
+            <AddressesContent
+              mostrarTabla={mostrarTablaDomicilios}
+              setMostrarTabla={setMostrarTablaDomicilios}
+              {...props}
+            />
+          );
           break;
         case "Correos":
           ContentComponent = EmailsContent;
@@ -107,10 +116,12 @@ export default function CoorinDashboard() {
           ContentComponent = null;
       }
 
-      // Usar size='pagos' por default y size='pagos-xl' cuando mostrarTablaPagosReportados sea true
+      // Usar size='pagos' por default y size='pagos-xl' cuando mostrarTablaPagosReportados o mostrarTablaDomicilios sea true
       let size = undefined;
       if (selectedSidebarOption === "Pagos reportados") {
         size = mostrarTablaPagosReportados ? "pagos-xl" : "pagos";
+      } else if (selectedSidebarOption === "Domicilios") {
+        size = mostrarTablaDomicilios ? "pagos-xl" : "pagos";
       }
 
       return (
