@@ -23,6 +23,7 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Controllers
 			Summary = "Consultar Pagos - Yoshi",
 			Description = "Obtiene la lista de pagos de la cartera y producto especificados en el rango de fechas deseado."
 		)]
+		[AllowAnonymous]
 		public async Task<IActionResult> ConsultarPagos([FromBody] ConsultaPagosRequest request)
 		{
 			string? servidorClaim = User.FindFirst("Servidor")?.Value;

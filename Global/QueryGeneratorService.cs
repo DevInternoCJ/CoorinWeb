@@ -34,6 +34,14 @@ namespace Loki.Global
 
 		public async Task<SubQueryResult> GenerarQueryCuentas(string servidor, QueryGenerationOptions options)
 		{
+			// Si idConsulta es 0, replicamos el comportamiento original: no se genera subconsulta.
+			if (options.IdConsulta == 0)
+			{
+				// Devolvemos un resultado vacío. Los servicios que lo consumen
+				// ya están diseñados para no añadir el INNER JOIN si el SQL está vacío.
+				return new SubQueryResult();
+			}
+
 			var tblParámetros = CrearTablaParametros();
 			var tblAgrupar = CrearTablaAgrupar();
 
