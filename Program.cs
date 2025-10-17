@@ -125,6 +125,20 @@ using Loki.Mark.Consulta.Informacion.Busquedas.DAOs;
 using BusquedasService = Loki.Mark.Consulta.Cuenta.Services.BusquedasService;
 using Loki.Mark.Reportes.Ejecutivos.DAOs;
 using Loki.Mark.Reportes.Ejecutivos.Services;
+using Loki.Mark.Procesos.Gespa.Arrepentimientos.DAOs;
+using Loki.Mark.Procesos.Gespa.Arrepentimientos.Interfaces;
+using Loki.Mark.Procesos.Gespa.Bloqueo_cuentas.DAOs;
+using Loki.Mark.Procesos.Gespa.Bloqueo_cuentas.Interfaces;
+using Loki.Mark.Procesos.Gespa.Cargo_en_linea.DAOs;
+using Loki.Mark.Procesos.Gespa.Cargo_en_linea.Interfaces;
+using Loki.Mark.Procesos.Gespa.Comentarios.DAOs;
+using Loki.Mark.Procesos.Gespa.Comentarios.Interfaces;
+using Loki.Mark.Procesos.Gespa.Definicion.DAOs;
+using Loki.Mark.Procesos.Gespa.Definicion.Interfaces;
+using Loki.Mark.Procesos.Gespa.Estados_de_cuenta.DAOs;
+using Loki.Mark.Procesos.Gespa.Estados_de_cuenta.Interfaces;
+using Loki.Mark.Reportes.DiaDelEjecutivo.DAOs;
+using Loki.Mark.Reportes.DiaDelEjecutivo.Interfaces;
 
 
 
@@ -294,6 +308,15 @@ builder.Services.AddScoped<IHistoricoDao, HistoricoDao>();
 builder.Services.AddScoped<IPlantillasCorreoService, PlantillasCorreoService>();
 builder.Services.AddScoped<IPlantillasCorreoDao, PlantillasCorreoDao>();
 builder.Services.AddScoped<IBusqueda, BusquedasService>();
+
+builder.Services.AddScoped<IComentariosGespaDAOs, ComentariosGespaDAOs>();//padrino
+builder.Services.AddScoped<IDefinicionGespaBuscaDAOs, DefinicionGespaBusquedaDAOs>();//padrino
+builder.Services.AddScoped<IArrepentimientosGespaDAOs, ArrepentimientosGespaBusquedaDAOs>();//padrino
+builder.Services.AddScoped<IBloqueoCuentasGespaDAOs, BloqueoCuentasGespaDAOs>();//padrino
+builder.Services.AddScoped<ICargoEnLineaGespaDAOs, CargoEnLineaGespaDAOs>();//padrino
+builder.Services.AddScoped<IEstadosDeCuentaGespaDAOs, EstadosDeCuentaGespaDAOs>();//padrino
+builder.Services.AddScoped<IDiaDelEjecutivoDAOs, DiaDelEjecutivoDAOs>();//padrino
+
 
 #region Información
 
