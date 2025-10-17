@@ -310,9 +310,9 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             using var conn = dbContextFactory.GetSqlConnection(servidor, tipoBase);
 
             string query = @"
-SELECT LOWER(name) AS name 
-FROM dbCollection.sys.columns 
-WHERE object_id = OBJECT_ID('Y.' + @TableName)";
+            SELECT LOWER(name) AS name 
+            FROM dbCollection.sys.columns 
+            WHERE object_id = OBJECT_ID('Y.' + @TableName)";
 
             using var cmd = new SqlCommand(query, conn);
             cmd.Parameters.AddWithValue("@TableName", tableName);

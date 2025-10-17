@@ -1,171 +1,151 @@
-﻿using CoorinWeb.Loki.Global;
+﻿using System.Data;
+using Microsoft.Data.SqlClient;
+using CoorinWeb.Loki.Global;
 using CoorinWeb.Loki.Mark.Auth.DAOs;
 using Loki.Mark.Administracion.Carteras.Interfaces;
 using Loki.Mark.Consulta.Generales.Interfaces;
+using static Loki.Mark.Consulta.Cuenta.Services.BusquedasService;
+using static CoorinWeb.Loki.Global.AccionamientosQueryHelper;
+using CoorinWeb.Loki.Common;
+using Loki.Mark.Consulta.Informacion.Busquedas.Interfaces;
+using Loki.Global;
+using Loki.Mark.Consulta.Cuenta.Interfaces;
 
 namespace Loki.Mark.Consulta.Generales.DAOs
 {
-    public class GeneralesDao: IGeneralesDao
+    public class GeneralesDao : IGeneralesDao
     {
+        private readonly IDbContextFactory _dbContFactory;
+        private readonly DaoBase _daoBase;
+        private readonly IBusquedasService _busquedasService;
+        private readonly ICatalogosServiceRe _catalogosServiceRe;
+        private readonly ExcelGeneratorService _excelGeneratorService;
 
-            private readonly IDbContextFactory _dbContFactory;
-            private readonly DaoBase _daoBase;
+        // Tablas de parámetros y agrupamiento
+        private readonly DataTable _tblParametros;
+        private readonly DataTable _tblAgrupar;
 
-            public GeneralesDao(IDbContextFactory dbContFactory, DaoBase daoBase)
+        public GeneralesDao(
+            IDbContextFactory dbContFactory,
+            DaoBase daoBase,
+            IBusquedasService busquedasService,
+            ICatalogosServiceRe catalogosServiceRe,
+            ExcelGeneratorService excelGeneratorService)
+        {
+            _dbContFactory = dbContFactory;
+            _daoBase = daoBase;
+            _busquedasService = busquedasService;
+            _catalogosServiceRe = catalogosServiceRe;
+            _excelGeneratorService = excelGeneratorService;
+
+            // Inicialización de DataTables
+            _tblParametros = new DataTable("Parametros");
+            _tblParametros.Columns.Add("Concepto", typeof(string));
+            _tblParametros.Columns.Add("Campo", typeof(string));
+            _tblParametros.PrimaryKey = new DataColumn[]
             {
+                _tblParametros.Columns["Concepto"],
+                _tblParametros.Columns["Campo"]
+            };
 
-                _dbContFactory = dbContFactory;
-                _daoBase = daoBase;
-            }
-            //public void EstableceValores()
-            //{
-            //    // Limpia valores previos
-            //    LimpiaValores();
-
-            //    string concepto = cmbConceptos.Text;
-            //    string campo = cmbCampos.Text;
-
-            //    // Combos simples para campos que deben ser editables
-            //    void SetComboSimple() => cmbValores.DropDownStyle = ComboBoxStyle.Simple;
-
-            //    // Combos de lista con datasource
-            //    void SetComboList(object dataSource, string valueMember = "idValor", string displayMember = "Valor")
-            //    {
-            //        cmbValores.DropDownStyle = ComboBoxStyle.DropDownList;
-            //        cmbValores.ValueMember = valueMember;
-            //        cmbValores.DisplayMember = displayMember;
-            //        cmbValores.DataSource = dataSource;
-            //    }
-
-            //    switch (concepto)
-            //    {
-            //        case "Teléfonos":
-            //            if (new[] { "HusoHorario", "# Titulares", "# Conocidos", "# Desconocidos", "# SinContacto",
-            //                "# Descolgaron_ViciDial", "# Intentos_ViciDial", "ÚltimaMarcación" }.Contains(campo))
-            //            {
-            //                SetComboSimple();
-            //                return;
-            //            }
-
-            //            _tblSignos.DefaultView.RowFilter = @"Signo IN ('=', '≠')";
-
-            //            if (new[] { "Teléfono", "EntidadFederativa", "Calificacion" }.Contains(campo))
-            //            {
-            //                SetComboSimple();
-            //                return;
-            //            }
-
-            //            if (campo == "Municipio")
-            //            {
-            //                SetComboList(tblMunicipios, "Municipio", "Municipio");
-            //                return;
-            //            }
-
-            //            if (campo == "Ranking")
-            //            {
-            //                _tblSignos.DefaultView.RowFilter = @"Signo IN ('<', '≤', '=', '≥', '>', '≠')";
-            //                SetComboSimple();
-            //                return;
-            //            }
-
-            //            if (campo == "Clase") SetComboList(Catálogo.ValoresDelCatálogo(12));
-            //            else if (campo == "Telefonía") SetComboList(Catálogo.ValoresDelCatálogo(23));
-            //            else if (campo == "Origen") SetComboList(Catálogo.ValoresDelCatálogo(24));
-            //            else if (campo == "Confirmado") SetComboList(Catálogo.TablaBit());
-            //            break;
-
-            //        case "Gestiones":
-            //            if (new[] { "Fecha", "Hora", "Duración", "TiempoEnCuenta" }.Contains(campo))
-            //            {
-            //                SetComboSimple();
-            //                return;
-            //            }
-
-            //            _tblSignos.DefaultView.RowFilter = @"Signo IN ('=', '≠')";
-
-            //            if (new[] { "Usuario", "Teléfono", "Extensión", "Comentario", "NombreContacto" }.Contains(campo))
-            //            {
-            //                SetComboSimple();
-            //                return;
-            //            }
-
-            //            switch (campo)
-            //            {
-            //                case "Contacto": SetComboList(Catálogo.ValoresDelCatálogo(5, 1601)); break;
-            //                case "Situación": SetComboList(Catálogo.ValoresDelCatálogo(2)); break;
-            //                case "Sucursal": SetComboList(Catálogo.ValoresDelCatálogo(1)); break;
-            //                case "Modo": SetComboList(Catálogo.ValoresDelCatálogo(21)); break;
-            //                case "Acercamiento": SetComboList(Catálogo.ValoresDelCatálogo(8)); break;
-            //                case "Parentesco": SetComboList(Catálogo.ValoresDelCatálogo(11)); break;
-            //                case "CausaNoPago": SetComboList(Catálogo.ValoresDelCatálogo(10)); break;
-            //            }
-            //            break;
-
-            //        case "Negociaciones":
-            //            if (new[] { "MontoNegociado", "Pagos", "Plazos", "FechaCreación", "Hora",
-            //                "FechaAcordada", "FechaFinNegociación", "MontoPagado", "SaldoNegociación",
-            //                "Fecha_Plazo" }.Contains(campo))
-            //            {
-            //                SetComboSimple();
-            //                return;
-            //            }
-
-            //            _tblSignos.DefaultView.RowFilter = @"Signo IN ('=', '≠')";
-
-            //            if (new[] { "Usuario", "Validador", "Correo" }.Contains(campo))
-            //            {
-            //                SetComboSimple();
-            //                return;
-            //            }
-
-            //            if (campo == "Estado") SetComboList(Catálogo.ValoresDelCatálogo(9));
-            //            else if (campo == "CartaConvenio") SetComboList(Catálogo.TablaBit());
-            //            else if (campo == "Herramienta") SetComboList(tblHerramientas, "idHerramienta", "Herramienta");
-            //            else if (campo == "TipoNegociación") SetComboList(Catálogo.ValoresDelCatálogo(8));
-            //            else if (campo == "Modo") SetComboList(Catálogo.ValoresDelCatálogo(21));
-            //            break;
-
-            //        case "Seguimientos":
-            //            SetComboSimple();
-            //            if (new[] { "Recordatorio", "Realizado" }.Contains(campo))
-            //            {
-            //                _tblSignos.DefaultView.RowFilter = @"Signo IN ('=')";
-            //                SetComboList(Catálogo.TablaBit());
-            //            }
-            //            else if (new[] { "Usuario", "Teléfono" }.Contains(campo))
-            //            {
-            //                _tblSignos.DefaultView.RowFilter = @"Signo IN ('=', '≠')";
-            //            }
-            //            break;
-
-            //        case "Chats":
-            //            if (new[] { "Fecha", "Hora", "Duración" }.Contains(campo))
-            //            {
-            //                SetComboSimple();
-            //                return;
-            //            }
-
-            //            _tblSignos.DefaultView.RowFilter = @"Signo IN ('=', '≠')";
-
-            //            if (new[] { "Usuario", "Teléfono", "Comentario" }.Contains(campo))
-            //            {
-            //                SetComboSimple();
-            //                return;
-            //            }
-
-            //            switch (campo)
-            //            {
-            //                case "Salida": SetComboList(Catálogo.TablaBit()); break;
-            //                case "Contacto": SetComboList(Catálogo.ValoresDelCatálogo(5)); break;
-            //                case "Etapa": SetComboList(Catálogo.ValoresDelCatálogo(13, 2207)); break;
-            //                case "Situación": SetComboList(Catálogo.ValoresDelCatálogo(2)); break;
-            //                case "Parentesco": SetComboList(Catálogo.ValoresDelCatálogo(11)); break;
-            //                case "CausaNoPago": SetComboList(Catálogo.ValoresDelCatálogo(10)); break;
-            //                case "Sucursal": SetComboList(Catálogo.ValoresDelCatálogo(1)); break;
-            //            }
-            //            break;
-            //    }
-            //}
-
+            _tblAgrupar = new DataTable("Agrupar");
+            _tblAgrupar.Columns.Add("Concepto", typeof(string));
+            _tblAgrupar.Columns.Add("Campo", typeof(string));
+            _tblAgrupar.PrimaryKey = new DataColumn[]
+            {
+                _tblAgrupar.Columns["Concepto"],
+                _tblAgrupar.Columns["Campo"]
+            };
         }
+
+        // ===================== PARAMETROS =====================
+        public DataTable ObtenerParametros() => _tblParametros.Copy();
+        public DataTable ObtenerAgrupamientos() => _tblAgrupar.Copy();
+
+        public string AgregarParametro(string concepto, string campo)
+        {
+            if (string.IsNullOrWhiteSpace(concepto) || string.IsNullOrWhiteSpace(campo))
+                return "Concepto o campo inválido.";
+
+            var filaExistente = _tblParametros.Rows.Find(new object[] { concepto, campo });
+            if (filaExistente != null)
+                _tblParametros.Rows.Remove(filaExistente);
+
+            var dr = _tblParametros.NewRow();
+            dr["Concepto"] = concepto;
+            dr["Campo"] = campo;
+            _tblParametros.Rows.Add(dr);
+
+            return string.Empty;
+        }
+
+        public string AgregarAgrupamiento(string concepto, string campo)
+        {
+            if (string.IsNullOrWhiteSpace(concepto) || string.IsNullOrWhiteSpace(campo))
+                return "Concepto o campo inválido.";
+
+            var filaExistente = _tblAgrupar.Rows.Find(new object[] { concepto, campo });
+            if (filaExistente != null)
+                return "Ya dio de alta dicho parámetro.";
+
+            _tblAgrupar.Rows.Add(concepto, campo);
+            return string.Empty;
+        }
+
+        public bool EliminarAgrupamiento(string concepto, string campo)
+        {
+            var fila = _tblAgrupar.Rows.Find(new object[] { concepto, campo });
+            if (fila != null)
+            {
+                _tblAgrupar.Rows.Remove(fila);
+                return true;
+            }
+
+            return false;
+        }
+
+        // ===================== BÚSQUEDA =====================
+        public async Task<(bool ok, string mensaje, DataTable? tabla, string? rutaExcel)>
+            RealizaBusquedaAsync(string servidor, string tipoBase, string query, bool detalle = false, bool exportarExcel = false)
+        {
+            var tblCuentas = new DataTable("ConsultaCuentas");
+            string? rutaExcel = null;
+
+            try
+            {
+                using var conn = _dbContFactory.GetSqlConnection(servidor, tipoBase);
+                using var cmd = new SqlCommand($"USE dbCollection; SET DATEFORMAT YMD; {query}", conn);
+                await conn.OpenAsync();
+
+                using var da = new SqlDataAdapter(cmd);
+                da.Fill(tblCuentas);
+
+                if (tblCuentas.Rows.Count == 0)
+                    return (false, "No se encontraron registros.", null, null);
+
+                if (detalle && exportarExcel)
+                {
+                    rutaExcel = Path.Combine(Path.GetTempPath(), $"Consulta_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+                    string? resultadoExcel = _excelGeneratorService.ExportToExcelSAX(ref tblCuentas, rutaExcel);
+                    if (!string.IsNullOrEmpty(resultadoExcel))
+                        return (false, $"Error al exportar Excel: {resultadoExcel}", null, null);
+                }
+                else
+                {
+                    Funciones.ColumnaPorcentaje(ref tblCuentas, tblCuentas.Columns[0].ColumnName);
+                    Funciones.FilaTotales(ref tblCuentas);
+                }
+
+                return (true, "Consulta terminada.", tblCuentas, rutaExcel);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error durante la búsqueda: {ex.Message}", null, null);
+            }
+        }
+
+        // ===================== CONSULTAR =====================
+       
+
+    }
 }

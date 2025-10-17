@@ -125,6 +125,8 @@ using Loki.Mark.Consulta.Informacion.Busquedas.DAOs;
 using BusquedasService = Loki.Mark.Consulta.Cuenta.Services.BusquedasService;
 using Loki.Mark.Reportes.Ejecutivos.DAOs;
 using Loki.Mark.Reportes.Ejecutivos.Services;
+using Loki.Mark.Administracion.Gespa.Scripts.Interfaces;
+using Loki.Mark.Administracion.Gespa.Frases.Interfaces;
 
 
 
@@ -329,6 +331,15 @@ builder.Services.AddScoped<IComentariosDAO, ComentariosDAO>();
 builder.Services.AddScoped<IReporteEjecutivosService, ReporteEjecutivosService>();
 builder.Services.AddScoped<IReporteEjecutivosDAO, ReporteEjecutivosDAO>();
 
+#endregion
+
+
+#region scripts
+builder.Services.AddScoped<IScriptsDAO, Loki.Mark.Administracion.Gespa.Scripts.DAOs.ScriptsDAO>();
+#endregion
+
+#region Frases
+builder.Services.AddScoped<IFrases, Loki.Mark.Administracion.Gespa.Frases.DAOs.FrasesDao>();
 #endregion
 
 

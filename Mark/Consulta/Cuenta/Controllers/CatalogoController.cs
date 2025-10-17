@@ -23,11 +23,11 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
             _dbContFactory = dbContFactory;
         }
 
-        private bool ValidarClaimServidor(out string servidorClaim)
-        {
-            servidorClaim = User.FindFirst("Servidor")?.Value ?? string.Empty;
-            return !string.IsNullOrWhiteSpace(servidorClaim);
-        }
+        //private bool ValidarClaimServidor(out string servidorClaim)
+        //{
+        //    servidorClaim = User.FindFirst("Servidor")?.Value ?? string.Empty;
+        //    return !string.IsNullOrWhiteSpace(servidorClaim);
+        //}
 
         private List<Dictionary<string, object>> DataTableToList(DataTable dt)
         {
@@ -107,12 +107,9 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
                     idEjecutivo = result != null ? Convert.ToInt32(result) : 0;
                 }
 
-                Console.WriteLine($"idEjecutivo encontrado para '{usuarioRH}': {idEjecutivo}");
-
                 if (idEjecutivo == 0)
                 {
                     mensaje = $"No se encontró idEjecutivo para el usuario '{usuarioRH}'";
-                    Console.WriteLine($"⚠ {mensaje}");
                     return (dtUsuariosRH, idEjecutivo, mensaje);
                 }
 
@@ -128,14 +125,12 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
                 }
 
                 mensaje = $"Se encontraron {dtUsuariosRH.Rows.Count} registros para el idEjecutivo {idEjecutivo}";
-                Console.WriteLine($"✅ {mensaje}");
 
                 return (dtUsuariosRH, idEjecutivo, mensaje);
             }
             catch (Exception ex)
             {
                 mensaje = $"Error al cargar usuarios RH: {ex.Message}";
-                Console.WriteLine(mensaje);
                 return (dtUsuariosRH, idEjecutivo, mensaje);
             }
         }
