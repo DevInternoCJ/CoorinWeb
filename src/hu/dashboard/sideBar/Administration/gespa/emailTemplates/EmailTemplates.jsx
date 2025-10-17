@@ -17,11 +17,12 @@ const EmailTemplates = ({ onClose }) => {
   const { bounce } = ModalBase.useModalLogic();
   const [datosDeudor, setDatosDeudor] = useState({}); // ✅ Nuevo estado para datosDeudor
   const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
- 
+  const { walletProducts} = useWalletProducts();
+  const idProducto = walletProducts?.[0]?.idProducto;
+  const idCartera = walletProducts?.[0]?.idCartera;
 
   const actualizarPlantillas = async () => {
-    // Puedes usar el mismo requestData que usa LoadDates
-    const data = { idCartera: 1, idProducto: 1 };
+    const data = { idCartera, idProducto};
     console.log(
       "Body enviado a PostLoadData:",
       data,

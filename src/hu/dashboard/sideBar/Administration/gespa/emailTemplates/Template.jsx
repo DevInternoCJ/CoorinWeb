@@ -7,6 +7,7 @@ import {
 } from "../../../../../../services/mark/albaz/LokiServices";
 import { DeleteTemplate } from "../../../../../../services/mark/albaz/LokiServices";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
+import { useWalletProducts } from "../../../../../login/WalletProduct";
 import { toast } from "sonner";
 
 const Template = ({
@@ -28,7 +29,8 @@ const Template = ({
   );
   // Estados para el drag and drop
   const [isDraggingOver, setIsDraggingOver] = useState(false);
-
+  const { walletProducts} = useWalletProducts();
+    const idProducto = walletProducts?.[0]?.idProducto;
   useEffect(() => {
     setSelectedPlantilla(plantillas[0]?.nombre ?? "");
     setIdCorreoScript(plantillas[0]?.idCorreoScript ?? null);
@@ -188,7 +190,6 @@ const Template = ({
   console.log("Datos de usuario en el store:", user);
   const idEjecutivo = 38764;
   console.log("idEjecutivo del usuario:", idEjecutivo);
-  const idProducto = 1;
 
   const handleSave = async () => {
     setLoading(true);
