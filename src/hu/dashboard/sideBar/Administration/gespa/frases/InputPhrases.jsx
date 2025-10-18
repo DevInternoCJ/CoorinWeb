@@ -111,12 +111,12 @@ export const InputPhrases = ({ onPhraseSaved }) => {
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
       <div className="w-full">
-        <label
+        <h5
           htmlFor="textarea-phrase"
-          className="block text-sm font-medium text-gray-700 mb-2"
+          className="block text-sm font-semibold text-gray-700 mb-2"
         >
           Escribe la frase
-        </label>
+        </h5>
         <textarea
           id="textarea-phrase"
           value={phrase}
@@ -124,21 +124,10 @@ export const InputPhrases = ({ onPhraseSaved }) => {
           onKeyDown={handleKeyDown}
           className="py-2 border border-gray-300 rounded-lg px-3 sm:py-3 sm:px-4 block w-full sm:text-sm focus:ring-2 focus:border-blue-500 focus:ring-blue-500 focus:outline-none transition-colors disabled:opacity-50 disabled:pointer-events-none disabled:bg-gray-100"
           rows="4"
-          placeholder="Escribe tu frase aquí... (Ctrl + Enter para guardar rápido)"
+          placeholder="Frase..."
           disabled={loading}
         />
-        
-        {/* Contador de caracteres */}
-        <div className="flex justify-between items-center mt-2">
-          <span className="text-xs text-gray-500">
-            {phrase.length} caracteres
-          </span>
-          <span className="text-xs text-gray-400">
-            Tip: Presiona Ctrl + Enter para guardar
-          </span>
-        </div>
       </div>
-
       {/* Botón de guardar */}
       <div className="flex justify-end mt-4">
         <ButtonSave
