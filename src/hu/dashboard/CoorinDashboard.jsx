@@ -86,7 +86,13 @@ export default function CoorinDashboard() {
           );
           break;
         case "Datos Erroneos":
-          ContentComponent = WrongsContent;
+          ContentComponent = (props) => (
+            <WrongsContent
+              mostrarTabla={mostrarTablaPagosReportados}
+              setMostrarTabla={setMostrarTablaPagosReportados}
+              {...props}
+            />
+          );
           break;
         case "Domicilios":
           ContentComponent = (props) => (
@@ -122,6 +128,8 @@ export default function CoorinDashboard() {
         size = mostrarTablaPagosReportados ? "pagos-xl" : "pagos";
       } else if (selectedSidebarOption === "Domicilios") {
         size = mostrarTablaDomicilios ? "pagos-xl" : "pagos";
+      } else if (selectedSidebarOption === "Datos Erroneos") {
+        size = mostrarTablaPagosReportados ? "pagos-xl" : "pagos";
       }
 
       return (
