@@ -1,151 +1,187 @@
-﻿using System.Data;
-using Microsoft.Data.SqlClient;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Threading.Tasks;
+using Dapper;
+using Loki.DTOs.GeneralesDTOs;
+
+using Loki.Global;
+using Loki.Mark.Administracion.Carteras.Interfaces;
+using Loki.Mark.Consulta.Cuenta.Interfaces;
+using Loki.Mark.Consulta.Informacion.Busquedas.Interfaces;
+using Loki.Mark.Consulta.Generales.Interfaces;
+using CoorinWeb.Loki.Common;
 using CoorinWeb.Loki.Global;
 using CoorinWeb.Loki.Mark.Auth.DAOs;
-using Loki.Mark.Administracion.Carteras.Interfaces;
-using Loki.Mark.Consulta.Generales.Interfaces;
-using static Loki.Mark.Consulta.Cuenta.Services.BusquedasService;
-using static CoorinWeb.Loki.Global.AccionamientosQueryHelper;
-using CoorinWeb.Loki.Common;
-using Loki.Mark.Consulta.Informacion.Busquedas.Interfaces;
-using Loki.Global;
-using Loki.Mark.Consulta.Cuenta.Interfaces;
 
 namespace Loki.Mark.Consulta.Generales.DAOs
 {
     public class GeneralesDao : IGeneralesDao
     {
-        private readonly IDbContextFactory _dbContFactory;
+        private readonly IDbContextFactory _dbContextFactory;
         private readonly DaoBase _daoBase;
-        private readonly IBusquedasService _busquedasService;
-        private readonly ICatalogosServiceRe _catalogosServiceRe;
         private readonly ExcelGeneratorService _excelGeneratorService;
 
-        // Tablas de parámetros y agrupamiento
-        private readonly DataTable _tblParametros;
-        private readonly DataTable _tblAgrupar;
-
         public GeneralesDao(
-            IDbContextFactory dbContFactory,
+            IDbContextFactory dbContextFactory,
             DaoBase daoBase,
-            IBusquedasService busquedasService,
-            ICatalogosServiceRe catalogosServiceRe,
+            EjecutivoDao ejecutivoDao,
             ExcelGeneratorService excelGeneratorService)
         {
-            _dbContFactory = dbContFactory;
+            _dbContextFactory = dbContextFactory;
             _daoBase = daoBase;
-            _busquedasService = busquedasService;
-            _catalogosServiceRe = catalogosServiceRe;
             _excelGeneratorService = excelGeneratorService;
-
-            // Inicialización de DataTables
-            _tblParametros = new DataTable("Parametros");
-            _tblParametros.Columns.Add("Concepto", typeof(string));
-            _tblParametros.Columns.Add("Campo", typeof(string));
-            _tblParametros.PrimaryKey = new DataColumn[]
-            {
-                _tblParametros.Columns["Concepto"],
-                _tblParametros.Columns["Campo"]
-            };
-
-            _tblAgrupar = new DataTable("Agrupar");
-            _tblAgrupar.Columns.Add("Concepto", typeof(string));
-            _tblAgrupar.Columns.Add("Campo", typeof(string));
-            _tblAgrupar.PrimaryKey = new DataColumn[]
-            {
-                _tblAgrupar.Columns["Concepto"],
-                _tblAgrupar.Columns["Campo"]
-            };
         }
 
-        // ===================== PARAMETROS =====================
-        public DataTable ObtenerParametros() => _tblParametros.Copy();
-        public DataTable ObtenerAgrupamientos() => _tblAgrupar.Copy();
-
-        public string AgregarParametro(string concepto, string campo)
+        public async Task<SearchResultDto> RealizaBusqueda(
+            string servidor,
+            int idCartera,
+            int idProducto,
+            bool esContar,
+            bool esCuentas,
+            bool esDetalle,
+            int? idConsulta = null,
+            IEnumerable<ParameterDto>? parametrosExtra = null,
+            IEnumerable<AgruparDTO>? agrupamientoExtra = null)
         {
-            if (string.IsNullOrWhiteSpace(concepto) || string.IsNullOrWhiteSpace(campo))
-                return "Concepto o campo inválido.";
-
-            var filaExistente = _tblParametros.Rows.Find(new object[] { concepto, campo });
-            if (filaExistente != null)
-                _tblParametros.Rows.Remove(filaExistente);
-
-            var dr = _tblParametros.NewRow();
-            dr["Concepto"] = concepto;
-            dr["Campo"] = campo;
-            _tblParametros.Rows.Add(dr);
-
-            return string.Empty;
-        }
-
-        public string AgregarAgrupamiento(string concepto, string campo)
-        {
-            if (string.IsNullOrWhiteSpace(concepto) || string.IsNullOrWhiteSpace(campo))
-                return "Concepto o campo inválido.";
-
-            var filaExistente = _tblAgrupar.Rows.Find(new object[] { concepto, campo });
-            if (filaExistente != null)
-                return "Ya dio de alta dicho parámetro.";
-
-            _tblAgrupar.Rows.Add(concepto, campo);
-            return string.Empty;
-        }
-
-        public bool EliminarAgrupamiento(string concepto, string campo)
-        {
-            var fila = _tblAgrupar.Rows.Find(new object[] { concepto, campo });
-            if (fila != null)
-            {
-                _tblAgrupar.Rows.Remove(fila);
-                return true;
-            }
-
-            return false;
-        }
-
-        // ===================== BÚSQUEDA =====================
-        public async Task<(bool ok, string mensaje, DataTable? tabla, string? rutaExcel)>
-            RealizaBusquedaAsync(string servidor, string tipoBase, string query, bool detalle = false, bool exportarExcel = false)
-        {
-            var tblCuentas = new DataTable("ConsultaCuentas");
-            string? rutaExcel = null;
-
             try
             {
-                using var conn = _dbContFactory.GetSqlConnection(servidor, tipoBase);
-                using var cmd = new SqlCommand($"USE dbCollection; SET DATEFORMAT YMD; {query}", conn);
-                await conn.OpenAsync();
+                // ========================================
+                // Cargar datos de ConsultaGenerador (estático)
+                // ========================================
+                await AccionamientosQueryHelper.ConsultaGenerador.CargarDesdeBDAsync(_dbContextFactory, servidor);
 
-                using var da = new SqlDataAdapter(cmd);
-                da.Fill(tblCuentas);
+                var tblParametros = AccionamientosQueryHelper.Ejecutivo1.TablaParámetros;
+                var tblAgrupar = AccionamientosQueryHelper.Ejecutivo1.TablaAgrupar;
 
-                if (tblCuentas.Rows.Count == 0)
-                    return (false, "No se encontraron registros.", null, null);
+                tblParametros.Rows.Clear();
+                tblAgrupar.Rows.Clear();
 
-                if (detalle && exportarExcel)
+                // ========================================
+                // Parámetros base
+                // ========================================
+                if (idConsulta.HasValue)
                 {
-                    rutaExcel = Path.Combine(Path.GetTempPath(), $"Consulta_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
-                    string? resultadoExcel = _excelGeneratorService.ExportToExcelSAX(ref tblCuentas, rutaExcel);
-                    if (!string.IsNullOrEmpty(resultadoExcel))
-                        return (false, $"Error al exportar Excel: {resultadoExcel}", null, null);
+                    var consultaRow = AccionamientosQueryHelper.ConsultaGenerador.ObtenerConsulta(idConsulta.Value);
+                    if (consultaRow == null)
+                        throw new Exception($"No se encontró la consulta con ID {idConsulta.Value}");
+
+                    idProducto = Convert.ToInt32(consultaRow["idProducto"]);
                 }
+
+                tblParametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
+
+                if (parametrosExtra != null)
+                {
+                    foreach (var p in parametrosExtra)
+                        tblParametros.Rows.Add(p.Concepto, p.Campo, p.Valores, "AND", p.Dato);
+                }
+
+                // Agrupaciones predefinidas
+                tblAgrupar.Rows.Add("Cuenta", "Situación");
+                tblAgrupar.Rows.Add("Producto", "120");
+                tblAgrupar.Rows.Add("Conteos", "Gestiones");
+                tblAgrupar.Rows.Add("Fechas", "Activación");
+
+                Resultado conteo;
+                if (esDetalle)
+                    conteo = Resultado.Detalle;
+                else if (esCuentas)
+                    conteo = Resultado.ContarCuentas;
                 else
+                    conteo = Resultado.Contar;
+
+
+                // ========================================
+                // Llamada a QueryGeneral (estático)
+                // ========================================
+                string concepto = "Producto";
+                int idEjecutivo = idCartera;
+                // Crear instancia de ConsultaGenerador
+                // Crear instancia de ConsultaGenerador pasando _dbContextFactory
+                var consultaGenerador = new AccionamientosQueryHelper.ConsultaGenerador(_dbContextFactory);
+
+                // Llamada async a QueryGeneral
+                var queryData = await consultaGenerador.QueryGeneral(
+                    servidor,            // string servidor
+                    idCartera,           // int idCartera
+                    concepto,            // string concepto
+                    tblParametros,       // DataTable parámetros
+                    tblAgrupar,          // DataTable agrupamientos
+                    conteo,              // Resultado conteo
+                    DateTime.Today.AddMonths(-1), // DateTime desde
+                    idEjecutivo,         // int idEjecutivo
+                    idConsulta ?? 0      // int idConsulta
+                );
+
+
+                string sQuery = "USE dbCollection SET DATEFORMAT YMD; " + queryData;
+
+                // ========================================
+                // Ejecución SQL async
+                // ========================================
+                DataTable tblCuentas = new("Cuentas");
+
+                using (var sqlConnection = _dbContextFactory.GetSqlConnection(servidor, "Collection"))
                 {
-                    Funciones.ColumnaPorcentaje(ref tblCuentas, tblCuentas.Columns[0].ColumnName);
-                    Funciones.FilaTotales(ref tblCuentas);
+                    await sqlConnection.OpenAsync();
+                    using (var reader = await sqlConnection.ExecuteReaderAsync(sQuery))
+                    {
+                        tblCuentas.Load(reader);
+                    }
                 }
 
-                return (true, "Consulta terminada.", tblCuentas, rutaExcel);
+                // ========================================
+                // Exportación a Excel
+                // ========================================
+                string? rutaExcel = null;
+
+                if (tblCuentas.Rows.Count > 0)
+                {
+                    string fileName = $"Cuentas_{Guid.NewGuid():N}.xlsx";
+                    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports");
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    string filePath = Path.Combine(uploadsFolder, fileName);
+                    string sResultado = _excelGeneratorService.ExportToExcelSAX(ref tblCuentas, filePath);
+
+                    if (!string.IsNullOrEmpty(sResultado))
+                        return new SearchResultDto { Mensaje = sResultado, EsError = true };
+
+                    rutaExcel = $"/api/busquedas/download-excel?filename={fileName}";
+                }
+
+                // ========================================
+                // Conversión DataTable a lista de diccionarios
+                // ========================================
+                var datosResultado = new List<Dictionary<string, object>>();
+                foreach (DataRow row in tblCuentas.Rows)
+                {
+                    var item = new Dictionary<string, object>();
+                    foreach (DataColumn col in tblCuentas.Columns)
+                        item[col.ColumnName] = row[col];
+                    datosResultado.Add(item);
+                }
+
+                return new SearchResultDto
+                {
+                    Mensaje = "Búsqueda terminada correctamente.",
+                    EsError = false,
+                    TotalFilasEncontradas = tblCuentas.Rows.Count,
+                    Datos = datosResultado,
+                    RutaDescargaExcel = rutaExcel
+                };
             }
             catch (Exception ex)
             {
-                return (false, $"Error durante la búsqueda: {ex.Message}", null, null);
+                return new SearchResultDto
+                {
+                    Mensaje = $"Error al realizar la búsqueda: {ex.Message}",
+                    EsError = true
+                };
             }
         }
-
-        // ===================== CONSULTAR =====================
-       
-
     }
 }

@@ -1,8 +1,8 @@
 ﻿using CoorinWeb.Loki.Global;
 using Loki.Controllers;
-using Loki.DTOs.BusquedaDTOs;
+using Loki.DTOs.GeneralesDTOs;
 using Loki.Mark.Administracion.Carteras.Interfaces;
-using Loki.Mark.Consulta.Cuenta.Interfaces;
+//using Loki.Mark.Consulta.Cuenta.Interfaces;
 using Loki.Mark.Consulta.Generales.Interfaces;
 using Loki.Mark.Consulta.Generales.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -14,13 +14,15 @@ namespace Loki.Mark.Consulta.Generales.Controllers
     public class GeneralesController : Controller
     {
         private readonly IGenerales _generalesService; // Inyecta la interfaz del servicio de búsquedas
+        private readonly IGeneralesDao _generalesDao; 
         private readonly ILogger<GeneralesController> _logger;
 
 
-        public GeneralesController(IBusqueda busquedasService, ILogger<GeneralesController> logger, IGenerales generalesService)
+        public GeneralesController(IGenerales generales, ILogger<GeneralesController> logger, IGenerales generalesService, IGeneralesDao generalesDao)
         {
-            _generalesService = generalesService;
+            _generalesService = generales;
             _logger = logger;
+            _generalesDao = generalesDao;
 
 
         }
@@ -76,6 +78,48 @@ namespace Loki.Mark.Consulta.Generales.Controllers
                 return StatusCode(500, new { error = "Ocurrió un error al procesar la solicitud." });
             }
         }
+
+        [HttpPost("realizar-busqueda")]
+        [Authorize]
+        [SwaggerOperation(
+           Summary = "realizar busqueda - irene",
+           Description = "realiza una busqueda por medio de idconsulta o parametros y agrupamientos"
+        )]
+        public async Task<IActionResult> RealizarBusqueda([FromBody] SearchGeneral search)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(search.Servidor))
+                    return BadRequest(new { error = "Debe proporcionar el nombre del servidor." });
+
+                if (!search.IdProducto.HasValue || !search.IdCartera.HasValue)
+                    return BadRequest(new { error = "Debe proporcionar IdProducto y IdCartera." });
+
+                // Aquí puedes decidir esContar y esCuentas según la lógica de tu front
+                bool esDetalle = search.EsDetalleResultado;
+                bool esCuentas = search.EsCuentasResultado;  // si tienes esta propiedad en el DTO
+                bool esContar = search.EsContarResultado;    // idem
+
+                var result = await _generalesDao.RealizaBusqueda(
+                    search.Servidor!,
+                    search.IdCartera.Value,
+                    search.IdProducto.Value,
+                    esContar,
+                    esCuentas,
+                    esDetalle,
+                    search.IdConsulta,
+                    search.ParametrosExtra,
+                    search.AgrupamientoExtra
+                );
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
 
 
     }

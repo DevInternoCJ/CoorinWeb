@@ -53,7 +53,7 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
 
         [HttpGet("ColumnasProducto")]
         [SwaggerOperation(
-            Summary = "olumnas producto - irene",
+            Summary = "columnas producto - irene",
             Description = "Obtiene la lista de nombres de columnas de un producto específico"
         )]
         public async Task<IActionResult> ColumnasProducto([FromQuery] string servidor, [FromQuery] int idProducto)

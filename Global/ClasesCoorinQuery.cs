@@ -1458,610 +1458,617 @@ namespace CoorinWeb.Loki.Global
             /// <param name="idConsulta">id de la consulta de cuentas.</param>
             /// <returns></returns>
 
-            //public async Task<string> QueryGeneral(string servidor,int idCartera,string concepto, DataTable tblParametros,DataTable tblAgrupar,Resultado conteo,DateTime desde,int idEjecutivo,int idConsulta)
-            //{
-            //    // Variables auxiliares
-            //    string telefono = "0", clase = "0", telefonica = "0", origen = "0", confirmado = "0", huso = "0",
-            //           entidad = "0", ultima = "0", sinConocido = "0", desconocido = "0", conocido = "0",
-            //           titulares = "0", calificacion = "0", estatusNego = "0", ranking = "0";
-
-            //    string tipoHora = DateTime.Now.ToString("tt");
-            //    int hora = Convert.ToInt32(DateTime.Now.ToString("hh"));
-            //    string ConteoR = "0";
-            //    var columnas = new ArrayList();
-            //    bool bConteosTels = false;
-            //    string sCaseHusoHorario = ""; 
-            //    string sNot = "";
-
-            //    SqlQueryData queryCuentas = QueryCuentas(idConsulta, ref columnas);
-
-            //    string sSelect = conteo switch
-            //    {
-            //        Resultado.Detalle => "\t Z.idCuenta AS 'Cuenta' \r\n",
-            //        Resultado.ContarCuentas => "\t COUNT(DISTINCT Z.idCuenta) AS 'Cuentas' \r\n",
-            //        _ => "\t COUNT(*) AS '" + concepto + "' \r\n"
-            //    };
-
-            //    string sFrom = $" FROM dbCollection..{concepto} Z WITH (NOLOCK) \r\n";
-            //    string sWhere = $" WHERE Z.idCartera = {idCartera} \r\n";
-            //    string sGroupBy = "";
-            //    string sQuery = "";
-
-            //    // Condición especial fines de semana
-            //    if (idCartera == 28 && concepto == "Teléfonos" &&
-            //        (DateTime.Today.DayOfWeek == DayOfWeek.Sunday || DateTime.Today.DayOfWeek == DayOfWeek.Saturday))
-            //    {
-            //        sWhere += $" AND Z.idOrigen IN (1810,1811) ";
-            //    }
-
-            //    // JOIN a Cuentas para Teléfonos
-            //    if (concepto == "Teléfonos")
-            //        sFrom += " INNER JOIN dbCollection..Cuentas CA WITH (NOLOCK) ON Z.idCartera = CA.idCartera AND Z.idCuenta = CA.idCuenta AND CA.CuentaActiva = 1 \r\n";
-
-            //    // ------------------- #region Filtros -------------------
-            //    if (tblParametros != null)
-            //    {
-            //        foreach (DataRow drFila in tblParametros.Rows)
-            //        {
-            //            sNot = drFila["Valores"].ToString().Contains("≠") ? " NOT" : "";
-
-            //            switch (concepto)
-            //            {
-            //                case "Teléfonos":
-            //                    {
-            //                        string sCampo = drFila["Campo"].ToString().Replace("# ", "");
-            //                        sNot = drFila["Valores"].ToString().Contains("≠") ? "NOT" : "";
-
-            //                        // Instancia de CatalogosService
-            //                        var catalogosService = new CatalogosService(_dbContextFactory);
-
-            //                        if (sCampo == "Teléfono")
-            //                        {
-            //                            sWhere += $"\t AND Z.NúmeroTelefónico {sNot} IN ({drFila["Parámetros"]}) \r\n";
-            //                        }
-            //                        else if (sCampo == "Clase")
-            //                        {
-            //                            sWhere += $"\t AND Z.idClase {sNot} IN ({drFila["Parámetros"]}) \r\n";
-            //                        }
-            //                        else if (sCampo == "Telefonía")
-            //                        {
-            //                            sWhere += $"\t AND Z.idTelefonía {sNot} IN ({drFila["Parámetros"]}) \r\n";
-            //                        }
-            //                        else if (sCampo == "Origen")
-            //                        {
-            //                            sWhere += $"\t AND Z.idOrígen {sNot} IN ({drFila["Parámetros"]}) \r\n";
-            //                        }
-            //                        else if (sCampo == "Confirmado")
-            //                        {
-            //                            sWhere += $"\t AND Z.Confirmado {sNot} IN ({drFila["Parámetros"]}) \r\n";
-            //                        }
-            //                        else if (sCampo == "EntidadFederativa")
-            //                        {
-            //                            sWhere += $"\t AND Z.Estado {sNot} IN ({drFila["Parámetros"]}) \r\n";
-            //                        }
-            //                        else if (sCampo == "EstatusNegociación")
-            //                        {
-            //                            sWhere += $"\t AND EstatusNegociación {sNot} IN ({drFila["Parámetros"]}) \r\n";
-            //                        }
-            //                        else if (sCampo == "HusoHorario")
-            //                        {
-            //                            var parametrosHuso = drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',');
-            //                            for (int i = 0; i < parametrosHuso.Length; i++)
-            //                                sWhere += $"\t AND {sCaseHusoHorario} {parametrosHuso[i]} \r\n";
-
-            //                            if (!sFrom.Contains("MarcaciónInternacional MI"))
-            //                                sFrom += "\t LEFT JOIN MarcaciónInternacional MI ON Z.idTelefonía = MI.idTelefonía AND MI.Clave = SUBSTRING(CONVERT(VARCHAR(20),Z.NúmeroTelefónico), 1,3) \r\n";
-            //                        }
-            //                        else if (sCampo == "MejorContacto")
-            //                        {
-            //                            if (!sFrom.Contains(") MC"))
-            //                            {
-            //                                sFrom += "\t LEFT JOIN ( \r\n\t\t\t" +
-            //                                    "SELECT GT.NúmeroTelefónico, GT.idContacto, Contactos.Valor MejorContacto, Contactos.Orden, " +
-            //                                    "ROW_NUMBER() OVER (PARTITION BY GT.NúmeroTelefónico ORDER BY Contactos.Orden) NumMejorContacto \r\n\t\t\t" +
-            //                                    "FROM GestionesTelefónicas GT WITH (NOLOCK) " +
-            //                                    "INNER JOIN ValoresCatálogo Contactos WITH (NOLOCK) ON GT.idContacto = Contactos.idValor \r\n\t\t\t" +
-            //                                    $"WHERE GT.Fecha_Insert >= '{desde:yyyy-MM-dd}' AND GT.idCartera = {idCartera} \r\n\t\t\t" +
-            //                                    ") MC ON MC.NúmeroTelefónico = Z.NúmeroTelefónico AND MC.NumMejorContacto = 1 \r\n";
-            //                            }
-
-            //                            // Se obtiene IDs relacionados mediante CatalogosService
-            //                            var idsRelacionados = catalogosService.IdsRelaciones(Convert.ToInt32(drFila["Parámetros"]));
-            //                            sWhere += $"\t AND MC.idContacto {sNot} IN ({idsRelacionados}) \r\n";
-            //                        }
-            //                        else if (sCampo == "Descolgaron_ViciDial" || sCampo == "Intentos_ViciDial")
-            //                        {
-            //                            if (!sFrom.Contains(") IVD"))
-            //                            {
-            //                                sFrom += "\t LEFT JOIN ( \r\n\t\t\t" +
-            //                                    "SELECT IV.NúmeroTelefónico, SUM(Contestaron) Descolgaron_ViciDial, COUNT(NúmeroTelefónico) Intentos_ViciDial \r\n\t\t\t" +
-            //                                    "FROM Intentos_ViciDial IV WITH (NOLOCK) " +
-            //                                    "INNER JOIN Equivalencias_ViciDial EV WITH (NOLOCK) ON IV.Status_ViciDial = EV.Status_ViciDial \r\n\t\t\t" +
-            //                                    $"WHERE IV.Fecha_Insert >= '{desde:yyyy-MM-dd}' \r\n\t\t\t" +
-            //                                    "GROUP BY IV.NúmeroTelefónico ) IVD ON IVD.NúmeroTelefónico = Z.NúmeroTelefónico \r\n";
-            //                            }
-
-            //                            var parametrosVici = drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',');
-            //                            for (int i = 0; i < parametrosVici.Length; i++)
-            //                                sWhere += $"\t AND ISNULL(IVD.{sCampo},0) {parametrosVici[i]} \r\n";
-            //                        }
-            //                        else if (sCampo == "Extensión")
-            //                        {
-            //                            sWhere += "\t AND Z.Extensión";
-            //                        }
-            //                        else
-            //                        {
-            //                            if (!bConteosTels)
-            //                            {
-            //                                sFrom += "\t LEFT JOIN ( \r\n" +
-            //                                    "SELECT GT.idCuenta, GT.NúmeroTelefónico, " +
-            //                                    $"SUM(CASE WHEN idContacto=1101 THEN 1 ELSE 0 END) AS 'Titulares', " +
-            //                                    $"SUM(CASE WHEN idContacto=1102 THEN 1 ELSE 0 END) AS 'Conocidos', " +
-            //                                    $"SUM(CASE WHEN idContacto IN ({catalogosService.IdsRelaciones(1103)}) THEN 1 ELSE 0 END) AS 'Desconocidos', " +
-            //                                    $"SUM(CASE WHEN idContacto NOT IN (1101,1102,{catalogosService.IdsRelaciones(1103)}) THEN 1 ELSE 0 END) AS 'SinContacto', " +
-            //                                    "MAX(Fecha_Insert) AS 'ÚltimaMarcación' " +
-            //                                    "FROM dbCollection..GestionesTelefónicas GT WITH (NOLOCK) " +
-            //                                    $"WHERE GT.idCartera = {idCartera} AND Fecha_Insert >= '{desde:yyyy-MM-dd}' " +
-            //                                    "GROUP BY GT.idCuenta, GT.NúmeroTelefónico ) ConteosTels " +
-            //                                    "ON ConteosTels.idCuenta = Z.idCuenta AND ConteosTels.NúmeroTelefónico = Z.NúmeroTelefónico \r\n";
-            //                                bConteosTels = true;
-            //                            }
-
-            //                            if (sCampo == "Municipio")
-            //                            {
-            //                                sWhere += $"\t AND Z.Municipio {sNot} IN ('{drFila["Parámetros"]}') \r\n";
-            //                            }
-            //                            else
-            //                            {
-            //                                var parametrosConteos = drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',');
-            //                                for (int i = 0; i < parametrosConteos.Length; i++)
-            //                                    sWhere += $"\t AND ISNULL(ConteosTels.{sCampo},{(sCampo == "ÚltimaMarcación" ? "'1900-01-01'" : "0")}) {parametrosConteos[i]} \r\n";
-            //                            }
-            //                        }
-
-            //                        break;
-            //                    }
-
-
-            //                case "Gestiones":
-            //                    sNot = (drFila["Valores"].ToString().Contains("≠") ? " NOT" : "");
-
-            //                    if (drFila["Campo"].ToString() == "Usuario")
-            //                    {
-            //                        if (!sFrom.Contains("Ejecutivos E "))
-            //                            sFrom += "\t INNER JOIN dbCollection..Ejecutivos E WITH (NOLOCK) ON Z.idEjecutivo = E.idEjecutivo \r\n";
-            //                        sWhere += "\t AND E.Usuario " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "Teléfono")
-            //                        sWhere += "\t AND Z.NúmeroTelefónico " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
-            //                    else if (drFila["Campo"].ToString() == "Extensión")
-            //                        sWhere += "\t AND Z.Extensión " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
-            //                    else if (drFila["Campo"].ToString() == "Fecha")
-            //                        for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
-            //                            sWhere += "\t AND Z.Fecha_Insert " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
-
-            //                    else if (drFila["Campo"].ToString() == "Hora")
-            //                        for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
-            //                            sWhere += "\t AND Z.Segundo_Insert " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
-
-            //                    else if (drFila["Campo"].ToString() == "Duración" || drFila["Campo"].ToString() == "TiempoEnCuenta")
-            //                        for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
-            //                            sWhere += "\t AND Z." + drFila["Campo"] + " " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
-
-            //                    else if (drFila["Campo"].ToString() == "Comentario" || drFila["Campo"].ToString() == "NombreContacto")
-            //                    {
-            //                        for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
-            //                            sWhere += "\t AND Z." + drFila["Campo"] + " " + sNot + " LIKE " + drFila["Parámetros"].ToString().Split(',')[i] + "\r\n";
-
-            //                    }
-            //                    else // Catálogos
-            //                        sWhere += "\t AND Z.id" + drFila["Campo"] + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
-            //                    break;
-            //                case "Negociaciones":
-            //                    sNot = (drFila["Valores"].ToString().Contains("≠") ? " NOT" : "");
-
-            //                    if (drFila["Campo"].ToString() == "Usuario" || drFila["Campo"].ToString() == "Validador")
-            //                    {
-            //                        string sAlias = drFila["Campo"].ToString().Substring(0, 1);
-            //                        if (!sFrom.Contains("Ejecutivos " + sAlias))
-            //                            sFrom += "\t INNER JOIN dbCollection..Ejecutivos " + sAlias + " WITH (NOLOCK) ON Z.idEjecutivo" + (sAlias == "V" ? "Validador" : "") + " = " + sAlias + ".idEjecutivo \r\n";
-            //                        sWhere += "\t AND " + sAlias + ".Usuario " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "Fecha_Plazo")
-            //                    {
-            //                        if (!sFrom.Contains("..Plazos L "))
-            //                            sFrom += "\t INNER JOIN dbCollection..Plazos L WITH (NOLOCK) ON Z.idCartera = L.idCartera AND Z.idCuenta = L.idCuenta AND Z.Fecha_Insert = L.Fecha_Insert AND Z.Segundo_Insert = L.Segundo_Insert \r\n";
-            //                        for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
-            //                            sWhere += "\t AND L.FechaPago " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
-
-            //                    }
-            //                    else if (drFila["Dato"].ToString() == "list")
-            //                    {
-            //                        string sColumna = drFila["Campo"].ToString();
-            //                        if (sColumna == "Correo")
-            //                            sColumna = "CorreoElectrónico";
-            //                        if (sColumna == "Estado" || sColumna == "Herramienta")
-            //                            sColumna = "id" + sColumna;
-            //                        if (sColumna == "TipoNegociación" || sColumna == "Modo")
-            //                        {
-            //                            if (sColumna == "TipoNegociación")
-            //                                sWhere += "\t AND Acercamiento.idValor" + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-            //                            if (sColumna == "Modo")
-            //                                sWhere += "\t AND Modo.idValor" + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-            //                        }
-            //                        else
-            //                            sWhere += "\t AND Z." + sColumna + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
-            //                    }
-            //                    else
-            //                    {
-            //                        string sColumna = drFila["Campo"].ToString();
-            //                        if (sColumna == "Hora")
-            //                            sColumna = "Segundo_Insert";
-            //                        if (sColumna == "FechaCreación")
-            //                            sColumna = "Fecha_Insert";
-
-            //                        for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
-            //                            sWhere += "\t AND Z." + sColumna + " " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
-            //                    }
-
-            //                    break;
-            //                case "Seguimientos":
-            //                    sNot = (drFila["Valores"].ToString().Contains("≠") ? " NOT" : "");
-
-            //                    if (drFila["Campo"].ToString() == "Usuario")
-            //                    {
-            //                        if (!sFrom.Contains("Ejecutivos E "))
-            //                            sFrom += "\t INNER JOIN dbCollection..Ejecutivos E WITH (NOLOCK) ON Z.idEjecutivo = E.idEjecutivo \r\n";
-            //                        sWhere += "\t AND E.Usuario " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "Teléfono")
-            //                        sWhere += "\t AND Z.NúmeroTelefónico " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
-            //                    else if (drFila["Dato"].ToString() == "list")
-            //                        sWhere += "\t AND Z." + drFila["Campo"] + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
-            //                    else
-            //                    {
-            //                        string sColumna = drFila["Campo"].ToString();
-            //                        if (drFila["Campo"].ToString() == "HoraCreación")
-            //                            sColumna = "Segundo_Insert";
-            //                        if (drFila["Campo"].ToString() == "FechaCreación")
-            //                            sColumna = "Fecha_Insert";
-            //                        if (drFila["Campo"].ToString() == "HoraSeguimiento")
-            //                            sColumna = "SegundoSeguimiento";
-
-            //                        for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
-            //                            sWhere += "\t AND Z." + sColumna + " " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
-            //                    }
-            //                    break;
-            //                case "Chats":
-            //                    sNot = (drFila["Valores"].ToString().Contains("≠") ? " NOT" : "");
-
-            //                    if (drFila["Campo"].ToString() == "Usuario")
-            //                    {
-            //                        if (!sFrom.Contains("Ejecutivos E "))
-            //                            sFrom += "\t INNER JOIN dbCollection..Ejecutivos E WITH (NOLOCK) ON Z.idEjecutivo = E.idEjecutivo \r\n";
-            //                        sWhere += "\t AND E.Usuario " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "Teléfono")
-            //                        sWhere += "\t AND Z.NúmeroTelefónico " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
-            //                    else if (drFila["Campo"].ToString() == "Fecha")
-            //                        for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
-            //                            sWhere += "\t AND Z.Fecha_Insert " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
-
-            //                    else if (drFila["Campo"].ToString() == "Hora")
-            //                        for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
-            //                            sWhere += "\t AND Z.Segundo_Insert " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
-
-            //                    else if (drFila["Campo"].ToString() == "Duración")
-            //                        for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
-            //                            sWhere += "\t AND Z.Duración " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
-
-            //                    else if (drFila["Campo"].ToString() == "Comentario")
-            //                    {
-            //                        for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
-            //                            sWhere += "\t AND Z.Comentario " + sNot + " LIKE " + drFila["Parámetros"].ToString().Split(',')[i] + "\r\n";
-
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "Salida")
-            //                        sWhere += "\t AND Z." + drFila["Campo"] + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-            //                    else // Catálogos
-            //                        sWhere += "\t AND Z.id" + drFila["Campo"] + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
-            //                    break;
-            //            }
-            //        }
-            //    }
-            //    // ------------------- Fin Filtros -------------------
-
-            //    // ------------------- #region Agrupar -------------------
-            //    if (tblAgrupar != null)
-            //    {
-            //        foreach (DataRow drFila in tblAgrupar.Rows)
-            //        {
-            //            string sCampo = drFila["Campo"].ToString().Replace("# ", "");
-            //            var catalogosService = new CatalogosService(_dbContextFactory);
-
-            //            switch (sCampo)
-            //            {
-            //                case "Teléfono":
-            //                     sCampo = drFila["Campo"].ToString().Replace("# ", "");
-
-            //                    if (drFila["Campo"].ToString() == "Teléfono")
-            //                    {
-            //                        telefono = "1";
-            //                        //sSelect += "\t ,Z.NúmeroTelefónico \r\n ";
-            //                        //sGroupBy += "Z.NúmeroTelefónico, ";
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "Clase")
-            //                    {
-            //                        clase = "1";
-            //                        sSelect += "\t ,Clase.Valor AS 'Clase' \r\n ";
-            //                        sFrom += "\t INNER JOIN dbCollection..ValoresCatálogo Clase ON Z.idClase = Clase.idValor \r\n";
-            //                        if (conteo == Resultado.Detalle)
-            //                        {
-            //                            sSelect += "\t ,EC.Usuario AS EjecutivoClasificó \r\n " +
-            //                                       "\t ,Z.FechaClasificación \r\n ";
-            //                            sFrom += "\t LEFT JOIN dbCollection..Ejecutivos EC ON Z.idEjecutivoClasificación = EC.idEjecutivo \r\n";
-            //                        }
-            //                        sGroupBy += "Clase.Valor, ";
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "Telefonía")
-            //                    {
-            //                        telefonica = "1";
-            //                        sSelect += "\t ,Telefónia.Valor AS 'Telefónia' \r\n ";
-            //                        sFrom += "\t INNER JOIN dbCollection..ValoresCatálogo Telefónia ON Z.idTelefonía = Telefónia.idValor \r\n";
-            //                        sGroupBy += "Telefónia.Valor, ";
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "Origen")
-            //                    {
-            //                        origen = "1";
-            //                        sSelect += "\t ,Origen.Valor AS 'Origen' \r\n ";
-            //                        sFrom += "\t INNER JOIN dbCollection..ValoresCatálogo Origen ON Z.idOrígen = Origen.idValor \r\n";
-            //                        if (conteo == Resultado.Detalle)
-            //                        {
-            //                            sSelect += "\t ,EO.Usuario AS EjecutivoAlta \r\n "
-            //                                    + "\t ,Z.Fecha_Insert FechaAltaTeléfono \r\n ";
-            //                            sFrom += "\t LEFT JOIN dbCollection..Ejecutivos EO ON Z.idEjecutivo = EO.idEjecutivo AND EO.idEjecutivo > 1 \r\n";
-            //                        }
-
-            //                        sGroupBy += "Origen.Valor, ";
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "EstatusNegociación")
-            //                    {
-            //                        estatusNego = "1";
-            //                        sSelect += "\t ,EstatusNegociación \r\n";
-            //                        sFrom += "\t LEFT JOIN (\r\n\t\t\t\t SELECT COUNT(*) EstatusNegociación, IdCuenta, NúmeroTelefónico FROM \r\n\t\t\t\t(\r\n\t\t\t\t SELECT idCartera, idCuenta,NúmeroTelefónico, Fecha_Insert,Segundo_Insert,idSituación \r\n\t\t\t\t FROM  dbCollection..GestionesTelefónicas \r\n\t\t\t\t WHERE idSituación = 1010 AND idCartera = " + idCartera + " \r\n\t\t\t\t UNION ALL \r\n\t\t\t\t SELECT idCartera, idCuenta,NúmeroTelefónico, Fecha_Insert,Segundo_Insert,idSituación \r\n\t\t\t\t FROM  dbCollection..GestionesChat \r\n\t\t\t\t WHERE idSituación = 1010 AND idCartera = " + idCartera + " \r\n\t\t\t\t) Gest GROUP BY IdCuenta, NúmeroTelefónico\r\n\t\t\t\t) GTNeg ON  Z.idCuenta = GTNeg.idCuenta AND Z.NúmeroTelefónico = GTNeg.NúmeroTelefónico\r\n";
-            //                        sGroupBy += "EstatusNegociación,";//aqui GTNeg.NúmeroTelefónico
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "Confirmado")
-            //                    {
-            //                        confirmado = "1";
-            //                        sSelect += "\t ,CASE Z.Confirmado WHEN 1 THEN 'Sí' ELSE 'No' END AS 'Confirmado' \r\n ";
-            //                        sGroupBy += "Z.Confirmado, ";
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "HusoHorario")
-            //                    {
-            //                        huso = "1";
-            //                        sSelect += "\t , " + sCaseHusoHorario + " AS [HusoHorario] \r\n ";
-            //                        sGroupBy += sCaseHusoHorario + ", ";
-            //                        if (!sFrom.Contains(" MarcaciónInternacional MI "))
-            //                            sFrom += "\t LEFT JOIN MarcaciónInternacional MI ON Z.idTelefonía = MI.idTelefonía AND MI.Clave = SUBSTRING(CONVERT(VARCHAR(20),Z.NúmeroTelefónico), 1,3) \r\n";
-
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "EntidadFederativa")
-            //                    {
-            //                        entidad = "1";
-            //                        sSelect += "\t ,Z.Estado AS [EntidadFederativa] \r\n ";
-            //                        sGroupBy += "Z.Estado, ";
-
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "Extensión")
-            //                    {
-            //                        sSelect += "\t ,Z.Extensión";
-            //                        sGroupBy += "Extensión,";
-            //                    }
-            //                    else if (drFila["Campo"].ToString() == "Calificacion" || drFila["Campo"].ToString() == "Ranking")
-            //                    {
-
-            //                        if (drFila["Campo"].ToString() == "Calificacion")
-            //                        {
-            //                            calificacion = "1";
-            //                            sSelect += "\t ,TelComp.Calificacion AS Calificación \r\n ";
-            //                        }
-            //                        else
-            //                        {
-            //                            ranking = "1";
-            //                            sSelect += "\t ,TelComp.Ranking AS Ranking \r\n ";
-            //                        }
-            //                        if (ConteoR == "0")
-            //                        {
-            //                            ConteoR = "1";
-            //                            sFrom += "\t LEFT JOIN dbAllocation..TeléfonosComplemento  TelComp ON Z.idCartera=TelComp.IdCartera AND Z.IdCuenta=TelComp.IdCuenta AND Z.Númerotelefónico=TelComp.Númerotelefónico \r\n";
-            //                        }
-
-            //                        if (drFila["Campo"].ToString() == "Calificacion")
-            //                        {
-            //                            sGroupBy += "TelComp.Calificacion, ";
-            //                        }
-            //                        else
-            //                        {
-            //                            sGroupBy += "TelComp.Ranking, ";
-            //                        }
-
-            //                    }
-
-            //                    else if (sCampo == "Descolgaron_ViciDial" || sCampo == "Intentos_ViciDial")
-            //                    {
-            //                        if (!sFrom.Contains(") IVD"))
-            //                            sFrom += "\t LEFT JOIN ( \r\n\t\t\t" +
-            //                                "SELECT IV.NúmeroTelefónico, \r\n\t\t\t\t" +
-            //                                    "SUM(Contestaron) Descolgaron_ViciDial, \r\n\t\t\t\t" +
-            //                                    "COUNT(NúmeroTelefónico) Intentos_ViciDial \r\n\t\t\t" +
-            //                                "FROM Intentos_ViciDial IV  WITH (NOLOCK) INNER JOIN Equivalencias_ViciDial EV  WITH (NOLOCK) ON IV.Status_ViciDial = EV.Status_ViciDial \r\n\t\t\t" +
-            //                                "WHERE IV.Fecha_Insert >= '" + desde.ToString("yyyy-MM-dd") + "' \r\n\t\t\t" +
-            //                                "GROUP BY IV.NúmeroTelefónico ) IVD\r\n\t\t\t\tON IVD.NúmeroTelefónico = Z.NúmeroTelefónico \r\n ";
-            //                        sSelect += "\t ,ISNULL(IVD." + sCampo + ",0) AS [" + drFila["Campo"] + "] \r\n ";
-            //                        sGroupBy += "ISNULL(IVD." + sCampo + ",0), \r\n";//Aqui
-
-            //                    }
-            //                    else
-            //                    {
-            //                        if (!bConteosTels)//
-            //                            sFrom += "\t LEFT JOIN ( \r\n" +
-            //                                "SELECT GT.idCuenta, GT.NúmeroTelefónico, \r\n\t\t\t" +
-            //                                    "SUM( CASE WHEN idContacto=1101 THEN 1 ELSE 0 END  ) AS 'Titulares', \r\n\t\t\t\t" +
-            //                                    "SUM( CASE WHEN idContacto=1102 THEN 1 ELSE 0 END  ) AS 'Conocidos', \r\n\t\t\t\t" +
-            //                                    $"SUM(CASE WHEN idContacto IN ({catalogosService.IdsRelaciones(1103)}) THEN 1 ELSE 0 END) AS 'Desconocidos', " +
-            //                                    $"SUM(CASE WHEN idContacto NOT IN (1101,1102,{catalogosService.IdsRelaciones(1103)}) THEN 1 ELSE 0 END) AS 'SinContacto', " +
-            //                                    "MAX(Fecha_Insert) AS 'ÚltimaMarcación' \r\n\t\t\t\t" +
-            //                                "FROM (\r\n\t\t\t\t" +
-            //                                "SELECT idCuenta, idCartera, NúmeroTelefónico, idContacto, Fecha_Insert \r\n\t\t\t\t " +
-            //                                "FROM dbCollection..GestionesTelefónicas \r\n\t\t\t\t " +
-            //                                "WHERE idCartera = " + idCartera + " AND Fecha_Insert >= '" + desde.ToString("yyyy-MM-dd") + "' \r\n\t\t\t" +
-            //                                "UNION ALL \r\n\t\t\t" +
-            //                                 "SELECT idCuenta, idCartera, NúmeroTelefónico, idContacto, Fecha_Insert \r\n\t\t\t\t " +
-            //                                "FROM dbCollection..GestionesChat \r\n\t\t\t\t " +
-            //                                "WHERE idCartera = " + idCartera + " AND Fecha_Insert >= '" + desde.ToString("yyyy-MM-dd") + "' \r\n\t\t\t" +
-            //                                ") GT \r\n\t\t\t" +
-            //                                "WHERE GT.idCartera = " + idCartera + " AND Fecha_Insert >= '" + desde.ToString("yyyy-MM-dd") + "' \r\n\t\t\t" +
-            //                                "GROUP BY GT.idCuenta, GT.NúmeroTelefónico ) ConteosTels\r\n\t\t\t\tON ConteosTels.idCuenta = Z.idCuenta AND ConteosTels.NúmeroTelefónico = Z.NúmeroTelefónico \r\n ";
-
-
-            //                        bConteosTels = true;
-            //                        if (sCampo == "ÚltimaMarcación")
-            //                        {
-            //                            ultima = "1";
-            //                            sSelect += "\t ,ConteosTels.ÚltimaMarcación \r\n ";
-            //                            sGroupBy += "ConteosTels.ÚltimaMarcación, ";
-            //                        }
-            //                        else if (sCampo == "Municipio")
-            //                        {                                                       //este else if es prueba para lo d municipio
-            //                            sSelect += "\t ,ISNULL(Z." + sCampo + ",0) AS [" + drFila["Campo"] + "] \r\n ";
-            //                            sGroupBy += "ISNULL(Z." + sCampo + ",0), \r\n ";//Aqui
-            //                        }
-            //                        else
-            //                        {
-            //                            if (sCampo == "SinContacto")
-            //                            {
-            //                                sinConocido = "1";
-            //                            }
-            //                            if (sCampo == "Desconocidos")
-            //                            {
-            //                                desconocido = "1";
-            //                            }
-            //                            if (sCampo == "Conocidos")
-            //                            {
-            //                                conocido = "1";
-            //                            }
-            //                            if (sCampo == "Titulares")
-            //                            {
-            //                                titulares = "1";
-            //                            }
-            //                            sSelect += "\t ,ISNULL(ConteosTels." + sCampo + ",0) AS [" + drFila["Campo"] + "] \r\n ";
-            //                            sGroupBy += "ISNULL(ConteosTels." + sCampo + ",0), \r\n  ";//aqui
-            //                        }
-            //                    }
-
-            //                    break;
-            //                case "Clase": clase = "1"; break;
-            //                case "Telefonía": telefonica = "1"; break;
-            //                case "Origen": origen = "1"; break;
-            //                case "Confirmado": confirmado = "1"; break;
-            //                case "HusoHorario": huso = "1"; break;
-            //                case "EntidadFederativa": entidad = "1"; break;
-            //                case "ÚltimaMarcación": ultima = "1"; break;
-            //                case "SinContacto": sinConocido = "1"; break;
-            //                case "Desconocidos": desconocido = "1"; break;
-            //                case "Conocidos": conocido = "1"; break;
-            //                case "Titulares": titulares = "1"; break;
-            //                case "Calificacion": calificacion = "1"; break;
-            //                case "EstatusNegociacion": estatusNego = "1"; break;
-            //                case "Ranking": ranking = "1"; break;
-            //            }
-            //        }
-            //    }
-            //    // ------------------- Fin Agrupar -------------------
-
-            //    // Columnas de la consulta de cuentas.
-            //    foreach (string sColumna in columnas)
-            //    {
-            //        sSelect += "\t,CC.[" + sColumna + "]\r\n";
-            //        sGroupBy += "CC.[" + sColumna + "],";
-            //    }
-
-            //    if (sGroupBy.Length == 0 || conteo == Resultado.Detalle)
-            //        sGroupBy = "";
-            //    else
-            //        sGroupBy = " GROUP BY " + sGroupBy.TrimEnd(new char[] { ',', ' ' });
-
-            //    // Campañas - filas de trabajo.
-            //    if (conteo == Resultado.FilaDeTrabajo)
-            //    {
-            //        sSelect = "\t Z.idCartera, Z.idCuenta, Z.idEjecutivo " +
-            //                   (concepto != "Negociaciones" ? ", Z.NúmeroTelefónico \r\n" : ", NULL AS [NúmeroTelefónico] \r\n");
-            //        sGroupBy = "";
-            //    }
-
-            //    using var connectionJer = _dbContextFactory.GetSqlConnection(servidor, "Collection");
-            //    var ejecutivos = await ClasesCoorinMethods.ObtieneEjecutivosPropios(connectionJer, idEjecutivo);
-            //    int jerarquia = ejecutivos.FirstOrDefault()?.Jerarquía ?? 0;
-
-
-            //    if (conteo == Resultado.Detalle && jerarquia < 3)
-            //    {
-            //        if (idCartera == 1)
-            //            sSelect = sSelect.Replace(
-            //                "Z.idCuenta AS 'Cuenta'",
-            //                "STUFF(STUFF(Z.idCuenta,1,2,'XX'),13, 2,'XX') [Cuenta]"
-            //            );
-            //        else
-            //            sSelect = sSelect.Replace(
-            //                "Z.idCuenta AS 'Cuenta'",
-            //                "STUFF(Z.idCuenta,1,LEN(Z.idCuenta)-4,'XXX-XXX-') [Cuenta]"
-            //            );
-            //    }
-
-            //    if (idCartera == 1 && telefono == "1" && clase == "1" && telefonica == "1" &&
-            //        origen == "1" && confirmado == "1" && huso == "1" && entidad == "1" &&
-            //        ultima == "1" && sinConocido == "1" && desconocido == "1" &&
-            //        conocido == "1" && titulares == "1")
-            //    {
-            //        if (hora >= 7 && hora < 9 && tipoHora == "a. m.")
-            //        {
-            //            sQuery += " " + sSelect + sFrom + sWhere +
-            //                      " and LEFT(P.recoveredcode,1)<>'7' and LEFT(P.recoveredcode,1)<>'8' " +
-            //                      "and LEFT(P.recoveredcode,1)<>'9' and Z.HusoHorario=0 " +
-            //                      "and Z.idTelefonía <>2104 and Z.idTelefonía<>2105 and Z.idTelefonía<>2106" +
-            //                      sGroupBy;
-            //        }
-            //        else
-            //        {
-            //            sQuery += " " + sSelect + sFrom + sWhere + sGroupBy;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        sQuery += " " + sSelect + sFrom + sWhere + sGroupBy;
-            //    }
-
-            //    if (idCartera == 24 && sQuery.Contains("Intentos_ViciDial"))
-            //        sQuery = sQuery.Replace("FROM Intentos_ViciDial", "FROM dbHistory.CFE.Intentos_ViciDial");
-
-            //    ConteoR = "0";
-
-            //    return sQuery;
-
-            //}
+            public async Task<string> QueryGeneral(string servidor, int idCartera, string concepto, DataTable tblParametros, DataTable tblAgrupar, Resultado conteo, DateTime desde, int idEjecutivo, int idConsulta)
+            {
+                //Variables auxiliares
+                string telefono = "0", clase = "0", telefonica = "0", origen = "0", confirmado = "0", huso = "0",
+                       entidad = "0", ultima = "0", sinConocido = "0", desconocido = "0", conocido = "0",
+                       titulares = "0", calificacion = "0", estatusNego = "0", ranking = "0";
+
+                string tipoHora = DateTime.Now.ToString("tt");
+                int hora = Convert.ToInt32(DateTime.Now.ToString("hh"));
+                string ConteoR = "0";
+                var columnas = new ArrayList();
+                bool bConteosTels = false;
+                string sCaseHusoHorario = "";
+                string sNot = "";
+
+                SqlQueryData queryCuentas = QueryCuentas(idConsulta, ref columnas);
+
+                string sSelect = conteo switch
+                {
+                    Resultado.Detalle => "\t Z.idCuenta AS 'Cuenta' \r\n",
+                    Resultado.ContarCuentas => "\t COUNT(DISTINCT Z.idCuenta) AS 'Cuentas' \r\n",
+                    _ => "\t COUNT(*) AS '" + concepto + "' \r\n"
+                };
+
+                string sFrom = $" FROM dbCollection..{concepto} Z WITH (NOLOCK) \r\n";
+                string sWhere = $" WHERE Z.idCartera = {idCartera} \r\n";
+                string sGroupBy = "";
+                string sQuery = "";
+
+                //Condición especial fines de semana
+                if (idCartera == 28 && concepto == "Teléfonos" &&
+                    (DateTime.Today.DayOfWeek == DayOfWeek.Sunday || DateTime.Today.DayOfWeek == DayOfWeek.Saturday))
+                {
+                    sWhere += $" AND Z.idOrigen IN (1810,1811) ";
+                }
+
+                //JOIN a Cuentas para Teléfonos
+                if (concepto == "Teléfonos")
+                    sFrom += " INNER JOIN dbCollection..Cuentas CA WITH (NOLOCK) ON Z.idCartera = CA.idCartera AND Z.idCuenta = CA.idCuenta AND CA.CuentaActiva = 1 \r\n";
+
+                //------------------- #region Filtros -------------------
+                if (tblParametros != null)
+                {
+                    foreach (DataRow drFila in tblParametros.Rows)
+                    {
+                        sNot = drFila["Valores"].ToString().Contains("≠") ? " NOT" : "";
+
+                        switch (concepto)
+                        {
+                            case "Teléfonos":
+                                {
+                                    string sCampo = drFila["Campo"].ToString().Replace("# ", "");
+                                    sNot = drFila["Valores"].ToString().Contains("≠") ? "NOT" : "";
+
+                                    //Instancia de CatalogosService
+                                   var catalogosService = new CatalogosService(_dbContextFactory);
+
+                                    if (sCampo == "Teléfono")
+                                    {
+                                        sWhere += $"\t AND Z.NúmeroTelefónico {sNot} IN ({drFila["Parámetros"]}) \r\n";
+                                    }
+                                    else if (sCampo == "Clase")
+                                    {
+                                        sWhere += $"\t AND Z.idClase {sNot} IN ({drFila["Parámetros"]}) \r\n";
+                                    }
+                                    else if (sCampo == "Telefonía")
+                                    {
+                                        sWhere += $"\t AND Z.idTelefonía {sNot} IN ({drFila["Parámetros"]}) \r\n";
+                                    }
+                                    else if (sCampo == "Origen")
+                                    {
+                                        sWhere += $"\t AND Z.idOrígen {sNot} IN ({drFila["Parámetros"]}) \r\n";
+                                    }
+                                    else if (sCampo == "Confirmado")
+                                    {
+                                        sWhere += $"\t AND Z.Confirmado {sNot} IN ({drFila["Parámetros"]}) \r\n";
+                                    }
+                                    else if (sCampo == "EntidadFederativa")
+                                    {
+                                        sWhere += $"\t AND Z.Estado {sNot} IN ({drFila["Parámetros"]}) \r\n";
+                                    }
+                                    else if (sCampo == "EstatusNegociación")
+                                    {
+                                        sWhere += $"\t AND EstatusNegociación {sNot} IN ({drFila["Parámetros"]}) \r\n";
+                                    }
+                                    else if (sCampo == "HusoHorario")
+                                    {
+                                        var parametrosHuso = drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',');
+                                        for (int i = 0; i < parametrosHuso.Length; i++)
+                                            sWhere += $"\t AND {sCaseHusoHorario} {parametrosHuso[i]} \r\n";
+
+                                        if (!sFrom.Contains("MarcaciónInternacional MI"))
+                                            sFrom += "\t LEFT JOIN MarcaciónInternacional MI ON Z.idTelefonía = MI.idTelefonía AND MI.Clave = SUBSTRING(CONVERT(VARCHAR(20),Z.NúmeroTelefónico), 1,3) \r\n";
+                                    }
+                                    else if (sCampo == "MejorContacto")
+                                    {
+                                        if (!sFrom.Contains(") MC"))
+                                        {
+                                            sFrom += "\t LEFT JOIN ( \r\n\t\t\t" +
+                                                "SELECT GT.NúmeroTelefónico, GT.idContacto, Contactos.Valor MejorContacto, Contactos.Orden, " +
+                                                "ROW_NUMBER() OVER (PARTITION BY GT.NúmeroTelefónico ORDER BY Contactos.Orden) NumMejorContacto \r\n\t\t\t" +
+                                                "FROM GestionesTelefónicas GT WITH (NOLOCK) " +
+                                                "INNER JOIN ValoresCatálogo Contactos WITH (NOLOCK) ON GT.idContacto = Contactos.idValor \r\n\t\t\t" +
+                                                $"WHERE GT.Fecha_Insert >= '{desde:yyyy-MM-dd}' AND GT.idCartera = {idCartera} \r\n\t\t\t" +
+                                                ") MC ON MC.NúmeroTelefónico = Z.NúmeroTelefónico AND MC.NumMejorContacto = 1 \r\n";
+                                        }
+
+                                        //Se obtiene IDs relacionados mediante CatalogosService
+                                        var idsRelacionados = await catalogosService.IdsRelacionesAsync(servidor, Convert.ToInt32(drFila["Parámetros"]));
+
+                                        sWhere += $"\t AND MC.idContacto {sNot} IN ({idsRelacionados}) \r\n";
+                                    }
+                                    else if (sCampo == "Descolgaron_ViciDial" || sCampo == "Intentos_ViciDial")
+                                    {
+                                        if (!sFrom.Contains(") IVD"))
+                                        {
+                                            sFrom += "\t LEFT JOIN ( \r\n\t\t\t" +
+                                                "SELECT IV.NúmeroTelefónico, SUM(Contestaron) Descolgaron_ViciDial, COUNT(NúmeroTelefónico) Intentos_ViciDial \r\n\t\t\t" +
+                                                "FROM Intentos_ViciDial IV WITH (NOLOCK) " +
+                                                "INNER JOIN Equivalencias_ViciDial EV WITH (NOLOCK) ON IV.Status_ViciDial = EV.Status_ViciDial \r\n\t\t\t" +
+                                                $"WHERE IV.Fecha_Insert >= '{desde:yyyy-MM-dd}' \r\n\t\t\t" +
+                                                "GROUP BY IV.NúmeroTelefónico ) IVD ON IVD.NúmeroTelefónico = Z.NúmeroTelefónico \r\n";
+                                        }
+
+                                        var parametrosVici = drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',');
+                                        for (int i = 0; i < parametrosVici.Length; i++)
+                                            sWhere += $"\t AND ISNULL(IVD.{sCampo},0) {parametrosVici[i]} \r\n";
+                                    }
+                                    else if (sCampo == "Extensión")
+                                    {
+                                        sWhere += "\t AND Z.Extensión";
+                                    }
+                                    else
+                                    {
+                                        if (!bConteosTels)
+                                        {
+                                            var idsRelacionados = await catalogosService.IdsRelacionesAsync(servidor, 1103);
+
+                                            sFrom += "\t LEFT JOIN ( \r\n" +
+                                                "SELECT GT.idCuenta, GT.NúmeroTelefónico, " +
+                                                $"SUM(CASE WHEN idContacto=1101 THEN 1 ELSE 0 END) AS 'Titulares', " +
+                                                $"SUM(CASE WHEN idContacto=1102 THEN 1 ELSE 0 END) AS 'Conocidos', " +
+                                              $"SUM(CASE WHEN idContacto IN ({idsRelacionados}) THEN 1 ELSE 0 END) AS 'Desconocidos', " +
+                                               $"SUM(CASE WHEN idContacto NOT IN (1101,1102,{idsRelacionados}) THEN 1 ELSE 0 END) AS 'SinContacto', " +
+                                                "MAX(Fecha_Insert) AS 'ÚltimaMarcación' " +
+                                                "FROM dbCollection..GestionesTelefónicas GT WITH (NOLOCK) " +
+                                                $"WHERE GT.idCartera = {idCartera} AND Fecha_Insert >= '{desde:yyyy-MM-dd}' " +
+                                                "GROUP BY GT.idCuenta, GT.NúmeroTelefónico ) ConteosTels " +
+                                                "ON ConteosTels.idCuenta = Z.idCuenta AND ConteosTels.NúmeroTelefónico = Z.NúmeroTelefónico \r\n";
+                                            bConteosTels = true;
+                                        }
+
+                                        if (sCampo == "Municipio")
+                                        {
+                                            sWhere += $"\t AND Z.Municipio {sNot} IN ('{drFila["Parámetros"]}') \r\n";
+                                        }
+                                        else
+                                        {
+                                            var parametrosConteos = drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',');
+                                            for (int i = 0; i < parametrosConteos.Length; i++)
+                                                sWhere += $"\t AND ISNULL(ConteosTels.{sCampo},{(sCampo == "ÚltimaMarcación" ? "'1900-01-01'" : "0")}) {parametrosConteos[i]} \r\n";
+                                        }
+                                    }
+
+                                    break;
+                                }
+
+
+                            case "Gestiones":
+                                sNot = (drFila["Valores"].ToString().Contains("≠") ? " NOT" : "");
+
+                                if (drFila["Campo"].ToString() == "Usuario")
+                                {
+                                    if (!sFrom.Contains("Ejecutivos E "))
+                                        sFrom += "\t INNER JOIN dbCollection..Ejecutivos E WITH (NOLOCK) ON Z.idEjecutivo = E.idEjecutivo \r\n";
+                                    sWhere += "\t AND E.Usuario " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+
+                                }
+                                else if (drFila["Campo"].ToString() == "Teléfono")
+                                    sWhere += "\t AND Z.NúmeroTelefónico " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+
+                                else if (drFila["Campo"].ToString() == "Extensión")
+                                    sWhere += "\t AND Z.Extensión " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+
+                                else if (drFila["Campo"].ToString() == "Fecha")
+                                    for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
+                                        sWhere += "\t AND Z.Fecha_Insert " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
+
+                                else if (drFila["Campo"].ToString() == "Hora")
+                                    for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
+                                        sWhere += "\t AND Z.Segundo_Insert " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
+
+                                else if (drFila["Campo"].ToString() == "Duración" || drFila["Campo"].ToString() == "TiempoEnCuenta")
+                                    for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
+                                        sWhere += "\t AND Z." + drFila["Campo"] + " " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
+
+                                else if (drFila["Campo"].ToString() == "Comentario" || drFila["Campo"].ToString() == "NombreContacto")
+                                {
+                                    for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
+                                        sWhere += "\t AND Z." + drFila["Campo"] + " " + sNot + " LIKE " + drFila["Parámetros"].ToString().Split(',')[i] + "\r\n";
+
+                                }
+                                else // Catálogos
+                                    sWhere += "\t AND Z.id" + drFila["Campo"] + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+
+                                break;
+                            case "Negociaciones":
+                                sNot = (drFila["Valores"].ToString().Contains("≠") ? " NOT" : "");
+
+                                if (drFila["Campo"].ToString() == "Usuario" || drFila["Campo"].ToString() == "Validador")
+                                {
+                                    string sAlias = drFila["Campo"].ToString().Substring(0, 1);
+                                    if (!sFrom.Contains("Ejecutivos " + sAlias))
+                                        sFrom += "\t INNER JOIN dbCollection..Ejecutivos " + sAlias + " WITH (NOLOCK) ON Z.idEjecutivo" + (sAlias == "V" ? "Validador" : "") + " = " + sAlias + ".idEjecutivo \r\n";
+                                    sWhere += "\t AND " + sAlias + ".Usuario " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+
+                                }
+                                else if (drFila["Campo"].ToString() == "Fecha_Plazo")
+                                {
+                                    if (!sFrom.Contains("..Plazos L "))
+                                        sFrom += "\t INNER JOIN dbCollection..Plazos L WITH (NOLOCK) ON Z.idCartera = L.idCartera AND Z.idCuenta = L.idCuenta AND Z.Fecha_Insert = L.Fecha_Insert AND Z.Segundo_Insert = L.Segundo_Insert \r\n";
+                                    for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
+                                        sWhere += "\t AND L.FechaPago " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
+
+                                }
+                                else if (drFila["Dato"].ToString() == "list")
+                                {
+                                    string sColumna = drFila["Campo"].ToString();
+                                    if (sColumna == "Correo")
+                                        sColumna = "CorreoElectrónico";
+                                    if (sColumna == "Estado" || sColumna == "Herramienta")
+                                        sColumna = "id" + sColumna;
+                                    if (sColumna == "TipoNegociación" || sColumna == "Modo")
+                                    {
+                                        if (sColumna == "TipoNegociación")
+                                            sWhere += "\t AND Acercamiento.idValor" + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+                                        if (sColumna == "Modo")
+                                            sWhere += "\t AND Modo.idValor" + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+                                    }
+                                    else
+                                        sWhere += "\t AND Z." + sColumna + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+
+                                }
+                                else
+                                {
+                                    string sColumna = drFila["Campo"].ToString();
+                                    if (sColumna == "Hora")
+                                        sColumna = "Segundo_Insert";
+                                    if (sColumna == "FechaCreación")
+                                        sColumna = "Fecha_Insert";
+
+                                    for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
+                                        sWhere += "\t AND Z." + sColumna + " " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
+                                }
+
+                                break;
+                            case "Seguimientos":
+                                sNot = (drFila["Valores"].ToString().Contains("≠") ? " NOT" : "");
+
+                                if (drFila["Campo"].ToString() == "Usuario")
+                                {
+                                    if (!sFrom.Contains("Ejecutivos E "))
+                                        sFrom += "\t INNER JOIN dbCollection..Ejecutivos E WITH (NOLOCK) ON Z.idEjecutivo = E.idEjecutivo \r\n";
+                                    sWhere += "\t AND E.Usuario " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+
+                                }
+                                else if (drFila["Campo"].ToString() == "Teléfono")
+                                    sWhere += "\t AND Z.NúmeroTelefónico " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+
+                                else if (drFila["Dato"].ToString() == "list")
+                                    sWhere += "\t AND Z." + drFila["Campo"] + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+
+                                else
+                                {
+                                    string sColumna = drFila["Campo"].ToString();
+                                    if (drFila["Campo"].ToString() == "HoraCreación")
+                                        sColumna = "Segundo_Insert";
+                                    if (drFila["Campo"].ToString() == "FechaCreación")
+                                        sColumna = "Fecha_Insert";
+                                    if (drFila["Campo"].ToString() == "HoraSeguimiento")
+                                        sColumna = "SegundoSeguimiento";
+
+                                    for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
+                                        sWhere += "\t AND Z." + sColumna + " " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
+                                }
+                                break;
+                            case "Chats":
+                                sNot = (drFila["Valores"].ToString().Contains("≠") ? " NOT" : "");
+
+                                if (drFila["Campo"].ToString() == "Usuario")
+                                {
+                                    if (!sFrom.Contains("Ejecutivos E "))
+                                        sFrom += "\t INNER JOIN dbCollection..Ejecutivos E WITH (NOLOCK) ON Z.idEjecutivo = E.idEjecutivo \r\n";
+                                    sWhere += "\t AND E.Usuario " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+
+                                }
+                                else if (drFila["Campo"].ToString() == "Teléfono")
+                                    sWhere += "\t AND Z.NúmeroTelefónico " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+
+                                else if (drFila["Campo"].ToString() == "Fecha")
+                                    for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
+                                        sWhere += "\t AND Z.Fecha_Insert " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
+
+                                else if (drFila["Campo"].ToString() == "Hora")
+                                    for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
+                                        sWhere += "\t AND Z.Segundo_Insert " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
+
+                                else if (drFila["Campo"].ToString() == "Duración")
+                                    for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
+                                        sWhere += "\t AND Z.Duración " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
+
+                                else if (drFila["Campo"].ToString() == "Comentario")
+                                {
+                                    for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
+                                        sWhere += "\t AND Z.Comentario " + sNot + " LIKE " + drFila["Parámetros"].ToString().Split(',')[i] + "\r\n";
+
+                                }
+                                else if (drFila["Campo"].ToString() == "Salida")
+                                    sWhere += "\t AND Z." + drFila["Campo"] + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+                                else // Catálogos
+                                    sWhere += "\t AND Z.id" + drFila["Campo"] + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+
+                                break;
+                        }
+                    }
+                }
+                //-------------------Fin Filtros------------------ -
+
+                //------------------- #region Agrupar -------------------
+                if (tblAgrupar != null)
+                {
+                    foreach (DataRow drFila in tblAgrupar.Rows)
+                    {
+                        string sCampo = drFila["Campo"].ToString().Replace("# ", "");
+                        var catalogosService = new CatalogosService(_dbContextFactory);
+
+                        switch (sCampo)
+                        {
+                            case "Teléfono":
+                                sCampo = drFila["Campo"].ToString().Replace("# ", "");
+
+                                if (drFila["Campo"].ToString() == "Teléfono")
+                                {
+                                    telefono = "1";
+                                    sSelect += "\t ,Z.NúmeroTelefónico \r\n ";
+                                    sGroupBy += "Z.NúmeroTelefónico, ";
+                                }
+                                else if (drFila["Campo"].ToString() == "Clase")
+                                {
+                                    clase = "1";
+                                    sSelect += "\t ,Clase.Valor AS 'Clase' \r\n ";
+                                    sFrom += "\t INNER JOIN dbCollection..ValoresCatálogo Clase ON Z.idClase = Clase.idValor \r\n";
+                                    if (conteo == Resultado.Detalle)
+                                    {
+                                        sSelect += "\t ,EC.Usuario AS EjecutivoClasificó \r\n " +
+                                                   "\t ,Z.FechaClasificación \r\n ";
+                                        sFrom += "\t LEFT JOIN dbCollection..Ejecutivos EC ON Z.idEjecutivoClasificación = EC.idEjecutivo \r\n";
+                                    }
+                                    sGroupBy += "Clase.Valor, ";
+                                }
+                                else if (drFila["Campo"].ToString() == "Telefonía")
+                                {
+                                    telefonica = "1";
+                                    sSelect += "\t ,Telefónia.Valor AS 'Telefónia' \r\n ";
+                                    sFrom += "\t INNER JOIN dbCollection..ValoresCatálogo Telefónia ON Z.idTelefonía = Telefónia.idValor \r\n";
+                                    sGroupBy += "Telefónia.Valor, ";
+                                }
+                                else if (drFila["Campo"].ToString() == "Origen")
+                                {
+                                    origen = "1";
+                                    sSelect += "\t ,Origen.Valor AS 'Origen' \r\n ";
+                                    sFrom += "\t INNER JOIN dbCollection..ValoresCatálogo Origen ON Z.idOrígen = Origen.idValor \r\n";
+                                    if (conteo == Resultado.Detalle)
+                                    {
+                                        sSelect += "\t ,EO.Usuario AS EjecutivoAlta \r\n "
+                                                + "\t ,Z.Fecha_Insert FechaAltaTeléfono \r\n ";
+                                        sFrom += "\t LEFT JOIN dbCollection..Ejecutivos EO ON Z.idEjecutivo = EO.idEjecutivo AND EO.idEjecutivo > 1 \r\n";
+                                    }
+
+                                    sGroupBy += "Origen.Valor, ";
+                                }
+                                else if (drFila["Campo"].ToString() == "EstatusNegociación")
+                                {
+                                    estatusNego = "1";
+                                    sSelect += "\t ,EstatusNegociación \r\n";
+                                    sFrom += "\t LEFT JOIN (\r\n\t\t\t\t SELECT COUNT(*) EstatusNegociación, IdCuenta, NúmeroTelefónico FROM \r\n\t\t\t\t(\r\n\t\t\t\t SELECT idCartera, idCuenta,NúmeroTelefónico, Fecha_Insert,Segundo_Insert,idSituación \r\n\t\t\t\t FROM  dbCollection..GestionesTelefónicas \r\n\t\t\t\t WHERE idSituación = 1010 AND idCartera = " + idCartera + " \r\n\t\t\t\t UNION ALL \r\n\t\t\t\t SELECT idCartera, idCuenta,NúmeroTelefónico, Fecha_Insert,Segundo_Insert,idSituación \r\n\t\t\t\t FROM  dbCollection..GestionesChat \r\n\t\t\t\t WHERE idSituación = 1010 AND idCartera = " + idCartera + " \r\n\t\t\t\t) Gest GROUP BY IdCuenta, NúmeroTelefónico\r\n\t\t\t\t) GTNeg ON  Z.idCuenta = GTNeg.idCuenta AND Z.NúmeroTelefónico = GTNeg.NúmeroTelefónico\r\n";
+                                    sGroupBy += "EstatusNegociación,";//aqui GTNeg.NúmeroTelefónico
+                                }
+                                else if (drFila["Campo"].ToString() == "Confirmado")
+                                {
+                                    confirmado = "1";
+                                    sSelect += "\t ,CASE Z.Confirmado WHEN 1 THEN 'Sí' ELSE 'No' END AS 'Confirmado' \r\n ";
+                                    sGroupBy += "Z.Confirmado, ";
+                                }
+                                else if (drFila["Campo"].ToString() == "HusoHorario")
+                                {
+                                    huso = "1";
+                                    sSelect += "\t , " + sCaseHusoHorario + " AS [HusoHorario] \r\n ";
+                                    sGroupBy += sCaseHusoHorario + ", ";
+                                    if (!sFrom.Contains(" MarcaciónInternacional MI "))
+                                        sFrom += "\t LEFT JOIN MarcaciónInternacional MI ON Z.idTelefonía = MI.idTelefonía AND MI.Clave = SUBSTRING(CONVERT(VARCHAR(20),Z.NúmeroTelefónico), 1,3) \r\n";
+
+                                }
+                                else if (drFila["Campo"].ToString() == "EntidadFederativa")
+                                {
+                                    entidad = "1";
+                                    sSelect += "\t ,Z.Estado AS [EntidadFederativa] \r\n ";
+                                    sGroupBy += "Z.Estado, ";
+
+                                }
+                                else if (drFila["Campo"].ToString() == "Extensión")
+                                {
+                                    sSelect += "\t ,Z.Extensión";
+                                    sGroupBy += "Extensión,";
+                                }
+                                else if (drFila["Campo"].ToString() == "Calificacion" || drFila["Campo"].ToString() == "Ranking")
+                                {
+
+                                    if (drFila["Campo"].ToString() == "Calificacion")
+                                    {
+                                        calificacion = "1";
+                                        sSelect += "\t ,TelComp.Calificacion AS Calificación \r\n ";
+                                    }
+                                    else
+                                    {
+                                        ranking = "1";
+                                        sSelect += "\t ,TelComp.Ranking AS Ranking \r\n ";
+                                    }
+                                    if (ConteoR == "0")
+                                    {
+                                        ConteoR = "1";
+                                        sFrom += "\t LEFT JOIN dbAllocation..TeléfonosComplemento  TelComp ON Z.idCartera=TelComp.IdCartera AND Z.IdCuenta=TelComp.IdCuenta AND Z.Númerotelefónico=TelComp.Númerotelefónico \r\n";
+                                    }
+
+                                    if (drFila["Campo"].ToString() == "Calificacion")
+                                    {
+                                        sGroupBy += "TelComp.Calificacion, ";
+                                    }
+                                    else
+                                    {
+                                        sGroupBy += "TelComp.Ranking, ";
+                                    }
+
+                                }
+
+                                else if (sCampo == "Descolgaron_ViciDial" || sCampo == "Intentos_ViciDial")
+                                {
+                                    if (!sFrom.Contains(") IVD"))
+                                        sFrom += "\t LEFT JOIN ( \r\n\t\t\t" +
+                                            "SELECT IV.NúmeroTelefónico, \r\n\t\t\t\t" +
+                                                "SUM(Contestaron) Descolgaron_ViciDial, \r\n\t\t\t\t" +
+                                                "COUNT(NúmeroTelefónico) Intentos_ViciDial \r\n\t\t\t" +
+                                            "FROM Intentos_ViciDial IV  WITH (NOLOCK) INNER JOIN Equivalencias_ViciDial EV  WITH (NOLOCK) ON IV.Status_ViciDial = EV.Status_ViciDial \r\n\t\t\t" +
+                                            "WHERE IV.Fecha_Insert >= '" + desde.ToString("yyyy-MM-dd") + "' \r\n\t\t\t" +
+                                            "GROUP BY IV.NúmeroTelefónico ) IVD\r\n\t\t\t\tON IVD.NúmeroTelefónico = Z.NúmeroTelefónico \r\n ";
+                                    sSelect += "\t ,ISNULL(IVD." + sCampo + ",0) AS [" + drFila["Campo"] + "] \r\n ";
+                                    sGroupBy += "ISNULL(IVD." + sCampo + ",0), \r\n";//Aqui
+
+                                }
+                                else
+                                {
+                                    var idsRelacionados1103 = await catalogosService.IdsRelacionesAsync(servidor, 1103);
+                                    if (string.IsNullOrWhiteSpace(idsRelacionados1103))
+                                        idsRelacionados1103 = "0"; // usa 0 u otro id que no exista; evita IN () inválido
+
+                                    if (!bConteosTels)//
+                                        sFrom += "\t LEFT JOIN ( \r\n" +
+                                            "SELECT GT.idCuenta, GT.NúmeroTelefónico, \r\n\t\t\t" +
+                                                "SUM( CASE WHEN idContacto=1101 THEN 1 ELSE 0 END  ) AS 'Titulares', \r\n\t\t\t\t" +
+                                                "SUM( CASE WHEN idContacto=1102 THEN 1 ELSE 0 END  ) AS 'Conocidos', \r\n\t\t\t\t" +
+                                                $"SUM(CASE WHEN idContacto IN ({idsRelacionados1103}) THEN 1 ELSE 0 END) AS 'Desconocidos', " +
+                                                $"SUM(CASE WHEN idContacto NOT IN (1101,1102,{idsRelacionados1103}) THEN 1 ELSE 0 END) AS 'SinContacto', " +
+                                                "MAX(Fecha_Insert) AS 'ÚltimaMarcación' \r\n\t\t\t\t" +
+                                            "FROM (\r\n\t\t\t\t" +
+                                            "SELECT idCuenta, idCartera, NúmeroTelefónico, idContacto, Fecha_Insert \r\n\t\t\t\t " +
+                                            "FROM dbCollection..GestionesTelefónicas \r\n\t\t\t\t " +
+                                            "WHERE idCartera = " + idCartera + " AND Fecha_Insert >= '" + desde.ToString("yyyy-MM-dd") + "' \r\n\t\t\t" +
+                                            "UNION ALL \r\n\t\t\t" +
+                                             "SELECT idCuenta, idCartera, NúmeroTelefónico, idContacto, Fecha_Insert \r\n\t\t\t\t " +
+                                            "FROM dbCollection..GestionesChat \r\n\t\t\t\t " +
+                                            "WHERE idCartera = " + idCartera + " AND Fecha_Insert >= '" + desde.ToString("yyyy-MM-dd") + "' \r\n\t\t\t" +
+                                            ") GT \r\n\t\t\t" +
+                                            "WHERE GT.idCartera = " + idCartera + " AND Fecha_Insert >= '" + desde.ToString("yyyy-MM-dd") + "' \r\n\t\t\t" +
+                                            "GROUP BY GT.idCuenta, GT.NúmeroTelefónico ) ConteosTels\r\n\t\t\t\tON ConteosTels.idCuenta = Z.idCuenta AND ConteosTels.NúmeroTelefónico = Z.NúmeroTelefónico \r\n ";
+
+
+                                    bConteosTels = true;
+                                    if (sCampo == "ÚltimaMarcación")
+                                    {
+                                        ultima = "1";
+                                        sSelect += "\t ,ConteosTels.ÚltimaMarcación \r\n ";
+                                        sGroupBy += "ConteosTels.ÚltimaMarcación, ";
+                                    }
+                                    else if (sCampo == "Municipio")
+                                    {                                                       //este else if es prueba para lo d municipio
+                                        sSelect += "\t ,ISNULL(Z." + sCampo + ",0) AS [" + drFila["Campo"] + "] \r\n ";
+                                        sGroupBy += "ISNULL(Z." + sCampo + ",0), \r\n ";//Aqui
+                                    }
+                                    else
+                                    {
+                                        if (sCampo == "SinContacto")
+                                        {
+                                            sinConocido = "1";
+                                        }
+                                        if (sCampo == "Desconocidos")
+                                        {
+                                            desconocido = "1";
+                                        }
+                                        if (sCampo == "Conocidos")
+                                        {
+                                            conocido = "1";
+                                        }
+                                        if (sCampo == "Titulares")
+                                        {
+                                            titulares = "1";
+                                        }
+                                        sSelect += "\t ,ISNULL(ConteosTels." + sCampo + ",0) AS [" + drFila["Campo"] + "] \r\n ";
+                                        sGroupBy += "ISNULL(ConteosTels." + sCampo + ",0), \r\n  ";//aqui
+                                    }
+                                }
+
+                                break;
+                            case "Clase": clase = "1"; break;
+                            case "Telefonía": telefonica = "1"; break;
+                            case "Origen": origen = "1"; break;
+                            case "Confirmado": confirmado = "1"; break;
+                            case "HusoHorario": huso = "1"; break;
+                            case "EntidadFederativa": entidad = "1"; break;
+                            case "ÚltimaMarcación": ultima = "1"; break;
+                            case "SinContacto": sinConocido = "1"; break;
+                            case "Desconocidos": desconocido = "1"; break;
+                            case "Conocidos": conocido = "1"; break;
+                            case "Titulares": titulares = "1"; break;
+                            case "Calificacion": calificacion = "1"; break;
+                            case "EstatusNegociacion": estatusNego = "1"; break;
+                            case "Ranking": ranking = "1"; break;
+                        }
+                    }
+                }
+                //-------------------Fin Agrupar------------------ -
+
+                //Columnas de la consulta de cuentas.
+                foreach (string sColumna in columnas)
+                {
+                    sSelect += "\t,CC.[" + sColumna + "]\r\n";
+                    sGroupBy += "CC.[" + sColumna + "],";
+                }
+
+                if (sGroupBy.Length == 0 || conteo == Resultado.Detalle)
+                    sGroupBy = "";
+                else
+                    sGroupBy = " GROUP BY " + sGroupBy.TrimEnd(new char[] { ',', ' ' });
+
+                //Campañas - filas de trabajo.
+                if (conteo == Resultado.FilaDeTrabajo)
+                {
+                    sSelect = "\t Z.idCartera, Z.idCuenta, Z.idEjecutivo " +
+                               (concepto != "Negociaciones" ? ", Z.NúmeroTelefónico \r\n" : ", NULL AS [NúmeroTelefónico] \r\n");
+                    sGroupBy = "";
+                }
+
+                using var connectionJer = _dbContextFactory.GetSqlConnection(servidor, "Collection");
+                var ejecutivos = await ClasesCoorinMethods.ObtieneEjecutivosPropios(connectionJer, idEjecutivo);
+                int jerarquia = ejecutivos.FirstOrDefault()?.Jerarquía ?? 0;
+
+
+                if (conteo == Resultado.Detalle && jerarquia < 3)
+                {
+                    if (idCartera == 1)
+                        sSelect = sSelect.Replace(
+                            "Z.idCuenta AS 'Cuenta'",
+                            "STUFF(STUFF(Z.idCuenta,1,2,'XX'),13, 2,'XX') [Cuenta]"
+                        );
+                    else
+                        sSelect = sSelect.Replace(
+                            "Z.idCuenta AS 'Cuenta'",
+                            "STUFF(Z.idCuenta,1,LEN(Z.idCuenta)-4,'XXX-XXX-') [Cuenta]"
+                        );
+                }
+
+                if (idCartera == 1 && telefono == "1" && clase == "1" && telefonica == "1" &&
+                    origen == "1" && confirmado == "1" && huso == "1" && entidad == "1" &&
+                    ultima == "1" && sinConocido == "1" && desconocido == "1" &&
+                    conocido == "1" && titulares == "1")
+                {
+                    if (hora >= 7 && hora < 9 && tipoHora == "a. m.")
+                    {
+                        sQuery += " " + sSelect + sFrom + sWhere +
+                                  " and LEFT(P.recoveredcode,1)<>'7' and LEFT(P.recoveredcode,1)<>'8' " +
+                                  "and LEFT(P.recoveredcode,1)<>'9' and Z.HusoHorario=0 " +
+                                  "and Z.idTelefonía <>2104 and Z.idTelefonía<>2105 and Z.idTelefonía<>2106" +
+                                  sGroupBy;
+                    }
+                    else
+                    {
+                        sQuery += " " + sSelect + sFrom + sWhere + sGroupBy;
+                    }
+                }
+                else
+                {
+                    sQuery += " " + sSelect + sFrom + sWhere + sGroupBy;
+                }
+
+                if (idCartera == 24 && sQuery.Contains("Intentos_ViciDial"))
+                    sQuery = sQuery.Replace("FROM Intentos_ViciDial", "FROM dbHistory.CFE.Intentos_ViciDial");
+
+                ConteoR = "0";
+
+                return sQuery;
+
+            }
 
 
 
