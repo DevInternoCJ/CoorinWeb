@@ -628,65 +628,6 @@ const ModalValidadoresContent = ({
           </label>
         </div>
       </div>
-
-      <style>{`
-                .hover-bg-gray-100:hover {
-                    background-color: rgb(243 244 246) !important;
-                }
-                .hover-text-jerarquia4:hover {
-                    color: var(--color-jerarquia4) !important;
-                }
-                /* Estilos para el scrollbar del panel de ramificación */
-                div[style*="overflowY: auto"]::-webkit-scrollbar {
-                    width: 8px;
-                }
-                div[style*="overflowY: auto"]::-webkit-scrollbar-track {
-                    background: #f5f5f5;
-                    border-radius: 4px;
-                }
-                div[style*="overflowY: auto"]::-webkit-scrollbar-thumb {
-                    background: #b0b0b0;
-                    border-radius: 4px;
-                }
-                div[style*="overflowY: auto"]::-webkit-scrollbar-thumb:hover {
-                    background: #888;
-                }
-                /* Estilos para la tabla de usuarios validadores */
-                .modal-table {
-                    width: 100%;
-                    font-size: 0.75rem;
-                    border-collapse: collapse;
-                }
-                .modal-table-th {
-                    border: 1px solid #ddd;
-                    text-align: center;
-                    position: sticky;
-                    top: 0;
-                    z-index: 1;
-                }
-                .modal-table-td {
-                    border: 1px solid #ddd;
-                    border-top: none;
-                }
-                .modal-checkbox-small {
-                    cursor: pointer;
-                }
-                .scrollbar-gray::-webkit-scrollbar {
-                    width: 8px;
-                    height: 8px;
-                }
-                .scrollbar-gray::-webkit-scrollbar-track {
-                    background: #f5f5f5;
-                    border-radius: 4px;
-                }
-                .scrollbar-gray::-webkit-scrollbar-thumb {
-                    background: #b0b0b0;
-                    border-radius: 4px;
-                }
-                .scrollbar-gray::-webkit-scrollbar-thumb:hover {
-                    background: #888;
-                }
-            `}</style>
     </div>
   );
 };

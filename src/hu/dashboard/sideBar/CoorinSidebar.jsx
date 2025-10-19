@@ -169,6 +169,44 @@ export const CoorinSidebar = ({
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isMinified, setIsMinified] = useState(false);
+  // Guarda los IDs (aria-controls) de los grupos de acordeón que estaban abiertos
+  const savedAccordionsRef = useRef(new Set());
+
+  const saveAndCollapseAccordions = () => {
+    try {
+      if (!sidebarRef.current) return;
+      const toggles = Array.from(
+        sidebarRef.current.querySelectorAll('.hs-accordion-toggle[aria-expanded="true"]')
+      );
+      toggles.forEach((t) => {
+        const aria = t.getAttribute('aria-controls');
+        if (aria) savedAccordionsRef.current.add(aria);
+      });
+      // Colapsar cada toggle que esté abierto
+      toggles.forEach((t) => {
+        try { t.click(); } catch { /* ignore */ }
+      });
+    } catch (e) {
+      // no crítico
+      console.warn('saveAndCollapseAccordions failed', e);
+    }
+  };
+
+  const restoreAccordions = () => {
+    try {
+      if (!sidebarRef.current) return;
+      const toRestore = Array.from(savedAccordionsRef.current);
+      toRestore.forEach((ariaControls) => {
+        const toggle = sidebarRef.current.querySelector(`.hs-accordion-toggle[aria-controls="${ariaControls}"]`);
+        if (toggle && toggle.getAttribute('aria-expanded') !== 'true') {
+          try { toggle.click(); } catch { /* ignore */ }
+        }
+      });
+      // Leave saved set as-is so open/close cycles preserve the same saved groups
+    } catch (e) {
+      console.warn('restoreAccordions failed', e);
+    }
+  };
 
   useEffect(() => {
     const check = () => {
@@ -180,7 +218,19 @@ export const CoorinSidebar = ({
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  const toggleOpen = () => setIsOpen((v) => !v);
+  const toggleOpen = () => {
+    setIsOpen((v) => {
+      const next = !v;
+      if (!next) {
+        // we're closing -> save and collapse
+        saveAndCollapseAccordions();
+      } else {
+        // opening -> restore after a small delay to let DOM settle
+        setTimeout(restoreAccordions, 60);
+      }
+      return next;
+    });
+  };
   // Toggle minified and update body class immediately — avoid a resize-driven
   // effect that can conflict with Preline's own overlay handling.
   const toggleMinify = () => {
@@ -194,18 +244,29 @@ export const CoorinSidebar = ({
       } catch {
         // ignore
       }
+      // si se minifica, colapsar; si se expande, restaurar
+      if (next) {
+        saveAndCollapseAccordions();
+      } else {
+        setTimeout(restoreAccordions, 60);
+      }
       return next;
     });
   };
 
-  const closeMobile = () => isMobile && setIsOpen(false);
+  const closeMobile = () => {
+    if (isMobile) {
+      saveAndCollapseAccordions();
+      setIsOpen(false);
+    }
+  };
 
   // Ref para el contenedor del sidebar
   const sidebarRef = useRef(null);
 
   // Efecto para detectar clics fuera del sidebar
   useEffect(() => {
-    const handleClickOutside = (event) => {
+  const handleClickOutside = (event) => {
       // Solo cerrar en móviles o cuando el sidebar esté abierto y no minificado en desktop
       const shouldClose = (isMobile && isOpen) || (!isMobile && isOpen && !isMinified);
       
@@ -220,9 +281,11 @@ export const CoorinSidebar = ({
         }
         
         if (isMobile) {
+          saveAndCollapseAccordions();
           setIsOpen(false);
         } else if (!isMinified) {
           // En desktop, minificar el sidebar
+          saveAndCollapseAccordions();
           setIsMinified(true);
           try {
             if (typeof window !== "undefined") {
@@ -254,6 +317,8 @@ export const CoorinSidebar = ({
       }
       // En desktop, solo aplicamos el minificado si no está ya minificado
       if (!isMobile && !isMinified) {
+        // guardar y colapsar primero
+        saveAndCollapseAccordions();
         setIsMinified(true);
         try {
           if (typeof window !== "undefined") {
@@ -335,6 +400,8 @@ export const CoorinSidebar = ({
             window.HSOverlay?.autoInit?.();
             window.HSAccordion?.autoInit?.();
           }, 50);
+          // Restaurar acordeones después de re-init
+          setTimeout(restoreAccordions, 120);
         }
       } catch {
         // ignore
