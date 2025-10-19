@@ -542,9 +542,9 @@ export const CoorinSidebar = ({
           </header>
           {/* End Header */}
 
-          {/* Body */}
-          <div className="flex-1 flex flex-col px-2 pt-2 min-h-0 ">
-            <ul className="space-y-0.5 p-0 bg-white flex-1">
+          {/* Body: make this area scrollable so footer stays visible */}
+          <div className={`flex-1 flex flex-col px-2 pt-2 min-h-0 overflow-x-hidden ${isOpen && !isMinified ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>
+            <ul className="space-y-0.5 p-0 bg-white pb-4 overflow-x-hidden">
               {Object.values(dataSidebar).map((indiceArr, indiceIdx) =>
                 indiceArr.map((section, sectionIdx) => (
                   <React.Fragment
