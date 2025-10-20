@@ -1,6 +1,7 @@
 ﻿using CoorinWeb.DTOs.AuthDTOs;
 using CoorinWeb.Loki.DTOs.AuthDTOs;
 using CoorinWeb.Loki.Mark.Auth.Interfaces;
+using GaiaLibrary.ModelsDbCollection;
 using Loki.DTOs.AuthDTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -61,54 +62,42 @@ namespace Loki.Mark.Auth.Controllers
 			// Asigna la IP del cliente al objeto de solicitud.
 			request.IP = clientIP;
 
-			try
+			// Intenta validar las credenciales del usuario llamando al servicio de autenticación
+			var loginResultRaw = await _authService.ValidateUser(request);
+
+			// El resultado es una lista, obtenemos el primer elemento
+			var loginResultList = loginResultRaw as IList<dynamic>;
+			var loginResult = loginResultList?.FirstOrDefault();
+
+			// Si no hay respuesta del servicio (puede deberse a un error de conexión, por ejemplo)
+			if (loginResult == null)
 			{
-				// Intenta validar las credenciales del usuario llamando al servicio de autenticación
-				var loginResultRaw = await _authService.ValidateUser(request);
-
-				// El resultado es una lista, obtenemos el primer elemento
-				var loginResultList = loginResultRaw as IList<dynamic>;
-				var loginResult = loginResultList?.FirstOrDefault();
-
-				// Si no hay respuesta del servicio (puede deberse a un error de conexión, por ejemplo)
-				if (loginResult == null)
-				{
-					return BadRequest(new { Mensaje = "No se recibió respuesta de la base de datos." });
-				}
-
-				// Si la base de datos respondió con un mensaje de error, o si la sesión expiró o ya está activa
-				if (!string.IsNullOrEmpty(loginResult.Mensaje) || Convert.ToBoolean(loginResult.Expiro) || Convert.ToBoolean(loginResult.Sesion))
-				{
-					return BadRequest(new { loginResult });
-				}
-
-				// Si se obtuvo un idEjecutivo válido, se considera un inicio de sesión exitoso
-				if (loginResult.idEjecutivo != null)
-				{
-					// Genera un JWT usando la información del usuario (incluyendo el campo Servidor)
-					var token = GenerateJwtToken(request);
-
-					// Asigna el token al objeto de respuesta
-					loginResult.Token = token;
-
-					return Ok(new { ejecutivo = loginResult });
-				}
-				else
-				{
-					// Si no se obtuvo un idEjecutivo, el login falla sin explicación clara, así que se devuelve Unauthorized
-					return Unauthorized(new { Mensaje = "Ocurrió un error inesperado." });
-				}
+				return BadRequest(new { Mensaje = "No se recibió respuesta de la base de datos." });
 			}
-			catch (ArgumentException ex)
+
+			// Si la base de datos respondió con un mensaje de error, o si la sesión expiró o ya está activa
+			if (!string.IsNullOrEmpty(loginResult.Mensaje) || Convert.ToBoolean(loginResult.Expiro) || Convert.ToBoolean(loginResult.Sesion))
 			{
-				// Se devuelve un error BadRequest si la excepción fue causada por argumentos inválidos
-				return BadRequest(new { error = ex.Message });
+				return BadRequest(new { loginResult });
 			}
-			catch (Exception ex)
+
+			// Si se obtuvo un idEjecutivo válido, se considera un inicio de sesión exitoso
+			if (loginResult.idEjecutivo != null)
 			{
-				// Cualquier otra excepción no controlada se devuelve como error interno del servidor
-				return StatusCode(500, new { error = "Ocurrió un error interno.", detalle = ex.Message });
+				// Genera un JWT usando la información del usuario (incluyendo el campo Servidor)
+				var token = GenerateJwtToken(request);
+
+				// Asigna el token al objeto de respuesta
+				loginResult.Token = token;
+
+				return Ok(new { ejecutivo = loginResult });
 			}
+			else
+			{
+				// Si no se obtuvo un idEjecutivo, el login falla sin explicación clara, así que se devuelve Unauthorized
+				return Unauthorized(new { Mensaje = "Ocurrió un error inesperado." });
+			}
+
 		}
 
 
@@ -117,15 +106,10 @@ namespace Loki.Mark.Auth.Controllers
 		[AllowAnonymous]
 		public async Task<IActionResult> ValidateUserRetry([FromBody] AuthRequest request)
 		{
-			try
-			{
-				var result = await _authService.ValidateUserRetry(request);
-				return Ok(result);
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(500, $"Error interno del servidor: {ex.Message}");
-			}
+
+			var result = await _authService.ValidateUserRetry(request);
+			return Ok(result);
+
 		}
 
 		[HttpPost("validar-contrasenia")]
@@ -140,26 +124,16 @@ namespace Loki.Mark.Auth.Controllers
 		[ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
 		public async Task<IActionResult> ValidarContrasenia([FromBody] ValidatePasswordEjecutivoRequest request)
 		{
-			try
-			{
-				var resultado = await _authService.ValidatePasswordEjecutivoAsync(request);
 
-				if (resultado == null || resultado.Count == 0)
-				{
-					return NotFound("No se encontró coincidencia para el ejecutivo.");
-				}
+			var resultado = await _authService.ValidatePasswordEjecutivoAsync(request);
 
-				return Ok(resultado);
-			}
-			catch (ArgumentException ex)
+			if (resultado == null || resultado.Count == 0)
 			{
-				return BadRequest(ex.Message);
+				return NotFound("No se encontró coincidencia para el ejecutivo.");
 			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"❌ Error en ValidarContrasenia: {ex.Message}");
-				return StatusCode(500, "Error interno del servidor.");
-			}
+
+			return Ok(new { validado = resultado });
+
 		}
 
 		[HttpGet("validar-sesion")]
@@ -173,26 +147,16 @@ namespace Loki.Mark.Auth.Controllers
 		[ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
 		public async Task<IActionResult> ValidarSesion([FromQuery] string servidor, [FromQuery] int idEjecutivo)
 		{
-			try
-			{
-				var tieneSesion = await _authService.ValidateExistingSessionAsync(servidor, idEjecutivo);
 
-				if (tieneSesion is null)
-				{
-					return NotFound("No se encontró una sesión para el ejecutivo.");
-				}
+			var tieneSesion = await _authService.ValidateExistingSessionAsync(servidor, idEjecutivo);
 
-				return Ok(new { TieneSesionActiva = tieneSesion == 1 });
-			}
-			catch (ArgumentException ex)
+			if (tieneSesion is null)
 			{
-				return BadRequest(ex.Message);
+				return NotFound("No se encontró una sesión para el ejecutivo.");
 			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"❌ Error en ValidarSesion: {ex.Message}");
-				return StatusCode(500, "Error interno del servidor.");
-			}
+
+			return Ok(new { TieneSesionActiva = tieneSesion == 1 });
+
 		}
 
 		[HttpGet("auth-tester")]
@@ -254,10 +218,10 @@ namespace Loki.Mark.Auth.Controllers
             }
         }
 
-        /// <summary>
-        /// Genera un token JWT para un usuario autenticado con base en su información y configuración de seguridad.
-        /// </summary>
-        private string GenerateJwtToken(AuthRequest user)
+		/// <summary>
+		/// Genera un token JWT para un usuario autenticado con base en su información y configuración de seguridad.
+		/// </summary>
+		private string GenerateJwtToken(AuthRequest user)
 		{
 			if (string.IsNullOrEmpty(_secretKey))
 			{
@@ -287,44 +251,38 @@ namespace Loki.Mark.Auth.Controllers
 			return token;
 		}
 
-        [HttpPut("cerrar-sesión")]
-        [Authorize]
-        [SwaggerOperation(
-      Summary = "cerrar-sesión -irene",
-      Description = "cierra del ejecutivo"
-  )]
-        public async Task<IActionResult> Logout([FromBody] logout request)
-        {
-            try
-            {
-                // Validación individual para IdEjecutivo
-                if (request.IdEjecutivo == null)
-                {
-                    return BadRequest(new { error = "El parámetro IdEjecutivo es requerido" });
-                }
+		[HttpPut("cerrar-sesion")]
+		[Authorize]
+		[SwaggerOperation(
+			Summary = "Cerrar Sesión - Irene",
+			Description = "Cierra la sesión del ejecutivo.")]
+		public async Task<IActionResult> Logout([FromBody] logout request)
+		{
 
-                // Validación individual para IdLogIngreso
-                if (request.IdLogIngreso == null)
-                {
-                    return BadRequest(new { error = "El parámetro IdLogIngreso es requerido" });
-                }
+			// Validación individual para IdEjecutivo
+			if (request.IdEjecutivo == null)
+			{
+				return BadRequest(new { error = "El parámetro IdEjecutivo es requerido" });
+			}
 
-                string? servidor = User.FindFirst("Servidor")?.Value;
-                if (string.IsNullOrWhiteSpace(servidor))
-                {
-                    return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-                }
+			// Validación individual para IdLogIngreso
+			if (request.IdLogIngreso == null)
+			{
+				return BadRequest(new { error = "El parámetro IdLogIngreso es requerido" });
+			}
 
-                var result = await _authService.Logout(request, servidor);
+			string? servidor = User.FindFirst("Servidor")?.Value;
+			if (string.IsNullOrWhiteSpace(servidor))
+			{
+				return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+			}
 
-                return Ok(new { mensaje = "Sesión cerrada correctamente." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = $"Error interno del servidor: {ex.Message}" });
-            }
-        }
+			var result = await _authService.Logout(request, servidor);
 
-    }
+			return Ok(new { mensaje = "Sesión cerrada correctamente." });
+
+		}
+
+	}
 
 }

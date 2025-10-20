@@ -226,7 +226,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-#region contextos
+#region Contextos
 // ===== Agregar Contextos de Bases de Datos =====
 // Thor
 builder.Services.AddDbContext<DbMemoryContextThor>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("Thor_Memory")));
@@ -278,7 +278,7 @@ builder.Services.AddDbContext<DbMemoryContextAlbaz>(o => o.UseSqlServer(builder.
 #endregion
 
 // ===== Servicios personalizados =====
-#region global
+#region Global
 builder.Services.AddScoped<DaoBase>();
 builder.Services.AddScoped<AuthDAOs>();
 builder.Services.AddScoped<IDbContextFactory, CustomDbContextFactory>();
@@ -379,7 +379,7 @@ builder.Services.AddScoped<IHistoricoService, HistoricoService>();
 builder.Services.AddScoped<IProductividadService, ProductividadService>();
 builder.Services.AddScoped<IProductividadService, ProductividadService>();
 
-#region lista negra
+#region Lista Negra
 builder.Services.AddScoped<IListaNegraDao, ListaNegraDao>();
 builder.Services.AddScoped<IListaNegraService, ListaNegraService>();
 #endregion
