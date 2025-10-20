@@ -3,15 +3,22 @@ import CardConsultations from "./CardConsultations";
 
 const GridConsultations = ({ onModalOpen, onModalClose }) => {
     const containerRef = useRef(null);
-    const [hideTitle, setHideTitle] = useState(false);
+    const initialWidthRef = useRef(null);
+    const [gridMode, setGridMode] = useState('normal');
 
     useEffect(() => {
         const update = () => {
             const el = containerRef.current;
-            if (!el || typeof window === "undefined") return;
+            if (!el) return;
             const width = el.clientWidth;
-            const vw = window.innerWidth || document.documentElement.clientWidth;
-            setHideTitle(vw > 0 ? width / vw <= 0.45 : false);
+
+            if (!initialWidthRef.current) initialWidthRef.current = width;
+            const initial = initialWidthRef.current || width;
+            const ratio = initial > 0 ? width / initial : 1;
+            const newCompact = ratio <= 0.45;
+            const newMode = ratio <= 0.25 ? 'mobile' : newCompact ? 'compact' : 'normal';
+            console.debug('GridConsultations update', { width, initial, ratio, newMode });
+            setGridMode(newMode);
         };
 
         update();
@@ -29,13 +36,21 @@ const GridConsultations = ({ onModalOpen, onModalClose }) => {
         };
     }, []);
 
+    let containerClass;
+    if (gridMode === 'normal') {
+        containerClass = 'grid grid-cols-6 sm:grid md:grid-cols-3 xl:grid-cols-6 grid-rows-1 gap-4 sm:pt-8 md:mt-10 xl:mt-0';
+    } else if (gridMode === 'compact') {
+        containerClass = 'grid grid-cols-3 grid-rows-2 gap-4 sm:pt-8 md:mt-10 xl:mt-0';
+    } else {
+        containerClass = 'grid grid-cols-2 grid-rows-3 gap-4 sm:pt-8 md:mt-10 xl:mt-0';
+    }
+
     return (
         <>
-            <div ref={containerRef} className="grid-cols-6 sm:grid md:grid-cols-3 xl:grid-cols-6 grid-rows-1 gap-4 sm:pt-8 md:mt-10 xl:mt-0 block ">
+            <div ref={containerRef} className={containerClass}>
                 <CardConsultations 
                     onModalOpen={onModalOpen}
                     onModalClose={onModalClose}
-                    hideTitle={hideTitle}
                 />
             </div>
         </>

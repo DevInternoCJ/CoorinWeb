@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import DataDashConsul from "../../DataDashConsul";
 import { ExecutiveChart } from "../../DashboardIcons";
 import { IconCuentas, IconProductividad, IconGenerales, IconHistoricos,IconExecutive,IconDayExecutive } from "./IconesConsultations";
@@ -9,7 +9,7 @@ import ModalConsultaGenerales from "./Generals/ModalConsultaGenerales";
 import ModalBaseGenerales from "./Generals/ModalBaseGenerales";
 import HistoricosModal from "./Historical/ModalHistoricosModal";
 import ModalConsultaEjecutivosModal from "./Executives/ModalConsultaEjecutivosModal";
-const CardConsultations = ({ onModalOpen, onModalClose, hideTitle = false }) => {
+const CardConsultations = ({ onModalOpen, onModalClose }) => {
     const [open, setOpen] = useState(false);
     const [openProductividad, setOpenProductividad] = useState(false);
     const [openGenerales, setOpenGenerales] = useState(false);
@@ -29,38 +29,8 @@ const CardConsultations = ({ onModalOpen, onModalClose, hideTitle = false }) => 
     };
 
     const CardTile = ({ catalog, onClick }) => {
-        const ref = useRef(null);
-        const [hideLocal, setHideLocal] = useState(false);
-
-        useEffect(() => {
-            const THRESHOLD_PX = 120;
-            const update = () => {
-                const el = ref.current;
-                if (!el) return;
-                const width = el.clientWidth;
-                setHideLocal(width <= THRESHOLD_PX);
-            };
-
-            update();
-
-            let ro;
-            if (typeof ResizeObserver !== "undefined") {
-                ro = new ResizeObserver(update);
-                if (ref.current) ro.observe(ref.current);
-            }
-
-            window.addEventListener("resize", update);
-            return () => {
-                window.removeEventListener("resize", update);
-                if (ro && ro.disconnect) ro.disconnect();
-            };
-        }, []);
-
-        const finalHide = hideTitle || hideLocal;
-
         return (
             <div
-                ref={ref}
                 className="card card-sm sm:max-w-sm rounded-2xl p-2 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer shadow-none h-[156px] min-h-[156px] flex flex-col justify-between"
                 style={{ backgroundColor: `var(--${catalog.color})` }}
                 tabIndex={0}
@@ -69,7 +39,7 @@ const CardConsultations = ({ onModalOpen, onModalClose, hideTitle = false }) => 
             >
                 <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-15 transition-opacity duration-100"></div>
                 <div className="card-header p-1">
-                    <h5 className={`card-title font-weight-600 ${finalHide ? 'invisible' : ''}`} style={{ color: `var(--${catalog.fontcolor})` }}>
+                    <h5 className={`card-title font-weight-600`} style={{ color: `var(--${catalog.fontcolor})` }}>
                         {catalog.title}
                     </h5>
                 </div>
@@ -97,7 +67,7 @@ const CardConsultations = ({ onModalOpen, onModalClose, hideTitle = false }) => 
                     </div>
                 </div>
                 <div className="card-footer text-center">
-                    <p className={`group-hover:text-black transition-colors duration-200 ${finalHide ? 'invisible' : ''}`} style={{ color: `var(--${catalog.fontcolor})` }}>
+                    <p className={`group-hover:text-black transition-colors duration-200`} style={{ color: `var(--${catalog.fontcolor})` }}>
                         Abrir
                     </p>
                 </div>
