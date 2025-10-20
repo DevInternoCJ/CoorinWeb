@@ -21,7 +21,7 @@ const situacionOptions = [
 
 const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, idProducto, idCartera }) => {
     const [cuenta, setCuenta] = useState("Cuenta");
-    const [situacion, setSituacion] = useState("situacion1");
+    const [selectedConsultFilter, setSelectedConsultFilter] = useState(null);
     const [operador, setOperador] = useState("=");
     const [niegan, setNiegan] = useState("niegan1");
     const [filtros, setFiltros] = useState([]);
@@ -35,32 +35,30 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, idProducto, idCart
         const nuevoFiltro = {
             id: Date.now(),
             concepto: cuenta,
-            campo: situacion,
+            campo: selectedConsultFilter ? selectedConsultFilter.label : "",
             valores: niegan,
             operador: operador
         };
         setFiltros(prevFiltros => [...prevFiltros, nuevoFiltro]);
     };
 
+    // Actualizar la opción seleccionada para el componente de columnas
     React.useEffect(() => {
-        if (onGetSituacionOptions) {
-            const selectedOption = situacionOptions.find(option => option.value === situacion);
-            if (selectedOption) {
-                onGetSituacionOptions([selectedOption]); // Enviar solo la seleccionada como array
-            }
+        if (onGetSituacionOptions && selectedConsultFilter) {
+            onGetSituacionOptions([selectedConsultFilter]); // Enviar la opción seleccionada del ConsultFilter
         }
-    }, [situacion, onGetSituacionOptions]); // Actualizar cuando cambie la situación seleccionada
+    }, [selectedConsultFilter, onGetSituacionOptions]);
 
     return (
       <>
         <div
-          className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col"
+          className="bg-white rounded-lg p-3 h-full flex flex-col"
           style={{ minWidth: 0 }}
         >
           <div className="flex items-center justify-between mb-2">
             <IconCircular
               bgColor="bg-iconCircular"
-              textColor="text-gray-800"
+              textColor="text-jerarquia3"
               borderColor="border-gray-50"
               size="size-8"
               borderWidth="border-4"
@@ -143,10 +141,10 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, idProducto, idCart
             <ConsultFilter
               options={situacionOptions}
               label="Seleccione"
-              defaultValue={situacion}
+              defaultValue=""
               onSelectionChange={(selectedOption) => {
                 if (selectedOption) {
-                  setSituacion(selectedOption.value);
+                  setSelectedConsultFilter(selectedOption);
                 }
               }}
               id="situacion-select"
