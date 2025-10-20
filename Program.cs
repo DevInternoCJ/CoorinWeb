@@ -339,6 +339,8 @@ builder.Services.AddScoped<ICatalogosService, CatalogosService>();
 //generales
 builder.Services.AddScoped<Loki.Mark.Consulta.Generales.Interfaces.IGenerales,
                    Loki.Mark.Consulta.Generales.Services.GeneralesServices>();
+builder.Services.AddScoped<Loki.Mark.Consulta.Generales.Interfaces.IGeneralesDao,
+                   Loki.Mark.Consulta.Generales.DAOs.GeneralesDao>();
 #region Información
 
 builder.Services.AddScoped<IPagosService, PagosService>();

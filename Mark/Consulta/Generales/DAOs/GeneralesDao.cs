@@ -36,15 +36,15 @@ namespace Loki.Mark.Consulta.Generales.DAOs
         }
 
         public async Task<SearchResultDto> RealizaBusqueda(
-            string servidor,
-            int idCartera,
-            int idProducto,
-            bool esContar,
-            bool esCuentas,
-            bool esDetalle,
-            int? idConsulta = null,
-            IEnumerable<ParameterDto>? parametrosExtra = null,
-            IEnumerable<AgruparDTO>? agrupamientoExtra = null)
+      string servidor,
+      int idCartera,
+      int idProducto,
+      bool esContar,
+      bool esCuentas,
+      bool esDetalle,
+      int? idConsulta = null,
+      IEnumerable<ParameterDto>? parametrosExtra = null,
+      IEnumerable<AgruparDTO>? agrupamientoExtra = null)
         {
             try
             {
@@ -76,14 +76,27 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 if (parametrosExtra != null)
                 {
                     foreach (var p in parametrosExtra)
-                        tblParametros.Rows.Add(p.Concepto, p.Campo, p.Valores, "AND", p.Dato);
+                    {
+                        if (p.Concepto != null && p.Campo != null && p.Valores != null)
+                            tblParametros.Rows.Add(p.Concepto, p.Campo, p.Valores, "AND", p.Dato);
+                    }
                 }
 
-                // Agrupaciones predefinidas
-                tblAgrupar.Rows.Add("Cuenta", "Situación");
-                tblAgrupar.Rows.Add("Producto", "120");
-                tblAgrupar.Rows.Add("Conteos", "Gestiones");
-                tblAgrupar.Rows.Add("Fechas", "Activación");
+                // Agrupamientos
+                if (agrupamientoExtra != null)
+                {
+                    foreach (var agrupar in agrupamientoExtra)
+                    {
+                        if (agrupar.Campo != null)
+                            tblAgrupar.Rows.Add(agrupar.Campo, agrupar.Concepto ?? "");
+                    }
+                }
+                else
+                {
+                    // Agrupaciones por defecto basadas en tu JSON
+                    tblAgrupar.Rows.Add("Clase", "Teléfonos");
+                    tblAgrupar.Rows.Add("Origen", "Teléfonos");
+                }
 
                 Resultado conteo;
                 if (esDetalle)
@@ -93,49 +106,84 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 else
                     conteo = Resultado.Contar;
 
+                // ========================================
+                // Llamada a QueryGeneral
+                // ========================================
+                string concepto = "Teléfonos";
+                int idEjecutivo = 1; // Cambia esto por un idEjecutivo válido
 
-                // ========================================
-                // Llamada a QueryGeneral (estático)
-                // ========================================
-                string concepto = "Producto";
-                int idEjecutivo = idCartera;
-                // Crear instancia de ConsultaGenerador
-                // Crear instancia de ConsultaGenerador pasando _dbContextFactory
                 var consultaGenerador = new AccionamientosQueryHelper.ConsultaGenerador(_dbContextFactory);
 
-                // Llamada async a QueryGeneral
                 var queryData = await consultaGenerador.QueryGeneral(
-                    servidor,            // string servidor
-                    idCartera,           // int idCartera
-                    concepto,            // string concepto
-                    tblParametros,       // DataTable parámetros
-                    tblAgrupar,          // DataTable agrupamientos
-                    conteo,              // Resultado conteo
-                    DateTime.Today.AddMonths(-1), // DateTime desde
-                    idEjecutivo,         // int idEjecutivo
-                    idConsulta ?? 0      // int idConsulta
+                    servidor,
+                    idCartera,
+                    concepto,
+                    tblParametros,
+                    tblAgrupar,
+                    conteo,
+                    DateTime.Today.AddMonths(-1),
+                    idEjecutivo,
+                    idConsulta ?? 0
                 );
 
-
-                string sQuery = "USE dbCollection SET DATEFORMAT YMD; " + queryData;
+                // **LOGGING: Ver el query generado**
+                Console.WriteLine("=== QUERY GENERADO POR QueryGeneral ===");
+                Console.WriteLine(queryData);
+                Console.WriteLine("=== FIN DEL QUERY ===");
 
                 // ========================================
-                // Ejecución SQL async
+                // CONSTRUCCIÓN CORREGIDA DEL QUERY FINAL
+                // ========================================
+                string sQuery = queryData.Trim();
+
+                // Si el query contiene WITH (CTE), debemos manejarlo diferente
+                if (!sQuery.ToUpper().StartsWith("SELECT") && !sQuery.ToUpper().StartsWith("WITH"))
+                {
+                    sQuery = "SELECT " + sQuery;
+                }
+
+                Console.WriteLine("=== QUERY CORREGIDO ===");
+                Console.WriteLine(sQuery);
+                Console.WriteLine("=== FIN DEL QUERY CORREGIDO ===");
+
+                // Asegurar terminación con punto y coma
+                if (!sQuery.Trim().EndsWith(";"))
+                {
+                    sQuery += ";";
+                }
+                Console.WriteLine("=== QUERY FINAL A EJECUTAR ===");
+                Console.WriteLine(sQuery);
+                Console.WriteLine("=== FIN DEL QUERY FINAL ===");
+
+                // ========================================
+                // EJECUCIÓN CORREGIDA
                 // ========================================
                 DataTable tblCuentas = new("Cuentas");
 
                 using (var sqlConnection = _dbContextFactory.GetSqlConnection(servidor, "Collection"))
                 {
                     await sqlConnection.OpenAsync();
-                    using (var reader = await sqlConnection.ExecuteReaderAsync(sQuery))
+
+                    try
                     {
-                        tblCuentas.Load(reader);
+                        // Ejecutar SET DATEFORMAT por separado
+                        await sqlConnection.ExecuteAsync("SET DATEFORMAT YMD;");
+
+                        // Ejecutar el query principal
+                        using (var reader = await sqlConnection.ExecuteReaderAsync(sQuery))
+                        {
+                            tblCuentas.Load(reader);
+                        }
+                    }
+                    catch (Exception sqlEx)
+                    {
+                        Console.WriteLine($"ERROR SQL: {sqlEx.Message}");
+                        Console.WriteLine($"QUERY QUE FALLÓ: {sQuery}");
+                        throw;
                     }
                 }
 
-                // ========================================
-                // Exportación a Excel
-                // ========================================
+                // Resto del código para procesar resultados...
                 string? rutaExcel = null;
 
                 if (tblCuentas.Rows.Count > 0)
@@ -153,15 +201,12 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                     rutaExcel = $"/api/busquedas/download-excel?filename={fileName}";
                 }
 
-                // ========================================
-                // Conversión DataTable a lista de diccionarios
-                // ========================================
                 var datosResultado = new List<Dictionary<string, object>>();
                 foreach (DataRow row in tblCuentas.Rows)
                 {
                     var item = new Dictionary<string, object>();
                     foreach (DataColumn col in tblCuentas.Columns)
-                        item[col.ColumnName] = row[col];
+                        item[col.ColumnName] = row[col] == DBNull.Value ? null : row[col];
                     datosResultado.Add(item);
                 }
 
@@ -176,6 +221,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"EXCEPCIÓN GENERAL: {ex}");
                 return new SearchResultDto
                 {
                     Mensaje = $"Error al realizar la búsqueda: {ex.Message}",

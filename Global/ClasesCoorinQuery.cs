@@ -2020,9 +2020,7 @@ namespace CoorinWeb.Loki.Global
                 }
 
                 using var connectionJer = _dbContextFactory.GetSqlConnection(servidor, "Collection");
-                var ejecutivos = await ClasesCoorinMethods.ObtieneEjecutivosPropios(connectionJer, idEjecutivo);
-                int jerarquia = ejecutivos.FirstOrDefault()?.Jerarquía ?? 0;
-
+                int jerarquia = await ClasesCoorinMethods.ObtenerJerarquiaEjecutivo(connectionJer, idEjecutivo);
 
                 if (conteo == Resultado.Detalle && jerarquia < 3)
                 {
@@ -2037,6 +2035,7 @@ namespace CoorinWeb.Loki.Global
                             "STUFF(Z.idCuenta,1,LEN(Z.idCuenta)-4,'XXX-XXX-') [Cuenta]"
                         );
                 }
+
 
                 if (idCartera == 1 && telefono == "1" && clase == "1" && telefonica == "1" &&
                     origen == "1" && confirmado == "1" && huso == "1" && entidad == "1" &&
