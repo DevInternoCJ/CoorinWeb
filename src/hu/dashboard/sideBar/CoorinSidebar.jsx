@@ -264,6 +264,77 @@ export const CoorinSidebar = ({
   // Ref para el contenedor del sidebar
   const sidebarRef = useRef(null);
 
+  // Prev state and lock
+  const prevStateRef = useRef({ isOpen: null, isMinified: null });
+  const [isLockedByModal, setIsLockedByModal] = useState(false);
+  const isLockedRef = useRef(isLockedByModal);
+  useEffect(() => { isLockedRef.current = isLockedByModal; }, [isLockedByModal]);
+
+  // blocked flag
+  const blocked = isModalOpen || isLockedByModal;
+
+  // Ensure prop-driven modals (opened via dashboard state) also force the same
+  // minify/lock behavior as the event-driven flow. This covers cases like
+  // "Campañas" which rely on the parent prop instead of dispatching events.
+  useEffect(() => {
+    if (isModalOpen) {
+      // only act if we didn't already lock because of another modal
+      if (!isLockedRef.current) {
+        prevStateRef.current = { isOpen, isMinified };
+        if (isMobile) setIsOpen(false);
+        if (!isMinified) setIsMinified(true);
+        setIsLockedByModal(true);
+      }
+    } else {
+      // modal prop closed -> restore previous state if we had locked it
+      if (isLockedRef.current) {
+        const prev = prevStateRef.current || {};
+        if (prev.isOpen !== null && prev.isOpen !== undefined) setIsOpen(prev.isOpen);
+        if (prev.isMinified !== null && prev.isMinified !== undefined) setIsMinified(prev.isMinified);
+        setIsLockedByModal(false);
+      }
+    }
+    // We intentionally include isOpen/isMinified so the saved prevStateRef is
+    // the latest when we run this effect (small cost, keeps behaviour robust).
+  }, [isModalOpen, isMobile, isMinified, isOpen]);
+
+  // Listen global modal events
+  useEffect(() => {
+    const handle = (ev) => {
+      const detail = ev?.detail || {};
+      const open = !!detail.open;
+      const byClose = !!detail.byClose;
+      if (open) {
+        // first modal -> save
+        try { window.__coorin_modal_open_count = (window.__coorin_modal_open_count || 0) + 1; } catch (err) { console.warn(err); }
+        if (!isLockedRef.current) {
+          prevStateRef.current = { isOpen, isMinified };
+          // minimize and lock
+          if (isMobile) setIsOpen(false);
+          if (!isMinified) setIsMinified(true);
+          setIsLockedByModal(true);
+        }
+      } else {
+        try { window.__coorin_modal_open_count = Math.max((window.__coorin_modal_open_count || 1) - 1, 0); } catch (err) { console.warn(err); }
+        const remaining = window.__coorin_modal_open_count || 0;
+        if (remaining === 0) {
+          // restore only if closed via close button
+          if (byClose) {
+            const prev = prevStateRef.current || {};
+            if (prev.isOpen !== null) setIsOpen(prev.isOpen);
+            if (prev.isMinified !== null) setIsMinified(prev.isMinified);
+            setIsLockedByModal(false);
+          } else {
+            // closed by backdrop/Escape -> keep locked/minified
+            // do nothing (remain blocked)
+          }
+        }
+      }
+    };
+    window.addEventListener('coorin-modal-open', handle);
+    return () => window.removeEventListener('coorin-modal-open', handle);
+  }, [isMobile, isMinified, isOpen]);
+
   // Efecto para detectar clics fuera del sidebar
   useEffect(() => {
   const handleClickOutside = (event) => {
@@ -380,12 +451,12 @@ export const CoorinSidebar = ({
   const asideClass = `${
     isMinified ? "hs-overlay-minified " : ""
   }hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 transition-transform duration-150 transform fixed top-0 start-0 bottom-0 ${
-    isModalOpen ? "z-30" : "z-50"
+    blocked ? "z-30" : "z-50"
   } bg-white border-e border-gray-200 ${
     isMinified ? "w-[3.25rem]" : "w-64"
   } min-h-screen flex flex-col overflow-x-hidden ${
     isOpen ? "translate-x-0" : "-translate-x-full hidden"
-  } ${isModalOpen ? "pointer-events-none opacity-50" : ""}`.trim();
+  } ${blocked ? "pointer-events-none sidebar-blocked" : ""}`.trim();
   // Función para expandir la sidebar si está en modo minificado
   const expandSidebar = () => {
     if (isMinified) {
@@ -414,15 +485,16 @@ export const CoorinSidebar = ({
       <button
         type="button"
         className={`py-2 px-3 inline-flex justify-center items-center gap-x-2 text-start bg-gray-800 border-none text-white text-sm font-medium rounded-lg shadow-2xs align-middle hover:bg-gray-950 focus:outline-hidden focus:bg-gray-900 dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200 dark:focus:bg-neutral-200 ${
-          isModalOpen ? "opacity-50 pointer-events-none" : ""
+          (blocked && isMinified) ? 'cursor-default' : ''
         }`}
+        style={ (blocked && isMinified) ? { cursor: 'default' } : undefined }
         aria-haspopup="dialog"
         aria-expanded="false"
         aria-controls="hs-sidebar-content-push-to-mini-sidebar"
         aria-label="Toggle navigation"
         data-hs-overlay="#hs-sidebar-content-push-to-mini-sidebar"
-        disabled={isModalOpen}
-        onClick={isModalOpen ? undefined : toggleOpen}>
+  disabled={blocked}
+  onClick={blocked ? undefined : toggleOpen}>
         <svg
           className="hidden hs-overlay-minified:block shrink-0 w-4 h-4"
           xmlns="http://www.w3.org/2000/svg"
@@ -464,7 +536,8 @@ export const CoorinSidebar = ({
         id="hs-coorin-sidebar"
         className={asideClass}
         role="navigation"
-        aria-label="Coorin sidebar">
+        aria-label="Coorin sidebar"
+        style={{ overflowY: isMinified ? 'hidden' : undefined, pointerEvents: blocked ? 'none' : undefined, cursor: blocked ? 'default' : undefined }}>
         <div className="relative flex flex-col h-full max-h-full">
           {/* Header */}
           <header className="py-4 px-2 flex justify-between items-center gap-x-2">
@@ -506,7 +579,9 @@ export const CoorinSidebar = ({
                 type="button"
                 onClick={() => toggleMinify()}
                 aria-pressed={isMinified}
-                className="flex justify-center items-center w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-full focus:outline-hidden focus:bg-gray-100">
+                className="flex justify-center items-center w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-full focus:outline-hidden focus:bg-gray-100"
+                style={ (blocked && isMinified) ? { cursor: 'default' } : undefined }
+                >
                 <svg
                   className="hidden hs-overlay-minified:block shrink-0 w-4 h-4"
                   xmlns="http://www.w3.org/2000/svg"
@@ -543,8 +618,11 @@ export const CoorinSidebar = ({
           {/* End Header */}
 
           {/* Body: make this area scrollable so footer stays visible */}
-          <div className={`flex-1 flex flex-col px-2 pt-2 min-h-0 overflow-x-hidden ${isOpen && !isMinified ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>
-            <ul className="space-y-0.5 p-0 bg-white pb-4 overflow-x-hidden">
+          <div
+            className={`flex-1 flex flex-col px-2 pt-2 min-h-0 overflow-x-hidden coorin-scroll-area ${isMinified ? 'overflow-y-hidden' : (isOpen ? 'overflow-y-auto' : 'overflow-y-hidden')}`}
+            style={{ overflowY: isMinified ? 'hidden' : (isOpen ? 'auto' : 'hidden') }}
+          >
+            <ul className="space-y-0.5 p-0 bg-white pb-4 overflow-x-hidden" style={{ overflowY: isMinified ? 'hidden' : undefined }}>
               {Object.values(dataSidebar).map((indiceArr, indiceIdx) =>
                 indiceArr.map((section, sectionIdx) => (
                   <React.Fragment

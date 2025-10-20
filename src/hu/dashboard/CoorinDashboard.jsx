@@ -235,7 +235,8 @@ export default function CoorinDashboard() {
     <>
       <CoorinSidebar 
         onMenuClick={handleSidebarMenuClick}
-        isModalOpen={executiveModalOpen || consultationModalOpen}
+        // Consider any modal opened in the dashboard (cards or sidebar) as a modal open state
+        isModalOpen={executiveModalOpen || consultationModalOpen || modalSidebarOpen}
         onRegisterCloseFunction={setCloseSidebarFn}
       />
       <main className="flex-1 bg-background-dashboard h-screen relative z-0 flex flex-col overflow-hidden">

@@ -249,7 +249,7 @@ body {
 .modal-overlay {
     position: absolute;
     inset: 0;
-    cursor: pointer;
+  cursor: inherit;
 }
 
 .modal-content {
@@ -398,6 +398,18 @@ label {
   flex-shrink: 0;
 }
 /* === Botones globales para modales === */
+
+/* Sidebar blocked state: force default cursor and disable pointer interactions visually */
+.sidebar-blocked,
+.sidebar-blocked * {
+  cursor: default !important;
+}
+
+/* When the sidebar is minified ensure no vertical scrollbar shows */
+.hs-overlay-minified {
+  overflow-y: hidden !important;
+  cursor: default !important;
+}
 .modal-btn {
   display: inline-flex;
   align-items: center;

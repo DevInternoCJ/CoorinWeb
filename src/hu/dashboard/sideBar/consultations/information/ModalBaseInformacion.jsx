@@ -1,15 +1,10 @@
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import ModalBase from "../../../board/ModalBase";
 import CloseButtonCampanas from "../../../components/CloseButtonReusable";
 
 // Tamaños tipo ReusableModal
 const MODAL_SIZES = {
-    xs: { maxWidth: "384px", minWidth: "320px", width: "100%" },
-    sm: { maxWidth: "448px", minWidth: "340px", width: "100%" },
-    md: { maxWidth: "512px", minWidth: "380px", width: "100%" },
-    lg: { maxWidth: "76vw", minWidth: "40vw", width: "100%" },
-    xl: { maxWidth: "80vw", minWidth: "50vw", width: "100%" },
     pagos: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
     "pagos-xl": { maxWidth: "1104px", minWidth: "828px", height: "760px" },
     listaNegra: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
@@ -40,12 +35,23 @@ const ModalBaseInformacion = ({
     modalClassName = "",
     overlayClassName = "",
     enableBounce = true,
-    closeOnBackdropClick = true,
     backdropBlur = true,
     ...props
 }) => {
     const modalRef = useRef(null);
-    const { bounce } = ModalBase.useModalLogic();
+    const { bounce } = ModalBase.useModalLogic?.() || { bounce: false };
+    const [localBounce, setLocalBounce] = useState(false);
+
+    // helper to trigger bounce animation
+    const triggerBounce = () => {
+        try {
+            setLocalBounce(false);
+            // force reflow for restarting animation
+            void document?.body?.offsetHeight;
+        } catch (err) { console.warn('triggerBounce reflow failed', err); }
+        setLocalBounce(true);
+        setTimeout(() => setLocalBounce(false), 500);
+    };
 
     // Títulos
     const titulos = {
@@ -158,12 +164,39 @@ const ModalBaseInformacion = ({
         <img src="/public/logo_coorin_7.svg" alt="Logo Coorin" style={{ height: 36, marginRight: 8 }} />
     );
 
-    // Backdrop click
+    // Backdrop click: do NOT close. Trigger bounce instead.
     const handleBackdropClick = (e) => {
-        if (e.target === e.currentTarget && closeOnBackdropClick) {
-            onClose();
+        if (e.target === e.currentTarget) {
+            // attempt to close via backdrop -> play bounce and keep modal open
+            triggerBounce();
         }
     };
+
+    // Intercept Escape key to prevent closing; play bounce instead
+    useEffect(() => {
+        const handleKey = (e) => {
+            if (e.key === "Escape") {
+                e.preventDefault();
+                e.stopPropagation();
+                triggerBounce();
+            }
+        };
+        window.addEventListener("keydown", handleKey, true);
+        return () => window.removeEventListener("keydown", handleKey, true);
+    }, []);
+
+    // When modal mounts, notify sidebar that a modal opened
+    useEffect(() => {
+        try {
+            window.dispatchEvent(new CustomEvent('coorin-modal-open', { detail: { open: true } }));
+        } catch (err) { console.warn('dispatch open failed', err); }
+        return () => {
+            // If unmounted without close via button, still notify closed (byClose:false)
+            try {
+                window.dispatchEvent(new CustomEvent('coorin-modal-open', { detail: { open: false, byClose: false } }));
+            } catch (err) { console.warn('dispatch close failed', err); }
+        };
+    }, []);
 
         return (
             <div className="modal-blur-bg">
@@ -173,7 +206,7 @@ const ModalBaseInformacion = ({
                 />
                 <div
                     ref={modalRef}
-                    className={`modal-content modal-xl-container bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col ${modalClassName} ${bounce && enableBounce ? "animate-bounce-modal" : ""}`}
+                    className={`modal-content modal-xl-container bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col ${modalClassName} ${((bounce || localBounce) && enableBounce) ? "animate-bounce-modal" : ""}`}
                     style={mergedModalStyle}
                     onClick={e => e.stopPropagation()}
                     {...props}
@@ -188,7 +221,11 @@ const ModalBaseInformacion = ({
                                     {headerIcon}
                                     <h2 className="text-lg font-semibold truncate" style={headerTitleStyle}>{titulo}</h2>
                                 </div>
-                                <CloseButtonCampanas onClose={onClose} />
+                                                <CloseButtonCampanas onClose={() => {
+                                                    // notify that modal will close by close button, then call parent onClose
+                                                    try { window.dispatchEvent(new CustomEvent('coorin-modal-open', { detail: { open: false, byClose: true } })); } catch (err) { console.warn('dispatch close by button failed', err); }
+                                                    if (typeof onClose === 'function') onClose();
+                                                }} />
                             </div>
                         )
                     )}
