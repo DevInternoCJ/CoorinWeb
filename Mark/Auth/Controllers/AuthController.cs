@@ -227,22 +227,30 @@ namespace Loki.Mark.Auth.Controllers
                 {
                     return BadRequest(new { error = "El parámetro 'Servidor' es requerido." });
                 }
-
                 var resultado = await _authService.ResetPasswordAsync(request.Servidor, request);
 
                 if (resultado == null)
-                    return NotFound("No se pudo actualizar la contraseña.");
+                    return NotFound(new { error = "No se pudo actualizar la contraseña." });
+
+                if (resultado is IDictionary<string, object> dict && dict.ContainsKey("Mensaje"))
+                {
+                    var mensaje = dict["Mensaje"]?.ToString();
+                    if (!string.IsNullOrEmpty(mensaje) && mensaje.Contains("debe ser diferente", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return BadRequest(new { error = mensaje });
+                    }
+                }
 
                 return Ok(resultado);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ Error en ResetPasswordAsync: {ex}");
-                return StatusCode(500, "Error interno del servidor.");
+                return StatusCode(500, new { error = "Error interno del servidor." });
             }
         }
 
