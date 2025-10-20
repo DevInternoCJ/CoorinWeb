@@ -1468,6 +1468,7 @@ namespace CoorinWeb.Loki.Global
                 string tipoHora = DateTime.Now.ToString("tt");
                 int hora = Convert.ToInt32(DateTime.Now.ToString("hh"));
                 string ConteoR = "0";
+
                 var columnas = new ArrayList();
                 bool bConteosTels = false;
                 string sCaseHusoHorario = "";
@@ -1494,10 +1495,18 @@ namespace CoorinWeb.Loki.Global
                     sWhere += $" AND Z.idOrigen IN (1810,1811) ";
                 }
 
+                ////JOIN a Cuentas para Teléfonos
+                //if (concepto == "Teléfonos")
+                //    sFrom += " INNER JOIN dbCollection..Cuentas CA WITH (NOLOCK) ON Z.idCartera = CA.idCartera AND Z.idCuenta = CA.idCuenta AND CA.CuentaActiva = 1 \r\n";
                 //JOIN a Cuentas para Teléfonos
                 if (concepto == "Teléfonos")
                     sFrom += " INNER JOIN dbCollection..Cuentas CA WITH (NOLOCK) ON Z.idCartera = CA.idCartera AND Z.idCuenta = CA.idCuenta AND CA.CuentaActiva = 1 \r\n";
 
+                // JOIN al query de cuentas complemento (CC)
+                if (columnas.Count > 0 && !string.IsNullOrEmpty(queryCuentas.Query))
+                {
+                    sFrom += $" LEFT JOIN ( \r\n{queryCuentas.Query}\r\n ) CC ON Z.idCartera = CC.idCartera AND Z.idCuenta = CC.idCuenta \r\n";
+                }
                 //------------------- #region Filtros -------------------
                 if (tblParametros != null)
                 {
