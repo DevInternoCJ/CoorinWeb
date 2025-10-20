@@ -48,9 +48,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
         {
             try
             {
-                // ========================================
-                // Cargar datos de ConsultaGenerador (estático)
-                // ========================================
+
                 await AccionamientosQueryHelper.ConsultaGenerador.CargarDesdeBDAsync(_dbContextFactory, servidor);
 
                 var tblParametros = AccionamientosQueryHelper.Ejecutivo1.TablaParámetros;
@@ -59,9 +57,6 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 tblParametros.Rows.Clear();
                 tblAgrupar.Rows.Clear();
 
-                // ========================================
-                // Parámetros base
-                // ========================================
                 if (idConsulta.HasValue)
                 {
                     var consultaRow = AccionamientosQueryHelper.ConsultaGenerador.ObtenerConsulta(idConsulta.Value);
@@ -93,7 +88,6 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 }
                 else
                 {
-                    // Agrupaciones por defecto basadas en tu JSON
                     tblAgrupar.Rows.Add("Clase", "Teléfonos");
                     tblAgrupar.Rows.Add("Origen", "Teléfonos");
                 }
@@ -106,11 +100,8 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 else
                     conteo = Resultado.Contar;
 
-                // ========================================
-                // Llamada a QueryGeneral
-                // ========================================
                 string concepto = "Teléfonos";
-                int idEjecutivo = 1; // Cambia esto por un idEjecutivo válido
+                int idEjecutivo = 1;
 
                 var consultaGenerador = new AccionamientosQueryHelper.ConsultaGenerador(_dbContextFactory);
 
@@ -126,14 +117,10 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                     idConsulta ?? 0
                 );
 
-                // **LOGGING: Ver el query generado**
                 Console.WriteLine("=== QUERY GENERADO POR QueryGeneral ===");
                 Console.WriteLine(queryData);
                 Console.WriteLine("=== FIN DEL QUERY ===");
 
-                // ========================================
-                // CONSTRUCCIÓN CORREGIDA DEL QUERY FINAL
-                // ========================================
                 string sQuery = queryData.Trim();
 
                 // Si el query contiene WITH (CTE), debemos manejarlo diferente
@@ -155,9 +142,6 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 Console.WriteLine(sQuery);
                 Console.WriteLine("=== FIN DEL QUERY FINAL ===");
 
-                // ========================================
-                // EJECUCIÓN CORREGIDA
-                // ========================================
                 DataTable tblCuentas = new("Cuentas");
 
                 using (var sqlConnection = _dbContextFactory.GetSqlConnection(servidor, "Collection"))
@@ -183,7 +167,6 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                     }
                 }
 
-                // Resto del código para procesar resultados...
                 string? rutaExcel = null;
 
                 if (tblCuentas.Rows.Count > 0)

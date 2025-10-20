@@ -1505,7 +1505,7 @@ namespace CoorinWeb.Loki.Global
                 // JOIN al query de cuentas complemento (CC)
                 if (columnas.Count > 0 && !string.IsNullOrEmpty(queryCuentas.Query))
                 {
-                    sFrom += $" LEFT JOIN ( \r\n{queryCuentas.Query}\r\n ) CC ON Z.idCartera = CC.idCartera AND Z.idCuenta = CC.idCuenta \r\n";
+                    sFrom += $" INNER JOIN ( \r\n{queryCuentas.Query}\r\n ) CC ON Z.idCartera = CC.idCartera AND Z.idCuenta = CC.idCuenta \r\n";
                 }
                 //------------------- #region Filtros -------------------
                 if (tblParametros != null)
