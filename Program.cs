@@ -226,6 +226,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+#region contextos
 // ===== Agregar Contextos de Bases de Datos =====
 // Thor
 builder.Services.AddDbContext<DbMemoryContextThor>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("Thor_Memory")));
@@ -274,52 +275,72 @@ builder.Services.AddDbContext<DbCollectionContextAlbaz>(o => o.UseSqlServer(buil
 builder.Services.AddDbContext<DbAllocationContextAlbaz>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("Albaz_Allocation")));
 builder.Services.AddDbContext<DbHistoryContextAlbaz>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("Albaz_History")));
 builder.Services.AddDbContext<DbMemoryContextAlbaz>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("Albaz_Memory")));
-
+#endregion
 
 // ===== Servicios personalizados =====
+#region global
 builder.Services.AddScoped<DaoBase>();
 builder.Services.AddScoped<AuthDAOs>();
 builder.Services.AddScoped<IDbContextFactory, CustomDbContextFactory>();
-builder.Services.AddScoped<IAuthInterfaces,
-    AuthDAOs>();
-builder.Services.AddScoped<IArrepentimientosService, ArrepentimientosService>();
-builder.Services.AddScoped<IProductividadService, ProductividadService>();
+builder.Services.AddScoped<IAuthInterfaces,AuthDAOs>();
+builder.Services.AddScoped<CustomDbContextFactory>();
+builder.Services.AddScoped<IQueryGeneratorService, QueryGeneratorService>();
+builder.Services.AddScoped<IConsultaConfigDAO, ConsultaConfigDAO>();
+#endregion
+
+#region Administración
+
+#region Carteras
 builder.Services.AddScoped<ICampaniasService, CampaniasService>();
 builder.Services.AddScoped<ICampaniasDao, Campanias>();
 builder.Services.AddScoped<ICarterasService, CarterasService>();
 builder.Services.AddScoped<ICarterasDAOs, CarterasDao>();
-builder.Services.AddScoped<ISesionesService, SesionesService>();
-builder.Services.AddScoped<ICatalogosService, CatalogosService>();
-builder.Services.AddScoped<IEncargadosService, EncargadosService>();
+#endregion
+
+#region Ejecutivos
+builder.Services.AddScoped<EjecutivoDao>();
+builder.Services.AddScoped<IInfoEjecutivoDao, InfoEjecutivoDao>();
+//validadores
 builder.Services.AddScoped<IValidadoresDAOs, ValidadoresDao>();
 builder.Services.AddScoped<IValidadoresService, ValidadoresServices>();
+//metas
 builder.Services.AddScoped<IMetasService, MetasService>();
 builder.Services.AddScoped<IMetasDAOs, MetasDao>();
-builder.Services.AddScoped<IListaNegraDao, ListaNegraDao>();
-builder.Services.AddScoped<IInfoEjecutivoDao, InfoEjecutivoDao>();
-builder.Services.AddScoped<IListaNegraService, ListaNegraService>();
-builder.Services.AddScoped<IArrepentimientosService, ArrepentimientosService>();
-builder.Services.AddScoped<IProductividadService, ProductividadService>();
+//encargados
+builder.Services.AddScoped<IEncargadosService, EncargadosService>();
+//sesiones
+builder.Services.AddScoped<ISesionesService, SesionesService>();
+#endregion
+
+#region Gespa
+//campos pantalla
 builder.Services.AddScoped<CamposPantallaDao>();
 builder.Services.AddScoped<ICamposPantallaService, CamposPantallaService>();
-builder.Services.AddScoped<IHistoricoService, HistoricoService>();
-builder.Services.AddScoped<CustomDbContextFactory>();
-
-builder.Services.AddScoped<IHistoricoService, HistoricoService>();
-builder.Services.AddScoped<IHistoricoDao, HistoricoDao>();
+//scripts
+builder.Services.AddScoped<IScriptsDAO, Loki.Mark.Administracion.Gespa.Scripts.DAOs.ScriptsDAO>();
+//plantillas correo
 builder.Services.AddScoped<IPlantillasCorreoService, PlantillasCorreoService>();
 builder.Services.AddScoped<IPlantillasCorreoDao, PlantillasCorreoDao>();
+//frases
+builder.Services.AddScoped<IFrases, Loki.Mark.Administracion.Gespa.Frases.DAOs.FrasesDao>();
+
+#endregion
+
+#endregion
+
+#region Consulta
+//cuentas
 builder.Services.AddScoped<IBusqueda, BusquedasService>();
-
-builder.Services.AddScoped<IComentariosGespaDAOs, ComentariosGespaDAOs>();//padrino
-builder.Services.AddScoped<IDefinicionGespaBuscaDAOs, DefinicionGespaBusquedaDAOs>();//padrino
-builder.Services.AddScoped<IArrepentimientosGespaDAOs, ArrepentimientosGespaBusquedaDAOs>();//padrino
-builder.Services.AddScoped<IBloqueoCuentasGespaDAOs, BloqueoCuentasGespaDAOs>();//padrino
-builder.Services.AddScoped<ICargoEnLineaGespaDAOs, CargoEnLineaGespaDAOs>();//padrino
-builder.Services.AddScoped<IEstadosDeCuentaGespaDAOs, EstadosDeCuentaGespaDAOs>();//padrino
-builder.Services.AddScoped<IDiaDelEjecutivoDAOs, DiaDelEjecutivoDAOs>();//padrino
-
-
+builder.Services.AddScoped<ICatalogosService, CatalogosService>();
+builder.Services.AddScoped<ICatalogosServiceRe, Loki.Mark.Consulta.Cuenta.Services.CatalogosService>();
+builder.Services.AddScoped<Loki.Mark.Consulta.Cuenta.Interfaces.ICatalogosServiceRe,
+                   Loki.Mark.Consulta.Cuenta.Services.CatalogosService>();
+builder.Services.AddScoped<ICatalogosService, CatalogosService>();
+//generales
+builder.Services.AddScoped<Loki.Mark.Consulta.Generales.Interfaces.IGenerales,
+                   Loki.Mark.Consulta.Generales.Services.GeneralesServices>();
+builder.Services.AddScoped<Loki.Mark.Consulta.Generales.Interfaces.IGeneralesDao,
+                   Loki.Mark.Consulta.Generales.DAOs.GeneralesDao>();
 #region Información
 
 builder.Services.AddScoped<IPagosService, PagosService>();
@@ -348,6 +369,41 @@ builder.Services.AddScoped<IComentariosDAO, ComentariosDAO>();
 
 #endregion
 
+#region Historico
+builder.Services.AddScoped<IHistoricoService, HistoricoService>();
+builder.Services.AddScoped<IHistoricoDao, HistoricoDao>();
+builder.Services.AddScoped<IHistoricoService, HistoricoService>();
+#endregion
+
+//productividad
+builder.Services.AddScoped<IProductividadService, ProductividadService>();
+builder.Services.AddScoped<IProductividadService, ProductividadService>();
+
+#region lista negra
+builder.Services.AddScoped<IListaNegraDao, ListaNegraDao>();
+builder.Services.AddScoped<IListaNegraService, ListaNegraService>();
+#endregion
+
+#region Arrepentimientos
+builder.Services.AddScoped<IArrepentimientosService, ArrepentimientosService>();
+builder.Services.AddScoped<IArrepentimientosService, ArrepentimientosService>();
+#endregion
+
+#endregion
+
+#region Procesos
+
+#region Gespa
+builder.Services.AddScoped<IComentariosGespaDAOs, ComentariosGespaDAOs>();//padrino
+builder.Services.AddScoped<IDefinicionGespaBuscaDAOs, DefinicionGespaBusquedaDAOs>();//padrino
+builder.Services.AddScoped<IArrepentimientosGespaDAOs, ArrepentimientosGespaBusquedaDAOs>();//padrino
+builder.Services.AddScoped<IBloqueoCuentasGespaDAOs, BloqueoCuentasGespaDAOs>();//padrino
+builder.Services.AddScoped<ICargoEnLineaGespaDAOs, CargoEnLineaGespaDAOs>();//padrino
+builder.Services.AddScoped<IEstadosDeCuentaGespaDAOs, EstadosDeCuentaGespaDAOs>();//padrino
+builder.Services.AddScoped<IDiaDelEjecutivoDAOs, DiaDelEjecutivoDAOs>();//padrino
+#endregion
+
+#endregion
 
 #region Reportes
 
@@ -357,29 +413,6 @@ builder.Services.AddScoped<IReporteEjecutivosDAO, ReporteEjecutivosDAO>();
 #endregion
 
 
-#region scripts
-builder.Services.AddScoped<IScriptsDAO, Loki.Mark.Administracion.Gespa.Scripts.DAOs.ScriptsDAO>();
-#endregion
-
-#region Frases
-builder.Services.AddScoped<IFrases, Loki.Mark.Administracion.Gespa.Frases.DAOs.FrasesDao>();
-#endregion
-
-
-builder.Services.AddScoped<IQueryGeneratorService, QueryGeneratorService>();
-builder.Services.AddScoped<IConsultaConfigDAO, ConsultaConfigDAO>();
-
-builder.Services.AddScoped<EjecutivoDao>();
-
-//catalogos
-builder.Services.AddScoped<ICatalogosService, CatalogosService>();
-builder.Services.AddScoped<ICatalogosServiceRe, Loki.Mark.Consulta.Cuenta.Services.CatalogosService>();
-
-builder.Services.AddScoped<Loki.Mark.Consulta.Cuenta.Interfaces.ICatalogosServiceRe,
-                   Loki.Mark.Consulta.Cuenta.Services.CatalogosService>();
-//generales
-builder.Services.AddScoped<Loki.Mark.Consulta.Generales.Interfaces.IGenerales,
-                   Loki.Mark.Consulta.Generales.Services.GeneralesServices>();
 // En Program.cs, cambia a:
 builder.Services.AddSingleton<Loki.Global.ExcelGeneratorService>();
 builder.Services.AddScoped<AccionamientosQueryHelper>();

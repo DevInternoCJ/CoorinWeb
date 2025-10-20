@@ -218,39 +218,38 @@ namespace Loki.Mark.Auth.Controllers
 		[ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
 		[ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-		public async Task<IActionResult> RestablecerContrasenia([FromBody] ReseteaContra request)
-		{
-			try
-			{
-				string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
-				if (string.IsNullOrWhiteSpace(servidorClaim))
-				{
-					return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-				}
+        public async Task<IActionResult> RestablecerContrasenia([FromBody] ReseteaContra request)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(request.Servidor))
+                {
+                    return BadRequest(new { error = "El parámetro 'Servidor' es requerido." });
+                }
 
-				var resultado = await _authService.ResetPasswordAsync(servidorClaim, request);
+                var resultado = await _authService.ResetPasswordAsync(request.Servidor, request);
 
-				if (resultado == null)
-					return NotFound("No se pudo actualizar la contraseña.");
+                if (resultado == null)
+                    return NotFound("No se pudo actualizar la contraseña.");
 
-				return Ok(resultado);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(ex.Message);
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"❌ Error en ResetPasswordAsync: {ex}");
-				return StatusCode(500, "Error interno del servidor.");
-			}
-		}
+                return Ok(resultado);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error en ResetPasswordAsync: {ex}");
+                return StatusCode(500, "Error interno del servidor.");
+            }
+        }
 
-		/// <summary>
-		/// Genera un token JWT para un usuario autenticado con base en su información y configuración de seguridad.
-		/// </summary>
-		private string GenerateJwtToken(AuthRequest user)
+        /// <summary>
+        /// Genera un token JWT para un usuario autenticado con base en su información y configuración de seguridad.
+        /// </summary>
+        private string GenerateJwtToken(AuthRequest user)
 		{
 			if (string.IsNullOrEmpty(_secretKey))
 			{

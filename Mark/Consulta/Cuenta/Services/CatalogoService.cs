@@ -75,6 +75,28 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             return true;
         }
 
+        //relaciones
+        public async Task<Dictionary<string, string>> RelacionesCatalogoAsync(string servidor, int idValor2)
+        {
+            using var conn = _dbContFactory.GetSqlConnection(servidor, "Collection");
+            await conn.OpenAsync();
+
+            var query = @"
+        SELECT CAST(idValor1 AS varchar) AS IdValor1, Valor1
+        FROM dbCollection..RelacionesCatalogo (NOLOCK)
+        WHERE idValor2 = @IdValor2";
+
+            var result = await conn.QueryAsync<(string IdValor1, string Valor1)>(query, new { IdValor2 = idValor2 });
+            return result.ToDictionary(x => x.IdValor1, x => x.Valor1);
+        }
+
+        public async Task<string> IdsRelacionesAsync(string servidor, int idValor2)
+        {
+            var relaciones = await RelacionesCatalogoAsync(servidor, idValor2);
+            return string.Join(",", relaciones.Keys);
+        }
+
+
         public class CarteraDto
         {
             public int Id { get; set; }

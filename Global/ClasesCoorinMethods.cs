@@ -11,13 +11,21 @@ namespace Loki.Global
 	{
 		public static async Task<List<EjecutivoPropio>> ObtieneEjecutivosPropios(SqlConnection connection, int idEncargado)
 		{
-			var sql = "SELECT * FROM dbCollection..fn_EjecutivosPropios(@idEncargado)";
+			var sql = "SELECT * FROM dbCollection..fn_EjecutivosPropios(@idEncargado) OPTION (MAXRECURSION 0)";
 			var parametros = new { idEncargado };
 			var result = await connection.QueryAsync<EjecutivoPropio>(sql, parametros);
 			return result.ToList();
 		}
+        public static async Task<int> ObtenerJerarquiaEjecutivo(SqlConnection connection, int idEjecutivo)
+        {
+            var sql = "SELECT Jerarquía FROM dbCollection..Ejecutivos WHERE idEjecutivo = @idEjecutivo";
+            var parametro = new { idEjecutivo };
+            var jerarquia = await connection.QueryFirstOrDefaultAsync<int>(sql, parametro);
+            return jerarquia;
+        }
 
-		public static async Task<List<int>> GetIdEjecutivosPropiosAsync(
+
+        public static async Task<List<int>> GetIdEjecutivosPropiosAsync(
 			SqlConnection connection,
 			int idEjecutivo,
 			bool soloDescendientes = false)
