@@ -36,19 +36,19 @@ namespace Loki.Mark.Consulta.Generales.DAOs
         }
 
         public async Task<SearchResultDto> RealizaBusqueda(
-      string servidor,
-      int idCartera,
-      int idProducto,
-      bool esContar,
-      bool esCuentas,
-      bool esDetalle,
-      int? idConsulta = null,
-      IEnumerable<ParameterDto>? parametrosExtra = null,
-      IEnumerable<AgruparDTO>? agrupamientoExtra = null)
+            string servidor,
+            int idCartera,
+            int idProducto,
+            bool esContar,
+            bool esCuentas,
+            bool esDetalle,
+            string concepto, // Ahora es parámetro con valor por defecto
+            int? idConsulta = null,
+            IEnumerable<ParameterDto>? parametrosExtra = null,
+            IEnumerable<AgruparDTO>? agrupamientoExtra = null)
         {
             try
             {
-
                 await AccionamientosQueryHelper.ConsultaGenerador.CargarDesdeBDAsync(_dbContextFactory, servidor);
 
                 var tblParametros = AccionamientosQueryHelper.Ejecutivo1.TablaParámetros;
@@ -88,8 +88,20 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 }
                 else
                 {
-                    tblAgrupar.Rows.Add("Clase", "Teléfonos");
-                    tblAgrupar.Rows.Add("Origen", "Teléfonos");
+                    // Agrupamiento por defecto según el concepto
+                    switch (concepto)
+                    {
+                        case "Teléfonos":
+                            tblAgrupar.Rows.Add("Clase", "Teléfonos");
+                            tblAgrupar.Rows.Add("Origen", "Teléfonos");
+                            break;
+                        case "Gestiones":
+                        case "Negociaciones":
+                        case "Seguimientos":
+                        case "Chats":
+                            // Agrupamientos por defecto para otros conceptos si los necesitas
+                            break;
+                    }
                 }
 
                 Resultado conteo;
@@ -100,7 +112,6 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 else
                     conteo = Resultado.Contar;
 
-                string concepto = "Teléfonos";
                 int idEjecutivo = 1;
 
                 var consultaGenerador = new AccionamientosQueryHelper.ConsultaGenerador(_dbContextFactory);
@@ -108,7 +119,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 var queryData = await consultaGenerador.QueryGeneral(
                     servidor,
                     idCartera,
-                    concepto,
+                    concepto, // Ahora usa el parámetro recibido
                     tblParametros,
                     tblAgrupar,
                     conteo,
@@ -171,7 +182,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
 
                 if (tblCuentas.Rows.Count > 0)
                 {
-                    string fileName = $"Cuentas_{Guid.NewGuid():N}.xlsx";
+                    string fileName = $"{concepto}_{Guid.NewGuid():N}.xlsx";
                     string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports");
                     Directory.CreateDirectory(uploadsFolder);
 

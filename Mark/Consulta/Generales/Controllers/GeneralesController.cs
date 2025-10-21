@@ -85,20 +85,34 @@ namespace Loki.Mark.Consulta.Generales.Controllers
            Summary = "realizar busqueda - irene",
            Description = "realiza una busqueda por medio de idconsulta o parametros y agrupamientos"
         )]
+     
         public async Task<IActionResult> RealizarBusqueda([FromBody] SearchGeneral search)
         {
             try
             {
+                // Validaciones
                 if (string.IsNullOrWhiteSpace(search.Servidor))
                     return BadRequest(new { error = "Debe proporcionar el nombre del servidor." });
 
                 if (!search.IdProducto.HasValue || !search.IdCartera.HasValue)
                     return BadRequest(new { error = "Debe proporcionar IdProducto y IdCartera." });
 
-                // Aquí puedes decidir esContar y esCuentas según la lógica de tu front
+                // Validar concepto si se proporciona
+                string concepto = string.IsNullOrWhiteSpace(search.Concepto) ? "Teléfonos" : search.Concepto;
+
+                var conceptosValidos = new[] { "Teléfonos", "Gestiones", "Negociaciones", "Seguimientos", "Chats" };
+                if (!conceptosValidos.Contains(concepto))
+                {
+                    return BadRequest(new
+                    {
+                        error = $"El concepto '{concepto}' no es válido. Debe ser uno de: {string.Join(", ", conceptosValidos)}"
+                    });
+                }
+
+                // Determinar tipo de resultado
                 bool esDetalle = search.EsDetalleResultado;
-                bool esCuentas = search.EsCuentasResultado;  // si tienes esta propiedad en el DTO
-                bool esContar = search.EsContarResultado;    // idem
+                bool esCuentas = search.EsCuentasResultado;
+                bool esContar = search.EsContarResultado;
 
                 var result = await _generalesDao.RealizaBusqueda(
                     search.Servidor!,
@@ -107,6 +121,7 @@ namespace Loki.Mark.Consulta.Generales.Controllers
                     esContar,
                     esCuentas,
                     esDetalle,
+                    concepto,  // Nuevo parámetro
                     search.IdConsulta,
                     search.ParametrosExtra,
                     search.AgrupamientoExtra
@@ -116,11 +131,9 @@ namespace Loki.Mark.Consulta.Generales.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace });
             }
         }
-
-
 
     }
 }
