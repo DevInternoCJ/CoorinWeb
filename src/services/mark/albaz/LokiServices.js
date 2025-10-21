@@ -44,9 +44,6 @@ export const UpdatePassword = async (passwordData) => {
     // Verificar que el token existe antes de proceder
     const token = localStorage.getItem('token');
     
-    if (!token) {
-      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
-    }
     console.log('📤 Enviando a /Auth/restablecer-contrasenia:', passwordData);
     console.log('🔑 Token disponible:', token);
     // ✅ DEJA QUE EL INTERCEPTOR AÑADA EL TOKEN AUTOMÁTICAMENTE

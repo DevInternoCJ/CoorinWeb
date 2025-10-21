@@ -1,4 +1,3 @@
-// src/components/changePassword/ChangePassword.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import { EyeOpen, ArrowSync, LockSync } from "./PasswordIcons";
 import PASSWORD_REQUIREMENTS from "./Validations";
@@ -6,16 +5,31 @@ import ButtonLogin from "../ButtonLogin";
 import EyeClose from "../../../assets/eye-close.svg";
 import { UpdatePassword } from "../../../services/mark/albaz/LokiServices";
 import { useUserStore } from "../../../contextGlobal/userStore";
+import { toast } from "sonner";
 
-const ChangePassword = ({ onClose }) => {
+const ChangePassword = ({ onClose, contraActual, username, passwordData }) => {
   const user = useUserStore((state) => state.user);
+  
+  // ✅ MODIFICADO: Usar directamente los props que vienen de LoginCard
+  const currentUsername = username;
+  const currentContraActual = contraActual;
+  
+  console.log("🔍 ChangePassword - Datos recibidos:", {
+    contraActual: currentContraActual ? `✅ "${currentContraActual}" (${currentContraActual.length} chars)` : "❌ UNDEFINED",
+    username: currentUsername || "❌ UNDEFINED",
+    passwordData: passwordData,
+    userFromStore: user
+  });
+
+  // Estados para los dos campos de contraseña (solo nueva y confirmar)
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  
+  // Estados de visibilidad
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
   const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState("");
-  const [username, setUsername] = useState(""); // Estado para el username
 
   // Estado de errores
   const [errors, setErrors] = useState({
@@ -26,13 +40,6 @@ const ChangePassword = ({ onClose }) => {
     symbolError: false,
     matchError: false,
   });
-
-  // Obtener el username del localStorage al cargar el componente
- useEffect(() => {
-    if (user && user.usuario) {
-      setUsername(user.usuario);
-    }
-  }, [user]);
 
   // Validación de contraseña
   const validatePassword = useCallback((pwd, confirmPwd) => {
@@ -60,49 +67,110 @@ const ChangePassword = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // ✅ MODIFICADO: Validar que tengamos la contraseña actual de los props
+    if (!currentContraActual) {
+      toast.error("No se encontró la contraseña actual. Por favor, inicia sesión nuevamente.");
+      console.error("❌ Error: contraActual no disponible en props:", {
+        contraActual: currentContraActual,
+        username: currentUsername,
+        passwordData
+      });
+      return;
+    }
+
+    if (!currentUsername) {
+      toast.error("No se pudo identificar el usuario. Por favor, inicia sesión nuevamente.");
+      return;
+    }
+
     validatePassword(newPassword, confirmPassword);
 
     // Verificar si hay errores de validación
     const hasError = Object.values(errors).some(Boolean);
     if (hasError) {
-      console.log(
-        "Errores de validación. No se puede actualizar la contraseña."
-      );
+      toast.error("Por favor, corrige los errores de validación");
       return;
     }
 
-    // Si no hay errores, proceder con el cambio de contraseña
     setLoading(true);
-    setApiError("");
 
     try {
-      // Obtener datos del usuario desde localStorage
-      if (!username) {
-        throw new Error("No se pudo obtener el usuario");
-      }
-
-      // Llamar al endpoint UpdatePassword con el username
-      const response = await UpdatePassword({
-        usuario: username, // Usar el username obtenido
-        servidor: "Thor",
+      console.log("📤 Enviando solicitud de cambio de contraseña:", {
+        usuario: currentUsername,
+        contraActual: currentContraActual ? "✅ PRESENTE" : "❌ AUSENTE",
         nuevaContra: newPassword,
-        contra: confirmPassword,
+        servidor: "Albaz"
       });
 
-      console.log("Contraseña actualizada exitosamente:", response);
+      // Llamar al endpoint UpdatePassword
+      const response = await UpdatePassword({
+        usuario: currentUsername,
+        servidor: "Albaz",
+        nuevaContra: newPassword, // ✅ La nueva contraseña
+        contra: currentContraActual, // ✅ La contraseña con la que intentó hacer login (de los props)
+      });
 
-      // Mostrar mensaje de éxito y cerrar el modal
-      alert("Contraseña actualizada exitosamente");
+      console.log("✅ Respuesta de actualización exitosa:", response);
+      toast.success("Contraseña actualizada exitosamente");
+      
+      // Limpiar los campos
+      setNewPassword("");
+      setConfirmPassword("");
+      
+      // ✅ MODIFICADO: Limpiar la contraseña temporal del store por seguridad
+      const clearUser = useUserStore.getState().setUser;
+      clearUser({
+        ...user,
+        contraActual: undefined
+      });
+      
+      // ✅ MODIFICADO: Limpiar del localStorage de manera más completa
+      try {
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        delete userData.contraActual;
+        localStorage.setItem('userData', JSON.stringify(userData));
+        
+        // También limpiar username temporal si existe
+        localStorage.removeItem('tempUsername');
+      } catch (error) {
+        console.error("Error limpiando localStorage:", error);
+      }
+      
+      console.log("✅ Cambio de contraseña completado, cerrando modal...");
       onClose();
+      
     } catch (error) {
-      console.error("Error al cambiar la contraseña:", error);
-      setApiError(
-        error.message || "Error al cambiar la contraseña. Intenta nuevamente."
-      );
+      console.error("❌ Error al cambiar la contraseña:", error);
+      
+      let errorMessage = "Error al cambiar la contraseña. Intenta nuevamente.";
+
+      if (error.response && error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
+
+  // ✅ NUEVO: Efecto para debug adicional cuando se monta el componente
+  useEffect(() => {
+    console.log("🚀 ChangePassword montado con los siguientes datos:", {
+      props: {
+        contraActual: contraActual ? `✅ "${contraActual}"` : "❌ NO RECIBIDA",
+        username: username || "❌ NO RECIBIDO", 
+        passwordData: passwordData
+      },
+      derived: {
+        currentUsername,
+        currentContraActual: currentContraActual ? "✅ DISPONIBLE" : "❌ NO DISPONIBLE"
+      }
+    });
+  }, [contraActual, username, passwordData, currentUsername, currentContraActual]);
 
   return (
     <div className="flex flex-col justify-center items-center p-6 w-full">
@@ -126,13 +194,38 @@ const ChangePassword = ({ onClose }) => {
         </button>
       </div>
 
+      {/* ✅ NUEVO: Panel de información de debug */}
+      {!currentContraActual && (
+        <div className="bg-yellow-100 border border-yellow-400 p-3 rounded-lg mb-4 w-full">
+          <p className="text-yellow-800 font-bold">⚠️ Advertencia</p>
+          <p className="text-yellow-700 text-sm">
+            No se recibió la contraseña actual. Esto puede causar errores al actualizar.
+          </p>
+          <details className="mt-2">
+            <summary className="text-yellow-700 text-sm cursor-pointer">
+              Ver detalles técnicos
+            </summary>
+            <pre className="text-xs mt-2 bg-yellow-50 p-2 rounded">
+              {JSON.stringify({
+                contraActual: currentContraActual,
+                username: currentUsername,
+                propsReceived: { contraActual, username, passwordData },
+                userFromStore: user
+              }, null, 2)}
+            </pre>
+          </details>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="w-full">
         <div className="modal-body">
+          {/* Campo oculto para username (accesibilidad) */}
           <input
             type="text"
             name="username"
             id="username-hidden"
             autoComplete="username"
+            value={currentUsername || ""}
             className="hidden"
             aria-hidden="true"
             tabIndex="-1"
@@ -145,7 +238,7 @@ const ChangePassword = ({ onClose }) => {
               <input
                 type={showNewPassword ? "text" : "password"}
                 placeholder=""
-                className={`w-full pl-3 pr-10 text-neutral-900 py-2 text-sm bg-neutral-100 rounded-lg border focus:ring-2 focus:ring-jerarquia2 focus:outline-none ${
+                className={`peer w-full pl-3 pr-10 text-neutral-900 py-2 text-sm bg-neutral-100 rounded-lg border focus:ring-2 focus:ring-jerarquia2 focus:outline-none ${
                   newPassword.length > 0 &&
                   (errors.minLengthError ||
                     errors.uppercaseError ||
@@ -154,7 +247,7 @@ const ChangePassword = ({ onClose }) => {
                     errors.symbolError)
                     ? "border-red-500 focus:border-red-500"
                     : "border-jerarquia2 focus:border-jerarquia2"
-                }`}
+                } focus:pt-3 focus:pb-1 not-placeholder-shown:pt-3 not-placeholder-shown:pb-1 autofill:pt-3 autofill:pb-1`}
                 value={newPassword}
                 onChange={handleNewPasswordChange}
                 maxLength={50}
@@ -164,8 +257,8 @@ const ChangePassword = ({ onClose }) => {
                 disabled={loading}
               />
               <label
-                className="input-floating-label block text-sm font-medium text-neutral-500"
                 htmlFor="new-password-floating"
+                className="absolute top-0 start-0 p-2 h-full sm:text-sm truncate pointer-events-none transition ease-in-out duration-100 origin-[0_0] peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:scale-90 peer-focus:translate-x-0.5 peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-not-placeholder-shown:scale-90 peer-not-placeholder-shown:translate-x-0.5 peer-not-placeholder-shown:-translate-y-3 peer-not-placeholder-shown:text-gray-500"
               >
                 Nueva Contraseña
               </label>
@@ -191,11 +284,11 @@ const ChangePassword = ({ onClose }) => {
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder=""
-                className={`w-full pl-3 pr-10 text-neutral-900 py-2 text-sm bg-neutral-100 rounded-lg border focus:ring-2 focus:ring-jerarquia2 focus:outline-none ${
+                className={`peer w-full pl-3 pr-10 text-neutral-900 py-2 text-sm bg-neutral-100 rounded-lg border focus:ring-2 focus:ring-jerarquia2 focus:outline-none ${
                   confirmPassword.length > 0 && errors.matchError
                     ? "border-red-500 focus:border-red-500"
                     : "border-jerarquia2 focus:border-jerarquia2"
-                }`}
+                } focus:pt-3 focus:pb-1 not-placeholder-shown:pt-3 not-placeholder-shown:pb-1 autofill:pt-3 autofill:pb-1`}
                 value={confirmPassword}
                 onChange={handleConfirmPasswordChange}
                 maxLength={50}
@@ -205,8 +298,8 @@ const ChangePassword = ({ onClose }) => {
                 disabled={loading}
               />
               <label
-                className="input-floating-label ms-2 block text-sm font-medium text-neutral-500"
                 htmlFor="confirm-password-floating"
+                className="absolute top-0 start-0 p-2 h-full sm:text-sm truncate pointer-events-none transition ease-in-out duration-100 origin-[0_0] peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:scale-90 peer-focus:translate-x-0.5 peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-not-placeholder-shown:scale-90 peer-not-placeholder-shown:translate-x-0.5 peer-not-placeholder-shown:-translate-y-3 peer-not-placeholder-shown:text-gray-500"
               >
                 Confirmar Contraseña
               </label>
@@ -225,13 +318,6 @@ const ChangePassword = ({ onClose }) => {
               </button>
             </div>
           </div>
-
-          {/* Mostrar error de API si existe */}
-          {apiError && (
-            <div className="text-red-500 text-sm mb-4 p-2 bg-red-50 rounded-lg">
-              {apiError}
-            </div>
-          )}
 
           {/* Requisitos de la contraseña */}
           <div className="bg-jerarquia1 p-4 rounded-3xl mt-4">
@@ -261,8 +347,14 @@ const ChangePassword = ({ onClose }) => {
             </ul>
           </div>
         </div>
+        
         <div className="modal-footer mt-6">
-          <ButtonLogin type="submit" loading={loading} disabled={loading}>
+          <ButtonLogin 
+            type="submit" 
+            loading={loading} 
+            disabled={loading || !currentContraActual}
+            title={!currentContraActual ? "No se puede actualizar: contraseña actual no disponible" : ""}
+          >
             {loading ? "Actualizando..." : "Actualizar"}{" "}
             <span>
               <LockSync className="size-4 rotate-40 hover:rotate-220 inline ml-2" />
@@ -273,4 +365,5 @@ const ChangePassword = ({ onClose }) => {
     </div>
   );
 };
+
 export default ChangePassword;

@@ -1,4 +1,3 @@
-// src/components/LoginCard.jsx
 import React, { useState, useEffect} from "react";
 import LogoCoorin7 from "../../assets/logo_coorin_7.svg";
 import LogicCard from "./LogicCard";
@@ -7,7 +6,6 @@ import PasswordChangeContent from "./changePassword/PasswordChangeContent";
 import ChangePassword from "./changePassword/ChangePassword";
 
 const LoginCard = ({
-
   logo = LogoCoorin7,
   formComponent = null,
   children
@@ -15,6 +13,7 @@ const LoginCard = ({
   const [showPasswordContent, setShowPasswordContent] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [diasRestantes, setDiasRestantes] = useState(null);
+  const [passwordExpiredData, setPasswordExpiredData] = useState(null);
 
   useEffect(() => {
     // Obtener los días del localStorage
@@ -25,15 +24,37 @@ const LoginCard = ({
     }
   }, []);
 
-  // Función que se ejecuta cuando el login es exitoso
-  const handleLoginSuccess = () => {
-    // Aquí deberías verificar si la contraseña está por expirar
-    // Por ahora lo mostramos directamente para probar
-    setShowPasswordContent(true);
-  };
+  // ✅ CORREGIDO: Función mejorada con más debug y manejo de estado
+  // ✅ MODIFICADO: Recibir datos de contraseña expirada  
+const handlePasswordExpired = (data) => {
+  console.log("🔐 Contraseña expirada con datos:", data);
+  setPasswordExpiredData(data);
+  setDiasRestantes(data.diasRestantes);
+  setShowPasswordContent(false);
+  setShowChangePassword(true); // ✅ Mostrar directamente ChangePassword
+};
 
-  // Función para manejar el click en "Sí"
+  // ✅ MODIFICADO: Recibir datos del login exitoso
+const handleLoginSuccess = (data) => {
+  console.log("✅ Login exitoso con datos:", data);
+  setPasswordExpiredData(data); // ✅ Guardar datos para ChangePassword
+  setDiasRestantes(data.diasRestantes);
+  setShowPasswordContent(true); // ✅ Mostrar opción de cambio
+};
+
+  // Función para manejar el click en "Sí" en PasswordChangeContent
   const handleAcceptPasswordChange = () => {
+    console.log("✅ Usuario aceptó cambiar contraseña. Datos disponibles:", {
+      passwordExpiredData,
+      tieneContraActual: passwordExpiredData?.contraActual ? "✅ SÍ" : "❌ NO",
+      usuario: passwordExpiredData?.username
+    });
+    
+    if (!passwordExpiredData) {
+      console.error("❌ ERROR: No hay passwordExpiredData para cambiar contraseña");
+      return;
+    }
+    
     setShowPasswordContent(false);
     setShowChangePassword(true);
   };
@@ -41,17 +62,40 @@ const LoginCard = ({
   // Función para cerrar PasswordChangeContent
   const handleClosePasswordContent = () => {
     setShowPasswordContent(false);
+    setPasswordExpiredData(null);
   };
 
   // Función para cerrar ChangePassword
   const handleCloseChangePassword = () => {
     setShowChangePassword(false);
+    setPasswordExpiredData(null);
+    setDiasRestantes(null);
   };
 
+  // ✅ NUEVO: useEffect para debug del estado
+  useEffect(() => {
+    console.log("🔄 LoginCard - Estado actualizado:", {
+      showPasswordContent,
+      showChangePassword,
+      passwordExpiredData: passwordExpiredData ? {
+        username: passwordExpiredData.username,
+        contraActual: passwordExpiredData.contraActual ? "✅ PRESENTE" : "❌ AUSENTE",
+        diasRestantes: passwordExpiredData.diasRestantes
+      } : "❌ NULL",
+      diasRestantes
+    });
+  }, [showPasswordContent, showChangePassword, passwordExpiredData, diasRestantes]);
+
   const defaultContent = formComponent ? (
-    React.createElement(formComponent, { onLoginSuccess: handleLoginSuccess })
+    React.createElement(formComponent, { 
+      onLoginSuccess: handleLoginSuccess,
+      onPasswordExpired: handlePasswordExpired // ✅ Pasar el callback
+    })
   ) : (
-    <LoginForm onLoginSuccess={handleLoginSuccess} />
+    <LoginForm 
+      onLoginSuccess={handleLoginSuccess} 
+      onPasswordExpired={handlePasswordExpired} // ✅ Pasar el callback
+    />
   );
 
   return (
@@ -84,13 +128,25 @@ const LoginCard = ({
             <PasswordChangeContent 
               onClose={handleClosePasswordContent}
               onAccept={handleAcceptPasswordChange}
-              dias={diasRestantes || "_"} // Valor por defecto por si no hay datos
+              dias={diasRestantes || 0}
             />
           ) : showChangePassword ? (
-            <ChangePassword 
-              onClose={handleCloseChangePassword} 
-              show={true} 
-            />
+            <>
+              
+              {/* ✅ RENDER CONDICIONAL BASADO EN DATOS */}
+              {passwordExpiredData && passwordExpiredData.contraActual ? (
+                <ChangePassword 
+                  onClose={handleCloseChangePassword} 
+                  show={true}
+                  contraActual={passwordExpiredData.contraActual}
+                  username={passwordExpiredData.username}
+                  passwordData={passwordExpiredData}
+                />
+              ) : (
+                <div>
+                </div>
+              )}
+            </>
           ) : (
             children || defaultContent
           )}
@@ -99,4 +155,5 @@ const LoginCard = ({
     </div>
   );
 };
+
 export default LoginCard;

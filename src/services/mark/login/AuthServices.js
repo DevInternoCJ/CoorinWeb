@@ -13,7 +13,7 @@ export const loginUser = async (userData) => {
       dominio: "CONJUR",
       computadora: "Coorin",
       usuarioWindows: userData.usuarioWindows,
-      ip: API_URL,
+      ip: "192.168.7.116",
       aplicacion: "Coorin",
       version: "3.4.2",
       servidor: "Albaz"

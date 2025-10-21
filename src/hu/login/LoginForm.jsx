@@ -6,6 +6,7 @@ import { loginUser } from "../../services/mark/login/AuthServices";
 import ButtonLogin from "./ButtonLogin";
 import { LoginUser, LoginKey } from "./LoginIcons";
 import { useUserStore } from "../../contextGlobal/userStore";
+
 // Constantes para mensajes de error
 const ERROR_MESSAGES = {
   PASSWORD_LENGTH: "La contraseña debe tener al menos 8 caracteres.",
@@ -15,6 +16,7 @@ const ERROR_MESSAGES = {
     "Error al validar la contraseña. Por favor, contacta al administrador.",
   LOGIN_ERROR: "Error al iniciar sesión. Verifica tus credenciales.",
 };
+
 // Componente InputField separado (fuera de LoginForm)
 const InputField = ({
   icon: Icon,
@@ -64,7 +66,7 @@ const InputField = ({
   </div>
 );
 
-const LoginForm = ({ onLoginSuccess }) => {
+const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
   const setUser = useUserStore((state) => state.setUser);
   const [formData, setFormData] = useState({
     username: "",
@@ -146,80 +148,205 @@ const LoginForm = ({ onLoginSuccess }) => {
     [saveUserData]
   );
 
-  // Handler principal de submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (passwordError) {
-      toast.error(passwordError);
-      return;
-    }
-    if (!formData.username || !formData.password) {
-      toast.error(ERROR_MESSAGES.REQUIRED_FIELDS);
-      return;
-    }
-    setLoading(true);
-    setApiError("");
-    const userData = {
-      usuario: formData.username,
-      contrasenia: formData.password,
-      usuarioWindows: formData.username,
-    };
-    try {
-      const response = await loginUser(userData);
-      console.log("Respuesta de inicio de sesión exitosa:", response);
-      const idEjecutivo = extractIdEjecutivo(response);
-      localStorage.setItem("username", formData.username);
-      const userInfo = response?.ejecutivo || response;
+// Handler principal de submit
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (passwordError) {
+    toast.error(passwordError);
+    return;
+  }
+  if (!formData.username || !formData.password) {
+    toast.error(ERROR_MESSAGES.REQUIRED_FIELDS);
+    return;
+  }
+  setLoading(true);
+  setApiError("");
+  const userData = {
+    usuario: formData.username,
+    contrasenia: formData.password,
+    usuarioWindows: formData.username,
+  };
+  
+  try {
+    const response = await loginUser(userData);
+    console.log("Respuesta de inicio de sesión exitosa:", response);
+    const idEjecutivo = extractIdEjecutivo(response);
+    localStorage.setItem("username", formData.username);
+    const userInfo = response?.ejecutivo || response;
 
-      setUser({
-        idEjecutivo: userInfo.idEjecutivo,
-        usuario: userInfo.Usuario,
-        nombre: userInfo.NombreEjecutivo,
-        dias: userInfo.Días,
-        Jerarquía: userInfo.Jerarquía,
-        token: userInfo.Token,
-        idCartera: userInfo.idCartera,
-        idSucursal: userInfo.idSucursal,
-        idArea: userInfo.idÁrea,
-        Extensión: userInfo.Extensión,
-        Encargado: userInfo.Encargado,
-        idEncargado: userInfo.idEncargado,
-        idLogIngreso: userInfo.idLogIngreso,
-        idProducto: userInfo.idProducto,
-        Segmento: userInfo.Segmento,
-      });
-      console.log("Datos guardados en store:", {
-        estructura: userInfo
-      });
-      try {
-        const passwordValidation = await ValidatePassword(
-          { contrasenia: formData.password, servidor: "Thor" },
-          idEjecutivo
-        );
-        console.log(
-          "Respuesta de validación de contraseña:",
-          passwordValidation
-        );
+    // ✅ GUARDAR DATOS COMPLETOS EN STORE Y LOCALSTORAGE
+    const userStoreData = {
+      idEjecutivo: userInfo.idEjecutivo,
+      usuario: formData.username,
+      nombre: userInfo.NombreEjecutivo,
+      dias: userInfo.Días,
+      Jerarquía: userInfo.Jerarquía,
+      token: userInfo.Token,
+      idCartera: userInfo.idCartera,
+      idSucursal: userInfo.idSucursal,
+      idArea: userInfo.idÁrea,
+      Extensión: userInfo.Extensión,
+      Encargado: userInfo.Encargado,
+      idEncargado: userInfo.idEncargado,
+      idLogIngreso: userInfo.idLogIngreso,
+      idProducto: userInfo.idProducto,
+      Segmento: userInfo.Segmento,
+      // ✅ NUEVO: Guardar también la contraseña actual temporalmente
+      contraActual: formData.password
+    };
+
+    setUser(userStoreData);
+    
+    // ✅ GUARDAR EN LOCALSTORAGE CON CONTRASEÑA ACTUAL
+    const localStorageData = {
+      ...userStoreData,
+      contraActual: formData.password // ✅ Guardar para ChangePassword
+    };
+    localStorage.setItem("userData", JSON.stringify(localStorageData));
+    
+    console.log("Datos guardados en store y localStorage:", userStoreData);
+
+    try {
+      const passwordValidation = await ValidatePassword(
+        { contrasenia: formData.password, servidor: "Thor" },
+        idEjecutivo
+      );
+      console.log("Respuesta de validación de contraseña:", passwordValidation);
+
+      // ✅ DETECTAR SI LA CONTRASEÑA ESTÁ PRÓXIMA A EXPIRAR (pero aún es válida)
+      const diasRestantes = userInfo.Días;
+      console.log("🔍 Días restantes para expirar:", diasRestantes);
+
+      // ✅ CONDICIÓN MODIFICADA: Mostrar PasswordChangeContent si:
+      // 1. La contraseña expiró (días <= 0) O 
+      // 2. La contraseña está próxima a expirar (días < 30) Y es cambio opcional
+      if (diasRestantes <= 0) {
+        console.log("🚨 CONTRASEÑA EXPIRADA - Cambio obligatorio");
+        // ✅ Para contraseña expirada, usar onPasswordExpired para flujo directo a ChangePassword
+        if (onPasswordExpired && typeof onPasswordExpired === 'function') {
+          const expiredData = {
+            diasRestantes: diasRestantes,
+            username: formData.username,
+            contraActual: formData.password,
+            esExpirada: true
+          };
+          console.log("📤 Ejecutando onPasswordExpired (contraseña expirada):", expiredData);
+          onPasswordExpired(expiredData);
+        }
+      } else if (diasRestantes < 30) {
+        console.log("⚠️  CONTRASEÑA PRÓXIMA A EXPIRAR - Cambio recomendado");
+        // ✅ Para contraseña próxima a expirar, usar onLoginSuccess para mostrar opción
+        if (onLoginSuccess && typeof onLoginSuccess === 'function') {
+          const successData = {
+            diasRestantes: diasRestantes,
+            username: formData.username,
+            contraActual: formData.password,
+            esExpirada: false
+          };
+          console.log("📤 Ejecutando onLoginSuccess (cambio opcional):", successData);
+          onLoginSuccess(successData);
+        }
+      } else {
+        console.log("✅ CONTRASEÑA VÁLIDA - Login normal");
+        // ✅ Contraseña válida con muchos días restantes - login normal
         processSuccessfulLogin(
           response,
           passwordValidation,
-          onLoginSuccess,
+          () => {
+            // Callback vacío para no mostrar PasswordChangeContent
+            console.log("✅ Login exitoso, redirigiendo al dashboard");
+            navigate("/dashboardPage");
+          },
           navigate
         );
-      } catch (validationError) {
-        handlePasswordValidationError(validationError, onLoginSuccess);
       }
-    } catch (error) {
-      console.error("Error en inicio de sesión:", error);
-      const errorMessage =
-        error.response?.data?.loginResult?.Mensaje ||
-        ERROR_MESSAGES.LOGIN_ERROR;
+
+    } catch (validationError) {
+      console.error("Error en validación de contraseña:", validationError);
+      handlePasswordValidationError(validationError, onLoginSuccess);
+    }
+  } catch (error) {
+    console.error("❌ Error en el inicio de sesión:", error);
+    
+    // 🔥 DETECTAR CONTRASEÑA EXPIRADA (error 400 del servidor)
+    if (error.response?.status === 400 && 
+        error.response?.data?.loginResult?.Expiró === 1) {
+      
+      const diasRestantes = error.response?.data?.loginResult?.Días || 0;
+      const mensaje = error.response?.data?.loginResult?.Mensaje || "Su contraseña expiró y debe renovarla.";
+      
+      console.log("🔐 CONTRASEÑA EXPIRADA DETECTADA (error 400):", {
+        expiró: error.response.data.loginResult.Expiró,
+        mensaje,
+        días: diasRestantes,
+        usuario: formData.username,
+        contraActual: formData.password
+      });
+
+      // ✅ LIMPIAR Y GUARDAR DATOS TEMPORALES
+      localStorage.removeItem('userData');
+      
+      const tempUserData = {
+        dias: diasRestantes,
+        usuario: formData.username,
+        contraActual: formData.password,
+        mensaje: mensaje,
+        esExpirada: true
+      };
+      localStorage.setItem("userData", JSON.stringify(tempUserData));
+      
+      // ✅ GUARDAR EN STORE
+      setUser({
+        usuario: formData.username,
+        contraActual: formData.password,
+        dias: diasRestantes,
+        esExpirada: true
+      });
+      
+      // ✅ MOSTRAR TOAST INFORMATIVO
+      toast.warning(mensaje, { duration: 5000 });
+      
+      // ✅ EJECUTAR CALLBACK PARA CAMBIO OBLIGATORIO
+      if (onPasswordExpired && typeof onPasswordExpired === 'function') {
+        const dataToSend = {
+          diasRestantes: diasRestantes,
+          username: formData.username,
+          contraActual: formData.password,
+          esExpirada: true
+        };
+        
+        console.log("📤 EJECUTANDO onPasswordExpired con:", dataToSend);
+        onPasswordExpired(dataToSend);
+      } else {
+        console.error("❌ onPasswordExpired no disponible");
+      }
+      
+      setLoading(false);
+      return;
+    }
+    
+    // ✅ MANEJAR OTROS ERRORES 400
+    if (error.response?.status === 400) {
+      const errorMessage = error.response?.data?.loginResult?.Mensaje || 
+                          error.response?.data?.message || 
+                          ERROR_MESSAGES.LOGIN_ERROR;
       setApiError(errorMessage);
       toast.error(errorMessage);
-    } finally {
       setLoading(false);
+      return;
     }
-  };
+    
+    // ✅ MANEJO DE ERRORES GENÉRICOS
+    const errorMessage =
+      error.response?.data?.loginResult?.Mensaje ||
+      error.response?.data?.message ||
+      ERROR_MESSAGES.LOGIN_ERROR;
+    setApiError(errorMessage);
+    toast.error(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <form onSubmit={handleSubmit} className="lg:w-full px-6 text-neutral-900 ">
@@ -273,4 +400,5 @@ const LoginForm = ({ onLoginSuccess }) => {
     </form>
   );
 };
+
 export default LoginForm;
