@@ -6,8 +6,9 @@ import { IconHistoricos } from "../IconesConsultations";
 const HistoricosModal = ({ 
     isOpen, 
     onClose,
-    enableBounce = true,
+    enableBounce = false,
     enableShakeOnBackdropClick = true,
+    enableBounceOnBackdropOrEscape = true,
     closeOnBackdropClick = false,
     ...props 
 }) => {
@@ -19,40 +20,7 @@ const HistoricosModal = ({
         setIsIndividual(individual);
     }, []);
 
-    // Header personalizado con estilos verdes usando DefaultModalHeader structure
-    const CustomHeader = ({ onClose }) => (
-        <div className="px-3 pt-4 pb-3 sm:px-4 sm:pt-5 sm:pb-4 md:px-6 md:pt-6 md:pb-4 
-                       bg-white border-b-2 flex items-center justify-between gap-3"
-             style={{ borderColor: "var(--color-jerarquia1)" }}>
-            {/* Sección izquierda: Ícono y título */}
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                <IconHistoricos 
-                    className="size-5 sm:size-6 flex-shrink-0"
-                    style={{ color: "var(--color-jerarquia3)" }}
-                />
-                <div className="min-w-0">
-                    <h2 className="text-base sm:text-lg md:text-xl font-bold truncate sm:whitespace-normal leading-tight"
-                        style={{ color: "var(--color-jerarquia3)" }}>
-                        Históricos - Coorin
-                    </h2>
-                </div>
-            </div>
-            
-            {/* Botón de cerrar */}
-            <div className="flex-shrink-0">
-                <button
-                    onClick={onClose}
-                    className="text-2xl sm:text-3xl font-bold leading-none hover:text-red-600 
-                             transition-colors duration-200 rounded-full w-6 h-6 sm:w-8 sm:h-8 
-                             flex items-center justify-center hover:bg-gray-100"
-                    style={{ color: "var(--color-jerarquia3)" }}
-                    aria-label="Cerrar modal"
-                >
-                    ×
-                </button>
-            </div>
-        </div>
-    );
+
 
     // Footer personalizado con mensaje dinámico
     const CustomFooter = () => {
@@ -84,13 +52,17 @@ const HistoricosModal = ({
         <ReusableModal
             isOpen={isOpen}
             onClose={onClose}
-            size="historicos" // Tamaño específico para HistoricosModal
-            headerComponent={CustomHeader}
-            footerComponent={CustomFooter}
+            size="historicos"
             showHeader={true}
+            title="Históricos - Coorin"
+            icon={IconHistoricos}
+            iconClassName="text-jerarquia3"
+            headerProps={{ titleClassName: "text-jerarquia3" }}
+            footerComponent={CustomFooter}
             showFooter={true}
             enableBounce={enableBounce}
             enableShakeOnBackdropClick={enableShakeOnBackdropClick}
+            enableBounceOnBackdropOrEscape={enableBounceOnBackdropOrEscape}
             closeOnBackdropClick={closeOnBackdropClick}
             contentClassName="flex flex-col gap-4 h-full !overflow-hidden"
             modalClassName="border-0 shadow-2xl h-[60vh] overflow-hidden"
@@ -103,29 +75,7 @@ const HistoricosModal = ({
                 />
             </div>
 
-            {/* Agregar estilos específicos del modal de históricos */}
-            <style jsx global>{`
-                /* Scroll personalizado para el contenido del modal históricos */
-                .scrollbar-gray {
-                  overflow-y: auto !important;
-                  overflow-x: hidden !important;
-                  max-height: 50vh !important;
-                  height: 50vh !important;
-                }
-                
-                .scrollbar-gray::-webkit-scrollbar {
-                  height: 8px;
-                  width: 8px;
-                  background: #f5f5f5;
-                }
-                .scrollbar-gray::-webkit-scrollbar-thumb {
-                  background: #b0b0b0;
-                  border-radius: 4px;
-                }
-                .scrollbar-gray::-webkit-scrollbar-thumb:hover {
-                  background: #888;
-                }
-            `}</style>
+                        {/* ...existing code... */}
         </ReusableModal>
     );
 };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
-import { CreatedTableTempFilas, infoEjecutivo, CargarFilasConsulta, campainghInCharge } from "../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo, CargarFilasConsulta, campainghInCharge, sendArchiveCampanias } from "../../../../services/mark/albaz/LokiServices";
 
 const ModalFilasCampañas = ({
   open,
@@ -405,12 +405,86 @@ const ModalFilasCampañas = ({
       return;
     }
 
+    // Obtener idCartera
+    const idCartera = getIdCartera();
+
+    // Obtener el archivo original del input
+    const fileInput = document.querySelector('input[type="file"][accept=".csv,.xlsx"]');
+    const archivo = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+    if (!archivo) {
+      toast.error("No se encontró el archivo seleccionado.");
+      return;
+    }
+
     setLoading(true);
     try {
-      await CreatedTableTempFilas(idCampaña);
-      toast.success("Tabla temporal creada correctamente.");
+      // Construir el body para el endpoint
+      const body = {
+        Archivo: archivo,
+        IdCampania: idCampaña,
+        IdCartera: idCartera
+      };
+      const response = await sendArchiveCampanias(body);
+      // Esperamos respuesta tipo { mensaje, totalRegistros }
+      if (response && response.data) {
+        // Si la respuesta es un arraybuffer, intentar parsear a JSON
+        let data = response.data;
+        if (response.config && response.config.responseType === 'arraybuffer') {
+          try {
+            const decoder = new TextDecoder('utf-8');
+            const text = decoder.decode(new Uint8Array(data));
+            data = JSON.parse(text);
+          } catch (e) {
+            // Si falla el parseo, mostrar error genérico
+            toast.error("No se pudo procesar la respuesta del servidor.", e);
+            setMensajeCarga("");
+            setFilasCargadas(0);
+            return;
+          }
+        }
+        // Construir mensaje de éxito y, si corresponde, agregar el conteo de filas
+        const total = data.totalRegistros || 0;
+        let serverMsg = (data.mensaje || "Carga exitosa").toString();
+        // Si el servidor reporta el mensaje de procesamiento estándar, mostrar sólo el conteo de filas
+        if (/carga filas procesadas correctamente/i.test(serverMsg)) {
+          serverMsg = `Se cargaron ${total} filas.`;
+        }
+        toast.success(serverMsg);
+        setMensajeCarga(serverMsg);
+        setFilasCargadas(total);
+        // Si hay callback de éxito, ejecutarlo para actualizar campañas
+        if (typeof onSuccess === 'function') {
+          setTimeout(async () => {
+            try {
+              await onSuccess();
+            } catch (refreshError) {
+              console.error("Error al actualizar campañas tras carga de archivo:", refreshError);
+            }
+          }, 0); // pequeño delay para UX
+        }
+      } else {
+        toast.error("No se recibió respuesta válida del servidor.");
+        setMensajeCarga("");
+        setFilasCargadas(0);
+      }
     } catch (err) {
-      toast.error("Error al crear la tabla temporal de filas.", err);
+      let errorMsg = "Error al cargar filas.";
+      if (err.response && err.response.data) {
+        try {
+          // Si es arraybuffer, intentar parsear
+          const decoder = new TextDecoder('utf-8');
+          const text = decoder.decode(new Uint8Array(err.response.data));
+          const data = JSON.parse(text);
+          errorMsg = data.mensaje || errorMsg;
+        } catch (e) {
+          // Si falla el parseo, usar mensaje genérico
+        }
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+      toast.error(errorMsg);
+      setMensajeCarga(errorMsg);
+      setFilasCargadas(0);
     } finally {
       setLoading(false);
     }
@@ -1102,10 +1176,10 @@ const ModalFilasCampañas = ({
             fontWeight: !formatoValido && fileRows.length > 0 ? "600" : "normal",
           }}
         >
-          {tipoFilas === "consulta" && consultaCargada && mensajeCarga 
+          {(tipoFilas === "consulta" && consultaCargada && mensajeCarga) || (fileRows.length > 0 && filasCargadas > 0 && mensajeCarga)
             ? mensajeCarga
             : fileRows.length > 0
-            ? (!formatoValido 
+            ? (!formatoValido
               ? `${mensajeValidacion || "El formato del documento es incorrecto. Los headers deben ser: Cuenta, Usuario, Teléfono"}` 
               : "Verifique la equivalencia de columnas, si es correcta presione Cargar.")
             : "Resultado"}

@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import ConsorcioLogo from "../../../../assets/logo_coorin_7.svg";
 import { darkListV2 } from "../../../../services/mark/albaz/LokiServices";
 
 const DarkListContent = () => {
@@ -133,84 +134,114 @@ const DarkListContent = () => {
     }
 
     return (
-        <div style={{ width: '100%', maxWidth: 600, margin: '0 auto', padding: '1.5rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', overflow: 'hidden', minHeight: 400, justifyContent: 'center' }}>
-            <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                {/* Radio buttons arriba del input */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 40, marginBottom: 16, width: '100%' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <input type="radio" name="tipo" value="telefono" checked={tipo === "telefono"} onChange={() => handleTipoChange("telefono")} />
-                        Teléfono
+    <div className="w-full max-w-lg mx-auto p-6 box-border flex flex-col min-h-[360px]">
+            <div className="flex flex-col w-full">
+                <div className="mb-3">
+                    <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
+                </div>
+                {/* Radio buttons abajo del logo */}
+                <div className="flex justify-center gap-6 mb-4 w-full">
+                    <label className="inline-flex items-center gap-2">
+                        <input
+                            type="radio"
+                            name="tipo"
+                            value="telefono"
+                            checked={tipo === "telefono"}
+                            onChange={() => handleTipoChange("telefono")}
+                            className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                        />
+                        <span className="text-sm text-gray-700">Teléfono</span>
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <input type="radio" name="tipo" value="cuenta" checked={tipo === "cuenta"} onChange={() => handleTipoChange("cuenta")} />
-                        Cuenta
+                    <label className="inline-flex items-center gap-2">
+                        <input
+                            type="radio"
+                            name="tipo"
+                            value="cuenta"
+                            checked={tipo === "cuenta"}
+                            onChange={() => handleTipoChange("cuenta")}
+                            className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                        />
+                        <span className="text-sm text-gray-700">Cuenta</span>
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <input type="radio" name="tipo" value="correo" checked={tipo === "correo"} onChange={() => handleTipoChange("correo")} />
-                        Correo
+                    <label className="inline-flex items-center gap-2">
+                        <input
+                            type="radio"
+                            name="tipo"
+                            value="correo"
+                            checked={tipo === "correo"}
+                            onChange={() => handleTipoChange("correo")}
+                            className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                        />
+                        <span className="text-sm text-gray-700">Correo</span>
                     </label>
                 </div>
-                <form onSubmit={handleBuscar} style={{ display: 'flex', width: '100%', gap: 12, marginBottom: 24, justifyContent: 'center', alignItems: 'center' }}>
-                    <input
-                        className="modal-dropdown-select"
-                        style={{ flex: 1, minWidth: 200, maxWidth: 350, height: 36, borderRadius: 6, border: '1px solid #bdbdbd', padding: '0 10px', fontSize: 15 }}
-                        type="text"
-                        value={valor}
-                        onChange={e => {
-                            if (tipo === "telefono") {
-                                // Solo permitir números, máximo 15
-                                const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 15);
-                                setValor(soloNumeros);
-                            } else if (tipo === "cuenta") {
-                                // Solo permitir números, máximo 16
-                                const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 16);
-                                setValor(soloNumeros);
-                            } else if (tipo === "correo") {
-                                setValor(e.target.value.toLowerCase());
-                            } else {
-                                setValor(e.target.value);
-                            }
-                        }}
-                        onPaste={e => {
-                            if (tipo === "telefono") {
-                                e.preventDefault();
-                                const pasted = e.clipboardData.getData('text');
-                                const soloNumeros = pasted.replace(/\D/g, "").slice(0, 15);
-                                setValor(soloNumeros);
-                            }
-                        }}
-                        placeholder={tipo === "telefono" ? "Teléfono" : tipo === "cuenta" ? "Cuenta" : "Correo"}
-                        disabled={loading}
-                        maxLength={tipo === "telefono" ? 15 : tipo === "cuenta" ? 16 : undefined}
-                    />
-                    <button type="submit" className="modal-btn" style={{ background: '#526581', color: '#fff', minWidth: 120, height: 36, borderRadius: 6, fontSize: 15 }} disabled={loading}>
-                        {loading ? "Buscando..." : "Buscar"}
-                    </button>
-                </form>
-                {/* Piso firme (línea divisoria) */}
-                <div style={{ width: '100%', height: 2, background: '#bdbdbd', borderRadius: 2, margin: '0 0 18px 0' }} />
-            </div>
-            {/* Mensaje de validación, ayuda o resultado, al final arriba del footer, solo si hay mensaje */}
-            {(resultado || error || ayuda) && (
-                <div style={{ width: '100%', minHeight: 36, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: '0 0 8px 0' }}>
-                    {resultado ? (
-                        <div
-                            style={{
-                                fontSize: 15,
-                                textAlign: 'center',
-                                color: resultado.enListaNegra === true ? '#d32f2f' : '#388e3c',
-                                fontWeight: 'bold'
+
+                <form onSubmit={handleBuscar} className="flex flex-col w-full gap-3 mb-6 items-center justify-center">
+                    <div className="w-full flex justify-center">
+                            <input
+                                className="block w-[500px] bg-gray-50 border border-gray-200 rounded-lg py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
+                            type="text"
+                            value={valor}
+                            onChange={e => {
+                                if (tipo === "telefono") {
+                                    const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 15);
+                                    setValor(soloNumeros);
+                                } else if (tipo === "cuenta") {
+                                    const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 16);
+                                    setValor(soloNumeros);
+                                } else if (tipo === "correo") {
+                                    setValor(e.target.value.toLowerCase());
+                                } else {
+                                    setValor(e.target.value);
+                                }
                             }}
+                            onPaste={e => {
+                                if (tipo === "telefono") {
+                                    e.preventDefault();
+                                    const pasted = e.clipboardData.getData('text');
+                                    const soloNumeros = pasted.replace(/\D/g, "").slice(0, 15);
+                                    setValor(soloNumeros);
+                                }
+                            }}
+                            placeholder={tipo === "telefono" ? "Teléfono" : tipo === "cuenta" ? "Cuenta" : "Correo"}
+                            disabled={loading}
+                            maxLength={tipo === "telefono" ? 15 : tipo === "cuenta" ? 16 : undefined}
+                        />
+                    </div>
+
+                    <div className="w-full flex justify-center">
+                        <button
+                            type="submit"
+                            className="btn-success min-w-[95px] px-4 py-2 rounded-lg text-white text-sm font-medium shadow-sm hover:brightness-95 inline-flex items-center justify-center"
+                            disabled={loading}
                         >
-                            {resultado.msg}
-                        </div>
-                    ) : error ? (
-                        <div style={{ color: 'red', fontSize: 15, textAlign: 'center', marginBottom: 2 }}>{error}</div>
-                    ) : (
-                        ayuda && <div className="modal-span-2" style={{ fontSize: 14, textAlign: 'center', color: '#526581' }}>{ayuda}</div>
-                    )}
+                            {loading ? "Buscando..." : "Buscar"}
+                        </button>
+                    </div>
+                </form>
+
+                    <div className="w-full h-0.5 bg-gray-200 rounded mb-4" />
                 </div>
-            )}
+
+                {/* Mensaje de validación o resultado (mostrados arriba); la ayuda se muestra en el footer para no rellenar espacio) */}
+                {(resultado || error) && (
+                    <div className="w-full mt-2 mb-2 flex flex-col items-center">
+                        {resultado ? (
+                            <div className={`text-sm font-semibold ${resultado.enListaNegra ? 'text-red-600' : 'text-emerald-600'}`}>
+                                {resultado.msg}
+                            </div>
+                        ) : (
+                            <div className="text-sm text-red-600">{error}</div>
+                        )}
+                    </div>
+                )}
+
+                {/* Footer-like: ayuda bajada al final */}
+                {ayuda && (
+                    <div className="mt-auto pt-8">
+                        <div className="text-sm text-gray-600">{ayuda}</div>
+                    </div>
+                )}
         </div>
     );
 }

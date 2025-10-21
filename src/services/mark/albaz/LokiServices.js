@@ -1077,46 +1077,6 @@ export const topCampaign = async ({ idCampaña }) => {
 };
 
 
-
-
-export const CreatedTableTempFilas = async (idCampaña) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
-    }
-    const NombreTabla = `FilasTemp_${idCampaña}`;
-    const payload = { NombreTabla };
-    const url = `/carteras/crea-tabla-filasTemp?idCampaña=${idCampaña}`;
-    console.log('Enviando a', url, payload);
-    // El interceptor añade el token automáticamente
-    const response = await api.post(url, payload, {
-      headers: {
-        'Accept': '*/*',
-      }
-    });
-    console.log('Respuesta de /carteras/nueva-campania:', response);
-    return response;
-  } catch (error) {
-    console.error('Error al crear tabla temporal de filas cargadas:', error);
-    if (error.response?.status === 401) {
-      console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
-    }
-    if (error.response) {
-      console.error('Datos de respuesta del error:', error.response.data);
-      console.error('Status del error:', error.response.status);
-    } else if (error.request) {
-      console.error('No se recibió respuesta del servidor:', error.request);
-    } else {
-      console.error('Error al configurar la solicitud:', error.message);
-    }
-    throw error;
-  }
-};
-
-
 export const CargaFilasExcel = async (idCampaña, idCartera) => {
   try {
     const token = localStorage.getItem('token');
@@ -1163,7 +1123,7 @@ export const UsuarioRestante = async (idCampaña) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    const url = `/carteras/Ejecutivos-en-Campaña?idCampaña=${idCampaña}`;
+    const url = `/carteras/ejecutivos-campaña?idCampaña=${idCampaña}`;
     console.log('Enviando a', url);
     // El interceptor añade el token automáticamente
     const response = await api.get(url, null, {
@@ -1171,7 +1131,7 @@ export const UsuarioRestante = async (idCampaña) => {
         'Accept': '*/*',
       }
     });
-    console.log('Respuesta de /carteras/Ejecutivos_en-Campaña:', response);
+    console.log('Respuesta de /carteras/ejecutivos-campaña:', response);
     return response;
   } catch (error) {
     console.error('Error al cargar Ejecutivos en Campaña:', error);
@@ -1884,3 +1844,343 @@ export const chargueCatalog = async (data) => {
   }
 };
 
+
+
+
+// Obtener Campañas Archivo
+export const sendArchiveCampanias = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // Construir FormData
+    const formData = new FormData();
+    // Asume que body es un objeto con las claves necesarias y el archivo
+    Object.entries(body).forEach(([key, value]) => {
+      // Solo agregar si el valor no es null o undefined
+      if (value !== null && value !== undefined) {
+        // Si el valor es un array, agregar cada elemento por separado
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v));
+        } else {
+          formData.append(key, value);
+        }
+      }
+    });
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/carteras/cargar-archivo', formData, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'multipart/form-data'
+        // No establecer Content-Type manualmente, el navegador lo gestiona automáticamente con FormData
+      },
+      responseType: 'arraybuffer' // Para recibir datos binarios correctamente
+    });
+    return response;
+  } catch (error) {
+    console.error('Error al subir campanña Archivo:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const getExportReportPayments = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/informacion/PagosReportados/consultar', body, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Respuesta de /informacion/PagosReportados/consultar:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obtener o exportar los pagos recibidos:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+
+export const getAddress = async (idCartera, idConsulta) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+  const url = `/informacion/Domicilios/consultar?idCartera=${idCartera}&idConsulta=${idConsulta}`;
+    // El interceptor añade el token automáticamente
+    const response = await api.get(url, {
+      headers: {
+        'Accept': '*/*'
+      }
+    });
+    console.log('Respuesta de', url + ':', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener Domicilios:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const getEmailsInfo = async (idCartera, idConsulta) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+  const url = `/informacion/Correos/consultar?idCartera=${idCartera}&idConsulta=${idConsulta}`;
+    // El interceptor añade el token automáticamente
+    const response = await api.get(url, {
+      headers: {
+        'Accept': '*/*'
+      }
+    });
+    console.log('Respuesta de', url + ':', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener Correos:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const getSearchesInformation = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('Enviando a /informacion/Busquedas/consultar:', body);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/informacion/Busquedas/consultar', body, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      },
+      responseType: 'blob'
+    });
+    console.log(' Respuesta de /informacion/Busquedas/consultar:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obtener busquedas', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const getOffersInformation = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('Enviando a /informacion/Ofrecimientos/consultar:', body);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/informacion/Ofrecimientos/consultar', body, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      },
+      responseType: 'blob'
+    });
+    console.log(' Respuesta de /informacion/Ofrecimientos/consultar:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obtener Ofrecimientos', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const getCommentsInformation = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('Enviando a /informacion/Comentarios/consultar:', body);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/informacion/Comentarios/consultar', body, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      },
+      responseType: 'blob'
+    });
+    console.log(' Respuesta de /informacion/Comentarios/consultar:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obtener Comentarios', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+export const getWrongsInformation = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    console.log('Enviando a /informacion/DatosErroneos/consultar:', body);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/informacion/DatosErroneos/consultar', body, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      },
+      responseType: 'blob'
+    });
+    console.log(' Respuesta de /informacion/DatosErroneos/consultar:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obtener Datos Erróneos', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const ReportEjecutives = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/reportes/ReporteEjecutivos/consultar', body, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Respuesta de /reportes/ReporteEjecutivos/consultar:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obetener Reporte de Ejecutivos:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};

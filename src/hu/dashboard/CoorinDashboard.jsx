@@ -37,16 +37,19 @@ export default function CoorinDashboard() {
   // Función para cerrar el sidebar (será pasada al CoorinSidebar)
   const [closeSidebarFn, setCloseSidebarFn] = useState(null);
 
-  // Efecto para cerrar el sidebar cuando se abran modales de las cards
+  // Mapeo directo para renderizar cada componente con su propio modal
+
+  // Estado para controlar si la tabla de Pagos reportados está visible
+  const [mostrarTablaPagosReportados, setMostrarTablaPagosReportados] = useState(false);
+  // Estado para controlar si la tabla de Domicilios está visible
+  const [mostrarTablaDomicilios, setMostrarTablaDomicilios] = useState(false);
+
+      // Efecto para cerrar el sidebar cuando se abran modales de las cards
   useEffect(() => {
     if ((executiveModalOpen || consultationModalOpen) && closeSidebarFn) {
       closeSidebarFn();
     }
   }, [executiveModalOpen, consultationModalOpen, closeSidebarFn]);
-
-  // Mapeo directo para renderizar cada componente con su propio modal
-  // Estado para controlar si la tabla de Pagos reportados está visible
-  const [mostrarTablaPagosReportados, setMostrarTablaPagosReportados] = useState(false);
 
   const renderSelectedComponent = () => {
     const closeModal = () => {
@@ -84,10 +87,22 @@ export default function CoorinDashboard() {
           );
           break;
         case "Datos Erroneos":
-          ContentComponent = WrongsContent;
+          ContentComponent = (props) => (
+            <WrongsContent
+              mostrarTabla={mostrarTablaPagosReportados}
+              setMostrarTabla={setMostrarTablaPagosReportados}
+              {...props}
+            />
+          );
           break;
         case "Domicilios":
-          ContentComponent = AddressesContent;
+          ContentComponent = (props) => (
+            <AddressesContent
+              mostrarTabla={mostrarTablaDomicilios}
+              setMostrarTabla={setMostrarTablaDomicilios}
+              {...props}
+            />
+          );
           break;
         case "Correos":
           ContentComponent = EmailsContent;
@@ -108,9 +123,13 @@ export default function CoorinDashboard() {
           ContentComponent = null;
       }
 
-      // Usar size='pagos' por default y size='pagos-xl' cuando mostrarTablaPagosReportados sea true
+      // Usar size='pagos' por default y size='pagos-xl' cuando mostrarTablaPagosReportados o mostrarTablaDomicilios sea true
       let size = undefined;
       if (selectedSidebarOption === "Pagos reportados") {
+        size = mostrarTablaPagosReportados ? "pagos-xl" : "pagos";
+      } else if (selectedSidebarOption === "Domicilios") {
+        size = mostrarTablaDomicilios ? "pagos-xl" : "pagos";
+      } else if (selectedSidebarOption === "Datos Erroneos") {
         size = mostrarTablaPagosReportados ? "pagos-xl" : "pagos";
       }
 
@@ -219,7 +238,8 @@ export default function CoorinDashboard() {
     <>
       <CoorinSidebar 
         onMenuClick={handleSidebarMenuClick}
-        isModalOpen={executiveModalOpen || consultationModalOpen}
+        // Consider any modal opened in the dashboard (cards or sidebar) as a modal open state
+        isModalOpen={executiveModalOpen || consultationModalOpen || modalSidebarOpen}
         onRegisterCloseFunction={setCloseSidebarFn}
       />
       <main className="flex-1 bg-background-dashboard h-screen relative z-0 flex flex-col overflow-hidden">
