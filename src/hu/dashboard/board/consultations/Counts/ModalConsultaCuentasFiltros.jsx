@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { IconCustomTable } from "../IconesConsultations";
 import ModalSeleccionCampania from "../ModalCamapañas/ModalSeleccionCampania";
 import IconCircular from "../../../../../components/iconos/IconCircular";
+import ConsultFilter from "../../../../../components/select/ConsultFilter";
+  import { toast } from "sonner";
 
 const DropdownArrow = () => (
     <span className="modal-dropdown-arrow">
@@ -12,54 +14,62 @@ const DropdownArrow = () => (
 );
 
 const situacionOptions = [
-    { value: "situacion1", label: "Situación 1" },
-    { value: "situacion2", label: "Situación 2" },
-    { value: "situacion3", label: "Situación 3" },
-    { value: "situacion4", label: "Situación 4" }
+    { value: "Sin información", label: "Sin información" },
+  
 ];
 
-const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions }) => {
-    const [cuenta, setCuenta] = useState("cuenta1");
-    const [situacion, setSituacion] = useState("situacion1");
+const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, idProducto, idCartera }) => {
+    const [cuenta, setCuenta] = useState("Cuenta");
+    const [selectedConsultFilter, setSelectedConsultFilter] = useState(null);
     const [operador, setOperador] = useState("=");
-    const [niegan, setNiegan] = useState("niegan1");
+    const [niegan, setNiegan] = useState("");
     const [filtros, setFiltros] = useState([]);
     const [openSeleccionCampania, setOpenSeleccionCampania] = useState(false);
-
+  
     const eliminarFiltro = (id) => {
         setFiltros(filtros.filter(filtro => filtro.id !== id));
     };
 
     const agregarFiltro = () => {
+        const campoSeleccionado = selectedConsultFilter ? selectedConsultFilter.label : "";
+        
+        // Verificar si ya existe un filtro con el mismo concepto y campo
+        const filtroExistente = filtros.find(
+            filtro => filtro.concepto === cuenta && filtro.campo === campoSeleccionado
+        );
+
+        if (filtroExistente) {
+            toast.error("Este filtro ya fue agregado");
+            return;
+        }
+
         const nuevoFiltro = {
             id: Date.now(),
             concepto: cuenta,
-            campo: situacion,
-            valores: niegan,
+            campo: campoSeleccionado,
+            valores: operador + " " + niegan,
             operador: operador
         };
         setFiltros(prevFiltros => [...prevFiltros, nuevoFiltro]);
     };
 
+    // Actualizar la opción seleccionada para el componente de columnas
     React.useEffect(() => {
-        if (onGetSituacionOptions) {
-            const selectedOption = situacionOptions.find(option => option.value === situacion);
-            if (selectedOption) {
-                onGetSituacionOptions([selectedOption]); // Enviar solo la seleccionada como array
-            }
+        if (onGetSituacionOptions && selectedConsultFilter) {
+            onGetSituacionOptions([selectedConsultFilter]); // Enviar la opción seleccionada del ConsultFilter
         }
-    }, [situacion, onGetSituacionOptions]); // Actualizar cuando cambie la situación seleccionada
+    }, [selectedConsultFilter, onGetSituacionOptions]);
 
     return (
       <>
         <div
-          className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col"
+          className="bg-white rounded-lg p-3 h-full flex flex-col"
           style={{ minWidth: 0 }}
         >
           <div className="flex items-center justify-between mb-2">
             <IconCircular
               bgColor="bg-iconCircular"
-              textColor="text-gray-800"
+              textColor="text-jerarquia3"
               borderColor="border-gray-50"
               size="size-8"
               borderWidth="border-4"
@@ -124,8 +134,10 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions }) => {
                 id="cuenta-select"
               >
                 <option value="" disabled hidden></option>
-                <option value="cuenta1">Cuenta 1</option>
-                <option value="cuenta2">Cuenta 2</option>
+                <option value="Cuenta">Cuenta</option>
+                <option value="Producto">Producto</option>
+                <option value="Conteos">Conteos</option>
+                <option value="Fechas">Fechas</option>
               </select>
               <label
                 htmlFor="cuenta-select"
@@ -133,34 +145,24 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions }) => {
                             peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500
                             peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
               >
-                Cuenta
+                Filtros
               </label>
             </div>
-            {/* Situación */}
-            <div className="relative flex-1">
-              <select
-                className="peer p-4 pe-9 block w-full bg-gray-100 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
-                            focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                value={situacion}
-                onChange={(e) => setSituacion(e.target.value)}
-                id="situacion-select"
-              >
-                <option value="" disabled hidden></option>
-                {situacionOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <label
-                htmlFor="situacion-select"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
-                            peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500
-                            peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-              >
-                Situación
-              </label>
-            </div>
+            {/* Situación - Usando ConsultFilter */}
+            <ConsultFilter
+              options={situacionOptions}
+              label="Seleccione"
+              defaultValue=""
+              onSelectionChange={(selectedOption) => {
+                if (selectedOption) {
+                  setSelectedConsultFilter(selectedOption);
+                }
+              }}
+              id="situacion-select"
+              filterType={cuenta}
+              idProducto={idProducto}
+              idCartera={idCartera}
+            />
             {/* Operador */}
             <div className="relative flex-1">
               <select
@@ -226,7 +228,6 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions }) => {
                   <th>Concepto</th>
                   <th>Campo</th>
                   <th>Valores</th>
-                  <th>Operador</th>
                   <th>Borrar</th>
                 </tr>
               </thead>
@@ -234,7 +235,7 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions }) => {
                 {filtros.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="5"
+                      colSpan="4"
                       style={{
                         textAlign: "center",
                         color: "#666",
@@ -250,7 +251,6 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions }) => {
                       <td>{filtro.concepto}</td>
                       <td>{filtro.campo}</td>
                       <td>{filtro.valores}</td>
-                      <td>{filtro.operador}</td>
                       <td style={{ textAlign: "right" }}>
                         <div className="inline-flex border border-gray-200 rounded-full p-0.5">
                           <div className="hs-tooltip [--placement:left] inline-block">

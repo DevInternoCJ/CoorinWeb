@@ -8,7 +8,8 @@ const IconCircular = ({
   size = "size-8",
   borderWidth = "border-4",
   tooltip = "",
-  tooltipPlacement = "top"
+  tooltipPlacement = "top",
+  onClick
 }) => {
   const tooltipRef = useRef(null);
 
@@ -36,11 +37,12 @@ const IconCircular = ({
         style={{ '--placement': tooltipPlacement }}
       >
         <span 
-          className={`hs-tooltip-toggle modal-span-1 inline-flex justify-center items-center ${size} rounded-full ${borderWidth} ${borderColor} ${bgColor} ${textColor} cursor-pointer`}
+          className={`hs-tooltip-toggle inline-flex justify-center items-center ${size} rounded-full ${borderWidth} ${borderColor} ${bgColor} ${textColor} cursor-pointer`}
+          onClick={onClick}
         >
           {children}
           <span
-            className="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-xs font-medium text-white rounded-md shadow-sm whitespace-nowrap"
+            className="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-background-secondary text-xs font-medium text-white rounded-md shadow-sm whitespace-nowrap"
             role="tooltip"
           >
             {tooltip}
@@ -52,7 +54,8 @@ const IconCircular = ({
 
   return (
     <span 
-      className={`modal-span-1 inline-flex justify-center items-center ${size} rounded-full ${borderWidth} ${borderColor} ${bgColor} ${textColor}`}
+      className={`inline-flex justify-center items-center ${size} rounded-full ${borderWidth} ${borderColor} ${bgColor} ${textColor} ${onClick ? 'cursor-pointer' : ''}`}
+      onClick={onClick}
     >
       {children}
     </span>

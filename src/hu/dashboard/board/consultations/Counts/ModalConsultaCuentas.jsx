@@ -27,7 +27,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
                 className="scrollbar-gray"
             >
                 <div style={{ minWidth: 0, flex: 1, display: "flex", flexDirection: "column" }}>
-                    <ModalConsultaCuentasFiltros onGetSituacionOptions={handleGetSituacionOptions} />
+                    <ModalConsultaCuentasFiltros onGetSituacionOptions={handleGetSituacionOptions} idProducto={1} idCartera={1} />
                 </div>
                 <div style={{ minWidth: 0, flex: "0 0 450px", maxWidth: "450px", display: "flex", flexDirection: "column" }}>
                     <ModalConsultaCuentasColumnas situacionOptions={situacionOptions} />

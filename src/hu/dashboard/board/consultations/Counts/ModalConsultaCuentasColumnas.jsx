@@ -7,6 +7,10 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [] }) => {
     setColumnas(columnas.filter(columna => columna.id !== id));
   };
 
+  const limpiarTodasLasColumnas = () => {
+    setColumnas([]);
+  };
+
   const agregarColumna = () => {
     if (situacionOptions.length > 0) {
       // Verificar que la columna no exista ya para evitar duplicados
@@ -25,23 +29,35 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [] }) => {
 
   return (
     <div
-      className="bg-white rounded-lg p-2 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col"
+      className="bg-white rounded-lg p-2 h-full flex flex-col"
       style={{ minWidth: 0 }}
     >
       <div className="grid grid-cols-3 items-center gap-2 mb-2 w-full">
+        <div className="flex items-center gap-0">
           <IconCircular 
-              bgColor="bg-iconCircular" 
-              textColor="text-gray-800" 
-              borderColor="border-gray-50"
-              size="size-8"
-              borderWidth="border-4"
-              tooltip="Columnas"
-              tooltipPlacement="right"
-            >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="0.88em" height="1em" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96c0-35.3 28.7-64 64-64h320c35.3 0 64 28.7 64 64v320c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64zm64 64v256h128V160zm320 0H256v256h128z"/></svg>
-
-            </IconCircular>
-     
+            bgColor="bg-iconCircular" 
+            textColor="text-jerarquia3" 
+            borderColor="border-gray-50"
+            size="size-8"
+            borderWidth="border-4"
+            tooltip="Columnas"
+            tooltipPlacement="right"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="0.88em" height="1em" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96c0-35.3 28.7-64 64-64h320c35.3 0 64 28.7 64 64v320c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64zm64 64v256h128V160zm320 0H256v256h128z"/></svg>
+          </IconCircular>
+          <IconCircular 
+            bgColor="bg-[#EECCC9]" 
+            textColor="text-[#C1493E]" 
+            borderColor="border-gray-50"
+            size="size-8"
+            borderWidth="border-4"
+            tooltip="Limpiar todo"
+            tooltipPlacement="right"
+            onClick={limpiarTodasLasColumnas}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="1.078em" height="1em" viewBox="0 0 512 512"><path fill="currentColor" d="M256 512a256 256 0 1 0 0-512a256 256 0 1 0 0 512m-89-345c9.4-9.4 24.6-9.4 33.9 0l55 55l55-55c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-55 55l55 55c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-55-55l-55 55c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l55-55l-55-55c-9.4-9.4-9.4-24.6 0-33.9"/></svg>
+          </IconCircular>
+        </div>
         <div className="flex justify-center items-center gap-1 col-span-1">
           <label className="flex items-center gap-1.5 px-1.5 py-0.5 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10] transition-colors">
             <input
