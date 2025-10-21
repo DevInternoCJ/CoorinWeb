@@ -5,6 +5,7 @@ const ConsultFilter = ({
   options = [], 
   label = "Seleccione", 
   onSelectionChange,
+  onAllOptionsLoaded, // Nueva prop para enviar todas las opciones cargadas
   defaultValue = "",
   id = "consult-filter-select",
   filterType = "", // Nueva prop para identificar qué tipo de filtro es
@@ -126,6 +127,13 @@ const ConsultFilter = ({
       loadDynamicOptions("Cuenta");
     }
   }, [filterType, loadDynamicOptions, options]);
+
+  // Notificar cuando las opciones se carguen
+  useEffect(() => {
+    if (onAllOptionsLoaded && dynamicOptions.length > 0) {
+      onAllOptionsLoaded(dynamicOptions);
+    }
+  }, [dynamicOptions, onAllOptionsLoaded]);
 
   const handleChange = (e) => {
     const value = e.target.value;

@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React from "react";
 import IconCircular from "../../../../../components/iconos/IconCircular";
-const ModalConsultaCuentasColumnas = ({ situacionOptions = [] }) => {
-  const [columnas, setColumnas] = useState([]);
+import { toast } from "sonner";
+const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptions = [], onColumnasCountChange }) => {
+  const [columnas, setColumnas] = React.useState([]);
 
   const eliminarColumna = (id) => {
     setColumnas(columnas.filter(columna => columna.id !== id));
   };
 
   const limpiarTodasLasColumnas = () => {
+    if (columnas.length === 0) {
+      toast.warning("No hay columnas para limpiar");
+      return;
+    }
     setColumnas([]);
   };
 
@@ -26,6 +31,30 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [] }) => {
       }
     }
   };
+
+  const agregarTodasLasColumnas = () => {
+    if (allAvailableOptions.length > 0) {
+      // Filtrar las opciones que no estén ya agregadas
+      const baseTime = Date.now();
+      const nuevasColumnas = allAvailableOptions
+        .filter(option => !columnas.some(col => col.nombre === option.label))
+        .map((option, index) => ({
+          id: baseTime + index, // Asegurar IDs únicos incrementales
+          nombre: option.label
+        }));
+      
+      if (nuevasColumnas.length > 0) {
+        setColumnas(prevColumnas => [...prevColumnas, ...nuevasColumnas]);
+      }
+    }
+  };
+
+  // Notificar cambios en el conteo de columnas
+  React.useEffect(() => {
+    if (onColumnasCountChange) {
+      onColumnasCountChange(columnas.length);
+    }
+  }, [columnas.length, onColumnasCountChange]);
 
   return (
     <div
@@ -57,6 +86,18 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [] }) => {
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="1.078em" height="1em" viewBox="0 0 512 512"><path fill="currentColor" d="M256 512a256 256 0 1 0 0-512a256 256 0 1 0 0 512m-89-345c9.4-9.4 24.6-9.4 33.9 0l55 55l55-55c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-55 55l55 55c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-55-55l-55 55c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l55-55l-55-55c-9.4-9.4-9.4-24.6 0-33.9"/></svg>
           </IconCircular>
+            <IconCircular 
+            bgColor="bg-[#bfdbfe]" 
+            textColor="text-[#1F4356]" 
+            borderColor="border-gray-50"
+            size="size-8"
+            borderWidth="border-4"
+            tooltip="Agregar todas las columnas"
+            tooltipPlacement="right"
+            onClick={agregarTodasLasColumnas}
+          >
+           <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512"><path fill="currentColor" d="M256 512a256 256 0 1 0 0-512a256 256 0 1 0 0 512m-24-168v-64h-64c-13.3 0-24-10.7-24-24s10.7-24 24-24h64v-64c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24h-64v64c0 13.3-10.7 24-24 24s-24-10.7-24-24"/></svg>
+          </IconCircular>
         </div>
         <div className="flex justify-center items-center gap-1 col-span-1">
           <label className="flex items-center gap-1.5 px-1.5 py-0.5 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10] transition-colors">
@@ -76,7 +117,7 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [] }) => {
             />
             <span className="whitespace-nowrap text-xs font-semibold" style={{ color: "var(--color-jerarquia4)" }}>Detalle</span>
           </label>
-          <label className="flex items-center gap-1.5 px-1.5 py-0.5 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10] transition-colors">
+          <label className="hidden items-center gap-1.5 px-1.5 py-0.5 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10] transition-colors">
             <input 
               type="radio" 
               name="tipo" 

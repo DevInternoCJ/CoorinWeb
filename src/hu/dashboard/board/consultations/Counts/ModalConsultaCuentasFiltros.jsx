@@ -18,7 +18,7 @@ const situacionOptions = [
   
 ];
 
-const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, idProducto, idCartera }) => {
+const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableOptions, idProducto, idCartera, onFiltrosCountChange, isDateEnabled }) => {
     const [cuenta, setCuenta] = useState("Cuenta");
     const [selectedConsultFilter, setSelectedConsultFilter] = useState(null);
     const [operador, setOperador] = useState("=");
@@ -60,6 +60,21 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, idProducto, idCart
         }
     }, [selectedConsultFilter, onGetSituacionOptions]);
 
+    // Limpiar la selección cuando cambie el tipo de filtro
+    React.useEffect(() => {
+        setSelectedConsultFilter(null);
+        if (onGetSituacionOptions) {
+            onGetSituacionOptions([]);
+        }
+    }, [cuenta, onGetSituacionOptions]);
+
+    // Notificar cambios en el conteo de filtros
+    React.useEffect(() => {
+        if (onFiltrosCountChange) {
+            onFiltrosCountChange(filtros.length);
+        }
+    }, [filtros.length, onFiltrosCountChange]);
+
     return (
       <>
         <div
@@ -94,6 +109,7 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, idProducto, idCart
                 type="date"
                 className="bg-gray-50 py-2.5 sm:py-2 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                 placeholder="This is placeholder"
+                disabled={!isDateEnabled}
               />
               <button className="btn-success">
                 Exportar
@@ -156,6 +172,11 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, idProducto, idCart
               onSelectionChange={(selectedOption) => {
                 if (selectedOption) {
                   setSelectedConsultFilter(selectedOption);
+                }
+              }}
+              onAllOptionsLoaded={(allOptions) => {
+                if (onGetAllAvailableOptions) {
+                  onGetAllAvailableOptions(allOptions);
                 }
               }}
               id="situacion-select"
