@@ -36,19 +36,19 @@ export default function CoorinDashboard() {
   // Función para cerrar el sidebar (será pasada al CoorinSidebar)
   const [closeSidebarFn, setCloseSidebarFn] = useState(null);
 
-  // Efecto para cerrar el sidebar cuando se abran modales de las cards
-  useEffect(() => {
-    if ((executiveModalOpen || consultationModalOpen) && closeSidebarFn) {
-      closeSidebarFn();
-    }
-  }, [executiveModalOpen, consultationModalOpen, closeSidebarFn]);
-
   // Mapeo directo para renderizar cada componente con su propio modal
 
   // Estado para controlar si la tabla de Pagos reportados está visible
   const [mostrarTablaPagosReportados, setMostrarTablaPagosReportados] = useState(false);
   // Estado para controlar si la tabla de Domicilios está visible
   const [mostrarTablaDomicilios, setMostrarTablaDomicilios] = useState(false);
+
+      // Efecto para cerrar el sidebar cuando se abran modales de las cards
+  useEffect(() => {
+    if ((executiveModalOpen || consultationModalOpen) && closeSidebarFn) {
+      closeSidebarFn();
+    }
+  }, [executiveModalOpen, consultationModalOpen, closeSidebarFn]);
 
   const renderSelectedComponent = () => {
     const closeModal = () => {

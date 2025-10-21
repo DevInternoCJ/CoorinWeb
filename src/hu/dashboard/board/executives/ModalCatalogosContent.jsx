@@ -43,11 +43,11 @@ const ModalCatalogosContent = () => {
             setSelectedCatalog(mappedData[0].catalog);
           }
         } else {
-          console.warn("⚠️ Respuesta vacía o en formato incorrecto:", response);
+          console.warn("Respuesta vacía o en formato incorrecto:", response);
           setCatalogsData([]);
         }
       } catch (err) {
-        console.error("❌ Error al cargar catálogos:", err);
+        console.error("Error al cargar catálogos:", err);
         setError("Error al cargar los catálogos");
         setCatalogsData([]);
       } finally {
@@ -72,7 +72,7 @@ const ModalCatalogosContent = () => {
           setCatalogsValuesData(response);
         } else {
           console.warn(
-            "⚠️ Respuesta vacía o en formato incorrecto para valores:",
+            "Respuesta vacía o en formato incorrecto para valores:",
             response
           );
           setCatalogsValuesData([]);
@@ -163,7 +163,7 @@ const ModalCatalogosContent = () => {
         );
 
         console.log(
-          "🔍 Valores filtrados para idCatalogo",
+          "Valores filtrados para idCatalogo",
           selectedCatalogData.idCatalogo,
           ":",
           valuesData.length
@@ -283,7 +283,7 @@ const ModalCatalogosContent = () => {
                     className="px-3 py-8 text-center text-red-500"
                   >
                     <div className="flex items-center justify-center">
-                      <span className="mr-2">⚠️</span>
+                      <span className="mr-2"></span>
                       {error}
                     </div>
                   </td>
