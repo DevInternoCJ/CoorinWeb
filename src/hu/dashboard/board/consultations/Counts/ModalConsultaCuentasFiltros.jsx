@@ -3,6 +3,7 @@ import { IconCustomTable } from "../IconesConsultations";
 import ModalSeleccionCampania from "../ModalCamapañas/ModalSeleccionCampania";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import ConsultFilter from "../../../../../components/select/ConsultFilter";
+  import { toast } from "sonner";
 
 const DropdownArrow = () => (
     <span className="modal-dropdown-arrow">
@@ -13,30 +14,40 @@ const DropdownArrow = () => (
 );
 
 const situacionOptions = [
-    { value: "situacion1", label: "Situación 1" },
-    { value: "situacion2", label: "Situación 2" },
-    { value: "situacion3", label: "Situación 3" },
-    { value: "situacion4", label: "Situación 4" }
+    { value: "Sin información", label: "Sin información" },
+  
 ];
 
 const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, idProducto, idCartera }) => {
     const [cuenta, setCuenta] = useState("Cuenta");
     const [selectedConsultFilter, setSelectedConsultFilter] = useState(null);
     const [operador, setOperador] = useState("=");
-    const [niegan, setNiegan] = useState("niegan1");
+    const [niegan, setNiegan] = useState("");
     const [filtros, setFiltros] = useState([]);
     const [openSeleccionCampania, setOpenSeleccionCampania] = useState(false);
-
+  
     const eliminarFiltro = (id) => {
         setFiltros(filtros.filter(filtro => filtro.id !== id));
     };
 
     const agregarFiltro = () => {
+        const campoSeleccionado = selectedConsultFilter ? selectedConsultFilter.label : "";
+        
+        // Verificar si ya existe un filtro con el mismo concepto y campo
+        const filtroExistente = filtros.find(
+            filtro => filtro.concepto === cuenta && filtro.campo === campoSeleccionado
+        );
+
+        if (filtroExistente) {
+            toast.error("Este filtro ya fue agregado");
+            return;
+        }
+
         const nuevoFiltro = {
             id: Date.now(),
             concepto: cuenta,
-            campo: selectedConsultFilter ? selectedConsultFilter.label : "",
-            valores: niegan,
+            campo: campoSeleccionado,
+            valores: operador + " " + niegan,
             operador: operador
         };
         setFiltros(prevFiltros => [...prevFiltros, nuevoFiltro]);
@@ -214,6 +225,7 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, idProducto, idCart
             <table className="modal-table mb-2">
               <thead>
                 <tr>
+                  <th>Concepto</th>
                   <th>Campo</th>
                   <th>Valores</th>
                   <th>Borrar</th>
@@ -223,7 +235,7 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, idProducto, idCart
                 {filtros.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="3"
+                      colSpan="4"
                       style={{
                         textAlign: "center",
                         color: "#666",
@@ -236,6 +248,7 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, idProducto, idCart
                 ) : (
                   filtros.map((filtro) => (
                     <tr key={filtro.id}>
+                      <td>{filtro.concepto}</td>
                       <td>{filtro.campo}</td>
                       <td>{filtro.valores}</td>
                       <td style={{ textAlign: "right" }}>
