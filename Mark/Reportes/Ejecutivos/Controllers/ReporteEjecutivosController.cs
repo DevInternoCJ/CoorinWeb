@@ -18,7 +18,7 @@ namespace Loki.Mark.Reportes.Ejecutivos.Controllers
 
 		[HttpPost("consultar")]
 		[SwaggerOperation(
-			Summary = "Consultar Reporte de Productividad de Ejecutivos",
+			Summary = "Consultar Reporte de Productividad de Ejecutivos - Yoshi",
 			Description = "Obtiene los indicadores de productividad para un grupo de ejecutivos en un rango de fechas, cartera y producto específicos."
 		)]
 		[AllowAnonymous]
