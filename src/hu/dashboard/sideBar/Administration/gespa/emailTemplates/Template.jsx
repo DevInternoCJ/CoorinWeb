@@ -373,7 +373,7 @@ const Template = ({
           <div className="flex items-center justify-between text-jerarquia1 mt-4">
             <div className="flex items-center gap-5 text-jerarquia2">
               <button
-                className="bg-red-700 p-2 mt-5 rounded-md text-white hover:text-red-100 border-red-600 hover:border-red-600 focus:ring-red-500 hover:bg-red-600 hover:shadow-lg hover:shadow-red-600"
+                className="btn-danger"
                 onClick={handleDelete}
                 type="button"
                 disabled={!idCorreoScript}
@@ -399,6 +399,7 @@ const Template = ({
                   loading={loading}
                   onClick={handleSave}
                   disabled={!nombre.trim() || !asunto.trim() || !mensaje.trim()}
+                  className="btn-success"
                 />
               </div>
             )}

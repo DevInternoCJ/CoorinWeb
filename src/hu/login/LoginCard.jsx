@@ -34,13 +34,29 @@ const handlePasswordExpired = (data) => {
   setShowChangePassword(true); // ✅ Mostrar directamente ChangePassword
 };
 
-  // ✅ MODIFICADO: Recibir datos del login exitoso
-const handleLoginSuccess = (data) => {
-  console.log("✅ Login exitoso con datos:", data);
-  setPasswordExpiredData(data); // ✅ Guardar datos para ChangePassword
+ const handleLoginSuccess = (data) => {
+  console.log("🎯 handleLoginSuccess EJECUTADO con:", data);
+  
+  if (!data) {
+    console.error("❌ ERROR: data es null/undefined");
+    return;
+  }
+  
+  console.log("🔄 Actualizando estado...");
+  setPasswordExpiredData(data);
   setDiasRestantes(data.diasRestantes);
-  setShowPasswordContent(true); // ✅ Mostrar opción de cambio
-};
+  setShowPasswordContent(true);
+  
+  // Verificar que el estado se actualizó
+  setTimeout(() => {
+    console.log("📊 Estado después de handleLoginSuccess:", {
+      showPasswordContent,
+      showChangePassword, 
+      diasRestantes,
+      passwordExpiredData
+    });
+  }, 100);
+}
 
   // Función para manejar el click en "Sí" en PasswordChangeContent
   const handleAcceptPasswordChange = () => {
@@ -80,7 +96,8 @@ const handleLoginSuccess = (data) => {
       passwordExpiredData: passwordExpiredData ? {
         username: passwordExpiredData.username,
         contraActual: passwordExpiredData.contraActual ? "✅ PRESENTE" : "❌ AUSENTE",
-        diasRestantes: passwordExpiredData.diasRestantes
+        diasRestantes: passwordExpiredData.diasRestantes,
+        mensaje: passwordExpiredData.mensaje
       } : "❌ NULL",
       diasRestantes
     });
@@ -122,7 +139,7 @@ const handleLoginSuccess = (data) => {
           </div>
         )}
 
-        {/* Contenido principal */}
+          {/* Contenido principal */}
         <div className={(!showPasswordContent && !showChangePassword) ? "lg:w-1/2" : "w-full"}>
           {showPasswordContent ? (
             <PasswordChangeContent 
@@ -157,3 +174,5 @@ const handleLoginSuccess = (data) => {
 };
 
 export default LoginCard;
+
+

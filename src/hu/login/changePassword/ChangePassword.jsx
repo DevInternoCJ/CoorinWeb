@@ -7,7 +7,7 @@ import { UpdatePassword } from "../../../services/mark/albaz/LokiServices";
 import { useUserStore } from "../../../contextGlobal/userStore";
 import { toast } from "sonner";
 
-const ChangePassword = ({ onClose, contraActual, username, passwordData }) => {
+const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje}) => {
   const user = useUserStore((state) => state.user);
   
   // ✅ MODIFICADO: Usar directamente los props que vienen de LoginCard
@@ -188,7 +188,7 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData }) => {
           className="btn btn-text btn-circle btn-sm absolute end-0 -top-6 -right-6"
           aria-label="Close"
         >
-          <span className="hover:rotate-30 text-3xl text-jerarquia1 hover:text-jerarquia2 font-bold">
+          <span className="hover:rotate-30 text-3xl text-jerarquia1 hover:text-red-700 font-bold">
             ×
           </span>
         </button>
@@ -218,7 +218,13 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData }) => {
       )}
 
       <form onSubmit={handleSubmit} className="w-full">
-        <div className="modal-body">
+  {/* ✅ MOSTRAR MENSAJE SOLO SI dias ES 0 O NO ES NÚMERO */}
+  {passwordData?.mensaje && (passwordData?.diasRestantes === 0 || isNaN(passwordData?.diasRestantes)) && (
+    <kbd className="min-h-7.5 inline-flex mb-3 justify-center items-center py-1 px-1.5 bg-background-dashboard border border-transparent font-semibold text-sm text-red-800 rounded-md">
+      {passwordData.mensaje} {/* ✅ Usar passwordData.mensaje */}
+    </kbd>
+  )}
+  <div className="modal-body">
           {/* Campo oculto para username (accesibilidad) */}
           <input
             type="text"
@@ -367,3 +373,5 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData }) => {
 };
 
 export default ChangePassword;
+
+
