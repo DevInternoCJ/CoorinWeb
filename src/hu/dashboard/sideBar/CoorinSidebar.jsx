@@ -452,7 +452,7 @@ export const CoorinSidebar = ({
   const asideClass = `${
     isMinified ? "hs-overlay-minified " : ""
   }hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 transition-transform duration-150 transform fixed top-0 start-0 bottom-0 ${
-    blocked ? "z-30" : "z-50"
+    blocked ? "" : "z-1"
   } bg-white border-e border-gray-200 ${
     isMinified ? "w-[3.25rem]" : "w-64"
   } min-h-screen flex flex-col overflow-x-hidden ${
@@ -539,7 +539,7 @@ export const CoorinSidebar = ({
         role="navigation"
         aria-label="Coorin sidebar"
         style={{ overflowY: isMinified ? 'hidden' : undefined, pointerEvents: blocked ? 'none' : undefined, cursor: blocked ? 'default' : undefined }}>
-        <div className="relative flex flex-col h-full max-h-full">
+        <div className=" flex flex-col h-full max-h-full">
           {/* Header */}
           <header className="py-4 px-2 flex justify-between items-center gap-x-2">
             <a

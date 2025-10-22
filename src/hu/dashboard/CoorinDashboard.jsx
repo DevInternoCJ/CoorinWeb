@@ -242,7 +242,7 @@ export default function CoorinDashboard() {
         isModalOpen={executiveModalOpen || consultationModalOpen || modalSidebarOpen}
         onRegisterCloseFunction={setCloseSidebarFn}
       />
-      <main className="flex-1 bg-background-dashboard h-screen relative z-0 flex flex-col overflow-hidden">
+      <main className="flex-1 bg-background-dashboard h-screen flex flex-col overflow-hidden">
         <div
           className="transition-transform duration-200 flex-1 overflow-y-auto overflow-x-hidden"
           style={{
@@ -252,8 +252,8 @@ export default function CoorinDashboard() {
             maxHeight: "100vh"
           }}
         >
-          <div className="relative z-0 py-14 sm:py-2">
-            <div className="w-full px-4 lg:px-8 relative pt-8">
+          <div className="py-14 sm:py-2">
+            <div className="w-full px-4 lg:px-8 pt-8">
               <span className="text-3xl font-semibold tracking-tight text-balance text-gray-950 sm:text-4xl">
                 Ejecutivos
               </span>
@@ -267,7 +267,7 @@ export default function CoorinDashboard() {
                 </div>
               </div>
 
-              <div className="col-span-6 row-start-2 relative">
+              <div className="col-span-6 row-start-2">
                 <div className="flex justify-between items-start mb-4 mt-4">
                   <span className="text-3xl font-semibold tracking-tight text-balance text-gray-950 sm:text-4xl">
                     Consultas
@@ -282,12 +282,12 @@ export default function CoorinDashboard() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-8 w-full mb-8">
-                <div className="relative w-full">
+                <div className=" w-full">
                   <RamificacionSesiones
                     onExecutiveSelect={setSelectedExecutiveId}
                   />
                 </div>
-                <div className="relative w-full">
+                <div className=" w-full">
                   <TablaSesiones selectedExecutiveId={selectedExecutiveId} />
                 </div>
               </div>

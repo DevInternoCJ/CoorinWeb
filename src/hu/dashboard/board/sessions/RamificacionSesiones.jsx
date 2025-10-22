@@ -214,7 +214,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                             role="group"
                             aria-labelledby={headingId}
                         >
-                            <div className="ps-7 relative before:absolute before:top-0 before:start-3 before:w-0.5 before:-ms-px before:h-full before:bg-gray-100 dark:before:bg-neutral-700">
+                            <div className="ps-7 border-l border-gray-100 dark:border-neutral-700 pl-3">
                                 {renderExecutiveTree(node.subordinados, level + 1, nodeKey)}
                             </div>
                         </div>
