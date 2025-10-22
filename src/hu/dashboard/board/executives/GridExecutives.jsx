@@ -21,7 +21,6 @@ const GridExecutives = ({ onModalOpen, onModalClose }) => {
       // thresholds: compact when ratio <= 0.45, mobile when ratio <= 0.25
       const newMode = ratio <= 0.25 ? 'mobile' : newCompact ? 'compact' : 'normal';
       // debug info
-      console.debug('GridExecutives update', { width, initial, ratio, newMode });
       setGridMode(newMode);
     };
 

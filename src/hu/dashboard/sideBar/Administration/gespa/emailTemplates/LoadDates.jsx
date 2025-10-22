@@ -323,7 +323,7 @@ const LoadDates = ({
                       className={`py-3 px-4 border-b-jerarquia4 text-sm w-auto ${getValueClass(
                         value,
                         key
-                      )} break-words align-top`}
+                      )} whitespace-nowrap align-top`}
                     >
                       {formatValue(value, key)}
                     </td>

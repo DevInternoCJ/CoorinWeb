@@ -17,7 +17,6 @@ const GridConsultations = ({ onModalOpen, onModalClose }) => {
             const ratio = initial > 0 ? width / initial : 1;
             const newCompact = ratio <= 0.45;
             const newMode = ratio <= 0.25 ? 'mobile' : newCompact ? 'compact' : 'normal';
-            console.debug('GridConsultations update', { width, initial, ratio, newMode });
             setGridMode(newMode);
         };
 

@@ -20,6 +20,7 @@ import VGPContent from "./sideBar/consultations/information/VGP";
 import EmailTemplates from "./sideBar/Administration/gespa/emailTemplates/EmailTemplates";
 import ModalBaseCampanas from "./sideBar/Administration/ModalBaseCampanas";
 import Phrases from "./sideBar/Administration/gespa/frases/Phrases";
+import Scripts from "./sideBar/Administration/gespa/scripts/Scripts";
 
 
 export default function CoorinDashboard() {
@@ -148,6 +149,8 @@ export default function CoorinDashboard() {
         return <EmailTemplates onClose={closeModal} />;
       case "Frases":
         return <Phrases onClose={closeModal} />;
+      case "Scripts":
+        return <Scripts onClose={closeModal} />;
       default:
         return null;
     }
@@ -200,7 +203,8 @@ export default function CoorinDashboard() {
       "1AA": "Campañas",
       "1DD": "Campañas",
       "1EE": "Campañas",
-      "3AAA": "Frases"
+      "3AAA": "Frases",
+      "4AAA": "Scripts"
     };
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente

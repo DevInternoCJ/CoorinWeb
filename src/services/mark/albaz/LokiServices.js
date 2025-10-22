@@ -2184,3 +2184,30 @@ export const ReportEjecutives = async (body) => {
     throw error;
   }
 };
+
+// En LokiServices.js
+export const PostDataCharge = async (data) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+
+    console.log('📤 /Scripts/carga-datos-producto', data);
+    
+    // ✅ Enviar como query parameters en lugar de body
+    const response = await api.post(
+      `/Scripts/carga-datos-producto`,
+      null, // ✅ No body
+      {
+        params: data // ✅ Query parameters: ?idCartera=X&idProducto=Y
+      }
+    );
+    
+    console.log('📥 Respuesta:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error:', error);
+    throw error;
+  }
+};

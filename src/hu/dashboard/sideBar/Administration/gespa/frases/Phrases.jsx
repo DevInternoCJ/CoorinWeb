@@ -2,7 +2,6 @@ import React, { useState, useRef } from "react";
 import ModalHeader from "../ModalHeader";
 import ModalBase from "../../../../board/ModalBase";
 import { IconScreens } from "../IconsTemplates";
-import { useWalletProducts } from "../../../../../login/WalletProduct";
 import IconCircular from "../../../../../../components/iconos/IconCircular";
 import { InputPhrases } from "./InputPhrases";
 import SavePhrases from "./SavePhrases";
