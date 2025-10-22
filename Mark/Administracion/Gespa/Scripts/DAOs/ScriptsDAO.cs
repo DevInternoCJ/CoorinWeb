@@ -3,6 +3,8 @@ using CoorinWeb.Loki.Global;
 using Microsoft.Data.SqlClient;
 using CoorinWeb.Loki.Mark.Auth.DAOs;
 using Loki.Mark.Administracion.Gespa.Scripts.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 
 namespace Loki.Mark.Administracion.Gespa.Scripts.DAOs
@@ -94,8 +96,34 @@ namespace Loki.Mark.Administracion.Gespa.Scripts.DAOs
 				return rowsAffected;
 			}
 		}
+        public async Task<bool> DeleteScript(int idScript, string servidor, string nombreBaseDatos)
+        {
+            try
+            {
+                string sEliminaPlantilla = "DELETE FROM Scripts WHERE idScript = @idScript";
 
+                var dbContext = _dbContFactory.GetDbContext(servidor, nombreBaseDatos);
+                var connection = dbContext.Database.GetDbConnection();
 
-	}
+                using var command = connection.CreateCommand();
+                command.CommandText = sEliminaPlantilla;
+                command.CommandType = CommandType.Text;
+                command.Parameters.Add(new SqlParameter("@idScript", idScript));
+
+                if (connection.State != ConnectionState.Open)
+                    await connection.OpenAsync();
+
+                int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error eliminando plantilla: {ex.Message}");
+                return false;
+            }
+        }
+
+    }
 
 }

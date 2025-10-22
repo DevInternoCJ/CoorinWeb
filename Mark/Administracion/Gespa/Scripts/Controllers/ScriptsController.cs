@@ -1,7 +1,9 @@
-﻿using Loki.DTOs.ScriptsDTOs;
+﻿using Loki.DTOs.PlantillasCorreoDTOs;
+using Loki.DTOs.ScriptsDTOs;
 using Loki.Mark.Administracion.Gespa.Scripts.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Xml.Linq;
 
 namespace Loki.Mark.Administracion.Gespa.Scripts.Controllers
@@ -20,8 +22,12 @@ namespace Loki.Mark.Administracion.Gespa.Scripts.Controllers
 			_scriptsDao = scripts;
 		}
 
-        [HttpPut("actualizarScripts")]
+        [HttpPut("actualizar")]
         [Authorize]
+        [SwaggerOperation(
+          Summary = "actualizar script",
+          Description = "actualiza un script existente"
+          )]
         public async Task<IActionResult> UpdateScript([FromBody] actualizarScriptDTO actualizarScript)
         {
             if (!ModelState.IsValid)
@@ -66,8 +72,12 @@ namespace Loki.Mark.Administracion.Gespa.Scripts.Controllers
             }
         }
 
-        [HttpPost("guardarScripts")]
+        [HttpPost("guardar")]
         [Authorize]
+        [SwaggerOperation(
+          Summary = "guardar scripts",
+          Description = "guarda un nuevo scripts"
+          )]
         public async Task<IActionResult> CreateScript([FromBody] guardarScriptsDTO request)
         {
             if (!ModelState.IsValid)
@@ -108,5 +118,36 @@ namespace Loki.Mark.Administracion.Gespa.Scripts.Controllers
         }
 
 
+        [HttpDelete("eliminar")]
+        [Authorize]
+        [SwaggerOperation(
+          Summary = "eliminar scripts - irene",
+          Description = "elimina un script existente"
+          )]
+        public async Task<IActionResult> DeletePlantilla([FromBody] eliminarScriptDTO request)
+        {
+            if (request == null || request.IdScript <= 0)
+            {
+                return BadRequest("El ID del script no es válido.");
+            }
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+            {
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+            }
+
+            string nombreBaseDatos = "Collection";
+
+            bool exito = await _scriptsDao.DeleteScript(request.IdScript, servidorClaim, nombreBaseDatos);
+
+            if (exito)
+            {
+                return Ok(new { mensaje = "Script eliminada correctamente." });
+            }
+            else
+            {
+                return StatusCode(500, new { mensaje = "Error eliminando el script. Intente de nuevo." });
+            }
+        }
     }
 }
