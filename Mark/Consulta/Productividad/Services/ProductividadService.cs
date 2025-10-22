@@ -111,14 +111,22 @@ namespace Loki.Mark.Consulta.Productividad.Services
                 }
                 Console.WriteLine($"✅ DataTable llenado: {tblEjecutivos.Rows.Count} filas");
 
+                int idEjecutivoParaSP = idEjecutivo;
+                if (tblEjecutivos.Rows.Count > 1)
+                {
+                    // Si hay más de un ejecutivo, forzamos el modo grupal en el SP
+                    idEjecutivoParaSP = 0;
+                    Console.WriteLine($"Ajustando @idEjecutivo a 0 (Modo Grupal) ya que hay {tblEjecutivos.Rows.Count} ejecutivos.");
+                }
+
                 var parameters = new DynamicParameters();
                 parameters.Add("@Indicador", indicador);
-                parameters.Add("@idEjecutivo", idEjecutivo);
+                parameters.Add("@idEjecutivo", idEjecutivoParaSP); // Usar el valor ajustado
                 parameters.Add("@tbl_Ejecutivos", tblEjecutivos.AsTableValuedParameter("PS.tbl_Ejecutivos"));
 
                 Console.WriteLine($"Parámetros SP:");
                 Console.WriteLine($"  - @Indicador: {indicador}");
-                Console.WriteLine($"  - @idEjecutivo: {idEjecutivo}");
+                Console.WriteLine($"  - @idEjecutivo: {idEjecutivoParaSP}"); // Log del nuevo valor
                 Console.WriteLine($"  - @tbl_Ejecutivos: {tblEjecutivos.Rows.Count} filas");
 
                 object result;

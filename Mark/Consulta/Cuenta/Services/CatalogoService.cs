@@ -82,8 +82,8 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             await conn.OpenAsync();
 
             var query = @"
-        SELECT CAST(idValor1 AS varchar) AS IdValor1, Valor1
-        FROM dbCollection..RelacionesCatalogo (NOLOCK)
+        SELECT CAST(idValor1 AS varchar) AS IdValor1, idValor2
+        FROM dbCollection..RelacionesCatálogos (NOLOCK)
         WHERE idValor2 = @IdValor2";
 
             var result = await conn.QueryAsync<(string IdValor1, string Valor1)>(query, new { IdValor2 = idValor2 });

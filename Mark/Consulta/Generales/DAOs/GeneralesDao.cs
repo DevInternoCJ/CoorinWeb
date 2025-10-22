@@ -42,7 +42,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
             bool esContar,
             bool esCuentas,
             bool esDetalle,
-            string concepto, // Ahora es parámetro con valor por defecto
+            string concepto, 
             int? idConsulta = null,
             IEnumerable<ParameterDto>? parametrosExtra = null,
             IEnumerable<AgruparDTO>? agrupamientoExtra = null)
@@ -88,7 +88,6 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 }
                 else
                 {
-                    // Agrupamiento por defecto según el concepto
                     switch (concepto)
                     {
                         case "Teléfonos":
@@ -99,7 +98,6 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                         case "Negociaciones":
                         case "Seguimientos":
                         case "Chats":
-                            // Agrupamientos por defecto para otros conceptos si los necesitas
                             break;
                     }
                 }
@@ -119,7 +117,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 var queryData = await consultaGenerador.QueryGeneral(
                     servidor,
                     idCartera,
-                    concepto, // Ahora usa el parámetro recibido
+                    concepto, 
                     tblParametros,
                     tblAgrupar,
                     conteo,
@@ -134,7 +132,6 @@ namespace Loki.Mark.Consulta.Generales.DAOs
 
                 string sQuery = queryData.Trim();
 
-                // Si el query contiene WITH (CTE), debemos manejarlo diferente
                 if (!sQuery.ToUpper().StartsWith("SELECT") && !sQuery.ToUpper().StartsWith("WITH"))
                 {
                     sQuery = "SELECT " + sQuery;
