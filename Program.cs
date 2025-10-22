@@ -141,6 +141,7 @@ using Loki.Mark.Reportes.DiaDelEjecutivo.DAOs;
 using Loki.Mark.Reportes.DiaDelEjecutivo.Interfaces;
 using Loki.Mark.Administracion.Gespa.Scripts.Interfaces;
 using Loki.Mark.Administracion.Gespa.Frases.Interfaces;
+using Loki.Mark.Administracion.Gespa.Scripts.Services;
 
 
 
@@ -318,6 +319,7 @@ builder.Services.AddScoped<CamposPantallaDao>();
 builder.Services.AddScoped<ICamposPantallaService, CamposPantallaService>();
 //scripts
 builder.Services.AddScoped<IScriptsDAO, Loki.Mark.Administracion.Gespa.Scripts.DAOs.ScriptsDAO>();
+builder.Services.AddScoped<IScriptService, ScriptService>();
 //plantillas correo
 builder.Services.AddScoped<IPlantillasCorreoService, PlantillasCorreoService>();
 builder.Services.AddScoped<IPlantillasCorreoDao, PlantillasCorreoDao>();

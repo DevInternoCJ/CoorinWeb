@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Xml.Linq;
+using static Loki.DTOs.PlantillasCorreoDTOs.CargaDatos;
+using static Loki.DTOs.ScriptsDTOs.cargaDatosDTO;
 
 namespace Loki.Mark.Administracion.Gespa.Scripts.Controllers
 {
@@ -16,11 +18,12 @@ namespace Loki.Mark.Administracion.Gespa.Scripts.Controllers
 	public class ScriptsController : ControllerBase
 	{
 		private readonly IScriptsDAO _scriptsDao; 
-
-		public ScriptsController(IScriptsDAO scripts)
+        private readonly IScriptService _scriptService;
+        public ScriptsController(IScriptsDAO scripts, IScriptService scriptService)
 		{
 			_scriptsDao = scripts;
-		}
+            _scriptService = scriptService;
+        }
 
         [HttpPut("actualizar")]
         [Authorize]
@@ -149,5 +152,28 @@ namespace Loki.Mark.Administracion.Gespa.Scripts.Controllers
                 return StatusCode(500, new { mensaje = "Error eliminando el script. Intente de nuevo." });
             }
         }
+
+        [HttpPost("carga-datos-producto")]
+        [SwaggerOperation(Summary = "carga datos - irene",
+           Description = "Retorna plantillas, datos de producto y cuenta")]
+        public async Task<ActionResult<ResultadoCargaProductoDto>> CargarDatosProducto(
+        [FromQuery] int idCartera,
+        [FromQuery] int idProducto)
+        {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+            {
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+            }
+            var nombreBaseDatos = "Collection";
+            var resultado = await _scriptService.CargaDatosProducto(
+                idCartera, idProducto, servidorClaim, nombreBaseDatos);
+
+            if (!resultado.Exitoso)
+                return BadRequest(resultado);
+
+            return Ok(resultado);
+        }
+    
     }
 }
