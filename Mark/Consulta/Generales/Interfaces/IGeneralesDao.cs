@@ -15,8 +15,7 @@ namespace Loki.Mark.Consulta.Generales.Interfaces
              string concepto, // Ahora es parámetro con valor por defecto
              int? idConsulta = null,
              IEnumerable<ParameterDto>? parametrosExtra = null,
-             IEnumerable<AgruparDTO>? agrupamientoExtra = null);
-
-
+             IEnumerable<AgruparDTO>? agrupamientoExtra = null,
+             DateTime? desde = null);
     }
 }

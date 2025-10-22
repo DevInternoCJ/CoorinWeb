@@ -58,6 +58,7 @@ namespace Loki.DTOs.GeneralesDTOs
         /// Agrupamientos para la búsqueda
         /// </summary>
         public IEnumerable<AgruparDTO>? AgrupamientoExtra { get; set; }
+        public DateTime? Desde { get; set; }
     }
 
 }

@@ -45,7 +45,9 @@ namespace Loki.Mark.Consulta.Generales.DAOs
             string concepto, 
             int? idConsulta = null,
             IEnumerable<ParameterDto>? parametrosExtra = null,
-            IEnumerable<AgruparDTO>? agrupamientoExtra = null)
+            IEnumerable<AgruparDTO>? agrupamientoExtra = null,
+            DateTime? desde = null
+            )
         {
             try
             {
@@ -121,7 +123,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                     tblParametros,
                     tblAgrupar,
                     conteo,
-                    DateTime.Today.AddMonths(-1),
+                    desde ?? DateTime.MinValue,
                     idEjecutivo,
                     idConsulta ?? 0
                 );

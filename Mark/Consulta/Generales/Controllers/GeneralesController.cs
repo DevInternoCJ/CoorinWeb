@@ -124,7 +124,8 @@ namespace Loki.Mark.Consulta.Generales.Controllers
                     concepto,  // Nuevo parámetro
                     search.IdConsulta,
                     search.ParametrosExtra,
-                    search.AgrupamientoExtra
+                    search.AgrupamientoExtra,
+                    search.Desde
                 );
 
                 return Ok(result);
