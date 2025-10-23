@@ -4,18 +4,16 @@ import DefaultModalFooter from "./DefaultModalFooter";
 
 // Definir los tamaños disponibles con responsive breakpoints
 const MODAL_SIZES = {
-
-    // Tamaños especiales para casos específicos con responsive
-    metas: "w-full max-w-[95vw] sm:max-w-[85vw] md:max-w-[76vw]", // 76% viewport -> responsive
-    ejecutivos: "w-full max-w-[95vw] sm:max-w-[85vw] md:max-w-[76vw]", // Modal ejecutivos igual a metas (personalizable)
-    "metas-md": "w-full max-w-[90vw] sm:max-w-[80vw] md:max-w-[70vw]", // Modal metas mediano responsive
-    "metas-sm": "w-full max-w-[85vw] sm:max-w-[70vw] md:max-w-[60vw]", // Modal metas pequeño responsive
-    productivity: "w-full max-w-[95vw] sm:max-w-[85vw] md:max-w-[76vw]", // Modal productividad 76% -> responsive
-    catalogos: "w-full max-w-[90vw] sm:max-w-[80vw] md:max-w-[76vw]", // Modal catálogos 76% -> responsive
-    validadores: "w-full max-w-[95vw] sm:max-w-[75vw] md:max-w-[35vw]", // Modal validadores 60% viewport -> responsive
-    encargados: "w-full max-w-[95vw] sm:max-w-[75vw] md:max-w-[35vw]", // Modal encargados idéntico a validadores -> responsive
-    historicos: "w-full max-w-[95vw] sm:max-w-[80vw] md:max-w-[45vw]", // Modal históricos 60% viewport -> responsive
-    custom: ""  // Permite pasar tamaño personalizado en modalClassName
+    metas: "w-full max-w-[clamp(320px,92vw,1400px)] min-w-[clamp(220px,60vw,900px)]",
+    ejecutivos: "w-full max-w-[clamp(320px,92vw,1400px)] min-w-[clamp(220px,60vw,900px)]",
+    "metas-md": "w-full max-w-[clamp(280px,88vw,1100px)] min-w-[clamp(180px,50vw,700px)]",
+    "metas-sm": "w-full max-w-[clamp(220px,80vw,700px)] min-w-[clamp(120px,40vw,400px)]",
+    productivity: "w-full max-w-[clamp(320px,92vw,1400px)] min-w-[clamp(220px,60vw,900px)]",
+    catalogos: "w-full max-w-[clamp(280px,88vw,1100px)] min-w-[clamp(180px,50vw,700px)]",
+    validadores: "w-full max-w-[clamp(180px,60vw,600px)] min-w-[clamp(120px,30vw,300px)]",
+    encargados: "w-full max-w-[clamp(180px,60vw,600px)] min-w-[clamp(120px,30vw,300px)]",
+    historicos: "w-full max-w-[clamp(220px,80vw,900px)] min-w-[clamp(120px,40vw,400px)]",
+    custom: ""
 };
 
 const ReusableModal = ({
@@ -121,8 +119,8 @@ const ReusableModal = ({
             <div
                 ref={modalRef}
                 className={`bg-white rounded-lg sm:rounded-xl shadow-2xl 
-                           ${sizeClass} 
-                           max-h-[85vh] sm:max-h-[88vh] md:max-h-[90vh]
+                           ${sizeClass}
+                           max-h-[clamp(320px,92vh,900px)] min-h-[clamp(220px,40vh,400px)]
                            overflow-hidden 
                            transition-all duration-300 ease-out
                            grid grid-rows-[auto_1fr_auto]

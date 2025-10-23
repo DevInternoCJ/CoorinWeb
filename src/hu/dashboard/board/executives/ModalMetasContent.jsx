@@ -5,7 +5,7 @@ import { Toaster, toast } from "sonner";
 import InputNumber from '../../../../components/InputNumber/InputNumber.jsx';
 import { obetenerTablaMetas, actualizarMetas, obetenerJerarquiaEncargados } from "../../../../services/mark/albaz/LokiServices";
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
-import TimePicker from "../../../../components/TimePicker/TimePicker.jsx";
+
 
 // Función para inyectar estilos CSS que oculten los controles de incremento
 const injectHideNumberArrowsStyles = () => {
@@ -231,10 +231,17 @@ const ModalMetasContent = () => {
                     toast.warning('El campo H. Entrada es requerido');
                     return true;
                 }
-                // Validar formato HH:MM (24h)
-                const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+                // Validar formato HH:MM:SS (24h) o HH:MM
+                const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/;
                 if (!timeRegex.test(String(value))) {
                     toast.warning('Formato de hora inválido en H. Entrada');
+                    return true;
+                }
+                // Extraer hh y mm
+                const [hh] = value.split(':').map(Number);
+                // Validar rango horario permitido: entre 07:00:00 y 15:59:59
+                if (hh < 7 || hh > 15) {
+                    toast.warning('El horario de entrada debe de ser entre las 7 y 15 horas.');
                     return true;
                 }
                 return false;
@@ -475,8 +482,17 @@ const ModalMetasContent = () => {
             console.warn(mensaje);
             toast.warning(mensaje);
         }
-        if (validIds.length > 0) {
-            console.log('🟢 Ids enviados a obetenerTablaMetas:', validIds, '| Usuario seleccionado:', selectedExecutives);
+        // Si el nodo seleccionado es el ejecutivo de la sesión, enviar TODOS los ids de la jerarquía
+        const userDataForIds = JSON.parse(localStorage.getItem('userData'));
+        const idEjecutivoSesionLocal = userDataForIds?.idEjecutivo || userDataForIds?.idejecutivo || userDataForIds?.id || null;
+
+        let idsToSend = validIds.slice();
+        if (selectedExecutiveNode && Number(selectedExecutiveNode) === Number(idEjecutivoSesionLocal) && Array.isArray(allHierarchyIds) && allHierarchyIds.length > 0) {
+            // En el caso del ejecutivo de sesión, pedir absolutamente TODOS los objetos del árbol
+            idsToSend = allHierarchyIds.filter(id => Number.isInteger(Number(id)) && Number(id) > 0).map(Number);
+            console.log('Ejecutivo de sesión seleccionado -> Enviando TODOS los ids de la jerarquía a obetenerTablaMetas:', idsToSend);
+        } else if (idsToSend.length > 0) {
+            console.log('Ids enviados a obetenerTablaMetas:', idsToSend, '| Usuario seleccionado:', selectedExecutives);
         } else {
             console.log('No se enviaron ids válidos a obetenerTablaMetas. selectedExecutives:', selectedExecutives);
         }
@@ -509,7 +525,8 @@ const ModalMetasContent = () => {
         //     }
         // }
         // if (!validIds.length || debeOcultar) {
-        if (!validIds.length) {
+        // Usar idsToSend calculados (puede ser allHierarchyIds cuando aplica)
+        if (!idsToSend.length) {
             setTablaMetas([]);
             return;
         }
@@ -517,17 +534,18 @@ const ModalMetasContent = () => {
         setError(null);
         (async () => {
             try {
-                const data = await obetenerTablaMetas(validIds);
+                const data = await obetenerTablaMetas(idsToSend);
                 const processedData = Array.isArray(data) ? data.filter(Boolean) : [];
                 setTablaMetas(processedData);
-            } catch {
+            } catch (e) {
+                console.error('Error al obtener la tabla de metas:', e);
                 setError('Error al obtener la tabla de metas');
                 setTablaMetas([]);
             } finally {
                 setLoading(false);
             }
         })();
-    }, [selectedExecutives, executiveTree]);
+    }, [selectedExecutives, executiveTree, allHierarchyIds, selectedExecutiveNode]);
 
     // Manejo de selección individual
     const handleRowCheckbox = (rowKey) => {
@@ -725,18 +743,19 @@ const ModalMetasContent = () => {
     };
 
     return (
-        <div className="flex gap-4 h-full" style={{ maxHeight: '60vh', overflow: 'hidden' }}>
-            {/* Columna izquierda: Logo + Jerarquía en una sola columna */}
-            <div style={{ width: '18rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+  <div className="metas-responsive-blocks h-full w-full" style={{ maxHeight: '90vh', overflow: 'hidden', display: 'flex', gap: '1rem' }}>
+        {/* Bloque 1: Logo + Jerarquía */}
+        <div className="metas-block metas-block-1" style={{ width: 'clamp(180px,22vw,320px)', minWidth: '160px', maxWidth: '28vw', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+            {/* Logo */}
                 {/* Logo */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem 0 0.5rem 0' }}>
-                    <img src={ConsorcioLogo} alt="Consorcio Jurídico" style={{ width: 70, height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 8px #bdbdbd)' }} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2vh 0 1vh 0' }}>
+                    <img src={ConsorcioLogo} alt="Consorcio Jurídico" style={{ width: 'clamp(40px,7vw,90px)', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 0.3vh 1.2vh #bdbdbd)' }} />
                 </div>
                 {/* Jerarquía */}
                 <JerarquiaConR
                     executiveTree={executiveTree}
                     loadingJerarquia={loadingJerarquia}
-                    errorJerarquia={errorJerarquia}
+                    errorJerarquia={errorJerarquia} 
                     selectedExecutiveNode={selectedExecutiveNode}
                     allHierarchyIds={allHierarchyIds}
                     setSelectedExecutives={setSelectedExecutives}
@@ -746,13 +765,13 @@ const ModalMetasContent = () => {
                 />
             </div>
 
-            {/* Columna derecha - Inputs y Tabla principal */}
-            <div className="flex-1 flex flex-col gap-3" style={{ minWidth: 0 }}>
+        {/* Bloque 2: Inputs */}
+        <div className="metas-block metas-block-2 flex-1 flex flex-col gap-3 min-w-0 w-full">
                 {/* Fila de inputs */}
-                <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)]" style={{overflowX: 'auto'}}>
-                    <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem', minWidth: 900 }}>
+                <div className="bg-white rounded-lg p-2 sm:p-3 shadow border border-[var(--color-jerarquia1)] w-full" style={{overflowX: 'auto'}}>
+                    <div style={{ display: 'flex', flexDirection: 'row', gap: '2vw', minWidth: 'min(900px,100vw)', width: '100%' }}>
                         {/* Cuentas */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 70 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '48px', width: 'clamp(48px,7vw,90px)' }}>
                             <label>Cuentas</label>
                             <div className="relative">
                                 <InputNumber
@@ -786,7 +805,7 @@ const ModalMetasContent = () => {
                             {/* inline error message removed: toasts + icon handle feedback */}
                         </div>
                         {/* Titulares */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 70 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '48px', width: 'clamp(48px,7vw,90px)' }}>
                             <label>Titulares</label>
                             <div className="relative">
                                 <InputNumber
@@ -820,7 +839,7 @@ const ModalMetasContent = () => {
                         </div>
 
                         {/* Negociaciones */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 80 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '56px', width: 'clamp(56px,8vw,110px)' }}>
                             <label>Negocians</label>
                             <div className="relative">
                                 <InputNumber
@@ -861,7 +880,7 @@ const ModalMetasContent = () => {
                         </div>
 
                         {/* Cumplimientos */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 80 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '56px', width: 'clamp(56px,8vw,110px)' }}>
                             <label>Cmplmtos</label>
                             <div className="relative">
                                 <InputNumber
@@ -897,7 +916,7 @@ const ModalMetasContent = () => {
                         </div>
 
                         {/* Monto Cumplido */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 120 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '80px', width: 'clamp(80px,12vw,160px)' }}>
                             <label>M. Cumplido</label>
                             <div className="relative">
                                 {(() => {
@@ -968,8 +987,8 @@ const ModalMetasContent = () => {
                         </div>
 
                         {/* Saldo Solucionado */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 120 }}>
-                            <label>S. Solucionado</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '80px', width: 'clamp(80px,12vw,160px)' }}>
+                            <label>S. Solunado</label>
                             <div className="relative">
                                 {(() => {
                                     const err = inputErrors.saldoSolucionado;
@@ -1039,7 +1058,7 @@ const ModalMetasContent = () => {
                         </div>
 
                         {/* Segmento */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 80 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '56px', width: 'clamp(56px,8vw,110px)' }}>
                             <label>Segmento</label>
                             <input
                                 type="text"
@@ -1051,7 +1070,7 @@ const ModalMetasContent = () => {
                         </div>
 
                         {/* Hora Entrada */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 110, position: 'relative' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '72px', width: 'clamp(72px,10vw,140px)', position: 'relative' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                 <label>H. Entrada</label>
                                 {inputErrors.horaEntrada && (
@@ -1102,7 +1121,7 @@ const ModalMetasContent = () => {
                         </div>
 
                         {/* Hora Salida */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 110, position: 'relative' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '72px', width: 'clamp(72px,10vw,140px)', position: 'relative' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                 <label>H. Salida</label>
                                 {inputErrors.horaSalida && (
@@ -1154,13 +1173,12 @@ const ModalMetasContent = () => {
                 </div>
 
                 {/* Tabla principal */}
-                <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex-1 flex flex-col" style={{ minWidth: 0, minHeight: 0 }}>
-                    {/* Tabla con scroll */}
-                    <div style={{ maxHeight: "40vh", overflow: "auto", marginBottom: "1rem" }} className="scrollbar-gray">
-                        <table className="modal-table">
+        <div className="metas-block metas-block-3 bg-white rounded-lg p-2 sm:p-3 shadow border border-[var(--color-jerarquia1)] flex-1 flex flex-col min-w-0 min-h-0 w-full mt-2">
+            <div style={{ maxHeight: "32vh", overflow: "auto" }} className="scrollbar-gray w-full">
+                <table className="modal-table">
                             <thead>
                                 <tr>
-                                    <th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>
                                         <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                                             <input
                                                 type="checkbox"
@@ -1171,17 +1189,17 @@ const ModalMetasContent = () => {
                                             Cambiar
                                         </span>
                                     </th>
-                                    <th>Ejecutivo</th>
-                                    <th>Usuario</th>
-                                    <th>Cuentas</th>
-                                    <th>Titulares</th>
-                                    <th>Negociaciones</th>
-                                    <th>Cumplimientos</th>
-                                    <th>Monto Cumplido</th>
-                                    <th>Saldo Solucionado</th>
-                                    <th>Segmento</th>
-                                    <th>H.Entrada</th>
-                                    <th>H.Salida</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Ejecutivo</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Usuario</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Cuentas</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Titulares</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Negociaciones</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Cumplimientos</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Monto Cumplido</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Saldo Solucionado</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Segmento</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>H.Entrada</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>H.Salida</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1231,7 +1249,9 @@ const ModalMetasContent = () => {
                                             <tr 
                                                 key={rowKey} 
                                                 className={selectedRows.includes(rowKey) ? 'row-selected' : ''} 
-                                                style={{ cursor: 'pointer' }}
+                                                style={selectedRows.includes(rowKey)
+                                                    ? { cursor: 'pointer', background: 'var(--color-jerarquia1)', color: '#000' }
+                                                    : { cursor: 'pointer' }}
                                                 onClick={() => handleRowCheckbox(rowKey)}
                                             >
                                                 <td>
@@ -1242,60 +1262,44 @@ const ModalMetasContent = () => {
                                                         onClick={(e) => e.stopPropagation()}
                                                     />
                                                 </td>
-                                                <td style={{ minWidth: 180, maxWidth: 260, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={safe(row.ejecutivo) || safe(row.nombreEjecutivo) || safe(row.nombre)}>
+                                                <td style={{ minWidth: '120px', maxWidth: '22vw', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={safe(row.ejecutivo) || safe(row.nombreEjecutivo) || safe(row.nombre)}>
                                                     {safe(row.ejecutivo) || safe(row.nombreEjecutivo) || safe(row.nombre)}
                                                 </td>
-                                                <td>{safe(row.usuario) || safe(row.usuarioEjecutivo) || safe(row.clave)}</td>
-                                                <td style={{ textAlign: 'center', padding: '8px' }}>
-                                                    <span>
-                                                        {safe(row.cuentas, safe(row.totalCuentas, 0))}
-                                                    </span>
+                                                <td style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={safe(row.usuario) || safe(row.usuarioEjecutivo) || safe(row.clave)}>
+                                                    {safe(row.usuario) || safe(row.usuarioEjecutivo) || safe(row.clave)}
                                                 </td>
-                                                <td style={{ textAlign: 'center', padding: '8px' }}>
-                                                    <span>
-                                                        {safe(row.titulares, safe(row.totalTitulares, 0))}
-                                                    </span>
+                                                <td style={{ textAlign: 'center', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={String(safe(row.cuentas, safe(row.totalCuentas, 0)))}>
+                                                    {safe(row.cuentas, safe(row.totalCuentas, 0))}
                                                 </td>
-                                                <td style={{ textAlign: 'center', padding: '8px' }}>
-                                                    <span>
-                                                        {safe(row.negociaciones, safe(row.totalNegociaciones, 0))}
-                                                    </span>
+                                                <td style={{ textAlign: 'center', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={String(safe(row.titulares, safe(row.totalTitulares, 0)))}>
+                                                    {safe(row.titulares, safe(row.totalTitulares, 0))}
                                                 </td>
-                                                <td style={{ textAlign: 'center', padding: '8px' }}>
-                                                    <span>
-                                                        {safe(row.cumplimientos, safe(row.totalCumplimientos, 0))}
-                                                    </span>
+                                                <td style={{ textAlign: 'center', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={String(safe(row.negociaciones, safe(row.totalNegociaciones, 0)))}>
+                                                    {safe(row.negociaciones, safe(row.totalNegociaciones, 0))}
                                                 </td>
-                                                <td style={{ textAlign: 'center', padding: '8px' }}>
-                                                    <span>
-                                                        {(() => {
-                                                            const originalValue = safe(row.montoCumplido, safe(row.monto_cumplido, 0));
-                                                            return formatCurrencyForDisplay(originalValue);
-                                                        })()}
-                                                    </span>
+                                                <td style={{ textAlign: 'center', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={String(safe(row.cumplimientos, safe(row.totalCumplimientos, 0)))}>
+                                                    {safe(row.cumplimientos, safe(row.totalCumplimientos, 0))}
                                                 </td>
-                                                <td style={{ textAlign: 'center', padding: '8px' }}>
-                                                    <span>
-                                                        {(() => {
-                                                            const originalValue = safe(row.saldoSolucionado, safe(row.saldo_solucionado, 0));
-                                                            return formatCurrencyForDisplay(originalValue);
-                                                        })()}
-                                                    </span>
+                                                <td style={{ textAlign: 'center', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={formatCurrencyForDisplay(safe(row.montoCumplido, safe(row.monto_cumplido, 0)))}>
+                                                    {(() => {
+                                                        const originalValue = safe(row.montoCumplido, safe(row.monto_cumplido, 0));
+                                                        return formatCurrencyForDisplay(originalValue);
+                                                    })()}
                                                 </td>
-                                                <td style={{ textAlign: 'center', padding: '8px' }}>
-                                                    <span>
-                                                        {safe(row.segmento, safe(row.nombreSegmento, '-'))}
-                                                    </span>
+                                                <td style={{ textAlign: 'center', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={formatCurrencyForDisplay(safe(row.saldoSolucionado, safe(row.saldo_solucionado, 0)))}>
+                                                    {(() => {
+                                                        const originalValue = safe(row.saldoSolucionado, safe(row.saldo_solucionado, 0));
+                                                        return formatCurrencyForDisplay(originalValue);
+                                                    })()}
                                                 </td>
-                                                <td style={{ textAlign: 'center', padding: '8px' }}>
-                                                    <span>
-                                                        {safe(row.horaEntrada, safe(row.hora_entrada, '-'))}
-                                                    </span>
+                                                <td style={{ textAlign: 'center', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={safe(row.segmento, safe(row.nombreSegmento, '-'))}>
+                                                    {safe(row.segmento, safe(row.nombreSegmento, '-'))}
                                                 </td>
-                                                <td style={{ textAlign: 'center', padding: '8px' }}>
-                                                    <span>
-                                                        {safe(row.horaSalida, safe(row.hora_salida, '-'))}
-                                                    </span>
+                                                <td style={{ textAlign: 'center', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={safe(row.horaEntrada, safe(row.hora_entrada, '-'))}>
+                                                    {safe(row.horaEntrada, safe(row.hora_entrada, '-'))}
+                                                </td>
+                                                <td style={{ textAlign: 'center', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={safe(row.horaSalida, safe(row.hora_salida, '-'))}>
+                                                    {safe(row.horaSalida, safe(row.hora_salida, '-'))}
                                                 </td>
                                             </tr>
                                         );
@@ -1305,7 +1309,7 @@ const ModalMetasContent = () => {
                         {/* El botón Guardar ahora está fuera de la tabla */}
                     </div>
                     {/* Botón Guardar dentro del contenedor de la tabla pero fuera del scroll */}
-                    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: '1rem' }}>
+                    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: '2vh' }}>
                         {(() => {
                             const montoCumplido = Number(parseCurrencyToNumber(inputValues.montoCumplido)) || 0;
                             const saldoSolucionado = Number(parseCurrencyToNumber(inputValues.saldoSolucionado)) || 0;
@@ -1329,19 +1333,10 @@ const ModalMetasContent = () => {
 
                             return (
                                 <button
-                                    className="modal-btn"
-                                    style={{ 
-                                        background: isDisabled ? '#9ca3af' : '#2b463c', 
-                                        color: '#fff', 
-                                        minWidth: 140, 
-                                        height: 40, 
-                                        fontWeight: 600, 
-                                        fontSize: 16, 
-                                        borderRadius: 6, 
-                                        opacity: isDisabled ? 0.5 : 1, 
-                                        cursor: isDisabled ? 'not-allowed' : 'pointer', 
-                                        boxShadow: '0 2px 8px #bdbdbb33' 
-                                    }}
+                                    type="button"
+                                    className={
+                                        `btn-success w-full sm:w-auto sm:min-w-[120px] px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center${isDisabled ? ' opacity-50 cursor-not-allowed' : ''}`
+                                    }
                                     onClick={handleGuardar}
                                     disabled={isDisabled}
                                     title={tooltipText}
@@ -1355,7 +1350,6 @@ const ModalMetasContent = () => {
             </div>
 
             {/* Scrollbar personalizado ahora solo con la clase global 'scrollbar-gray' */}
-        <Toaster position="top-center" richColors />
         </div>
     );
 };

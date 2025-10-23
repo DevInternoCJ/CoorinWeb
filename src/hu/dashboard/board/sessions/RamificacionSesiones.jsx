@@ -233,7 +233,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     return (
         <div className=" bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64 ramificacion-sesiones">
             {/* Header responsive */}
-            <div className="mb-4">
+            <div className="mb-1">
                 {/* Layout para pantallas grandes (md y superiores) */}
                 <div className="hidden lg:grid grid-cols-3 items-center">
                     {/* Columna izquierda - Título */}
