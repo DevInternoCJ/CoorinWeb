@@ -1,5 +1,5 @@
 ﻿// Ubicación: /Mark/Reportes/Cliente/DAOs/ReportesClienteDAO.cs
-using CoorinWeb.Loki.Global; // Para IDbContextFactory y EntityTypeHelper
+using CoorinWeb.Loki.Global;
 using Dapper;
 using Loki.DTOs.Reportes.ClienteDTOs;
 using System.Data;
@@ -7,31 +7,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text;
-using Microsoft.EntityFrameworkCore; // Necesario si EntityTypeHelper lo requiere
+using Microsoft.EntityFrameworkCore; // O el namespace correcto para DbContext
+using Microsoft.Data.SqlClient; // O System.Data.SqlClient según tu proyecto
 
 namespace Loki.Mark.Reportes.Cliente.DAOs
 {
 	public class ReportesClienteDAO : IReportesClienteDAO
 	{
 		private readonly IDbContextFactory _dbContextFactory;
-		// Asumiendo que EntityTypeHelper es estático o inyectado si es un servicio
-		// private readonly EntityTypeHelper _entityTypeHelper;
 
-		// Ajusta el constructor si EntityTypeHelper se inyecta
-		public ReportesClienteDAO(IDbContextFactory dbContextFactory /*, EntityTypeHelper entityTypeHelper */)
+		// Caché simple para almacenar los nombres de parámetros obtenidos (opcional pero recomendado)
+		// private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, List<string>> _parameterNameCache = new(); // Removido
+
+		public ReportesClienteDAO(IDbContextFactory dbContextFactory)
 		{
 			_dbContextFactory = dbContextFactory;
-			// _entityTypeHelper = entityTypeHelper;
 		}
 
 		public async Task<IEnumerable<ReporteDefinicionDto>> GetReporteDefinicionesAsync(string servidor)
 		{
-			var context = _dbContextFactory.GetDbContext(servidor, "Collection"); // O donde esté la tabla ReportesAlCliente
-
-			// Usamos EntityTypeHelper para obtener los datos dinámicos
+			var context = _dbContextFactory.GetDbContext(servidor, "Collection"); // O donde esté ReportesAlCliente
 			var definicionesDinamicas = await EntityTypeHelper.GetFullEntityTable(context, "ReportesAlCliente");
 
-			// Filtramos y mapeamos manualmente a DTO
 			var definicionesDto = definicionesDinamicas
 				.Cast<dynamic>()
 				.Where(d => d.Activo == true)
@@ -39,7 +36,7 @@ namespace Loki.Mark.Reportes.Cliente.DAOs
 				{
 					IdReporte = d.IdReporte,
 					Reporte = d.Reporte,
-					Descripcion = d.Descripción, // Asegúrate que el nombre de propiedad sea correcto
+					Descripcion = d.Descripción, // Cuidado con la tilde
 					IdCartera = d.IdCartera,
 					RequiereProducto = d.ParamProducto,
 					RequiereDesde = d.ParamDesde,
@@ -50,79 +47,165 @@ namespace Loki.Mark.Reportes.Cliente.DAOs
 			return definicionesDto;
 		}
 
+		// --- INICIO DEL MÉTODO COMPLETO ---
+		/// <summary>
+		/// Ejecuta dinámicamente un reporte definido en la tabla ReportesAlCliente.
+		/// Obtiene los nombres de los parámetros requeridos desde los metadatos de la BD.
+		/// Puede ejecutar tanto Procedimientos Almacenados (SP) como Funciones de Tabla (Fn).
+		/// Maneja reportes que devuelven múltiples conjuntos de resultados (tablas).
+		/// </summary>
+		/// <param name="servidor">El nombre del servidor donde se ejecutará la consulta (obtenido del claim).</param>
+		/// <param name="definicion">Un objeto 'dynamic' que contiene la fila de configuración de ReportesAlCliente para el reporte solicitado.</param>
+		/// <param name="parametrosUsuario">El DTO con los parámetros proporcionados por el usuario (fechas, idProducto, etc.).</param>
+		/// <returns>
+		/// Un diccionario donde cada clave es el nombre de una tabla devuelta por el reporte
+		/// y el valor es una lista de objetos 'dynamic' que representan las filas de esa tabla.
+		/// </returns>
 		public async Task<Dictionary<string, IEnumerable<dynamic>>> GenerarReporteAsync(
-			string servidor,
-			dynamic definicion, // Recibe la definición dinámica
-			GenerarReporteRequestDto parametrosUsuario)
+					string servidor,
+					dynamic definicion,
+					GenerarReporteRequestDto parametrosUsuario)
 		{
 			var dapperParams = new DynamicParameters();
-			var sqlBuilder = new StringBuilder();
-			var paramsList = new List<string>();
+			var sqlBuilder = new StringBuilder(); // Solo para funciones
+			string sqlFinal;
+			CommandType commandTypeFinal;
 
-			// Accedemos a las propiedades del objeto dynamic
+			// Accedemos a las propiedades una vez
 			bool esSP = definicion.EsProcedimientoOfunción;
 			string baseDatos = definicion.BaseDatos;
-			string esquema = definicion.Esquema;
-			string funcionStore = definicion.FunciónStore;
+			string esquema = string.IsNullOrWhiteSpace((string?)definicion.Esquema) ? "dbo" : definicion.Esquema;
+			string funcionStoreOriginal = definicion.FunciónStore;
 			bool nombresTabla = definicion.NombresTabla;
 			bool paramDesde = definicion.ParamDesde;
 			bool paramHasta = definicion.ParamHasta;
 			bool paramProducto = definicion.ParamProducto;
-			short idCartera = definicion.IdCartera; // Asumiendo que IdCartera está en la definición
-			short idReporte = definicion.IdReporte; // Asumiendo que IdReporte está en la definición
+			short idCartera = definicion.IdCartera;
+			short idReporte = definicion.IdReporte;
 
-			// 1. Construir llamada
-			if (esSP) { sqlBuilder.Append($"EXEC {baseDatos}.{esquema}.[{funcionStore}] "); }
-			else { sqlBuilder.Append($"SELECT * FROM {baseDatos}.{esquema}.{funcionStore}("); }
-
-			// 2. Añadir parámetros
-			if (paramDesde) { paramsList.Add("@Fecha_Desde"); dapperParams.Add("Fecha_Desde", parametrosUsuario.FechaDesde?.ToString("yyyy-MM-dd")); }
-			if (paramHasta) { paramsList.Add("@Fecha_Hasta"); dapperParams.Add("Fecha_Hasta", parametrosUsuario.FechaHasta?.ToString("yyyy-MM-dd")); }
-			if (idCartera == 5 && idReporte == 21 && !string.IsNullOrEmpty(parametrosUsuario.Segmento))
+			// Nombre limpio del objeto (sin BD, con esquema si no es dbo, con corchetes)
+			string funcionStoreLimpio = funcionStoreOriginal.Replace("[", "").Replace("]", "");
+			if (funcionStoreLimpio.Contains(".."))
 			{
-				paramsList.Add("@iProducto");
-				int valorSegmento = parametrosUsuario.Segmento.Equals("Castigo", StringComparison.OrdinalIgnoreCase) ? 10 : 40;
-				dapperParams.Add("iProducto", valorSegmento);
+				funcionStoreLimpio = funcionStoreLimpio.Split(new[] { ".." }, StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? funcionStoreLimpio;
 			}
-			else if (paramProducto)
-			{
-				paramsList.Add("@iProducto"); dapperParams.Add("iProducto", parametrosUsuario.IdProducto);
-			}
-			// Añadir otros parámetros comunes si es necesario
+			string nombreCalificado = $"[{esquema}].[{funcionStoreLimpio}]"; // Construimos Schema.Object
 
-			// 3. Parámetro de salida
-			if (nombresTabla && esSP)
-			{
-				paramsList.Add("@NombresTablas = @NombresParam OUTPUT");
-				dapperParams.Add("NombresParam", dbType: DbType.String, direction: ParameterDirection.Output, size: 8000);
-			}
+			string baseDatosParaConexion = baseDatos.StartsWith("db", StringComparison.OrdinalIgnoreCase)
+											? baseDatos.Substring(2)
+											: baseDatos;
 
-			// 4. Finalizar SQL
-			if (esSP) { sqlBuilder.Append(string.Join(", ", paramsList)); }
-			else { sqlBuilder.Append(string.Join(", ", paramsList.Select(p => p.Split('=')[0].Trim()))).Append(')'); }
+			List<string> expectedParamNames; // No inicializamos aquí
 
-			// 5. Ejecutar y procesar
-			var resultados = new Dictionary<string, IEnumerable<dynamic>>();
-			using (var connection = _dbContextFactory.GetSqlConnection(servidor, baseDatos))
+			using (var connection = _dbContextFactory.GetSqlConnection(servidor, baseDatosParaConexion))
 			{
-				using (var multi = await connection.QueryMultipleAsync(sqlBuilder.ToString(), dapperParams, commandType: esSP ? CommandType.StoredProcedure : CommandType.Text))
+				await connection.OpenAsync();
+
+				// --- 1. Obtener Nombres de Parámetros Reales (SIEMPRE desde BD) ---
+				// Limpiamos corchetes del nombre para la búsqueda en metadatos
+				expectedParamNames = await GetRoutineParameterNamesAsync(connection, esquema, funcionStoreLimpio.Replace("[", "").Replace("]", ""));
+
+				// --- 2. Construir Objeto Dapper Parameters ---
+				int dateParamIndex = 0;
+				foreach (string paramName in expectedParamNames)
+				{
+					string dapperName = paramName.Substring(1); // Nombre sin '@' para Dapper
+
+					// Asignación de Fechas
+					if (paramName.IndexOf("fecha", StringComparison.OrdinalIgnoreCase) >= 0)
+					{
+						DateTime? dateValue = null;
+						if (paramDesde && paramHasta) dateValue = (dateParamIndex++ == 0) ? parametrosUsuario.FechaDesde : parametrosUsuario.FechaHasta;
+						else if (paramHasta) dateValue = parametrosUsuario.FechaHasta;
+						else if (paramDesde) dateValue = parametrosUsuario.FechaDesde;
+
+						if (dateValue.HasValue) dapperParams.Add(dapperName, dateValue.Value.ToString("yyyy-MM-dd"));
+					}
+					// Asignación de Producto/Segmento
+					else if (paramName.IndexOf("producto", StringComparison.OrdinalIgnoreCase) >= 0)
+					{
+						if (idCartera == 5 && idReporte == 21 && !string.IsNullOrEmpty(parametrosUsuario.Segmento))
+						{
+							int valorSegmento = parametrosUsuario.Segmento.Equals("Castigo", StringComparison.OrdinalIgnoreCase) ? 10 : 40;
+							dapperParams.Add(dapperName, valorSegmento);
+						}
+						else if (paramProducto)
+						{
+							dapperParams.Add(dapperName, parametrosUsuario.IdProducto);
+						}
+					}
+					// Añadir lógica para otros parámetros
+				}
+
+				// Parámetro de salida
+				if (nombresTabla && esSP)
+				{
+					dapperParams.Add("NombresParam", dbType: DbType.String, direction: ParameterDirection.Output, size: 8000);
+				}
+
+				// --- 3. Determinar SQL final y CommandType ---
+				if (esSP)
+				{
+					sqlFinal = nombreCalificado; // [Schema].[NombreSP]
+					commandTypeFinal = CommandType.StoredProcedure;
+				}
+				else // Es Función
+				{
+					sqlBuilder.Append($"SELECT * FROM {nombreCalificado}("); // [Schema].[NombreFn]
+					sqlBuilder.Append(string.Join(", ", expectedParamNames)); // (@param1, @param2...)
+					sqlBuilder.Append(')');
+					sqlFinal = sqlBuilder.ToString();
+					commandTypeFinal = CommandType.Text;
+				}
+
+				int commandTimeoutSeconds = 1800;
+				// --- 4. Ejecutar y Procesar Resultados ---
+				var resultados = new Dictionary<string, IEnumerable<dynamic>>();
+				using (var multi = await connection.QueryMultipleAsync(
+					sqlFinal,
+					dapperParams,
+					commandType: commandTypeFinal,
+					commandTimeout: commandTimeoutSeconds
+					))
 				{
 					int tableIndex = 0;
-					string[] nombresTablaArray = nombresTabla ? dapperParams.Get<string>("NombresParam")?.Split('|') ?? Array.Empty<string>() : Array.Empty<string>();
+					string[] nombresTablaArray = (nombresTabla && esSP) ? dapperParams.Get<string>("NombresParam")?.Split('|') ?? Array.Empty<string>() : Array.Empty<string>();
 
 					while (!multi.IsConsumed)
 					{
 						var tablaActual = await multi.ReadAsync<dynamic>();
 						if (tablaActual.Any())
 						{
-							string nombreTabla = (nombresTablaArray.Length > tableIndex) ? nombresTablaArray[tableIndex].Trim() : $"Tabla{tableIndex + 1}";
+							string nombreTabla = (nombresTablaArray.Length > tableIndex && !string.IsNullOrWhiteSpace(nombresTablaArray[tableIndex]))
+													? nombresTablaArray[tableIndex].Trim()
+													: $"Tabla{tableIndex + 1}";
 							resultados.Add(nombreTabla, tablaActual);
 						}
 						tableIndex++;
 					}
 				}
-			}
-			return resultados;
+				return resultados;
+			} // La conexión se cierra aquí
+		}
+
+
+		/// <summary>
+		/// Obtiene los nombres de los parámetros de un SP o Función desde los metadatos de SQL Server.
+		/// </summary>
+		private async Task<List<string>> GetRoutineParameterNamesAsync(SqlConnection connection, string schema, string routineName)
+		{
+			// Limpiamos corchetes aquí también por seguridad
+			routineName = routineName.Replace("[", "").Replace("]", "");
+			string sql = @"
+                SELECT PARAMETER_NAME
+                FROM INFORMATION_SCHEMA.PARAMETERS
+                WHERE SPECIFIC_SCHEMA = @SchemaName
+                  AND SPECIFIC_NAME = @RoutineName
+                  AND PARAMETER_MODE = 'IN' -- Solo parámetros de entrada
+                ORDER BY ORDINAL_POSITION;
+            ";
+			var parameters = await connection.QueryAsync<string>(sql, new { SchemaName = schema, RoutineName = routineName });
+			return parameters.ToList();
 		}
 	}
 }
