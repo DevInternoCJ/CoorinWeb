@@ -90,3 +90,7 @@ node_modules/
 /Properties/PublishProfiles/
 *.pubxml
 *.publish.xml
+
+# Archivos Excel
+*.xlsx
+*.xls

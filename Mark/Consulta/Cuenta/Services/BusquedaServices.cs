@@ -135,13 +135,26 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     rutaExcel = $"/api/busquedas/download-excel?filename={fileName}";
                 }
 
-                // === Convertir a lista de diccionarios ===
+                // convertir a lista de diccionarios 
                 var datosResultado = new List<Dictionary<string, object>>();
                 foreach (DataRow row in tblCuentas.Rows)
                 {
                     var item = new Dictionary<string, object>();
                     foreach (DataColumn col in tblCuentas.Columns)
-                        item[col.ColumnName] = row[col];
+                    {
+                        var value = row[col];
+
+                        if (col.ColumnName.Equals("Cuenta", StringComparison.OrdinalIgnoreCase) &&
+                            value != null && value != DBNull.Value)
+                        {
+                            string cuenta = value.ToString();
+                            if (cuenta.Length > 4)
+                            {
+                                value = new string('X', cuenta.Length - 5) + cuenta.Substring(cuenta.Length - 5);
+                            }
+                        }
+                        item[col.ColumnName] = value;
+                    }
                     datosResultado.Add(item);
                 }
 
