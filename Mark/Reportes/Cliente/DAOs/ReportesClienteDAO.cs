@@ -97,95 +97,94 @@ namespace Loki.Mark.Reportes.Cliente.DAOs
 
 			List<string> expectedParamNames; // No inicializamos aquí
 
-			using (var connection = _dbContextFactory.GetSqlConnection(servidor, baseDatosParaConexion))
+			using var connection = _dbContextFactory.GetSqlConnection(servidor, baseDatosParaConexion);
+			await connection.OpenAsync();
+
+			// --- 1. Obtener Nombres de Parámetros Reales (SIEMPRE desde BD) ---
+			// Limpiamos corchetes del nombre para la búsqueda en metadatos
+			expectedParamNames = await GetRoutineParameterNamesAsync(connection, esquema, funcionStoreLimpio.Replace("[", "").Replace("]", ""));
+
+			// --- 2. Construir Objeto Dapper Parameters ---
+			int dateParamIndex = 0;
+			foreach (string paramName in expectedParamNames)
 			{
-				await connection.OpenAsync();
+				string dapperName = paramName.Substring(1); // Nombre sin '@' para Dapper
 
-				// --- 1. Obtener Nombres de Parámetros Reales (SIEMPRE desde BD) ---
-				// Limpiamos corchetes del nombre para la búsqueda en metadatos
-				expectedParamNames = await GetRoutineParameterNamesAsync(connection, esquema, funcionStoreLimpio.Replace("[", "").Replace("]", ""));
-
-				// --- 2. Construir Objeto Dapper Parameters ---
-				int dateParamIndex = 0;
-				foreach (string paramName in expectedParamNames)
+				// Asignación de Fechas
+				if (paramName.Contains("fecha", StringComparison.OrdinalIgnoreCase))
 				{
-					string dapperName = paramName.Substring(1); // Nombre sin '@' para Dapper
+					DateTime? dateValue = null;
+					if (paramDesde && paramHasta) dateValue = (dateParamIndex++ == 0) ? parametrosUsuario.FechaDesde : parametrosUsuario.FechaHasta;
+					else if (paramHasta) dateValue = parametrosUsuario.FechaHasta;
+					else if (paramDesde) dateValue = parametrosUsuario.FechaDesde;
 
-					// Asignación de Fechas
-					if (paramName.IndexOf("fecha", StringComparison.OrdinalIgnoreCase) >= 0)
+					if (dateValue.HasValue) dapperParams.Add(dapperName, dateValue.Value.ToString("yyyy-MM-dd"));
+				}
+				// Asignación de Producto/Segmento
+				else if (paramName.Contains("producto", StringComparison.OrdinalIgnoreCase))
+				{
+					if (idCartera == 5 && idReporte == 21 && !string.IsNullOrEmpty(parametrosUsuario.Segmento))
 					{
-						DateTime? dateValue = null;
-						if (paramDesde && paramHasta) dateValue = (dateParamIndex++ == 0) ? parametrosUsuario.FechaDesde : parametrosUsuario.FechaHasta;
-						else if (paramHasta) dateValue = parametrosUsuario.FechaHasta;
-						else if (paramDesde) dateValue = parametrosUsuario.FechaDesde;
-
-						if (dateValue.HasValue) dapperParams.Add(dapperName, dateValue.Value.ToString("yyyy-MM-dd"));
+						int valorSegmento = parametrosUsuario.Segmento.Equals("Castigo", StringComparison.OrdinalIgnoreCase) ? 10 : 40;
+						dapperParams.Add(dapperName, valorSegmento);
 					}
-					// Asignación de Producto/Segmento
-					else if (paramName.IndexOf("producto", StringComparison.OrdinalIgnoreCase) >= 0)
+					else if (paramProducto)
 					{
-						if (idCartera == 5 && idReporte == 21 && !string.IsNullOrEmpty(parametrosUsuario.Segmento))
-						{
-							int valorSegmento = parametrosUsuario.Segmento.Equals("Castigo", StringComparison.OrdinalIgnoreCase) ? 10 : 40;
-							dapperParams.Add(dapperName, valorSegmento);
-						}
-						else if (paramProducto)
-						{
-							dapperParams.Add(dapperName, parametrosUsuario.IdProducto);
-						}
-					}
-					// Añadir lógica para otros parámetros
-				}
-
-				// Parámetro de salida
-				if (nombresTabla && esSP)
-				{
-					dapperParams.Add("NombresParam", dbType: DbType.String, direction: ParameterDirection.Output, size: 8000);
-				}
-
-				// --- 3. Determinar SQL final y CommandType ---
-				if (esSP)
-				{
-					sqlFinal = nombreCalificado; // [Schema].[NombreSP]
-					commandTypeFinal = CommandType.StoredProcedure;
-				}
-				else // Es Función
-				{
-					sqlBuilder.Append($"SELECT * FROM {nombreCalificado}("); // [Schema].[NombreFn]
-					sqlBuilder.Append(string.Join(", ", expectedParamNames)); // (@param1, @param2...)
-					sqlBuilder.Append(')');
-					sqlFinal = sqlBuilder.ToString();
-					commandTypeFinal = CommandType.Text;
-				}
-
-				int commandTimeoutSeconds = 1800;
-				// --- 4. Ejecutar y Procesar Resultados ---
-				var resultados = new Dictionary<string, IEnumerable<dynamic>>();
-				using (var multi = await connection.QueryMultipleAsync(
-					sqlFinal,
-					dapperParams,
-					commandType: commandTypeFinal,
-					commandTimeout: commandTimeoutSeconds
-					))
-				{
-					int tableIndex = 0;
-					string[] nombresTablaArray = (nombresTabla && esSP) ? dapperParams.Get<string>("NombresParam")?.Split('|') ?? Array.Empty<string>() : Array.Empty<string>();
-
-					while (!multi.IsConsumed)
-					{
-						var tablaActual = await multi.ReadAsync<dynamic>();
-						if (tablaActual.Any())
-						{
-							string nombreTabla = (nombresTablaArray.Length > tableIndex && !string.IsNullOrWhiteSpace(nombresTablaArray[tableIndex]))
-													? nombresTablaArray[tableIndex].Trim()
-													: $"Tabla{tableIndex + 1}";
-							resultados.Add(nombreTabla, tablaActual);
-						}
-						tableIndex++;
+						dapperParams.Add(dapperName, parametrosUsuario.IdProducto);
 					}
 				}
-				return resultados;
-			} // La conexión se cierra aquí
+				// Añadir lógica para otros parámetros
+			}
+
+			// Parámetro de salida
+			if (nombresTabla && esSP)
+			{
+				dapperParams.Add("NombresParam", dbType: DbType.String, direction: ParameterDirection.Output, size: 8000);
+			}
+
+			// --- 3. Determinar SQL final y CommandType ---
+			if (esSP)
+			{
+				sqlFinal = nombreCalificado; // [Schema].[NombreSP]
+				commandTypeFinal = CommandType.StoredProcedure;
+			}
+			else // Es Función
+			{
+				sqlBuilder.Append($"SELECT * FROM {nombreCalificado}("); // [Schema].[NombreFn]
+				sqlBuilder.Append(string.Join(", ", expectedParamNames)); // (@param1, @param2...)
+				sqlBuilder.Append(')');
+				sqlFinal = sqlBuilder.ToString();
+				commandTypeFinal = CommandType.Text;
+			}
+
+			int commandTimeoutSeconds = 1800;
+			// --- 4. Ejecutar y Procesar Resultados ---
+			var resultados = new Dictionary<string, IEnumerable<dynamic>>();
+			using (var multi = await connection.QueryMultipleAsync(
+				sqlFinal,
+				dapperParams,
+				commandType: commandTypeFinal,
+				commandTimeout: commandTimeoutSeconds
+				))
+			{
+				int tableIndex = 0;
+				string[] nombresTablaArray = (nombresTabla && esSP) ? dapperParams.Get<string>("NombresParam")?.Split('|') ?? Array.Empty<string>() : Array.Empty<string>();
+
+				while (!multi.IsConsumed)
+				{
+					var tablaActual = await multi.ReadAsync<dynamic>();
+					if (tablaActual.Any())
+					{
+						string nombreTabla = (nombresTablaArray.Length > tableIndex && !string.IsNullOrWhiteSpace(nombresTablaArray[tableIndex]))
+												? nombresTablaArray[tableIndex].Trim()
+												: $"Tabla{tableIndex + 1}";
+						resultados.Add(nombreTabla, tablaActual);
+					}
+					tableIndex++;
+				}
+			}
+			return resultados;
+			// La conexión se cierra aquí
 		}
 
 
