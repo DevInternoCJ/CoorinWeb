@@ -4,6 +4,7 @@ using CoorinWeb.Loki.Global;
 using CoorinWeb.Loki.Mark.Auth;
 using Loki.Mark.Administracion.Gespa.Frases.Interfaces;
 using Loki.DTOs.FrasesDTOs;
+using static CoorinWeb.Loki.Global.EntityTypeHelper;
 
 namespace Loki.Mark.Administracion.Gespa.Frases.DAOs
 {
@@ -42,6 +43,32 @@ namespace Loki.Mark.Administracion.Gespa.Frases.DAOs
         }
 
 
+        public async Task<int> ActivarFrase(string servidor, int idRegistro, bool activo)
+        {
+            var contextCollection = _dbContFactory.GetDbContext(servidor, "Collection");
 
+            var entityType = EntityTypeHelper.GetModelTypeByContext(contextCollection, "FrasesMotivacion");
+
+            var filtros = new List<DynamicFilter>
+    {
+        new DynamicFilter
+        {
+            Campo = "IdRegistro", 
+            Operador = "=",
+            Valor = idRegistro
+        }
+    };
+            var camposActualizados = new Dictionary<string, object?>
+    {
+        { "FraseActiva", activo }
+    };
+
+            return await EntityTypeHelper.UpdateMultipleEntitiesAsync(
+                contextCollection,
+                entityType,
+                filtros,
+                camposActualizados
+            );
+        }
     }
 }

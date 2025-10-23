@@ -145,6 +145,7 @@ using Loki.Mark.Administracion.Gespa.Scripts.Services;
 using Loki.Mark.Reportes.Productividad.DAOs;
 using Loki.Mark.Reportes.Cliente.DAOs;
 using Loki.Mark.Reportes.Cliente.Services;
+using Loki.Mark.Administracion.Gespa.Frases.Services;
 
 
 
@@ -328,6 +329,7 @@ builder.Services.AddScoped<IPlantillasCorreoService, PlantillasCorreoService>();
 builder.Services.AddScoped<IPlantillasCorreoDao, PlantillasCorreoDao>();
 //frases
 builder.Services.AddScoped<IFrases, Loki.Mark.Administracion.Gespa.Frases.DAOs.FrasesDao>();
+builder.Services.AddScoped<IFrasesService, FrasesServices>();
 
 #endregion
 
