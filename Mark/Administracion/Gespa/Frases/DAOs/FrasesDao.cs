@@ -50,18 +50,18 @@ namespace Loki.Mark.Administracion.Gespa.Frases.DAOs
             var entityType = EntityTypeHelper.GetModelTypeByContext(contextCollection, "FrasesMotivacion");
 
             var filtros = new List<DynamicFilter>
-    {
-        new DynamicFilter
-        {
-            Campo = "IdRegistro", 
-            Operador = "=",
-            Valor = idRegistro
-        }
-    };
-            var camposActualizados = new Dictionary<string, object?>
-    {
-        { "FraseActiva", activo }
-    };
+            {
+                new DynamicFilter
+                {
+                    Campo = "IdRegistro", 
+                    Operador = "=",
+                    Valor = idRegistro
+                }
+            };
+                    var camposActualizados = new Dictionary<string, object?>
+            {
+                { "FraseActiva", activo }
+            };
 
             return await EntityTypeHelper.UpdateMultipleEntitiesAsync(
                 contextCollection,
