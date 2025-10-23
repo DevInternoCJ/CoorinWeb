@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { PostDataCharge } from '../../../../../../services/mark/albaz/LokiServices';
-import { useWalletProducts } from '../../../../../login/WalletProduct';
-import { useUserStore } from '../../../../../../contextGlobal/userStore';
+import { PostDataCharge } from '../../../../../services/mark/albaz/LokiServices';
+import { useWalletProducts } from '../../../../login/WalletProduct';
+import { useUserStore } from '../../../../../contextGlobal/userStore';
 
-const DataCharges = () => {
+const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
   // Estados
   const [ejemploCuentas, setEjemploCuentas] = useState(null);
   const [ejemploProducto, setEjemploProducto] = useState(null);
@@ -12,7 +12,7 @@ const DataCharges = () => {
   const [error, setError] = useState(null);
   const [draggedLabel, setDraggedLabel] = useState("");
   const user = useUserStore((state) => state.user);
-    const NombreEjecutivo = user?.nombre;
+  const NombreEjecutivo = user?.nombre;
 
   // Obtener datos del producto
   const { walletProducts, isLoading: isLoadingStore, error: errorStore } = useWalletProducts(); 
@@ -23,7 +23,7 @@ const DataCharges = () => {
   console.log("idProducto:", idProducto);
   console.log("idCartera:", idCartera);
 
-  // Fetch data cuando tengamos idCartera e idProducto
+    // Fetch data cuando tengamos idCartera e idProducto
   useEffect(() => {
     const fetchData = async () => {
       if (!idCartera || !idProducto) {
@@ -62,8 +62,12 @@ const DataCharges = () => {
 
           // Guardar scripts (opcional)
           if (response.scripts) {
-            setScripts(response.scripts);
-          }
+  setScripts(response.scripts);  // Guardar todos los scripts sin filtrar
+  
+  if (onScriptsLoaded) {
+    onScriptsLoaded(response.scripts);  // Enviar todos los scripts
+  }
+}
         } else {
           setError(response?.mensaje || "No se pudieron cargar los datos del servidor");
         }
@@ -76,7 +80,7 @@ const DataCharges = () => {
     };
 
     fetchData();
-  }, [idCartera, idProducto, isLoadingStore]);
+  }, [idCartera, idProducto, isLoadingStore]); // ✅ Agrega onScriptsLoaded a las dependencias
 
   // Handlers para drag and drop
   const handleDragStart = (e, labelText) => {
@@ -103,7 +107,7 @@ const DataCharges = () => {
     return String(value).trim();
   };
 
-  // Spinner de carga
+   // Spinner de carga
   if (loading || isLoadingStore) {
     return (
       <div className="min-h-60 flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl">
@@ -183,7 +187,7 @@ const DataCharges = () => {
             {cardData.map((item, index) => (
               <div
                 key={index}
-                className="bg-background-tertiary p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-200"
+                className="bg-background-tertiary p-2 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-200"
               >
                 <div
                   draggable="true"
@@ -249,32 +253,11 @@ const DataCharges = () => {
             </div>
           </div>
         )}
-
-        {/* Sección de Scripts (opcional) */}
-        {scripts.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Scripts Disponibles ({scripts.length})</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {scripts.slice(0, 6).map((script) => (
-                <div
-                  key={script.idScript}
-                  className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <h4 className="font-semibold text-sm text-gray-800 mb-1">{script.nombre}</h4>
-                  {script.descripcion && (
-                    <p className="text-xs text-gray-500 mb-2">{script.descripcion}</p>
-                  )}
-                  {script.script && (
-                    <p className="text-xs text-gray-600 line-clamp-2">{script.script}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
 export default DataCharges;
+
+

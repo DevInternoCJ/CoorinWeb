@@ -204,13 +204,14 @@ const Template = ({
           mensaje: mensaje,
           idEjecutivo,
         };
+        console.log("datos al guardar plantilla: ",payload)
         await UpdateTemplate(payload);
         toast.success("Plantilla actualizada correctamente.");
       } else {
         // Validar que no exista una plantilla con el mismo nombre
         const existeNombre = plantillas.some((p) =>
-          p.nombre.trim().toLowerCase()
-        );
+  p.nombre.trim().toLowerCase() === nombre.trim().toLowerCase()
+);
         if (existeNombre) {
           toast.warning(
             "Ya existe una plantilla con ese nombre. Elige otro nombre."
@@ -225,6 +226,7 @@ const Template = ({
           mensaje: mensaje,
           idEjecutivo,
         };
+        console.log("datos al guardar plantilla: ",payload)
         await SaveCreateTemplate(payload);
         toast.success("Plantilla creada correctamente.");
       }
