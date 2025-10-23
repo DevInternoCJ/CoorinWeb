@@ -49,12 +49,10 @@ namespace Loki.Mark.Administracion.Carteras.DAOs
             }
             catch (SqlException ex)
             {
-                Console.WriteLine($"SQL Error: {ex.Message}");
                 throw;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected Error: {ex.Message}");
                 throw;
             }
             finally
@@ -81,12 +79,10 @@ namespace Loki.Mark.Administracion.Carteras.DAOs
             }
             catch (SqlException ex)
             {
-                Console.WriteLine($"Error de SQL al eliminar la campaña: {ex.Message}");
                 return $"Error de base de datos al eliminar: {ex.Message}";
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error inesperado al eliminar la campaña: {ex.Message}");
                 return $"Error inesperado al eliminar: {ex.Message}";
             }
         }
@@ -110,12 +106,10 @@ namespace Loki.Mark.Administracion.Carteras.DAOs
             }
             catch (SqlException ex)
             {
-                Console.WriteLine($"Error de SQL al limpiar la campaña: {ex.Message}");
                 return $"Error de base de datos al limpiar: {ex.Message}";
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error inesperado al limpiar la campaña: {ex.Message}");
                 return $"Error inesperado al limpiar: {ex.Message}";
             }
         }

@@ -23,10 +23,6 @@ namespace Loki.Mark.Administracion.Ejecutivos.Metas.Services
         {
             string tipoBase = "Collection";
 
-            // Logging de información de conexión
-            _logger.LogInformation("Conectando a la base de datos - Servidor: {Servidor}, Base: {TipoBase}", servidor, tipoBase);
-            _logger.LogInformation("Consultando metas para ejecutivos: {EjecutivoIds}", string.Join(", ", ejecutivoIdsPropios));
-
             using (var connection = _dbContFactory.GetSqlConnection(servidor, tipoBase))
             {
                 if (connection.State != ConnectionState.Open)
@@ -58,11 +54,8 @@ namespace Loki.Mark.Administracion.Ejecutivos.Metas.Services
 
                 try
                 {
-                    _logger.LogDebug("Ejecutando query: {Query}", query);
 
                     var resultados = await connection.QueryAsync<MetasRequest>(query, new { EjecutivoIds = ejecutivoIdsPropios });
-
-                    _logger.LogInformation("Consulta exitosa. Se encontraron {Count} registros", resultados.Count());
 
                     foreach (var resultado in resultados)
                     {

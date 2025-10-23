@@ -9,7 +9,7 @@ namespace Loki.DTOs.BusquedaDTOs
         public int IdCartera { get; set; }
         public bool IncluirCuenta { get; set; }
         public bool IncluirUsuario { get; set; } = false;
-        [JsonIgnore]
+       
         public bool IncluirTelefono { get; set; } = false;
         public List<ParametroDto> Parametros { get; set; } = new();
         public List<AgruparDto> Agrupar { get; set; } = new();

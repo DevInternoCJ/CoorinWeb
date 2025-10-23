@@ -36,18 +36,18 @@ namespace Loki.Mark.Consulta.Generales.DAOs
         }
 
         public async Task<SearchResultDto> RealizaBusqueda(
-            string servidor,
-            int idCartera,
-            int idProducto,
-            bool esContar,
-            bool esCuentas,
-            bool esDetalle,
-            string concepto, 
-            int? idConsulta = null,
-            IEnumerable<ParameterDto>? parametrosExtra = null,
-            IEnumerable<AgruparDTO>? agrupamientoExtra = null,
-            DateTime? desde = null
-            )
+         string servidor,
+         int idCartera,
+         int idProducto,
+         bool esContar,
+         bool esCuentas,
+         bool esDetalle,
+         string concepto,
+         int? idConsulta = null,
+         IEnumerable<ParameterDto>? parametrosExtra = null,
+         IEnumerable<AgruparDTO>? agrupamientoExtra = null,
+         DateTime? desde = null
+         )
         {
             try
             {
@@ -59,7 +59,8 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 tblParametros.Rows.Clear();
                 tblAgrupar.Rows.Clear();
 
-                if (idConsulta.HasValue)
+                // SOLUCIÓN: Solo cargar desde consulta si idConsulta tiene valor
+                if (idConsulta.HasValue && idConsulta.Value > 0)
                 {
                     var consultaRow = AccionamientosQueryHelper.ConsultaGenerador.ObtenerConsulta(idConsulta.Value);
                     if (consultaRow == null)
@@ -116,16 +117,17 @@ namespace Loki.Mark.Consulta.Generales.DAOs
 
                 var consultaGenerador = new AccionamientosQueryHelper.ConsultaGenerador(_dbContextFactory);
 
+                // SOLUCIÓN: Pasar null en lugar de 0 cuando no hay idConsulta
                 var queryData = await consultaGenerador.QueryGeneral(
                     servidor,
                     idCartera,
-                    concepto, 
+                    concepto,
                     tblParametros,
                     tblAgrupar,
                     conteo,
                     desde ?? DateTime.MinValue,
                     idEjecutivo,
-                    idConsulta ?? 0
+                    idConsulta ?? -1  // ← Esto pasa null cuando no hay valor
                 );
 
                 Console.WriteLine("=== QUERY GENERADO POR QueryGeneral ===");

@@ -203,10 +203,10 @@ namespace Loki.Mark.Consulta.Historico.DAOs
 
         //historico archivo
         public async Task<DataSet> BuscarCuentasPorArchivoAsync(
-     DataTable cuentas,
-     ConsultaBaseRequest parametros,
-     string servidor,
-     string idEjecutivo)
+         DataTable cuentas,
+         ConsultaBaseRequest parametros,
+         string servidor,
+         string idEjecutivo)
         {
             var ds = new DataSet();
             string dbHistory = "History";
