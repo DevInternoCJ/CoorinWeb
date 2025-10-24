@@ -1096,7 +1096,7 @@ namespace CoorinWeb.Loki.Global
                 {
                     string concepto = drFila["Concepto"].ToString();
                     string campo = drFila["Campo"].ToString();
-                    string valores = drFila["Parámetros"].ToString();
+                    string valores = drFila["Valores"].ToString();
                     string sNot = valores.Contains("≠") ? "NOT" : "";
 
                     switch (concepto)
@@ -1123,8 +1123,24 @@ namespace CoorinWeb.Loki.Global
                             if (idProducto != null && !sFrom.Contains("Y.Producto_"))
                                 sFrom += "\tINNER JOIN dbCollection.Y.Producto_" + idProducto + " Y WITH (NOLOCK) ON C.idCuenta = Y.idcuenta \r\n";
 
+                            //if (drFila["Dato"].ToString() == "char")
+                            //    sWhere += "\tAND ISNULL(Y.[" + campo + "], '') " + sNot + " IN (" + valores.Replace("=", "'").Replace("≠", "'").Replace(",", "',") + "') \r\n";
                             if (drFila["Dato"].ToString() == "char")
-                                sWhere += "\tAND ISNULL(Y.[" + campo + "], '') " + sNot + " IN (" + valores.Replace("=", "'").Replace("≠", "'").Replace(",", "',") + "') \r\n";
+                            {
+                                // Si los valores ya vienen formateados con comillas simples, usarlos directamente
+                                if (valores.Contains("'"))
+                                {
+                                    sWhere += "\tAND ISNULL(Y.[" + campo + "], '') " + sNot + " IN (" + valores + ") \r\n";
+                                }
+                                else
+                                {
+                                    // Agregar comillas simples a cada valor
+                                    var valoresArray = valores.Split(',');
+                                    var valoresConComillas = string.Join(", ", valoresArray.Select(v => $"'{v.Trim()}'"));
+                                    sWhere += "\tAND ISNULL(Y.[" + campo + "], '') " + sNot + " IN (" + valoresConComillas + ") \r\n";
+                                }
+                            }
+
                             else if (drFila["Dato"].ToString() == "int")
                                 foreach (var val in valores.Replace("≠", "<>").Split(','))
                                     sWhere += "\tAND CASE WHEN ISNUMERIC(Y.[" + campo + "]) = 1 THEN CONVERT(MONEY, Y.[" + campo + "]) ELSE NULL END " + val + "\r\n";

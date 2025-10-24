@@ -52,26 +52,34 @@ namespace Loki.Controllers
         {
             try
             {
+                // === LOG EN CONTROLLER ===
+                Console.WriteLine($"🎯 CONTROLLER - IdConsulta recibido: {criteria.IdConsulta}");
+                Console.WriteLine($"🎯 CONTROLLER - Servidor: {criteria.Servidor}");
+                Console.WriteLine($"🎯 CONTROLLER - IdCartera: {criteria.IdCartera}");
+                Console.WriteLine($"🎯 CONTROLLER - IdProducto: {criteria.IdProducto}");
+
                 // Validaciones básicas
                 if (string.IsNullOrWhiteSpace(criteria.Servidor))
                     return BadRequest(new { error = "Debe proporcionar el nombre del servidor." });
 
-                if (criteria.IdProducto == null || criteria.IdCartera == null)
+                if (criteria.IdProducto == 0 || criteria.IdCartera == 0) // Cambié null por 0 según tu DTO
                     return BadRequest(new { error = "Debe proporcionar IdProducto y IdCartera." });
 
-                // Llamada al servicio de búsqueda
+                // Llamada al servicio de búsqueda - ASEGÚRATE DE PASAR idConsulta
                 var result = await _busquedasService.RealizaBusqueda(
-                  criteria.IdProducto,
-                  criteria.IdCartera,
-                  criteria.Servidor,
-                  esDetalleResultado: criteria.EsDetalleResultado
-              );
+                    idProducto: criteria.IdProducto,
+                    idCartera: criteria.IdCartera,
+                    servidor: criteria.Servidor,
+                    esDetalleResultado: criteria.EsDetalleResultado,
+                    idConsulta: criteria.IdConsulta, // ← ¡ESTE ES EL IMPORTANTE!
+                    parametrosExtra: criteria.Parametros
+                );
 
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                // Manejo centralizado de errores
+                Console.WriteLine($"💥 ERROR EN CONTROLLER: {ex.Message}");
                 return StatusCode(500, new { error = ex.Message });
             }
         }
