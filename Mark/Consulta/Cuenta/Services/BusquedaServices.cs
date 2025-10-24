@@ -35,12 +35,12 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         }
 
         public async Task<SearchResultDto> RealizaBusqueda(
-            int idProducto,
-            int idCartera,
-            string servidor,
-            bool esDetalleResultado,
-            int? idConsulta = null,
-            IEnumerable<ParametroDto>? parametrosExtra = null)
+     int idProducto,
+     int idCartera,
+     string servidor,
+     bool esDetalleResultado,
+     int? idConsulta = null,
+     IEnumerable<ParametroDto>? parametrosExtra = null)
         {
             try
             {
@@ -96,16 +96,58 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     tblParametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
                 }
 
-                // === Agregar parámetros extra desde el DTO (si los hay) ===
+                // === Agregar parámetros extra ===
+                ProcesarParametrosExtra(parametrosExtra, tblParametros);
+
+                // === AGREGAR AGRUPACIONES EXTRA DESDE PARAMETROSEXTRA ===
+                // Buscar agrupaciones en los parámetros extra (si vienen en el mismo objeto)
                 if (parametrosExtra != null && parametrosExtra.Any())
                 {
-                    foreach (var p in parametrosExtra)
+                    // Buscar parámetros que sean de tipo agrupación
+                    var agrupacionesExtra = parametrosExtra.Where(p =>
+                        p.Concepto?.ToLower() == "agrupar" ||
+                        p.Campo?.ToLower() == "agrupar" ||
+                        !string.IsNullOrEmpty(p.Parámetros) && p.Parámetros.ToLower().Contains("agrupar"));
+
+                    foreach (var agrupar in agrupacionesExtra)
                     {
-                        tblParametros.Rows.Add(p.Concepto, p.Campo, p.Valores, "AND", p.Dato);
+                        // Intentar extraer campo y concepto del parámetro
+                        string campo = agrupar.Campo;
+                        string concepto = agrupar.Concepto;
+
+                        // Si el campo es "agrupar", usar valores para el campo y parámetros para el concepto
+                        if (agrupar.Campo?.ToLower() == "agrupar")
+                        {
+                            campo = agrupar.Valores;
+                            concepto = agrupar.Parámetros;
+                        }
+                        // Si el concepto es "agrupar", usar campo para el campo y valores para el concepto
+                        else if (agrupar.Concepto?.ToLower() == "agrupar")
+                        {
+                            concepto = agrupar.Valores;
+                            // campo ya está en agrupar.Campo
+                        }
+
+                        if (!string.IsNullOrEmpty(campo) && !string.IsNullOrEmpty(concepto))
+                        {
+                            tblAgrupar.Rows.Add(campo, concepto);
+                            Console.WriteLine($"✅ Agrupación extra cargada: {campo}, {concepto}");
+                        }
                     }
                 }
 
-                // === Logging para debug - CORREGIDO: usar "Parámetros" no "Operador" ===
+                // === AGREGAR AGRUPACIONES MANUALES SI SE ESPECIFICAN EN PARAMETROSEXTRA ===
+                // Si hay parámetros específicos para agrupar por Situación
+                var parametroSituacion = parametrosExtra?.FirstOrDefault(p =>
+                    p.Concepto == "Cuenta" && p.Campo == "Situación");
+
+                if (parametroSituacion != null)
+                {
+                    // Agregar agrupación por Situación
+                    tblAgrupar.Rows.Add("Situación", "Cuenta");
+                    Console.WriteLine($"✅ Agrupación por Situación agregada automáticamente");
+                }
+
                 Console.WriteLine("=== PARÁMETROS FINALES ===");
                 foreach (DataRow row in tblParametros.Rows)
                 {
@@ -333,6 +375,31 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             return valoresLimpios;
         }
 
+        // === Método para procesar parámetros extra ===
+        private void ProcesarParametrosExtra(IEnumerable<ParametroDto> parametrosExtra, DataTable tblParametros)
+        {
+            if (parametrosExtra == null || !parametrosExtra.Any())
+                return;
+
+            foreach (var p in parametrosExtra)
+            {
+                string valoresProcesados = p.Valores;
+
+                // Procesar según el concepto y campo
+                if (p.Concepto == "Cuenta" && p.Campo == "Situación")
+                {
+                    // Si viene texto como "= Niegan Acreditado", extraer solo el ID
+                    if (p.Valores.Contains("=") && !string.IsNullOrEmpty(p.Parámetros))
+                    {
+                        valoresProcesados = p.Parámetros; // Usar el ID que viene en "parámetros"
+                        Console.WriteLine($"🔧 Parámetro extra procesado: {p.Valores} -> {valoresProcesados}");
+                    }
+                }
+
+                tblParametros.Rows.Add(p.Concepto, p.Campo, valoresProcesados, "AND", p.Dato);
+                Console.WriteLine($"✅ Parámetro extra cargado: {p.Concepto}, {p.Campo}, {valoresProcesados}, {p.Dato}");
+            }
+        }
         // === Método de debug ===
         private void DebugDataTables(DataTable parametros, DataTable agrupar)
         {
