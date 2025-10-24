@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { getColumsProduct } from "../../services/mark/albaz/LokiServices";
 import { chargueCatalog } from "../../services/mark/albaz/LokiServices";
 const ConsultFilter = ({ 
@@ -14,6 +14,7 @@ const ConsultFilter = ({
   const [selectedValue, setSelectedValue] = useState(defaultValue);
   const [dynamicOptions, setDynamicOptions] = useState(options);
   const [isLoading, setIsLoading] = useState(false);
+  const previousOptionsRef = useRef([]);
 
   // Función para cargar opciones dinámicas según el tipo de filtro
   const loadDynamicOptions = useCallback(async (filterValue) => {
@@ -128,12 +129,32 @@ const ConsultFilter = ({
     }
   }, [filterType, loadDynamicOptions, options]);
 
-  // Notificar cuando las opciones se carguen
+  // Notificar cuando las opciones se carguen y seleccionar la primera opción
   useEffect(() => {
-    if (onAllOptionsLoaded && dynamicOptions.length > 0) {
-      onAllOptionsLoaded(dynamicOptions);
+    if (dynamicOptions.length > 0) {
+      // Verificar si las opciones realmente cambiaron comparando con las anteriores
+      const optionsChanged = JSON.stringify(previousOptionsRef.current) !== JSON.stringify(dynamicOptions);
+      
+      if (optionsChanged) {
+        // Actualizar la referencia con las nuevas opciones
+        previousOptionsRef.current = dynamicOptions;
+        
+        // Seleccionar automáticamente la primera opción solo cuando las opciones cambien
+        const firstOption = dynamicOptions[0];
+        setSelectedValue(firstOption.value);
+        
+        // Notificar la selección de la primera opción
+        if (onSelectionChange) {
+          onSelectionChange(firstOption);
+        }
+      }
+      
+      // Notificar todas las opciones cargadas (esto sí se hace siempre)
+      if (onAllOptionsLoaded) {
+        onAllOptionsLoaded(dynamicOptions);
+      }
     }
-  }, [dynamicOptions, onAllOptionsLoaded]);
+  }, [dynamicOptions, onAllOptionsLoaded, onSelectionChange]);
 
   const handleChange = (e) => {
     const value = e.target.value;

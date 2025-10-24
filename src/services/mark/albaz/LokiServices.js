@@ -602,7 +602,7 @@ export const getCatalogoCard = async () => {
     throw error;
   }
 };
-
+//Valores Catalogo
 export const getCatalogoValueCard = async () => {
   try {
     const token = localStorage.getItem('token');
@@ -610,10 +610,10 @@ export const getCatalogoValueCard = async () => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
     const url = `/Catalogos/valores-catalogo`;
-    console.log('Enviando a', url);
+ 
     // El interceptor añade el token automáticamente
     const response = await api.get(url);
-    console.log('Respuesta de', url + ':', response.data);
+
     return response.data;
   } catch (error) {
     console.error('Error al obtener los valores actalogo:', error);

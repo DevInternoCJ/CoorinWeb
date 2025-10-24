@@ -29,39 +29,42 @@ const ModalConsultaCuentas = ({ onClose }) => {
     const totalItems = totalFiltros + totalColumnas;
 
     return (
-        <div className="modal-xl-container" style={{ maxWidth: "98vw", overflowX: "hidden" }}>
-            <ModalConsultaCuentasHeader onClose={onClose} />
-            <div
-                style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    gap: "1rem",
-                    overflowX: "auto",
-                    width: "100%",
-                    minHeight: "1px",
-                    alignItems: "stretch"
-                }}
-                className="scrollbar-gray"
-            >
-                <div style={{ minWidth: 0, flex: 1, display: "flex", flexDirection: "column" }}>
-                    <ModalConsultaCuentasFiltros 
-                        onGetSituacionOptions={handleGetSituacionOptions} 
-                        onGetAllAvailableOptions={handleGetAllAvailableOptions}
-                        idProducto={1} 
-                        idCartera={1}
-                        onFiltrosCountChange={handleFiltrosCount}
-                        isDateEnabled={totalItems >= 4}
-                    />
-                </div>
-                <div style={{ minWidth: 0, flex: "0 0 450px", maxWidth: "450px", display: "flex", flexDirection: "column" }}>
-                    <ModalConsultaCuentasColumnas 
-                        situacionOptions={situacionOptions}
-                        allAvailableOptions={allAvailableOptions}
-                        onColumnasCountChange={handleColumnasCount}
-                    />
+        <div 
+            className="modal-xl-container flex flex-col w-full h-full max-h-[95vh] overflow-hidden"
+        >
+            {/* Header fijo */}
+            <div className="flex-shrink-0 px-2 sm:px-0">
+                <ModalConsultaCuentasHeader onClose={onClose} />
+            </div>
+            
+            {/* Contenido con scroll */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-gray px-2 py-2">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 w-full">
+                    {/* Sección de Filtros - Toma todo el ancho en móvil, 8/12 columnas en desktop */}
+                    <div className="lg:col-span-8 w-full min-w-0 flex flex-col">
+                        <ModalConsultaCuentasFiltros 
+                            onGetSituacionOptions={handleGetSituacionOptions} 
+                            onGetAllAvailableOptions={handleGetAllAvailableOptions}
+                            idProducto={1} 
+                            idCartera={1}
+                            onFiltrosCountChange={handleFiltrosCount}
+                            isDateEnabled={totalItems >= 4}
+                        />
+                    </div>
+                    
+                    {/* Sección de Columnas - Toma todo el ancho en móvil, 4/12 columnas en desktop */}
+                    <div className="lg:col-span-4 w-full min-w-0 flex flex-col">
+                        <ModalConsultaCuentasColumnas 
+                            situacionOptions={situacionOptions}
+                            allAvailableOptions={allAvailableOptions}
+                            onColumnasCountChange={handleColumnasCount}
+                        />
+                    </div>
                 </div>
             </div>
-            <div style={{ width: "100%", overflowX: "auto" }}>
+            
+            {/* Footer fijo */}
+            <div className="flex-shrink-0 w-full px-2 sm:px-0">
                 <ModalConsultaCuentasFooter />
             </div>
         </div>

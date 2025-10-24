@@ -8,12 +8,7 @@ const ModalConsultaCuentasFooter = () => {
                 {/* Tabla de resultados */}
                 <div className="w-full flex justify-center rounded-lg bg-white border border-[var(--color-jerarquia1)] p-0.5">
                     <div
-                        style={{
-                            overflowX: "auto",
-                            overflowY: "auto",
-                            maxHeight: "20vh",
-                            width: "100%",
-                        }}
+                     
                         className="scrollbar-gray"
                     >
                         <table className="modal-table">

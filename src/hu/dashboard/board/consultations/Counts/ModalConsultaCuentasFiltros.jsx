@@ -3,16 +3,8 @@ import { IconCustomTable } from "../IconesConsultations";
 import ModalSeleccionCampania from "../ModalCamapañas/ModalSeleccionCampania";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import ConsultFilter from "../../../../../components/select/ConsultFilter";
-  import { toast } from "sonner";
-
-const DropdownArrow = () => (
-    <span className="modal-dropdown-arrow">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <path d="M6 8l4 4 4-4" stroke="#222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    </span>
-);
-
+import { toast } from "sonner";
+import {getCatalogoValueCard} from "../../../../../services/mark/albaz/LokiServices";
 const situacionOptions = [
     { value: "Sin información", label: "Sin información" },
   
@@ -25,6 +17,7 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
     const [niegan, setNiegan] = useState("");
     const [filtros, setFiltros] = useState([]);
     const [openSeleccionCampania, setOpenSeleccionCampania] = useState(false);
+    const [nieganOptions, setNieganOptions] = useState([]);
   
     const eliminarFiltro = (id) => {
         setFiltros(filtros.filter(filtro => filtro.id !== id));
@@ -33,24 +26,47 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
     const agregarFiltro = () => {
         const campoSeleccionado = selectedConsultFilter ? selectedConsultFilter.label : "";
         
+        // Obtener el texto legible del valor seleccionado para "Niegan acreditado"
+        let valorMostrar = niegan;
+        if (cuenta === "Cuenta" && niegan) {
+            const opcionSeleccionada = nieganOptions.find(option => option.idValor === parseInt(niegan));
+            if (opcionSeleccionada) {
+                valorMostrar = opcionSeleccionada.valor;
+            }
+        }
+
         // Verificar si ya existe un filtro con el mismo concepto y campo
         const filtroExistente = filtros.find(
             filtro => filtro.concepto === cuenta && filtro.campo === campoSeleccionado
         );
 
         if (filtroExistente) {
-            toast.error("Este filtro ya fue agregado");
-            return;
+            // Verificar si el valor ya está en la lista de valores del filtro existente
+            const valoresArray = filtroExistente.valores.split(", ").map(v => v.replace(/^[=≠]\s*/, "").trim());
+            if (valoresArray.includes(valorMostrar.trim())) {
+                toast.warning("Este valor ya fue agregado al filtro");
+                return;
+            }
+            
+            // Concatenar el nuevo valor al valor existente
+            setFiltros(prevFiltros => 
+                prevFiltros.map(filtro => 
+                    filtro.id === filtroExistente.id
+                        ? { ...filtro, valores: filtro.valores + ", " + valorMostrar }
+                        : filtro
+                )
+            );
+        } else {
+            // Crear un nuevo filtro
+            const nuevoFiltro = {
+                id: Date.now(),
+                concepto: cuenta,
+                campo: campoSeleccionado,
+                valores: operador + " " + valorMostrar,
+                operador: operador
+            };
+            setFiltros(prevFiltros => [...prevFiltros, nuevoFiltro]);
         }
-
-        const nuevoFiltro = {
-            id: Date.now(),
-            concepto: cuenta,
-            campo: campoSeleccionado,
-            valores: operador + " " + niegan,
-            operador: operador
-        };
-        setFiltros(prevFiltros => [...prevFiltros, nuevoFiltro]);
     };
 
     // Actualizar la opción seleccionada para el componente de columnas
@@ -67,6 +83,31 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
             onGetSituacionOptions([]);
         }
     }, [cuenta, onGetSituacionOptions]);
+
+    // Cargar opciones de "Niegan acreditado" cuando se seleccione "Cuenta"
+    React.useEffect(() => {
+        const loadNieganOptions = async () => {
+            if (cuenta === "Cuenta") {
+                try {
+                    const catalogData = await getCatalogoValueCard();
+                    if (catalogData && Array.isArray(catalogData)) {
+                        // Filtrar solo los que tienen idCatálogo === 2
+                        const filteredOptions = catalogData.filter(item => item.idCatálogo === 2);
+                        setNieganOptions(filteredOptions);
+                    }
+                } catch (error) {
+                    console.error("Error al cargar opciones de Niegan acreditado:", error);
+                    setNieganOptions([]);
+                }
+            } else {
+                // Limpiar opciones si no es "Cuenta"
+                setNieganOptions([]);
+                setNiegan("");
+            }
+        };
+        
+        loadNieganOptions();
+    }, [cuenta]);
 
     // Notificar cambios en el conteo de filtros
     React.useEffect(() => {
@@ -210,27 +251,55 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
               </label>
             </div>
             {/* Niegan Acreditado */}
-            <div className="relative flex-1">
-              <select
-                className="peer p-4 pe-9 block w-full bg-gray-100 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
-                            focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                value={niegan}
-                onChange={(e) => setNiegan(e.target.value)}
-                id="niegan-select"
-              >
-                <option value="" disabled hidden></option>
-                <option value="niegan1">Niegan Acreditado 1</option>
-                <option value="niegan2">Niegan Acreditado 2</option>
-              </select>
-              <label
-                htmlFor="niegan-select"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
-                            peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500
-                            peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-              >
-                Niegan acreditado
-              </label>
-            </div>
+            {cuenta === "Cuenta" && (
+              <div className="relative flex-1">
+                <select
+                  className="peer p-4 pe-9 block w-full bg-gray-100 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
+                              focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  value={niegan}
+                  onChange={(e) => setNiegan(e.target.value)}
+                  id="niegan-select"
+                  disabled={nieganOptions.length === 0}
+                >
+                  <option value="" disabled hidden></option>
+                  {nieganOptions.map((option) => (
+                    <option key={option.idValor} value={option.idValor}>
+                      {option.valor}
+                    </option>
+                  ))}
+                </select>
+                <label
+                  htmlFor="niegan-select"
+                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
+                              peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500
+                              peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                >
+                  Niegan acreditado
+                </label>
+              </div>
+            )}
+            {/* Input de texto/fecha para otros filtros */}
+            {cuenta !== "Cuenta" && (
+              <div className="relative flex-1">
+                <input
+                  type={cuenta === "Fechas" ? "date" : "text"}
+                  className="peer p-4 block w-full bg-gray-100 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
+                              focus:pt-6 focus:pb-2 [&:not(:placeholder-shown)]:pt-6 [&:not(:placeholder-shown)]:pb-2"
+                  value={niegan}
+                  onChange={(e) => setNiegan(e.target.value)}
+                  id="valores-input"
+                  placeholder=" "
+                />
+                <label
+                  htmlFor="valores-input"
+                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
+                              peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500
+                              peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                >
+                  {cuenta === "Fechas" ? "Fecha" : "Ingresa un valor"}
+                </label>
+              </div>
+            )}
           </div>
 
           <div
