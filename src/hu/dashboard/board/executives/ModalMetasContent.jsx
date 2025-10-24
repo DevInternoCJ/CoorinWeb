@@ -121,7 +121,7 @@ const ModalMetasContent = () => {
     React.useEffect(() => {
         injectHideNumberArrowsStyles();
     }, []);
-    // Estado para la jerarquía de ejecutivos (lógica separada)
+    // Estado para la jerarquía de ejecutivos (solo datos, render y estilos centralizados en JerarquiaConR)
     const [executiveTree, setExecutiveTree] = useState([]);
     const [loadingJerarquia, setLoadingJerarquia] = useState(false);
     const [errorJerarquia, setErrorJerarquia] = useState(null);
@@ -325,78 +325,8 @@ const ModalMetasContent = () => {
     // removed unused allSubordinateIds state (was declared but never read)
     const [allHierarchyIds, setAllHierarchyIds] = useState([]); // ids de toda la jerarquía
 
-    // Handler para click en ejecutivo de la jerarquía (selección inteligente)
-    const handleExecutiveClick = (node) => {
-        setInputValues({
-            cuentas: '',
-            titulares: '',
-            negociaciones: '',
-            cumplimientos: '',
-            montoCumplido: '',
-            saldoSolucionado: '',
-            segmento: '',
-            horaEntrada: '',
-            horaSalida: ''
-        });
-        setSelectedRows([]);
-        setError(null);
-        setTablaMetas([]);
-        setLoading(true);
-
-        const userData = JSON.parse(localStorage.getItem('userData'));
-        const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
-
-        setSelectedExecutiveNode(node.idEjecutivo); // Guardar el nodo seleccionado para iluminar
-
-        if (node.idEjecutivo === Number(idEjecutivoSesion)) {
-            if (Array.isArray(node.subordinados) && node.subordinados.length > 0) {
-                const idsSubordinados = node.subordinados.map(sub => sub.idEjecutivo).filter(Boolean);
-                setSelectedExecutives(idsSubordinados);
-            } else {
-                setSelectedExecutives([]);
-            }
-        } else if (Array.isArray(node.subordinados) && node.subordinados.length > 0) {
-            // Si tiene subordinados, mostrar solo los subordinados de ese subordinado
-            const idsSubSub = node.subordinados.map(sub => sub.idEjecutivo).filter(Boolean);
-            setSelectedExecutives(idsSubSub);
-        } else {
-            // Si no tiene subordinados, marcar solo este nodo como seleccionado (para iluminarlo)
-            setSelectedExecutives([node.idEjecutivo]);
-        }
-        setLoading(false);
-    };
 
 
-    // Renderizado recursivo de la jerarquía, cada ejecutivo es clickeable y solo uno puede estar seleccionado
-    const renderExecutiveTree = (tree, level = 0) => {
-        if (!Array.isArray(tree)) return null;
-        return tree.map((node, idx) => {
-            // Solo iluminar el nodo seleccionado en la jerarquía
-            const isSelected = node.idEjecutivo === selectedExecutiveNode;
-            return (
-                <React.Fragment key={node.usuario || node.id || idx}>
-                    <div
-                        className={`executive-hierarchy-item${isSelected ? ' selected' : ''}`}
-                        style={{
-                            paddingLeft: level * 18,
-                            marginBottom: 2,
-                            fontWeight: 500,
-                            fontSize: 13,
-                            color: isSelected ? '#2b463c' : undefined,
-                            userSelect: 'none',
-                        }}
-                        onClick={() => handleExecutiveClick(node)}
-                        title={Array.isArray(node.subordinados) && node.subordinados.length > 0 ? "Mostrar solo subordinados" : "Mostrar solo este ejecutivo"}
-                    >
-                        {node.usuario || ''} - {node.nombreEjecutivo || ''}
-                    </div>
-                    {Array.isArray(node.subordinados) && node.subordinados.length > 0 && (
-                        renderExecutiveTree(node.subordinados, level + 1)
-                    )}
-                </React.Fragment>
-            );
-        });
-    };
 
 
 
@@ -755,13 +685,12 @@ const ModalMetasContent = () => {
                 <JerarquiaConR
                     executiveTree={executiveTree}
                     loadingJerarquia={loadingJerarquia}
-                    errorJerarquia={errorJerarquia} 
+                    errorJerarquia={errorJerarquia}
                     selectedExecutiveNode={selectedExecutiveNode}
                     allHierarchyIds={allHierarchyIds}
                     setSelectedExecutives={setSelectedExecutives}
                     setSelectedRows={setSelectedRows}
                     setSelectedExecutiveNode={setSelectedExecutiveNode}
-                    renderExecutiveTree={renderExecutiveTree}
                 />
             </div>
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import JerarquiaConR from "../../board/executives/JerarquiaConR/JerarquiaConR";
 import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
 import {
   obetenerJerarquiaEncargados,
@@ -16,40 +17,15 @@ const DropdownArrow = () => (
       pointerEvents: "none",
       position: "absolute",
       right: "0.75rem",
-      top: "50%",
-      transform: "translateY(-50%)",
-      fontSize: "1.15rem",
-      color: "#2b463c",
-      display: "flex",
-      alignItems: "center",
     }}
   >
-    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-      <path
-        d="M6 8l4 4 4-4"
-        stroke="#2b463c"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    ▼
   </span>
 );
-
-const ModalValidadoresContent = ({
-  onFooterDataChange, // Nueva prop para comunicar cambios al padre
-}) => {
-  // Estados principales (idéntico a ModalCampanasEjecutivos)
+function ModalValidadoresContent(props) {
+  // Todos los hooks y lógica van dentro de la función principal
   const [executiveTree, setExecutiveTree] = useState([]);
   const [usuariosValidadores, setUsuariosValidadores] = useState([]);
-  // Otros estados propios del modal
-  const [cartera, setCartera] = useState(() => {
-    // Usar la función getIdCartera para obtener el valor inicial
-    const idCartera = getIdCartera();
-    // Si es string, usarlo directo; si es número, convertir a string para el value del select
-    return typeof idCartera === 'string' ? idCartera : String(idCartera);
-  });
-  const [producto, setProducto] = useState(""); // Iniciamos vacío para obligar selección
   const [arrepentimientos, setArrepentimientos] = useState(false);
   const [validadoresFromAPI, setValidadoresFromAPI] = useState([]);
   const [isLoadingValidadores, setIsLoadingValidadores] = useState(false);
@@ -57,33 +33,23 @@ const ModalValidadoresContent = ({
   // Estados para el footer
   const [lastAction, setLastAction] = useState(null); // 'added' | 'removed' | null
   const [lastUser, setLastUser] = useState(null);
-
-
-  // Función para obtener idCartera desde localStorage (debe ir antes del componente para evitar hoisting)
-  function getIdCartera() {
-    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-    return userData?.idCartera || userData?.idcartera || userData?.cartera || 1; // fallback a 1 si no existe
-  }
-
+  const [producto, setProducto] = useState("");
+  const [cartera, setCartera] = useState("american_express");
+  const { onFooterDataChange } = props;
   // Función para obtener validadores del API
   const fetchValidadores = useCallback(
     async (idProducto, esArrepentimientos = false) => {
       if (!idProducto) return;
-
       setIsLoadingValidadores(true);
       try {
         let response;
         if (esArrepentimientos) {
-          // Llamar al endpoint de validadores arrepentimientos
           response = await Validatorsregrets(idProducto);
         } else {
-          // Llamar al endpoint normal
           response = await ValidatorsNormal(idProducto);
         }
-
         const validadores = response?.data || [];
         setValidadoresFromAPI(validadores);
-
         return validadores;
       } catch (error) {
         toast.error("Error al obtener validadores:", error);
@@ -393,109 +359,63 @@ const ModalValidadoresContent = ({
 
   return (
     <div
-      className="flex flex-col md:flex-row w-full h-full gap-4 overflow-y-auto max-h-[90vh]"
-      style={{ maxHeight: '130vh', overflowY: 'auto' }}
+      className="flex flex-col md:flex-row w-full h-full gap-4"
+      style={{ minWidth: '18.75rem' }}
     >
       {/* Árbol a la izquierda en desktop, arriba en mobile */}
-      <div className="w-full md:flex-1 flex flex-col order-2 md:order-1 mt-4 md:mt-0">
-        <div
-          className="flex flex-col bg-white border border-[var(--color-jerarquia1)] rounded-lg p-4 h-full"
+      <div
+        className="flex flex-col order-2 md:order-1 mt-4 md:mt-0"
+        style={{ width: '18.75rem', minWidth: '18.75rem', maxWidth: '18.75rem' }}
+      >
+        {/* Label y árbol directamente en el layout principal */}
+        {/* Solo el contador, sin mostrar usuario de sesión arriba del árbol */}
+        <label
+          className="modal-span-1"
+          style={{ color: "var(--color-jerarquia3)" }}
         >
-          <label
-            className="modal-span-1"
-            style={{ color: "var(--color-jerarquia3)" }}
-          >
-            Validadores ({contadorValidadores.asignados} / {contadorValidadores.total})
-            {isLoadingValidadores && (
-              <span style={{ marginLeft: "0.5rem", color: "var(--color-jerarquia2)", fontSize: "0.8rem" }}>
-                (Cargando...)
-              </span>
-            )}
-          </label>
-          <div className="border border-[var(--color-jerarquia1)] rounded-lg bg-white flex-1 overflow-hidden mt-2">
-            <div className="scrollbar-gray overflow-y-auto h-full w-full p-2">
-              {/* Árbol recursivo con checkboxes y estilo metas */}
-              {(() => {
-                // Replica el estilo exacto de indentación y stacking del árbol de metas
-                const renderValidadorTree = (tree, level = 0) => {
-                  if (!Array.isArray(tree)) return null;
-                  return tree.map((node, idx) => {
-                    const indexUV = usuariosValidadores.findIndex(u => u.idEjecutivo === node.idEjecutivo);
-                    const isChecked = indexUV !== -1 ? usuariosValidadores[indexUV].seleccionado : false;
-                    return (
-                      <React.Fragment key={node.usuario || node.idEjecutivo || idx}>
-                        <div
-                          className={
-                            `executive-hierarchy-item flex items-center${isChecked ? ' selected' : ''}`
-                          }
-                          style={{
-                            paddingLeft: level * 18,
-                            marginBottom: 2,
-                            fontWeight: 500,
-                            fontSize: 13,
-                            color: '#2b463c',
-                            userSelect: 'none',
-                            opacity: !producto ? 0.5 : 1,
-                            pointerEvents: !producto ? 'none' : 'auto',
-                          }}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            disabled={!producto}
-                            className="modal-checkbox-small mr-2"
-                            onChange={e => {
-                              e.stopPropagation();
-                              if (producto && indexUV !== -1) handleSeleccionarUsuario(node.usuario, indexUV);
-                            }}
-                          />
-                          <span
-                            style={{
-                              cursor: !producto ? 'not-allowed' : 'pointer',
-                              userSelect: 'none',
-                            }}
-                            onClick={() => { if (producto && indexUV !== -1) handleSeleccionarUsuario(node.usuario, indexUV); }}
-                          >
-                            {node.usuario} - {node.nombreEjecutivo}
-                          </span>
-                        </div>
-                        {Array.isArray(node.subordinados) && node.subordinados.length > 0 && (
-                          renderValidadorTree(node.subordinados, level + 1)
-                        )}
-                      </React.Fragment>
-                    );
-                  });
-                };
-                return executiveTree.length === 0 ? (
-                  <div
-                    style={{ textAlign: 'center', padding: '1rem', color: '#666', fontStyle: 'italic' }}
-                  >
-                    {!producto
-                      ? 'Selecciona un producto para ver los validadores'
-                      : 'No hay usuarios disponibles'}
-                  </div>
-                ) : (
-                  renderValidadorTree(executiveTree, 1)
-                );
-              })()}
-            </div>
+          Validadores ({contadorValidadores.asignados} / {contadorValidadores.total})
+          {isLoadingValidadores && (
+            <span style={{ marginLeft: "0.5rem", color: "var(--color-jerarquia2)", fontSize: "0.8rem" }}>
+              (Cargando...)
+            </span>
+          )}
+        </label>
+        {executiveTree.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '1rem', color: '#666', fontStyle: 'italic' }}>
+            {!producto
+              ? 'Selecciona un producto para ver los validadores'
+              : 'No hay usuarios disponibles'}
           </div>
-        </div>
+        ) : (
+          <JerarquiaConR
+            executiveTree={executiveTree}
+            useCheckbox={true}
+            usuariosValidadores={usuariosValidadores}
+            handleSeleccionarUsuario={handleSeleccionarUsuario}
+            producto={producto}
+            style={{ height: '100%', width: '100%' }}
+          />
+        )}
       </div>
 
       {/* Controles a la derecha en desktop, abajo en mobile */}
-      <div className="w-full md:w-[320px] flex flex-col items-center md:items-stretch order-1 md:order-2">
+      <div
+      className="flex flex-col items-center md:items-stretch order-1 md:order-2 mx-auto md:mx-0"
+      style={{ width: '14rem', minWidth: '14rem', maxWidth: '14rem' }}
+      >
         {/* Logo arriba en mobile, a la derecha en desktop */}
         <div className="flex justify-center items-center bg-white p-4 w-full order-1">
-          <img
-            src={ConsorcioLogo}
-            alt="Consorcio Jurídico"
-            style={{ height: "70px", width: "auto", objectFit: "contain" }}
-          />
-            </div>
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <img
+              src={ConsorcioLogo}
+              alt="Consorcio Jurídico"
+              style={{ height: "70px", width: "auto", objectFit: "contain", display: 'block', margin: '0 auto' }}
+            />
+          </div>
+        </div>
         {/* Controles: Cartera, Producto, Arrepentimientos */}
-        <div className="flex flex-col gap-2 w-full order-2 px-2 md:px-0 mt-2">
-          <div className="relative w-full mb-2">
+        <div className="flex flex-col gap-2 w-full order-2 px-2 md:px-0 mt-2" style={{ alignContent: 'center' }}>
+          <div className="relative mb-2" style={{ width: '14rem', minWidth: '14rem', maxWidth: '12.5rem', alignContent: 'center' }}>
             <select
               className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
               value={cartera}
@@ -512,7 +432,7 @@ const ModalValidadoresContent = ({
               Cartera
             </label>
           </div>
-          <div className="relative w-full mb-2">
+          <div className="relative mb-2" style={{ width: '14rem', minWidth: '14rem', maxWidth: '12.5rem', alignContent: 'center' }}>
             <select
               className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
               value={producto}

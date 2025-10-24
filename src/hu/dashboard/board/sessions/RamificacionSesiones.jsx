@@ -176,13 +176,18 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                     >
                         {hasSub && (
                             <button
-                                className="hs-accordion-toggle size-6 flex justify-center items-center hover:bg-gray-100 rounded-md focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+                                className="hs-accordion-toggle size-6 flex justify-center items-center rounded-md focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
                                 aria-expanded={!isCollapsed}
                                 aria-controls={collapseId}
                                 type="button"
+                                style={{ background: 'var(--color-jerarquia1)' }}
+                                onMouseOver={e => e.currentTarget.style.background = 'var(--color-jerarquia2)'}
+                                onMouseOut={e => e.currentTarget.style.background = 'var(--color-jerarquia1)'}
+                                onFocus={e => e.currentTarget.style.background = 'var(--color-jerarquia2)'}
+                                onBlur={e => e.currentTarget.style.background = 'var(--color-jerarquia1)'}
                                 onClick={e => { e.stopPropagation(); toggleCollapse(node.idEjecutivo); }}
                             >
-                                <svg className="size-4 text-gray-800 dark:text-neutral-200" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <svg className="size-4 text-gray-800" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M5 12h14"></path>
                                     <path className={!isCollapsed ? 'hs-accordion-active:hidden block' : ''} d="M12 5v14"></path>
                                 </svg>

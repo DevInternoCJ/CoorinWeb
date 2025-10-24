@@ -85,7 +85,7 @@ const ValidadoresModal = ({
             enableShakeOnBackdropClick={enableShakeOnBackdropClick}
             enableBounceOnBackdropOrEscape={enableBounceOnBackdropOrEscape}
             closeOnBackdropClick={closeOnBackdropClick}
-            contentClassName="flex flex-col gap-4 h-full !overflow-hidden"
+            contentClassName="flex flex-col gap-4 h-full"
             modalClassName="border-0 shadow-2xl h-[60vh] overflow-hidden"
             {...props}
         >
