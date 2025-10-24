@@ -213,7 +213,6 @@ const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
         {/* Tabla de datos del producto */}
         {ejemploProducto && Object.keys(ejemploProducto).length > 0 && (
           <div className="mt-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Detalles del Producto</h3>
             <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
               <table className="bg-white min-w-full">
                 <tbody>
