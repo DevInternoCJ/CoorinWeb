@@ -756,9 +756,9 @@ export const historyArchivoUpload = async (body) => {
         }
       }
     });
-    console.log('Enviando a /Histórico/archivo (FormData):', formData);
+    console.log('Enviando a /Historico/archivo (FormData):', formData);
     // El interceptor añade el token automáticamente
-    const response = await api.post('/Histórico/archivo', formData, {
+    const response = await api.post('/Historico/archivo', formData, {
       headers: {
         'Accept': '*/*',
         'Content-Type': 'multipart/form-data'
@@ -766,7 +766,7 @@ export const historyArchivoUpload = async (body) => {
       },
       responseType: 'arraybuffer' // Para recibir datos binarios correctamente
     });
-    console.log('Respuesta de /Histórico/archivo:', response);
+    console.log('Respuesta de /Historico/archivo:', response);
     return response;
   } catch (error) {
     console.error('Error al obtener historico Archivo:', error);
