@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { topCampaign } from "../../../../services/mark/albaz/LokiServices";
+import { topCampaign } from "../../../../../services/mark/albaz/LokiServices";
 import { toast } from "sonner";
 
 const ModalToponeHundred = ({ open, onClose, idCampaña }) => {

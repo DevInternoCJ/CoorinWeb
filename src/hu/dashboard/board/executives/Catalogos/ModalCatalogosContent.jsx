@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   getCatalogoCard,
   getCatalogoValueCard,
-} from "../../../../services/mark/albaz/LokiServices";
+} from "../../../../../services/mark/albaz/LokiServices";
 
 const ModalCatalogosContent = () => {
   const [catalogsData, setCatalogsData] = useState([]);

@@ -1,7 +1,7 @@
 import React from "react";
-import ReusableModal from "../modalGlobalReboot/ReusableModal";
+import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import ModalMetasContent from "./ModalMetasContent";
-import { IconMetas } from "./IconesEjecutives";
+import { IconMetas } from "../IconesEjecutives";
 
 const MetasModal = ({
     isOpen,

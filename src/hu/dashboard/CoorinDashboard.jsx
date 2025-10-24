@@ -18,7 +18,7 @@ import OffersContent from "./sideBar/consultations/information/Offers";
 import CommentsContent from "./sideBar/consultations/information/Comments";
 import VGPContent from "./sideBar/consultations/information/VGP";
 import EmailTemplates from "./sideBar/Administration/gespa/emailTemplates/EmailTemplates";
-import ModalBaseCampanas from "./sideBar/Administration/ModalBaseCampanas";
+import ModalBaseCampanas from "./sideBar/Administration/Campanias/ModalBaseCampanas";
 import Phrases from "./sideBar/Administration/gespa/frases/Phrases";
 
 

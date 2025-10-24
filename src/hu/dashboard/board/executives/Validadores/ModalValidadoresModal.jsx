@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
-import ReusableModal from "../modalGlobalReboot/ReusableModal";
+import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import ModalValidadoresContent from "./ModalValidadoresContent";
-import { IconValidadores } from "./IconesEjecutives";
+import { IconValidadores } from "../IconesEjecutives";
 
 const ValidadoresModal = ({ 
     isOpen, 

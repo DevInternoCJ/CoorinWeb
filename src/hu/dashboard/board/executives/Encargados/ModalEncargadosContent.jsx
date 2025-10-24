@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos, AsignaEncargados } from "../../../../services/mark/albaz/LokiServices";
-import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
+import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos, AsignaEncargados } from "../../../../../services/mark/albaz/LokiServices";
+import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 import { toast } from "sonner";
-import JerarquiaConR from '../../board/executives/JerarquiaConR/JerarquiaConR';
+import JerarquiaConR from '../../branchs/JerarquiaConR';
 // Flecha tipo chevron moderna
 const ModalEncargadosContent = () => {
     // Estados para dropdowns y logo

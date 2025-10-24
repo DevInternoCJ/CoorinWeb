@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 // import { Input, Label } from 'preline'
-import JerarquiaConR from "./JerarquiaConR/JerarquiaConR";
+import JerarquiaConR from "../../branchs/JerarquiaConR.jsx";
 import { Toaster, toast } from "sonner";
-import InputNumber from '../../../../components/InputNumber/InputNumber.jsx';
-import { obetenerTablaMetas, actualizarMetas, obetenerJerarquiaEncargados } from "../../../../services/mark/albaz/LokiServices";
-import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
+import InputNumber from '../../../../../components/InputNumber/InputNumber.jsx';
+import { obetenerTablaMetas, actualizarMetas, obetenerJerarquiaEncargados } from "../../../../../services/mark/albaz/LokiServices.js";
+import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 
 
 // Función para inyectar estilos CSS que oculten los controles de incremento

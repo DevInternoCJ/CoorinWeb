@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import ModalEncargadosHeader from "./ModalEncargadosHeader";
-import ModalEncargadosContent from "./ModalEncargadosContent";
-import ModalEncargadosFooter from "./ModalEncargadosFooter";
+import ModalEncargadosHeader from "../Encargados/ModalEncargadosHeader";
+import ModalEncargadosContent from "./Encargados/ModalEncargadosContent";
+import ModalEncargadosFooter from "./Encargados/ModalEncargadosFooter";
 
 const ModalEncargadosEjecutivos = ({ onClose }) => {
     const [bounce, setBounce] = useState(false);

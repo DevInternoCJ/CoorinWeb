@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
-import { infoEjecutivo, CargarFilasConsulta, campainghInCharge, sendArchiveCampanias } from "../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo, CargarFilasConsulta, campainghInCharge, sendArchiveCampanias } from "../../../../../services/mark/albaz/LokiServices";
 
 const ModalFilasCampañas = ({
   open,
@@ -368,10 +368,6 @@ const ModalFilasCampañas = ({
     }
   };
 
-  // Eliminar fila
-  const handleDeleteRow = (rowIdx) => {
-    setFileRows((prev) => prev.filter((_, i) => i !== rowIdx));
-  };
 
   // Acción al presionar Cargar (solo modo archivo)
   const handleCargarArchivo = async () => {
@@ -477,7 +473,7 @@ const ModalFilasCampañas = ({
           const data = JSON.parse(text);
           errorMsg = data.mensaje || errorMsg;
         } catch (e) {
-          // Si falla el parseo, usar mensaje genérico
+          errorMsg = "No se pudo procesar la respuesta de error del servidor.",e;
         }
       } else if (err.message) {
         errorMsg = err.message;

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import JerarquiaConR from "../../board/executives/JerarquiaConR/JerarquiaConR";
-import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
+import JerarquiaConR from "../../branchs/JerarquiaConR";
+import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 import {
   obetenerJerarquiaEncargados,
   ValidatorsNormal,
   Validatorsregrets,
   InsertDeletedValidators,
   InsertDeletedValidatorsRegrets,
-} from "../../../../services/mark/albaz/LokiServices";
+} from "../../../../../services/mark/albaz/LokiServices";
 import { toast } from "sonner";
 
 
