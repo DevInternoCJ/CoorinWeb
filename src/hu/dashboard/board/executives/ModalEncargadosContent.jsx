@@ -4,26 +4,6 @@ import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
 import { toast } from "sonner";
 import JerarquiaConR from '../../board/executives/JerarquiaConR/JerarquiaConR';
 // Flecha tipo chevron moderna
-const DropdownArrow = () => (
-    <span
-        style={{
-            pointerEvents: "none",
-            position: "absolute",
-            right: "0.75rem",
-            top: "50%",
-            transform: "translateY(-50%)",
-            fontSize: "1.15rem",
-            color: "#2b463c",
-            display: "flex",
-            alignItems: "center"
-        }}
-    >
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <path d="M6 8l4 4 4-4" stroke="#2b463c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    </span>
-);
-
 const ModalEncargadosContent = () => {
     // Estados para dropdowns y logo
     const [cartera, setCartera] = React.useState("");

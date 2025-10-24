@@ -705,16 +705,16 @@ export const historySingle = async (body) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    console.log('📤 Enviando a /Histórico/individual:', body);
+    console.log('📤 Enviando a /Historico/individual:', body);
     // El interceptor añade el token automáticamente
-    const response = await api.post('/Histórico/individual', body, {
+    const response = await api.post('/Historico/individual', body, {
       headers: {
         'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json, text/plain, /',
         'Content-Type': 'application/json'
       },
       responseType: 'blob'
     });
-    console.log('📥 Respuesta de /Histórico/individual:', response);
+    console.log('📥 Respuesta de /Historico/individual:', response);
     return response;
   } catch (error) {
     console.error('Error al obtener historico:', error);

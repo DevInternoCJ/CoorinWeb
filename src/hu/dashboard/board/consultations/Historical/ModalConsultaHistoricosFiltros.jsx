@@ -28,6 +28,12 @@ async function fetchHistorySingle(params) {
 }
 
 const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
+  // Estados para dropdowns de cartera/producto
+  const [cartera, setCartera] = useState("");
+  const [producto, setProducto] = useState("");
+  const [carteras, setCarteras] = useState(["American Express"]); // Puedes cargar dinámicamente
+  const [productos, setProductos] = useState(["-Sin Producto-"]);
+  const [carterasProductosData, setCarterasProductosData] = useState([]); // [{cartera, producto}]
   const [tipoSeleccionado, setTipoSeleccionado] = useState(null); // null: ninguno, true: individual, false: archivo
   const [isIndividual, setIsIndividual] = useState(null);
   const [idCuenta, setIdCuenta] = useState("");
@@ -282,14 +288,6 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
 
   return (
     <>
-      {/* CSS para la animación del spinner */}
-      <style>{`
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            `}</style>
-
       <div style={{ minWidth: "400px", paddingRight: "1rem" }}>
         {/* Logo del Consorcio */}
         <div
@@ -306,19 +304,33 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
           />
         </div>
 
-        {/* Sección Cartera */}
-        <div style={{ marginBottom: "2.5rem" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "1rem",
+        {/* Sección Cartera con dropdown estilo preline */}
+  <div className="relative w-full mb-2 max-w-xs mx-auto sm:max-w-[14rem] md:max-w-[12rem]">
+          <select
+            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 sm:w-[14rem] md:w-[12rem]"
+            value={cartera}
+            onChange={e => {
+              setCartera(e.target.value);
+              const productosFiltrados = carterasProductosData
+                .filter(item => item.cartera === e.target.value)
+                .map(item => item.producto);
+              const productosConDefault = ["-Sin Producto-", ...productosFiltrados];
+              setProductos(productosConDefault);
+              setProducto("-Sin Producto-");
             }}
+            id="cartera-select"
           >
-            <label className="modal-span-1">Cartera:</label>
-            <span className="modal-span-2">American Express</span>
-          </div>
+            {carteras.length === 0 && <option value="" disabled hidden></option>}
+            {carteras.map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <label
+            htmlFor="cartera-select"
+            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+          >
+            Cartera
+          </label>
         </div>
 
         {/* Radio buttons Individual/Archivo */}
@@ -371,162 +383,88 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
 
         {/* Mostrar el resto solo si se seleccionó un radio button */}
         {tipoSeleccionado !== null && (
+
           <>
-            {/* Checkboxes de tipos de consulta */}
-            <div style={{ marginBottom: "1.5rem" }}>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "1rem",
-                  flexWrap: "wrap",
-                  justifyContent: isIndividual ? "center" : "flex-start",
-                }}
-              >
-                {Object.entries(checkedItems).map(([key, checked]) => (
-                  <label
-                    key={key}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => handleCheckboxChange(key)}
-                      className="modal-checkbox"
-                    />
-                    <span className="modal-span-2 capitalize">
-                      {key === "accionamientos" ? "Accionamientos" : key}
-                    </span>
-                  </label>
-                ))}
+            {/* Checkboxes de tipos de consulta: ahora siempre visibles */}
+            <div className="mb-6 w-full flex justify-center">
+              <div className="w-full max-w-md flex flex-col items-center">
+                <div className="grid grid-cols-3 gap-2 w-full bg-white rounded-lg p-2 shadow-sm justify-items-center sm:flex sm:flex-row sm:justify-center sm:items-center">
+                  {Object.entries(checkedItems).map(([key, checked]) => (
+                    <label key={key} className="flex items-center gap-1 justify-center sm:mb-0 mb-0">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => handleCheckboxChange(key)}
+                        className="modal-checkbox"
+                      />
+                      <span className="modal-span-2 capitalize">{key === "accionamientos" ? "Accionamientos" : key}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Período */}
-            <div style={{ marginBottom: "1.5rem" }}>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "1rem",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+            {/* Período, Desde y Hasta alineados en un solo div */}
+            <div className="mb-6 w-full flex justify-center"> 
+              <div className="flex flex-row items-center gap-2 flex-wrap bg-white rounded-lg p-2 shadow-sm">
                 {/* Checkbox Período */}
-                <div style={{ minWidth: "80px" }}>
-                  <label
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      cursor: "pointer",
+                <label className="flex items-center gap-2 cursor-pointer min-w-[80px]">
+                  <input
+                    type="checkbox"
+                    checked={periodo}
+                    onChange={() => setPeriodo(!periodo)}
+                    className="modal-checkbox"
+                  />
+                  <span className="modal-span-1">Período</span>
+                </label>
+                {/* Desde */}
+                <div className={`hs-input-group max-w-[120px] sm:max-w-[180px] ${!periodo ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <span className="hs-input-group-text min-w-[50px] sm:min-w-[70px]">Desde</span>
+                  <input
+                    type="date"
+                    max={getFechaMaxima()}
+                    min={getFechaMinima()}
+                    className="bg-gray-50 py-2 px-2 sm:py-3 sm:px-4 block w-full border-gray-200 rounded-lg text-xs sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                    value={fechaDesde.split("/").reverse().join("-")}
+                    onChange={e => {
+                      const nuevaFecha = e.target.value.split("-").reverse().join("/");
+                      setFechaDesde(nuevaFecha);
+                      const fechaHastaISO = fechaHasta.split("/").reverse().join("-");
+                      if (e.target.value > fechaHastaISO) {
+                        setFechaHasta(nuevaFecha);
+                      }
                     }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={periodo}
-                      onChange={() => setPeriodo(!periodo)}
-                      className="modal-checkbox"
-                    />
-                    <span className="modal-span-1">Período</span>
-                  </label>
+                    disabled={!periodo}
+                  />
                 </div>
-                {/* Campos de fecha */}
-                {periodo && (
-                  <>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                      }}
-                    >
-                      <label className="modal-span-2 whitespace-nowrap">
-                        Desde:
-                      </label>
-                      <input
-                        type="date"
-                        value={fechaDesde.split("/").reverse().join("-")}
-                        min={getFechaMinima()}
-                        max={getFechaMaxima()}
-                        onChange={(e) => {
-                          const nuevaFecha = e.target.value
-                            .split("-")
-                            .reverse()
-                            .join("/");
-                          setFechaDesde(nuevaFecha);
-                          // Si la fecha "Hasta" es anterior a la nueva fecha "Desde", ajustarla
-                          const fechaHastaISO = fechaHasta
-                            .split("/")
-                            .reverse()
-                            .join("-");
-                          if (e.target.value > fechaHastaISO) {
-                            setFechaHasta(nuevaFecha);
-                          }
-                        }}
-                        className="w-32 px-2 py-1 text-sm bg-white border border-black rounded focus:outline-none focus:border-[var(--color-jerarquia3)] cursor-pointer calendar-input"
-                        style={{
-                          fontSize: "14px",
-                          color: "#000000",
-                          colorScheme: "light",
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                      }}
-                    >
-                      <label className="modal-span-2 whitespace-nowrap">
-                        Hasta:
-                      </label>
-                      <input
-                        type="date"
-                        value={fechaHasta.split("/").reverse().join("-")}
-                        min={fechaDesde.split("/").reverse().join("-")}
-                        max={getFechaMaxima()}
-                        onChange={(e) => {
-                          const nuevaFecha = e.target.value
-                            .split("-")
-                            .reverse()
-                            .join("/");
-                          setFechaHasta(nuevaFecha);
-                        }}
-                        className="w-32 px-2 py-1 text-sm bg-white border border-black rounded focus:outline-none focus:border-[var(--color-jerarquia3)] cursor-pointer calendar-input"
-                        style={{
-                          fontSize: "14px",
-                          color: "#000000",
-                          colorScheme: "light",
-                        }}
-                      />
-                    </div>
-                  </>
-                )}
+                {/* Hasta */}
+                <div className={`hs-input-group max-w-[120px] sm:max-w-[180px] ${!periodo ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <span className="hs-input-group-text min-w-[50px] sm:min-w-[70px]">Hasta</span>
+                  <input
+                    type="date"
+                    min={fechaDesde.split("/").reverse().join("-")}
+                    max={getFechaMaxima()}
+                    className="bg-gray-50 py-2 px-2 sm:py-3 sm:px-4 block w-full border-gray-200 rounded-lg text-xs sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                    value={fechaHasta.split("/").reverse().join("-")}
+                    onChange={e => {
+                      const nuevaFecha = e.target.value.split("-").reverse().join("/");
+                      setFechaHasta(nuevaFecha);
+                    }}
+                    disabled={!periodo}
+                  />
+                </div>
               </div>
             </div>
+
 
             {/* Campo de cuenta individual */}
             {isIndividual && (
               <>
                 <div style={{ marginBottom: "1.5rem" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "1rem",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <label className="modal-span-1 whitespace-nowrap">
-                      Cuenta:
-                    </label>
+                  <div className="flex flex-row items-center justify-center gap-2 w-full flex-wrap">
+                    <label htmlFor="cuentaInput" className="modal-span-1 whitespace-nowrap text-sm font-medium">Cuenta:</label>
                     <input
+                      id="cuentaInput"
                       type="text"
                       inputMode="numeric"
                       pattern="[0-9]*"
@@ -538,16 +476,15 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                       }}
                       placeholder="Ingrese el número de cuenta"
                       style={{
-                        flex: 1,
                         padding: "0.5rem",
                         border:
                           idCuenta.length < 6
                             ? "2px solid #e53e3e"
                             : "2px solid #d1d5db",
                         borderRadius: "0.5rem",
-                        fontSize: "0.875rem",
-                        minWidth: "610px",
+                        fontSize: "0.875rem"
                       }}
+                      className="w-[8.5rem] sm:w-[20rem] md:w-[38.125rem]"
                     />
                     <button
                       onClick={handleBuscar}
@@ -583,141 +520,11 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
 
             {/* Input file oculto y botón Seleccionar para modo Archivo */}
             {!isIndividual && (
-              <div style={{ marginBottom: "1.5rem" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "1rem",
-                    alignItems: "center",
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  <input
-                    type="file"
-                    accept=".xlsx,.xls"
-                    id="archivoInput"
-                    style={{ display: "none" }}
-                    onChange={async (e) => {
-                      const archivoSeleccionado = e.target.files[0];
-                      if (archivoSeleccionado) {
-                        setArchivo(archivoSeleccionado);
-                        setExcelBlob(null);
-
-                        // Ejecutar automáticamente el endpoint historyArchivoUpload
-                        try {
-                          // Activar spinner de carga
-                          setIsLoading(true);
-                          toast.loading("Procesando archivo...", {
-                            id: "archivo-loading",
-                          });
-
-                          const userData = JSON.parse(
-                            localStorage.getItem("userData")
-                          );
-                          const idCartera = userData?.idCartera || 1;
-
-                          const formatFecha = (fecha) => {
-                            if (!fecha) return null;
-                            const [dia, mes, anio] = fecha.split("/");
-                            return `${anio}-${mes}-${dia}`;
-                          };
-
-                          const body = {
-                            Archivo: archivoSeleccionado,
-                            IdCartera: idCartera,
-                            IncluirCuenta: checkedItems.cuenta,
-                            IncluirNegociaciones: checkedItems.negociaciones,
-                            IncluirVisitas: checkedItems.visitas,
-                            IncluirGestiones: checkedItems.gestiones,
-                            IncluirAccionamientos: checkedItems.accionamientos,
-                            IncluirPagos: checkedItems.pagos,
-                            UsarPeriodo: periodo,
-                          };
-
-                          // Solo incluir las fechas si UsarPeriodo es true
-                          if (periodo) {
-                            body.FechaDesde = formatFecha(fechaDesde);
-                            body.FechaHasta = formatFecha(fechaHasta);
-                          }
-
-                          console.log(
-                            "Body enviado al endpoint archivo:",
-                            body
-                          );
-                          const result = await historyArchivoUpload(body);
-
-                          console.log("Respuesta del endpoint:", result);
-
-                          // Remover toast de loading
-                          toast.dismiss("archivo-loading");
-
-                          // Manejar la respuesta según lo que devuelva el servidor
-                          if (result?.data) {
-                            // Crear blob directamente del ArrayBuffer
-                            const excelBlob = new Blob([result.data], {
-                              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            });
-
-                            // Verificar que el blob tenga contenido
-                            if (excelBlob.size === 0) {
-                              toast.warning(
-                                "El archivo no contiene cuentas válidas"
-                              );
-                              return;
-                            }
-
-                            // Descargar automáticamente
-                            const fileName = `historico_archivo_${new Date()
-                              .toISOString()
-                              .slice(0, 10)}.xlsx`;
-                            const url = window.URL.createObjectURL(excelBlob);
-                            const link = document.createElement("a");
-                            link.href = url;
-                            link.setAttribute("download", fileName);
-                            document.body.appendChild(link);
-                            link.click();
-                            link.remove();
-                            window.URL.revokeObjectURL(url);
-
-                            toast.success(
-                              "Archivo procesado y descargado correctamente"
-                            );
-                            console.log("Archivo procesado exitosamente");
-
-                            // Limpiar estado para permitir nueva carga
-                            setTimeout(() => {
-                              limpiarEstadoArchivo();
-                              toast.info(
-                                "Puede cargar un nuevo archivo si lo desea"
-                              );
-                            }, 1500); // Esperar 1.5 segundos después del toast de éxito
-                          } else {
-                            toast.warning("El archivo no pudo ser procesado");
-                          }
-                        } catch (error) {
-                          console.error(
-                            "Error al consultar histórico por archivo:",
-                            error
-                          );
-                          toast.dismiss("archivo-loading");
-                          toast.error(
-                            "Error al consultar histórico por archivo"
-                          );
-
-                          // Limpiar estado también en caso de error para permitir reintentar
-                          setTimeout(() => {
-                            limpiarEstadoArchivo();
-                          }, 1000);
-                        } finally {
-                          // Desactivar spinner
-                          setIsLoading(false);
-                        }
-                      }
-                    }}
-                  />
+              <div className="mb-6 w-full flex justify-center">
+                <div className="w-full max-w-md flex flex-col items-center">
                   <button
                     type="button"
-                    className="modal-btn modal-btn-primary"
+                    className="modal-btn modal-btn-primary mt-4 w-full max-w-xs sm:mt-0 sm:w-auto"
                     style={{
                       whiteSpace: "nowrap",
                       opacity:
@@ -739,12 +546,7 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                       cursor: isLoading ? "not-allowed" : "pointer",
                     }}
                     onClick={() => {
-                      // Validar si está cargando
-                      if (isLoading) {
-                        return;
-                      }
-
-                      // Validar checkboxes
+                      if (isLoading) return;
                       const algunoSeleccionado = Object.entries(checkedItems)
                         .filter(([key]) =>
                           [
@@ -757,14 +559,12 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                           ].includes(key)
                         )
                         .some(([, checked]) => checked);
-
                       if (!algunoSeleccionado) {
                         toast.warning(
                           "Debe seleccionar al menos una opción: Cuenta, Gestiones, Visitas, Negociaciones, Accionamientos o Pagos"
                         );
                         return;
                       }
-
                       document.getElementById("archivoInput").click();
                     }}
                   >
@@ -788,13 +588,110 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
                       "Seleccionar"
                     )}
                   </button>
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls"
+                    id="archivoInput"
+                    style={{ display: "none" }}
+                    onChange={async (e) => {
+                      const archivoSeleccionado = e.target.files[0];
+                      if (archivoSeleccionado) {
+                        setArchivo(archivoSeleccionado);
+                        setExcelBlob(null);
+                        try {
+                          setIsLoading(true);
+                          toast.loading("Procesando archivo...", {
+                            id: "archivo-loading",
+                          });
+                          const userData = JSON.parse(
+                            localStorage.getItem("userData")
+                          );
+                          const idCartera = userData?.idCartera || 1;
+                          const formatFecha = (fecha) => {
+                            if (!fecha) return null;
+                            const [dia, mes, anio] = fecha.split("/");
+                            return `${anio}-${mes}-${dia}`;
+                          };
+                          const body = {
+                            Archivo: archivoSeleccionado,
+                            IdCartera: idCartera,
+                            IncluirCuenta: checkedItems.cuenta,
+                            IncluirNegociaciones: checkedItems.negociaciones,
+                            IncluirVisitas: checkedItems.visitas,
+                            IncluirGestiones: checkedItems.gestiones,
+                            IncluirAccionamientos: checkedItems.accionamientos,
+                            IncluirPagos: checkedItems.pagos,
+                            UsarPeriodo: periodo,
+                          };
+                          if (periodo) {
+                            body.FechaDesde = formatFecha(fechaDesde);
+                            body.FechaHasta = formatFecha(fechaHasta);
+                          }
+                          console.log(
+                            "Body enviado al endpoint archivo:",
+                            body
+                          );
+                          const result = await historyArchivoUpload(body);
+                          console.log("Respuesta del endpoint:", result);
+                          toast.dismiss("archivo-loading");
+                          if (result?.data) {
+                            const excelBlob = new Blob([result.data], {
+                              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            });
+                            if (excelBlob.size === 0) {
+                              toast.warning(
+                                "El archivo no contiene cuentas válidas"
+                              );
+                              return;
+                            }
+                            const fileName = `historico_archivo_${new Date()
+                              .toISOString()
+                              .slice(0, 10)}.xlsx`;
+                            const url = window.URL.createObjectURL(excelBlob);
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.setAttribute("download", fileName);
+                            document.body.appendChild(link);
+                            link.click();
+                            link.remove();
+                            window.URL.revokeObjectURL(url);
+                            toast.success(
+                              "Archivo procesado y descargado correctamente"
+                            );
+                            console.log("Archivo procesado exitosamente");
+                            setTimeout(() => {
+                              limpiarEstadoArchivo();
+                              toast.info(
+                                "Puede cargar un nuevo archivo si lo desea"
+                              );
+                            }, 1500);
+                          } else {
+                            toast.warning("El archivo no pudo ser procesado");
+                          }
+                        } catch (error) {
+                          console.error(
+                            "Error al consultar histórico por archivo:",
+                            error
+                          );
+                          toast.dismiss("archivo-loading");
+                          toast.error(
+                            "Error al consultar histórico por archivo"
+                          );
+                          setTimeout(() => {
+                            limpiarEstadoArchivo();
+                          }, 1000);
+                        } finally {
+                          setIsLoading(false);
+                        }
+                      }
+                    }}
+                  />
                 </div>
               </div>
             )}
+
           </>
         )}
-
-        {/* Mensaje del footer */}
       </div>
     </>
   );
