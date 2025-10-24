@@ -10,18 +10,7 @@ import {
 } from "../../../../services/mark/albaz/LokiServices";
 import { toast } from "sonner";
 
-// Flecha tipo chevron moderna
-const DropdownArrow = () => (
-  <span
-    style={{
-      pointerEvents: "none",
-      position: "absolute",
-      right: "0.75rem",
-    }}
-  >
-    ▼
-  </span>
-);
+
 function ModalValidadoresContent(props) {
   // Todos los hooks y lógica van dentro de la función principal
   const [executiveTree, setExecutiveTree] = useState([]);
