@@ -1207,8 +1207,27 @@ namespace CoorinWeb.Loki.Global
                                 "Próximo seguimiento" => "FechaPróximoSeguimiento",
                                 _ => ""
                             };
+
                             foreach (var val in valores.Replace("≠", "<>").Split(','))
-                                sWhere += "\tAND C." + col + val + "\r\n";
+                            {
+                                // Extraer el operador y el valor
+                                string operador = "=";
+                                string valorFecha = val.Trim();
+
+                                if (val.StartsWith(">=") || val.StartsWith("<=") || val.StartsWith("<>") || val.StartsWith("!="))
+                                {
+                                    operador = val.Substring(0, 2);
+                                    valorFecha = val.Substring(2).Trim();
+                                }
+                                else if (val.StartsWith(">") || val.StartsWith("<") || val.StartsWith("="))
+                                {
+                                    operador = val.Substring(0, 1);
+                                    valorFecha = val.Substring(1).Trim();
+                                }
+
+                                // Agregar comillas simples para fechas
+                                sWhere += $"\tAND C.{col} {operador} '{valorFecha}'\r\n";
+                            }
                             break;
                     }
                 }

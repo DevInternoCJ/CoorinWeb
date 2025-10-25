@@ -35,12 +35,13 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         }
 
         public async Task<SearchResultDto> RealizaBusqueda(
-     int idProducto,
-     int idCartera,
-     string servidor,
-     bool esDetalleResultado,
-     int? idConsulta = null,
-     IEnumerable<ParametroDto>? parametrosExtra = null)
+      int idProducto,
+      int idCartera,
+      string servidor,
+      bool esDetalleResultado,
+      int? idConsulta = null,
+      IEnumerable<ParametroDto>? parametrosExtra = null,
+      IEnumerable<AgruparDto>? agruparExtra = null)
         {
             try
             {
@@ -55,7 +56,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 tblParametros.Columns.Add("Concepto", typeof(string));
                 tblParametros.Columns.Add("Campo", typeof(string));
                 tblParametros.Columns.Add("Valores", typeof(string));
-                tblParametros.Columns.Add("Parámetros", typeof(string));  // ← COLUMNA QUE ESPERA EL MÉTODO
+                tblParametros.Columns.Add("Parámetros", typeof(string));
                 tblParametros.Columns.Add("Dato", typeof(string));
 
                 DataTable tblAgrupar = new DataTable();
@@ -99,6 +100,24 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 // === Agregar parámetros extra ===
                 ProcesarParametrosExtra(parametrosExtra, tblParametros);
 
+                // === AGREGAR AGRUPACIONES EXTRA DESDE EL NUEVO PARÁMETRO ===
+                if (agruparExtra != null && agruparExtra.Any())
+                {
+                    foreach (var agrupar in agruparExtra)
+                    {
+                        // Verificar si ya existe esta agrupación
+                        if (!AgrupacionExiste(tblAgrupar, agrupar.Campo, agrupar.Concepto))
+                        {
+                            tblAgrupar.Rows.Add(agrupar.Campo, agrupar.Concepto);
+                            Console.WriteLine($"✅ Agrupación extra cargada desde agruparExtra: {agrupar.Campo}, {agrupar.Concepto}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"⚠️ Agrupación duplicada omitida: {agrupar.Campo}, {agrupar.Concepto}");
+                        }
+                    }
+                }
+
                 // === AGREGAR AGRUPACIONES EXTRA DESDE PARAMETROSEXTRA ===
                 // Buscar agrupaciones en los parámetros extra (si vienen en el mismo objeto)
                 if (parametrosExtra != null && parametrosExtra.Any())
@@ -130,22 +149,18 @@ namespace Loki.Mark.Consulta.Cuenta.Services
 
                         if (!string.IsNullOrEmpty(campo) && !string.IsNullOrEmpty(concepto))
                         {
-                            tblAgrupar.Rows.Add(campo, concepto);
-                            Console.WriteLine($"✅ Agrupación extra cargada: {campo}, {concepto}");
+                            // Verificar si ya existe esta agrupación
+                            if (!AgrupacionExiste(tblAgrupar, campo, concepto))
+                            {
+                                tblAgrupar.Rows.Add(campo, concepto);
+                                Console.WriteLine($"✅ Agrupación extra cargada desde parámetro: {campo}, {concepto}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"⚠️ Agrupación duplicada omitida desde parámetro: {campo}, {concepto}");
+                            }
                         }
                     }
-                }
-
-                // === AGREGAR AGRUPACIONES MANUALES SI SE ESPECIFICAN EN PARAMETROSEXTRA ===
-                // Si hay parámetros específicos para agrupar por Situación
-                var parametroSituacion = parametrosExtra?.FirstOrDefault(p =>
-                    p.Concepto == "Cuenta" && p.Campo == "Situación");
-
-                if (parametroSituacion != null)
-                {
-                    // Agregar agrupación por Situación
-                    tblAgrupar.Rows.Add("Situación", "Cuenta");
-                    Console.WriteLine($"✅ Agrupación por Situación agregada automáticamente");
                 }
 
                 Console.WriteLine("=== PARÁMETROS FINALES ===");
@@ -208,7 +223,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     rutaExcel = $"/api/busquedas/download-excel?filename={fileName}";
                 }
 
-                // convertir a lista de diccionarios 
+                // convertir a lista de diccionarios y enmascarar el número de cuenta
                 var datosResultado = new List<Dictionary<string, object>>();
                 foreach (DataRow row in tblCuentas.Rows)
                 {
@@ -252,6 +267,18 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             }
         }
 
+        // === Método auxiliar para verificar duplicados ===
+        private bool AgrupacionExiste(DataTable tblAgrupar, string campo, string concepto)
+        {
+            foreach (DataRow row in tblAgrupar.Rows)
+            {
+                if (row["Campo"].ToString() == campo && row["Concepto"].ToString() == concepto)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         // === Métodos para cargar desde BD ===
 
         private async Task CargarParametrosDesdeBD(int idConsulta, DataTable tblParametros, string servidor)
