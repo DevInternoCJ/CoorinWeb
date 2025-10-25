@@ -34,24 +34,14 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             this._accionamientosQueryHelper = accionamientosQueryHelper;
         }
 
-        public async Task<SearchResultDto> RealizaBusqueda(
-      int idProducto,
-      int idCartera,
-      string servidor,
-      bool esDetalleResultado,
-      int? idConsulta = null,
-      IEnumerable<ParametroDto>? parametrosExtra = null,
-      IEnumerable<AgruparDto>? agruparExtra = null)
+        public async Task<SearchResultDto> RealizaBusqueda(int idProducto,int idCartera,string servidor,bool esDetalleResultado,int? idConsulta = null,IEnumerable<ParametroDto>? parametrosExtra = null,IEnumerable<AgruparDto>? agruparExtra = null)
         {
             try
             {
-                Console.WriteLine("🚨🚨🚨 INICIO REALIZABUSQUEDA 🚨🚨🚨");
-                Console.WriteLine($"idConsulta recibido: {idConsulta}");
-
-                // === Cargar consultas desde BD ===
+                //  Cargar consultas desde BD
                 await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidor);
 
-                // === CREAR TABLAS CON LA ESTRUCTURA QUE ESPERA GeneraQueryCuentas ===
+                //  CREAR TABLAS CON LA ESTRUCTURA QUE ESPERA GeneraQueryCuentas 
                 DataTable tblParametros = new DataTable();
                 tblParametros.Columns.Add("Concepto", typeof(string));
                 tblParametros.Columns.Add("Campo", typeof(string));
@@ -65,11 +55,9 @@ namespace Loki.Mark.Consulta.Cuenta.Services
 
                 DateTime desdeFecha = DateTime.Today.AddMonths(-1);
 
-                // === Si hay idConsulta, cargar parámetros y agrupaciones desde BD ===
+                //  Si hay idConsulta, cargar parámetros y agrupaciones desde BD 
                 if (idConsulta.HasValue)
                 {
-                    Console.WriteLine($"=== PROCESANDO idConsulta: {idConsulta.Value} ===");
-
                     var consultaRow = ConsultaGenerador.ObtenerConsulta(idConsulta.Value);
                     if (consultaRow == null)
                         throw new Exception($"No se encontró la consulta con ID {idConsulta.Value}");
@@ -77,8 +65,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     idProducto = Convert.ToInt32(consultaRow["idProducto"]);
                     idCartera = Convert.ToInt32(consultaRow["idCartera"]);
                     desdeFecha = Convert.ToDateTime(consultaRow["Desde"]);
-
-                    Console.WriteLine($"=== Valores actualizados: Producto={idProducto}, Cartera={idCartera}, Desde={desdeFecha}");
 
                     // Cargar parámetros de la consulta
                     await CargarParametrosDesdeBD(idConsulta.Value, tblParametros, servidor);
@@ -92,34 +78,26 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 }
                 else
                 {
-                    Console.WriteLine("=== NO hay idConsulta, usando parámetros por defecto ===");
-                    // Parámetro básico de cartera cuando no hay idConsulta
                     tblParametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
                 }
-
-                // === Agregar parámetros extra ===
                 ProcesarParametrosExtra(parametrosExtra, tblParametros);
 
-                // === AGREGAR AGRUPACIONES EXTRA DESDE EL NUEVO PARÁMETRO ===
+                //  AGREGAR AGRUPACIONES EXTRA DESDE EL NUEVO PARÁMETRO 
                 if (agruparExtra != null && agruparExtra.Any())
                 {
                     foreach (var agrupar in agruparExtra)
                     {
-                        // Verificar si ya existe esta agrupación
                         if (!AgrupacionExiste(tblAgrupar, agrupar.Campo, agrupar.Concepto))
                         {
                             tblAgrupar.Rows.Add(agrupar.Campo, agrupar.Concepto);
-                            Console.WriteLine($"✅ Agrupación extra cargada desde agruparExtra: {agrupar.Campo}, {agrupar.Concepto}");
                         }
                         else
                         {
-                            Console.WriteLine($"⚠️ Agrupación duplicada omitida: {agrupar.Campo}, {agrupar.Concepto}");
                         }
                     }
                 }
 
-                // === AGREGAR AGRUPACIONES EXTRA DESDE PARAMETROSEXTRA ===
-                // Buscar agrupaciones en los parámetros extra (si vienen en el mismo objeto)
+                //  AGREGAR AGRUPACIONES EXTRA DESDE PARAMETROSEXTRA 
                 if (parametrosExtra != null && parametrosExtra.Any())
                 {
                     // Buscar parámetros que sean de tipo agrupación
@@ -144,16 +122,13 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                         else if (agrupar.Concepto?.ToLower() == "agrupar")
                         {
                             concepto = agrupar.Valores;
-                            // campo ya está en agrupar.Campo
                         }
 
                         if (!string.IsNullOrEmpty(campo) && !string.IsNullOrEmpty(concepto))
                         {
-                            // Verificar si ya existe esta agrupación
                             if (!AgrupacionExiste(tblAgrupar, campo, concepto))
                             {
                                 tblAgrupar.Rows.Add(campo, concepto);
-                                Console.WriteLine($"✅ Agrupación extra cargada desde parámetro: {campo}, {concepto}");
                             }
                             else
                             {
@@ -163,22 +138,22 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     }
                 }
 
-                Console.WriteLine("=== PARÁMETROS FINALES ===");
+                Console.WriteLine(" PARÁMETROS FINALES ");
                 foreach (DataRow row in tblParametros.Rows)
                 {
                     Console.WriteLine($"Concepto: {row["Concepto"]}, Campo: {row["Campo"]}, Valores: {row["Valores"]}, Parámetros: {row["Parámetros"]}, Dato: {row["Dato"]}");
                 }
 
-                Console.WriteLine("=== AGRUPACIONES FINALES ===");
+                Console.WriteLine(" AGRUPACIONES FINALES ");
                 foreach (DataRow row in tblAgrupar.Rows)
                 {
                     Console.WriteLine($"Campo: {row["Campo"]}, Concepto: {row["Concepto"]}");
                 }
 
-                // === Determinar tipo de resultado ===
+                //  Determinar tipo de resultado 
                 var conteo = esDetalleResultado ? Resultado.Detalle : Resultado.Contar;
 
-                // === Generar query completo ===
+                //  Generar query completo 
                 ArrayList listaColumnas = new ArrayList();
                 var queryData = ConsultaGenerador.GeneraQueryCuentas(
                     idProducto,
@@ -192,11 +167,11 @@ namespace Loki.Mark.Consulta.Cuenta.Services
 
                 string sQuery = "WAITFOR DELAY '00:00:00'; USE dbCollection SET DATEFORMAT YMD \r\n" + queryData.Query;
 
-                // === Logging para debug ===
-                Console.WriteLine("=== Conteo usado: " + conteo);
-                Console.WriteLine("=== Query generado ===\n" + sQuery);
+                //  Logging para debug 
+                Console.WriteLine(" Conteo usado: " + conteo);
+                Console.WriteLine(" Query generado n" + sQuery);
 
-                // === Ejecutar query ===
+                //  Ejecutar query 
                 DataTable tblCuentas = new("Cuentas");
                 using (var sqlConnection = _dbContFactory.GetSqlConnection(servidor, "Collection"))
                 {
@@ -207,7 +182,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     }
                 }
 
-                // === Exportar a Excel si hay resultados ===
                 string rutaExcel = null;
                 if (tblCuentas.Rows.Count > 0)
                 {
@@ -257,8 +231,8 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"=== ERROR: {ex.Message}");
-                Console.WriteLine($"=== STACK TRACE: {ex.StackTrace}");
+                Console.WriteLine($" ERROR: {ex.Message}");
+                Console.WriteLine($" STACK TRACE: {ex.StackTrace}");
                 return new SearchResultDto
                 {
                     Mensaje = $"Error al realizar la búsqueda: {ex.Message}",
@@ -267,7 +241,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             }
         }
 
-        // === Método auxiliar para verificar duplicados ===
+        //  Método auxiliar para verificar duplicados 
         private bool AgrupacionExiste(DataTable tblAgrupar, string campo, string concepto)
         {
             foreach (DataRow row in tblAgrupar.Rows)
@@ -279,7 +253,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             }
             return false;
         }
-        // === Métodos para cargar desde BD ===
+        //  Métodos para cargar desde BD 
 
         private async Task CargarParametrosDesdeBD(int idConsulta, DataTable tblParametros, string servidor)
         {
@@ -304,10 +278,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                         string campo = param.Campo;
                         string valores = param.Valores;
                         string dato = param.Dato;
-
-                        Console.WriteLine($"=== VALOR ORIGINAL: {valores} ===");
-
-                        // Usar el método LimpiarValoresParametro que ahora procesa todos los tipos
                         string valoresLimpios = LimpiarValoresParametro(valores, dato);
 
                         DataRow newRow = tblParametros.NewRow();
@@ -332,7 +302,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         {
             try
             {
-                Console.WriteLine("=== CARGANDO AGRUPACIONES DESDE BD ===");
+                Console.WriteLine(" CARGANDO AGRUPACIONES DESDE BD ");
 
                 string query = @"
                     SELECT Campo, Concepto 
@@ -366,7 +336,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             }
         }
 
-        // === Método para limpiar valores de parámetros ===
         private string LimpiarValoresParametro(string valores, string tipoDato)
         {
             if (string.IsNullOrEmpty(valores))
@@ -377,27 +346,19 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             // Procesar según el tipo de dato
             if (tipoDato?.ToLower() == "char")
             {
-                // Para tipo char, enviar valores YA FORMATEADOS para SQL
-                // Formato final deseado: '417WHICO', '417WLOCO'
-
                 if (valoresLimpios.Contains("\""))
                 {
-                    // Formato: ="417WHICO", ="417WLOCO" → '417WHICO', '417WLOCO'
                     valoresLimpios = valoresLimpios.Replace("=\"", "'").Replace("\"", "'");
                 }
                 else if (valoresLimpios.Contains("='"))
                 {
-                    // Si ya viene con ='valor', quitar el = → '417WHICO', '417WLOCO'
                     valoresLimpios = valoresLimpios.Replace("='", "'");
                 }
                 else if (!valoresLimpios.Contains("'"))
                 {
-                    // Formato: 417WHICO, 417WLOCO → '417WHICO', '417WLOCO'
                     var valoresArray = valoresLimpios.Split(',');
                     valoresLimpios = string.Join(", ", valoresArray.Select(v => $"'{v.Trim()}'"));
                 }
-
-                Console.WriteLine($"🔧 Valores char transformados: {valores} -> {valoresLimpios}");
             }
             else if (tipoDato?.ToLower() == "list")
             {
@@ -409,7 +370,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 }
                 else if (valoresLimpios.Contains("=") && !valoresLimpios.All(char.IsDigit))
                 {
-                    // Para otras situaciones con formato = Descripción, extraer solo números si existen
                     var matches = Regex.Matches(valoresLimpios, @"\d+");
                     if (matches.Count > 0)
                     {
@@ -418,7 +378,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     }
                     else
                     {
-                        // Si no hay números, limpiar el "= " y usar como está
                         valoresLimpios = valoresLimpios.Replace("= ", "").Trim();
                         Console.WriteLine($"🔧 Situación limpiada: {valores} -> {valoresLimpios}");
                     }
@@ -426,7 +385,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             }
             else if (tipoDato?.ToLower() == "date")
             {
-                // Para fechas, asegurar que estén entre comillas simples
                 if (!valoresLimpios.Contains("'"))
                 {
                     valoresLimpios = valoresLimpios.Replace("= ", "= '") + "'";
@@ -437,10 +395,8 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     valoresLimpios = valoresLimpios.Replace("<> ", "<> '") + "'";
                 }
             }
-
-            Console.WriteLine($"🔧 Valores transformados final: {valores} -> {valoresLimpios}");
             return valoresLimpios;
-        } // === Método para procesar parámetros extra ===
+        } 
         private void ProcesarParametrosExtra(IEnumerable<ParametroDto> parametrosExtra, DataTable tblParametros)
         {
             if (parametrosExtra == null || !parametrosExtra.Any())
@@ -465,7 +421,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 Console.WriteLine($"✅ Parámetro extra cargado: {p.Concepto}, {p.Campo}, {valoresProcesados}, {p.Dato}");
             }
         }
-        // === Método de debug ===
+        //  Método de debug 
         private void DebugDataTables(DataTable parametros, DataTable agrupar)
         {
             Console.WriteLine("=== DEBUG PARAMETROS TABLE ===");
@@ -557,7 +513,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 }
             }
 
-            // Agregar fila de totales (solo suma columnas numéricas)
             public static void FilaTotales(ref DataTable tblTabla)
             {
                 if (tblTabla.Rows.Count == 0) return;
@@ -579,7 +534,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 tblTabla.Rows.Add(totalRow);
             }
 
-            // Ordenar DataTable dinámicamente
             public static void OrdenarTabla(ref DataTable tblTabla)
             {
                 if (tblTabla.Columns.Count < 2) return;
