@@ -288,9 +288,9 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 Console.WriteLine("=== CARGANDO PARÁMETROS DESDE BD ===");
 
                 string query = @"
-                    SELECT Concepto, Campo, Valores, Dato 
-                    FROM ConsultaParámetros 
-                    WHERE idConsulta = @idConsulta";
+            SELECT Concepto, Campo, Valores, Dato 
+            FROM ConsultaParámetros 
+            WHERE idConsulta = @idConsulta";
 
                 using (var sqlConnection = _dbContFactory.GetSqlConnection(servidor, "Collection"))
                 {
@@ -307,16 +307,14 @@ namespace Loki.Mark.Consulta.Cuenta.Services
 
                         Console.WriteLine($"=== VALOR ORIGINAL: {valores} ===");
 
-                        // Limpiar y formatear valores
+                        // Usar el método LimpiarValoresParametro que ahora procesa todos los tipos
                         string valoresLimpios = LimpiarValoresParametro(valores, dato);
-                        Console.WriteLine($"=== VALOR LIMPIO: {valoresLimpios} ===");
 
-                        // CREAR NUEVA FILA - USANDO LA COLUMNA "Parámetros"
                         DataRow newRow = tblParametros.NewRow();
                         newRow["Concepto"] = concepto;
                         newRow["Campo"] = campo;
                         newRow["Valores"] = valoresLimpios;
-                        newRow["Parámetros"] = "AND";  // ← USAR "Parámetros"
+                        newRow["Parámetros"] = "AND";
                         newRow["Dato"] = dato;
 
                         tblParametros.Rows.Add(newRow);
@@ -330,7 +328,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 throw;
             }
         }
-
         private async Task CargarAgrupacionesDesdeBD(int idConsulta, DataTable tblAgrupar, string servidor)
         {
             try
@@ -375,34 +372,75 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             if (string.IsNullOrEmpty(valores))
                 return valores;
 
-            // Extraer solo los valores entre comillas
-            var matches = Regex.Matches(valores, @"\""([^\""]+)\""");
-            string valoresLimpios = "";
+            string valoresLimpios = valores;
 
-            if (matches.Count > 0)
+            // Procesar según el tipo de dato
+            if (tipoDato?.ToLower() == "char")
             {
-                if (tipoDato?.ToLower() == "char")
+                // Para tipo char, enviar valores YA FORMATEADOS para SQL
+                // Formato final deseado: '417WHICO', '417WLOCO'
+
+                if (valoresLimpios.Contains("\""))
                 {
-                    // SOLO los valores, SIN comillas simples - el método GeneraQueryCuentas las agregará
-                    valoresLimpios = string.Join(", ", matches.Cast<Match>()
-                        .Select(m => m.Groups[1].Value));  // ← QUITAR las comillas simples
+                    // Formato: ="417WHICO", ="417WLOCO" → '417WHICO', '417WLOCO'
+                    valoresLimpios = valoresLimpios.Replace("=\"", "'").Replace("\"", "'");
                 }
-                else
+                else if (valoresLimpios.Contains("='"))
                 {
-                    valoresLimpios = string.Join(", ", matches.Cast<Match>()
-                        .Select(m => m.Groups[1].Value));
+                    // Si ya viene con ='valor', quitar el = → '417WHICO', '417WLOCO'
+                    valoresLimpios = valoresLimpios.Replace("='", "'");
+                }
+                else if (!valoresLimpios.Contains("'"))
+                {
+                    // Formato: 417WHICO, 417WLOCO → '417WHICO', '417WLOCO'
+                    var valoresArray = valoresLimpios.Split(',');
+                    valoresLimpios = string.Join(", ", valoresArray.Select(v => $"'{v.Trim()}'"));
+                }
+
+                Console.WriteLine($"🔧 Valores char transformados: {valores} -> {valoresLimpios}");
+            }
+            else if (tipoDato?.ToLower() == "list")
+            {
+                // Para tipo list (como Situación), convertir descripciones a IDs
+                if (valoresLimpios.Contains("= Niegan Acreditado"))
+                {
+                    valoresLimpios = "1042"; // ID conocido para "Niegan Acreditado"
+                    Console.WriteLine($"🔧 Situación convertida: {valores} -> {valoresLimpios}");
+                }
+                else if (valoresLimpios.Contains("=") && !valoresLimpios.All(char.IsDigit))
+                {
+                    // Para otras situaciones con formato = Descripción, extraer solo números si existen
+                    var matches = Regex.Matches(valoresLimpios, @"\d+");
+                    if (matches.Count > 0)
+                    {
+                        valoresLimpios = string.Join(", ", matches.Cast<Match>().Select(m => m.Value));
+                        Console.WriteLine($"🔧 Situación procesada: {valores} -> {valoresLimpios}");
+                    }
+                    else
+                    {
+                        // Si no hay números, limpiar el "= " y usar como está
+                        valoresLimpios = valoresLimpios.Replace("= ", "").Trim();
+                        Console.WriteLine($"🔧 Situación limpiada: {valores} -> {valoresLimpios}");
+                    }
                 }
             }
-            else
+            else if (tipoDato?.ToLower() == "date")
             {
-                valoresLimpios = valores; // Fallback
+                // Para fechas, asegurar que estén entre comillas simples
+                if (!valoresLimpios.Contains("'"))
+                {
+                    valoresLimpios = valoresLimpios.Replace("= ", "= '") + "'";
+                    valoresLimpios = valoresLimpios.Replace(">= ", ">= '") + "'";
+                    valoresLimpios = valoresLimpios.Replace("<= ", "<= '") + "'";
+                    valoresLimpios = valoresLimpios.Replace("> ", "> '") + "'";
+                    valoresLimpios = valoresLimpios.Replace("< ", "< '") + "'";
+                    valoresLimpios = valoresLimpios.Replace("<> ", "<> '") + "'";
+                }
             }
 
-            Console.WriteLine($"🔧 Valores transformados: {valores} -> {valoresLimpios}");
+            Console.WriteLine($"🔧 Valores transformados final: {valores} -> {valoresLimpios}");
             return valoresLimpios;
-        }
-
-        // === Método para procesar parámetros extra ===
+        } // === Método para procesar parámetros extra ===
         private void ProcesarParametrosExtra(IEnumerable<ParametroDto> parametrosExtra, DataTable tblParametros)
         {
             if (parametrosExtra == null || !parametrosExtra.Any())
