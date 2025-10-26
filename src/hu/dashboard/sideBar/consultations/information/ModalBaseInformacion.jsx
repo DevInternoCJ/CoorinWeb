@@ -13,6 +13,7 @@ const MODAL_SIZES = {
     correos: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
     busquedas: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
     consultaVisits: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
+    capturaVisit: { maxWidth: "966px", minWidth: "444px", width: "444px", height: "380px", maxHeight: "506px"  },
     ofrecimientos: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
     comentarios: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
     vgp: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
@@ -66,7 +67,8 @@ const ModalBaseInformacion = ({
         "Ofrecimientos": "Ofrecimientos",
         "Comentarios": "Comentarios",
         "VGP": "VGP",
-        "Consulta Visitas": "Consulta Visitas - Coorin"
+        "Consulta Visitas": "Consulta Visitas - Coorin",
+        "Captura Visitas": "Captura Visitas - Coorin"
     };
     const titulo = titulos[tipoInformacion] || "Información";
 
@@ -88,6 +90,7 @@ const ModalBaseInformacion = ({
             case "Comentarios": normalizedSize = "comentarios"; break;
             case "VGP": normalizedSize = "vgp"; break;
             case "Consulta Visitas": normalizedSize = "consultaVisits"; break;
+            case "Captura Visitas": normalizedSize = "capturaVisits"; break;
             default: normalizedSize = size;
         }
     }

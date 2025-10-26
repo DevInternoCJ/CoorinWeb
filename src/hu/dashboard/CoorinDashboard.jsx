@@ -21,6 +21,7 @@ import EmailTemplates from "./sideBar/Administration/gespa/emailTemplates/EmailT
 import ModalBaseCampanas from "./sideBar/Administration/Campanias/ModalBaseCampanas";
 import Phrases from "./sideBar/Administration/gespa/frases/Phrases";
 import ConsultVisitContent from "./sideBar/processes/visits/ConsultaVisits";
+import CaptureVisit from "./sideBar/processes/visits/CaptureVisit";
 
 
 export default function CoorinDashboard() {
@@ -45,6 +46,15 @@ export default function CoorinDashboard() {
   // Estado para controlar si la tabla de Domicilios está visible
   const [mostrarTablaDomicilios, setMostrarTablaDomicilios] = useState(false);
 
+        // Estado para controlar el tamaño del modal de Captura Visitas
+      const [captureVisitModalSize, setCaptureVisitModalSize] = useState("capturaVisit");
+      const handleGrowCaptureVisitModal = (grow) => {
+        // Solo expandir, no volver atrás si ya está expandido
+        if (grow && captureVisitModalSize !== "pagos-xl") {
+          setCaptureVisitModalSize("pagos-xl");
+        }
+      };
+
       // Efecto para cerrar el sidebar cuando se abran modales de las cards
   useEffect(() => {
     if ((executiveModalOpen || consultationModalOpen) && closeSidebarFn) {
@@ -56,6 +66,7 @@ export default function CoorinDashboard() {
     const closeModal = () => {
       setModalSidebarOpen(false);
       setMostrarTablaPagosReportados(false); // Reiniciar al cerrar
+      setCaptureVisitModalSize("capturaVisit"); // Reiniciar tamaño al cerrar
     };
 
     // Componentes de información que usan el ModalBaseInformacion
@@ -63,7 +74,7 @@ export default function CoorinDashboard() {
       "Lista Negra", "Arrepentimientos",
       "Pagos", "Pagos reportados", "Datos Erroneos", "Domicilios", 
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios", "VGP",
-      "Consulta Visitas"
+      "Consulta Visitas", "Captura Visitas"
     ];
 
     if (informationComponents.includes(selectedSidebarOption)) {
@@ -124,6 +135,15 @@ export default function CoorinDashboard() {
         case "Consulta Visitas":
           ContentComponent = ConsultVisitContent;
           break;
+        case "Captura Visitas":
+          ContentComponent = (props) => (
+            <CaptureVisit
+              {...props}
+              mostrarTabla={captureVisitModalSize === "pagos-xl"}
+              setMostrarTabla={grow => handleGrowCaptureVisitModal(grow)}
+            />
+          );
+          break;
         default:
           ContentComponent = null;
       }
@@ -136,6 +156,8 @@ export default function CoorinDashboard() {
         size = mostrarTablaDomicilios ? "pagos-xl" : "pagos";
       } else if (selectedSidebarOption === "Datos Erroneos") {
         size = mostrarTablaPagosReportados ? "pagos-xl" : "pagos";
+      } else if (selectedSidebarOption === "Captura Visitas") {
+        size = captureVisitModalSize;
       }
 
       return (
@@ -206,7 +228,8 @@ export default function CoorinDashboard() {
       "1DD": "Campañas",
       "1EE": "Campañas",
       "3AAA": "Frases",
-      "1CCC": "Consulta Visitas" // Consulta en Visitas (Procesos)
+      "1CCC": "Consulta Visitas", // Consulta en Visitas (Procesos)
+      "2CCC": "Captura Visitas" // Captura en Visitas (Procesos)
     };
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
