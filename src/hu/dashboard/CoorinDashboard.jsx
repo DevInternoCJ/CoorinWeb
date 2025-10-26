@@ -20,6 +20,7 @@ import VGPContent from "./sideBar/consultations/information/VGP";
 import EmailTemplates from "./sideBar/Administration/gespa/emailTemplates/EmailTemplates";
 import ModalBaseCampanas from "./sideBar/Administration/Campanias/ModalBaseCampanas";
 import Phrases from "./sideBar/Administration/gespa/frases/Phrases";
+import ConsultVisitContent from "./sideBar/processes/visits/ConsultaVisits";
 
 
 export default function CoorinDashboard() {
@@ -61,7 +62,8 @@ export default function CoorinDashboard() {
     const informationComponents = [
       "Lista Negra", "Arrepentimientos",
       "Pagos", "Pagos reportados", "Datos Erroneos", "Domicilios", 
-      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios", "VGP"
+      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios", "VGP",
+      "Consulta Visitas"
     ];
 
     if (informationComponents.includes(selectedSidebarOption)) {
@@ -118,6 +120,9 @@ export default function CoorinDashboard() {
           break;
         case "VGP":
           ContentComponent = VGPContent;
+          break;
+        case "Consulta Visitas":
+          ContentComponent = ConsultVisitContent;
           break;
         default:
           ContentComponent = null;
@@ -200,7 +205,8 @@ export default function CoorinDashboard() {
       "1AA": "Campañas",
       "1DD": "Campañas",
       "1EE": "Campañas",
-      "3AAA": "Frases"
+      "3AAA": "Frases",
+      "1CCC": "Consulta Visitas" // Consulta en Visitas (Procesos)
     };
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente

@@ -14,7 +14,7 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
     const [modalEliminar, setModalEliminar] = useState({ open: false, idCampaña: null, nombre: "" });
     const [modalTop100, setModalTop100] = useState({ open: false, idCampaña: null });
     const [modalFilas, setModalFilas] = useState({ open: false, cartera: "American Express", idCampaña: null, nombreCampaña: "" });
-    const [tipoFilas, setTipoFilas] = useState("archivo");
+    const [setTipoFilas] = useState("archivo");
 
     // Función para cargar campañas
     const cargarCampanas = async () => {

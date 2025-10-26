@@ -13,6 +13,7 @@ const MODAL_SIZES = {
     validadores: "w-full max-w-[clamp(180px,60vw,600px)] min-w-[clamp(120px,30vw,300px)]",
     encargados: "w-full max-w-[clamp(180px,60vw,600px)] min-w-[clamp(120px,30vw,300px)]",
     historicos: "w-full max-w-[clamp(220px,80vw,900px)] min-w-[clamp(120px,40vw,400px)]",
+    "historicos-inicial": "w-[340px] min-w-[220px] h-[120px] max-h-[160px]",
     custom: ""
 };
 
