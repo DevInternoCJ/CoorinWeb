@@ -119,7 +119,7 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
   const handlePasswordValidationError = useCallback((error, onLoginSuccess) => {
     console.error("Error en validación de contraseña:", error);
     if (error.response?.status === 404) {
-      const errorMessage = error.response.data || ERROR_MESSAGES.LOGIN_ERROR;
+      const errorMessage = error.message || ERROR_MESSAGES.LOGIN_ERROR;
       toast.error(errorMessage);
       setApiError(errorMessage);
     } else if (error.response?.status === 400) {
