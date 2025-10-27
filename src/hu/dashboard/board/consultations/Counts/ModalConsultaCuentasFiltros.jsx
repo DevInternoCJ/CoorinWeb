@@ -119,10 +119,9 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
     return (
       <>
         <div
-          className="bg-white rounded-lg p-3 h-full flex flex-col"
-          style={{ minWidth: 0 }}
+          className="bg-white rounded-lg p-3 h-auto lg:h-[400px] flex flex-col"
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2 flex-shrink-0">
             <IconCircular
               bgColor="bg-iconCircular"
               textColor="text-jerarquia3"
@@ -145,38 +144,40 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
               </svg>
             </IconCircular>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
               <input
                 type="date"
-                className="bg-gray-50 py-2.5 sm:py-2 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                className="bg-gray-50 py-2.5 sm:py-2 px-4 block w-full sm:w-auto border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                 placeholder="This is placeholder"
                 disabled={!isDateEnabled}
               />
-              <button className="btn-success">
-                Exportar
-                <span className="material-icons text-base align-middle"></span>
-              </button>
-              <button className="btn-info" onClick={agregarFiltro}>
-                Agregar
-              </button>
-              <button className="btn-success">
-                Consultar
-                <span className="material-icons text-base align-middle"></span>
-              </button>
-              {/* Tooltip agregado aquí */}
-              <span className="hs-tooltip [--placement:top] inline-flex justify-center items-center size-7 rounded-lg bg-iconCircular">
-                <IconCustomTable
-                  className="size-18 cursor-pointer"
-                  style={{ color: "var(--color-jerarquia3)" }}
-                  onClick={() => setOpenSeleccionCampania(true)}
-                />
-                <span
-                  className="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-xs font-medium text-white rounded-md shadow-sm"
-                  role="tooltip"
-                >
-                  Cargar filas de trabajo
+              <div className="flex flex-row items-center gap-2 w-full sm:w-auto">
+                <button className="btn-success flex-1 sm:flex-none">
+                  Exportar
+                  <span className="material-icons text-base align-middle"></span>
+                </button>
+                <button className="btn-info flex-1 sm:flex-none" onClick={agregarFiltro}>
+                  Agregar
+                </button>
+                <button className="btn-success flex-1 sm:flex-none">
+                  Consultar
+                  <span className="material-icons text-base align-middle"></span>
+                </button>
+                {/* Tooltip agregado aquí */}
+                <span className="hs-tooltip [--placement:top] inline-flex justify-center items-center size-7 rounded-lg bg-iconCircular flex-shrink-0">
+                  <IconCustomTable
+                    className="size-18 cursor-pointer"
+                    style={{ color: "var(--color-jerarquia3)" }}
+                    onClick={() => setOpenSeleccionCampania(true)}
+                  />
+                  <span
+                    className="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-xs font-medium text-white rounded-md shadow-sm"
+                    role="tooltip"
+                  >
+                    Cargar filas de trabajo
+                  </span>
                 </span>
-              </span>
+              </div>
             </div>
           </div>
           {/* Selects en columnas y responsivo */}

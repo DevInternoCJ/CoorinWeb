@@ -30,7 +30,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
 
     return (
         <div 
-            className="modal-xl-container flex flex-col w-full h-full max-h-[95vh] overflow-hidden"
+            className="modal-xl-container flex flex-col w-full sm:max-h-[95vh] sm:max-w-[95vw] max-h-[90vh] max-w-[90vw]"
         >
             {/* Header fijo */}
             <div className="flex-shrink-0 px-2 sm:px-0">
@@ -38,14 +38,14 @@ const ModalConsultaCuentas = ({ onClose }) => {
             </div>
             
             {/* Contenido con scroll */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-gray px-2 py-2">
+            <div className="flex-1 scrollbar-gray py-2 overflow-y-auto overflow-x-hidden" style={{ height: "400px" }}>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 w-full">
                     {/* Sección de Filtros - Toma todo el ancho en móvil, 8/12 columnas en desktop */}
                     <div className="lg:col-span-8 w-full min-w-0 flex flex-col">
                         <ModalConsultaCuentasFiltros 
-                            onGetSituacionOptions={handleGetSituacionOptions} 
+                            onGetSituacionOptions={handleGetSituacionOptions}
                             onGetAllAvailableOptions={handleGetAllAvailableOptions}
-                            idProducto={1} 
+                            idProducto={1}
                             idCartera={1}
                             onFiltrosCountChange={handleFiltrosCount}
                             isDateEnabled={totalItems >= 4}
@@ -61,12 +61,13 @@ const ModalConsultaCuentas = ({ onClose }) => {
                         />
                     </div>
                 </div>
-            </div>
-            
+                 
             {/* Footer fijo */}
             <div className="flex-shrink-0 w-full px-2 sm:px-0">
                 <ModalConsultaCuentasFooter />
             </div>
+            </div>
+           
         </div>
     );
 };

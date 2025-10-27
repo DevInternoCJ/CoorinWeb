@@ -58,11 +58,11 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptio
 
   return (
     <div
-      className="bg-white rounded-lg p-2 h-full flex flex-col"
-      style={{ minWidth: 0 }}
+      className="bg-white rounded-lg p-2 flex flex-col"
+      style={{ height: "400px" }}
     >
-      <div className="grid grid-cols-3 items-center gap-2 mb-2 w-full">
-        <div className="flex items-center gap-0">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2 flex-shrink-0">
+        <div className="flex items-center justify-center gap-0">
           <IconCircular 
             bgColor="bg-iconCircular" 
             textColor="text-jerarquia3" 
@@ -99,7 +99,7 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptio
            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512"><path fill="currentColor" d="M256 512a256 256 0 1 0 0-512a256 256 0 1 0 0 512m-24-168v-64h-64c-13.3 0-24-10.7-24-24s10.7-24 24-24h64v-64c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24h-64v64c0 13.3-10.7 24-24 24s-24-10.7-24-24"/></svg>
           </IconCircular>
         </div>
-        <div className="flex justify-center items-center gap-1 col-span-1">
+        <div className="flex justify-center items-center gap-1 flex-1 sm:flex-none">
           <label className="flex items-center gap-1.5 px-1.5 py-0.5 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10] transition-colors">
             <input
               type="radio"
@@ -126,9 +126,9 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptio
             <span className="whitespace-nowrap text-xs font-semibold" style={{ color: "var(--color-jerarquia4)" }}>Cuentas</span>
           </label>
         </div>
-        <div className="flex justify-end items-center col-span-1">
+        <div className="flex items-center sm:ml-auto">
           <button
-            className="btn-info"
+            className="btn-info w-full sm:w-auto"
             onClick={agregarColumna}
             disabled={situacionOptions.length === 0}
           >
@@ -137,14 +137,8 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptio
         </div>
       </div>
       <div
-        style={{
-          overflowX: "auto",
-          overflowY: "auto",
-          maxHeight: "44vh",
-          height: "100%",
-          flex: 1,
-        }}
-        className="scrollbar-gray"
+        className="flex-1 overflow-y-auto overflow-x-auto scrollbar-gray"
+        style={{ minHeight: 0 }}
       >
         <table className="modal-table">
           <thead>

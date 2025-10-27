@@ -98,27 +98,27 @@ body {
 .scrollbar-gray::-webkit-scrollbar {
     height: 8px;
     width: 8px;
-    background: #b0b0b0;
+    background: var(--color-jerarquia4);
 }
 .scrollbar-gray::-webkit-scrollbar-thumb {
-    background: #b0b0b0;
+    background: var(--color-jerarquia4);
     border-radius: 4px;
 }
 .scrollbar-gray::-webkit-scrollbar-thumb:hover {
-    background: #b0b0b0;
+    background: var(--color-jerarquia4) ;
 }
 /* Scrollbar global para modales (colores y grosor) */
 .scrollbar-gray {
-  scrollbar-color: #b0b0b0 #f5f5f5;
+  scrollbar-color: var(--color-jerarquia4) #f5f5f5;
   scrollbar-width: thin;
 }
 .scrollbar-gray::-webkit-scrollbar {
   height: 8px;
   width: 8px;
-  background: #f5f5f5;
+  background: var(--color-jerarquia4);
 }
 .scrollbar-gray::-webkit-scrollbar-thumb {
-  background: #b0b0b0;
+  background: var(--color-jerarquia4);
   border-radius: 4px;
 }
 .scrollbar-gray::-webkit-scrollbar-thumb:hover {
@@ -154,6 +154,7 @@ body {
     max-height: 100vh;
     left: 0;
     top: 0;
+    overflow: auto;
 }
 
 .modal-overlay {
@@ -166,9 +167,9 @@ body {
     position: relative;
     z-index: 10;
     width: 100%;
-    max-width: 90rem;
-    max-height: 50rem;
-    height: 100%;
+    max-width: fit-content;
+   
+    height: auto;
     /* Cambia este valor para hacer el modal más grande (ejemplo: 64rem = 1024px) */
     background: var(--color-bgcolor1);
     border-radius: 1rem;
@@ -502,7 +503,7 @@ label {
   background: #888;
 }
 .coorin-modal-scroll-gray {
-  scrollbar-color: #b0b0b0 #f5f5f5;
+  scrollbar-color: var(--color-jerarquia4) #f5f5f5;
   scrollbar-width: thin;
 }
 

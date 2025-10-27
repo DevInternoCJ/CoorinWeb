@@ -28,15 +28,25 @@ const ModalConsultaCuentasHeader = ({ onClose }) => {
     const [consulta, setConsulta] = useState("");
 
     return (
-        <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-2 w-full">
-            {/* Título */}
-            <h2 className="modal-title whitespace-nowrap lg:flex-shrink-0">
-                <IconCuentas className="modal-title-icon" />
-                Consulta cuentas
-            </h2>
+        <div className="flex flex-col gap-3 mb-2 w-full">
+            {/* Fila 1: Título y botón de cierre alineados */}
+            <div className="flex items-center justify-between w-full">
+                <h2 className="modal-title whitespace-nowrap">
+                    <IconCuentas className="modal-title-icon" />
+                    Consulta cuentas
+                </h2>
+                
+                {/* Botón de cierre */}
+             <button
+          onClick={onClose}
+          className="text-jerarquia3 hover:bg-background-dashboard hover:text-red-600 text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors "
+        >
+          &times;
+        </button>
+            </div>
             
-            {/* Grid de selects - 3 columnas en móvil/tablet, fila horizontal en desktop */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:flex lg:flex-row gap-2 sm:gap-3 lg:gap-4 flex-1">
+            {/* Fila 2: Grid de selects - 3 columnas en móvil/tablet, fila horizontal en desktop */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:flex lg:flex-row gap-2 sm:gap-3 lg:gap-4 w-full">
                 {/* Cartera */}
                 <div className="relative w-full lg:flex-1">
                     <select
@@ -108,15 +118,6 @@ const ModalConsultaCuentasHeader = ({ onClose }) => {
                     </label>
                 </div>
             </div>
-            
-            {/* Botón de cierre */}
-            <button
-                onClick={onClose}
-                className="modal-btn modal-btn-close self-end lg:self-auto lg:flex-shrink-0"
-                aria-label="Cerrar"
-            >
-                &times;
-            </button>
         </div>
     );
 };
