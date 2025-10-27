@@ -1048,14 +1048,7 @@ namespace CoorinWeb.Loki.Global
 
             //    return new SqlQueryData(sQuery, alColumnas); // Se devuelve el objeto completo
             //}
-            public static SqlQueryData GeneraQueryCuentas(
-            object idProducto,
-            DataTable tblParámetros,
-            DataTable tblAgrupar,
-            Resultado Conteo,
-            DateTime Desde,
-            object idCarteraParam,
-            ref ArrayList listaColumnas)
+            public static SqlQueryData GeneraQueryCuentas(object idProducto,DataTable tblParámetros, DataTable tblAgrupar,Resultado Conteo,DateTime Desde,object idCarteraParam,ref ArrayList listaColumnas)
             {
                 // Inicializamos SqlQueryData
                 var queryData = new SqlQueryData();
@@ -1243,9 +1236,11 @@ namespace CoorinWeb.Loki.Global
                         case "Cuenta":
                             if (campo == "Situación")
                             {
-                                sSelect += Conteo == Resultado.Detalle ? "\t,Situación.Valor AS 'SituaciónCuenta' \r\n" :
-                                "\t ,RIGHT('00' + CONVERT(VARCHAR(3),Situación.Orden),2) + ' ' + Situación.Valor AS 'SituaciónCuenta' \r\n ";
-                                sFrom += "\tINNER JOIN dbCollection..ValoresCatálogo Situación ON C.idSituación = Situación.idValor \r\n";
+                                sSelect += Conteo == Resultado.Detalle ?
+                                 "\t ,Situación.Valor AS 'SituaciónCuenta' \r\n " :
+                                 "\t ,RIGHT('00' + CONVERT(VARCHAR(3),Situación.Orden),2) + ' ' + Situación.Valor AS 'SituaciónCuenta' \r\n "
+                                 ;
+                                sFrom += "\t INNER JOIN dbCollection..ValoresCatálogo Situación ON C.idSituación = Situación.idValor \r\n";
                                 sGroupBy += "Situación.Valor, Situación.Orden, ";
                                 listaColumnas.Add("SituaciónCuenta");
 
