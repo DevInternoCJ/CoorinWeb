@@ -1844,6 +1844,20 @@ export const chargueCatalog = async (data) => {
   }
 };
 
+export const postReportCampaign = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    const response = await api.post('Busquedas/realizar-busqueda', body);
+    return response.data;
+  }
+  catch (error) {
+    console.error('Error al obtener el reporte de campaña:', error);
+  }
+};
+//Fin Reportes de Campañas
 
 
 

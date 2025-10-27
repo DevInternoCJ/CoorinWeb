@@ -1,7 +1,7 @@
 import React from "react";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import { toast } from "sonner";
-const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptions = [], onColumnasCountChange }) => {
+const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptions = [], onColumnasCountChange, onColumnasChange }) => {
   const [columnas, setColumnas] = React.useState([]);
 
   const eliminarColumna = (id) => {
@@ -25,7 +25,8 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptio
       if (!existe) {
         const columnaNueva = {
           id: Date.now(),
-          nombre: nuevaColumna.label
+          nombre: nuevaColumna.label,
+          concepto: nuevaColumna.concepto || "Cuenta" // Agregar el concepto
         };
         setColumnas(prevColumnas => [...prevColumnas, columnaNueva]);
       }
@@ -40,7 +41,8 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptio
         .filter(option => !columnas.some(col => col.nombre === option.label))
         .map((option, index) => ({
           id: baseTime + index, // Asegurar IDs únicos incrementales
-          nombre: option.label
+          nombre: option.label,
+          concepto: option.concepto || "Cuenta" // Agregar el concepto
         }));
       
       if (nuevasColumnas.length > 0) {
@@ -54,7 +56,11 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptio
     if (onColumnasCountChange) {
       onColumnasCountChange(columnas.length);
     }
-  }, [columnas.length, onColumnasCountChange]);
+    // Notificar cambios en las columnas
+    if (onColumnasChange) {
+      onColumnasChange(columnas);
+    }
+  }, [columnas.length, onColumnasCountChange, onColumnasChange, columnas]);
 
   return (
     <div

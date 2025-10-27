@@ -35,7 +35,8 @@ const ConsultFilter = ({
           if (productData && Array.isArray(productData)) {
             const mappedOptions = productData.map(item => ({
               value: item,
-              label: item
+              label: item,
+              concepto: "Producto" // Agregar el concepto
             }));
             setDynamicOptions(mappedOptions);
           }
@@ -55,7 +56,8 @@ const ConsultFilter = ({
               .filter(item => item.detalle === "Cuenta")
               .map(item => ({
                 value: item.valor,
-                label: item.valor
+                label: item.valor,
+                concepto: "Cuenta" // Agregar el concepto
               }));
             setDynamicOptions(cuentaOptions);
           } else {
@@ -77,7 +79,8 @@ const ConsultFilter = ({
               .filter(item => item.detalle === "Conteos")
               .map(item => ({
                 value: item.valor,
-                label: item.valor
+                label: item.valor,
+                concepto: "Conteos" // Agregar el concepto
               }));
             setDynamicOptions(conteosOptions);
           } else {
@@ -98,7 +101,8 @@ const ConsultFilter = ({
               .filter(item => item.detalle === "Fechas")
               .map(item => ({
                 value: item.valor,
-                label: item.valor
+                label: item.valor,
+                concepto: "Fechas" // Agregar el concepto
               }));
             setDynamicOptions(fechasOptions);
           } else {

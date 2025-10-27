@@ -3,12 +3,19 @@ import ModalConsultaCuentasHeader from "./ModalConsultaCuentasHeader";
 import ModalConsultaCuentasFiltros from "./ModalConsultaCuentasFiltros";
 import ModalConsultaCuentasColumnas from "./ModalConsultaCuentasColumnas";
 import ModalConsultaCuentasFooter from "./ModalConsultaCuentasFooter";
+import { toast } from "sonner";
+import { postReportCampaign } from "../../../../../services/mark/albaz/LokiServices";
 
 const ModalConsultaCuentas = ({ onClose }) => {
     const [situacionOptions, setSituacionOptions] = useState([]);
     const [allAvailableOptions, setAllAvailableOptions] = useState([]);
     const [totalFiltros, setTotalFiltros] = useState(0);
     const [totalColumnas, setTotalColumnas] = useState(0);
+    const [filtros, setFiltros] = useState([]);
+    const [columnas, setColumnas] = useState([]);
+    const [headerData, setHeaderData] = useState({});
+    const [fechaDesde, setFechaDesde] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleGetSituacionOptions = useCallback((options) => {
         setSituacionOptions(options);
@@ -26,6 +33,70 @@ const ModalConsultaCuentas = ({ onClose }) => {
         setTotalColumnas(count);
     }, []);
 
+    const handleFiltrosChange = useCallback((filtrosData) => {
+        setFiltros(filtrosData);
+    }, []);
+
+    const handleColumnasChange = useCallback((columnasData) => {
+        setColumnas(columnasData);
+    }, []);
+
+    const handleHeaderDataChange = useCallback((data) => {
+        setHeaderData(data);
+    }, []);
+
+    const handleConsultar = async () => {
+        // Validar que haya filtros y columnas
+        if (filtros.length === 0) {
+            toast.warning("Debe agregar al menos un filtro");
+            return;
+        }
+
+        if (columnas.length === 0) {
+            toast.warning("Debe agregar al menos una columna");
+            return;
+        }
+
+        // Construir el JSON
+        const consultaJSON = {
+            servidor: "Albaz",
+            idCartera: headerData.idCartera || 1,
+            idProducto: headerData.idProducto || 1,
+            desdeFecha: fechaDesde || "2025-10-01",
+            esDetalleResultado: headerData.esDetalleResultado || true,
+            parametros: filtros.map(filtro => ({
+                concepto: filtro.concepto,
+                campo: filtro.campo,
+                valores: filtro.valores
+            })),
+            agrupar: columnas.map(columna => ({
+                campo: columna.nombre,
+                concepto: columna.concepto
+            }))
+        };
+
+        console.log("📤 JSON de consulta:", JSON.stringify(consultaJSON, null, 2));
+
+        try {
+            setIsLoading(true);
+            toast.info("Realizando consulta...");
+            
+            const response = await postReportCampaign(consultaJSON);
+            
+            console.log("📥 Respuesta de la consulta:", response);
+            toast.success("Consulta realizada exitosamente");
+            
+            // Aquí puedes manejar la respuesta
+            // Por ejemplo, pasarla al footer o a otro componente para mostrar resultados
+            
+        } catch (error) {
+            console.error("❌ Error al realizar la consulta:", error);
+            toast.error("Error al realizar la consulta");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const totalItems = totalFiltros + totalColumnas;
 
     return (
@@ -34,7 +105,10 @@ const ModalConsultaCuentas = ({ onClose }) => {
         >
             {/* Header fijo */}
             <div className="flex-shrink-0 px-2 sm:px-0">
-                <ModalConsultaCuentasHeader onClose={onClose} />
+                <ModalConsultaCuentasHeader 
+                    onClose={onClose}
+                    onHeaderDataChange={handleHeaderDataChange}
+                />
             </div>
             
             {/* Contenido con scroll */}
@@ -48,6 +122,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
                             idProducto={1}
                             idCartera={1}
                             onFiltrosCountChange={handleFiltrosCount}
+                            onFiltrosChange={handleFiltrosChange}
                             isDateEnabled={totalItems >= 4}
                         />
                     </div>
@@ -58,13 +133,17 @@ const ModalConsultaCuentas = ({ onClose }) => {
                             situacionOptions={situacionOptions}
                             allAvailableOptions={allAvailableOptions}
                             onColumnasCountChange={handleColumnasCount}
+                            onColumnasChange={handleColumnasChange}
                         />
                     </div>
                 </div>
                  
             {/* Footer fijo */}
             <div className="flex-shrink-0 w-full px-2 sm:px-0">
-                <ModalConsultaCuentasFooter />
+                <ModalConsultaCuentasFooter 
+                    onConsultar={handleConsultar}
+                    isLoading={isLoading}
+                />
             </div>
             </div>
            
