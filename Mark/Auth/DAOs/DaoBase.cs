@@ -155,5 +155,25 @@ namespace CoorinWeb.Loki.Mark.Auth.DAOs
             }
             // Puedes a?adir m?s manejo de errores espec?ficos aqu? seg?n tus necesidades
         }
+
+        public async Task<SqlMapper.GridReader> ExecuteQueryMultiple(SqlConnection sqlConnection, string storedProcedureName, params SqlParameter[] parameters)
+        {
+            // Crear DynamicParameters con los SqlParameter 
+            var dapperParams = new DynamicParameters();
+            foreach (var param in parameters)
+            {
+                dapperParams.Add(param.ParameterName, param.Value);
+            }
+
+            if (sqlConnection.State != ConnectionState.Open)
+                await sqlConnection.OpenAsync();
+
+            // devuelve un GridReader para leer múltiples resultados.
+            return await sqlConnection.QueryMultipleAsync(
+                storedProcedureName,
+                dapperParams,
+                commandType: CommandType.StoredProcedure
+            );
+        }
     }
 }

@@ -74,7 +74,6 @@ namespace Loki.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"💥 ERROR EN CONTROLLER: {ex.Message}");
                 return StatusCode(500, new { error = ex.Message });
             }
         }

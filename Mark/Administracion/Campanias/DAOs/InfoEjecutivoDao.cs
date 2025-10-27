@@ -4,6 +4,7 @@ using CoorinWeb.Loki.Global;
 using CoorinWeb.Loki.Mark.Auth.DAOs;
 using Loki.Mark.Administracion.Campanias.Interfaces;
 using Loki.Mark.Administracion.Carteras.Interfaces;
+using Loki.DTOs.InfoEjecutivoDTO;
 
 
 
@@ -21,18 +22,33 @@ namespace Loki.Mark.Administracion.Campanias.DAOs
 		}
 
 
-		public async Task<List<dynamic>?> GetConsultasEjecutivo(string servidor, int idEjecutivo)
-		{
-			const string tipoBase = "Collection";
+        public async Task<ResultadoConsultasEjecutivoDTO?> GetConsultasEjecutivo(string servidor, int idEjecutivo)
+        {
+            const string tipoBase = "Collection";
 
-			var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
-			var nombreSp = "[dbo].[1.5.ConsultasEjecutivo]";
+            var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
+            var nombreSp = "[dbo].[1.5.ConsultasEjecutivo]";
 
-			return await _daoBase.ExecuteStoredProcedure(
-				sqlConnection,
-				nombreSp,
-				new SqlParameter("@idEjecutivo", idEjecutivo)
-			);
-		}
-	}
+            using var reader = await _daoBase.ExecuteQueryMultiple(
+                sqlConnection,
+                nombreSp,
+                new SqlParameter("@idEjecutivo", idEjecutivo)
+            );
+            var consultas = (await reader.ReadAsync<ConsultaDTO>()).ToList();
+
+            if (consultas == null || consultas.Count == 0)
+            {
+                return null;
+            }          
+            var parametros = (await reader.ReadAsync<ParametroDTO>()).ToList();
+            var agrupar = (await reader.ReadAsync<AgruparDTO>()).ToList();
+
+            return new ResultadoConsultasEjecutivoDTO
+            {
+                Consultas = consultas,      
+                Parametros = parametros,
+                Agrupar = agrupar
+            };
+        }
+    }
 }

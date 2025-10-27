@@ -32,24 +32,23 @@ namespace Loki.Mark.Administracion.Campanias.Controllers
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		[AllowAnonymous]
-		public async Task<IActionResult> Consultas(int idEjecutivo)
-		{
-			string? servidorClaim = User.FindFirst("Servidor")?.Value;
+        public async Task<IActionResult> Consultas(int idEjecutivo)
+        {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
-			if (string.IsNullOrWhiteSpace(servidorClaim))
-			{
-				return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-			}
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+            {
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+            }
 
-			var consultas = await _infoEjecutivoDao.GetConsultasEjecutivo(servidorClaim, idEjecutivo);
+            var resultadoCompleto = await _infoEjecutivoDao.GetConsultasEjecutivo(servidorClaim, idEjecutivo);
 
-			if (consultas == null || consultas.Count == 0)
-			{
-				return NotFound(); // Devuelve 404 si no se encontraron consultas.
-			}
+            if (resultadoCompleto == null)
+            {
+                return NotFound();
+            }
 
-			return Ok(consultas); // Devuelve 200 OK con la lista de consultas.
-		}
-
-	}
+            return Ok(resultadoCompleto); 
+        }
+    }
 }
