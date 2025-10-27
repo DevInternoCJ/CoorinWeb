@@ -46,15 +46,15 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla }) => {
             {mostrarTabla ? (
                 <>
                     {/* Row con todos los elementos */}
-                    <div className="grid grid-cols-12 items-center gap-0 w-full px-[1vw] py-[0.5vw]">
-                        <div className="col-span-1 flex-shrink-0 min-w-[2.5rem] max-w-[8vw]">
-                            <img src={ConsorcioLogo} alt="Logo Coorin" className="h-[4vw] w-[4vw] min-h-[2.5rem] min-w-[2.5rem] object-contain mx-auto" />
+                    <div className="flex flex-col w-full px-[1vw] py-[0.5vw] sm:grid sm:grid-cols-12 sm:items-center sm:gap-0">
+                        <div className="w-full flex justify-center mb-2 sm:col-span-1 sm:w-auto sm:mb-0 sm:block">
+                            <img src={ConsorcioLogo} alt="Logo Coorin" className="h-[4vw] w-[4vw] min-h-[2.5rem] min-w-[2.5rem] object-contain" />
                         </div>
                         {/* Cartera: más pequeño, responsive */}
-                        <div className="col-span-1 flex flex-col min-w-[1.66rem] max-w-[8vw] w-[6.66vw]">
+                        <div className="w-full flex flex-col items-center mb-2 sm:col-span-1 sm:w-[6.66vw] sm:mb-0">
                             <label htmlFor="cartera-select-carga-visits" className="text-sm font-medium mb-[0.25rem]">Cartera</label>
                             <select
-                                className="peer p-[0.33rem] block w-full bg-gray-50 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2"
+                                className="peer p-[0.33rem] block w-full max-w-xs mx-auto bg-gray-50 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2"
                                 value={cartera}
                                 onChange={e => setCartera(e.target.value)}
                                 id="cartera-select-carga-visits"
@@ -66,7 +66,7 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla }) => {
                             </select>
                         </div>
                         {/* Checkbox pegado a cartera, sin padding */}
-                        <div className="col-span-1 flex flex-col items-center justify-start pl-0 ml-[1vw] min-w-[1.875rem] max-w-[7vw] w-[6vw]">
+                        <div className="w-full flex flex-col items-center justify-center mb-2 sm:col-span-1 sm:w-[6vw] sm:ml-[1vw] sm:mb-0">
                             <label htmlFor="porExpediente" className="text-sm font-medium mb-[0.25rem] text-center">Expte.</label>
                             <input
                                 id="porExpediente"
@@ -77,7 +77,7 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla }) => {
                             />
                         </div>
                         {/* Input Cuenta: más grande y separado del checkbox */}
-                        <div className="col-span-3 flex flex-col justify-center min-w-[2.21rem] max-w-[8.88vw] w-[8vw] ml-[1vw] mr-[-1vw]">
+                        <div className="w-full flex flex-col items-center justify-center mb-2 sm:col-span-3 sm:w-[8vw] sm:ml-[1vw] sm:mr-[-1vw] sm:mb-0">
                             <label htmlFor="cuentaInput" className="modal-span-1 whitespace-nowrap text-sm font-medium mb-[0.25rem]">
                                 {porExpediente ? "Expediente:" : "Cuenta:"}
                             </label>
@@ -94,45 +94,56 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla }) => {
                                 }}
                                 placeholder={porExpediente ? "Ingrese el expediente" : "Ingrese el nú. de cuenta"}
                                 style={{ padding: "0.33rem", border: idCuenta.length < 6 ? "0.125rem solid #e53e3e" : "0.125rem solid #d1d5db", borderRadius: "0.5rem", fontSize: "0.875rem" }}
-                                className="w-full"
+                                className="w-full max-w-xs mx-auto"
                             />
                         </div>
                         {/* Dropdown extra: prioridad visual, ocupa el resto */}
-                        <div className="col-span-6 flex flex-col justify-center ml-[-1vw] min-w-[5rem] max-w-[26.66vw] w-[25.32vw]">
-                            <label className="text-sm font-medium mb-[0.25rem]">Opciones extra</label>
-                            <select className="p-[0.33rem] border border-gray-300 rounded-lg text-sm bg-gray-50 w-full">
-                                <option value="">Opciones extra</option>
+                        <div className="w-full flex flex-col items-center justify-center mb-2 sm:col-span-6 sm:w-[28vw] sm:ml-[-1vw] sm:mb-0">
+                            <label className="text-sm font-medium mb-[0.25rem]">Dirección</label>
+                            <select className="p-[0.33rem] border border-gray-300 rounded-lg text-sm bg-gray-50 w-full max-w-lg mx-auto">
+                                <option value="">Direcciones</option>
                                 <option value="1">Opción 1</option>
                                 <option value="2">Opción 2</option>
                             </select>
                         </div>
                     </div>
-                    {/* Campos y áreas debajo de los elementos principales reorganizados */}
-                        <div className="w-full flex flex-col gap-4 mb-6 mt-4">
-                            <div className="grid w-full gap-4" style={{ gridTemplateColumns: '1fr 2fr' }}>
-                                {/* F2 y F3 en columna 1, 1/3 exacto del modal */}
-                                <div className="flex flex-col gap-4 w-full">
-                                    <CapturaVisitsF2 />
-                                    <CapturaVisitsF3 />
+                {/* Campos y áreas debajo de los elementos principales reorganizados */}
+                <div className="w-full flex flex-col gap-4 mb-6 mt-4">
+                    <div className="flex flex-col w-full gap-4 sm:grid sm:grid-cols-2 sm:gap-4" style={{ gridTemplateColumns: '1fr 2fr' }}>
+                        {/* F2 y F3 en columna 1, 1/3 exacto del modal */}
+                        <div className="flex flex-col gap-4 w-full mb-4 sm:mb-0">
+                            <CapturaVisitsF2 />
+                            <CapturaVisitsF3 />
+                        </div>
+                        {/* F4 expandido arriba de F5 y F7, 2/3 exacto del modal */}
+                        <div className="flex flex-col gap-4 w-full mb-4 sm:mb-0">
+                            <CapturaVisitsF4 />
+                            <div className="flex flex-col w-full gap-4 sm:grid sm:grid-cols-3 sm:gap-4">
+                                <div className="flex flex-col gap-4 mb-4 sm:mb-0">
+                                    <CapturaVisitsF5 />
                                 </div>
-                                {/* F4 expandido arriba de F5 y F7, 2/3 exacto del modal */}
-                                <div className="flex flex-col gap-4 w-full">
-                                    <CapturaVisitsF4 />
-                                    <div className="grid grid-cols-3 gap-4 w-full">
-                                        <div className="flex flex-col gap-4">
-                                            <CapturaVisitsF5 />
-                                        </div>
-                                        <div className="flex flex-col gap-4">
-                                            <CapturaVisitsF6 />
-                                        </div>
-                                        <div className="flex flex-col h-full justify-stretch">
-                                            <CapturaVisitsF7 />
-                                        </div>
-                                    </div>
+                                <div className="flex flex-col gap-4 mb-4 sm:mb-0">
+                                    <CapturaVisitsF6 />
+                                </div>
+                                <div className="flex flex-col h-full justify-stretch mb-4 sm:mb-0">
+                                    <CapturaVisitsF7 />
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                {/* Botón Capturar centrado debajo de todos los F's */}
+                <div className="w-full mt-4 flex justify-center">
+                    <button
+                        type="button"
+                        className="btn-success w-full sm:w-auto sm:min-w-[120px] px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                        onClick={() => {}}
+                    >
+                        Capturar
+                    </button>
+                </div>
                 </>
+                
             ) : (
                 <>
                     {/* Layout original (modal pequeño) */}
