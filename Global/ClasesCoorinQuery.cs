@@ -1071,12 +1071,12 @@ namespace CoorinWeb.Loki.Global
                 //       sWhere = " WHERE C.CuentaActiva = 1 AND C.idCartera = " + idCartera + (idProducto == null ? "" : " AND C.idProducto = " + idProducto) + " \r\n",
                 //       sGroupBy = "";
                 string sQuery = "SELECT \r\n",
-                     sSelect = Conteo == Resultado.Detalle
-                       ? "\tC.idCuenta AS Cuenta, Car.Abreviación + CONVERT(VARCHAR(10),C.Expediente) AS Expediente \r\n"
-                       : "\t COUNT(C.idCuenta) AS 'Cuentas', ISNULL(SUM(C.Saldo) ,0) AS 'Saldo' \r\n",
-                      sFrom = " FROM dbCollection..Cuentas C WITH (NOLOCK) \r\n",
-                      sWhere = " WHERE C.CuentaActiva = 1 AND C.idCartera = " + idCartera + (idProducto == null ? "" : " AND C.idProducto = " + idProducto) + " \r\n",
-                      sGroupBy = "";
+      sSelect = Conteo == Resultado.Detalle
+        ? "\tC.idCuenta AS Cuenta, Car.Abreviación + CONVERT(VARCHAR(10), C.Expediente) AS Expediente, C.NombreDeudor, C.NúmeroCliente, C.Saldo \r\n"
+        : "\t COUNT(C.idCuenta) AS 'Cuentas', ISNULL(SUM(C.Saldo) ,0) AS 'Saldo' \r\n",
+      sFrom = " FROM dbCollection..Cuentas C WITH (NOLOCK) \r\n",
+      sWhere = " WHERE C.CuentaActiva = 1 AND C.idCartera = " + idCartera + (idProducto == null ? "" : " AND C.idProducto = " + idProducto) + " \r\n",
+      sGroupBy = "";
 
                 //if ( idCarteraParam > 0 )
                 if (Conteo == Resultado.Cuentas || Conteo == Resultado.FilaDeTrabajo)
@@ -1141,14 +1141,13 @@ namespace CoorinWeb.Loki.Global
                                 foreach (var val in valores.Replace("≠", "<>").Split(','))
                                     sWhere += "\tAND CASE WHEN ISDATE(Y.[" + campo + "]) = 1 THEN CONVERT(DATETIME, Y.[" + campo + "]) ELSE NULL END " + val + "\r\n";
                             break;
-
                         case "Conteos":
                             {
                                 string sNombreTabla = drFila["Campo"].ToString();
                                 string sAlias = sNombreTabla.Substring(0, 1);
                                 string sFecha = " AND Fecha_Insert >= '" + Desde.ToString("yyyy-MM-dd") + "' ";
 
-                                // Ajustes según tipo de Campo
+                                // Ajustes según tipo de Campo (tu código existente)
                                 switch (sNombreTabla)
                                 {
                                     case "Gestiones": sNombreTabla = "GestionesTelefónicas"; break;
@@ -1180,14 +1179,22 @@ namespace CoorinWeb.Loki.Global
 
                                 sFrom += joinQuery;
 
-                                // Aplicar filtros del parámetro en WHERE
-                                foreach (var val in drFila["Parámetros"].ToString().Replace("≠", "<>").Split(','))
-                                    sWhere += "\t AND ISNULL(" + sAlias + ".Conteo,0) " + val + "\r\n";
+                                // ✅ CORRECCIÓN: Aplicar filtros del parámetro en WHERE - USAR "Valores" no "Parámetros"
+                                string valoresFiltro = drFila["Valores"].ToString();
+                                if (!string.IsNullOrEmpty(valoresFiltro))
+                                {
+                                    foreach (var val in valoresFiltro.Replace("≠", "<>").Split(','))
+                                    {
+                                        if (!string.IsNullOrEmpty(val.Trim()))
+                                        {
+                                            sWhere += "\t AND ISNULL(" + sAlias + ".Conteo,0) " + val.Trim() + "\r\n";
+                                        }
+                                    }
+                                }
 
                                 listaColumnas.Add(drFila["Campo"].ToString());
                                 break;
                             }
-
 
                         case "Fechas":
                             string col = campo switch
@@ -1201,13 +1208,13 @@ namespace CoorinWeb.Loki.Global
                                 _ => ""
                             };
 
-                            foreach (var val in valores.Replace("≠", "<>").Split(','))
+                            foreach (var val in valores.Replace("≠", "<>").Replace("''", "'").Split(','))
                             {
-                                // Extraer el operador y el valor
                                 string operador = "=";
                                 string valorFecha = val.Trim();
 
-                                if (val.StartsWith(">=") || val.StartsWith("<=") || val.StartsWith("<>") || val.StartsWith("!="))
+                                // Extraer operador correctamente
+                                if (val.StartsWith(">=") || val.StartsWith("<=") || val.StartsWith("<>"))
                                 {
                                     operador = val.Substring(0, 2);
                                     valorFecha = val.Substring(2).Trim();
@@ -1218,8 +1225,13 @@ namespace CoorinWeb.Loki.Global
                                     valorFecha = val.Substring(1).Trim();
                                 }
 
-                                // Agregar comillas simples para fechas
-                                sWhere += $"\tAND C.{col} {operador} '{valorFecha}'\r\n";
+                                // Limpiar comillas extras y espacios
+                                valorFecha = valorFecha.Trim().Trim('\'').Trim();
+
+                                if (!string.IsNullOrEmpty(col) && !string.IsNullOrEmpty(valorFecha))
+                                {
+                                    sWhere += $"\tAND C.{col} {operador} '{valorFecha}'\r\n";
+                                }
                             }
                             break;
                     }
@@ -1465,7 +1477,7 @@ namespace CoorinWeb.Loki.Global
                     : "";
                 if (sGroupBy.Length > 0)
                     sGroupBy = "GROUP BY " + sGroupBy;
-
+                sSelect = RemoverLineasDuplicadas(sSelect);
                 // Armar query final
                 sQuery += sSelect + sFrom + sWhere + sGroupBy;
 
@@ -1473,8 +1485,18 @@ namespace CoorinWeb.Loki.Global
                 queryData.Columns = listaColumnas;
 
                 return queryData;
-            }
 
+            }
+            private static string RemoverLineasDuplicadas(string select)
+            {
+                var lineas = select.Split('\n')
+                    .Where(line => !string.IsNullOrWhiteSpace(line))
+                    .Select(line => line.Trim())
+                    .Distinct()
+                    .ToList();
+
+                return string.Join("\r\n", lineas) + "\r\n";
+            }
 
             // Genrales
             /// <summary>

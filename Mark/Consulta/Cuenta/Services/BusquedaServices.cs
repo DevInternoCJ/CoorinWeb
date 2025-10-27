@@ -42,11 +42,11 @@ namespace Loki.Mark.Consulta.Cuenta.Services
          int? idConsulta = null,
          IEnumerable<ParametroDto>? parametrosExtra = null,
          IEnumerable<AgruparDto>? agruparExtra = null,
-         DateTime? desdeFecha = null)  // Nuevo parámetro para la fecha desde
+         DateTime? desdeFecha = null) 
         {
             try
             {
-                Console.WriteLine("🚨🚨🚨 INICIO REALIZABUSQUEDA 🚨🚨🚨");
+
                 Console.WriteLine($"idConsulta recibido: {idConsulta}");
                 Console.WriteLine($"desdeFecha recibido: {desdeFecha}");
 
