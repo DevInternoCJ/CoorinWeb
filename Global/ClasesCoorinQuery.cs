@@ -1256,10 +1256,12 @@ namespace CoorinWeb.Loki.Global
                                 sGroupBy += "Situación.Valor, Situación.Orden, ";
                                 listaColumnas.Add("SituaciónCuenta");
 
-                                if (Conteo == Resultado.Detalle)
-                                    sSelect += "\t ,SD.Valor AS 'SituaciónDesactivación' \r\n ";
-                                sFrom += "\t LEFT JOIN dbCollection..ValoresCatálogo SD ON C.idSituaciónDesactivación = SD.idValor \r\n";
-                                sGroupBy += "SD.Valor, ";
+
+                                ////LEFT JOIN de SD.Valor
+                                //if (Conteo == Resultado.Detalle)
+                                //    sSelect += "\t ,SD.Valor AS 'SituaciónDesactivación' \r\n ";
+                                //sFrom += "\t LEFT JOIN dbCollection..ValoresCatálogo SD ON C.idSituaciónDesactivación = SD.idValor \r\n";
+                                //sGroupBy += "SD.Valor, ";
                             }
                             else if (campo == "Sucursal")
                             {
