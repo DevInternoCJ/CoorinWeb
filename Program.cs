@@ -145,6 +145,8 @@ using Loki.Mark.Administracion.Gespa.Scripts.Services;
 using Loki.Mark.Reportes.Productividad.DAOs;
 using Loki.Mark.Reportes.Cliente.DAOs;
 using Loki.Mark.Reportes.Cliente.Services;
+using Swashbuckle.AspNetCore.Filters;
+using System.Reflection;
 using Loki.Mark.Administracion.Gespa.Frases.Services;
 
 
@@ -204,6 +206,8 @@ builder.Services.AddSwaggerGen(options =>
 	options.SwaggerDoc("v1", new OpenApiInfo { Title = "Loki(ta) API", Version = "v1" });
 
 	options.EnableAnnotations(); // <-- Perú es clave.🏳️‍🌈
+
+	options.ExampleFilters();
 
 	options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 	{
@@ -425,6 +429,12 @@ builder.Services.AddScoped<IReporteEjecutivosDAO, ReporteEjecutivosDAO>();
 
 #endregion
 
+
+#region Ejemplos de Swagger
+
+builder.Services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
+
+#endregion
 
 // En Program.cs, cambia a:
 builder.Services.AddSingleton<Loki.Global.ExcelGeneratorService>();

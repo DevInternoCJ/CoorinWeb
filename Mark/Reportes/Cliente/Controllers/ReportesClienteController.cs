@@ -1,9 +1,11 @@
 ﻿// Ubicación: /Mark/Reportes/Cliente/Controllers/ReportesClienteController.cs
 using Loki.DTOs.Reportes.ClienteDTOs;
 using Loki.Mark.Reportes.Cliente.Services;
+using Loki.SwaggerExamples.Reportes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Loki.Mark.Reportes.Cliente.Controllers
 {
@@ -52,6 +54,7 @@ namespace Loki.Mark.Reportes.Cliente.Controllers
         [ProducesResponseType(typeof(Dictionary<string, IEnumerable<dynamic>>), 200)]
 		[ProducesResponseType(typeof(object), 404)]
 		[ProducesResponseType(typeof(object), 400)]
+		[SwaggerRequestExample(typeof(GenerarReporteRequestDto), typeof(GenerarReporteExamples))]
 		public async Task<IActionResult> GenerarReporte([FromBody] GenerarReporteRequestDto request)
 		{
 			string? servidorClaim = User.FindFirst("Servidor")?.Value;
