@@ -1,6 +1,6 @@
 import React from "react";
 
-const ModalConsultaCuentasFooter = ({ onConsultar, isLoading = false }) => {
+const ModalConsultaCuentasFooter = ({ onConsultar, isLoading = false, resultData = { data: [], totalRows: 0, excelUrl: "" } }) => {
     const handleConsultar = () => {
         if (onConsultar && !isLoading) {
             onConsultar();
@@ -43,20 +43,43 @@ const ModalConsultaCuentasFooter = ({ onConsultar, isLoading = false }) => {
                         className="scrollbar-gray"
                     >
                         <table className="modal-table">
-                            <tbody>
-                                <tr>
-                                    <td
-                                        style={{
-                                            textAlign: "center",
-                                            color: "#666",
-                                            fontStyle: "italic",
-                                            padding: "2rem"
-                                        }}
-                                    >
-                                        No hay consultas realizadas
-                                    </td>
-                                </tr>
-                            </tbody>
+                            {resultData.data.length > 0 ? (
+                                <>
+                                    <thead>
+                                        <tr>
+                                            {Object.keys(resultData.data[0]).map((header) => (
+                                                <th key={header}>{header}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {resultData.data.map((row, index) => (
+                                            <tr key={index}>
+                                                {Object.values(row).map((value, cellIndex) => (
+                                                    <td key={cellIndex}>
+                                                        {value && typeof value === 'object' ? JSON.stringify(value) : value || ''}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </>
+                            ) : (
+                                <tbody>
+                                    <tr>
+                                        <td
+                                            style={{
+                                                textAlign: "center",
+                                                color: "#666",
+                                                fontStyle: "italic",
+                                                padding: "2rem"
+                                            }}
+                                        >
+                                            No hay consultas realizadas
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            )}
                         </table>
                     </div>
                 </div>

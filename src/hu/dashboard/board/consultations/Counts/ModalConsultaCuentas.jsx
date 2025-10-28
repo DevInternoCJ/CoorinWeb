@@ -16,6 +16,11 @@ const ModalConsultaCuentas = ({ onClose }) => {
     const [headerData, setHeaderData] = useState({});
     const [fechaDesde, setFechaDesde] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [resultData, setResultData] = useState({
+        data: [],
+        totalRows: 0,
+        excelUrl: ""
+    });
 
     const handleGetSituacionOptions = useCallback((options) => {
         setSituacionOptions(options);
@@ -62,8 +67,8 @@ const ModalConsultaCuentas = ({ onClose }) => {
             servidor: "Albaz",
             idCartera: headerData.idCartera || 1,
             idProducto: headerData.idProducto || 1,
-            desdeFecha: fechaDesde || "2025-10-01",
-            esDetalleResultado: headerData.esDetalleResultado || true,
+            desdeFecha: fechaDesde || "2025-06-11",
+            esDetalleResultado: headerData.esDetalleResultado || false,
             parametros: filtros.map(filtro => ({
                 concepto: filtro.concepto,
                 campo: filtro.campo,
@@ -84,18 +89,27 @@ const ModalConsultaCuentas = ({ onClose }) => {
             const response = await postReportCampaign(consultaJSON);
             
             console.log("📥 Respuesta de la consulta:", response);
-            toast.success("Consulta realizada exitosamente");
             
-            // Aquí puedes manejar la respuesta
-            // Por ejemplo, pasarla al footer o a otro componente para mostrar resultados
-            
-        } catch (error) {
-            console.error("❌ Error al realizar la consulta:", error);
+            if (response && !response.esError) {
+                setResultData({
+                    data: response.datos || [],
+                    totalRows: response.totalFilasEncontradas || 0,
+                    excelUrl: response.rutaDescargaExcel || ""
+                });
+                toast.success(response.mensaje || "Consulta realizada exitosamente");
+            } else {
+                throw new Error(response.mensaje || "Error al realizar la consulta");
+            }
+
+        } catch (resultError) {
+            console.error("❌ Error al realizar la consulta:", resultError);
             toast.error("Error al realizar la consulta");
         } finally {
             setIsLoading(false);
         }
+    
     };
+    
 
     const totalItems = totalFiltros + totalColumnas;
 
@@ -143,6 +157,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
                 <ModalConsultaCuentasFooter 
                     onConsultar={handleConsultar}
                     isLoading={isLoading}
+                    resultData={resultData}
                 />
             </div>
             </div>

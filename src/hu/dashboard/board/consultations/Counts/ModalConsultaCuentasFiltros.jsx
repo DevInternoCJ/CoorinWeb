@@ -11,6 +11,7 @@ const situacionOptions = [
 ];
 
 const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableOptions, idProducto, idCartera, onFiltrosCountChange, isDateEnabled, onFiltrosChange }) => {
+    const [campoSeleccionado, setCampoSeleccionado] = useState("");
     const [cuenta, setCuenta] = useState("Cuenta");
     const [selectedConsultFilter, setSelectedConsultFilter] = useState(null);
     const [operador, setOperador] = useState("=");
@@ -235,7 +236,7 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
                     filtro.id === filtroExistente.id
                         ? { 
                             ...filtro, 
-                            valores: filtro.valores + ", " + operador + " " + valorMostrar,
+                            valores: filtro.valores + ", " + operador + valorMostrar,
                             operador: filtro.operador + "," + operador // Guardar múltiples operadores
                           }
                         : filtro
@@ -247,7 +248,7 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
                 id: Date.now(),
                 concepto: cuenta,
                 campo: campoSeleccionado,
-                valores: operador + " " + valorMostrar,
+                valores: operador + valorMostrar,
                 operador: operador
             };
             setFiltros(prevFiltros => [...prevFiltros, nuevoFiltro]);
@@ -265,6 +266,8 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
     // Limpiar la selección cuando cambie el tipo de filtro
     React.useEffect(() => {
         setSelectedConsultFilter(null);
+        setCampoSeleccionado("");
+        setNiegan("");
         if (onGetSituacionOptions) {
             onGetSituacionOptions([]);
         }
@@ -414,6 +417,7 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
               onSelectionChange={(selectedOption) => {
                 if (selectedOption) {
                   setSelectedConsultFilter(selectedOption);
+                  setCampoSeleccionado(selectedOption.label || "");
                 }
               }}
               onAllOptionsLoaded={(allOptions) => {
@@ -476,31 +480,58 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
                 Operador
               </label>
             </div>
-            {/* Niegan Acreditado */}
+            {/* Campo de valor - Input o Select según el caso */}
             {cuenta === "Cuenta" && (
               <div className="relative flex-1">
-                <select
-                  className="peer p-4 pe-9 block w-full bg-gray-100 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
-                              focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                  value={niegan}
-                  onChange={(e) => setNiegan(e.target.value)}
-                  id="niegan-select"
-                  disabled={nieganOptions.length === 0}
-                >
-                  {nieganOptions.map((option) => (
-                    <option key={option.idValor} value={option.idValor}>
-                      {option.valor}
-                    </option>
-                  ))}
-                </select>
-                <label
-                  htmlFor="niegan-select"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
-                              peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500
-                              peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                >
-                  Campo
-                </label>
+                {campoSeleccionado === "RFC" ? (
+                  // Input de texto para RFC
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      className="peer p-4 block w-full bg-gray-100 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
+                                focus:pt-6 focus:pb-2 [&:not(:placeholder-shown)]:pt-6 [&:not(:placeholder-shown)]:pb-2"
+                      value={niegan}
+                      onChange={(e) => setNiegan(e.target.value)}
+                      id="rfc-input"
+                      placeholder=" "
+                      maxLength={13}
+                    />
+                    <label
+                      htmlFor="rfc-input"
+                      className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
+                                peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500
+                                peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                    >
+                      Ingresa el RFC
+                    </label>
+                  </div>
+                ) : (
+                  // Select para otros campos de Cuenta
+                  <>
+                    <select
+                      className="peer p-4 pe-9 block w-full bg-gray-100 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
+                                focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                      value={niegan}
+                      onChange={(e) => setNiegan(e.target.value)}
+                      id="niegan-select"
+                      disabled={nieganOptions.length === 0}
+                    >
+                      {nieganOptions.map((option) => (
+                        <option key={option.idValor} value={option.idValor}>
+                          {option.valor}
+                        </option>
+                      ))}
+                    </select>
+                    <label
+                      htmlFor="niegan-select"
+                      className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
+                                peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500
+                                peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                    >
+                      Campo
+                    </label>
+                  </>
+                )}
               </div>
             )}
             {/* Input de texto/fecha para otros filtros */}
