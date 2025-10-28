@@ -21,7 +21,7 @@ import EmailTemplates from "./sideBar/Administration/gespa/emailTemplates/EmailT
 import ModalBaseCampanas from "./sideBar/Administration/Campanias/ModalBaseCampanas";
 import Phrases from "./sideBar/Administration/gespa/frases/Phrases";
 import ConsultVisitContent from "./sideBar/processes/visits/ConsultaVisits";
-import CaptureVisit from "./sideBar/processes/visits/CaptureVisit";
+import CaptureVisit from "./sideBar/processes/visits/Capture/CaptureVisit";
 
 
 export default function CoorinDashboard() {

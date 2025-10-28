@@ -109,6 +109,7 @@ const ModalBaseInformacion = ({
     const isBusquedas = tipoInformacion === "Búsquedas";
     const isComentarios = tipoInformacion === "Comentarios";
     const isConsultaVisitas = tipoInformacion === "Consulta Visitas";
+    const isCapturaVisitas = tipoInformacion === "Captura Visitas";
         const headerTitleStyle = isConsultaVisitas
             ? { color: 'var(--color-jerarquia2)' }
             : isPagos

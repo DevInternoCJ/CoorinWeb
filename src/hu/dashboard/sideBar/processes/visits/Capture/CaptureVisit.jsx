@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
-import CapturaVisitsF2 from "./CapturaVisitsF2";
-import CapturaVisitsF3 from "./CapturaVisitsF3";
-import CapturaVisitsF4 from "./CapturaVisitsF4";
-import CapturaVisitsF5 from "./CapturaVisitsF5";
-import CapturaVisitsF6 from "./CapturaVisitsF6";
-import CapturaVisitsF7 from "./CapturaVisitsF7";
+import ConsorcioLogo from "../../../../../../assets/logo_coorin_7.svg";
+import CapturaVisitsF2 from "../Capture/CapturaVisitsF2";
+import CapturaVisitsF3 from "../Capture/CapturaVisitsF3";
+import CapturaVisitsF4 from "../Capture/CapturaVisitsF4";
+import CapturaVisitsF5 from "../Capture/CapturaVisitsF5";
+import CapturaVisitsF6 from "../Capture/CapturaVisitsF6";
+import CapturaVisitsF7 from "../Capture/CapturaVisitsF7";
 
 const CaptureVisit = ({ mostrarTabla, setMostrarTabla }) => {
     // Obtener idCartera dinámico desde localStorage
