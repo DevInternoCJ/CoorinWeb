@@ -50,7 +50,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 Console.WriteLine($"idConsulta recibido: {idConsulta}");
                 Console.WriteLine($"desdeFecha recibido: {desdeFecha}");
 
-                // === Cargar consultas desde BD (solo para obtener datos básicos) ===
+
                 await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidor);
 
                 // === CREAR TABLAS CON LA ESTRUCTURA QUE ESPERA GeneraQueryCuentas ===
@@ -134,7 +134,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
 
                 // === Determinar tipo de resultado ===
                 var conteo = esDetalleResultado ? Resultado.Detalle : Resultado.Contar;
-
+                Console.WriteLine($"Fecha a usar en GeneraQueryCuentas: {fechaDesde:yyyy-MM-dd}");
                 // === Generar query completo ===
                 ArrayList listaColumnas = new ArrayList();
                 var queryData = ConsultaGenerador.GeneraQueryCuentas(
