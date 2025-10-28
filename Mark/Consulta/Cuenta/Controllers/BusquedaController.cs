@@ -67,7 +67,8 @@ namespace Loki.Controllers
                     esDetalleResultado: criteria.EsDetalleResultado,
                     idConsulta: criteria.IdConsulta,
                     parametrosExtra: criteria.Parametros,
-                    agruparExtra: criteria.Agrupar  // ← Pasar las agrupaciones
+                    agruparExtra: criteria.Agrupar,  // ← Pasar las agrupaciones
+                    desdeFecha: criteria.DesdeFecha
                 );
 
                 return Ok(result);
