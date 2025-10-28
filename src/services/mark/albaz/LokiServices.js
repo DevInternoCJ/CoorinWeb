@@ -2211,3 +2211,66 @@ export const PostDataCharge = async (data) => {
     throw error;
   }
 };
+
+export const PostSaveScripts = async (data) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+
+    console.log('📤 /Scripts/guardar', data);   
+    // ✅ Enviar como query parameters en lugar de body
+    const response = await api.post(
+      `/Scripts/guardar`,data
+    );  
+    console.log('📥 Respuesta:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error:', error);
+    throw error;
+  }
+};
+
+export const deleteScripts = async ({ idScript }) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+    console.log('📤 /Scripts/eliminar', { idScript });   
+    
+    const response = await api.delete('/Scripts/eliminar',{
+      data: { idScript }
+    });
+    
+    console.log('📥 Respuesta:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error:', error);
+    throw error;
+  }
+};
+
+export const putUpdateScripts = async (data) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+    console.log('📤 /Scripts/actualizar', data);   
+    
+    const response = await api.put('/Scripts/actualizar', data, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    console.log('📥 Respuesta:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error:', error);
+    throw error;
+  }
+};

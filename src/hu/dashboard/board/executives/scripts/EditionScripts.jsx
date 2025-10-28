@@ -1,9 +1,27 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import SelectWallet from "../../../board/screenFields/SelectWallet";
 import ButtonSave from "../../../sideBar/Administration/gespa/ButtonSave";
 import IconCircular from "../../../../../components/iconos/IconCircular";
+import {
+  PostSaveScripts,
+  deleteScripts,
+  putUpdateScripts,
+} from "../../../../../services/mark/albaz/LokiServices";
+import { useUserStore } from "../../../../../contextGlobal/userStore";
+import { useWalletProducts } from "../../../../login/WalletProduct";
+import { toast } from "sonner";
 
-const EditionScripts = ({ scripts = [], onSaveScript }) => {
+const EditionScripts = ({
+  scripts = [],
+  placeholderValues = {},
+  onSaveScript,
+}) => {
+  // Log inicial de props
+  console.log("🔄 EditionScripts - Props recibidas:", {
+    scripts: scripts.length,
+    placeholderValues,
+    hasOnSaveScript: !!onSaveScript,
+  });
   const [selectedScript, setSelectedScript] = useState(null);
   const [editedData, setEditedData] = useState({
     nombre: "",
@@ -19,6 +37,151 @@ const EditionScripts = ({ scripts = [], onSaveScript }) => {
     value: script.idScript.toString(),
     label: script.nombre,
   }));
+  const { walletProducts } = useWalletProducts();
+  const idProducto = walletProducts?.[0]?.idProducto;
+  const user = useUserStore((state) => state.user);
+  const idEjecutivo = user?.idEjecutivo;
+
+  // Función auxiliar para formatear valores
+  const formatValue = useCallback((value, key) => {
+    if (key === "Saldo" && typeof value === "number") {
+      return `$${value.toLocaleString("es-MX", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+    }
+    return String(value).trim();
+  }, []);
+
+  // Función para reemplazar placeholders
+ const replacePlaceholders = useCallback(
+  (text, preview = false) => {
+    if (!text) return "";
+    if (!preview) return text;
+
+    try {
+      console.log("🔄 Iniciando reemplazo de placeholders:", {
+        text,
+        preview,
+        valoresDisponibles: placeholderValues
+      });
+
+      const resultado = text.replace(/\[([^\]]+)\]/g, (match, placeholder) => {
+        console.log(`🎯 Procesando: [${placeholder}]`);
+        let replacement;
+
+        switch (placeholder) {
+          case "NombreEjecutivo":
+            replacement = user?.nombre || match;
+            break;
+          case "NombreDeudor":
+            replacement = placeholderValues?.NombreDeudor || match;
+            break;
+          case "idCuenta":
+            replacement = placeholderValues?.idCuenta || match;
+            break;
+          case "RFC":
+            replacement = placeholderValues?.RFC || match;
+            break;
+          case "NúmeroCliente":
+            replacement = placeholderValues?.NúmeroCliente || match;
+            break;
+          case "Saldo":
+            replacement = placeholderValues?.Saldo != null
+              ? formatValue(placeholderValues.Saldo, "Saldo")
+              : match;
+            break;
+          default:
+            replacement = Object.prototype.hasOwnProperty.call(
+              placeholderValues,
+              placeholder
+            )
+              ? formatValue(placeholderValues[placeholder], placeholder)
+              : match;
+        }
+
+        console.log(`✨ Reemplazo completado:`, {
+          original: match,
+          replacement,
+          encontrado: replacement !== match
+        });
+        return replacement;
+      });
+
+      console.log("📝 Texto final:", resultado);
+      return resultado;
+    } catch (error) {
+      console.error("❌ Error al reemplazar placeholders:", error);
+      return text;
+    }
+  },
+  [placeholderValues, user, formatValue]
+);
+
+  const escapeHtml = useCallback((text) => {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }, []);
+
+  // Renderizar a HTML para contentEditable
+  const renderFormattedScriptToHTML = useCallback(
+    (text) => {
+      if (!text) return "";
+
+      // Primero reemplazamos los placeholders si estamos en vista previa
+      const processedText = showPreview
+        ? replacePlaceholders(text, true)
+        : text;
+
+      let html = "";
+      let currentText = "";
+      let isBold = false;
+      let isColored = false;
+
+      for (let i = 0; i < processedText.length; i++) {
+        const char = processedText[i];
+
+        if (char === "*") {
+          if (currentText) {
+            const classes = `${isBold ? "font-bold" : ""} ${
+              isColored ? "text-lime-500" : ""
+            }`.trim();
+            html += classes
+              ? `<span class="${classes}">${escapeHtml(currentText)}</span>`
+              : escapeHtml(currentText);
+            currentText = "";
+          }
+          isBold = !isBold;
+        } else if (char === "&") {
+          if (currentText) {
+            const classes = `${isBold ? "font-bold" : ""} ${
+              isColored ? "text-lime-500" : ""
+            }`.trim();
+            html += classes
+              ? `<span class="${classes}">${escapeHtml(currentText)}</span>`
+              : escapeHtml(currentText);
+            currentText = "";
+          }
+          isColored = !isColored;
+        } else {
+          currentText += char;
+        }
+      }
+
+      if (currentText) {
+        const classes = `${isBold ? "font-bold" : ""} ${
+          isColored ? "text-lime-500" : ""
+        }`.trim();
+        html += classes
+          ? `<span class="${classes}">${escapeHtml(currentText)}</span>`
+          : escapeHtml(currentText);
+      }
+
+      return html;
+    },
+    [showPreview, replacePlaceholders, escapeHtml]
+  );
 
   useEffect(() => {
     if (selectedScript) {
@@ -36,75 +199,55 @@ const EditionScripts = ({ scripts = [], onSaveScript }) => {
   // ✅ Actualizar el contenido visual cuando cambia el script
   useEffect(() => {
     if (editableRef.current && editedData.script !== undefined) {
+      console.log("🔍 Renderizando con vista previa:", showPreview);
+      console.log("📝 Texto actual:", editedData.script);
+      console.log("💾 Valores de reemplazo:", placeholderValues);
       const rendered = renderFormattedScriptToHTML(editedData.script);
+      console.log("🎨 Texto renderizado:", rendered);
       if (editableRef.current.innerHTML !== rendered) {
         editableRef.current.innerHTML = rendered;
-        restoreCursorPosition();
+        if (!showPreview) {
+          restoreCursorPosition();
+        }
       }
     }
-  }, [editedData.script]);
+  }, [
+    editedData.script,
+    showPreview,
+    placeholderValues,
+    renderFormattedScriptToHTML,
+  ]);
 
   const handleWalletChange = (selectedValue) => {
-    if (
-      hasChanges &&
-      !window.confirm("Tienes cambios sin guardar. ¿Deseas continuar?")
-    ) {
+    if (hasChanges) {
+      toast.promise(
+        new Promise((resolve, reject) => {
+          const confirmed = confirm(
+            "Tienes cambios sin guardar. ¿Deseas continuar?"
+          );
+          if (confirmed) {
+            resolve();
+          } else {
+            reject();
+          }
+        }),
+        {
+          loading: "Confirmando...",
+          success: () => {
+            const script = scripts.find(
+              (s) => s.idScript.toString() === selectedValue
+            );
+            setSelectedScript(script);
+            return "Cambiando script...";
+          },
+          error: "Operación cancelada",
+        }
+      );
       return;
     }
 
     const script = scripts.find((s) => s.idScript.toString() === selectedValue);
     setSelectedScript(script);
-  };
-
-  // ✅ Renderizar a HTML para contentEditable
-  const renderFormattedScriptToHTML = (text) => {
-    if (!text) return "";
-
-    let html = "";
-    let currentText = "";
-    let isBold = false;
-    let isColored = false;
-
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-
-      if (char === "*") {
-        if (currentText) {
-          const classes = `${isBold ? "font-bold" : ""} ${
-            isColored ? "text-lime-500" : ""
-          }`.trim();
-          html += classes
-            ? `<span class="${classes}">${escapeHtml(currentText)}</span>`
-            : escapeHtml(currentText);
-          currentText = "";
-        }
-        isBold = !isBold;
-      } else if (char === "&") {
-        if (currentText) {
-          const classes = `${isBold ? "font-bold" : ""} ${
-            isColored ? "text-lime-500" : ""
-          }`.trim();
-          html += classes
-            ? `<span class="${classes}">${escapeHtml(currentText)}</span>`
-            : escapeHtml(currentText);
-          currentText = "";
-        }
-        isColored = !isColored;
-      } else {
-        currentText += char;
-      }
-    }
-
-    if (currentText) {
-      const classes = `${isBold ? "font-bold" : ""} ${
-        isColored ? "text-lime-500" : ""
-      }`.trim();
-      html += classes
-        ? `<span class="${classes}">${escapeHtml(currentText)}</span>`
-        : escapeHtml(currentText);
-    }
-
-    return html;
   };
 
   // ✅ Renderizar a React elements para vista previa
@@ -170,12 +313,6 @@ const EditionScripts = ({ scripts = [], onSaveScript }) => {
     return parts;
   };
 
-  const escapeHtml = (text) => {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
-  };
-
   const handleInputChange = (field, value) => {
     setEditedData((prev) => ({
       ...prev,
@@ -234,108 +371,194 @@ const EditionScripts = ({ scripts = [], onSaveScript }) => {
   const handleEditorChange = () => {
     if (editableRef.current) {
       saveCursorPosition();
-      const plainText = editableRef.current.innerText;
-      handleInputChange("script", plainText);
+      const html = editableRef.current.innerHTML;
+
+      // Convertir el HTML de vuelta a texto con marcadores
+      let text = "";
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = html;
+
+      const processNode = (node) => {
+        if (node.nodeType === 3) {
+          // Nodo de texto
+          text += node.textContent;
+        } else if (node.nodeType === 1) {
+          // Elemento
+          const classes = node.className;
+          const isBold = classes.includes("font-bold");
+          const isColored = classes.includes("text-lime-500");
+
+          if (isBold) text += "*";
+          if (isColored) text += "&";
+
+          Array.from(node.childNodes).forEach(processNode);
+
+          if (isColored) text += "&";
+          if (isBold) text += "*";
+        }
+      };
+
+      Array.from(tempDiv.childNodes).forEach(processNode);
+      handleInputChange("script", text);
     }
   };
 
-  // ✅ Obtener selección como índices en el texto plano
-  const getTextSelection = () => {
+  const insertFormatMarker = (marker) => {
     const selection = window.getSelection();
-    if (selection.rangeCount === 0 || !editableRef.current) {
-      return { start: 0, end: 0 };
+    if (!selection.rangeCount) return;
+
+    const selectedText = selection.toString();
+    if (!selectedText) {
+      toast.error("Selecciona un texto para aplicar el formato");
+      return;
     }
 
-    const range = selection.getRangeAt(0);
-    const preSelectionRange = range.cloneRange();
-    preSelectionRange.selectNodeContents(editableRef.current);
-    preSelectionRange.setEnd(range.startContainer, range.startOffset);
-    const start = preSelectionRange.toString().length;
-    const end = start + range.toString().length;
-
-    return { start, end };
-  };
-
- const insertFormatMarker = (marker) => {
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
-
-  const selectedText = selection.toString();
-  if (!selectedText) {
-    alert("Selecciona un texto para aplicar el formato");
-    return;
-  }
-
-  const text = editedData.script;
-  const escapedMarker = marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escapa &, *, etc.
-  const pattern = new RegExp(`${escapedMarker}([^${escapedMarker}]*)${escapedMarker}`, 'g');
-
-  // Verifica si la selección ya está coloreada (ya tiene marcadores &...&)
-  const isColored = pattern.test(selectedText);
-
-  let newText;
-  if (isColored) {
-    // Quita el color (elimina los &)
-    newText = text.replace(
-      new RegExp(`${escapedMarker}${selectedText}${escapedMarker}`),
-      selectedText
+    const text = editedData.script;
+    const escapedMarker = marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escapa &, *, etc.
+    const pattern = new RegExp(
+      `${escapedMarker}([^${escapedMarker}]*)${escapedMarker}`,
+      "g"
     );
-  } else {
-    // Aplica color (añade & antes y después del texto seleccionado)
-    newText = text.replace(selectedText, `${marker}${selectedText}${marker}`);
-  }
 
-  handleInputChange("script", newText);
-  setTimeout(() => {
-  if (editableRef.current) {
-    editableRef.current.focus();
-  }
-}, 50);
-};
+    // Verifica si la selección ya está coloreada (ya tiene marcadores &...&)
+    const isColored = pattern.test(selectedText);
 
+    let newText;
+    if (isColored) {
+      // Quita el color (elimina los &)
+      newText = text.replace(
+        new RegExp(`${escapedMarker}${selectedText}${escapedMarker}`),
+        selectedText
+      );
+    } else {
+      // Aplica color (añade & antes y después del texto seleccionado)
+      newText = text.replace(selectedText, `${marker}${selectedText}${marker}`);
+    }
+
+    handleInputChange("script", newText);
+    setTimeout(() => {
+      if (editableRef.current) {
+        editableRef.current.focus();
+      }
+    }, 50);
+  };
 
   const cleanFormatMarkers = () => {
-  if (!selectedScript) return;
+    if (!selectedScript) return;
 
-  if (
-    window.confirm("¿Deseas restaurar el script a su versión original del servidor?")
-  ) {
-    setEditedData((prev) => ({
-      ...prev,
-      script: selectedScript.script || "",
-    }));
-    setHasChanges(false);
-    setShowPreview(false);
+    toast.promise(
+      new Promise((resolve, reject) => {
+        const confirmed = confirm(
+          "¿Deseas restaurar el script a su versión original del servidor?"
+        );
+        if (confirmed) {
+          resolve();
+        } else {
+          reject();
+        }
+      }),
+      {
+        loading: "Confirmando restauración...",
+        success: () => {
+          setEditedData((prev) => ({
+            ...prev,
+            script: selectedScript.script || "",
+          }));
+          setHasChanges(false);
+          setShowPreview(false);
+          return "Script restaurado correctamente";
+        },
+        error: "Restauración cancelada",
+      }
+    );
 
     // Refresca visualmente el editor
     setTimeout(() => {
       if (editableRef.current) {
-        editableRef.current.innerHTML = renderFormattedScriptToHTML(selectedScript.script || "");
+        editableRef.current.innerHTML = renderFormattedScriptToHTML(
+          selectedScript.script || ""
+        );
         editableRef.current.focus();
       }
     }, 50);
-  }
-};
+  };
 
-  const clearScript = () => {
-    if (
-      window.confirm("¿Estás seguro de borrar todo el contenido del script?")
-    ) {
+  const clearScript = async () => {
+    if (!selectedScript || !selectedScript.idScript) {
+      // Si no hay script seleccionado o es nuevo, solo limpia el contenido
       handleInputChange("script", "");
+      toast.success("Contenido borrado correctamente");
+      return;
     }
+
+    toast.promise(
+      new Promise((resolve, reject) => {
+        const confirmed = confirm(
+          "¿Estás seguro de eliminar este script? Esta acción no se puede deshacer."
+        );
+        if (confirmed) {
+          resolve();
+        } else {
+          reject();
+        }
+      }).then(async () => {
+        await deleteScripts({ idScript: selectedScript.idScript });
+        // Actualizar la lista de scripts
+        if (onSaveScript) {
+          onSaveScript();
+        }
+        // Limpiar el formulario
+        setSelectedScript(null);
+        setEditedData({
+          nombre: "",
+          descripcion: "",
+          script: "",
+        });
+        setHasChanges(false);
+        setShowPreview(false);
+      }),
+      {
+        loading: "Eliminando script...",
+        success: "Script eliminado exitosamente",
+        error: (error) => {
+          console.error("Error al eliminar script:", error);
+          return `Error al eliminar el script: ${error.message}`;
+        },
+      }
+    );
   };
 
   const handleSave = async () => {
     if (!selectedScript) return;
 
     try {
-      if (onSaveScript) {
-        await onSaveScript({
-          idScript: selectedScript.idScript,
-          ...editedData,
-        });
+      // Preparar los datos para el endpoint en el formato correcto
+      const scriptData = {
+        idScript: selectedScript.idScript,
+        idProducto: idProducto,
+        nombre: editedData.nombre,
+        descripción: editedData.descripcion, // Note la 'ó' en descripción
+        script1: editedData.script,
+        fechaInsert: new Date().toISOString().split("T")[0], // Solo la fecha sin la hora
+        idEjecutivoInsert: idEjecutivo,
+      };
+
+      console.log("Enviando datos:", scriptData);
+
+      let response;
+      // Si el script ya existe (tiene ID), actualizarlo
+      if (selectedScript.idScript) {
+        response = await putUpdateScripts(scriptData);
+        console.log("Respuesta actualización:", response);
+        toast.success("Script actualizado exitosamente");
+      } else {
+        // Si es un script nuevo, guardarlo
+        response = await PostSaveScripts(scriptData);
+        console.log("Respuesta nuevo script:", response);
+        toast.success("Script guardado exitosamente");
       }
 
+      // Actualizar el estado local
       setSelectedScript({
         ...selectedScript,
         ...editedData,
@@ -344,27 +567,49 @@ const EditionScripts = ({ scripts = [], onSaveScript }) => {
       setHasChanges(false);
       setIsEditingScript(false);
       setShowPreview(false);
-
-      alert("Script guardado exitosamente");
     } catch (error) {
       console.error("Error al guardar script:", error);
-      alert("Error al guardar el script");
+
+      // Mostrar mensaje de error más detallado
+      let errorMessage = "Error desconocido";
+      if (error.response?.data?.errors) {
+        errorMessage = Object.values(error.response.data.errors)
+          .flat()
+          .join("\n");
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error("Error al guardar el script:\n" + errorMessage);
     }
   };
 
   const handleCancel = () => {
-    if (!window.confirm("¿Deseas descartar los cambios?")) {
-      return;
-    }
-
-    setEditedData({
-      nombre: selectedScript?.nombre || "",
-      descripcion: selectedScript?.descripcion || "",
-      script: selectedScript?.script || "",
-    });
-    setHasChanges(false);
-    setIsEditingScript(false);
-    setShowPreview(false);
+    toast.promise(
+      new Promise((resolve, reject) => {
+        const confirmed = confirm("¿Deseas descartar los cambios?");
+        if (confirmed) {
+          resolve();
+        } else {
+          reject();
+        }
+      }),
+      {
+        loading: "Confirmando...",
+        success: () => {
+          setEditedData({
+            nombre: selectedScript?.nombre || "",
+            descripcion: selectedScript?.descripcion || "",
+            script: selectedScript?.script || "",
+          });
+          setHasChanges(false);
+          setIsEditingScript(false);
+          setShowPreview(false);
+          return "Cambios descartados";
+        },
+        error: "Operación cancelada",
+      }
+    );
   };
 
   return (
@@ -486,7 +731,12 @@ const EditionScripts = ({ scripts = [], onSaveScript }) => {
                     </label>
                   </div>
                   {showPreview ? (
-                    <ButtonSave onClick={handleSave} className="btn-success" />
+                    <div className="flex gap-2">
+                      <ButtonSave
+                        onClick={handleSave}
+                        className="btn-success"
+                      />
+                    </div>
                   ) : (
                     <button onClick={clearScript} className="flex btn-danger">
                       Borrar
@@ -495,37 +745,52 @@ const EditionScripts = ({ scripts = [], onSaveScript }) => {
                 </div>
               </div>
               <div>
-                {showPreview ? (
-                  <div className="w-full px-3 py-2 bg-gray-800 text-white border border-gray-800 rounded-lg min-h-[288px] max-h-96 overflow-auto">
-                    <pre className="whitespace-pre-wrap text-sm font-sans leading-relaxed">
-                      {renderFormattedScript(editedData.script)}
-                    </pre>
-                  </div>
-                ) : (
-                  <div
-                    ref={editableRef}
-                    contentEditable={!showPreview}
-                    suppressContentEditableWarning
-                    onInput={handleEditorChange}
-                    onFocus={() => setIsEditingScript(true)}
-                    onBlur={() => {
-                      setIsEditingScript(false);
-                      saveCursorPosition();
-                    }}
-                    className={`w-full px-3 py-2 bg-gray-800 text-white border border-gray-800 rounded-lg ${
-                      !showPreview
-                        ? "focus:ring-2 focus:ring-jerarquia2 focus:border-transparent"
-                        : ""
-                    } text-sm min-h-[288px] max-h-96 overflow-auto transition-all outline-none ${
-                      showPreview ? "cursor-default" : "cursor-text"
-                    }`}
-                    style={{
-                      whiteSpace: "pre-wrap",
-                      fontFamily: "sans-serif",
-                      lineHeight: "1.5",
-                    }}
-                  />
-                )}
+                <div
+                  ref={editableRef}
+                  contentEditable={!showPreview}
+                  suppressContentEditableWarning
+                  onInput={handleEditorChange}
+                  onFocus={() => setIsEditingScript(true)}
+                  onBlur={() => {
+                    setIsEditingScript(false);
+                    saveCursorPosition();
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.dataTransfer.dropEffect = "copy";
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!showPreview) {
+                      // Usar el texto que ya viene formateado desde DataCharges
+                      const droppedText = e.dataTransfer.getData("text/plain");
+                      const selection = window.getSelection();
+                      if (selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        const span = document.createElement("span");
+                        span.textContent = droppedText;
+                        range.deleteContents();
+                        range.insertNode(span);
+                        selection.removeAllRanges();
+                        handleEditorChange();
+                      }
+                    }
+                  }}
+                  className={`w-full px-3 py-2 bg-gray-800 text-white border border-gray-800 rounded-lg ${
+                    !showPreview
+                      ? "focus:ring-2 focus:ring-jerarquia2 focus:border-transparent"
+                      : ""
+                  } text-sm min-h-[288px] max-h-96 overflow-auto transition-all outline-none ${
+                    showPreview ? "cursor-default" : "cursor-text"
+                  }`}
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    fontFamily: "sans-serif",
+                    lineHeight: "1.5",
+                  }}
+                />
               </div>
             </div>
             {hasChanges && (

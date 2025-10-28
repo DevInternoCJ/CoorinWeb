@@ -11,15 +11,17 @@ const Scripts = ({ onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [verifyResult, setVerifyResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [scripts, setScripts] = useState([]); // ✅ NUEVO ESTADO PARA SCRIPTS
-  
+  const [scripts, setScripts] = useState([]); // Scripts disponibles
+  const [placeholderValues, setPlaceholderValues] = useState({}); // Valores para reemplazar en vista previa
+
   // Refs y hooks
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
 
-  // ✅ Función para recibir scripts desde DataCharges
-  const handleScriptsLoaded = (loadedScripts) => {
+  // Función para recibir datos desde DataCharges
+  const handleDataLoaded = (loadedScripts, valores) => {
     setScripts(loadedScripts);
+    setPlaceholderValues(valores);
   };
 
   return (
@@ -50,10 +52,14 @@ const Scripts = ({ onClose }) => {
         <div className="overflow-auto">
           <div className="m-5">
             {/* ✅ Pasa los scripts a EditionScripts */}
-            <EditionScripts scripts={scripts} />
-            
+               <EditionScripts 
+      scripts={scripts} 
+      placeholderValues={placeholderValues}
+      onSaveScript={() => handleDataLoaded([], {})}
+    />
+
             {/* ✅ Pasa la función callback a DataCharges */}
-            <DataCharges onScriptsLoaded={handleScriptsLoaded} />
+            <DataCharges onDataLoaded={handleDataLoaded} />
           </div>
         </div>
       </div>

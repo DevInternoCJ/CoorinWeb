@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { PostDataCharge } from '../../../../../services/mark/albaz/LokiServices';
-import { useWalletProducts } from '../../../../login/WalletProduct';
-import { useUserStore } from '../../../../../contextGlobal/userStore';
+import React, { useState, useEffect } from "react";
+import { PostDataCharge } from "../../../../../services/mark/albaz/LokiServices";
+import { useWalletProducts } from "../../../../login/WalletProduct";
+import { useUserStore } from "../../../../../contextGlobal/userStore";
 
-const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
+const DataCharges = ({ onDataLoaded }) => {
   // Estados
   const [ejemploCuentas, setEjemploCuentas] = useState(null);
   const [ejemploProducto, setEjemploProducto] = useState(null);
@@ -11,11 +11,16 @@ const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [draggedLabel, setDraggedLabel] = useState("");
+  const [lastFetchParams, setLastFetchParams] = useState(null);
   const user = useUserStore((state) => state.user);
   const NombreEjecutivo = user?.nombre;
 
   // Obtener datos del producto
-  const { walletProducts, isLoading: isLoadingStore, error: errorStore } = useWalletProducts(); 
+  const {
+    walletProducts,
+    isLoading: isLoadingStore,
+    error: errorStore,
+  } = useWalletProducts();
   const idProducto = walletProducts?.[0]?.idProducto;
   const idCartera = walletProducts?.[0]?.idCartera;
 
@@ -23,53 +28,85 @@ const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
   console.log("idProducto:", idProducto);
   console.log("idCartera:", idCartera);
 
-    // Fetch data cuando tengamos idCartera e idProducto
+  // Fetch data cuando tengamos idCartera e idProducto
   useEffect(() => {
+    // Limpiar localStorage al desmontar el componente
+    return () => {
+      localStorage.removeItem("ejemploCuentas");
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
     const fetchData = async () => {
-      if (!idCartera || !idProducto) {
-        if (!isLoadingStore) {
-          setError("No se encontraron idCartera o idProducto");
-          setLoading(false);
-        }
+      // Verificar si tenemos los datos necesarios y no estamos ya cargando
+      if (!idCartera || !idProducto || isLoadingStore) {
         return;
       }
 
-      setLoading(true);
-      setError(null);
+      // Crear un objeto de parámetros para comparar
+      const currentParams = JSON.stringify({ idCartera, idProducto });
+
+      // Evitar llamadas duplicadas con los mismos parámetros
+      if (lastFetchParams === currentParams) {
+        return;
+      }
+
+      if (isMounted) {
+        setLoading(true);
+        setError(null);
+        setLastFetchParams(currentParams);
+      }
 
       try {
         const params = {
           idCartera: idCartera,
-          idProducto: idProducto
+          idProducto: idProducto,
         };
-
-        console.log("📤 Enviando petición con params:", params);
 
         const response = await PostDataCharge(params);
 
         console.log("📥 Respuesta recibida:", response);
 
         if (response?.exitoso) {
-          // Guardar datos de cuentas
-          if (response.ejemploCuentas) {
-            setEjemploCuentas(response.ejemploCuentas);
-          }
+          // Preparar los datos
+          if (
+            response.ejemploCuentas ||
+            response.ejemploProducto ||
+            response.scripts
+          ) {
+            // Preparar los valores de reemplazo
+            const allValues = {
+              ...response.ejemploCuentas,
+              ...(response.ejemploProducto || {}),
+              NombreEjecutivo: NombreEjecutivo,
+            };
 
-          // Guardar datos del producto
-          if (response.ejemploProducto) {
-            setEjemploProducto(response.ejemploProducto);
-          }
+            // Actualizar estados locales
+            if (response.ejemploCuentas) {
+              setEjemploCuentas(response.ejemploCuentas);
+            }
+            if (response.ejemploProducto) {
+              setEjemploProducto(response.ejemploProducto);
+            }
+            if (response.scripts) {
+              setScripts(response.scripts);
+            }
 
-          // Guardar scripts (opcional)
-          if (response.scripts) {
-  setScripts(response.scripts);  // Guardar todos los scripts sin filtrar
-  
-  if (onScriptsLoaded) {
-    onScriptsLoaded(response.scripts);  // Enviar todos los scripts
-  }
-}
+            // Notificar al componente padre con todos los datos
+            if (onDataLoaded) {
+              console.log("📤 Enviando datos al EditionScripts:", {
+                scripts: response.scripts || [],
+                placeholders: allValues,
+              });
+              onDataLoaded(response.scripts || [], allValues);
+            }
+          }
         } else {
-          setError(response?.mensaje || "No se pudieron cargar los datos del servidor");
+          setError(
+            response?.mensaje || "No se pudieron cargar los datos del servidor"
+          );
         }
       } catch (err) {
         console.error("❌ Error al cargar datos:", err);
@@ -80,12 +117,25 @@ const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
     };
 
     fetchData();
-  }, [idCartera, idProducto, isLoadingStore]); // ✅ Agrega onScriptsLoaded a las dependencias
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    idCartera,
+    idProducto,
+    isLoadingStore,
+    onDataLoaded,
+    NombreEjecutivo,
+    lastFetchParams,
+  ]);
 
   // Handlers para drag and drop
   const handleDragStart = (e, labelText) => {
     e.dataTransfer.effectAllowed = "copy";
-    e.dataTransfer.setData("text/plain", `[${labelText}]`);
+    // Asegurarse de que el texto tenga el formato correcto para placeholders
+    const placeholderText = `[${labelText}]`;
+    e.dataTransfer.setData("text/plain", placeholderText);
+    e.dataTransfer.setData("application/x-placeholder", labelText); // Para identificar que es un placeholder
     setDraggedLabel(labelText);
   };
 
@@ -95,33 +145,43 @@ const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
 
   // Función para formatear valores
   const formatValue = (value, key) => {
-    if (value === null || value === undefined || value === "" || value === " ") {
+    if (
+      value === null ||
+      value === undefined ||
+      value === "" ||
+      value === " "
+    ) {
       return "N/A";
     }
 
     // Formatear saldo como moneda
     if (key === "Saldo" && typeof value === "number") {
-      return `$${value.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      return `$${value.toLocaleString("es-MX", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
     }
 
     return String(value).trim();
   };
 
-   // Spinner de carga
+  // Spinner de carga
   if (loading || isLoadingStore) {
     return (
       <div className="min-h-60 flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl">
         <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
           <div className="flex justify-center">
-            <div 
-              className="animate-spin inline-block size-6 border-[3px] border-current border-t-transparent text-blue-600 rounded-full" 
-              role="status" 
+            <div
+              className="animate-spin inline-block size-6 border-[3px] border-current border-t-transparent text-blue-600 rounded-full"
+              role="status"
               aria-label="loading"
             >
               <span className="sr-only">Cargando...</span>
             </div>
           </div>
-          <p className="mt-4 text-sm text-gray-600">Cargando datos del producto...</p>
+          <p className="mt-4 text-sm text-gray-600">
+            Cargando datos del producto...
+          </p>
         </div>
       </div>
     );
@@ -133,8 +193,18 @@ const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
       <div className="min-h-60 flex flex-col bg-white border border-red-200 shadow-2xs rounded-xl">
         <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
           <div className="text-red-500 text-center">
-            <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-12 h-12 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <p className="font-semibold">Error</p>
             <p className="text-sm mt-2">{error}</p>
@@ -145,38 +215,40 @@ const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
   }
 
   // Datos de las tarjetas (de ejemploCuentas)
-  const cardData = ejemploCuentas ? [
-    {
-      label: "NombreEjecutivo",
-      value: formatValue(NombreEjecutivo, "NombreEjecutivo"),
-      color: "gray",
-    },
-    {
-      label: "NombreDeudor",
-      value: formatValue(ejemploCuentas.NombreDeudor, "NombreDeudor"),
-      color: "gray",
-    },
-    {
-      label: "idCuenta",
-      value: formatValue(ejemploCuentas.idCuenta, "idCuenta"),
-      color: "gray",
-    },
-    {
-      label: "RFC",
-      value: formatValue(ejemploCuentas.RFC, "RFC"),
-      color: "blue",
-    },
-    {
-      label: "NúmeroCliente",
-      value: formatValue(ejemploCuentas.NúmeroCliente, "NúmeroCliente"),
-      color: "gray",
-    },
-    {
-      label: "Saldo",
-      value: formatValue(ejemploCuentas.Saldo, "Saldo"),
-      color: "green",
-    },
-  ] : [];
+  const cardData = ejemploCuentas
+    ? [
+        {
+          label: "NombreEjecutivo",
+          value: formatValue(NombreEjecutivo, "NombreEjecutivo"),
+          color: "gray",
+        },
+        {
+          label: "NombreDeudor",
+          value: formatValue(ejemploCuentas.NombreDeudor, "NombreDeudor"),
+          color: "gray",
+        },
+        {
+          label: "idCuenta",
+          value: formatValue(ejemploCuentas.idCuenta, "idCuenta"),
+          color: "gray",
+        },
+        {
+          label: "RFC",
+          value: formatValue(ejemploCuentas.RFC, "RFC"),
+          color: "blue",
+        },
+        {
+          label: "NúmeroCliente",
+          value: formatValue(ejemploCuentas.NúmeroCliente, "NúmeroCliente"),
+          color: "gray",
+        },
+        {
+          label: "Saldo",
+          value: formatValue(ejemploCuentas.Saldo, "Saldo"),
+          color: "green",
+        },
+      ]
+    : [];
 
   return (
     <div>
@@ -193,7 +265,11 @@ const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
                   draggable="true"
                   onDragStart={(e) => handleDragStart(e, item.label)}
                   onDragEnd={handleDragEnd}
-                  className={`inline-block text-xs font-medium text-${item.color}-600 tracking-wide mb-2 cursor-grabbing select-none hover:bg-gray-100 hover:text-${item.color}-700 active:opacity-50 rounded-md transition-all duration-150 ${
+                  className={`inline-block text-xs font-medium text-${
+                    item.color
+                  }-600 tracking-wide mb-2 cursor-grabbing select-none hover:bg-gray-100 hover:text-${
+                    item.color
+                  }-700 active:opacity-50 rounded-md transition-all duration-150 ${
                     draggedLabel === item.label ? "opacity-50 scale-95" : ""
                   }`}
                   title="Arrastra el texto al campo mensaje"
@@ -202,7 +278,9 @@ const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
                     {item.label}
                   </span>
                 </div>
-                <div className={`text-sm text-${item.color}-700 font-medium break-words`}>
+                <div
+                  className={`text-sm text-${item.color}-700 font-medium break-words`}
+                >
                   {item.value}
                 </div>
               </div>
@@ -238,14 +316,16 @@ const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
 
                   {/* Fila de valores */}
                   <tr className="hover:bg-gray-50">
-                    {Object.entries(ejemploProducto).map(([key, value], index) => (
-                      <td
-                        key={index}
-                        className="py-3 px-4 border-b border-gray-200 text-sm whitespace-nowrap align-top"
-                      >
-                        {formatValue(value, key)}
-                      </td>
-                    ))}
+                    {Object.entries(ejemploProducto).map(
+                      ([key, value], index) => (
+                        <td
+                          key={index}
+                          className="py-3 px-4 border-b border-gray-200 text-sm whitespace-nowrap align-top"
+                        >
+                          {formatValue(value, key)}
+                        </td>
+                      )
+                    )}
                   </tr>
                 </tbody>
               </table>
@@ -258,5 +338,3 @@ const DataCharges = ({ onScriptsLoaded }) => { // ✅ Recibe la prop callback
 };
 
 export default DataCharges;
-
-
