@@ -231,10 +231,10 @@ export const darkListV2 = async ({ idCartera, selector, dato }) => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
     const params = { idCartera, selector, dato };
-    console.log('Enviando a /ListaNegra/get-lista-negra con:', params);
+    console.log('Enviando a /ListaNegra/lista-negra con:', params);
     // El interceptor añade el token automáticamente
-    const response = await api.get('/ListaNegra/get-lista-negra', { params });
-    console.log('Respuesta de /ListaNegra/get-lista-negra:', response.data);
+    const response = await api.get('/ListaNegra/lista-negra', { params });
+    console.log('Respuesta de /ListaNegra/lista-negra:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error al obtener la ListaNegra:', error);

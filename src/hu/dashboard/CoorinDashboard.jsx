@@ -22,6 +22,7 @@ import ModalBaseCampanas from "./sideBar/Administration/Campanias/ModalBaseCampa
 import Phrases from "./sideBar/Administration/gespa/frases/Phrases";
 import ConsultVisitContent from "./sideBar/processes/visits/ConsultaVisits";
 import CaptureVisit from "./sideBar/processes/visits/Capture/CaptureVisit";
+import LoadVisitsContent from "./sideBar/processes/visits/LoadVisits";
 
 
 export default function CoorinDashboard() {
@@ -74,12 +75,12 @@ export default function CoorinDashboard() {
       "Lista Negra", "Arrepentimientos",
       "Pagos", "Pagos reportados", "Datos Erroneos", "Domicilios", 
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios", "VGP",
-      "Consulta Visitas", "Captura Visitas"
+      "Consulta Visitas", "Captura Visitas", "Carga Visitas"
     ];
 
     if (informationComponents.includes(selectedSidebarOption)) {
       let ContentComponent;
-
+      let contentProps = {};
       switch (selectedSidebarOption) {
         case "Lista Negra":
           ContentComponent = DarkListContent;
@@ -91,31 +92,25 @@ export default function CoorinDashboard() {
           ContentComponent = PaymentsContent;
           break;
         case "Pagos reportados":
-          ContentComponent = (props) => (
-            <ReportingPaymentsContent
-              mostrarTabla={mostrarTablaPagosReportados}
-              setMostrarTabla={setMostrarTablaPagosReportados}
-              {...props}
-            />
-          );
+          ContentComponent = ReportingPaymentsContent;
+          contentProps = {
+            mostrarTabla: mostrarTablaPagosReportados,
+            setMostrarTabla: setMostrarTablaPagosReportados
+          };
           break;
         case "Datos Erroneos":
-          ContentComponent = (props) => (
-            <WrongsContent
-              mostrarTabla={mostrarTablaPagosReportados}
-              setMostrarTabla={setMostrarTablaPagosReportados}
-              {...props}
-            />
-          );
+          ContentComponent = WrongsContent;
+          contentProps = {
+            mostrarTabla: mostrarTablaPagosReportados,
+            setMostrarTabla: setMostrarTablaPagosReportados
+          };
           break;
         case "Domicilios":
-          ContentComponent = (props) => (
-            <AddressesContent
-              mostrarTabla={mostrarTablaDomicilios}
-              setMostrarTabla={setMostrarTablaDomicilios}
-              {...props}
-            />
-          );
+          ContentComponent = AddressesContent;
+          contentProps = {
+            mostrarTabla: mostrarTablaDomicilios,
+            setMostrarTabla: setMostrarTablaDomicilios
+          };
           break;
         case "Correos":
           ContentComponent = EmailsContent;
@@ -136,13 +131,19 @@ export default function CoorinDashboard() {
           ContentComponent = ConsultVisitContent;
           break;
         case "Captura Visitas":
-          ContentComponent = (props) => (
-            <CaptureVisit
-              {...props}
-              mostrarTabla={captureVisitModalSize === "pagos-xl"}
-              setMostrarTabla={grow => handleGrowCaptureVisitModal(grow)}
-            />
-          );
+          ContentComponent = CaptureVisit;
+          contentProps = {
+            mostrarTabla: captureVisitModalSize === "pagos-xl",
+            setMostrarTabla: grow => handleGrowCaptureVisitModal(grow)
+          };
+          break;
+        case "Carga Visitas":
+          ContentComponent = LoadVisitsContent;
+          contentProps = {
+            mostrarTabla: false,
+            setMostrarTabla: () => {},
+            onClose: closeModal
+          };
           break;
         default:
           ContentComponent = null;
@@ -162,7 +163,7 @@ export default function CoorinDashboard() {
 
       return (
         <ModalBaseInformacion onClose={closeModal} tipoInformacion={selectedSidebarOption} size={size}>
-          {ContentComponent && <ContentComponent />}
+          {ContentComponent && <ContentComponent {...contentProps} />}
         </ModalBaseInformacion>
       );
     }
@@ -229,7 +230,8 @@ export default function CoorinDashboard() {
       "1EE": "Campañas",
       "3AAA": "Frases",
       "1CCC": "Consulta Visitas", // Consulta en Visitas (Procesos)
-      "2CCC": "Captura Visitas" // Captura en Visitas (Procesos)
+      "2CCC": "Captura Visitas", // Captura en Visitas (Procesos)
+      "3CCC": "Carga Visitas", // Carga de Visitas (Procesos)
     };
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
