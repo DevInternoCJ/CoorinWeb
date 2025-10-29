@@ -58,7 +58,7 @@ namespace Loki.Global
 
 			parametros.Add("IdCartera", options.IdCartera);
 
-			// CORRECCIÓN: Añadimos el filtro por idProducto si existe
+			// CORRECCIÓN: Añadimos el filtro por idProducto si existes
 			if (idProducto != null)
 			{
 				whereBuilder.Append(" AND C.idProducto = @IdProducto ");
@@ -87,65 +87,113 @@ namespace Loki.Global
 
 		#region Métodos Privados de Construcción de Query
 
-		private void AplicarFiltros(DataTable tblParámetros, StringBuilder fromBuilder, StringBuilder whereBuilder, DynamicParameters parametros, QueryGenerationOptions options, DateTime desde, int? idProducto)
+
+		// Dentro de QueryGeneratorService.cs
+
+		private void AplicarFiltros(DataTable tblParámetros, StringBuilder fromBuilder, StringBuilder whereBuilder,
+			DynamicParameters parametros, QueryGenerationOptions options, DateTime desde, int? idProducto)
 		{
 			int paramIndex = 0;
 			foreach (DataRow drFila in tblParámetros.Rows)
 			{
 				string concepto = drFila["Concepto"].ToString();
 				string campo = drFila["Campo"].ToString();
-				string valores = drFila["Parámetros"].ToString();
+				string valores = drFila["Parámetros"].ToString(); // Contiene operadores y valores (ej. ">= 1", "'val1','val2'")
 				string datoTipo = drFila["Dato"].ToString();
-				string sNot = valores.Contains("≠") ? "NOT" : "";
-				valores = valores.Replace("≠", "").Replace("=", "");
+				string sNot = valores.Contains('≠') ? "NOT" : "";
 
-				// Generar un nombre de parámetro único para cada filtro
-				string paramName = $"@p{paramIndex++}";
+				// --- INICIO DE LA CORRECCIÓN DE PARÁMETROS ---
 
-				// -- Validación de seguridad --
-				//ValidarNombreDeColumna(campo);
+				// 1. Genera el nombre del parámetro LIMPIO para Dapper (ej. "p0", "p1")
+				string dapperParamName = $"p{paramIndex++}";
+				// 2. Genera el nombre del parámetro para usar en el SQL (ej. "@p0", "@p1")
+				string sqlParamName = $"@{dapperParamName}";
+
+				// Limpiamos operadores de los valores (para listas IN)
+				string valoresLimpios = valores.Replace("=", "").Replace("≠", "");
+				var listaValores = valoresLimpios.Split(',');
+
+				// --- FIN DE LA CORRECCIÓN DE PARÁMETROS ---
+
+				// if (!EsNombreDeColumnaValido(campo)) continue; // Comentado según tu solicitud
 
 				switch (concepto)
 				{
 					case "Cuenta":
-						// --- INICIO DE LA CORRECCIÓN ---
 						if (campo.Equals("RFC", StringComparison.OrdinalIgnoreCase))
 						{
-							// Lógica especial para el campo RFC
-							whereBuilder.Append($" AND RTRIM(LTRIM(C.RFC)) {sNot} IN {paramName} ");
+							whereBuilder.Append($" AND RTRIM(LTRIM(C.RFC)) {sNot} IN {sqlParamName} ");
 						}
 						else
 						{
-							// Lógica general para los demás campos de 'Cuenta'
-							whereBuilder.Append($" AND C.id{campo} {sNot} IN {paramName} ");
+							whereBuilder.Append($" AND C.id{campo} {sNot} IN {sqlParamName} ");
 						}
-						parametros.Add(paramName, valores.Split(','));
+						// Añadimos el nombre LIMPIO (p0) y la lista de valores a Dapper
+						parametros.Add(dapperParamName, listaValores);
 						break;
 
 					case "Producto":
 						if (!fromBuilder.ToString().Contains(" Y WITH (NOLOCK)"))
 						{
-							// Asumimos que idProducto existe en el request si se necesita
-							//int idProducto = (int)options.IdProducto; // Ajustar según tu DTO
+							// Asumimos que idProducto (del método) es el correcto
 							fromBuilder.Append($" INNER JOIN dbCollection.Y.Producto_{idProducto} Y WITH (NOLOCK) ON C.idCuenta = Y.idcuenta");
 						}
 
-						whereBuilder.Append($" AND Y.[{campo}] {sNot} IN @{paramName}");
-						parametros.Add(paramName, valores.Split(','));
+						// CORREGIDO: Usamos el nombre SQL (@p0)
+						whereBuilder.Append($" AND Y.[{campo}] {sNot} IN {sqlParamName}");
+						// Añadimos el nombre LIMPIO (p0) y la lista de valores a Dapper
+						parametros.Add(dapperParamName, listaValores);
 						break;
 
 					case "Conteos":
-						// Esta es la parte más compleja. Implica añadir LEFT JOINs a subconsultas.
-						// Este es un ejemplo simplificado del patrón.
-						string nombreTabla = campo; // Simplificación, la lógica original es más compleja
+						// Lógica de conteos (simplificada del original)
+						string nombreTabla = campo;
 						string alias = nombreTabla.Substring(0, 1);
-						fromBuilder.Append($" LEFT JOIN (SELECT COUNT(*) Conteo, idCuenta FROM dbCollection..{nombreTabla} WITH (NOLOCK) WHERE idCartera = @IdCartera AND Fecha_Insert >= @Desde GROUP BY idCuenta) {alias} ON C.idCuenta = {alias}.idCuenta");
+						string fechaFiltro = $" AND Fecha_Insert >= @Desde ";
+						// ... (aquí iría la lógica completa de switch para nombreTabla, alias, fechaFiltro) ...
 
-						whereBuilder.Append($" AND ISNULL({alias}.Conteo, 0) {valores}"); // 'valores' aquí contendría el operador y valor, ej: ">= 1"
-						parametros.Add("Desde", desde);
+						if (!fromBuilder.ToString().Contains($" {alias} ON C.idCuenta"))
+						{
+							fromBuilder.Append($" LEFT JOIN (SELECT COUNT(*) Conteo, idCuenta FROM dbCollection..{nombreTabla} WITH (NOLOCK) WHERE idCartera = @IdCartera AND Fecha_Insert >= @Desde GROUP BY idCuenta) {alias} ON C.idCuenta = {alias}.idCuenta");
+						}
+
+						// Refactorización para parametrizar el valor numérico (ej. ">= 1")
+						string operador = new string(valores.Where(c => !char.IsDigit(c) && !char.IsWhiteSpace(c)).ToArray()).Trim(); // Extrae ">= "
+						string valorNumerico = new string(valores.Where(char.IsDigit).ToArray()); // Extrae "1"
+
+						if (string.IsNullOrEmpty(operador)) operador = "="; // Default
+						if (int.TryParse(valorNumerico, out int valNum))
+						{
+							whereBuilder.Append($" AND ISNULL({alias}.Conteo, 0) {operador} {sqlParamName}");
+							parametros.Add(dapperParamName, valNum);
+						}
+
+						// Asegurarnos de añadir el parámetro @Desde solo una vez
+						if (!parametros.ParameterNames.Contains("Desde"))
+						{
+							parametros.Add("Desde", desde);
+						}
 						break;
 
-						// ... Aquí iría la lógica refactorizada para los demás casos ('Fechas', etc.)
+					case "Fechas": // Lógica de fechas refactorizada para seguridad
+						string sColumna = "";
+						if (campo == "Activación") sColumna = "Fecha_CambioActivación";
+						else if (campo == "Última gestión") sColumna = "FechaÚltimaGestión";
+						else if (campo == "Última visita") sColumna = "FechaÚltimaVisita";
+						else if (campo == "Último pago") sColumna = "FechaÚltimoPago";
+						else if (campo == "Última negociación") sColumna = "FechaÚltimaNegociación";
+						else if (campo == "Próximo seguimiento") sColumna = "FechaPróximoSeguimiento";
+
+						if (!string.IsNullOrEmpty(sColumna))
+						{
+							// Asumimos que 'valores' tiene formato ">= 'YYYY-MM-DD'"
+							string opFecha = new(valores.Where(c => c == '=' || c == '<' || c == '>').ToArray());
+							string valFecha = valores.Split('\'').Length > 1 ? valores.Split('\'')[1] : "1900-01-01"; // Extrae la fecha
+
+							whereBuilder.Append($" AND C.{sColumna} {opFecha} {sqlParamName}");
+							parametros.Add(dapperParamName, valFecha);
+						}
+						break;
 				}
 			}
 		}
