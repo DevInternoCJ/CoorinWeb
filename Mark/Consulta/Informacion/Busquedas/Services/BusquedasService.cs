@@ -34,11 +34,7 @@ namespace Loki.Mark.Consulta.Informacion.Busquedas.Services
 			string sqlFinal = $"SELECT Z.* {columnasDinamicas} {sqlPrincipal}";
 
 			var parametros = new DynamicParameters(subQueryResult.Parameters);
-			if (!parametros.ParameterNames.Contains("IdCartera"))
-			{
-				parametros.Add("IdCartera", request.IdCartera);
 
-			}
 			parametros.Add("Desde", request.Desde);
 			parametros.Add("Hasta", request.Hasta);
 
@@ -47,6 +43,11 @@ namespace Loki.Mark.Consulta.Informacion.Busquedas.Services
 				sqlFinal += $" INNER JOIN ({subQueryResult.Sql}) CC ON Z.Cuenta = CC.idCuenta";
 			}
 
+			if (!parametros.ParameterNames.Contains("IdCartera"))
+			{
+				parametros.Add("IdCartera", request.IdCartera);
+
+			}
 			return await _dao.ObtenerDatosAsync<BusquedaDto>(servidor, sqlFinal, parametros);
 		}
 	}
