@@ -54,7 +54,12 @@ namespace Loki.Mark.Consulta.Informacion.PagosReportados.Services
                 FROM ({sqlPrincipal}) Z";
 
 			var parametros = new DynamicParameters();
-			//parametros.Add("IdCartera", request.IdCartera);
+
+			if (!parametros.ParameterNames.Contains("IdCartera"))
+			{
+				parametros.Add("IdCartera", request.IdCartera);
+
+			}
 			parametros.Add("Desde", request.Desde);
 			parametros.Add("Hasta", request.Hasta);
 

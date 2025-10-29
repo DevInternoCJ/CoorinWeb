@@ -52,6 +52,12 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Services
 
 			// --- FIN DE LA CORRECCIÓN ---
 
+			if (!parametros.ParameterNames.Contains("IdCartera"))
+			{
+				parametros.Add("IdCartera", request.IdCartera);
+
+			}
+
 			// 3. Unir la subconsulta si existe.
 			if (!string.IsNullOrEmpty(subQueryResult.Sql))
 			{

@@ -34,6 +34,11 @@ namespace Loki.Mark.Consulta.Informacion.Busquedas.Services
 			string sqlFinal = $"SELECT Z.* {columnasDinamicas} {sqlPrincipal}";
 
 			var parametros = new DynamicParameters(subQueryResult.Parameters);
+			if (!parametros.ParameterNames.Contains("IdCartera"))
+			{
+				parametros.Add("IdCartera", request.IdCartera);
+
+			}
 			parametros.Add("Desde", request.Desde);
 			parametros.Add("Hasta", request.Hasta);
 

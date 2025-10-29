@@ -103,7 +103,7 @@ namespace Loki.Global
 				string paramName = $"@p{paramIndex++}";
 
 				// -- Validación de seguridad --
-				ValidarNombreDeColumna(campo);
+				//ValidarNombreDeColumna(campo);
 
 				switch (concepto)
 				{

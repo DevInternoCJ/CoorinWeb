@@ -35,6 +35,11 @@ namespace Loki.Mark.Consulta.Informacion.Busquedas.Controllers
 			}
 
 			var resultados = await _service.ConsultarBusquedasAsync(servidorClaim, request);
+			if (!resultados.Any())
+			{
+				return NotFound(new { mensaje = "No se encontraron registros para los pagos reportados." });
+			}
+
 			return Ok(resultados);
 		}
 	}

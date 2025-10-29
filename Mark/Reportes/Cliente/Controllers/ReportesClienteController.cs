@@ -20,15 +20,15 @@ namespace Loki.Mark.Reportes.Cliente.Controllers
 		public ReportesClienteController(IReportesClienteService service)
 		{
 			_service = service;
-		}
+		} 
 
         [HttpGet("definiciones")]
         [SwaggerOperation(
-                    Summary = "Obtener Definiciones de Reportes Disponibles",
-                    Description = @"Obtiene la lista de reportes configurados que el usuario puede generar. 
-                            *Nota para Frontend*: La respuesta incluye flags booleanos (requiereProducto, requiereDesde, requiereHasta) 
-                            que indican qué controles de filtro deben mostrarse al usuario para cada reporte seleccionado."
-                )]
+            Summary = "Obtener Definiciones de Reportes Disponibles",
+            Description = @"Obtiene la lista de reportes configurados que el usuario puede generar. 
+                    *Nota para Frontend*: La respuesta incluye flags booleanos (requiereProducto, requiereDesde, requiereHasta) 
+                    que indican qué controles de filtro deben mostrarse al usuario para cada reporte seleccionado."
+        )]
         [ProducesResponseType(typeof(IEnumerable<ReporteDefinicionDto>), 200)]
 		public async Task<IActionResult> GetDefiniciones()
 		{

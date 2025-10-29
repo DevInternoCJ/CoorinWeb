@@ -38,6 +38,12 @@ namespace Loki.Mark.Consulta.Informacion.DatosErroneos.Controllers
 			}
 
 			var resultados = await _service.ConsultarDatosErroneosAsync(servidorClaim, request);
+
+			if (!resultados.Any())
+			{
+				return NotFound(new { mensaje = "No se encontraron registros para los Datos Erróneos." });
+			}
+
 			return Ok(resultados);
 		}
 	}

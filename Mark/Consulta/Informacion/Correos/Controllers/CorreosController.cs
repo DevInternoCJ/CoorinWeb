@@ -35,6 +35,12 @@ namespace Loki.Mark.Consulta.Informacion.Correos.Controllers
 			}
 
 			var resultados = await _service.ConsultarCorreosAsync(servidorClaim, idCartera, idConsulta);
+
+
+			if (!resultados.Any())
+			{
+				return NotFound(new { mensaje = "No se encontraron registros para los Correos de Cartera ." });
+			}
 			return Ok(resultados);
 		}
 	}

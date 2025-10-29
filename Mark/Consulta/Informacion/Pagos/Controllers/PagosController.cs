@@ -38,7 +38,7 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Controllers
 
 			if (!resultados.Any())
 			{
-				return NotFound(new { message = "No se encontraron resultados." });
+				return NotFound(new { message = "No se encontraron registros para los Pagos." });
 			}
 			return Ok(resultados);
 

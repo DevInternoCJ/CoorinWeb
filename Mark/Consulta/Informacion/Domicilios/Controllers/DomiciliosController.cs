@@ -37,6 +37,12 @@ namespace Loki.Mark.Consulta.Informacion.Domicilios.Controllers
 			}
 
 			var resultados = await _service.ConsultarDomiciliosAsync(servidorClaim, idCartera, idConsulta);
+
+			if (!resultados.Any())
+			{
+				return NotFound(new { mensaje = "No se encontraron registros para los Domicilios." });
+			}
+
 			return Ok(resultados);
 		}
 	}

@@ -35,6 +35,12 @@ namespace Loki.Mark.Consulta.Informacion.Comentarios.Controllers
 			}
 
 			var resultados = await _service.ConsultarComentariosAsync(servidorClaim, request);
+
+			if (!resultados.Any())
+			{
+				return NotFound(new { mensaje = "No se encontraron registros para los comentarios de cuentas." });
+			}
+
 			return Ok(resultados);
 		}
 	}
