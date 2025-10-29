@@ -14,8 +14,6 @@ const DataCharges = ({ onDataLoaded }) => {
   const [lastFetchParams, setLastFetchParams] = useState(null);
   const user = useUserStore((state) => state.user);
   const NombreEjecutivo = user?.nombre;
-
-  // Obtener datos del producto
   const {
     walletProducts,
     isLoading: isLoadingStore,
@@ -23,14 +21,8 @@ const DataCharges = ({ onDataLoaded }) => {
   } = useWalletProducts();
   const idProducto = walletProducts?.[0]?.idProducto;
   const idCartera = walletProducts?.[0]?.idCartera;
-
-  console.log("Wallet Products:", walletProducts);
-  console.log("idProducto:", idProducto);
-  console.log("idCartera:", idCartera);
-
   // Fetch data cuando tengamos idCartera e idProducto
   useEffect(() => {
-    // Limpiar localStorage al desmontar el componente
     return () => {
       localStorage.removeItem("ejemploCuentas");
     };
@@ -38,37 +30,29 @@ const DataCharges = ({ onDataLoaded }) => {
 
   useEffect(() => {
     let isMounted = true;
-
     const fetchData = async () => {
       // Verificar si tenemos los datos necesarios y no estamos ya cargando
       if (!idCartera || !idProducto || isLoadingStore) {
         return;
       }
-
       // Crear un objeto de parámetros para comparar
       const currentParams = JSON.stringify({ idCartera, idProducto });
-
       // Evitar llamadas duplicadas con los mismos parámetros
       if (lastFetchParams === currentParams) {
         return;
       }
-
       if (isMounted) {
         setLoading(true);
         setError(null);
         setLastFetchParams(currentParams);
       }
-
       try {
         const params = {
           idCartera: idCartera,
           idProducto: idProducto,
         };
-
         const response = await PostDataCharge(params);
-
         console.log("📥 Respuesta recibida:", response);
-
         if (response?.exitoso) {
           // Preparar los datos
           if (
@@ -82,7 +66,6 @@ const DataCharges = ({ onDataLoaded }) => {
               ...(response.ejemploProducto || {}),
               NombreEjecutivo: NombreEjecutivo,
             };
-
             // Actualizar estados locales
             if (response.ejemploCuentas) {
               setEjemploCuentas(response.ejemploCuentas);
@@ -93,7 +76,6 @@ const DataCharges = ({ onDataLoaded }) => {
             if (response.scripts) {
               setScripts(response.scripts);
             }
-
             // Notificar al componente padre con todos los datos
             if (onDataLoaded) {
               console.log("📤 Enviando datos al EditionScripts:", {
@@ -128,7 +110,6 @@ const DataCharges = ({ onDataLoaded }) => {
     NombreEjecutivo,
     lastFetchParams,
   ]);
-
   // Handlers para drag and drop
   const handleDragStart = (e, labelText) => {
     e.dataTransfer.effectAllowed = "copy";
@@ -151,9 +132,8 @@ const DataCharges = ({ onDataLoaded }) => {
       value === "" ||
       value === " "
     ) {
-      return "N/A";
+      return "";
     }
-
     // Formatear saldo como moneda
     if (key === "Saldo" && typeof value === "number") {
       return `$${value.toLocaleString("es-MX", {
@@ -161,7 +141,6 @@ const DataCharges = ({ onDataLoaded }) => {
         maximumFractionDigits: 2,
       })}`;
     }
-
     return String(value).trim();
   };
 

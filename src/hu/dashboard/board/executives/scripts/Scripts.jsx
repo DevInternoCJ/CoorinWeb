@@ -7,21 +7,21 @@ import EditionScripts from "./EditionScripts";
 import DataCharges from "./DataCharges";
 
 const Scripts = ({ onClose }) => {
-  // Estados
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [verifyResult, setVerifyResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [scripts, setScripts] = useState([]); // Scripts disponibles
   const [placeholderValues, setPlaceholderValues] = useState({}); // Valores para reemplazar en vista previa
-
-  // Refs y hooks
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
-
-  // Función para recibir datos desde DataCharges
   const handleDataLoaded = (loadedScripts, valores) => {
     setScripts(loadedScripts);
     setPlaceholderValues(valores);
+  };
+  // Callback para actualizar scripts desde EditionScripts
+  const handleScriptsUpdate = (updatedScripts) => {
+    console.log("🔄 Actualizando scripts en Scripts.jsx:", updatedScripts);
+    setScripts(updatedScripts);
   };
 
   return (
@@ -49,17 +49,39 @@ const Scripts = ({ onClose }) => {
           loading={loading}
           setLoading={setLoading}
         />
-        <div className="overflow-auto">
+      <div className="overflow-auto flex-1">
           <div className="m-5">
-            {/* ✅ Pasa los scripts a EditionScripts */}
-               <EditionScripts 
-      scripts={scripts} 
-      placeholderValues={placeholderValues}
-      onSaveScript={() => handleDataLoaded([], {})}
-    />
-
-            {/* ✅ Pasa la función callback a DataCharges */}
-            <DataCharges onDataLoaded={handleDataLoaded} />
+            {selectedProduct ? (
+              <>
+                <EditionScripts
+                  scripts={scripts}
+                  placeholderValues={placeholderValues}
+                  onSaveScript={() => handleDataLoaded([], {})}
+                  onScriptsUpdate={handleScriptsUpdate}
+                />
+                <DataCharges onDataLoaded={handleDataLoaded} />
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center text-gray-500 bg-gray-100 rounded-lg py-20">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 mb-4 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6v6h4m6 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-sm text-gray-400 mt-1">
+                  Seleccione el producto para gestionar scripts.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

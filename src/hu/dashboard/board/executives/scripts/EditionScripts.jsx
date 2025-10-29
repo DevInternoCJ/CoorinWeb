@@ -11,151 +11,121 @@ import { useUserStore } from "../../../../../contextGlobal/userStore";
 import { useWalletProducts } from "../../../../login/WalletProduct";
 import { toast } from "sonner";
 
-const EditionScripts = ({
-  scripts = [],
-  placeholderValues = {},
-  onSaveScript,
-}) => {
-  // Log inicial de props
-  console.log("🔄 EditionScripts - Props recibidas:", {
-    scripts: scripts.length,
-    placeholderValues,
-    hasOnSaveScript: !!onSaveScript,
-  });
+const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate }) => {
+  // Estados
   const [selectedScript, setSelectedScript] = useState(null);
-  const [editedData, setEditedData] = useState({
-    nombre: "",
-    descripcion: "",
-    script: "",
-  });
+  const [editedData, setEditedData] = useState({ nombre: "", descripcion: "", script: "" });
   const [hasChanges, setHasChanges] = useState(false);
   const [isEditingScript, setIsEditingScript] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const editableRef = useRef(null);
   const [cursorPosition, setCursorPosition] = useState(0);
-  const scriptOptions = scripts.map((script) => ({
-    value: script.idScript.toString(),
-    label: script.nombre,
-  }));
   const { walletProducts } = useWalletProducts();
   const idProducto = walletProducts?.[0]?.idProducto;
   const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;
 
-  // Función auxiliar para formatear valores
+  useEffect(() => {
+    if (scripts.length > 0 && !selectedScript) {
+      // Buscar el script con idScript === 0 (Nuevo)
+      const nuevoScript = scripts.find((s) => s.idScript === 0);
+      
+      if (nuevoScript) {
+        setSelectedScript(nuevoScript);
+      } else {
+        // Si no existe "Nuevo", crear uno temporal
+        const newScript = { 
+          idScript: 0, 
+          nombre: " -- Nuevo -- ", 
+          descripcion: "", 
+          script: "" 
+        };  
+        // Actualizar en el padre para que aparezca en la lista
+        onScriptsUpdate?.([newScript, ...scripts]);
+        setSelectedScript(newScript);
+      }
+    }
+  }, [scripts, selectedScript, onScriptsUpdate]);
+
+  const scriptOptions = scripts.map((script) => ({
+    value: script.idScript.toString(),
+    label: script.nombre,
+  }));
+
+  // Formateo de valores
   const formatValue = useCallback((value, key) => {
     if (key === "Saldo" && typeof value === "number") {
-      return `$${value.toLocaleString("es-MX", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}`;
+      return `$${value.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
     return String(value).trim();
   }, []);
 
-  // Función para reemplazar placeholders
- const replacePlaceholders = useCallback(
-  (text, preview = false) => {
-    if (!text) return "";
-    if (!preview) return text;
-
-    try {
-      console.log("🔄 Iniciando reemplazo de placeholders:", {
-        text,
-        preview,
-        valoresDisponibles: placeholderValues
-      });
-
-      const resultado = text.replace(/\[([^\]]+)\]/g, (match, placeholder) => {
-        console.log(`🎯 Procesando: [${placeholder}]`);
-        let replacement;
-
-        switch (placeholder) {
-          case "NombreEjecutivo":
-            replacement = user?.nombre || match;
-            break;
-          case "NombreDeudor":
-            replacement = placeholderValues?.NombreDeudor || match;
-            break;
-          case "idCuenta":
-            replacement = placeholderValues?.idCuenta || match;
-            break;
-          case "RFC":
-            replacement = placeholderValues?.RFC || match;
-            break;
-          case "NúmeroCliente":
-            replacement = placeholderValues?.NúmeroCliente || match;
-            break;
-          case "Saldo":
-            replacement = placeholderValues?.Saldo != null
-              ? formatValue(placeholderValues.Saldo, "Saldo")
-              : match;
-            break;
-          default:
-            replacement = Object.prototype.hasOwnProperty.call(
-              placeholderValues,
-              placeholder
-            )
-              ? formatValue(placeholderValues[placeholder], placeholder)
-              : match;
-        }
-        console.log(`✨ Reemplazo completado:`, {
-          original: match,
-          replacement,
-          encontrado: replacement !== match
+  // Reemplazo de placeholders
+  const replacePlaceholders = useCallback(
+    (text, preview = false) => {
+      if (!text) return "";
+      if (!preview) return text;
+      try {
+        const resultado = text.replace(/\[([^\]]+)\]/g, (match, placeholder) => {
+          let replacement;
+          switch (placeholder) {
+            case "NombreEjecutivo":
+              replacement = user?.nombre || match;
+              break;
+            case "NombreDeudor":
+            case "idCuenta":
+            case "RFC":
+            case "NúmeroCliente":
+            case "Saldo":
+              replacement =
+                placeholderValues[placeholder] != null
+                  ? formatValue(placeholderValues[placeholder], placeholder)
+                  : match;
+              break;
+            default:
+              replacement = Object.prototype.hasOwnProperty.call(placeholderValues, placeholder)
+                ? formatValue(placeholderValues[placeholder], placeholder)
+                : match;
+          }
+          return replacement;
         });
-        return replacement;
-      });
-      console.log("📝 Texto final:", resultado);
-      return resultado;
-    } catch (error) {
-      console.error("❌ Error al reemplazar placeholders:", error);
-      return text;
-    }
-  },
-  [placeholderValues, user, formatValue]
-);
+        return resultado;
+      } catch (error) {
+        console.error("❌ Error al reemplazar placeholders:", error);
+        return text;
+      }
+    },
+    [placeholderValues, user, formatValue]
+  );
 
   const escapeHtml = useCallback((text) => {
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
   }, []);
-  // Renderizar a HTML para contentEditable
+
+  // Renderizado de script a HTML
   const renderFormattedScriptToHTML = useCallback(
     (text) => {
       if (!text) return "";
-      // Primero reemplazamos los placeholders si estamos en vista previa
-      const processedText = showPreview
-        ? replacePlaceholders(text, true)
-        : text;
-
+      const processedText = showPreview ? replacePlaceholders(text, true) : text;
       let html = "";
       let currentText = "";
       let isBold = false;
       let isColored = false;
-
       for (let i = 0; i < processedText.length; i++) {
         const char = processedText[i];
         if (char === "*") {
           if (currentText) {
-            const classes = `${isBold ? "font-bold" : ""} ${
-              isColored ? "text-lime-500" : ""
-            }`.trim();
-            html += classes
-              ? `<span class="${classes}">${escapeHtml(currentText)}</span>`
-              : escapeHtml(currentText);
+            const classes = `${isBold ? "font-bold" : ""} ${isColored ? "text-lime-500" : ""}`.trim();
+            html += classes ? `<span class="${classes}">${escapeHtml(currentText)}</span>` : escapeHtml(currentText);
             currentText = "";
           }
           isBold = !isBold;
         } else if (char === "&") {
           if (currentText) {
-            const classes = `${isBold ? "font-bold" : ""} ${
-              isColored ? "text-lime-500" : ""
-            }`.trim();
-            html += classes
-              ? `<span class="${classes}">${escapeHtml(currentText)}</span>`
-              : escapeHtml(currentText);
+            const classes = `${isBold ? "font-bold" : ""} ${isColored ? "text-lime-500" : ""}`.trim();
+            html += classes ? `<span class="${classes}">${escapeHtml(currentText)}</span>` : escapeHtml(currentText);
             currentText = "";
           }
           isColored = !isColored;
@@ -164,18 +134,15 @@ const EditionScripts = ({
         }
       }
       if (currentText) {
-        const classes = `${isBold ? "font-bold" : ""} ${
-          isColored ? "text-lime-500" : ""
-        }`.trim();
-        html += classes
-          ? `<span class="${classes}">${escapeHtml(currentText)}</span>`
-          : escapeHtml(currentText);
+        const classes = `${isBold ? "font-bold" : ""} ${isColored ? "text-lime-500" : ""}`.trim();
+        html += classes ? `<span class="${classes}">${escapeHtml(currentText)}</span>` : escapeHtml(currentText);
       }
       return html;
     },
     [showPreview, replacePlaceholders, escapeHtml]
   );
 
+  // Inicializar datos al seleccionar script
   useEffect(() => {
     if (selectedScript) {
       setEditedData({
@@ -189,47 +156,29 @@ const EditionScripts = ({
     }
   }, [selectedScript]);
 
-  // ✅ Actualizar el contenido visual cuando cambia el script
+  // Actualizar contentEditable
   useEffect(() => {
     if (editableRef.current && editedData.script !== undefined) {
-      console.log("🔍 Renderizando con vista previa:", showPreview);
-      console.log("📝 Texto actual:", editedData.script);
-      console.log("💾 Valores de reemplazo:", placeholderValues);
       const rendered = renderFormattedScriptToHTML(editedData.script);
-      console.log("🎨 Texto renderizado:", rendered);
       if (editableRef.current.innerHTML !== rendered) {
         editableRef.current.innerHTML = rendered;
-        if (!showPreview) {
-          restoreCursorPosition();
-        }
+        if (!showPreview) restoreCursorPosition();
       }
     }
-  }, [
-    editedData.script,
-    showPreview,
-    placeholderValues,
-    renderFormattedScriptToHTML,
-  ]);
+  }, [editedData.script, showPreview, placeholderValues, renderFormattedScriptToHTML]);
 
-  const handleWalletChange = (selectedValue) => {
+  // Selección de wallet/script
+    const handleWalletChange = (selectedValue) => {
     if (hasChanges) {
       toast.promise(
         new Promise((resolve, reject) => {
-          const confirmed = confirm(
-            "Tienes cambios sin guardar. ¿Deseas continuar?"
-          );
-          if (confirmed) {
-            resolve();
-          } else {
-            reject();
-          }
+          const confirmed = confirm("Tienes cambios sin guardar. ¿Deseas continuar?");
+          confirmed ? resolve() : reject();
         }),
         {
           loading: "Confirmando...",
           success: () => {
-            const script = scripts.find(
-              (s) => s.idScript.toString() === selectedValue
-            );
+            const script = scripts.find((s) => s.idScript.toString() === selectedValue);
             setSelectedScript(script);
             return "Cambiando script...";
           },
@@ -243,14 +192,10 @@ const EditionScripts = ({
   };
 
   const handleInputChange = (field, value) => {
-    setEditedData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setEditedData((prev) => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
 
-  // ✅ Guardar posición del cursor
   const saveCursorPosition = () => {
     const selection = window.getSelection();
     if (selection.rangeCount > 0 && editableRef.current) {
@@ -261,7 +206,7 @@ const EditionScripts = ({
       setCursorPosition(preCaretRange.toString().length);
     }
   };
-  // ✅ Restaurar posición del cursor
+
   const restoreCursorPosition = () => {
     if (!editableRef.current) return;
     const selection = window.getSelection();
@@ -282,9 +227,7 @@ const EditionScripts = ({
         charCount = nextCharCount;
       } else {
         let i = node.childNodes.length;
-        while (i--) {
-          nodeStack.push(node.childNodes[i]);
-        }
+        while (i--) nodeStack.push(node.childNodes[i]);
       }
     }
     if (foundStart) {
@@ -293,167 +236,176 @@ const EditionScripts = ({
     }
   };
 
-  // ✅ Manejar cambios en el editor
   const handleEditorChange = () => {
-    if (editableRef.current) {
-      saveCursorPosition();
-      const html = editableRef.current.innerHTML;
-      // Convertir el HTML de vuelta a texto con marcadores
-      let text = "";
-      const tempDiv = document.createElement("div");
-      tempDiv.innerHTML = html;
-      const processNode = (node) => {
-        if (node.nodeType === 3) {
-          // Nodo de texto
-          text += node.textContent;
-        } else if (node.nodeType === 1) {
-          // Elemento
-          const classes = node.className;
-          const isBold = classes.includes("font-bold");
-          const isColored = classes.includes("text-lime-500");
-          if (isBold) text += "*";
-          if (isColored) text += "&";
-          Array.from(node.childNodes).forEach(processNode);
-          if (isColored) text += "&";
-          if (isBold) text += "*";
-        }
-      };
-      Array.from(tempDiv.childNodes).forEach(processNode);
-      handleInputChange("script", text);
-    }
+    if (!editableRef.current) return;
+    saveCursorPosition();
+    const html = editableRef.current.innerHTML;
+
+    let text = "";
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+
+    const processNode = (node) => {
+      if (node.nodeType === 3) text += node.textContent;
+      else if (node.nodeType === 1) {
+        const classes = node.className;
+        const isBold = classes.includes("font-bold");
+        const isColored = classes.includes("text-lime-500");
+        if (isBold) text += "*";
+        if (isColored) text += "&";
+        Array.from(node.childNodes).forEach(processNode);
+        if (isColored) text += "&";
+        if (isBold) text += "*";
+      }
+    };
+    Array.from(tempDiv.childNodes).forEach(processNode);
+    handleInputChange("script", text);
   };
 
-  // --- Insertar marcador de formato ---
-const insertFormatMarker = (marker) => {
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
-  const selectedText = selection.toString();
-  if (!selectedText) {
-    toast.error("Selecciona un texto para aplicar el formato");
-    return;
-  }
-  const text = editedData.script;
-  const escapedMarker = marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const pattern = new RegExp(`${escapedMarker}([^${escapedMarker}]*)${escapedMarker}`, "g");
-  const isColored = pattern.test(selectedText);
+  const insertFormatMarker = (marker) => {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    const selectedText = selection.toString();
+    if (!selectedText) return toast.error("Selecciona un texto para aplicar el formato");
 
-  let newText;
-  if (isColored) {
-    newText = text.replace(
-      new RegExp(`${escapedMarker}${selectedText}${escapedMarker}`),
-      selectedText
-    );
-    toast.info("Color de texto eliminado");
-  } else {
-    newText = text.replace(selectedText, `${marker}${selectedText}${marker}`);
-    toast.success("Color de texto aplicado");
-  }
+    const text = editedData.script;
+    const escapedMarker = marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const pattern = new RegExp(`${escapedMarker}([^${escapedMarker}]*)${escapedMarker}`, "g");
+    const isColored = pattern.test(selectedText);
 
-  handleInputChange("script", newText);
-
-  setTimeout(() => {
-    editableRef.current?.focus();
-  }, 50);
-};
-
-  // --- Restaurar script original ---
-const cleanFormatMarkers = () => {
-  if (!selectedScript) return;
-  toast.promise(
-    new Promise((resolve) => {
-      setTimeout(() => {
-        setEditedData((prev) => ({
-          ...prev,
-          script: selectedScript.script || "",
-        }));
-        setHasChanges(false);
-        setShowPreview(false);
-        if (editableRef.current) {
-          editableRef.current.innerHTML = renderFormattedScriptToHTML(selectedScript.script || "");
-          editableRef.current.focus();
-        }
-        resolve();
-      }, 400);
-    }),
-    {
-      loading: "Restaurando script original...",
-      success: "Script restaurado correctamente",
-      error: "No se pudo restaurar el script",
+    let newText;
+    if (isColored) {
+      newText = text.replace(new RegExp(`${escapedMarker}${selectedText}${escapedMarker}`), selectedText);
+      toast.info("Formato eliminado");
+    } else {
+      newText = text.replace(selectedText, `${marker}${selectedText}${marker}`);
+      toast.success("Formato aplicado");
     }
-  );
-};
+    handleInputChange("script", newText);
+    setTimeout(() => editableRef.current?.focus(), 50);
+  };
 
- // --- Eliminar script ---
-const clearScript = async () => {
-  if (!selectedScript || !selectedScript.idScript) {
-    handleInputChange("script", "");
-    toast.success("Contenido borrado correctamente");
-    return;
-  }
-  toast.promise(
-    (async () => {
-      await deleteScripts({ idScript: selectedScript.idScript });
-      if (onSaveScript) onSaveScript();
+  const cleanFormatMarkers = () => {
+    if (!selectedScript) return;
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          setEditedData((prev) => ({ ...prev, script: selectedScript.script || "" }));
+          setHasChanges(false);
+          setShowPreview(false);
+          if (editableRef.current)
+            editableRef.current.innerHTML = renderFormattedScriptToHTML(selectedScript.script || "");
+          resolve();
+        }, 400);
+      }),
+      {
+        loading: "Restaurando script original...",
+        success: "Script restaurado correctamente",
+        error: "No se pudo restaurar el script",
+      }
+    );
+  };
 
-      setSelectedScript(null);
+ // ✅ Modificar clearScript
+  const clearScript = async () => {
+    if (!selectedScript || !selectedScript.idScript) {
+      const newScript = { 
+        idScript: 0, 
+        nombre: " -- Nuevo -- ", 
+        descripcion: "", 
+        script: "" 
+      };  
+      // ✅ Actualizar en el padre
+      const updatedScripts = scripts.find((s) => s.idScript === 0) 
+        ? scripts 
+        : [newScript, ...scripts];
+      
+      onScriptsUpdate?.(updatedScripts);
+      setSelectedScript(newScript);
       setEditedData({ nombre: "", descripcion: "", script: "" });
       setHasChanges(false);
-      setShowPreview(false);
-    })(),
-    {
-      loading: "Eliminando script...",
-      success: "Script eliminado exitosamente",
-      error: "Error al eliminar el script",
+      return toast.success("Contenido borrado correctamente");
     }
-  );
-}
 
-// --- Guardar cambios ---
-const handleSave = async () => {
-  if (!selectedScript) {
-    toast.error("Selecciona un script antes de guardar");
-    return;
-  }
-  const scriptData = {
-    idScript: selectedScript.idScript,
-    idProducto: idProducto,
-    nombre: editedData.nombre,
-    descripción: editedData.descripcion,
-    script1: editedData.script,
-    fechaInsert: new Date().toISOString().split("T")[0],
-    idEjecutivoInsert: idEjecutivo,
-  };
-  toast.promise(
-    (async () => {
-      let response;
-      if (selectedScript.idScript) {
-        response = await putUpdateScripts(scriptData);
-        toast.success("Script actualizado exitosamente");
-      } else {
-        response = await PostSaveScripts(scriptData);
-        toast.success("Script guardado exitosamente");
+    toast.promise(
+      (async () => {
+        await deleteScripts({ idScript: selectedScript.idScript });
+
+        // ✅ Actualizar scripts en el padre
+        const filtered = scripts.filter((s) => s.idScript !== selectedScript.idScript);
+        
+        if (!filtered.find((s) => s.idScript === 0)) {
+          filtered.unshift({ 
+            idScript: 0, 
+            nombre: " ", 
+            descripcion: "", 
+            script: "" 
+          });
+        }
+        onScriptsUpdate?.(filtered); // ✅ Notificar al padre
+        // Seleccionar automáticamente el script "Nuevo"
+        const newScript = filtered.find((s) => s.idScript === 0);
+        setSelectedScript(newScript);
+        setEditedData({ nombre: "", descripcion: "", script: "" });
+        setHasChanges(false);
+        setShowPreview(false);
+      })(),
+      {
+        loading: "Eliminando script...",
+        success: "Script eliminado. Ahora puedes editar el script Nuevo",
+        error: "Error al eliminar el script",
       }
+    );
+  };
 
-      setSelectedScript({ ...selectedScript, ...editedData });
-      setHasChanges(false);
-      setIsEditingScript(false);
-      setShowPreview(false);
-      return response;
-    })(),
-    {
-      loading: "Guardando script...",
-      success: "Cambios guardados correctamente",
-      error: (error) => {
-        console.error("Error al guardar script:", error);
-        const msg =
-          error?.response?.data?.errors
-            ? Object.values(error.response.data.errors).flat().join("\n")
-            : error.message || "Error desconocido";
-        return `Error al guardar el script:\n${msg}`;
-      },
-    }
-  );
-};
+
+   // ✅ Modificar handleSave
+  const handleSave = async () => {
+    if (!editedData.nombre) return toast.error("El nombre del script es obligatorio");
+    if (!selectedScript) return toast.error("Selecciona un script antes de guardar");
+    const scriptData = {
+      idScript: selectedScript.idScript,
+      idProducto: idProducto,
+      nombre: editedData.nombre,
+      descripción: editedData.descripcion,
+      script1: editedData.script,
+      fechaInsert: new Date().toISOString().split("T")[0],
+      idEjecutivoInsert: idEjecutivo,
+    };
+
+    toast.promise(
+      (async () => {
+        let response;
+        if (selectedScript.idScript) {
+          response = await putUpdateScripts(scriptData);     
+          // ✅ Actualizar scripts en el padre
+          const updatedScripts = scripts.map((s) =>
+            s.idScript === selectedScript.idScript ? { ...s, ...editedData } : s
+          );
+          onScriptsUpdate?.(updatedScripts);      
+          toast.success("Script actualizado exitosamente");
+        } else {
+          response = await PostSaveScripts(scriptData);
+          const newScript = { ...editedData, idScript: response.idScript };
+          onScriptsUpdate?.([...scripts, newScript]);      
+          setSelectedScript(newScript);
+          toast.success("Script guardado exitosamente");
+        }      
+        setHasChanges(false);
+        setIsEditingScript(false);
+        setShowPreview(false);
+        return response;
+      })(),
+      {
+        loading: "Guardando script...",
+        success: "Cambios guardados correctamente",
+        error: (error) => {
+          console.error("Error al guardar script:", error);
+          return error.message || "Error desconocido";
+        },
+      }
+    );
+  };
 
   return (
     <div className="rounded-lg">
@@ -468,8 +420,7 @@ const handleSave = async () => {
           />
         </div>
       </div>
-      <div className="bg-gray-700 rounded-lg p-4 gap-2">
-        {selectedScript ? (
+      <div className="bg-gray-700 rounded-lg p-4 gap-2"> 
           <div className="space-y-4">
             <div className="mb-2">
               <input
@@ -484,9 +435,7 @@ const handleSave = async () => {
               <input
                 type="text"
                 value={editedData.descripcion}
-                onChange={(e) =>
-                  handleInputChange("descripcion", e.target.value)
-                }
+                onChange={(e) => handleInputChange("descripcion", e.target.value)}
                 className="w-full px-2 py-1 bg-gray-800 text-white border border-gray-800 rounded-lg focus:ring-2 focus:ring-jerarquia2 focus:border-transparent resize-none transition-all"
                 placeholder="Descripción del script"
               />
@@ -495,91 +444,36 @@ const handleSave = async () => {
               <div className="block md:flex justify-between items-center">
                 {!showPreview && (
                   <div className="flex gap-2 mb-2">
-                    <button
-                      className="font-bold"
-                      onClick={() => insertFormatMarker("*")}
-                      type="button"
-                    >
-                      <IconCircular
-                        textColor="text-gray-200"
-                        borderColor="border-gray-800 hover:border-jerarquia3"
-                        bgColor="bg-gray-800 hover:bg-jerarquia3"
-                        tooltip="Agregar/quitar resaltado"
-                      >
+                    <button className="font-bold" onClick={() => insertFormatMarker("*")} type="button">
+                      <IconCircular textColor="text-gray-200" borderColor="border-gray-800 hover:border-jerarquia3" bgColor="bg-gray-800 hover:bg-jerarquia3" tooltip="Agregar/quitar resaltado">
                         N
                       </IconCircular>
                     </button>
-                    <button
-                      onClick={() => insertFormatMarker("&")}
-                      type="button"
-                      className=""
-                    >
-                      <IconCircular
-                        textColor="text-lime-500"
-                        borderColor="border-gray-800 hover:border-jerarquia3"
-                        bgColor="bg-gray-800 hover:bg-jerarquia3"
-                        tooltip="Agregar/quitar color"
-                      >
+                    <button onClick={() => insertFormatMarker("&")} type="button">
+                      <IconCircular textColor="text-lime-500" borderColor="border-gray-800 hover:border-jerarquia3" bgColor="bg-gray-800 hover:bg-jerarquia3" tooltip="Agregar/quitar color">
                         C
                       </IconCircular>
                     </button>
-                    <button
-                      onClick={cleanFormatMarkers}
-                      type="button"
-                      className=""
-                    >
-                      <IconCircular
-                        textColor="text-gray-200"
-                        borderColor="border-gray-800 hover:border-jerarquia3"
-                        bgColor="bg-gray-800 hover:bg-jerarquia3"
-                        tooltip="Limpiar formato"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width={18}
-                          height={18}
-                          viewBox="0 0 32 32"
-                        >
-                          <path
-                            fill="currentColor"
-                            d="M26 20h-6v-2h6zm4 8h-6v-2h6zm-2-4h-6v-2h6z"
-                          ></path>
-                          <path
-                            fill="currentColor"
-                            d="M17.003 20a4.9 4.9 0 0 0-2.404-4.173L22 3l-1.73-1l-7.577 13.126a5.7 5.7 0 0 0-5.243 1.503C3.706 20.24 3.996 28.682 4.01 29.04a1 1 0 0 0 1 .96h14.991a1 1 0 0 0 .6-1.8c-3.54-2.656-3.598-8.146-3.598-8.2m-5.073-3.003A3.11 3.11 0 0 1 15.004 20c0 .038.002.208.017.469l-5.9-2.624a3.8 3.8 0 0 1 2.809-.848M15.45 28A5.2 5.2 0 0 1 14 25h-2a6.5 6.5 0 0 0 .968 3h-2.223A16.6 16.6 0 0 1 10 24H8a17.3 17.3 0 0 0 .665 4H6c.031-1.836.29-5.892 1.803-8.553l7.533 3.35A13 13 0 0 0 17.596 28Z"
-                          ></path>
+                    <button onClick={cleanFormatMarkers} type="button">
+                      <IconCircular textColor="text-gray-200" borderColor="border-gray-800 hover:border-jerarquia3" bgColor="bg-gray-800 hover:bg-jerarquia3" tooltip="Deshacer Cambios">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={18} height={18} viewBox="0 0 32 32">
+                          <path fill="currentColor" d="M26 20h-6v-2h6zm4 8h-6v-2h6zm-2-4h-6v-2h6z"></path>
+                          <path fill="currentColor" d="M17.003 20a4.9 4.9 0 0 0-2.404-4.173L22 3l-1.73-1l-7.577 13.126a5.7 5.7 0 0 0-5.243 1.503C3.706 20.24 3.996 28.682 4.01 29.04a1 1 0 0 0 1 .96h14.991a1 1 0 0 0 .6-1.8c-3.54-2.656-3.598-8.146-3.598-8.2m-5.073-3.003A3.11 3.11 0 0 1 15.004 20c0 .038.002.208.017.469l-5.9-2.624a3.8 3.8 0 0 1 2.809-.848M15.45 28A5.2 5.2 0 0 1 14 25h-2a6.5 6.5 0 0 0 .968 3h-2.223A16.6 16.6 0 0 1 10 24H8a17.3 17.3 0 0 0 .665 4H6c.031-1.836.29-5.892 1.803-8.553l7.533 3.35A13 13 0 0 0 17.596 28Z"></path>
                         </svg>
                       </IconCircular>
                     </button>
                   </div>
                 )}
-                <div
-                  className={`flex items-center gap-3 mb-2 ${
-                    showPreview ? "ml-auto" : ""
-                  }`}
-                >
+                <div className={`flex items-center gap-3 mb-2 ${showPreview ? "ml-auto" : ""}`}>
                   <div className=" text-center items-center">
-                    <input
-                      type="checkbox"
-                      id="vista-previa"
-                      className="form-checkbox  h-4 w-4 bg-blue-600 text-end text-jerarquia1 rounded cursor-pointer"
-                      checked={showPreview}
-                      onChange={(e) => setShowPreview(e.target.checked)}
-                    />
-                    <label
-                      htmlFor="vista-previa"
-                      style={{color: "#3eac91"}}
-                      className="ml-1 text-sm cursor-pointer text-end "
-                    >
+                    <input type="checkbox" id="vista-previa" className="form-checkbox  h-4 w-4 bg-blue-600 text-end text-jerarquia1 rounded cursor-pointer" checked={showPreview} onChange={(e) => setShowPreview(e.target.checked)} />
+                    <label htmlFor="vista-previa" style={{color: "#3eac91"}} className="ml-1 text-sm cursor-pointer text-end ">
                       Vista Previa
                     </label>
                   </div>
                   {showPreview ? (
                     <div className="flex gap-2">
-                      <ButtonSave
-                        onClick={handleSave}
-                        className="btn-success"
-                      />
+                      <ButtonSave onClick={handleSave} className="btn-success" />
                     </div>
                   ) : (
                     <button onClick={clearScript} className="flex btn-danger">
@@ -588,6 +482,7 @@ const handleSave = async () => {
                   )}
                 </div>
               </div>
+              {/* Editor */}
               <div>
                 <div
                   ref={editableRef}
@@ -599,16 +494,11 @@ const handleSave = async () => {
                     setIsEditingScript(false);
                     saveCursorPosition();
                   }}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.dataTransfer.dropEffect = "copy";
-                  }}
+                  onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = "copy"; }}
                   onDrop={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     if (!showPreview) {
-                      // Usar el texto que ya viene formateado desde DataCharges
                       const droppedText = e.dataTransfer.getData("text/plain");
                       const selection = window.getSelection();
                       if (selection.rangeCount > 0) {
@@ -622,18 +512,8 @@ const handleSave = async () => {
                       }
                     }
                   }}
-                  className={`w-full px-3 py-2 bg-gray-800 text-white border border-gray-800 rounded-lg ${
-                    !showPreview
-                      ? "focus:ring-2 focus:ring-jerarquia2 focus:border-transparent"
-                      : ""
-                  } text-sm min-h-[288px] max-h-96 overflow-auto transition-all outline-none ${
-                    showPreview ? "cursor-default" : "cursor-text"
-                  }`}
-                  style={{
-                    whiteSpace: "pre-wrap",
-                    fontFamily: "sans-serif",
-                    lineHeight: "1.5",
-                  }}
+                  className={`w-full px-3 py-2 bg-gray-800 text-white border border-gray-800 rounded-lg ${!showPreview ? "focus:ring-2 focus:ring-jerarquia2 focus:border-transparent" : ""} text-sm min-h-[288px] max-h-96 overflow-auto transition-all outline-none ${showPreview ? "cursor-default" : "cursor-text"}`}
+                  style={{ whiteSpace: "pre-wrap", fontFamily: "sans-serif", lineHeight: "1.5" }}
                 />
               </div>
             </div>
@@ -644,13 +524,8 @@ const handleSave = async () => {
               </div>
             )}
           </div>
-        ) : (
-          <div className="flex items-center justify-center h-64 text-gray-400">
-            <p>📝 Selecciona un script para ver y editar su contenido</p>
-          </div>
-        )}
       </div>
-      {scripts.length === 0 && (
+      {scriptOptions.length === 0 && (
         <div className="text-center py-8 text-gray-400 text-sm bg-gray-800 rounded-lg mt-4">
           <p>No hay scripts disponibles.</p>
         </div>
