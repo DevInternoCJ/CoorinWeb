@@ -99,7 +99,6 @@ const EditionScripts = ({
               ? formatValue(placeholderValues[placeholder], placeholder)
               : match;
         }
-
         console.log(`✨ Reemplazo completado:`, {
           original: match,
           replacement,
@@ -107,7 +106,6 @@ const EditionScripts = ({
         });
         return replacement;
       });
-
       console.log("📝 Texto final:", resultado);
       return resultado;
     } catch (error) {
@@ -123,12 +121,10 @@ const EditionScripts = ({
     div.textContent = text;
     return div.innerHTML;
   }, []);
-
   // Renderizar a HTML para contentEditable
   const renderFormattedScriptToHTML = useCallback(
     (text) => {
       if (!text) return "";
-
       // Primero reemplazamos los placeholders si estamos en vista previa
       const processedText = showPreview
         ? replacePlaceholders(text, true)
@@ -141,7 +137,6 @@ const EditionScripts = ({
 
       for (let i = 0; i < processedText.length; i++) {
         const char = processedText[i];
-
         if (char === "*") {
           if (currentText) {
             const classes = `${isBold ? "font-bold" : ""} ${
@@ -168,7 +163,6 @@ const EditionScripts = ({
           currentText += char;
         }
       }
-
       if (currentText) {
         const classes = `${isBold ? "font-bold" : ""} ${
           isColored ? "text-lime-500" : ""
@@ -177,7 +171,6 @@ const EditionScripts = ({
           ? `<span class="${classes}">${escapeHtml(currentText)}</span>`
           : escapeHtml(currentText);
       }
-
       return html;
     },
     [showPreview, replacePlaceholders, escapeHtml]
@@ -245,72 +238,8 @@ const EditionScripts = ({
       );
       return;
     }
-
     const script = scripts.find((s) => s.idScript.toString() === selectedValue);
     setSelectedScript(script);
-  };
-
-  // ✅ Renderizar a React elements para vista previa
-  const renderFormattedScript = (text) => {
-    if (!text) return null;
-
-    const parts = [];
-    let currentText = "";
-    let isBold = false;
-    let isColored = false;
-    let key = 0;
-
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-
-      if (char === "*") {
-        if (currentText) {
-          parts.push(
-            <span
-              key={key++}
-              className={`${isBold ? "font-bold" : ""} ${
-                isColored ? "text-lime-500" : ""
-              }`}
-            >
-              {currentText}
-            </span>
-          );
-          currentText = "";
-        }
-        isBold = !isBold;
-      } else if (char === "&") {
-        if (currentText) {
-          parts.push(
-            <span
-              key={key++}
-              className={`${isBold ? "font-bold" : ""} ${
-                isColored ? "text-lime-500" : ""
-              }`}
-            >
-              {currentText}
-            </span>
-          );
-          currentText = "";
-        }
-        isColored = !isColored;
-      } else {
-        currentText += char;
-      }
-    }
-
-    if (currentText) {
-      parts.push(
-        <span
-          key={key++}
-          className={`${isBold ? "font-bold" : ""} ${
-            isColored ? "text-lime-500" : ""
-          }`}
-        >
-          {currentText}
-        </span>
-      );
-    }
-    return parts;
   };
 
   const handleInputChange = (field, value) => {
@@ -332,11 +261,9 @@ const EditionScripts = ({
       setCursorPosition(preCaretRange.toString().length);
     }
   };
-
   // ✅ Restaurar posición del cursor
   const restoreCursorPosition = () => {
     if (!editableRef.current) return;
-
     const selection = window.getSelection();
     const range = document.createRange();
     let charCount = 0;
@@ -360,7 +287,6 @@ const EditionScripts = ({
         }
       }
     }
-
     if (foundStart) {
       selection.removeAllRanges();
       selection.addRange(range);
@@ -372,12 +298,10 @@ const EditionScripts = ({
     if (editableRef.current) {
       saveCursorPosition();
       const html = editableRef.current.innerHTML;
-
       // Convertir el HTML de vuelta a texto con marcadores
       let text = "";
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = html;
-
       const processNode = (node) => {
         if (node.nodeType === 3) {
           // Nodo de texto
@@ -387,230 +311,149 @@ const EditionScripts = ({
           const classes = node.className;
           const isBold = classes.includes("font-bold");
           const isColored = classes.includes("text-lime-500");
-
           if (isBold) text += "*";
           if (isColored) text += "&";
-
           Array.from(node.childNodes).forEach(processNode);
-
           if (isColored) text += "&";
           if (isBold) text += "*";
         }
       };
-
       Array.from(tempDiv.childNodes).forEach(processNode);
       handleInputChange("script", text);
     }
   };
 
-  const insertFormatMarker = (marker) => {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return;
+  // --- Insertar marcador de formato ---
+const insertFormatMarker = (marker) => {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
+  const selectedText = selection.toString();
+  if (!selectedText) {
+    toast.error("Selecciona un texto para aplicar el formato");
+    return;
+  }
+  const text = editedData.script;
+  const escapedMarker = marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`${escapedMarker}([^${escapedMarker}]*)${escapedMarker}`, "g");
+  const isColored = pattern.test(selectedText);
 
-    const selectedText = selection.toString();
-    if (!selectedText) {
-      toast.error("Selecciona un texto para aplicar el formato");
-      return;
-    }
-
-    const text = editedData.script;
-    const escapedMarker = marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escapa &, *, etc.
-    const pattern = new RegExp(
-      `${escapedMarker}([^${escapedMarker}]*)${escapedMarker}`,
-      "g"
+  let newText;
+  if (isColored) {
+    newText = text.replace(
+      new RegExp(`${escapedMarker}${selectedText}${escapedMarker}`),
+      selectedText
     );
+    toast.info("Color de texto eliminado");
+  } else {
+    newText = text.replace(selectedText, `${marker}${selectedText}${marker}`);
+    toast.success("Color de texto aplicado");
+  }
 
-    // Verifica si la selección ya está coloreada (ya tiene marcadores &...&)
-    const isColored = pattern.test(selectedText);
+  handleInputChange("script", newText);
 
-    let newText;
-    if (isColored) {
-      // Quita el color (elimina los &)
-      newText = text.replace(
-        new RegExp(`${escapedMarker}${selectedText}${escapedMarker}`),
-        selectedText
-      );
-    } else {
-      // Aplica color (añade & antes y después del texto seleccionado)
-      newText = text.replace(selectedText, `${marker}${selectedText}${marker}`);
-    }
+  setTimeout(() => {
+    editableRef.current?.focus();
+  }, 50);
+};
 
-    handleInputChange("script", newText);
-    setTimeout(() => {
-      if (editableRef.current) {
-        editableRef.current.focus();
-      }
-    }, 50);
-  };
-
-  const cleanFormatMarkers = () => {
-    if (!selectedScript) return;
-
-    toast.promise(
-      new Promise((resolve, reject) => {
-        const confirmed = confirm(
-          "¿Deseas restaurar el script a su versión original del servidor?"
-        );
-        if (confirmed) {
-          resolve();
-        } else {
-          reject();
-        }
-      }),
-      {
-        loading: "Confirmando restauración...",
-        success: () => {
-          setEditedData((prev) => ({
-            ...prev,
-            script: selectedScript.script || "",
-          }));
-          setHasChanges(false);
-          setShowPreview(false);
-          return "Script restaurado correctamente";
-        },
-        error: "Restauración cancelada",
-      }
-    );
-
-    // Refresca visualmente el editor
-    setTimeout(() => {
-      if (editableRef.current) {
-        editableRef.current.innerHTML = renderFormattedScriptToHTML(
-          selectedScript.script || ""
-        );
-        editableRef.current.focus();
-      }
-    }, 50);
-  };
-
-  const clearScript = async () => {
-    if (!selectedScript || !selectedScript.idScript) {
-      // Si no hay script seleccionado o es nuevo, solo limpia el contenido
-      handleInputChange("script", "");
-      toast.success("Contenido borrado correctamente");
-      return;
-    }
-
-    toast.promise(
-      new Promise((resolve, reject) => {
-        const confirmed = confirm(
-          "¿Estás seguro de eliminar este script? Esta acción no se puede deshacer."
-        );
-        if (confirmed) {
-          resolve();
-        } else {
-          reject();
-        }
-      }).then(async () => {
-        await deleteScripts({ idScript: selectedScript.idScript });
-        // Actualizar la lista de scripts
-        if (onSaveScript) {
-          onSaveScript();
-        }
-        // Limpiar el formulario
-        setSelectedScript(null);
-        setEditedData({
-          nombre: "",
-          descripcion: "",
-          script: "",
-        });
+  // --- Restaurar script original ---
+const cleanFormatMarkers = () => {
+  if (!selectedScript) return;
+  toast.promise(
+    new Promise((resolve) => {
+      setTimeout(() => {
+        setEditedData((prev) => ({
+          ...prev,
+          script: selectedScript.script || "",
+        }));
         setHasChanges(false);
         setShowPreview(false);
-      }),
-      {
-        loading: "Eliminando script...",
-        success: "Script eliminado exitosamente",
-        error: (error) => {
-          console.error("Error al eliminar script:", error);
-          return `Error al eliminar el script: ${error.message}`;
-        },
-      }
-    );
+        if (editableRef.current) {
+          editableRef.current.innerHTML = renderFormattedScriptToHTML(selectedScript.script || "");
+          editableRef.current.focus();
+        }
+        resolve();
+      }, 400);
+    }),
+    {
+      loading: "Restaurando script original...",
+      success: "Script restaurado correctamente",
+      error: "No se pudo restaurar el script",
+    }
+  );
+};
+
+ // --- Eliminar script ---
+const clearScript = async () => {
+  if (!selectedScript || !selectedScript.idScript) {
+    handleInputChange("script", "");
+    toast.success("Contenido borrado correctamente");
+    return;
+  }
+  toast.promise(
+    (async () => {
+      await deleteScripts({ idScript: selectedScript.idScript });
+      if (onSaveScript) onSaveScript();
+
+      setSelectedScript(null);
+      setEditedData({ nombre: "", descripcion: "", script: "" });
+      setHasChanges(false);
+      setShowPreview(false);
+    })(),
+    {
+      loading: "Eliminando script...",
+      success: "Script eliminado exitosamente",
+      error: "Error al eliminar el script",
+    }
+  );
+}
+
+// --- Guardar cambios ---
+const handleSave = async () => {
+  if (!selectedScript) {
+    toast.error("Selecciona un script antes de guardar");
+    return;
+  }
+  const scriptData = {
+    idScript: selectedScript.idScript,
+    idProducto: idProducto,
+    nombre: editedData.nombre,
+    descripción: editedData.descripcion,
+    script1: editedData.script,
+    fechaInsert: new Date().toISOString().split("T")[0],
+    idEjecutivoInsert: idEjecutivo,
   };
-
-  const handleSave = async () => {
-    if (!selectedScript) return;
-
-    try {
-      // Preparar los datos para el endpoint en el formato correcto
-      const scriptData = {
-        idScript: selectedScript.idScript,
-        idProducto: idProducto,
-        nombre: editedData.nombre,
-        descripción: editedData.descripcion, // Note la 'ó' en descripción
-        script1: editedData.script,
-        fechaInsert: new Date().toISOString().split("T")[0], // Solo la fecha sin la hora
-        idEjecutivoInsert: idEjecutivo,
-      };
-
-      console.log("Enviando datos:", scriptData);
-
+  toast.promise(
+    (async () => {
       let response;
-      // Si el script ya existe (tiene ID), actualizarlo
       if (selectedScript.idScript) {
         response = await putUpdateScripts(scriptData);
-        console.log("Respuesta actualización:", response);
         toast.success("Script actualizado exitosamente");
       } else {
-        // Si es un script nuevo, guardarlo
         response = await PostSaveScripts(scriptData);
-        console.log("Respuesta nuevo script:", response);
         toast.success("Script guardado exitosamente");
       }
 
-      // Actualizar el estado local
-      setSelectedScript({
-        ...selectedScript,
-        ...editedData,
-      });
-
+      setSelectedScript({ ...selectedScript, ...editedData });
       setHasChanges(false);
       setIsEditingScript(false);
       setShowPreview(false);
-    } catch (error) {
-      console.error("Error al guardar script:", error);
-
-      // Mostrar mensaje de error más detallado
-      let errorMessage = "Error desconocido";
-      if (error.response?.data?.errors) {
-        errorMessage = Object.values(error.response.data.errors)
-          .flat()
-          .join("\n");
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      toast.error("Error al guardar el script:\n" + errorMessage);
+      return response;
+    })(),
+    {
+      loading: "Guardando script...",
+      success: "Cambios guardados correctamente",
+      error: (error) => {
+        console.error("Error al guardar script:", error);
+        const msg =
+          error?.response?.data?.errors
+            ? Object.values(error.response.data.errors).flat().join("\n")
+            : error.message || "Error desconocido";
+        return `Error al guardar el script:\n${msg}`;
+      },
     }
-  };
-
-  const handleCancel = () => {
-    toast.promise(
-      new Promise((resolve, reject) => {
-        const confirmed = confirm("¿Deseas descartar los cambios?");
-        if (confirmed) {
-          resolve();
-        } else {
-          reject();
-        }
-      }),
-      {
-        loading: "Confirmando...",
-        success: () => {
-          setEditedData({
-            nombre: selectedScript?.nombre || "",
-            descripcion: selectedScript?.descripcion || "",
-            script: selectedScript?.script || "",
-          });
-          setHasChanges(false);
-          setIsEditingScript(false);
-          setShowPreview(false);
-          return "Cambios descartados";
-        },
-        error: "Operación cancelada",
-      }
-    );
-  };
+  );
+};
 
   return (
     <div className="rounded-lg">
@@ -661,7 +504,7 @@ const EditionScripts = ({
                         textColor="text-gray-200"
                         borderColor="border-gray-800 hover:border-jerarquia3"
                         bgColor="bg-gray-800 hover:bg-jerarquia3"
-                        tooltip="Texto en Negrita"
+                        tooltip="Agregar/quitar resaltado"
                       >
                         N
                       </IconCircular>
@@ -675,7 +518,7 @@ const EditionScripts = ({
                         textColor="text-lime-500"
                         borderColor="border-gray-800 hover:border-jerarquia3"
                         bgColor="bg-gray-800 hover:bg-jerarquia3"
-                        tooltip="Color de texto"
+                        tooltip="Agregar/quitar color"
                       >
                         C
                       </IconCircular>
@@ -689,7 +532,7 @@ const EditionScripts = ({
                         textColor="text-gray-200"
                         borderColor="border-gray-800 hover:border-jerarquia3"
                         bgColor="bg-gray-800 hover:bg-jerarquia3"
-                        tooltip="Limpiar marcadores"
+                        tooltip="Limpiar formato"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -715,17 +558,18 @@ const EditionScripts = ({
                     showPreview ? "ml-auto" : ""
                   }`}
                 >
-                  <div className="flex items-center">
+                  <div className=" text-center items-center">
                     <input
                       type="checkbox"
                       id="vista-previa"
-                      className="form-checkbox h-4 w-4 bg-blue-600 text-jerarquia1 rounded cursor-pointer"
+                      className="form-checkbox  h-4 w-4 bg-blue-600 text-end text-jerarquia1 rounded cursor-pointer"
                       checked={showPreview}
                       onChange={(e) => setShowPreview(e.target.checked)}
                     />
                     <label
                       htmlFor="vista-previa"
-                      className="ml-1 text-sm text-jerarquia1 cursor-pointer whitespace-nowrap"
+                      style={{color: "#3eac91"}}
+                      className="ml-1 text-sm cursor-pointer text-end "
                     >
                       Vista Previa
                     </label>
