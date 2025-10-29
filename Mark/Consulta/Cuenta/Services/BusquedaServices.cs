@@ -39,6 +39,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
          int idCartera,
          string servidor,
          bool esDetalleResultado,
+         int jerarquiaEjecutivo,
          int? idConsulta = null,
          IEnumerable<ParametroDto>? parametrosExtra = null,
          IEnumerable<AgruparDto>? agruparExtra = null,
@@ -184,28 +185,56 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 {
                     Console.WriteLine(" No hay resultados para exportar a Excel ");
                 }
-                // convertir a lista de diccionarios y enmascarar el número de cuenta
                 var datosResultado = new List<Dictionary<string, object>>();
+
                 foreach (DataRow row in tblCuentas.Rows)
                 {
                     var item = new Dictionary<string, object>();
+
                     foreach (DataColumn col in tblCuentas.Columns)
                     {
-                        var value = row[col];
+                        object value = row[col];
 
                         if (col.ColumnName.Equals("Cuenta", StringComparison.OrdinalIgnoreCase) &&
                             value != null && value != DBNull.Value)
                         {
                             string cuenta = value.ToString();
-                            if (cuenta.Length > 4)
+
+                            // ✅ MISMA LÓGICA QUE TU QUERY ORIGINAL
+                            if (jerarquiaEjecutivo < 3) // ejecutivos de bajo nivel
                             {
-                                value = new string('X', cuenta.Length - 5) + cuenta.Substring(cuenta.Length - 5);
+                                if (idCartera == 1)
+                                {
+                                    // STUFF(STUFF(C.idCuenta,1,2,'XX'),13, 2,'XX') [Cuenta]
+                                    if (cuenta.Length >= 14)
+                                    {
+                                        char[] arr = cuenta.ToCharArray();
+                                        arr[0] = 'X';
+                                        arr[1] = 'X';
+                                        arr[12] = 'X';
+                                        arr[13] = 'X';
+                                        value = new string(arr);
+                                    }
+                                }
+                                else
+                                {
+                                    // STUFF(C.idCuenta,1,LEN(C.idCuenta)-4,'XXX-XXX-')
+                                    if (cuenta.Length > 4)
+                                    {
+                                        int ocultar = cuenta.Length - 4;
+                                        value = new string('X', ocultar) + cuenta.Substring(cuenta.Length - 4);
+                                    }
+                                }
                             }
                         }
+
                         item[col.ColumnName] = value;
                     }
+
                     datosResultado.Add(item);
                 }
+
+            
                 return new SearchResultDto
                 {
                     Mensaje = "Búsqueda terminada.",
