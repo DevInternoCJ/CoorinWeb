@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { getCatalogoValueCard, getWrongsInformation } from "../../../../../services/mark/albaz/LokiServices";
 
@@ -19,7 +20,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
     // Memorizar los parámetros actuales
     const searchParams = {
         idCartera: 1,
-        idDatoErroneo: datoErroneo || 1,
+        idDatoErroneo: datoErroneo === "" ? 0 : parseInt(datoErroneo, 10),
         desde,
         hasta
     };
@@ -91,8 +92,13 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
         setLoadingTabla(true);
         setErrorTabla(null);
         setTablaData([]);
-        // Usar los parámetros guardados si existen, si no los actuales
-        const params = paramsGuardados || searchParams;
+        // SIEMPRE usar los parámetros actuales al buscar manualmente
+        let params = {
+            idCartera: 1,
+            idDatoErroneo: datoErroneo === "" ? 0 : parseInt(datoErroneo, 10),
+            desde,
+            hasta
+        };
         try {
             const response = await getWrongsInformation(params);
             // La respuesta es un blob, leer como texto y parsear JSON
@@ -139,7 +145,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                 value={desde}
                                 onChange={e => setDesde(e.target.value)}
                                 min="2016-01-01"
-                                max={new Date().toISOString().slice(0, 10)}
+                                max={(() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10); })()}
                             />
                         </div>
                         <div className="hs-input-group w-full">
@@ -280,13 +286,16 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                             </tr>
                                         )}
                                         {!loadingTabla && tablaData.length === 0 && (
-                                            <tr>
-                                                <td colSpan={8} style={{ textAlign: 'center', verticalAlign: 'middle', padding: '48px 12px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                                                        <span className="text-gray-500" style={{ fontSize: 18 }}>Aún no hay registros</span>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            <>
+                                                {toast.warning && toast.warning("Su consulta no cuenta con registros en la fecha especificada", { duration: 4000 })}
+                                                <tr>
+                                                    <td colSpan={8} style={{ textAlign: 'center', verticalAlign: 'middle', padding: '48px 12px' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                                                            <span className="text-gray-500" style={{ fontSize: 18 }}>Aún no hay registros</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </>
                                         )}
                                         {!loadingTabla && tablaData.map((row, idx) => (
                                             <tr key={idx}>

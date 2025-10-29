@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { infoEjecutivo, getEmailsInfo } from "../../../../../services/mark/albaz/LokiServices";
 
 const EmailsContent = ({ mostrarTabla }) => {
@@ -14,7 +15,7 @@ const EmailsContent = ({ mostrarTabla }) => {
     
         const [cartera, setCartera] = useState(idCartera);
         // Opciones de cartera dinámicas
-        const [carterasOptions, setCarterasOptions] = useState([]);
+        const [carterasOptions, setCarterasOptions] = useState([]); 
         const [consulta, setConsulta] = useState("");
         const [consultasOptions, setConsultasOptions] = useState([]);
         const [loadingConsultas, setLoadingConsultas] = useState(false);
@@ -44,8 +45,8 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 : [];
                             setCarterasOptions(carterasUnicas);
                             // Filtrar consultas por cartera e idProducto
-                            const filtered = Array.isArray(data)
-                                ? data.filter(
+                            const filtered = Array.isArray(data.consultas)
+                                ? data.consultas.filter(
                                     (item) => String(item.idCartera) === String(cartera) && String(item.idProducto) === String(idProducto)
                                 )
                                 : [];
@@ -67,10 +68,14 @@ const EmailsContent = ({ mostrarTabla }) => {
                     try {
                         // Usar los parámetros actuales
                         const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
-                        const idConsultaInt = consulta ? parseInt(consulta, 10) : undefined;
+                        const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
+                        console.log('Enviando al endpoint:', { idCartera: idCarteraInt, idConsulta: idConsultaInt });
                         const response = await getEmailsInfo(idCarteraInt, idConsultaInt);
                         let data = Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : (typeof response === 'object' ? [response] : []));
-                        if (data.length === 0) throw new Error('No hay datos para exportar.');
+                        if (data.length === 0) {
+                            toast.warning("Su consulta no cuenta con registros en la fecha especificada", { duration: 4000 });
+                            throw new Error('No hay datos para exportar.');
+                        }
                         // Obtener headers y loguearlos para revisión
                         const headers = Object.keys(data[0]);
                         // setHeadersRecibidos(headers); // Ya no se usa para mostrar en pantalla
@@ -158,8 +163,8 @@ const EmailsContent = ({ mostrarTabla }) => {
                             >
                                 <option value="">- Todas -</option>
                                 {consultasOptions.map((item) => (
-                                    <option key={item.idConsulta || item.NombreConsulta} value={item.idConsulta}>
-                                        {item.NombreConsulta}
+                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                        {item.nombreConsulta}
                                     </option>
                                 ))}
                             </select>
@@ -227,8 +232,8 @@ const EmailsContent = ({ mostrarTabla }) => {
                             >
                                 <option value="">- Todas -</option>
                                 {consultasOptions.map((item) => (
-                                    <option key={item.idConsulta || item.NombreConsulta} value={item.idConsulta}>
-                                        {item.NombreConsulta}
+                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                        {item.nombreConsulta}
                                     </option>
                                 ))}
                             </select>
@@ -252,7 +257,7 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 className="btn-success w-full sm:w-auto min-w-[120px] max-w-xs px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center items-center"
                                 style={{ margin: '0 auto', display: 'block' }}
                                 onClick={handleDownloadExcel}
-                                disabled={loadingExcel || !consulta}
+                                disabled={loadingExcel}
                             >
                                 {loadingExcel
                                     ? (

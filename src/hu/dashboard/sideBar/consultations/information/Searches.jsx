@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { infoEjecutivo, getSearchesInformation } from "../../../../../services/mark/albaz/LokiServices";
 
@@ -20,8 +21,11 @@ const SearchesContent = () => {
     const [carterasOptions, setCarterasOptions] = useState([]);
     const [consulta, setConsulta] = useState("");
     const [consultasOptions, setConsultasOptions] = useState([]);
-    const [desde, setDesde] = useState(new Date().toISOString().slice(0, 10));
-    const [hasta, setHasta] = useState(new Date().toISOString().slice(0, 10));
+    // Limitar fechas: mínimo 2016-01-01, máximo hoy
+    const minDate = "2016-01-01";
+    const maxDate = new Date().toISOString().slice(0, 10);
+    const [desde, setDesde] = useState(maxDate);
+    const [hasta, setHasta] = useState(maxDate);
     const [loadingConsultas, setLoadingConsultas] = useState(false);
     const [errorConsultas, setErrorConsultas] = useState(null);
     const [loadingExcel, setLoadingExcel] = useState(false);
@@ -43,8 +47,8 @@ const SearchesContent = () => {
                     : [];
                 setCarterasOptions(carterasUnicas);
                 // Filtrar consultas por cartera e idProducto
-                const filtered = Array.isArray(data)
-                    ? data.filter(
+                const filtered = Array.isArray(data.consultas)
+                    ? data.consultas.filter(
                         (item) => String(item.idCartera) === String(cartera) && String(item.idProducto) === String(idProducto)
                     )
                     : [];
@@ -65,9 +69,10 @@ const SearchesContent = () => {
             setFooterMsg("Consulta terminada. Guardando libro de Excel.");
             try {
                 // Usar los parámetros actuales
+                const idConsulta = consulta === "" ? 0 : parseInt(consulta, 10);
                 const params = {
                     idCartera: cartera,
-                    idConsulta: consulta,
+                    idConsulta,
                     idProducto,
                     desde,
                     hasta,
@@ -82,6 +87,10 @@ const SearchesContent = () => {
                     // Si parece JSON, convertir a CSV
                     try {
                         const json = JSON.parse(text);
+                        if (Array.isArray(json) && json.length === 0) {
+                            toast.warning("Su consulta no cuenta con registros en la fecha especificada", { duration: 4000 });
+                            throw new Error('No hay datos para exportar.');
+                        }
                         if (Array.isArray(json) && json.length > 0 && typeof json[0] === 'object') {
                             const headers = Object.keys(json[0]);
                             const rows = json.map(obj => headers.map(h => {
@@ -160,8 +169,8 @@ const SearchesContent = () => {
                         >
                             <option value="">- Todas -</option>
                             {consultasOptions.map((item) => (
-                                <option key={item.idConsulta || item.NombreConsulta} value={item.idConsulta}>
-                                    {item.NombreConsulta}
+                                <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                    {item.nombreConsulta}
                                 </option>
                             ))}
                         </select>
@@ -188,6 +197,8 @@ const SearchesContent = () => {
                             type="date"
                             className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                             value={desde}
+                            min={minDate}
+                            max={maxDate}
                             onChange={e => setDesde(e.target.value)}
                         />
                     </div>
@@ -198,6 +209,8 @@ const SearchesContent = () => {
                             type="date"
                             className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                             value={hasta}
+                            min={minDate}
+                            max={maxDate}
                             onChange={e => setHasta(e.target.value)}
                         />
                     </div>
@@ -208,7 +221,7 @@ const SearchesContent = () => {
                         className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
                         style={{ margin: '0 auto', display: 'block' }}
                         onClick={handleDownloadExcel}
-                        disabled={loadingExcel || !consulta}
+                        disabled={loadingExcel}
                     >
                         {loadingExcel ? "Exportando..." : "Guardar Excel"}
                     </button>

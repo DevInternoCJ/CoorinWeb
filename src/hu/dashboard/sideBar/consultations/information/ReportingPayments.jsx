@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Toaster, toast } from "sonner";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { infoEjecutivo, getExportReportPayments } from "../../../../../services/mark/albaz/LokiServices";
 
@@ -13,8 +14,11 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
     const jerarquiaDefault = userData?.jerarquia ?? userData?.Jerarquia ?? 4;
 
     // Estados para filtros y datos
+    // Bandera para controlar el toast de error
+    const [errorToastShown, setErrorToastShown] = useState(false);
+    // Bandera para saber si la búsqueda fue manual
     const [cartera, setCartera] = useState(idCartera);
-    const [consulta, setConsulta] = useState("");
+    const [consulta, setConsulta] = useState("0");
     const [desde, setDesde] = useState(new Date().toISOString().slice(0, 10));
     const [hasta, setHasta] = useState(new Date().toISOString().slice(0, 10));
     const [idProducto, setIdProducto] = useState(idProductoDefault);
@@ -33,8 +37,8 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
         setErrorConsultas(null);
         infoEjecutivo(idEjecutivo)
             .then((data) => {
-                let filtered = Array.isArray(data)
-                    ? data.filter(
+                let filtered = Array.isArray(data?.consultas)
+                    ? data.consultas.filter(
                         (item) =>
                             String(item.idCartera) === String(idCartera) &&
                             String(item.idProducto) === String(idProducto)
@@ -59,7 +63,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
     // Memorizar los parámetros actuales
     const searchParams = useMemo(() => ({
         idCartera: cartera,
-        idConsulta: consulta,
+        idConsulta: consulta === "0" ? "0" : consulta,
         idProducto,
         desde,
         hasta,
@@ -72,6 +76,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
         setLoadingTabla(true);
         setErrorTabla(null);
         setTablaData([]);
+        setErrorToastShown(false);
         // Usar los parámetros guardados si existen, si no los actuales
         const params = paramsGuardados || searchParams;
         try {
@@ -80,14 +85,20 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
             let data = response?.data ?? response;
             if (Array.isArray(data)) {
                 setTablaData(data);
+                toast.success("Consulta realizada correctamente.");
             } else if (Array.isArray(data?.data)) {
                 setTablaData(data.data);
+                toast.success("Consulta realizada correctamente.");
             } else {
                 setTablaData([]);
                 setErrorTabla("No se encontraron resultados.");
+                toast.warning("Su consulta no cuenta con registros en la fecha especificada", { duration: 4000 });
             }
         } catch (err) {
-            setErrorTabla("Error al obtener los pagos reportados.", err);
+            if (!errorToastShown) {
+                toast.error("Error al obtener los pagos reportados.", err);
+                setErrorToastShown(true);
+            }
         } finally {
             setLoadingTabla(false);
         }
@@ -102,6 +113,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
             localStorage.setItem('reportingPaymentsParams', JSON.stringify(searchParams));
             setMostrarTabla(true);
         } else {
+            setParamsGuardados(null); // Limpiar los parámetros guardados para usar los actuales
             fetchPagosReportados();
             localStorage.removeItem('reportingPaymentsParams');
         }
@@ -154,10 +166,12 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        toast.success("Archivo exportado correctamente. Ábrelo en Excel para visualizar los pagos.");
     };
 
     return (
-        <div style={{ width: '100%' }} className="flex flex-col items-center">
+    <>
+    <div style={{ width: '100%' }} className="flex flex-col items-center">
             {/* Layout dinámico según mostrarTabla (modo pagos-xl) */}
             {!mostrarTabla && (
                 <>
@@ -178,8 +192,8 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                     className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                                     value={desde}
                                     onChange={e => setDesde(e.target.value)}
-                                        min={new Date(new Date().setFullYear(new Date().getFullYear() - 6)).toISOString().slice(0, 10)}
-                                        max={new Date().toISOString().slice(0, 10)}
+                                    min={new Date(new Date().setFullYear(new Date().getFullYear() - 6)).toISOString().slice(0, 10)}
+                                    max={(function(){const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10);})()}
                                 />
                             </div>
                             <div className="hs-input-group w-full">
@@ -203,10 +217,10 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                 id="consulta-select-reporting"
                                 disabled={loadingConsultas || errorConsultas}
                             >
-                                <option value="">- Todas -</option>
+                                <option value="0">- Todas -</option>
                                 {consultasOptions.map((item) => (
-                                    <option key={item.idConsulta || item.NombreConsulta} value={item.idConsulta}>
-                                        {item.NombreConsulta}
+                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                        {item.nombreConsulta}
                                     </option>
                                 ))}
                             </select>
@@ -229,7 +243,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                 className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
                                 style={{ margin: '0 auto', display: 'block' }}
                                 onClick={handleBuscar}
-                                disabled={loadingTabla || !consulta}
+                                disabled={loadingTabla}
                             >
                                 {loadingTabla ? "Buscando..." : "Buscar"}
                             </button>
@@ -243,7 +257,6 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                 Exportar
                             </button>
                         </div>
-                        {errorTabla && <div className="text-red-500 text-xs text-center mt-1">{errorTabla}</div>}
                     </div>
                 </>
             )}
@@ -288,8 +301,8 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                 >
                                     <option value="">- Todas -</option>
                                     {consultasOptions.map((item) => (
-                                        <option key={item.idConsulta || item.NombreConsulta} value={item.idConsulta}>
-                                            {item.NombreConsulta}
+                                        <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                            {item.nombreConsulta}
                                         </option>
                                     ))}
                                 </select>
@@ -407,6 +420,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                 )}
             </div>
         </div>
+        </>
     );
 };
 
