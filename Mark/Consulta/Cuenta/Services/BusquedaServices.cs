@@ -79,9 +79,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     {
                         fechaDesde = Convert.ToDateTime(consultaRow["Desde"]);
                     }
-
-                    Console.WriteLine($"=== Valores actualizados: Producto={idProducto}, Cartera={idCartera}, Desde={fechaDesde:yyyy-MM-dd}");
-                    Console.WriteLine("=== Usando parámetros y agrupaciones del JSON en lugar de BD ===");
                 }
                 else
                 {

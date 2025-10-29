@@ -97,11 +97,11 @@ namespace Loki.Mark.Consulta.Generales.Controllers
         {
             try
             {
-                // Validaciones
-                if (string.IsNullOrWhiteSpace(search.Servidor))
+                // Validaciones básicas
+                if (string.IsNullOrWhiteSpace(criteria.Servidor))
                     return BadRequest(new { error = "Debe proporcionar el nombre del servidor." });
 
-                if (!search.IdProducto.HasValue || !search.IdCartera.HasValue)
+                if (criteria.IdProducto == 0 || criteria.IdCartera == 0)
                     return BadRequest(new { error = "Debe proporcionar IdProducto y IdCartera." });
 
                 // Validar concepto si se proporciona
