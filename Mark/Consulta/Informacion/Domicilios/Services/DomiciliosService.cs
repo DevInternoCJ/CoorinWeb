@@ -33,16 +33,17 @@ namespace Loki.Mark.Consulta.Informacion.Domicilios.Services
 			string sqlFinal = $"SELECT Z.* {columnasDinamicas} FROM {sqlPrincipal} Z";
 
 			var parametros = new DynamicParameters(subQueryResult.Parameters);
-			// Aseguramos que IdCartera (usado por la función) esté en los parámetros.
-			if (!parametros.ParameterNames.Contains("IdCartera"))
-			{
-				parametros.Add("IdCartera", idCartera);
-			}
+
 
 			// 3. Unimos la subconsulta si existe
 			if (!string.IsNullOrEmpty(subQueryResult.Sql))
 			{
 				sqlFinal += $" INNER JOIN ({subQueryResult.Sql}) CC ON Z.Cuenta = CC.idCuenta";
+			}
+			// Aseguramos que IdCartera (usado por la función) esté en los parámetros.
+			if (!parametros.ParameterNames.Contains("IdCartera"))
+			{
+				parametros.Add("IdCartera", idCartera);
 			}
 
 			// 4. Llamamos al DAO

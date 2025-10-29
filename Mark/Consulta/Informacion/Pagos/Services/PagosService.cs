@@ -36,7 +36,6 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Services
 			string columnasDinamicas = subQueryResult.Columns.Cast<string>()
 				.Aggregate("", (current, col) => current + $", CC.[{col}]");
 
-			// --- INICIO DE LA CORRECCIÓN ---
 
 			// Formateamos las fechas de forma segura para SQL
 			string desdeStr = request.Desde.ToString("yyyy-MM-dd");
@@ -50,13 +49,6 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Services
 			// El objeto de parámetros ahora solo contendrá los de la subconsulta
 			var parametros = new DynamicParameters();
 
-			// --- FIN DE LA CORRECCIÓN ---
-
-			if (!parametros.ParameterNames.Contains("IdCartera"))
-			{
-				parametros.Add("IdCartera", request.IdCartera);
-
-			}
 
 			// 3. Unir la subconsulta si existe.
 			if (!string.IsNullOrEmpty(subQueryResult.Sql))
@@ -64,6 +56,11 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Services
 				sqlPrincipal += $" INNER JOIN ({subQueryResult.Sql}) CC ON Z.Cuenta = CC.idCuenta";
 				// Los parámetros de la subconsulta son los únicos que se añaden
 				parametros.AddDynamicParams(subQueryResult.Parameters);
+			}
+			if (!parametros.ParameterNames.Contains("IdCartera"))
+			{
+				parametros.Add("IdCartera", request.IdCartera);
+
 			}
 
 			// 4. Llamar al DAO para la ejecución final.

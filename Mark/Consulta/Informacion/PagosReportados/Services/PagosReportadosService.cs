@@ -55,11 +55,6 @@ namespace Loki.Mark.Consulta.Informacion.PagosReportados.Services
 
 			var parametros = new DynamicParameters();
 
-			if (!parametros.ParameterNames.Contains("IdCartera"))
-			{
-				parametros.Add("IdCartera", request.IdCartera);
-
-			}
 			parametros.Add("Desde", request.Desde);
 			parametros.Add("Hasta", request.Hasta);
 
@@ -68,6 +63,12 @@ namespace Loki.Mark.Consulta.Informacion.PagosReportados.Services
 			{
 				sqlFinal += $" INNER JOIN ({subQueryResult.Sql}) CC ON Z.Cuenta = CC.idCuenta";
 				parametros.AddDynamicParams(subQueryResult.Parameters);
+			}
+
+			if (!parametros.ParameterNames.Contains("IdCartera"))
+			{
+				parametros.Add("IdCartera", request.IdCartera);
+
 			}
 
 			// 4. Llamamos al DAO

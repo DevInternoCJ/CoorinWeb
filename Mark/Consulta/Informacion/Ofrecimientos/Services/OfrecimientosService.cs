@@ -41,6 +41,12 @@ namespace Loki.Mark.Consulta.Informacion.Ofrecimientos.Services
 				sqlFinal += $" INNER JOIN ({subQueryResult.Sql}) CC ON Z.Cuenta = CC.idCuenta";
 			}
 
+			// Aseguramos que IdCartera (usado por la función) esté en los parámetros.
+			if (!parametros.ParameterNames.Contains("IdCartera"))
+			{
+				parametros.Add("IdCartera", request.IdCartera);
+			}
+
 			return await _dao.ObtenerDatosAsync<OfrecimientoDto>(servidor, sqlFinal, parametros);
 		}
 	}
