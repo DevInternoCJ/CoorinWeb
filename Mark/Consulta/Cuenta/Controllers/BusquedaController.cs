@@ -65,6 +65,7 @@ namespace Loki.Controllers
                     idCartera: criteria.IdCartera,
                     servidor: criteria.Servidor,
                     esDetalleResultado: criteria.EsDetalleResultado,
+                    jerarquiaEjecutivo: criteria.JerarquiaEjecutivo,
                     idConsulta: criteria.IdConsulta,
                     parametrosExtra: criteria.Parametros,
                     agruparExtra: criteria.Agrupar,  // ← Pasar las agrupaciones

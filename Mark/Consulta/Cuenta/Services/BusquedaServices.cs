@@ -39,6 +39,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
          int idCartera,
          string servidor,
          bool esDetalleResultado,
+         int jerarquiaEjecutivo,
          int? idConsulta = null,
          IEnumerable<ParametroDto>? parametrosExtra = null,
          IEnumerable<AgruparDto>? agruparExtra = null,
@@ -47,13 +48,8 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             try
             {
 
-                Console.WriteLine($"idConsulta recibido: {idConsulta}");
-                Console.WriteLine($"desdeFecha recibido: {desdeFecha}");
-
-
                 await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidor);
 
-                // === CREAR TABLAS CON LA ESTRUCTURA QUE ESPERA GeneraQueryCuentas ===
                 DataTable tblParametros = new DataTable();
                 tblParametros.Columns.Add("Concepto", typeof(string));
                 tblParametros.Columns.Add("Campo", typeof(string));
@@ -65,15 +61,12 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 tblAgrupar.Columns.Add("Campo", typeof(string));
                 tblAgrupar.Columns.Add("Concepto", typeof(string));
 
-                // === USAR LA FECHA DEL REQUEST O POR DEFECTO ===
                 DateTime fechaDesde = desdeFecha ?? DateTime.Today.AddMonths(-1);
                 Console.WriteLine($"=== Usando fecha desde: {fechaDesde:yyyy-MM-dd}");
 
                 // === Si hay idConsulta, obtener solo datos básicos (no parámetros/agrupaciones) ===
                 if (idConsulta.HasValue)
                 {
-                    Console.WriteLine($"=== PROCESANDO idConsulta: {idConsulta.Value} ===");
-
                     var consultaRow = ConsultaGenerador.ObtenerConsulta(idConsulta.Value);
                     if (consultaRow == null)
                         throw new Exception($"No se encontró la consulta con ID {idConsulta.Value}");
@@ -87,11 +80,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     {
                         fechaDesde = Convert.ToDateTime(consultaRow["Desde"]);
                     }
-
-                    Console.WriteLine($"=== Valores actualizados: Producto={idProducto}, Cartera={idCartera}, Desde={fechaDesde:yyyy-MM-dd}");
-
-                    // NO cargar parámetros ni agrupaciones desde BD - usar solo los del JSON
-                    Console.WriteLine("=== Usando parámetros y agrupaciones del JSON en lugar de BD ===");
                 }
                 else
                 {
@@ -100,10 +88,8 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     tblParametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
                 }
 
-                // === Procesar parámetros del JSON (tanto si hay idConsulta como si no) ===
                 ProcesarParametrosExtra(parametrosExtra, tblParametros);
 
-                // === AGREGAR AGRUPACIONES EXTRA DESDE EL NUEVO PARÁMETRO ===
                 if (agruparExtra != null && agruparExtra.Any())
                 {
                     foreach (var agrupar in agruparExtra)
@@ -111,11 +97,11 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                         if (!AgrupacionExiste(tblAgrupar, agrupar.Campo, agrupar.Concepto))
                         {
                             tblAgrupar.Rows.Add(agrupar.Campo, agrupar.Concepto);
-                            Console.WriteLine($"✅ Agrupación extra cargada: {agrupar.Campo}, {agrupar.Concepto}");
+                            Console.WriteLine($"Agrupación extra cargada: {agrupar.Campo}, {agrupar.Concepto}");
                         }
                         else
                         {
-                            Console.WriteLine($"⚠️ Agrupación duplicada omitida: {agrupar.Campo}, {agrupar.Concepto}");
+                            Console.WriteLine($"Agrupación duplicada omitida: {agrupar.Campo}, {agrupar.Concepto}");
                         }
                     }
                 }
@@ -132,25 +118,21 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     Console.WriteLine($"Campo: {row["Campo"]}, Concepto: {row["Concepto"]}");
                 }
 
-                // === Determinar tipo de resultado ===
                 var conteo = esDetalleResultado ? Resultado.Detalle : Resultado.Contar;
                 Console.WriteLine($"Fecha a usar en GeneraQueryCuentas: {fechaDesde:yyyy-MM-dd}");
-                // === Generar query completo ===
+
                 ArrayList listaColumnas = new ArrayList();
                 var queryData = ConsultaGenerador.GeneraQueryCuentas(
                     idProducto,
                     tblParametros,
                     tblAgrupar,
                     conteo,
-                    fechaDesde,  // Usar la fecha calculada
+                    fechaDesde,  
                     idCartera,
                     ref listaColumnas
                 );
 
                 string sQuery = "WAITFOR DELAY '00:00:00'; USE dbCollection; SET DATEFORMAT YMD;\r\n" + queryData.Query;
-
-                // === Logging para debug ===
-                Console.WriteLine("=== Conteo usado: " + conteo);
                 Console.WriteLine("=== Query generado ===\n" + sQuery);
 
                 // === Ejecutar query ===
@@ -163,55 +145,96 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                         tblCuentas.Load(reader);
                     }
                 }
-
-                Console.WriteLine($"=== Query ejecutado correctamente. Filas obtenidas: {tblCuentas.Rows.Count}");
-
                 // === Exportar a Excel si hay resultados ===
                 string rutaExcel = null;
+                bool excelExportFailed = false;
+
                 if (tblCuentas.Rows.Count > 0)
                 {
-                    string fileName = $"Cuentas_{Guid.NewGuid():N}.xlsx";
-                    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports");
-                    Directory.CreateDirectory(uploadsFolder);
-                    string filePath = Path.Combine(uploadsFolder, fileName);
+                    try
+                    {
+                        string fileName = $"Cuentas_{Guid.NewGuid():N}.xlsx";
+                        string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports");
+                        Directory.CreateDirectory(uploadsFolder);
+                        string filePath = Path.Combine(uploadsFolder, fileName);
 
-                    string sResultado = _excelGeneratorService.ExportToExcelSAX(ref tblCuentas, filePath);
-                    if (!string.IsNullOrEmpty(sResultado))
-                        return new SearchResultDto { Mensaje = sResultado, EsError = true };
+                        // Intenta exportar a Excel. Si falla, lanza excepción (UnauthorizedAccessException, IOException, etc.)
+                        string sResultado = _excelGeneratorService.ExportToExcelSAX(ref tblCuentas, filePath);
 
-                    rutaExcel = $"/api/busquedas/download-excel?filename={fileName}";
-                    Console.WriteLine($"=== Excel generado: {rutaExcel}");
+                        if (!string.IsNullOrEmpty(sResultado))
+                        {
+                            Console.WriteLine($"ADVERTENCIA: La exportación a Excel falló internamente: {sResultado}");
+                            excelExportFailed = true;
+                        }
+                        else
+                        {
+                            rutaExcel = $"/api/busquedas/download-excel?filename={fileName}";
+                            Console.WriteLine($"Excel generado: {rutaExcel}");
+                        }
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        excelExportFailed = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        excelExportFailed = true;
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("=== No hay resultados para exportar a Excel ===");
+                    Console.WriteLine(" No hay resultados para exportar a Excel ");
                 }
-
-                // convertir a lista de diccionarios y enmascarar el número de cuenta
                 var datosResultado = new List<Dictionary<string, object>>();
+
                 foreach (DataRow row in tblCuentas.Rows)
                 {
                     var item = new Dictionary<string, object>();
+
                     foreach (DataColumn col in tblCuentas.Columns)
                     {
-                        var value = row[col];
+                        object value = row[col];
 
                         if (col.ColumnName.Equals("Cuenta", StringComparison.OrdinalIgnoreCase) &&
                             value != null && value != DBNull.Value)
                         {
                             string cuenta = value.ToString();
-                            if (cuenta.Length > 4)
+
+                            // ✅ MISMA LÓGICA QUE TU QUERY ORIGINAL
+                            if (jerarquiaEjecutivo < 3) // ejecutivos de bajo nivel
                             {
-                                value = new string('X', cuenta.Length - 5) + cuenta.Substring(cuenta.Length - 5);
+                                if (idCartera == 1)
+                                {
+                                    // STUFF(STUFF(C.idCuenta,1,2,'XX'),13, 2,'XX') [Cuenta]
+                                    if (cuenta.Length >= 14)
+                                    {
+                                        char[] arr = cuenta.ToCharArray();
+                                        arr[0] = 'X';
+                                        arr[1] = 'X';
+                                        arr[12] = 'X';
+                                        arr[13] = 'X';
+                                        value = new string(arr);
+                                    }
+                                }
+                                else
+                                {
+                                    // STUFF(C.idCuenta,1,LEN(C.idCuenta)-4,'XXX-XXX-')
+                                    if (cuenta.Length > 4)
+                                    {
+                                        int ocultar = cuenta.Length - 4;
+                                        value = new string('X', ocultar) + cuenta.Substring(cuenta.Length - 4);
+                                    }
+                                }
                             }
                         }
+
                         item[col.ColumnName] = value;
                     }
+
                     datosResultado.Add(item);
                 }
 
-                Console.WriteLine("=== Búsqueda terminada exitosamente ===");
-
+            
                 return new SearchResultDto
                 {
                     Mensaje = "Búsqueda terminada.",
@@ -226,7 +249,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 Console.WriteLine($"=== ERROR: {ex.Message}");
                 Console.WriteLine($"=== STACK TRACE: {ex.StackTrace}");
 
-                // Log más detallado para errores de SQL
                 if (ex.Message.Contains("Incorrect syntax"))
                 {
                     Console.WriteLine("=== ERROR DE SINTAXIS SQL DETECTADO ===");
@@ -240,7 +262,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             }
         }
 
-        // === Método auxiliar para verificar duplicados ===
+        //  Método auxiliar para verificar duplicados 
         private bool AgrupacionExiste(DataTable tblAgrupar, string campo, string concepto)
         {
             foreach (DataRow row in tblAgrupar.Rows)
@@ -273,7 +295,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 string datoValue = tipoDato;
 
                 tblParametros.Rows.Add(p.Concepto, p.Campo, valoresProcesados, parametrosValue, datoValue);
-                Console.WriteLine($"✅ Parámetro cargado: {p.Concepto}, {p.Campo}, {valoresProcesados}, {datoValue}");
+                Console.WriteLine($"Parámetro cargado: {p.Concepto}, {p.Campo}, {valoresProcesados}, {datoValue}");
             }
         }
 
@@ -335,8 +357,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     valoresLimpios = valoresConComillas;
                 }
             }
-
-            Console.WriteLine($"🔧 Valores transformados: {valores} -> {valoresLimpios}");
             return valoresLimpios;
         }
 

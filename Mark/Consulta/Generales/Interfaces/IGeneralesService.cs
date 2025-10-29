@@ -1,10 +1,8 @@
-﻿
-using Loki.DTOs.GeneralesDTOs;
-
+﻿using Loki.DTOs.GeneralesDTOs;
 
 namespace Loki.Mark.Consulta.Generales.Interfaces
 {
-    public interface IGenerales
+    public interface IGeneralesService
     {
         Task<List<HerramientaDTO>> CargaHerramienta(int idCartera, string servidor);
         Task<List<string>> CargaMunicipios(int idCartera, string servidor);

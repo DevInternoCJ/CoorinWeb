@@ -148,6 +148,9 @@ using Loki.Mark.Reportes.Cliente.Services;
 using Swashbuckle.AspNetCore.Filters;
 using System.Reflection;
 using Loki.Mark.Administracion.Gespa.Frases.Services;
+using Loki.Mark.Consulta.Generales.Interfaces;
+using Loki.Mark.Consulta.Generales.Services;
+using Loki.Mark.Consulta.Generales.DAOs;
 
 
 
@@ -348,10 +351,8 @@ builder.Services.AddScoped<Loki.Mark.Consulta.Cuenta.Interfaces.ICatalogosServic
 				   Loki.Mark.Consulta.Cuenta.Services.CatalogosService>();
 builder.Services.AddScoped<ICatalogosService, CatalogosService>();
 //generales
-builder.Services.AddScoped<Loki.Mark.Consulta.Generales.Interfaces.IGenerales,
-				   Loki.Mark.Consulta.Generales.Services.GeneralesServices>();
-builder.Services.AddScoped<Loki.Mark.Consulta.Generales.Interfaces.IGeneralesDao,
-				   Loki.Mark.Consulta.Generales.DAOs.GeneralesDao>();
+builder.Services.AddScoped<IGeneralesService,GeneralesServices>();
+builder.Services.AddScoped<IGeneralesDao,GeneralesDao>();
 #region Información
 
 builder.Services.AddScoped<IPagosService, PagosService>();

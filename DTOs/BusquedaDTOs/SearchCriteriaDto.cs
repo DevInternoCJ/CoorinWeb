@@ -10,5 +10,6 @@
         public int? IdConsulta { get; set; }
         public IEnumerable<ParametroDto> Parametros { get; set; }
         public IEnumerable<AgruparDto> Agrupar { get; set; }
+        public int JerarquiaEjecutivo { get; set; }
     }
 }
