@@ -1,21 +1,18 @@
 ﻿using Loki.DTOs.GeneralesDTOs;
 
-
 namespace Loki.Mark.Consulta.Generales.Interfaces
 {
     public interface IGeneralesDao
     {
         Task<SearchResultDto> RealizaBusqueda(
-             string servidor,
-             int idCartera,
              int idProducto,
-             bool esContar,
-             bool esCuentas,
-             bool esDetalle,
-             string concepto, // Ahora es parámetro con valor por defecto
+             int idCartera,
+             string servidor,
+             int tipoResultado, // 1=Contar, 2=Detalle, 3=Cuentas
              int? idConsulta = null,
              IEnumerable<ParameterDto>? parametrosExtra = null,
-             IEnumerable<AgruparDTO>? agrupamientoExtra = null,
-             DateTime? desde = null);
+             IEnumerable<AgruparDTO>? agruparExtra = null,
+             DateTime? desdeFecha = null
+         );
     }
 }

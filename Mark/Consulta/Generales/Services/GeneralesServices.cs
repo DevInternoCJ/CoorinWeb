@@ -7,7 +7,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Loki.Mark.Consulta.Generales.Services
 {
-    public class GeneralesServices: IGenerales
+    public class GeneralesServices: IGeneralesService
     {
         private readonly IDbContextFactory _dbContFactory;
         private readonly DaoBase _daoBase;
