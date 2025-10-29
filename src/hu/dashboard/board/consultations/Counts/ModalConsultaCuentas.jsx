@@ -1,10 +1,12 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import ModalConsultaCuentasHeader from "./ModalConsultaCuentasHeader";
 import ModalConsultaCuentasFiltros from "./ModalConsultaCuentasFiltros";
 import ModalConsultaCuentasColumnas from "./ModalConsultaCuentasColumnas";
 import ModalConsultaCuentasFooter from "./ModalConsultaCuentasFooter";
+import ExcelDownloader from "../Historical/ExcelDownloader";
 import { toast } from "sonner";
 import { postReportCampaign } from "../../../../../services/mark/albaz/LokiServices";
+import * as XLSX from 'xlsx';
 
 const ModalConsultaCuentas = ({ onClose }) => {
     const [situacionOptions, setSituacionOptions] = useState([]);
@@ -16,11 +18,13 @@ const ModalConsultaCuentas = ({ onClose }) => {
     const [headerData, setHeaderData] = useState({});
     const [fechaDesde, setFechaDesde] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [tipoConsulta, setTipoConsulta] = useState('contar');
     const [resultData, setResultData] = useState({
         data: [],
         totalRows: 0,
         excelUrl: ""
     });
+    const [excelBlob, setExcelBlob] = useState(null);
 
     const handleGetSituacionOptions = useCallback((options) => {
         setSituacionOptions(options);
@@ -50,6 +54,30 @@ const ModalConsultaCuentas = ({ onClose }) => {
         setHeaderData(data);
     }, []);
 
+    const generateExcelFromData = (data) => {
+        try {
+            // Crear un nuevo libro de trabajo
+            const wb = XLSX.utils.book_new();
+            
+            // Convertir los datos a una hoja de trabajo
+            const ws = XLSX.utils.json_to_sheet(data);
+            
+            // Agregar la hoja al libro
+            XLSX.utils.book_append_sheet(wb, ws, "Reporte");
+            
+            // Generar el archivo Excel
+            const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            
+            // Convertir el buffer a Blob
+            const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            
+            return blob;
+        } catch (error) {
+            console.error("Error al generar Excel:", error);
+            return null;
+        }
+    };
+
     const handleConsultar = async () => {
         // Validar que haya filtros y columnas
         if (filtros.length === 0) {
@@ -68,7 +96,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
             idCartera: headerData.idCartera || 1,
             idProducto: headerData.idProducto || 1,
             desdeFecha: fechaDesde || "2025-06-11",
-            esDetalleResultado: headerData.esDetalleResultado || false,
+            esDetalleResultado: tipoConsulta === 'detalle',
             parametros: filtros.map(filtro => ({
                 concepto: filtro.concepto,
                 campo: filtro.campo,
@@ -97,6 +125,16 @@ const ModalConsultaCuentas = ({ onClose }) => {
                     excelUrl: response.rutaDescargaExcel || ""
                 });
                 toast.success(response.mensaje || "Consulta realizada exitosamente");
+
+                // Si está marcada la opción de detalle, generamos el Excel desde los datos
+                if (tipoConsulta === 'detalle' && response.datos && response.datos.length > 0) {
+                    const excelBlob = generateExcelFromData(response.datos);
+                    if (excelBlob) {
+                        setExcelBlob(excelBlob);
+                    } else {
+                        toast.error("Error al generar el Excel");
+                    }
+                }
             } else {
                 throw new Error(response.mensaje || "Error al realizar la consulta");
             }
@@ -148,6 +186,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
                             allAvailableOptions={allAvailableOptions}
                             onColumnasCountChange={handleColumnasCount}
                             onColumnasChange={handleColumnasChange}
+                            onTipoChange={setTipoConsulta}
                         />
                     </div>
                 </div>
@@ -161,7 +200,14 @@ const ModalConsultaCuentas = ({ onClose }) => {
                 />
             </div>
             </div>
-           
+            
+            {/* Componente para descargar Excel solo cuando es detalle */}
+            {excelBlob && tipoConsulta === 'detalle' && (
+                <ExcelDownloader 
+                    blob={excelBlob} 
+                    fileName={`reporte_consulta_${new Date().toISOString().slice(0,10)}.xlsx`}
+                />
+            )}
         </div>
     );
 };

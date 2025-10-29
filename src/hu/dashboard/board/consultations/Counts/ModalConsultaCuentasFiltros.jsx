@@ -362,10 +362,7 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
                 <button className="btn-info flex-1 sm:flex-none" onClick={agregarFiltro}>
                   Agregar
                 </button>
-                <button className="btn-success flex-1 sm:flex-none">
-                  Consultar
-                  <span className="material-icons text-base align-middle"></span>
-                </button>
+              
                 {/* Tooltip agregado aquí */}
                 <span className="hs-tooltip [--placement:top] inline-flex justify-center items-center size-7 rounded-lg bg-iconCircular flex-shrink-0">
                   <IconCustomTable

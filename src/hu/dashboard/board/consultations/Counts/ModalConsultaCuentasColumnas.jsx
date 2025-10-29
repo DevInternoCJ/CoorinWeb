@@ -1,8 +1,9 @@
 import React from "react";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import { toast } from "sonner";
-const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptions = [], onColumnasCountChange, onColumnasChange }) => {
+const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptions = [], onColumnasCountChange, onColumnasChange, onTipoChange }) => {
   const [columnas, setColumnas] = React.useState([]);
+  const [tipoConsulta, setTipoConsulta] = React.useState('contar');
 
   const eliminarColumna = (id) => {
     setColumnas(columnas.filter(columna => columna.id !== id));
@@ -110,7 +111,12 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptio
             <input
               type="radio"
               name="tipo"
-              defaultChecked
+              value="contar"
+              checked={tipoConsulta === 'contar'}
+              onChange={(e) => {
+                setTipoConsulta(e.target.value);
+                onTipoChange(e.target.value);
+              }}
               className="modal-radio"
             />
             <span className="whitespace-nowrap text-xs font-semibold" style={{ color: "var(--color-jerarquia4)" }}>Contar</span>
@@ -118,7 +124,13 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptio
           <label className="flex items-center gap-1.5 px-1.5 py-0.5 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10] transition-colors">
             <input 
               type="radio" 
-              name="tipo" 
+              name="tipo"
+              value="detalle"
+              checked={tipoConsulta === 'detalle'}
+              onChange={(e) => {
+                setTipoConsulta(e.target.value);
+                onTipoChange(e.target.value);
+              }}
               className="modal-radio" 
             />
             <span className="whitespace-nowrap text-xs font-semibold" style={{ color: "var(--color-jerarquia4)" }}>Detalle</span>
