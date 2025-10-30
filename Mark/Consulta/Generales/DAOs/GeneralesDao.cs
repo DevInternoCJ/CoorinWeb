@@ -92,7 +92,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 string query = await consulta.QueryGeneral(
                     servidor,
                     idCartera,
-                    "Cuenta",              // CONCEPTO DEFAULT; puedes cambiar según necesites
+                    parametrosExtra?.FirstOrDefault()?.Concepto ?? "Cuenta",
                     tblParametros,
                     tblAgrupar,
                     conteo,
@@ -102,7 +102,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 );
 
                 string sql = "WAITFOR DELAY '00:00:00'; USE dbCollection; SET DATEFORMAT YMD;\r\n" + query;
-
+                Console.WriteLine("=== Query generado ===\n" + sql);
                 // 4️⃣ Ejecutar query
                 DataTable tblCuentas = new("Cuentas");
                 using var sqlConnection = _dbContFactory.GetSqlConnection(servidor, "Collection");
@@ -187,6 +187,8 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 return valores;
 
             string valoresLimpios = valores.Trim();
+            if (valoresLimpios.StartsWith("="))
+                valoresLimpios = valoresLimpios.Substring(1).Trim();
 
             // Para campos de lista (como situación), extraer solo el ID
             if (tipoDato?.ToLower() == "list" && concepto?.ToLower() == "cuenta" && campo?.ToLower() == "situación")

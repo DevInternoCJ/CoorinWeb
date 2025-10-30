@@ -1989,8 +1989,8 @@ namespace CoorinWeb.Loki.Global
                                 if (drFila["Campo"].ToString() == "Teléfono")
                                 {
                                     telefono = "1";
-                                    sSelect += "\t ,Z.NúmeroTelefónico \r\n ";
-                                    sGroupBy += "Z.NúmeroTelefónico, ";
+                                    //sSelect += "\t ,Z.NúmeroTelefónico \r\n ";
+                                    //sGroupBy += "Z.NúmeroTelefónico, ";
                                 }
                                 else if (drFila["Campo"].ToString() == "Clase")
                                 {
