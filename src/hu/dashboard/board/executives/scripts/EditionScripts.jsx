@@ -177,7 +177,7 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
               toast.dismiss(t.id);
               toast.success("Operación cancelada");
             }}
-            className="btn-danger" 
+            className="btn-danger hover:bg-red-600" 
           >
             Cancelar
           </ButtonSave>
