@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { PostDataCharge } from "../../../../../services/mark/albaz/LokiServices";
 import { useWalletProducts } from "../../../../login/WalletProduct";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
+import { IconError } from "./IconScripts";
 
 const DataCharges = ({ onDataLoaded }) => {
   // Estados
@@ -52,7 +53,7 @@ const DataCharges = ({ onDataLoaded }) => {
           idProducto: idProducto,
         };
         const response = await PostDataCharge(params);
-        console.log("📥 Respuesta recibida:", response);
+        console.log(" Respuesta recibida:", response);
         if (response?.exitoso) {
           // Preparar los datos
           if (
@@ -91,7 +92,7 @@ const DataCharges = ({ onDataLoaded }) => {
           );
         }
       } catch (err) {
-        console.error("❌ Error al cargar datos:", err);
+        console.error(" Error al cargar datos:", err);
         setError(err.message || "Error al cargar los datos");
       } finally {
         setLoading(false);
@@ -143,7 +144,6 @@ const DataCharges = ({ onDataLoaded }) => {
     }
     return String(value).trim();
   };
-
   // Spinner de carga
   if (loading || isLoadingStore) {
     return (
@@ -165,26 +165,13 @@ const DataCharges = ({ onDataLoaded }) => {
       </div>
     );
   }
-
   // Estado de error
   if (error) {
     return (
       <div className="min-h-60 flex flex-col bg-white border border-red-200 shadow-2xs rounded-xl">
         <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
           <div className="text-red-500 text-center">
-            <svg
-              className="w-12 h-12 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            < IconError className="w-12 h-12 mx-auto mb-4"/>
             <p className="font-semibold">Error</p>
             <p className="text-sm mt-2">{error}</p>
           </div>
@@ -192,7 +179,6 @@ const DataCharges = ({ onDataLoaded }) => {
       </div>
     );
   }
-
   // Datos de las tarjetas (de ejemploCuentas)
   const cardData = ejemploCuentas
     ? [
@@ -232,7 +218,6 @@ const DataCharges = ({ onDataLoaded }) => {
   return (
     <div>
       <div className="mt-3">
-        {/* Tarjetas de información */}
         {ejemploCuentas && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
             {cardData.map((item, index) => (
@@ -266,14 +251,12 @@ const DataCharges = ({ onDataLoaded }) => {
             ))}
           </div>
         )}
-
         {/* Tabla de datos del producto */}
         {ejemploProducto && Object.keys(ejemploProducto).length > 0 && (
           <div className="mt-4">
             <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
               <table className="bg-white min-w-full">
                 <tbody>
-                  {/* Fila de encabezados */}
                   <tr className="bg-jerarquia4">
                     {Object.keys(ejemploProducto).map((key) => (
                       <th
@@ -292,15 +275,13 @@ const DataCharges = ({ onDataLoaded }) => {
                       </th>
                     ))}
                   </tr>
-
                   {/* Fila de valores */}
                   <tr className="hover:bg-gray-50">
                     {Object.entries(ejemploProducto).map(
                       ([key, value], index) => (
                         <td
                           key={index}
-                          className="py-3 px-4 border-b border-gray-200 text-sm whitespace-nowrap align-top"
-                        >
+                          className="py-3 px-4 border-b border-gray-200 text-sm whitespace-nowrap align-top">
                           {formatValue(value, key)}
                         </td>
                       )

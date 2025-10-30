@@ -2195,19 +2195,18 @@ export const PostDataCharge = async (data) => {
 
     console.log('📤 /Scripts/carga-datos-producto', data);
     
-    // ✅ Enviar como query parameters en lugar de body
     const response = await api.post(
       `/Scripts/carga-datos-producto`,
-      null, // ✅ No body
+      null, 
       {
-        params: data // ✅ Query parameters: ?idCartera=X&idProducto=Y
+        params: data 
       }
     );
     
     console.log('📥 Respuesta:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error(' Error:', error);
     throw error;
   }
 };
@@ -2220,14 +2219,13 @@ export const PostSaveScripts = async (data) => {
     }
 
     console.log('📤 /Scripts/guardar', data);   
-    // ✅ Enviar como query parameters en lugar de body
     const response = await api.post(
       `/Scripts/guardar`,data
     );  
     console.log('📥 Respuesta:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error(' Error:', error);
     throw error;
   }
 };
@@ -2238,7 +2236,7 @@ export const deleteScripts = async ({ idScript }) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
-    console.log('📤 /Scripts/eliminar', { idScript });   
+    console.log(' /Scripts/eliminar', { idScript });   
     
     const response = await api.delete('/Scripts/eliminar',{
       data: { idScript }
@@ -2247,7 +2245,7 @@ export const deleteScripts = async ({ idScript }) => {
     console.log('📥 Respuesta:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error(' Error:', error);
     throw error;
   }
 };
@@ -2258,7 +2256,7 @@ export const putUpdateScripts = async (data) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
-    console.log('📤 /Scripts/actualizar', data);   
+    console.log(' /Scripts/actualizar', data);   
     
     const response = await api.put('/Scripts/actualizar', data, {
       headers: {
@@ -2270,7 +2268,7 @@ export const putUpdateScripts = async (data) => {
     console.log('📥 Respuesta:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error(' Error:', error);
     throw error;
   }
 };

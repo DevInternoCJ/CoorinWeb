@@ -5,6 +5,7 @@ import { IconScreens } from "../../../sideBar/Administration/gespa/IconsTemplate
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import EditionScripts from "./EditionScripts";
 import DataCharges from "./DataCharges";
+import { IconWarning } from "./IconScripts";
 
 const Scripts = ({ onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -20,7 +21,7 @@ const Scripts = ({ onClose }) => {
   };
   // Callback para actualizar scripts desde EditionScripts
   const handleScriptsUpdate = (updatedScripts) => {
-    console.log("🔄 Actualizando scripts en Scripts.jsx:", updatedScripts);
+    console.log(" Actualizando scripts en Scripts.jsx:", updatedScripts);
     setScripts(updatedScripts);
   };
 
@@ -63,20 +64,7 @@ const Scripts = ({ onClose }) => {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center text-center text-gray-500 bg-gray-100 rounded-lg py-20">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-12 w-12 mb-4 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 6v6h4m6 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <IconWarning className="size-8"/>
                 <p className="text-sm text-gray-400 mt-1">
                   Seleccione el producto para gestionar scripts.
                 </p>
@@ -90,3 +78,6 @@ const Scripts = ({ onClose }) => {
 };
 
 export default Scripts;
+
+
+
