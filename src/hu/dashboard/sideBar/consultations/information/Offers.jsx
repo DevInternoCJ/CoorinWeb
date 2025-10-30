@@ -146,10 +146,12 @@ const OffersContent = () => {
                             onChange={e => setCartera(e.target.value)}
                             id="cartera-select-ofrecimiento"
                         >
-                            {carterasOptions.length === 0 && <option value="">Cargando...</option>}
-                            {carterasOptions.map((item) => (
+                            {carterasOptions.length === 0
+                                ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                : carterasOptions.map((item) => (
                                 <option key={item.id} value={item.id}>{item.nombre}</option>
-                            ))}
+                                ))
+                            }
                         </select>
                         <label
                             htmlFor="cartera-select-ofrecimiento"

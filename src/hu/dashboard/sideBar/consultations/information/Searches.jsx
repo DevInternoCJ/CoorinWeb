@@ -88,7 +88,16 @@ const SearchesContent = () => {
                     try {
                         const json = JSON.parse(text);
                         if (Array.isArray(json) && json.length === 0) {
-                            toast.warning("Su consulta no cuenta con registros en la fecha especificada", { duration: 4000 });
+                            let nombreConsulta = "Búsquedas";
+                            if (consulta === "" || consulta === 0) {
+                                nombreConsulta = "Búsquedas";
+                            } else {
+                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
+                                if (consultaObj && consultaObj.nombreConsulta) {
+                                    nombreConsulta = consultaObj.nombreConsulta;
+                                }
+                            }
+                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros en las fechas especificadas.`, { duration: 4000 });
                             throw new Error('No hay datos para exportar.');
                         }
                         if (Array.isArray(json) && json.length > 0 && typeof json[0] === 'object') {
@@ -102,11 +111,32 @@ const SearchesContent = () => {
                             csvContent = headers.join(",") + "\n" + rows.join("\n");
                         }
                     } catch (e) {
+                        // Si el error es por mensaje de backend, mostrar toast
+                        if (response?.status === 404 && response?.statusText === "Not Found") {
+                            try {
+                                const jsonError = JSON.parse(text);
+                                if (jsonError?.mensaje && jsonError.mensaje.includes("No se encontraron registros")) {
+                                    let nombreConsulta = "Búsquedas";
+                                    if (consulta === "" || consulta === 0) {
+                                        nombreConsulta = "Búsquedas";
+                                    } else {
+                                        const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
+                                        if (consultaObj && consultaObj.nombreConsulta) {
+                                            nombreConsulta = consultaObj.nombreConsulta;
+                                        }
+                                    }
+                                    toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros en las fechas especificadas.`, { duration: 4000 });
+                                }
+                            } catch {
+                                // No hacer nada
+                            }
+                        }
                         console.error('Error al convertir a CSV:', e);
                         // No es JSON, dejar como está
                     }
-                    // Descargar como CSV limpio
-                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    // Descargar como CSV UTF-8 con BOM para soportar español (ñ, acentos, etc.)
+                    const BOM = '\uFEFF';
+                    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
@@ -121,8 +151,30 @@ const SearchesContent = () => {
                     setFooterMsg("Ocurrió un error al guardar el libro de Excel.");
                 }
             } catch (err) {
-                setErrorExcel('Error al obtener las búsquedas.',err);
-                setFooterMsg("Ocurrió un error al guardar el libro de Excel.");
+                // Validar error 404 y mensaje específico del backend
+                const status = err?.response?.status;
+                const statusText = err?.response?.statusText;
+                if (status === 404 && statusText === "Not Found" && err?.response?.data instanceof Blob) {
+                    try {
+                        const text = await err.response.data.text();
+                        const jsonError = JSON.parse(text);
+                        if (jsonError?.mensaje && jsonError.mensaje.includes("No se encontraron registros")) {
+                            let nombreConsulta = "Búsquedas";
+                            if (consulta === "" || consulta === 0) {
+                                nombreConsulta = "Búsquedas";
+                            } else {
+                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
+                                if (consultaObj && consultaObj.nombreConsulta) {
+                                    nombreConsulta = consultaObj.nombreConsulta;
+                                }
+                            }
+                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros en la fecha especificada.`, { duration: 4000 });
+                        }
+                    } catch {
+                        // No hacer nada
+                    }
+                }
+                setFooterMsg("Consulta terminada sin registros.");
             } finally {
                 setLoadingExcel(false);
             }
@@ -146,10 +198,12 @@ const SearchesContent = () => {
                             onChange={e => setCartera(e.target.value)}
                             id="cartera-select-searches"
                         >
-                            {carterasOptions.length === 0 && <option value="">Cargando...</option>}
-                            {carterasOptions.map((item) => (
-                                <option key={item.id} value={item.id}>{item.nombre}</option>
-                            ))}
+                            {carterasOptions.length === 0
+                                ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                : carterasOptions.map((item) => (
+                                    <option key={item.id} value={item.id}>{item.nombre}</option>
+                                ))
+                            }
                         </select>
                         <label
                             htmlFor="cartera-select-searches"

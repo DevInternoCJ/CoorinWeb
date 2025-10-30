@@ -73,7 +73,17 @@ const EmailsContent = ({ mostrarTabla }) => {
                         const response = await getEmailsInfo(idCarteraInt, idConsultaInt);
                         let data = Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : (typeof response === 'object' ? [response] : []));
                         if (data.length === 0) {
-                            toast.warning("Su consulta no cuenta con registros en la fecha especificada", { duration: 4000 });
+                            // Mensaje para error sin registros
+                            let nombreConsulta = "Correos";
+                            if (consulta === "" || consulta === 0) {
+                                nombreConsulta = "Correos";
+                            } else {
+                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
+                                if (consultaObj && consultaObj.nombreConsulta) {
+                                    nombreConsulta = consultaObj.nombreConsulta;
+                                }
+                            }
+                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros.`, { duration: 4000 });
                             throw new Error('No hay datos para exportar.');
                         }
                         // Obtener headers y loguearlos para revisión
@@ -98,8 +108,8 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 value = value.replace(/,/g, '');
                                 // Escapar comillas dobles
                                 value = value.replace(/"/g, '""');
-                                // Envolver en comillas si contiene caracteres especiales o espacios
-                                if (/[^\w\d]/.test(value)) value = '"' + value + '"';
+                                // Envolver en comillas si contiene comas, comillas o espacios
+                                if (/[",\s]/.test(value)) value = '"' + value + '"';
                             }
                             return value;
                         }).join(","));
@@ -117,8 +127,27 @@ const EmailsContent = ({ mostrarTabla }) => {
                         URL.revokeObjectURL(url);
                         setFooterMsg("Libro de Excell Guardado.");
                     } catch (err) {
-                        setErrorExcel('Error al exportar los correos.');
-                        setFooterMsg("Ocurrió un error al guardar el libro de Excell.");
+                        // Validar error 404 y mensaje específico del backend
+                        const status = err?.response?.status;
+                        const statusText = err?.response?.statusText;
+                        const mensajeBackend = err?.response?.data?.mensaje;
+                        if (status === 404 && statusText === "Not Found" && mensajeBackend && mensajeBackend.includes("No se encontraron registros para los Correos")) {
+                            let nombreConsulta = "Correos";
+                            if (consulta === "" || consulta === 0) {
+                                nombreConsulta = "Correos";
+                            } else {
+                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
+                                if (consultaObj && consultaObj.nombreConsulta) {
+                                    nombreConsulta = consultaObj.nombreConsulta;
+                                }
+                            }
+                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros.`, { duration: 4000 });
+                            setErrorExcel(null);
+                            setFooterMsg("Consulta terminada sin registros.");
+                        } else {
+                            setErrorExcel('Error al exportar los correos.');
+                            setFooterMsg("Ocurrió un error al guardar el libro de Excell.");
+                        }
                         console.error('Error al exportar los correos:', err);
                     } finally {
                         setLoadingExcel(false);
@@ -139,12 +168,14 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 value={cartera}
                                 onChange={e => setCartera(e.target.value)}
                                 id="cartera-select-emails-row"
-                                disabled={loadingConsultas || carterasOptions.length === 0}
+                                disabled={loadingConsultas}
                             >
-                                {carterasOptions.length === 0 && <option value="">Cargando...</option>}
-                                {carterasOptions.map((item) => (
-                                    <option key={item.id} value={item.id}>{item.nombre}</option>
-                                ))}
+                                {carterasOptions.length === 0
+                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                    : carterasOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>{item.nombre}</option>
+                                    ))
+                                }
                             </select>
                             <label
                                 htmlFor="cartera-select-emails-row"
@@ -208,12 +239,14 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 value={cartera}
                                 onChange={e => setCartera(e.target.value)}
                                 id="cartera-select-emails"
-                                disabled={loadingConsultas || carterasOptions.length === 0}
+                                disabled={loadingConsultas}
                             >
-                                {carterasOptions.length === 0 && <option value="">Cargando...</option>}
-                                {carterasOptions.map((item) => (
-                                    <option key={item.id} value={item.id}>{item.nombre}</option>
-                                ))}
+                                {carterasOptions.length === 0
+                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                    : carterasOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>{item.nombre}</option>
+                                    ))
+                                }
                             </select>
                             <label
                                 htmlFor="cartera-select-emails"

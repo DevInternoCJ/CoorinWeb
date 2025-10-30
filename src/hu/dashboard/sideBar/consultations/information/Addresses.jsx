@@ -119,8 +119,28 @@ const AddressesContent = ({ mostrarTabla }) => {
             URL.revokeObjectURL(url);
             setFooterMsg("Libro de Excell Guardado.");
         } catch (err) {
-            setErrorExcel('Error al exportar los domicilios.');
-            setFooterMsg("Ocurrió un error al guardar el libro de Excell.");
+            // Validar error 404 y mensaje específico del backend
+            const status = err?.response?.status;
+            const statusText = err?.response?.statusText;
+            const mensajeBackend = err?.response?.data?.mensaje;
+            if (status === 404 && statusText === "Not Found" && mensajeBackend === "No se encontraron registros para los Domicilios.") {
+                // Buscar el nombre de la consulta seleccionada
+                let nombreConsulta = "Domicilios";
+                if (consulta === "" || consulta === 0) {
+                    nombreConsulta = "Domicilios";
+                } else {
+                    const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
+                    if (consultaObj && consultaObj.nombreConsulta) {
+                        nombreConsulta = consultaObj.nombreConsulta;
+                    }
+                }
+                toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros.`, { duration: 4000 });
+                setErrorExcel(null);
+                setFooterMsg("Consulta terminada sin registros.");
+            } else {
+                setErrorExcel('Error al exportar los domicilios.');
+                setFooterMsg("Ocurrió un error al guardar el libro de Excell.");
+            }
             console.error('Error al exportar los domicilios:', err);
         } finally {
             setLoadingExcel(false);
@@ -141,12 +161,14 @@ const AddressesContent = ({ mostrarTabla }) => {
                                 value={cartera}
                                 onChange={e => setCartera(e.target.value)}
                                 id="cartera-select-addresses-row"
-                                disabled={loadingConsultas || carterasOptions.length === 0}
+                                disabled={loadingConsultas}
                             >
-                                {carterasOptions.length === 0 && <option value="">Cargando...</option>}
-                                {carterasOptions.map((item) => (
-                                    <option key={item.id} value={item.id}>{item.nombre}</option>
-                                ))}
+                                {carterasOptions.length === 0
+                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                    : carterasOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>{item.nombre}</option>
+                                    ))
+                                }
                             </select>
                             <label
                                 htmlFor="cartera-select-addresses-row"
@@ -210,12 +232,14 @@ const AddressesContent = ({ mostrarTabla }) => {
                                 value={cartera}
                                 onChange={e => setCartera(e.target.value)}
                                 id="cartera-select-addresses"
-                                disabled={loadingConsultas || carterasOptions.length === 0}
+                                disabled={loadingConsultas}
                             >
-                                {carterasOptions.length === 0 && <option value="">Cargando...</option>}
-                                {carterasOptions.map((item) => (
-                                    <option key={item.id} value={item.id}>{item.nombre}</option>
-                                ))}
+                                {carterasOptions.length === 0
+                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                    : carterasOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>{item.nombre}</option>
+                                    ))
+                                }
                             </select>
                             <label
                                 htmlFor="cartera-select-addresses"

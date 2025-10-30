@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import CoorinGreen from '../../../../assets/CoorinGreen.svg';
 import { getSessions, patchLogoutEjecutive, patchUnlockedEjecutive, ResetPassword } from "../../../../services/mark/albaz/LokiServices";
 import { toast } from 'sonner';
 
@@ -152,7 +153,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
             </span>
             Sesiones
         </h3>
-        <div className="bg-white rounded-lg p-2 lg:p-3 shadow border border-[var(--color-jerarquia1)] flex-1 w-full overflow-hidden">
+    <div className="bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex-1 w-full overflow-hidden">
             <div
                 style={{
                     overflowX: "auto",
@@ -163,13 +164,13 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                 className="scrollbar-gray w-full max-h-[30vh] lg:max-h-[22vh]"
             >
                 <table className="modal-table text-xs lg:text-sm" style={{ minWidth: '100%' }}>
-                    <thead>
+                    <thead style={{ position: 'sticky', top: 0, background: 'var(--color-jerarquia1)', zIndex: 0 }}>
                         <tr>
-                            <th>Ejecutivo</th>
-                            <th>Usuario</th>
-                            <th>Bloqueado</th>
-                            <th>Contraseña</th>
-                            <th>Sesión Abierta</th>
+                            <th style={{ top: 0, background: 'bg-jerarquia4', color: '#fff' }}>Ejecutivo</th>
+                            <th style={{ textAlign: 'center', top: 0, background: 'bg-jerarquia4¿', color: '#fff' }}>Usuario</th>
+                            <th style={{ textAlign: 'center', top: 0, background: 'bg-jerarquia4', color: '#fff' }}>Bloqueado</th>
+                            <th style={{ textAlign: 'center', top: 0, background: 'bg-jerarquia4', color: '#fff' }}>Contraseña</th>
+                            <th style={{ textAlign: 'center', top: 0, background: 'bg-jerarquia4', color: '#fff' }}>Sesión Abierta</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -212,11 +213,11 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                             </tr>
                         )}
                         {!loading && !error && sessions.length > 0 && sessions.map((session, i) => (
-                            <tr key={session.id || i}>
+                            <tr key={session.id || i} style={{ height: '20px' }}>
                                 <td>
                                     {session.nombreEjecutivo || session.ejecutivo || session.nombre || '---'}
                                 </td>
-                                <td>
+                                <td style={{ letterSpacing: '0.05em', fontVariantNumeric: 'tabular-nums', fontFamily: 'monospace', textAlign: 'center' }}>
                                     {session.usuario || session.user || '---'}
                                 </td>
                                 <td style={{ textAlign: 'center' }}>
@@ -252,22 +253,30 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                                         </>
                                     ) : '---'}
                                 </td>
-                                <td>
-                                    <button 
-                                        className="modal-btn modal-btn-outline text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-2"
-                                        onClick={() => {
-                                            if (!passwordReset.has(session.usuario) && resettingPassword !== session.usuario) {
-                                                handleResetPassword(session.usuario);
-                                            }
-                                        }}
-                                        disabled={passwordReset.has(session.usuario) || resettingPassword === session.usuario}
-                                        style={{ 
-                                            opacity: passwordReset.has(session.usuario) || resettingPassword === session.usuario ? 0.5 : 1,
-                                            cursor: passwordReset.has(session.usuario) || resettingPassword === session.usuario ? 'not-allowed' : 'pointer'
-                                        }}
-                                    >
-                                        RESTABLECER
-                                    </button>
+                                <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                                        <button 
+                                            className="modal-btn modal-btn-outline text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-2"
+                                            onClick={() => {
+                                                if (!passwordReset.has(session.usuario) && resettingPassword !== session.usuario) {
+                                                    handleResetPassword(session.usuario);
+                                                }
+                                            }}
+                                            disabled={passwordReset.has(session.usuario) || resettingPassword === session.usuario}
+                                            style={{ 
+                                                opacity: passwordReset.has(session.usuario) || resettingPassword === session.usuario ? 0.5 : 1,
+                                                cursor: passwordReset.has(session.usuario) || resettingPassword === session.usuario ? 'not-allowed' : 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}
+                                            title="Reestablecer contraseña"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#ef4444" style={{ width: '18px', height: '18px', display: 'inline-block', verticalAlign: 'middle' }}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </td>
                                 <td style={{ textAlign: 'center' }}>
                                     {session.sesionAbierta !== undefined ? (
@@ -284,7 +293,9 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                                             }}
                                             style={{ 
                                                 cursor: session.sesionAbierta ? 'pointer' : 'default',
-                                                opacity: loggingOut === session.idEjecutivo ? 0.5 : 1
+                                                opacity: loggingOut === session.idEjecutivo ? 0.5 : 1,
+                                                margin: '0 auto',
+                                                display: 'block'
                                             }}
                                             title={session.sesionAbierta ? 'Doble clic para cerrar sesión' : 'Sesión ya cerrada'}
                                         />

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import GridExecutives from "./board/executives/GridExecutives";
 import { CoorinSidebar } from "./sideBar/CoorinSidebar";
@@ -47,6 +48,9 @@ export default function CoorinDashboard() {
   // Estado para controlar si la tabla de Domicilios está visible
   const [mostrarTablaDomicilios, setMostrarTablaDomicilios] = useState(false);
 
+    // Estado para controlar el tamaño del modal de arrepentimientos
+  const [regrestModalSize, setRegrestModalSize] = useState('pagos');
+
         // Estado para controlar el tamaño del modal de Captura Visitas
       const [captureVisitModalSize, setCaptureVisitModalSize] = useState("capturaVisit");
       const handleGrowCaptureVisitModal = (grow) => {
@@ -87,6 +91,10 @@ export default function CoorinDashboard() {
           break;
         case "Arrepentimientos":
           ContentComponent = RegrestContent;
+          contentProps = {
+            growModal: () => setRegrestModalSize('pagos-xl'),
+            isExpanded: regrestModalSize === 'pagos-xl'
+          };
           break;
         case "Pagos":
           ContentComponent = PaymentsContent;
@@ -159,6 +167,8 @@ export default function CoorinDashboard() {
         size = mostrarTablaPagosReportados ? "pagos-xl" : "pagos";
       } else if (selectedSidebarOption === "Captura Visitas") {
         size = captureVisitModalSize;
+      } else if (selectedSidebarOption === "Arrepentimientos") {
+        size = regrestModalSize;
       }
 
       return (
@@ -240,6 +250,8 @@ export default function CoorinDashboard() {
       console.log(`Abriendo modal para: ${option} (ID: ${menuId})`);
       setSelectedSidebarOption(option);
       setModalSidebarOpen(true);
+      // Reiniciar tamaño del modal de arrepentimientos al abrir
+      if (option === "Arrepentimientos") setRegrestModalSize('pagos');
     } else {
       console.log(`Click en menú: ${menuTitle} (ID: ${menuId})`);
     }

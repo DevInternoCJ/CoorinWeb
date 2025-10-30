@@ -92,10 +92,16 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
             } else {
                 setTablaData([]);
                 setErrorTabla("No se encontraron resultados.");
-                toast.warning("Su consulta no cuenta con registros en la fecha especificada", { duration: 4000 });
+                toast.warning("Su consulta no cuenta con registros en la fecha especificada.", { duration: 4000 });
             }
         } catch (err) {
-            if (!errorToastShown) {
+            // Manejo especial para el mensaje del backend
+            const mensajeBackend = err?.response?.data?.mensaje;
+            if (mensajeBackend === "No se encontraron registros para los pagos reportados.") {
+                setTablaData([]);
+                setErrorTabla("No se encontraron resultados.");
+                toast.warning("Su consulta no cuenta con registros en la fecha especificada.", { duration: 4000 });
+            } else if (!errorToastShown) {
                 toast.error("Error al obtener los pagos reportados.", err);
                 setErrorToastShown(true);
             }
@@ -192,8 +198,8 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                     className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                                     value={desde}
                                     onChange={e => setDesde(e.target.value)}
-                                    min={new Date(new Date().setFullYear(new Date().getFullYear() - 6)).toISOString().slice(0, 10)}
-                                    max={(function(){const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10);})()}
+                                    min="2016-01-01"
+                                    max={new Date().toISOString().slice(0, 10)}
                                 />
                             </div>
                             <div className="hs-input-group w-full">
@@ -203,8 +209,8 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                     className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                                     value={hasta}
                                     onChange={e => setHasta(e.target.value)}
-                                        min={new Date(new Date().setFullYear(new Date().getFullYear() - 6)).toISOString().slice(0, 10)}
-                                        max={new Date().toISOString().slice(0, 10)}
+                                    min="2016-01-01"
+                                    max={new Date().toISOString().slice(0, 10)}
                                 />
                             </div>
                         </div>
@@ -276,6 +282,8 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                     className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                                     value={desde}
                                     onChange={e => setDesde(e.target.value)}
+                                    min="2016-01-01"
+                                    max={new Date().toISOString().slice(0, 10)}
                                 />
                             </div>
                         </div>
@@ -287,6 +295,8 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                     className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                                     value={hasta}
                                     onChange={e => setHasta(e.target.value)}
+                                    min="2016-01-01"
+                                    max={new Date().toISOString().slice(0, 10)}
                                 />
                             </div>
                         </div>
@@ -299,7 +309,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                     id="consulta-select-reporting"
                                     disabled={loadingConsultas || errorConsultas}
                                 >
-                                    <option value="">- Todas -</option>
+                                    <option value="0">- Todas -</option>
                                     {consultasOptions.map((item) => (
                                         <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
                                             {item.nombreConsulta}
@@ -322,7 +332,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                             className="btn-success w-full sm:w-auto min-w-[120px] max-w-xs px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
                             style={{ margin: '0 auto', display: 'block' }}
                             onClick={handleBuscar}
-                            disabled={loadingTabla || !consulta}
+                            disabled={loadingTabla}
                         >
                             {loadingTabla ? "Buscando..." : "Buscar"}
                         </button>
