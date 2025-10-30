@@ -2272,3 +2272,25 @@ export const putUpdateScripts = async (data) => {
     throw error;
   }
 };
+
+//endpoint obteber frases
+export const getPhrases = async (idEjecutivo) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+    console.log('/Frases/frases', idEjecutivo);   
+    
+     const response = await api.get('/Frases/frases', 
+ idEjecutivo // Esto envía como ?idEjecutivo=valor
+ );
+    console.log('📥 Respuesta:', response);
+    return response.data;
+  } catch (error) {
+    console.error(' Error:', error);
+    throw error;
+  }
+};
+
+
