@@ -109,12 +109,12 @@ const OptionFields = ({ data, onEdit }) => {
           onDragLeave={handleDragLeaveAlias}
           onDrop={handleDropAlias}
           className={`
-            w-full border rounded-md px-3 py-1 text-sm
+            w-full rounded-md px-3 py-2 text-sm
             focus:outline-none focus:ring-2
             transition-all duration-200
             ${isDraggingOverAlias
-              ? 'border-blue-500 ring-2 ring-blue-300 bg-blue-50'
-              : 'border-gray-300 focus:ring-blue-500 focus:border-transparent'
+              ? 'border-jerarquia3 ring-2 ring-jerarquia2 bg-green-50'
+              : 'bg-gray-100 focus:ring-jerarquia2 focus:border-transparent'
             }
           `}
           placeholder="Ingresa el alias..."
@@ -138,12 +138,12 @@ const OptionFields = ({ data, onEdit }) => {
           onDragLeave={handleDragLeaveCampos}
           onDrop={handleDropCampos}
           className={`
-            w-full border rounded-md px-3 py-1 text-sm
+            w-full rounded-md px-3 py-2 text-sm
             focus:outline-none focus:ring-2
             transition-all duration-200
             ${isDraggingOverCampos
-              ? 'border-green-500 ring-2 ring-green-300 bg-green-50'
-              : 'border-gray-300 focus:ring-blue-500 focus:border-transparent'
+              ? 'border-jerarquia3 ring-2 ring-jerarquia2 bg-green-50'
+              : 'bg-gray-100 focus:ring-jerarquia2 focus:border-transparent'
             }
           `}
           placeholder="Ingresa el campo..."

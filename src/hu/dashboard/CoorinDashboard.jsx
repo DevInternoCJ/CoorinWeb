@@ -19,8 +19,7 @@ import CommentsContent from "./sideBar/consultations/information/Comments";
 import VGPContent from "./sideBar/consultations/information/VGP";
 import EmailTemplates from "./sideBar/Administration/gespa/emailTemplates/EmailTemplates";
 import ModalBaseCampanas from "./sideBar/Administration/ModalBaseCampanas";
-import Phrases from "./sideBar/Administration/gespa/frases/Phrases";
-
+import Phrases from "./sideBar/Administration/gespa/phrases/Phrases";
 
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -200,7 +199,7 @@ export default function CoorinDashboard() {
       "1AA": "Campañas",
       "1DD": "Campañas",
       "1EE": "Campañas",
-      "3AAA": "Frases"
+      "3AAA": "Frases",
     };
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
@@ -252,8 +251,8 @@ export default function CoorinDashboard() {
             maxHeight: "100vh"
           }}
         >
-          <div className="  py-14 sm:py-2">
-            <div className="w-full px-4 lg:px-8  pt-8">
+          <div className=" py-14 sm:py-2">
+            <div className="w-full px-4 lg:px-8 pt-8">
               <span className="text-3xl font-semibold tracking-tight text-balance text-gray-950 sm:text-4xl">
                 Ejecutivos
               </span>
@@ -267,7 +266,7 @@ export default function CoorinDashboard() {
                 </div>
               </div>
 
-              <div className="col-span-6 row-start-2">
+              <div className="col-span-6 row-start-2 ">
                 <div className="flex justify-between items-start mb-4 mt-4">
                   <span className="text-3xl font-semibold tracking-tight text-balance text-gray-950 sm:text-4xl">
                     Consultas

@@ -296,7 +296,7 @@ const getInfoArray = () => {
     <div className="bg-gray-700 p-4 rounded-lg shadow-sm">
       <h3 className="text-lg text-jerarquia1 font-bold -mb-1">Info</h3>
       <div className="overflow-x-auto">
-        <table className="table-border text-sm border border-jerarquia1 rounded-lg text-background-dashboard w-full">
+        <table className="table-border p-2 text-sm border border-jerarquia1 rounded-lg text-background-dashboard w-full">
           <tbody>
             {rows.map((rowItems, rowIdx) => (
               <tr

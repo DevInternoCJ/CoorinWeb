@@ -282,7 +282,7 @@ const LoadDates = ({
           <table className="bg-white min-w-full">
             <tbody>
               {/* Fila de encabezados - AHORA ARRASTRABLES */}
-              <tr className="bg-ba">
+              <tr className="bg-jerarquia4">
                 {Object.keys(datosProductoCompleto).map((key) => (
                   <th
                     key={key}
@@ -290,14 +290,14 @@ const LoadDates = ({
                     onDragStart={(e) => handleDragStart(e, key)}
                     onDragEnd={handleDragEnd}
                     className={`
-                      py-3 w-auto px-4 border-b border-r-background-secondary 
+                      py-3 w-full px-4 border-b border-r-background-secondary 
                       text-xs font-semibold  tracking-wider 
                       whitespace-nowrap align-top
                       cursor-grabbing select-none
-                      hover:bg-jerarquia4 active:bg-slate-500
+                      hover:bg-green-950 active:bg-slate-500
                       transition-all duration-150
-                      bg-background-dashboard
-                      hover:text-background-tertiary 
+                     bg-jerarquia4
+                     text-background-tertiary 
                       ${
                         draggedLabel === key
                           ? "opacity-50 scale-95 bg-slate-500"
@@ -306,7 +306,7 @@ const LoadDates = ({
                     `}
                     title="Arrastra el texto al campo mensaje"
                   >
-                    <span className="inline-flex items-center text-neutral-800 gap-2">
+                    <span className="inline-flex items-center text-background-tertiary gap-2">
                       {key
                         .replace(/([A-Z])/g, " $1")
                         .replace(/^./, (str) => str.toUpperCase())}
@@ -323,7 +323,7 @@ const LoadDates = ({
                       className={`py-3 px-4 border-b-jerarquia4 text-sm w-auto ${getValueClass(
                         value,
                         key
-                      )} break-words align-top`}
+                      )} whitespace-nowrap align-top`}
                     >
                       {formatValue(value, key)}
                     </td>

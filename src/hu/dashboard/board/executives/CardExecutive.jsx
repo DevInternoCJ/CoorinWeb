@@ -15,6 +15,7 @@ import ValidadoresModal from "./ModalValidadoresModal";
 import EncargadosModal from "./ModalEncargadosModal";
 import CatalogosModal from "./ModalCatalogosModal";
 import ModalScriptsEjecutivos from "./ModalScriptsEjecutivos";
+import Scripts from "./scripts/Scripts";
 
 const CardExecutive = ({ onModalOpen, onModalClose }) => {
   const [showMetasModal, setShowMetasModal] = useState(false);
@@ -139,7 +140,7 @@ const CardExecutive = ({ onModalOpen, onModalClose }) => {
 
       {/* Modal de Scripts */}
       {showScriptsModal && (
-        <ModalScriptsEjecutivos onClose={() => handleCloseModal(setShowScriptsModal)} />
+        <Scripts onClose={() => handleCloseModal(setShowScriptsModal)} />
       )}
 
       {/* Modal de Pantalla */}

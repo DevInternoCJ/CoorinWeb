@@ -14,7 +14,7 @@ const SelectWallet = ({
     return (
         <div className="relative">
             <select
-                id={selectId} // ✅ 2. Asocia el ID para la accesibilidad
+                id={selectId} // 2. Asocia el ID para la accesibilidad
                 defaultValue={defaultValue}
                 onChange={e => onChange(e.target.value)}
                 value={value}
@@ -29,7 +29,7 @@ const SelectWallet = ({
                 ))}
             </select>
             
-            {/* ✅ 3. ELEMENTO LABEL FLOTANTE (Necesario para el estilo) */}
+            {/* 3. ELEMENTO LABEL FLOTANTE (Necesario para el estilo) */}
             {label && (
                 <label
                     htmlFor={selectId}

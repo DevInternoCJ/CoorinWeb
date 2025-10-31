@@ -119,7 +119,7 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
   const handlePasswordValidationError = useCallback((error, onLoginSuccess) => {
     console.error("Error en validación de contraseña:", error);
     if (error.response?.status === 404) {
-      const errorMessage = error.response.data || ERROR_MESSAGES.LOGIN_ERROR;
+      const errorMessage = error.message || ERROR_MESSAGES.LOGIN_ERROR;
       toast.error(errorMessage);
       setApiError(errorMessage);
     } else if (error.response?.status === 400) {
@@ -217,50 +217,42 @@ const handleSubmit = async (e) => {
       const diasRestantes = userInfo.Días;
       console.log("🔍 Días restantes para expirar:", diasRestantes);
 
-      // ✅ CONDICIÓN MODIFICADA: Mostrar PasswordChangeContent si:
-      // 1. La contraseña expiró (días <= 0) O 
-      // 2. La contraseña está próxima a expirar (días < 30) Y es cambio opcional
-      if (diasRestantes <= 0) {
-        console.log("🚨 CONTRASEÑA EXPIRADA - Cambio obligatorio");
-        // ✅ Para contraseña expirada, usar onPasswordExpired para flujo directo a ChangePassword
-        if (onPasswordExpired && typeof onPasswordExpired === 'function') {
-          const expiredData = {
-            diasRestantes: diasRestantes,
-            username: formData.username,
-            contraActual: formData.password,
-            esExpirada: true
-          };
-          console.log("📤 Ejecutando onPasswordExpired (contraseña expirada):", expiredData);
-          onPasswordExpired(expiredData);
-        }
-      } else if (diasRestantes < 30) {
-        console.log("⚠️  CONTRASEÑA PRÓXIMA A EXPIRAR - Cambio recomendado");
-        // ✅ Para contraseña próxima a expirar, usar onLoginSuccess para mostrar opción
-        if (onLoginSuccess && typeof onLoginSuccess === 'function') {
-          const successData = {
-            diasRestantes: diasRestantes,
-            username: formData.username,
-            contraActual: formData.password,
-            esExpirada: false
-          };
-          console.log("📤 Ejecutando onLoginSuccess (cambio opcional):", successData);
-          onLoginSuccess(successData);
-        }
-      } else {
-        console.log("✅ CONTRASEÑA VÁLIDA - Login normal");
-        // ✅ Contraseña válida con muchos días restantes - login normal
-        processSuccessfulLogin(
-          response,
-          passwordValidation,
-          () => {
-            // Callback vacío para no mostrar PasswordChangeContent
-            console.log("✅ Login exitoso, redirigiendo al dashboard");
-            navigate("/dashboardPage");
-          },
-          navigate
-        );
-      }
+     if (diasRestantes <= 0) {
+  console.log("🚨 CONTRASEÑA EXPIRADA - Cambio obligatorio");
+  if (onPasswordExpired) {
+    const expiredData = {
+      diasRestantes: diasRestantes,
+      username: formData.username,
+      contraActual: formData.password,
+      esExpirada: true,
+      mensaje: `Su contraseña expiró y debe renovarla.`
+    };
+    onPasswordExpired(expiredData);
+  }
+} else {
+  // ✅ PARA CUALQUIER CANTIDAD DE DÍAS > 0, mostrar PasswordChangeContent
+  console.log("🔄 Contraseña válida - Mostrando opción de cambio");
+  if (onLoginSuccess) {
+    const successData = {
+      diasRestantes: diasRestantes,
+      username: formData.username,
+      contraActual: formData.password,
+      esExpirada: false,
+      mensaje: diasRestantes
+    };
+    console.log("📤 Ejecutando onLoginSuccess:", successData);
+    onLoginSuccess(successData);
 
+  } else {
+    // Fallback: redirigir directamente si no hay callback
+    processSuccessfulLogin(
+      response,
+      passwordValidation,
+      () => navigate("/dashboardPage"),
+      navigate
+    );
+      }
+    }
     } catch (validationError) {
       console.error("Error en validación de contraseña:", validationError);
       handlePasswordValidationError(validationError, onLoginSuccess);
@@ -312,7 +304,8 @@ const handleSubmit = async (e) => {
           diasRestantes: diasRestantes,
           username: formData.username,
           contraActual: formData.password,
-          esExpirada: true
+          esExpirada: true,
+          mensaje: mensaje
         };
         
         console.log("📤 EJECUTANDO onPasswordExpired con:", dataToSend);

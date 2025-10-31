@@ -12,7 +12,7 @@ function App() {
   return (
     <>
       <div className="container-fluid min-h-screen">
-        <Toaster/>
+        <Toaster position=" top-right" richColors/>
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route element={<PrortectedRoute canActivate={true} redirectTo='/' />}>
