@@ -28,11 +28,6 @@ const dataSidebar = {
                   title: "Frases",
                   icon: "BookOpenIcon",
                 },
-                 {
-                  id: "4AAA",
-                  title: "Scripts",
-                  icon: "BookOpenIcon",
-                },
               ],
             },
           ],
