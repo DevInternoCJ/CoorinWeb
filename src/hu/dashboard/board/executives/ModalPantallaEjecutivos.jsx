@@ -89,31 +89,6 @@ const ModalPantallaEjecutivos = ({ onClose }) => {
                     </div>
                 </div>
             </div>
-            <style>{`
-                @keyframes shake-modal {
-                    0% { transform: scale(1); }
-                    20% { transform: scale(1.05, 0.95); }
-                    40% { transform: scale(0.95, 1.05); }
-                    60% { transform: scale(1.03, 0.97); }
-                    80% { transform: scale(0.97, 1.03); }
-                    100% { transform: scale(1); }
-                }
-                .animate-shake-modal {
-                    animation: shake-modal 0.5s;
-                }
-                .scrollbar-gray::-webkit-scrollbar {
-                    height: 8px;
-                    width: 8px;
-                    background: #f5f5f5;
-                }
-                .scrollbar-gray::-webkit-scrollbar-thumb {
-                    background: #b0b0b0;
-                    border-radius: 4px;
-                }
-                .scrollbar-gray::-webkit-scrollbar-thumb:hover {
-                    background: #888;
-                }
-            `}</style>
         </div>
     );
 };

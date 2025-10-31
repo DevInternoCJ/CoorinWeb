@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { getCatalogoValueCard, getWrongsInformation } from "../../../../../services/mark/albaz/LokiServices";
 
@@ -19,7 +20,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
     // Memorizar los parámetros actuales
     const searchParams = {
         idCartera: 1,
-        idDatoErroneo: datoErroneo || 1,
+        idDatoErroneo: datoErroneo === "" ? 0 : parseInt(datoErroneo, 10),
         desde,
         hasta
     };
@@ -61,8 +62,13 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
             }
             setTablaData(Array.isArray(json) ? json : []);
             localStorage.removeItem('wrongsParams');
-        } catch {
-            setErrorTabla("Error al obtener los datos erróneos.");
+        } catch (err) {
+            if (err?.response?.status === 404 && err?.response?.statusText === "Not Found") {
+                setErrorTabla("No se encontraron resultados.");
+                toast.warning("Su consulta no cuenta con registros en la fecha especificada.", { duration: 4000 });
+            } else {
+                setErrorTabla("Error al obtener los datos erróneos.");
+            }
         } finally {
             setLoadingTabla(false);
         }
@@ -91,8 +97,13 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
         setLoadingTabla(true);
         setErrorTabla(null);
         setTablaData([]);
-        // Usar los parámetros guardados si existen, si no los actuales
-        const params = paramsGuardados || searchParams;
+        // SIEMPRE usar los parámetros actuales al buscar manualmente
+        let params = {
+            idCartera: 1,
+            idDatoErroneo: datoErroneo === "" ? 0 : parseInt(datoErroneo, 10),
+            desde,
+            hasta
+        };
         try {
             const response = await getWrongsInformation(params);
             // La respuesta es un blob, leer como texto y parsear JSON
@@ -113,7 +124,12 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
             setTablaData(Array.isArray(json) ? json : []);
             localStorage.removeItem('wrongsParams');
         } catch (err) {
-            setErrorTabla("Error al obtener los datos erróneos.", err);
+            if (err?.response?.status === 404 && err?.response?.statusText === "Not Found") {
+                setErrorTabla("No se encontraron resultados.");
+                toast.warning("Su consulta no cuenta con registros en la fecha especificada.", { duration: 4000 });
+            } else {
+                setErrorTabla("Error al obtener los datos erróneos.");
+            }
         } finally {
             setLoadingTabla(false);
         }
@@ -139,7 +155,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                 value={desde}
                                 onChange={e => setDesde(e.target.value)}
                                 min="2016-01-01"
-                                max={new Date().toISOString().slice(0, 10)}
+                                max={(() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10); })()}
                             />
                         </div>
                         <div className="hs-input-group w-full">
@@ -269,7 +285,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                         </tr>
                                     </thead>
                                     <tbody style={{ background: '#b6d6f6' }}>
-                                        {loadingTabla && (
+                                        {loadingTabla ? (
                                             <tr>
                                                 <td colSpan={8} style={{ textAlign: 'center', verticalAlign: 'middle', padding: '48px 12px' }}>
                                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
@@ -278,8 +294,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                                     </div>
                                                 </td>
                                             </tr>
-                                        )}
-                                        {!loadingTabla && tablaData.length === 0 && (
+                                        ) : tablaData.length === 0 ? (
                                             <tr>
                                                 <td colSpan={8} style={{ textAlign: 'center', verticalAlign: 'middle', padding: '48px 12px' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
@@ -287,19 +302,20 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                                     </div>
                                                 </td>
                                             </tr>
+                                        ) : (
+                                            tablaData.map((row, idx) => (
+                                                <tr key={idx}>
+                                                    <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden'}}>{row.producto}</td>
+                                                    <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.cuenta}</td>
+                                                    <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden'}}>{row.nombreDeudor}</td>
+                                                    <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.rfc}</td>
+                                                    <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.numeroCliente}</td>
+                                                    <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.saldo}</td>
+                                                    <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.reporto}</td>
+                                                    <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row["DatoErróneo"]}</td>
+                                                </tr>
+                                            ))
                                         )}
-                                        {!loadingTabla && tablaData.map((row, idx) => (
-                                            <tr key={idx}>
-                                                <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden'}}>{row.producto}</td>
-                                                <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.cuenta}</td>
-                                                <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden'}}>{row.nombreDeudor}</td>
-                                                <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.rfc}</td>
-                                                <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.numeroCliente}</td>
-                                                <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.saldo}</td>
-                                                <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.reporto}</td>
-                                                <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row["DatoErróneo"]}</td>
-                                            </tr>
-                                        ))}
                                     </tbody>
                                 </table>
                             </div>

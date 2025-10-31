@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { infoEjecutivo, getEmailsInfo } from "../../../../../services/mark/albaz/LokiServices";
 
 const EmailsContent = ({ mostrarTabla }) => {
@@ -14,7 +15,7 @@ const EmailsContent = ({ mostrarTabla }) => {
     
         const [cartera, setCartera] = useState(idCartera);
         // Opciones de cartera dinámicas
-        const [carterasOptions, setCarterasOptions] = useState([]);
+        const [carterasOptions, setCarterasOptions] = useState([]); 
         const [consulta, setConsulta] = useState("");
         const [consultasOptions, setConsultasOptions] = useState([]);
         const [loadingConsultas, setLoadingConsultas] = useState(false);
@@ -44,8 +45,8 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 : [];
                             setCarterasOptions(carterasUnicas);
                             // Filtrar consultas por cartera e idProducto
-                            const filtered = Array.isArray(data)
-                                ? data.filter(
+                            const filtered = Array.isArray(data.consultas)
+                                ? data.consultas.filter(
                                     (item) => String(item.idCartera) === String(cartera) && String(item.idProducto) === String(idProducto)
                                 )
                                 : [];
@@ -67,10 +68,24 @@ const EmailsContent = ({ mostrarTabla }) => {
                     try {
                         // Usar los parámetros actuales
                         const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
-                        const idConsultaInt = consulta ? parseInt(consulta, 10) : undefined;
+                        const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
+                        console.log('Enviando al endpoint:', { idCartera: idCarteraInt, idConsulta: idConsultaInt });
                         const response = await getEmailsInfo(idCarteraInt, idConsultaInt);
                         let data = Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : (typeof response === 'object' ? [response] : []));
-                        if (data.length === 0) throw new Error('No hay datos para exportar.');
+                        if (data.length === 0) {
+                            // Mensaje para error sin registros
+                            let nombreConsulta = "Correos";
+                            if (consulta === "" || consulta === 0) {
+                                nombreConsulta = "Correos";
+                            } else {
+                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
+                                if (consultaObj && consultaObj.nombreConsulta) {
+                                    nombreConsulta = consultaObj.nombreConsulta;
+                                }
+                            }
+                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros.`, { duration: 4000 });
+                            throw new Error('No hay datos para exportar.');
+                        }
                         // Obtener headers y loguearlos para revisión
                         const headers = Object.keys(data[0]);
                         // setHeadersRecibidos(headers); // Ya no se usa para mostrar en pantalla
@@ -93,8 +108,8 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 value = value.replace(/,/g, '');
                                 // Escapar comillas dobles
                                 value = value.replace(/"/g, '""');
-                                // Envolver en comillas si contiene caracteres especiales o espacios
-                                if (/[^\w\d]/.test(value)) value = '"' + value + '"';
+                                // Envolver en comillas si contiene comas, comillas o espacios
+                                if (/[",\s]/.test(value)) value = '"' + value + '"';
                             }
                             return value;
                         }).join(","));
@@ -112,8 +127,27 @@ const EmailsContent = ({ mostrarTabla }) => {
                         URL.revokeObjectURL(url);
                         setFooterMsg("Libro de Excell Guardado.");
                     } catch (err) {
-                        setErrorExcel('Error al exportar los correos.');
-                        setFooterMsg("Ocurrió un error al guardar el libro de Excell.");
+                        // Validar error 404 y mensaje específico del backend
+                        const status = err?.response?.status;
+                        const statusText = err?.response?.statusText;
+                        const mensajeBackend = err?.response?.data?.mensaje;
+                        if (status === 404 && statusText === "Not Found" && mensajeBackend && mensajeBackend.includes("No se encontraron registros para los Correos")) {
+                            let nombreConsulta = "Correos";
+                            if (consulta === "" || consulta === 0) {
+                                nombreConsulta = "Correos";
+                            } else {
+                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
+                                if (consultaObj && consultaObj.nombreConsulta) {
+                                    nombreConsulta = consultaObj.nombreConsulta;
+                                }
+                            }
+                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros.`, { duration: 4000 });
+                            setErrorExcel(null);
+                            setFooterMsg("Consulta terminada sin registros.");
+                        } else {
+                            setErrorExcel('Error al exportar los correos.');
+                            setFooterMsg("Ocurrió un error al guardar el libro de Excell.");
+                        }
                         console.error('Error al exportar los correos:', err);
                     } finally {
                         setLoadingExcel(false);
@@ -134,12 +168,14 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 value={cartera}
                                 onChange={e => setCartera(e.target.value)}
                                 id="cartera-select-emails-row"
-                                disabled={loadingConsultas || carterasOptions.length === 0}
+                                disabled={loadingConsultas}
                             >
-                                {carterasOptions.length === 0 && <option value="">Cargando...</option>}
-                                {carterasOptions.map((item) => (
-                                    <option key={item.id} value={item.id}>{item.nombre}</option>
-                                ))}
+                                {carterasOptions.length === 0
+                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                    : carterasOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>{item.nombre}</option>
+                                    ))
+                                }
                             </select>
                             <label
                                 htmlFor="cartera-select-emails-row"
@@ -158,8 +194,8 @@ const EmailsContent = ({ mostrarTabla }) => {
                             >
                                 <option value="">- Todas -</option>
                                 {consultasOptions.map((item) => (
-                                    <option key={item.idConsulta || item.NombreConsulta} value={item.idConsulta}>
-                                        {item.NombreConsulta}
+                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                        {item.nombreConsulta}
                                     </option>
                                 ))}
                             </select>
@@ -203,12 +239,14 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 value={cartera}
                                 onChange={e => setCartera(e.target.value)}
                                 id="cartera-select-emails"
-                                disabled={loadingConsultas || carterasOptions.length === 0}
+                                disabled={loadingConsultas}
                             >
-                                {carterasOptions.length === 0 && <option value="">Cargando...</option>}
-                                {carterasOptions.map((item) => (
-                                    <option key={item.id} value={item.id}>{item.nombre}</option>
-                                ))}
+                                {carterasOptions.length === 0
+                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                    : carterasOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>{item.nombre}</option>
+                                    ))
+                                }
                             </select>
                             <label
                                 htmlFor="cartera-select-emails"
@@ -227,8 +265,8 @@ const EmailsContent = ({ mostrarTabla }) => {
                             >
                                 <option value="">- Todas -</option>
                                 {consultasOptions.map((item) => (
-                                    <option key={item.idConsulta || item.NombreConsulta} value={item.idConsulta}>
-                                        {item.NombreConsulta}
+                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                        {item.nombreConsulta}
                                     </option>
                                 ))}
                             </select>
@@ -252,7 +290,7 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 className="btn-success w-full sm:w-auto min-w-[120px] max-w-xs px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center items-center"
                                 style={{ margin: '0 auto', display: 'block' }}
                                 onClick={handleDownloadExcel}
-                                disabled={loadingExcel || !consulta}
+                                disabled={loadingExcel}
                             >
                                 {loadingExcel
                                     ? (

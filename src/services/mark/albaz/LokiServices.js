@@ -231,10 +231,10 @@ export const darkListV2 = async ({ idCartera, selector, dato }) => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
     const params = { idCartera, selector, dato };
-    console.log('Enviando a /ListaNegra/get-lista-negra con:', params);
+    console.log('Enviando a /ListaNegra/lista-negra con:', params);
     // El interceptor añade el token automáticamente
-    const response = await api.get('/ListaNegra/get-lista-negra', { params });
-    console.log('Respuesta de /ListaNegra/get-lista-negra:', response.data);
+    const response = await api.get('/ListaNegra/lista-negra', { params });
+    console.log('Respuesta de /ListaNegra/lista-negra:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error al obtener la ListaNegra:', error);
@@ -705,16 +705,16 @@ export const historySingle = async (body) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    console.log('📤 Enviando a /Histórico/individual:', body);
+    console.log('📤 Enviando a /Historico/individual:', body);
     // El interceptor añade el token automáticamente
-    const response = await api.post('/Histórico/individual', body, {
+    const response = await api.post('/Historico/individual', body, {
       headers: {
         'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json, text/plain, /',
         'Content-Type': 'application/json'
       },
       responseType: 'blob'
     });
-    console.log('📥 Respuesta de /Histórico/individual:', response);
+    console.log('📥 Respuesta de /Historico/individual:', response);
     return response;
   } catch (error) {
     console.error('Error al obtener historico:', error);
@@ -756,9 +756,9 @@ export const historyArchivoUpload = async (body) => {
         }
       }
     });
-    console.log('Enviando a /Histórico/archivo (FormData):', formData);
+    console.log('Enviando a /Historico/archivo (FormData):', formData);
     // El interceptor añade el token automáticamente
-    const response = await api.post('/Histórico/archivo', formData, {
+    const response = await api.post('/Historico/archivo', formData, {
       headers: {
         'Accept': '*/*',
         'Content-Type': 'multipart/form-data'
@@ -766,7 +766,7 @@ export const historyArchivoUpload = async (body) => {
       },
       responseType: 'arraybuffer' // Para recibir datos binarios correctamente
     });
-    console.log('Respuesta de /Histórico/archivo:', response);
+    console.log('Respuesta de /Historico/archivo:', response);
     return response;
   } catch (error) {
     console.error('Error al obtener historico Archivo:', error);

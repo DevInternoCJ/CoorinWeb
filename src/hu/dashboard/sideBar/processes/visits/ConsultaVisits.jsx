@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { toast } from "sonner";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
-import { infoEjecutivo, getCommentsInformation } from "../../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo, getSearchesInformation } from "../../../../../services/mark/albaz/LokiServices";
 
-const CommentsContent = () => {
+
+const ConsultVisitContent = () => {
     // Mensaje de footer dinámico
-    const [footerMsg, setFooterMsg] = useState("Elija la consulta de las cuentas que desee el comentarioso y el periodo.");
+    const [footerMsg, setFooterMsg] = useState("Elija la consulta de las cuentas que desee las consultas y el periodo.");
 
     // Obtener datos de usuario desde localStorage
     const userData = JSON.parse(localStorage.getItem("userData"));
@@ -20,11 +20,8 @@ const CommentsContent = () => {
     const [carterasOptions, setCarterasOptions] = useState([]);
     const [consulta, setConsulta] = useState("");
     const [consultasOptions, setConsultasOptions] = useState([]);
-    // Limitar fechas: mínimo 2016-01-01, máximo hoy
-    const minDate = "2016-01-01";
-    const maxDate = new Date().toISOString().slice(0, 10);
-    const [desde, setDesde] = useState(maxDate);
-    const [hasta, setHasta] = useState(maxDate);
+    const [desde, setDesde] = useState(new Date().toISOString().slice(0, 10));
+    const [hasta, setHasta] = useState(new Date().toISOString().slice(0, 10));
     const [loadingConsultas, setLoadingConsultas] = useState(false);
     const [errorConsultas, setErrorConsultas] = useState(null);
     const [loadingExcel, setLoadingExcel] = useState(false);
@@ -46,8 +43,8 @@ const CommentsContent = () => {
                     : [];
                 setCarterasOptions(carterasUnicas);
                 // Filtrar consultas por cartera e idProducto
-                const filtered = Array.isArray(data.consultas)
-                    ? data.consultas.filter(
+                const filtered = Array.isArray(data)
+                    ? data.filter(
                         (item) => String(item.idCartera) === String(cartera) && String(item.idProducto) === String(idProducto)
                     )
                     : [];
@@ -68,16 +65,15 @@ const CommentsContent = () => {
             setFooterMsg("Consulta terminada. Guardando libro de Excel.");
             try {
                 // Usar los parámetros actuales
-                const idConsulta = consulta === "" ? 0 : parseInt(consulta, 10);
                 const params = {
                     idCartera: cartera,
-                    idConsulta,
+                    idConsulta: consulta,
                     idProducto,
                     desde,
                     hasta,
                     jerarquia
                 };
-                const response = await getCommentsInformation(params);
+                const response = await getSearchesInformation(params);
                 // response.data es un Blob
                 if (response && response.data instanceof Blob) {
                     // Leer el contenido del blob como texto
@@ -86,65 +82,17 @@ const CommentsContent = () => {
                     // Si parece JSON, convertir a CSV
                     try {
                         const json = JSON.parse(text);
-                        if (Array.isArray(json) && json.length === 0) {
-                            let nombreConsulta = "Comentarios";
-                            if (consulta === "" || consulta === 0) {
-                                nombreConsulta = "Comentarios";
-                            } else {
-                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
-                                if (consultaObj && consultaObj.nombreConsulta) {
-                                    nombreConsulta = consultaObj.nombreConsulta;
-                                }
-                            }
-                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros en la fecha especificada.`, { duration: 4000 });
-                            throw new Error('No hay datos para exportar.');
-                        }
                         if (Array.isArray(json) && json.length > 0 && typeof json[0] === 'object') {
                             const headers = Object.keys(json[0]);
                             const rows = json.map(obj => headers.map(h => {
                                 let value = obj[h];
-                                // Si el campo es cuenta y es número, exportar como texto para evitar notación científica
-                                if (h.toLowerCase().includes('cuenta')) {
-                                    if (typeof value === 'number') {
-                                        value = '\t"' + value.toString() + '"';
-                                    } else if (typeof value === 'string') {
-                                        // Si ya es string, anteponer tabulación y envolver en comillas
-                                        value = '\t"' + value.replace(/,/g, '').replace(/"/g, '') + '"';
-                                    }
-                                    return value;
-                                }
                                 // Quitar comas internas para no romper el CSV
-                                if (typeof value === 'string') {
-                                    value = value.replace(/,/g, '');
-                                    // Escapar comillas dobles
-                                    value = value.replace(/"/g, '""');
-                                    // Envolver en comillas si contiene caracteres especiales o espacios
-                                    if (/[",\sñáéíóúü]/i.test(value)) value = '"' + value + '"';
-                                }
+                                if (typeof value === 'string') value = value.replace(/,/g, '');
                                 return value;
                             }).join(","));
-                            // Encabezados en UTF-8 con BOM para español
-                            csvContent = '\uFEFF' + headers.join(",") + "\n" + rows.join("\n");
+                            csvContent = headers.join(",") + "\n" + rows.join("\n");
                         }
                     } catch (e) {
-                        // Si el error es por mensaje de backend, mostrar toast
-                        if (response?.status === 404 && response?.statusText === "Not Found") {
-                            try {
-                                const jsonError = JSON.parse(text);
-                                if (jsonError?.mensaje && jsonError.mensaje.includes("No se encontraron registros")) {
-                                    let nombreConsulta = "Comentarios";
-                                    if (consulta === "" || consulta === 0) {
-                                        nombreConsulta = "Comentarios";
-                                    } else {
-                                        const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
-                                        if (consultaObj && consultaObj.nombreConsulta) {
-                                            nombreConsulta = consultaObj.nombreConsulta;
-                                        }
-                                    }
-                                    toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros en la fecha especificada.`, { duration: 4000 });
-                                }
-                            } catch {/* empty */}
-                        }
                         console.error('Error al convertir a CSV:', e);
                         // No es JSON, dejar como está
                     }
@@ -153,7 +101,7 @@ const CommentsContent = () => {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `comentarioso${desde}_a_${hasta}.csv`;
+                    a.download = `consulta_visitas_${desde}_a_${hasta}.csv`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -161,31 +109,11 @@ const CommentsContent = () => {
                     setFooterMsg("Libro de Excel Guardado.");
                 } else {
                     setErrorExcel('No se pudo descargar el archivo.');
-                    setFooterMsg("Consulta terminada sin registros.");
+                    setFooterMsg("Ocurrió un error al guardar el libro de Excel.");
                 }
             } catch (err) {
-                // Validar error 404 y mensaje específico del backend
-                const status = err?.response?.status;
-                const statusText = err?.response?.statusText;
-                if (status === 404 && statusText === "Not Found" && err?.response?.data instanceof Blob) {
-                    try {
-                        const text = await err.response.data.text();
-                        const jsonError = JSON.parse(text);
-                        if (jsonError?.mensaje && jsonError.mensaje.includes("No se encontraron registros")) {
-                            let nombreConsulta = "Comentarios";
-                            if (consulta === "" || consulta === 0) {
-                                nombreConsulta = "-Todas-";
-                            } else {
-                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
-                                if (consultaObj && consultaObj.nombreConsulta) {
-                                    nombreConsulta = consultaObj.nombreConsulta;
-                                }
-                            }
-                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros en la fecha especificada.`, { duration: 4000 });
-                        }
-                    } catch {/* empty */}
-                }
-                setFooterMsg("Consulta terminada sin registros.");
+                setErrorExcel('Error al obtener las búsquedas.',err);
+                setFooterMsg("Ocurrió un error al guardar el libro de Excel.");
             } finally {
                 setLoadingExcel(false);
             }
@@ -207,17 +135,15 @@ const CommentsContent = () => {
                             className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                             value={cartera}
                             onChange={e => setCartera(e.target.value)}
-                            id="cartera-select-comentarioso"
+                            id="cartera-select-consults-visits"
                         >
-                                {carterasOptions.length === 0
-                                ? <option value={cartera}>{`Cartera ${cartera}`}</option>
-                                : carterasOptions.map((item) => (
+                            {carterasOptions.length === 0 && <option value="">Cargando...</option>}
+                            {carterasOptions.map((item) => (
                                 <option key={item.id} value={item.id}>{item.nombre}</option>
-                                ))
-                            }
+                            ))}
                         </select>
                         <label
-                            htmlFor="cartera-select-comentarioso"
+                            htmlFor="cartera-select-consults-visits"
                             className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
                         >
                             Cartera
@@ -229,18 +155,18 @@ const CommentsContent = () => {
                             className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                             value={consulta}
                             onChange={e => setConsulta(e.target.value)}
-                            id="consulta-select-comentarioso"
+                            id="consulta-select-consult-visits"
                             disabled={loadingConsultas || errorConsultas}
                         >
                             <option value="">- Todas -</option>
                             {consultasOptions.map((item) => (
-                                <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
-                                    {item.nombreConsulta}
+                                <option key={item.idConsulta || item.NombreConsulta} value={item.idConsulta}>
+                                    {item.NombreConsulta}
                                 </option>
                             ))}
                         </select>
                         <label
-                            htmlFor="consulta-select-comentarioso"
+                            htmlFor="consulta-select-consult-visits"
                             className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
                         >
                             Consulta
@@ -262,8 +188,6 @@ const CommentsContent = () => {
                             type="date"
                             className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                             value={desde}
-                            min={minDate}
-                            max={maxDate}
                             onChange={e => setDesde(e.target.value)}
                         />
                     </div>
@@ -274,8 +198,6 @@ const CommentsContent = () => {
                             type="date"
                             className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                             value={hasta}
-                            min={minDate}
-                            max={maxDate}
                             onChange={e => setHasta(e.target.value)}
                         />
                     </div>
@@ -286,7 +208,7 @@ const CommentsContent = () => {
                         className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
                         style={{ margin: '0 auto', display: 'block' }}
                         onClick={handleDownloadExcel}
-                        disabled={loadingExcel}
+                        disabled={loadingExcel || !consulta}
                     >
                         {loadingExcel ? "Exportando..." : "Guardar Excel"}
                     </button>
@@ -304,4 +226,6 @@ const CommentsContent = () => {
         </div>
     );
 }
-export default CommentsContent;
+
+
+export default ConsultVisitContent;

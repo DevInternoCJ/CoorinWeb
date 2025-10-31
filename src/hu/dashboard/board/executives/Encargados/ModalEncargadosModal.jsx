@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
-import ReusableModal from "../modalGlobalReboot/ReusableModal";
-import ModalEncargadosContent from "./ModalEncargadosContent";
-import { IconEncargados } from "./IconesEjecutives";
+import ReusableModal from "../../modalGlobalReboot/ReusableModal";
+import ModalEncargadosContent from "../Encargados/ModalEncargadosContent";
+import { IconEncargados } from "../IconesEjecutives";
 
 const EncargadosModal = ({ 
     isOpen, 

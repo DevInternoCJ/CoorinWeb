@@ -25,9 +25,9 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
             setErrorJerarquia(null);
             try {
                 const userData = JSON.parse(localStorage.getItem('userData'));
-                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+                const idEjecutivo = userData?.idEjecutivo;
                 const usuario = userData?.usuario || '';
-                const nombreEjecutivo = userData?.nombre || userData?.nombreEjecutivo || userData?.ejecutivo || '';
+                const nombreEjecutivo = userData?.nombreEjecutivo;
                 if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
                 
                 const data = await obetenerJerarquiaEncargados(idEjecutivo);
@@ -176,13 +176,18 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                     >
                         {hasSub && (
                             <button
-                                className="hs-accordion-toggle size-6 flex justify-center items-center hover:bg-gray-100 rounded-md focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+                                className="hs-accordion-toggle size-6 flex justify-center items-center rounded-md focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
                                 aria-expanded={!isCollapsed}
                                 aria-controls={collapseId}
                                 type="button"
+                                style={{ background: 'var(--color-jerarquia1)' }}
+                                onMouseOver={e => e.currentTarget.style.background = 'var(--color-jerarquia2)'}
+                                onMouseOut={e => e.currentTarget.style.background = 'var(--color-jerarquia1)'}
+                                onFocus={e => e.currentTarget.style.background = 'var(--color-jerarquia2)'}
+                                onBlur={e => e.currentTarget.style.background = 'var(--color-jerarquia1)'}
                                 onClick={e => { e.stopPropagation(); toggleCollapse(node.idEjecutivo); }}
                             >
-                                <svg className="size-4 text-gray-800 dark:text-neutral-200" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <svg className="size-4 text-gray-800" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M5 12h14"></path>
                                     <path className={!isCollapsed ? 'hs-accordion-active:hidden block' : ''} d="M12 5v14"></path>
                                 </svg>
@@ -214,7 +219,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                             role="group"
                             aria-labelledby={headingId}
                         >
-                            <div className="ps-7 relative before:absolute before:top-0 before:start-3 before:w-0.5 before:-ms-px before:h-full before:bg-gray-100 dark:before:bg-neutral-700">
+                            <div className="ps-7 border-l border-gray-100 dark:border-neutral-700 pl-3">
                                 {renderExecutiveTree(node.subordinados, level + 1, nodeKey)}
                             </div>
                         </div>
@@ -233,7 +238,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     return (
         <div className=" bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64 ramificacion-sesiones">
             {/* Header responsive */}
-            <div className="mb-4">
+            <div className="mb-1">
                 {/* Layout para pantallas grandes (md y superiores) */}
                 <div className="hidden lg:grid grid-cols-3 items-center">
                     {/* Columna izquierda - Título */}

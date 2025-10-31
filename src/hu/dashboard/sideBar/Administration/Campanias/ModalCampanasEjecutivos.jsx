@@ -3,7 +3,7 @@ import {
   obetenerJerarquiaEncargados,
   asignaEjecutivoCampanas,
   UsuarioRestante,
-} from "../../../../services/mark/albaz/LokiServices";
+} from "../../../../../services/mark/albaz/LokiServices";
 import { toast } from "sonner";
 
 const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {

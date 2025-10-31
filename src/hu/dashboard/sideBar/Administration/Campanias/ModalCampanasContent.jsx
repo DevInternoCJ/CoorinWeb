@@ -4,7 +4,7 @@ import ModalCampanasHeader from "./ModalCampanasHeader";
 import ModalCampanasCampanias from "./ModalCampanasCampanias";
 import ModalCampanasEjecutivos from "./ModalCampanasEjecutivos";
 import ModalCampanasFooter from "./ModalCampanasFooter";
-import logoCoorin from "../../../../assets/logo_coorin_7.svg";
+import logoCoorin from "../../../../../assets/logo_coorin_7.svg";
 
 
 const ModalCampanas = ({ onClose }) => {

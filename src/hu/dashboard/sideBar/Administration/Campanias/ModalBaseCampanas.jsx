@@ -1,6 +1,6 @@
 import React, { useRef } from "react"
-import ModalBase from "../../board/ModalBase";
-import ModalCampanasContent from "./ModalCampanasContent";
+import ModalBase from "../../../board/ModalBase";
+import ModalCampanasContent from "../Campanias/ModalCampanasContent";
 
 const ModalBaseCampanas = ({ open, onClose }) => {
     const modalRef = useRef(null);

@@ -1,7 +1,7 @@
 import React from "react";
-import ReusableModal from "../modalGlobalReboot/ReusableModal";
+import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import ModalCatalogosContent from "./ModalCatalogosContent";
-import { IconCatalogos } from "./IconesEjecutives";
+import { IconCatalogos } from "../IconesEjecutives";
 
 const CatalogosModal = ({ isOpen, onClose }) => {
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import JerarquiaConR from "../../executives/JerarquiaConR/JerarquiaConR";
+import JerarquiaConR from "../../branchs/JerarquiaConR";
 import { obetenerJerarquiaEncargados } from "../../../../../services/mark/albaz/LokiServices";
 
 const ModalProductividadContent = ({

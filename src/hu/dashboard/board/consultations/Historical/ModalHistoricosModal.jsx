@@ -15,6 +15,13 @@ const HistoricosModal = ({
     // Estado para el tipo de consulta (individual/archivo)
     const [isIndividual, setIsIndividual] = useState(); // null: ninguno, true: individual, false: archivo
 
+    // Reiniciar el estado al cerrar el modal
+    React.useEffect(() => {
+        if (!isOpen) {
+            setIsIndividual(undefined);
+        }
+    }, [isOpen]);
+
     // Función para manejar cambios en el tipo de consulta
     const handleIndividualChange = useCallback((individual) => {
         setIsIndividual(individual);
@@ -52,7 +59,7 @@ const HistoricosModal = ({
         <ReusableModal
             isOpen={isOpen}
             onClose={onClose}
-            size="historicos"
+            size={isIndividual === undefined ? "historicos-inicial" : "historicos"}
             showHeader={true}
             title="Históricos - Coorin"
             icon={IconHistoricos}
@@ -74,8 +81,6 @@ const HistoricosModal = ({
                     onIndividualChange={handleIndividualChange}
                 />
             </div>
-
-                        {/* ...existing code... */}
         </ReusableModal>
     );
 };

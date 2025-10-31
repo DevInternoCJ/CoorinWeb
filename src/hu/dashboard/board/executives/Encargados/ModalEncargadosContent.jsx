@@ -1,28 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos, AsignaEncargados } from "../../../../services/mark/albaz/LokiServices";
-import ConsorcioLogo from "../../../../assets/logo_coorin_5.svg";
+import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos, AsignaEncargados } from "../../../../../services/mark/albaz/LokiServices";
+import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 import { toast } from "sonner";
+import JerarquiaConR from '../../branchs/JerarquiaConR';
 // Flecha tipo chevron moderna
-const DropdownArrow = () => (
-    <span
-        style={{
-            pointerEvents: "none",
-            position: "absolute",
-            right: "0.75rem",
-            top: "50%",
-            transform: "translateY(-50%)",
-            fontSize: "1.15rem",
-            color: "#2b463c",
-            display: "flex",
-            alignItems: "center"
-        }}
-    >
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <path d="M6 8l4 4 4-4" stroke="#2b463c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    </span>
-);
-
 const ModalEncargadosContent = () => {
     // Estados para dropdowns y logo
     const [cartera, setCartera] = React.useState("");
@@ -156,20 +137,19 @@ const ModalEncargadosContent = () => {
         const fetchExecutives = async () => {
             try {
                 const userData = JSON.parse(localStorage.getItem('userData'));
-                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id;
+                const idEjecutivo = userData?.idEjecutivo;
                 if (!idEjecutivo) return;
                 const data = await obetenerJerarquiaEncargados(idEjecutivo);
-                // Mapeo: estructura completa según el endpoint
-                const mapped = Array.isArray(data) ? data.map(e => ({
-                    usuario: e.usuario || e.Usuario || '',
-                    nombreEjecutivo: e.nombreEjecutivo || '',
-                    subordinados: Array.isArray(e.subordinados) ? e.subordinados : [],
-                    idEjecutivo: e.idEjecutivo || e.idejecutivo || e.id || '',
-                    idEncargado: e.idEncargado || null,
-                    seleccionado: false // Añadimos campo para manejar selección
-                })) : [];
-                
-                setExecutiveTree(mapped);
+                // El nodo raíz será el ejecutivo de la sesión, y todos los demás serán sus subordinados directos
+                const rootNode = {
+                    usuario: userData.usuario || '',
+                    nombreEjecutivo: userData.nombreEjecutivo,
+                    subordinados: Array.isArray(data) ? data : [],
+                    idEjecutivo: idEjecutivo,
+                    idEncargado: null,
+                    seleccionado: false
+                };
+                setExecutiveTree([rootNode]);
             } catch (error) {
                 toast.error('Error al cargar ejecutivos para encargados:', error);
                 setExecutiveTree([]);
@@ -179,44 +159,28 @@ const ModalEncargadosContent = () => {
     }, []);
 
     // Filtrar ejecutivos: Mostrar toda la jerarquía para encargados
+    // Recursivo: agrega todos los nodos del árbol a usuariosEncargados
     const usuariosFiltrados = useMemo(() => {
         if (!executiveTree.length) return [];
-        
         const usuariosEncargados = [];
-        
-        // Tomar TODOS los ejecutivos principales (sin límite)
-        const ejecutivosPrincipales = executiveTree;
-        
-        ejecutivosPrincipales.forEach(ejecutivo => {
-            // Agregar el ejecutivo principal
+        const recorrer = (nodo, nivel = 1, padre = null) => {
             usuariosEncargados.push({
-                ...ejecutivo,
-                usuario: ejecutivo.usuario || ejecutivo.Usuario || '',
-                nombreEjecutivo: ejecutivo.nombreEjecutivo || '',
-                displayName: `${ejecutivo.usuario || ejecutivo.Usuario || ''} - ${ejecutivo.nombreEjecutivo || ''}`,
-                nivelJerarquia: 1,
-                esSubordinado: false,
+                ...nodo,
+                usuario: nodo.usuario || nodo.Usuario || '',
+                nombreEjecutivo: nodo.nombreEjecutivo || '',
+                displayName: `${nodo.usuario || nodo.Usuario || ''} - ${nodo.nombreEjecutivo || ''}`,
+                idEjecutivo: nodo.idEjecutivo || nodo.idejecutivo || nodo.id || '',
+                idEncargado: nodo.idEncargado || (padre && padre.idEjecutivo),
+                nivelJerarquia: nivel,
+                esSubordinado: nivel > 1,
+                encargadoPadre: padre ? (padre.usuario || padre.Usuario || '') : null,
                 seleccionado: false
             });
-            
-            // Agregar sus subordinados si los tiene
-            if (Array.isArray(ejecutivo.subordinados) && ejecutivo.subordinados.length > 0) {
-                ejecutivo.subordinados.forEach(subordinado => {
-                    usuariosEncargados.push({
-                        usuario: subordinado.usuario || subordinado.Usuario || '',
-                        nombreEjecutivo: subordinado.nombreEjecutivo || '',
-                        displayName: `${subordinado.usuario || subordinado.Usuario || ''} - ${subordinado.nombreEjecutivo || ''}`,
-                        idEjecutivo: subordinado.idEjecutivo || subordinado.idejecutivo || subordinado.id || '',
-                        idEncargado: subordinado.idEncargado || ejecutivo.idEjecutivo,
-                        nivelJerarquia: 2,
-                        esSubordinado: true,
-                        encargadoPadre: ejecutivo.usuario,
-                        seleccionado: false
-                    });
-                });
+            if (Array.isArray(nodo.subordinados) && nodo.subordinados.length > 0) {
+                nodo.subordinados.forEach(sub => recorrer(sub, nivel + 1, nodo));
             }
-        });
-        
+        };
+        executiveTree.forEach(root => recorrer(root, 1, null));
         return usuariosEncargados;
     }, [executiveTree]);
 
@@ -271,15 +235,16 @@ const ModalEncargadosContent = () => {
             const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id;
             if (idEjecutivo) {
                 const jerarquiaData = await obetenerJerarquiaEncargados(idEjecutivo);
-                const mapped = Array.isArray(jerarquiaData) ? jerarquiaData.map(e => ({
-                    usuario: e.usuario || e.Usuario || '',
-                    nombreEjecutivo: e.nombreEjecutivo || '',
-                    subordinados: Array.isArray(e.subordinados) ? e.subordinados : [],
-                    idEjecutivo: e.idEjecutivo || e.idejecutivo || e.id || '',
-                    idEncargado: e.idEncargado || null,
+                // El nodo raíz será el ejecutivo de la sesión, y todos los demás serán sus subordinados directos
+                const rootNode = {
+                    usuario: userData.usuario || '',
+                    nombreEjecutivo: userData.nombre || userData.nombreEjecutivo || userData.ejecutivo || '',
+                    subordinados: Array.isArray(jerarquiaData) ? jerarquiaData : [],
+                    idEjecutivo: idEjecutivo,
+                    idEncargado: null,
                     seleccionado: false
-                })) : [];
-                setExecutiveTree(mapped);
+                };
+                setExecutiveTree([rootNode]);
             }
             
         } catch (err) {
@@ -429,307 +394,132 @@ const ModalEncargadosContent = () => {
     };
 
     return (
-        <div style={{
-            display: "flex",
-            width: "100%",
-            height: "100%",
-            gap: "1rem"
-        }}>
-            {/* Columna izquierda - Tabla de usuarios encargados (estilo de ModalValidadoresContent) */}
-            <div style={{
-                width: "300px",
-                display: "flex",
-                flexDirection: "column"
-            }}>
-                <div style={{ 
-                    display: "flex", 
-                    flexDirection: "column",
-                    backgroundColor: "white",
-                    border: "1px solid var(--color-jerarquia1)",
-                    borderRadius: "8px",
-                    padding: "1rem",
-                    height: "100%"
-                }}>
-                    <label className="modal-span-1" style={{ color: "var(--color-jerarquia3)" }}>
-                        Encargados ({contadorEncargados.asignados} / {contadorEncargados.total})
-                    </label>
-                    <div style={{
-                        border: "1px solid var(--color-jerarquia1)",
-                        borderRadius: "8px",
-                        backgroundColor: "white",
-                        flex: 1,
-                        overflow: "hidden"
-                    }}>
-                        <div
-                            style={{
-                                overflowY: "auto",
-                                height: "100%",
-                                width: "100%",
-                                padding: "0.5rem"
-                            }}
-                            className="scrollbar-gray"
-                        >
-                            {usuariosEncargados.length === 0 ? (
-                                <div style={{ 
-                                    textAlign: 'center', 
-                                    padding: '1rem',
-                                    color: '#666',
-                                    fontStyle: 'italic'
-                                }}>
-                                    Cargando jerarquía de encargados...
-                                </div>
-                            ) : (
-                                usuariosEncargados.map((row, i) => (
-                                    <div 
-                                        key={i}
-                                        className="executive-hierarchy-item"
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.5rem',
-                                            paddingLeft: '2px',
-                                            marginBottom: '0.25rem',
-                                            width: 'fit-content',
-                                            minWidth: '100%'
-                                        }}
-                                        onClick={() => handleSeleccionarUsuario(row.usuario, i)}
-                                    >
-                                        {row.esSubordinado && (
-                                            <span style={{ 
-                                                color: '#666',
-                                                fontSize: '0.8rem',
-                                                marginRight: '0.25rem'
-                                            }}>
-                                                └─
-                                            </span>
-                                        )}
-                                        <input
-                                            type="checkbox"
-                                            checked={row.seleccionado || false}
-                                            className="modal-checkbox-small"
-                                            onChange={(e) => {
-                                                e.stopPropagation();
-                                                handleSeleccionarUsuario(row.usuario, i);
-                                            }}
-                                        />
-                                        <span style={{ 
-                                            color: '#000',
-                                            fontSize: row.esSubordinado ? '0.8rem' : '0.85rem',
-                                            fontWeight: row.esSubordinado ? 'normal' : '500',
-                                            whiteSpace: 'nowrap'
-                                        }}>
-                                            {row.displayName}
-                                        </span>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
+    <div className="flex flex-col md:flex-row w-full h-full gap-4 overflow-y-auto max-h-screen">
+            {/* Bloque de controles: logo, dropdowns, botón */}
+            <div className="flex flex-col w-full md:w-[300px] md:order-2 gap-2">
+                <div className="flex justify-center items-center mb-4">
+                    <img src={ConsorcioLogo} alt="Consorcio Jurídico" className="h-16 object-contain" />
                 </div>
-            </div>
-
-            {/* Campos del lado derecho */}
-            <div style={{
-                width: "300px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "1rem"
-            }}>
-                {/* Logo del Consorcio Jurídico movido aquí arriba */}
-                <div style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    backgroundColor: "white",
-                    padding: "1rem",
-                }}>
-                    <img 
-                        src={ConsorcioLogo} 
-                        alt="Consorcio Jurídico" 
-                        style={{ 
-                            height: "70px", 
-                            width: "auto",
-                            objectFit: "contain"
-                        }}
-                    />
-                </div>
-
                 {/* Cartera */}
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                    <label style={{
-                        fontSize: "0.875rem",
-                        fontWeight: "500",
-                        marginBottom: "0.5rem",
-                        color: "var(--color-jerarquia3)"
-                    }}>
+                <div className="relative w-full mb-2">
+                    <select
+                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={cartera}
+                        onChange={e => {
+                            setCartera(e.target.value);
+                            const productosFiltrados = carterasProductosData
+                                .filter(item => item.cartera === e.target.value)
+                                .map(item => item.producto);
+                            const productosConDefault = ["-Sin Producto-", ...productosFiltrados];
+                            setProductos(productosConDefault);
+                            setProducto("-Sin Producto-");
+                        }}
+                        id="cartera-select"
+                    >
+                        {carteras.length === 0 && <option value="" disabled hidden></option>}
+                        {carteras.map(c => (
+                            <option key={c} value={c}>{c}</option>
+                        ))}
+                    </select>
+                    <label
+                        htmlFor="cartera-select"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                    >
                         Cartera
                     </label>
-                    <div style={{ position: "relative" }}>
-                        <select
-                            value={cartera}
-                            onChange={e => {
-                                setCartera(e.target.value);
-                                // Al cambiar cartera, filtrar productos desde carterasProductosData
-                                const productosFiltrados = carterasProductosData
-                                    .filter(item => item.cartera === e.target.value)
-                                    .map(item => item.producto);
-                                
-                                // Agregar "-Sin Producto-" como primera opción por defecto
-                                const productosConDefault = ["-Sin Producto-", ...productosFiltrados];
-                                setProductos(productosConDefault);
-                                setProducto("-Sin Producto-"); // Seleccionar por defecto "-Sin Producto-"
-                            }}
-                            className="font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
-                            style={{ fontSize: "14px", width: "100%", cursor: "pointer" }}
-                        >
-                            {carteras.map(c => (
-                                <option key={c} value={c}>{c}</option>
-                            ))}
-                        </select>
-                        <DropdownArrow />
-                    </div>
                 </div>
-
                 {/* Producto */}
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                    <label style={{
-                        fontSize: "0.875rem",
-                        fontWeight: "500",
-                        marginBottom: "0.5rem",
-                        color: "var(--color-jerarquia3)"
-                    }}>
+                <div className="relative w-full mb-2">
+                    <select
+                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={producto}
+                        onChange={e => {
+                            setProducto(e.target.value);
+                        }}
+                        id="producto-select"
+                    >
+                        {productos.length === 0 && <option value="" disabled hidden></option>}
+                        {productos.map(p => (
+                            <option key={p} value={p}>{p}</option>
+                        ))}
+                    </select>
+                    <label
+                        htmlFor="producto-select"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                    >
                         Producto
                     </label>
-                    <div style={{ position: "relative" }}>
-                        <select
-                            value={producto}
-                            onChange={e => {
-                                setProducto(e.target.value);
-                                // El filtrado y selección de encargado se maneja automáticamente por useEffect
-                            }}
-                            className="font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
-                            style={{ fontSize: "14px", width: "100%", cursor: "pointer" }}
-                        >
-                            {productos.map(p => (
-                                <option key={p} value={p}>{p}</option>
-                            ))}
-                        </select>
-                        <DropdownArrow />
-                    </div>
                 </div>
-
                 {/* Encargado */}
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                    <label style={{
-                        fontSize: "0.875rem",
-                        fontWeight: "500",
-                        marginBottom: "0.5rem",
-                        color: "var(--color-jerarquia3)"
-                    }}>
-                        Encargado
-                    </label>
-                    <div style={{ position: "relative" }}>
-                        {loading ? (
-                            <div>Cargando encargados...</div>
-                        ) : error ? (
-                            <div style={{color:'red'}}>{error}</div>
-                        ) : (
+                <div className="relative w-full mb-2">
+                    {loading ? (
+                        <div className="p-4 text-gray-500">Cargando encargados...</div>
+                    ) : error ? (
+                        <div className="p-4 text-red-500">{error}</div>
+                    ) : (
+                        <>
                             <select
+                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={selectedEncargado || (encargadosFiltrados && encargadosFiltrados.length > 0 ? "" : "VACIO")}
                                 onChange={e => setSelectedEncargado(e.target.value)}
-                                className="font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
-                                style={{ fontSize: "14px", width: "100%", cursor: "pointer" }}
+                                id="encargado-select"
                             >
                                 {encargadosFiltrados && encargadosFiltrados.length > 0 ? (
                                     <>
                                         {selectedEncargado ? null : <option value="">Seleccionar...</option>}
-                                        {encargadosFiltrados.map(item => (
-                                            <option key={item.idEjecutivo} value={item.idEjecutivo}>
-                                                {item.nombreEjecutivo}
-                                            </option>
-                                        ))}
+                                        {encargadosFiltrados
+                                            .slice()
+                                            .sort((a, b) => (a.nombreEjecutivo || '').localeCompare(b.nombreEjecutivo || ''))
+                                            .map(item => (
+                                                <option key={item.idEjecutivo} value={item.idEjecutivo}>
+                                                    {item.nombreEjecutivo}
+                                                </option>
+                                            ))}
                                     </>
                                 ) : (
                                     <option value="Null"></option>
                                 )}
                             </select>
-                        )}
-                        <DropdownArrow />
-                    </div>
+                            <label
+                                htmlFor="encargado-select"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                            >
+                                Encargado
+                            </label>
+                        </>
+                    )}
                 </div>
-
                 {/* Botón Cambiar */}
-                <div style={{
-                    marginTop: "1rem"
-                }}>
+                <div className="flex justify-center mt-4">
                     <button
+                        type="button"
+                        className={`btn-success w-full sm:w-auto sm:min-w-[120px] px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center${isChangingAssignment || loading ? ' opacity-70 cursor-not-allowed' : ''}`}
                         onClick={handleCambiarAsignacion}
                         disabled={isChangingAssignment || loading}
-                        style={{
-                            backgroundColor: isChangingAssignment || loading ? "#ccc" : "var(--color-jerarquia2)",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "0.375rem",
-                            padding: "0.75rem 1.5rem",
-                            fontSize: "0.875rem",
-                            fontWeight: "600",
-                            cursor: isChangingAssignment || loading ? "not-allowed" : "pointer",
-                            width: "100%",
-                            transition: "background-color 0.2s",
-                            opacity: isChangingAssignment || loading ? 0.7 : 1
-                        }}
-                        onMouseOver={(e) => {
-                            if (!isChangingAssignment && !loading) {
-                                e.target.style.backgroundColor = "var(--color-jerarquia3)";
-                            }
-                        }}
-                        onMouseOut={(e) => {
-                            if (!isChangingAssignment && !loading) {
-                                e.target.style.backgroundColor = "var(--color-jerarquia2)";
-                            }
-                        }}
                     >
                         {isChangingAssignment ? "Procesando..." : "Cambiar"}
                     </button>
                 </div>
             </div>
-
-            <style>{`
-                /* Estilos para el scrollbar del panel de jerarquía */
-                div[style*="overflowY: auto"]::-webkit-scrollbar {
-                    width: 8px;
-                }
-                div[style*="overflowY: auto"]::-webkit-scrollbar-track {
-                    background: #f5f5f5;
-                    border-radius: 4px;
-                }
-                div[style*="overflowY: auto"]::-webkit-scrollbar-thumb {
-                    background: #b0b0b0;
-                    border-radius: 4px;
-                }
-                div[style*="overflowY: auto"]::-webkit-scrollbar-thumb:hover {
-                    background: #888;
-                }
-                /* Estilos para la tabla de usuarios encargados */
-                .modal-checkbox-small {
-                    cursor: pointer;
-                }
-                .scrollbar-gray::-webkit-scrollbar {
-                    width: 8px;
-                    height: 8px;
-                }
-                .scrollbar-gray::-webkit-scrollbar-track {
-                    background: #f5f5f5;
-                    border-radius: 4px;
-                }
-                .scrollbar-gray::-webkit-scrollbar-thumb {
-                    background: #b0b0b0;
-                    border-radius: 4px;
-                }
-                .scrollbar-gray::-webkit-scrollbar-thumb:hover {
-                    background: #888;
-                }
-            `}</style>
+            {/* Bloque árbol y contador */}
+            <div className="flex flex-col w-full md:w-[300px] md:order-1 max-h-[60vh] overflow-y-auto md:max-h-none md:overflow-visible">
+                <label className="modal-span-1" style={{ color: "var(--color-jerarquia3)", marginBottom: 8 }}>
+                    Encargados ({contadorEncargados.asignados} / {contadorEncargados.total})
+                </label>
+                <JerarquiaConR
+                    executiveTree={executiveTree}
+                    loadingJerarquia={loading}
+                    errorJerarquia={error}
+                    selectedExecutiveNode={null}
+                    setSelectedExecutives={() => {}}
+                    setSelectedRows={() => {}}
+                    setSelectedExecutiveNode={() => {}}
+                    useCheckbox={true}
+                    usuariosValidadores={usuariosEncargados}
+                    handleSeleccionarUsuario={handleSeleccionarUsuario}
+                    producto={producto}
+                />
+            </div>
         </div>
     );
 };
