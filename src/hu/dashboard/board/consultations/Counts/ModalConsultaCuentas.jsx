@@ -7,8 +7,10 @@ import ExcelDownloader from "../Historical/ExcelDownloader";
 import { toast } from "sonner";
 import { postReportCampaign } from "../../../../../services/mark/albaz/LokiServices";
 import * as XLSX from 'xlsx';
-
+import {useUserStore} from "../../../../../contextGlobal/userStore";
 const ModalConsultaCuentas = ({ onClose }) => {
+    const user = useUserStore((state) => state.user);
+    const jerarquia = user?.Jerarquía;
     const [situacionOptions, setSituacionOptions] = useState([]);
     const [allAvailableOptions, setAllAvailableOptions] = useState([]);
     const [totalFiltros, setTotalFiltros] = useState(0);
@@ -105,7 +107,8 @@ const ModalConsultaCuentas = ({ onClose }) => {
             agrupar: columnas.map(columna => ({
                 campo: columna.nombre,
                 concepto: columna.concepto
-            }))
+            })),
+            jerarquiaEjecutivo: jerarquia  ? jerarquia : 0
         };
 
         console.log("📤 JSON de consulta:", JSON.stringify(consultaJSON, null, 2));
@@ -126,14 +129,16 @@ const ModalConsultaCuentas = ({ onClose }) => {
                 });
                 toast.success(response.mensaje || "Consulta realizada exitosamente");
 
-                // Si está marcada la opción de detalle, generamos el Excel desde los datos
+                // Generamos el Excel solo si es tipo detalle y hay datos
                 if (tipoConsulta === 'detalle' && response.datos && response.datos.length > 0) {
-                    const excelBlob = generateExcelFromData(response.datos);
-                    if (excelBlob) {
-                        setExcelBlob(excelBlob);
+                    const blob = generateExcelFromData(response.datos);
+                    if (blob) {
+                        setExcelBlob(blob); // Esto activará la descarga una sola vez
                     } else {
                         toast.error("Error al generar el Excel");
                     }
+                } else {
+                    setExcelBlob(null); // Limpiar el blob si no es detalle
                 }
             } else {
                 throw new Error(response.mensaje || "Error al realizar la consulta");
@@ -201,11 +206,12 @@ const ModalConsultaCuentas = ({ onClose }) => {
             </div>
             </div>
             
-            {/* Componente para descargar Excel solo cuando es detalle */}
-            {excelBlob && tipoConsulta === 'detalle' && (
+            {/* Componente para descargar Excel */}
+            {excelBlob && (
                 <ExcelDownloader 
                     blob={excelBlob} 
                     fileName={`reporte_consulta_${new Date().toISOString().slice(0,10)}.xlsx`}
+                    onDownloadComplete={() => setExcelBlob(null)}
                 />
             )}
         </div>
