@@ -21,7 +21,7 @@ namespace Loki.Mark.Consulta.Informacion.Comentarios.Services
 		/// <summary>
 		/// Orquesta la consulta de comentarios de cuentas, aplicando filtros dinámicos.
 		/// </summary>
-		public async Task<IEnumerable<ComentarioDto>> ConsultarComentariosAsync(string servidor, ConsultaPagosRequest request)
+		public async Task<IEnumerable<dynamic>> ConsultarComentariosAsync(string servidor, ConsultaPagosRequest request)
 		{
 			var queryOptions = new QueryGenerationOptions { IdConsulta = request.IdConsulta, IdCartera = request.IdCartera };
 			var subQueryResult = await _queryGenerator.GenerarQueryCuentas(servidor, queryOptions);
@@ -47,7 +47,7 @@ namespace Loki.Mark.Consulta.Informacion.Comentarios.Services
 
 			}
 
-			return await _dao.ObtenerDatosAsync<ComentarioDto>(servidor, sqlFinal, parametros);
+			return await _dao.ObtenerDatosAsync<dynamic>(servidor, sqlFinal, parametros);
 		}
 	}
 }

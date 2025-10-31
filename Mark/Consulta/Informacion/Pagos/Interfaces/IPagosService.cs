@@ -4,6 +4,6 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Interfaces
 {
 	public interface IPagosService
 	{
-		Task<IEnumerable<PagoNegociacionDto>> ConsultarPagosAsync(string servidor, ConsultaPagosRequest request);
+		Task<IEnumerable<dynamic>> ConsultarPagosAsync(string servidor, ConsultaPagosRequest request);
 	}
 }

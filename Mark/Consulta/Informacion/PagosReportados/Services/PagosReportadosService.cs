@@ -24,7 +24,7 @@ namespace Loki.Mark.Consulta.Informacion.PagosReportados.Services
 		/// <param name="servidor">El servidor donde se ejecutará la consulta, obtenido del claim del token.</param>
 		/// <param name="request">El DTO que contiene los parámetros de la petición, como el rango de fechas y el ID de la consulta.</param>
 		/// <returns>Una colección de DTOs con los resultados de los pagos reportados.</returns>
-		public async Task<IEnumerable<PagoReportadoDto>> ConsultarPagosReportadosAsync(string servidor, ConsultaPagosRequest request)
+		public async Task<IEnumerable<dynamic>> ConsultarPagosReportadosAsync(string servidor, ConsultaPagosRequest request)
 		{
 			// 1. REUTILIZAMOS el generador para la subconsulta de cuentas
 			var queryOptions = new QueryGenerationOptions { IdConsulta = request.IdConsulta, IdCartera = request.IdCartera };
@@ -72,7 +72,7 @@ namespace Loki.Mark.Consulta.Informacion.PagosReportados.Services
 			}
 
 			// 4. Llamamos al DAO
-			return await _dao.ObtenerDatosAsync<PagoReportadoDto>(servidor, sqlFinal, parametros);
+			return await _dao.ObtenerDatosAsync<dynamic>(servidor, sqlFinal, parametros);
 		}
 	}
 }

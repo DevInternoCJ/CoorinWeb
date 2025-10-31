@@ -7,6 +7,6 @@ namespace Loki.Mark.Consulta.Informacion.Correos.Services
 		/// <summary>
 		/// Orquesta la consulta de correos, aplicando filtros de cuentas dinámicas.
 		/// </summary>
-		Task<IEnumerable<CorreoDto>> ConsultarCorreosAsync(string servidor, int idCartera, int idConsulta);
+		Task<IEnumerable<dynamic>> ConsultarCorreosAsync(string servidor, int idCartera, int idConsulta);
 	}
 }

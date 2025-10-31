@@ -11,7 +11,7 @@ namespace Loki.Middleware
 		/// sin importar el entorno (Desarrollo, Producción, etc.).
 		/// ADVERTENCIA: Establecer en 'true' solo para depuración temporal. NUNCA en producción.
 		/// </summary>
-		private const bool _forceDetailedErrors = true;
+		private const bool _detailedErrors = true;
 
 		private readonly RequestDelegate _next;
 		private readonly ILogger<GlobalErrorHandler> _logger;
@@ -54,7 +54,7 @@ namespace Loki.Middleware
 			object? errorDetails;
 
 			// La condición ahora revisa la bandera manual O si el entorno es de desarrollo.
-			if (_forceDetailedErrors || _env.IsDevelopment())
+			if (_detailedErrors)
 			{
 				// Mostramos todos los detalles para depuración.
 				detailMessage = ex.Message;

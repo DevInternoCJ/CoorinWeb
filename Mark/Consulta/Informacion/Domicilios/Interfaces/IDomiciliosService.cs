@@ -8,6 +8,6 @@ namespace Loki.Mark.Consulta.Informacion.Domicilios.Interfaces
 		/// <summary>
 		/// Orquesta la consulta de domicilios, aplicando filtros de cuentas dinámicas.
 		/// </summary>
-		Task<IEnumerable<DomicilioDto>> ConsultarDomiciliosAsync(string servidor, int idCartera, int idConsulta);
+		Task<IEnumerable<dynamic>> ConsultarDomiciliosAsync(string servidor, int idCartera, int idConsulta);
 	}
 }

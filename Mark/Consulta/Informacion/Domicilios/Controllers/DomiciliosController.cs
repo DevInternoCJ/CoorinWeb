@@ -25,7 +25,7 @@ namespace Loki.Mark.Consulta.Informacion.Domicilios.Controllers
 			Summary = "Consultar Domicilios - Yoshi",
 			Description = "Obtiene una lista de domicilios para una cartera, con la opción de aplicar filtros de cuentas dinámicas basadas en un ID de consulta predefinido."
 		)]
-		[ProducesResponseType(typeof(IEnumerable<DomicilioDto>), 200)]
+		[ProducesResponseType(typeof(IEnumerable<dynamic>), 200)]
 		public async Task<IActionResult> Consultar([FromQuery] int idCartera, [FromQuery] int idConsulta)
 		{
 			string? servidorClaim = User.FindFirst("Servidor")?.Value;

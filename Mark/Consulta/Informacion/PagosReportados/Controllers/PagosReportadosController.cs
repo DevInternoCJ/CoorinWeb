@@ -25,7 +25,7 @@ namespace Loki.Mark.Consulta.Informacion.PagosReportados.Controllers
 			Summary = "Consultar Pagos Reportados - Yoshi",
 			Description = "Obtiene una lista de los pagos reportados en un rango de fechas, permitiendo aplicar filtros dinámicos basados en un ID de consulta predefinido."
 		)]
-		[ProducesResponseType(typeof(IEnumerable<PagoReportadoDto>), 200)]
+		[ProducesResponseType(typeof(IEnumerable<dynamic>), 200)]
 		public async Task<IActionResult> Consultar([FromBody] ConsultaPagosRequest request)
 		{
 			string? servidorClaim = User.FindFirst("Servidor")?.Value;
