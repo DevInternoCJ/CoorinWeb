@@ -143,7 +143,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
     }, [selectedExecutiveId, idEjecutivoSesion]);
 
     return (
-    <div className=" bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64">
+    <div className=" bg-white/80 ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64">
         <h3 className="text-base lg:text-lg font-semibold mb-4 flex items-center text-gray-800">
             <span className="mr-2">
                 {/* Icono personalizado para Sesiones */}
@@ -153,7 +153,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
             </span>
             Sesiones
         </h3>
-    <div className="bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex-1 w-full overflow-hidden">
+    <div className="bg-white/80 rounded-lg border border-[var(--color-jerarquia1)] flex-1 w-full overflow-hidden">
             <div
                 style={{
                     overflowX: "auto",

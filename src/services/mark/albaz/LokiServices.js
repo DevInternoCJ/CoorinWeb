@@ -1710,7 +1710,7 @@ export const putLogout = async (data) => {
     console.log('🔑 Parámetros:', { data });
     
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
-      const response = await api.put(`/Auth/cerrar-sesión `, data);
+      const response = await api.put(`/Auth/cerrar-sesion `, data);
     
     console.log('📥 Respuesta de /Auth/cerrar-sesión ', response.data);
     

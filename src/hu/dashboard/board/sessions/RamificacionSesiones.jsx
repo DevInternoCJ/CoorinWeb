@@ -219,7 +219,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                             role="group"
                             aria-labelledby={headingId}
                         >
-                            <div className="ps-7 border-l border-gray-100 dark:border-neutral-700 pl-3">
+                            <div className="ps-7 border-l border-jerarquia1 pl-3">
                                 {renderExecutiveTree(node.subordinados, level + 1, nodeKey)}
                             </div>
                         </div>
@@ -236,7 +236,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     const usuarioSesion = userData?.usuario || '';
 
     return (
-        <div className=" bg-white shadow-lg ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64 ramificacion-sesiones">
+        <div className="ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64 bg-white/80">
             {/* Header responsive */}
             <div className="mb-1">
                 {/* Layout para pantallas grandes (md y superiores) */}
@@ -346,7 +346,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
             {/* Contenedor de la ramificación con estilos de JerarquiaConR */}
             <div
                 ref={ramificacionRef}
-                className="productividad-branch flex-1 h-[40vh] xl:h-[56vh]"
+                className="productividad-branch flex-1 h-[40vh] xl:h-[56vh] p-2"
                 style={{
                     overflowX: 'auto',
                     overflowY: 'auto',
@@ -355,7 +355,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                     background: '#ffffff',
                     borderRadius: 8,
                     border: '1px solid #e0e0e0',
-                    padding: 6
+                    
                 }}
             >
                 {/* Contenido de la jerarquía con Preline Tree View */}
