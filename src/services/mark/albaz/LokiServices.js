@@ -1706,11 +1706,11 @@ export const putLogout = async (data) => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
     
-    console.log('📤 Enviando a /Auth/cerrar-sesión', data);
+    console.log('📤 Enviando a /Auth/cerrar-sesion', data);
     console.log('🔑 Parámetros:', { data });
     
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
-      const response = await api.put(`/Auth/cerrar-sesión `, data);
+      const response = await api.put(`/Auth/cerrar-sesion`, data);
     
     console.log('📥 Respuesta de /Auth/cerrar-sesión ', response.data);
     

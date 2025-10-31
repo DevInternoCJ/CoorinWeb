@@ -41,10 +41,10 @@ export const InputPhrases = ({ onPhraseSaved }) => {
         idProducto,
         textoFrase: phrase.trim()
       };
-      console.log("💾 Guardando frase:", data);
+      console.log("Guardando frase:", data);
       // Llamar al endpoint
       const response = await postSavePhrases(data);
-      console.log("📥 Respuesta completa:", response);
+      console.log("Respuesta completa:", response);
 
       if (response?.exito || response?.success || response?.message) {
         const successMessage = response?.message || response?.mensaje || "Frase guardada exitosamente";     

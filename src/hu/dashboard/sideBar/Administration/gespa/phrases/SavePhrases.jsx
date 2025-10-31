@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getPhrases, putPhrases } from "../../../../../../services/mark/albaz/LokiServices";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import { toast } from "sonner"; // si ya usas sonner en tu proyecto
+import { IconActive, IconOffActive} from "./IconPhrases";
 
 const SavePhrases = () => {
   const [phrases, setPhrases] = useState([]);
@@ -41,7 +42,7 @@ const SavePhrases = () => {
     }
   }, [idEjecutivo]);
 
-  // 🔁 Manejador del cambio de estado del switch
+  //Manejador del cambio de estado del switch
   const handleTogglePhrase = async (phrase) => {
     const newStatus = !phrase.fraseActiva;
 
@@ -152,10 +153,10 @@ const SavePhrases = () => {
         <span className="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-jerarquia3"></span>
         <span className="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
         <span className="absolute top-1/2 start-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-white transition-colors duration-200">
-          <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"></path></svg>
+          <IconActive />
         </span>
         <span className="absolute top-1/2 end-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-jerarquia3 transition-colors duration-200 ">
-          <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"></path></svg>
+          <IconOffActive />
         </span>
       </label>
     </div>

@@ -6,6 +6,7 @@ import IconCircular from "../../../../../../components/iconos/IconCircular";
 import { InputPhrases } from "./InputPhrases";
 import SavePhrases from "./SavePhrases";
 import { IconWarning } from "../../../../board/executives/scripts/IconScripts";
+import {IconScripts} from "../../../../board/executives/IconesEjecutives";
 
 const Phrases = ({ onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -20,7 +21,6 @@ const Phrases = ({ onClose }) => {
       setActiveView(null); // Resetear vista si se deselecciona el producto
     }
   };
-
   // Manejar cambio de vista (mutuamente excluyente)
   const handleViewChange = (view) => {
     setActiveView(activeView === view ? null : view);
@@ -56,7 +56,7 @@ const Phrases = ({ onClose }) => {
         <ModalHeader
           icon={
             <IconCircular size="size-10">
-              <IconScreens className="size-6" />
+              <IconScripts className="size-6" />
             </IconCircular>
           }
           title="Frases"

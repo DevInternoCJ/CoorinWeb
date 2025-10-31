@@ -6,6 +6,7 @@ import IconCircular from "../../../../../components/iconos/IconCircular";
 import EditionScripts from "./EditionScripts";
 import DataCharges from "./DataCharges";
 import { IconWarning } from "./IconScripts";
+import {IconScripts} from "../../../board/executives/IconesEjecutives";
 
 const Scripts = ({ onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -38,7 +39,7 @@ const Scripts = ({ onClose }) => {
         <ModalHeader
           icon={
             <IconCircular size="size-10">
-              <IconScreens className="size-6" />
+              <IconScripts className="size-5" />
             </IconCircular>
           }
           title="Scripts"

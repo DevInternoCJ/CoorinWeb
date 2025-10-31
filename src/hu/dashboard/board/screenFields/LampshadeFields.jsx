@@ -3,7 +3,8 @@ import ModalHeader from "../../sideBar/Administration/gespa/ModalHeader";
 import InfoSection from "./InfoSection";
 import TableEditFields from "./TableEditFields";
 import GridLampsFields from "./GridLampsFields";
-import { IconScreens } from "../../sideBar/Administration/gespa/IconsTemplates";
+import IconCircular from "../../../../components/iconos/IconCircular";
+import { IconPantalla } from "../../board/executives/IconesEjecutives";
 
 const LampshadeFields = ({ isOpen, onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -66,7 +67,9 @@ const LampshadeFields = ({ isOpen, onClose }) => {
     <div className=" modal-blur-bg fixed inset-0 bg-opacity-70 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl max-w-6xl max-h-[90vh] overflow-hidden border border-gray-300">
         <ModalHeader
-          icon={<IconScreens className="size-6" />}
+          icon={ <IconCircular size="size-10">
+              <IconPantalla className="size-5" />
+            </IconCircular>}
           title="Campos Pantalla"
           onClose={onClose}
           selectedProduct={selectedProduct}

@@ -1,0 +1,31 @@
+import React from "react";
+
+export const IconActive = (props) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={16}
+    height={16}
+    viewBox="0 0 24 24"
+    className={props.className}
+  >
+    <path
+      fill="currentColor"
+      d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"
+    ></path>
+  </svg>
+);
+
+export const IconOffActive = (props) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={16}
+    height={16}
+    viewBox="0 0 24 24"
+    className={props.className}
+  >
+    <path
+      fill="currentColor"
+      d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"
+    ></path>
+  </svg>
+);
