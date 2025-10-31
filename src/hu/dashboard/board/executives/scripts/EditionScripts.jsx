@@ -12,8 +12,6 @@ import { useUserStore } from "../../../../../contextGlobal/userStore";
 import { useWalletProducts } from "../../../../login/WalletProduct";
 import { toast } from "sonner";
 import { IconClean } from "./IconScripts";
-
-// Importar utilidades y hooks
 import { 
   formatValue, 
   escapeHtml, 
@@ -21,8 +19,6 @@ import {
   useScriptInitialization,
   useScriptEditor
 } from "./ScriptsUtils";
-
-// Importar componentes
 import {
   ScriptHeader,
   ScriptInputs,
@@ -32,7 +28,6 @@ import {
 } from "./ScriptsComponents";
 
 const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate }) => {
-  // Estados
   const [selectedScript, setSelectedScript] = useState(null);
   const [editedData, setEditedData] = useState({ nombre: "", descripcion: "", script: "" });
   const [hasChanges, setHasChanges] = useState(false);
@@ -40,13 +35,10 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
   const [showPreview, setShowPreview] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
   const editableRef = useRef(null);
-  
-  // Hooks externos
   const { walletProducts } = useWalletProducts();
   const idProducto = walletProducts?.[0]?.idProducto;
   const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;
-
   // Inicialización de script
   useScriptInitialization(scripts, selectedScript, onScriptsUpdate);
   useEffect(() => {
@@ -61,7 +53,6 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
     value: script.idScript.toString(),
     label: script.nombre,
   }));
-
   // Reemplazo de placeholders
   const replacePlaceholders = useCallback(
     (text, preview = false) => {
@@ -99,7 +90,6 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
     },
     [placeholderValues, user]
   );
-
   // Renderizado de script a HTML
   const renderFormattedScriptToHTML = useCallback(
     (text) => {
@@ -129,8 +119,7 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
         } else {
           currentText += char;
         }
-      }
-      
+      }  
       if (currentText) {
         const classes = `${isBold ? "font-bold" : ""} ${isColored ? "text-lime-500" : ""}`.trim();
         html += classes ? `<span class="${classes}">${escapeHtml(currentText)}</span>` : escapeHtml(currentText);
@@ -148,7 +137,6 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
     editableRef, 
     cursorPosition
   );
-
   // Efectos
   useEffect(() => {
     if (selectedScript) {
@@ -177,8 +165,7 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
               toast.dismiss(t.id);
               toast.success("Operación cancelada");
             }}
-            className="btn-danger hover:bg-red-600" 
-          >
+            className="btn-danger hover:bg-red-600">
             Cancelar
           </ButtonSave>
           <ButtonSave
@@ -198,8 +185,7 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
                 }
               );
             }}
-            className="btn-success"
-          >
+            className="btn-success">
             Continuar
           </ButtonSave>
         </div>
@@ -210,7 +196,6 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
   const script = scripts.find((s) => s.idScript.toString() === selectedValue);
   setSelectedScript(script);
 };
-
 
   const handleInputChange = (field, value) => {
     setEditedData((prev) => ({ ...prev, [field]: value }));
@@ -249,12 +234,10 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
     if (!selection.rangeCount) return;
     const selectedText = selection.toString();
     if (!selectedText) return toast.error("Selecciona un texto para aplicar el formato");
-
     const text = editedData.script;
     const escapedMarker = marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const pattern = new RegExp(`${escapedMarker}([^${escapedMarker}]*)${escapedMarker}`, "g");
     const isColored = pattern.test(selectedText);
-
     let newText;
     if (isColored) {
       newText = text.replace(new RegExp(`${escapedMarker}${selectedText}${escapedMarker}`), selectedText);
@@ -293,25 +276,21 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
       const newScript = createNewScript();
       const updatedScripts = scripts.find((s) => s.idScript === 0) 
         ? scripts 
-        : [newScript, ...scripts];
-      
+        : [newScript, ...scripts];  
       onScriptsUpdate?.(updatedScripts);
       setSelectedScript(newScript);
       setEditedData({ nombre: "", descripcion: "", script: "" });
       setHasChanges(false);
       return toast.success("Contenido borrado correctamente");
     }
-
     toast.promise(
       (async () => {
         await deleteScripts({ idScript: selectedScript.idScript });
-        const filtered = scripts.filter((s) => s.idScript !== selectedScript.idScript);
-        
+        const filtered = scripts.filter((s) => s.idScript !== selectedScript.idScript);    
         if (!filtered.find((s) => s.idScript === 0)) {
           filtered.unshift(createNewScript());
         }
-        onScriptsUpdate?.(filtered);
-        
+        onScriptsUpdate?.(filtered);    
         const newScript = filtered.find((s) => s.idScript === 0);
         setSelectedScript(newScript);
         setEditedData({ nombre: "", descripcion: "", script: "" });
@@ -328,8 +307,7 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
 
   const handleSave = async () => {
     if (!editedData.nombre) return toast.error("El nombre del script es obligatorio");
-    if (!selectedScript) return toast.error("Selecciona un script antes de guardar");
-    
+    if (!selectedScript) return toast.error("Selecciona un script antes de guardar");  
     const scriptData = {
       idScript: selectedScript.idScript,
       idProducto: idProducto,
@@ -398,15 +376,13 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
         selectedScript={selectedScript}
         onWalletChange={handleWalletChange}
         SelectWallet={SelectWallet}
-      />
-      
+      />   
       <div className="bg-gray-700 rounded-lg p-4 gap-2">
         <div className="space-y-4">
           <ScriptInputs 
             editedData={editedData}
             onInputChange={handleInputChange}
-          />
-          
+          />     
           <div>
             <ScriptEditorToolbar
               showPreview={showPreview}
@@ -418,8 +394,7 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
               IconCircular={IconCircular}
               IconClean={IconClean}
               ButtonSave={ButtonSave}
-            />
-            
+            />     
             <div>
               <ScriptTextEditor
                 editableRef={editableRef}

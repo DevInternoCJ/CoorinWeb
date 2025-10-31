@@ -101,7 +101,7 @@ export const InputPhrases = ({ onPhraseSaved }) => {
           value={phrase}
           onChange={handlePhraseChange}
           onKeyDown={handleKeyDown}
-          className="py-2 border border-gray-300 rounded-lg px-3 sm:py-3 sm:px-4 block w-full sm:text-sm focus:ring-2 focus:border-blue-500 focus:ring-blue-500 focus:outline-none transition-colors disabled:opacity-50 disabled:pointer-events-none disabled:bg-gray-100"
+          className="py-2 border border-gray-300 rounded-lg px-3 sm:py-3 sm:px-4 block w-full sm:text-sm focus:ring-2 focus:border-jerarquia2 focus:ring-jerarquia2 focus:outline-none transition-colors disabled:opacity-50 disabled:pointer-events-none disabled:bg-gray-100"
           rows="4"
           placeholder="Frase..."
           disabled={loading}
@@ -109,7 +109,7 @@ export const InputPhrases = ({ onPhraseSaved }) => {
       </div>
       <div className="flex justify-end mt-4">
         <ButtonSave
-          className=""
+          className="btn-success"
           loading={loading}
           onClick={handleSavePhrase}
           disabled={loading || !isValidPhrase}

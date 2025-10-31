@@ -2263,8 +2263,7 @@ export const putUpdateScripts = async (data) => {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       }
-    });
-    
+    });  
     console.log('📥 Respuesta:', response.data);
     return response.data;
   } catch (error) {
@@ -2273,24 +2272,44 @@ export const putUpdateScripts = async (data) => {
   }
 };
 
-//endpoint obteber frases
 export const getPhrases = async (idEjecutivo) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
-    console.log('/Frases/frases', idEjecutivo);   
-    
-     const response = await api.get('/Frases/frases', 
- idEjecutivo // Esto envía como ?idEjecutivo=valor
- );
-    console.log('📥 Respuesta:', response);
+    console.log('📤 Solicitando frases para idEjecutivo:', idEjecutivo);    
+    // Tal vez el parámetro se llama 'ejecutivo' y no 'idEjecutivo'
+    const response = await api.get('/Frases/frases', {
+      params: { ejecutivo: idEjecutivo } // Cambiado el nombre del parámetro
+    });   
+    console.log('📥 Respuesta completa:', response);
+    console.log('📥 Data:', response.data);
     return response.data;
   } catch (error) {
-    console.error(' Error:', error);
+    console.error('❌ Error:', error.response?.data || error.message);
     throw error;
   }
 };
 
-
+export const putPhrases = async (idRegistro, activo) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+    
+    console.log('Enviando a /Frases/activar-frase:', { idRegistro, activo });     
+    
+    const response = await api.put('/Frases/activar-frase', {
+      idRegistro,
+      activo
+    });  
+    
+    console.log('📥 Respuesta:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error:', error);
+    throw error;
+  }
+};

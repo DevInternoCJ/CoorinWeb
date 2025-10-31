@@ -5,17 +5,22 @@ import { IconScreens } from "../IconsTemplates";
 import IconCircular from "../../../../../../components/iconos/IconCircular";
 import { InputPhrases } from "./InputPhrases";
 import SavePhrases from "./SavePhrases";
+import { IconWarning } from "../../../../board/executives/scripts/IconScripts";
 
 const Phrases = ({ onClose }) => {
-  // Estados
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [verifyResult, setVerifyResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeView, setActiveView] = useState(null); // 'add', 'list', o null
-
-  // Refs y hooks
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
+  const handleProductChange = (product) => {
+    setSelectedProduct(product);
+    if (!product) {
+      setActiveView(null); // Resetear vista si se deselecciona el producto
+    }
+  };
+
   // Manejar cambio de vista (mutuamente excluyente)
   const handleViewChange = (view) => {
     setActiveView(activeView === view ? null : view);
@@ -48,7 +53,6 @@ const Phrases = ({ onClose }) => {
         } bg-white rounded-lg shadow-2xl w-full max-w-4xl overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <ModalHeader
           icon={
             <IconCircular size="size-10">
@@ -58,68 +62,59 @@ const Phrases = ({ onClose }) => {
           title="Frases"
           onClose={onClose}
           selectedProduct={selectedProduct}
-          setSelectedProduct={setSelectedProduct}
+          setSelectedProduct={handleProductChange}
           verifyResult={verifyResult}
           setVerifyResult={setVerifyResult}
           loading={loading}
           setLoading={setLoading}
         />
-
-        {/* Body con scroll */}
         <div className="flex-1 overflow-y-auto bg-gray-100">
-          {/* Controles - Checkboxes */}
-          <div className="flex items-center gap-6 px-6 py-4 bg-200 border-b border-gray-200">
-            {checkboxOptions.map((option) => (
-              <label
-                key={option.id}
-                htmlFor={option.id}
-                className="flex items-center gap-3 cursor-pointer group"
-              >
-                <input
-                  type="checkbox"
-                  id={option.id}
-                  checked={option.checked}
-                  onChange={option.onChange}
-                  className="shrink-0 w-4 h-4 border-gray-300 rounded text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
-                />
-                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">
-                  {option.label}
-                </span>
-              </label>
-            ))}
-          </div>
-
+          {/* Controles - Checkboxes (solo visible cuando hay producto seleccionado) */}
+          {selectedProduct && (
+            <div className="flex items-center gap-6 px-6 py-4 bg-200 border-b border-gray-200">
+              {checkboxOptions.map((option) => (
+                <label
+                  key={option.id}
+                  htmlFor={option.id}
+                  className="flex items-center gap-3 cursor-pointer group"
+                >
+                  <input
+                    type="checkbox"
+                    id={option.id}
+                    checked={option.checked}
+                    onChange={option.onChange}
+                    className="shrink-0 w-4 h-4 border-gray-300 rounded text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+                  />
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">
+                    {option.label}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
           {/* Contenido principal */}
           <div className="">
-            {/* Mensaje cuando no hay nada seleccionado */}
-            {!activeView && (
-              <div className="flex my-3 flex-col items-center justify-center bg-gray-100 text-gray-500">
-                <svg
-                  className="w-10 h-10 mb-4 text-gray-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+            {!selectedProduct && (
+              <div className="flex py-10 m-3 flex-col items-center justify-center rounded-lg bg-gray-200 text-gray-500">
+                <IconWarning className="size-8 mb-2" />
+                <p className="text-sm font-medium">Selecciona un producto para continuar</p>
+              </div>
+            )}
+            {/* Mensaje cuando hay producto pero no hay vista seleccionada */}
+            {selectedProduct && !activeView && (
+              <div className="flex py-10 m-3 flex-col items-center justify-center rounded-lg bg-gray-200 text-gray-500">
+                <IconWarning className="size-8 mb-2" />
                 <p className="text-sm font-medium">Selecciona una opción</p>
               </div>
             )}
-
             {/* Vista: Agregar Frase */}
-            {activeView === "add" && (
+            {selectedProduct && activeView === "add" && (
               <div className="transition-all duration-300 ease-in-out">
                 <InputPhrases />
               </div>
             )}
-
             {/* Vista: Lista de Frases */}
-            {activeView === "list" && (
+            {selectedProduct && activeView === "list" && (
               <div className="transition-all duration-300 ease-in-out">
                 <SavePhrases />
               </div>
