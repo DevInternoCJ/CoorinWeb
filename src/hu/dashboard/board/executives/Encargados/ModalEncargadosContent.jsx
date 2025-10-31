@@ -137,13 +137,13 @@ const ModalEncargadosContent = () => {
         const fetchExecutives = async () => {
             try {
                 const userData = JSON.parse(localStorage.getItem('userData'));
-                const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id;
+                const idEjecutivo = userData?.idEjecutivo;
                 if (!idEjecutivo) return;
                 const data = await obetenerJerarquiaEncargados(idEjecutivo);
                 // El nodo raíz será el ejecutivo de la sesión, y todos los demás serán sus subordinados directos
                 const rootNode = {
                     usuario: userData.usuario || '',
-                    nombreEjecutivo: userData.nombre || userData.nombreEjecutivo || userData.ejecutivo || '',
+                    nombreEjecutivo: userData.nombreEjecutivo,
                     subordinados: Array.isArray(data) ? data : [],
                     idEjecutivo: idEjecutivo,
                     idEncargado: null,

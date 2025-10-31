@@ -57,7 +57,7 @@ function ModalValidadoresContent(props) {
       try {
         const userData = JSON.parse(localStorage.getItem("userData"));
         const idEjecutivo =
-          userData?.idEjecutivo || userData?.idejecutivo || userData?.id;
+          userData?.idEjecutivo;
         const usuarioSesion = userData?.usuario || userData?.Usuario || "";
         const nombreSesion = userData?.nombreEjecutivo || userData?.nombre || "";
         if (!idEjecutivo) return;
@@ -65,14 +65,14 @@ function ModalValidadoresContent(props) {
         // Filtrar solo ejecutivos propios de nivel 1 (simula tvDependientes.CargaEjecutivosPropios(1))
         const hijos = Array.isArray(data)
           ? data
-              .filter(e => (e.jerarquia === undefined || e.jerarquia > 0))
+              .filter(e => (e.jerarquia === undefined || e.jerarquia > 0)) // Solo excluye jerarquía <= 0
               .map((e) => ({
-                usuario: e.usuario || e.Usuario || "",
+                usuario: e.usuario,
                 nombreEjecutivo: e.nombreEjecutivo || "",
                 subordinados: Array.isArray(e.subordinados)
-                  ? e.subordinados.filter(s => (s.jerarquia === undefined || s.jerarquia > 0))
+                  ? e.subordinados.filter(s => (s.jerarquia === undefined || s.jerarquia > 0)) // Solo excluye jerarquía <= 0 en subordinados
                   : [],
-                idEjecutivo: e.idEjecutivo || e.idejecutivo || e.id || "",
+                idEjecutivo: e.idEjecutivo,
                 idEncargado: e.idEncargado || null,
                 seleccionado: false,
                 jerarquia: e.jerarquia || 1,
@@ -103,50 +103,35 @@ function ModalValidadoresContent(props) {
   const usuariosFiltrados = useMemo(() => {
     if (!executiveTree.length) return [];
 
-    const usuariosValidadores = [];
-
-    // Tomar solo los primeros 13 ejecutivos principales
-    const ejecutivosPrincipales = executiveTree.slice(0, 13);
-
-    ejecutivosPrincipales.forEach((ejecutivo) => {
-      // Agregar el ejecutivo principal
-      usuariosValidadores.push({
-        ...ejecutivo,
-        usuario: ejecutivo.usuario || ejecutivo.Usuario || "",
-        nombreEjecutivo: ejecutivo.nombreEjecutivo || "",
-        displayName: `${ejecutivo.usuario || ejecutivo.Usuario || ""} - ${
-          ejecutivo.nombreEjecutivo || ""
-        }`,
-        nivelJerarquia: 1,
-        esSubordinado: false,
-        seleccionado: false,
-      });
-
-      // Agregar sus subordinados si los tiene
-      if (
-        Array.isArray(ejecutivo.subordinados) &&
-        ejecutivo.subordinados.length > 0
-      ) {
-        ejecutivo.subordinados.forEach((subordinado) => {
-          usuariosValidadores.push({
-            usuario: subordinado.usuario || subordinado.Usuario || "",
-            nombreEjecutivo: subordinado.nombreEjecutivo || "",
-            displayName: `${
-              subordinado.usuario || subordinado.Usuario || ""
-            } - ${subordinado.nombreEjecutivo || ""}`,
-            idEjecutivo:
-              subordinado.idEjecutivo ||
-              subordinado.idejecutivo ||
-              subordinado.id ||
-              "",
-            idEncargado: subordinado.idEncargado || ejecutivo.idEjecutivo,
-            nivelJerarquia: 2,
-            esSubordinado: true,
-            encargadoPadre: ejecutivo.usuario,
-            seleccionado: false,
-          });
+    // Función recursiva para recorrer toda la jerarquía y agregar ejecutivos válidos
+    const recolectarEjecutivos = (ejecutivo, nivel = 1, encargadoPadre = null) => {
+      const lista = [];
+      if (ejecutivo && (ejecutivo.jerarquia === undefined || ejecutivo.jerarquia > 0)) {
+        lista.push({
+          usuario: ejecutivo.usuario || ejecutivo.Usuario || "",
+          nombreEjecutivo: ejecutivo.nombreEjecutivo || "",
+          displayName: `${ejecutivo.usuario || ejecutivo.Usuario || ""} - ${ejecutivo.nombreEjecutivo || ""}`,
+          idEjecutivo: ejecutivo.idEjecutivo || ejecutivo.idejecutivo || ejecutivo.id || "",
+          idEncargado: ejecutivo.idEncargado || null,
+          nivelJerarquia: nivel,
+          esSubordinado: nivel > 1,
+          encargadoPadre: encargadoPadre,
+          seleccionado: false,
+          jerarquia: ejecutivo.jerarquia || 1,
         });
       }
+      if (Array.isArray(ejecutivo.subordinados) && ejecutivo.subordinados.length > 0) {
+        ejecutivo.subordinados.forEach(sub => {
+          lista.push(...recolectarEjecutivos(sub, nivel + 1, ejecutivo.usuario));
+        });
+      }
+      return lista;
+    };
+
+    // Recorrer todos los nodos raíz
+    let usuariosValidadores = [];
+    executiveTree.forEach(ejecutivo => {
+      usuariosValidadores.push(...recolectarEjecutivos(ejecutivo, 1, null));
     });
 
     return usuariosValidadores;
@@ -326,6 +311,9 @@ function ModalValidadoresContent(props) {
 
     const usuarioActual = usuariosValidadores[index];
     const nuevoEstado = !usuarioActual.seleccionado;
+
+    // Mostrar los datos completos del ejecutivo seleccionado, incluyendo jerarquía
+    console.log("Ejecutivo seleccionado:", usuarioActual);
 
     // Actualizar el estado local inmediatamente para mejor UX
     setUsuariosValidadores((prev) => {
