@@ -1530,7 +1530,15 @@ namespace CoorinWeb.Loki.Global
                 //string sNot = "";
 
                 SqlQueryData squeryCuentas = QueryCuentas(idConsulta, ref columnas);
-
+                Console.WriteLine("🔍 === PARÁMETROS EN QueryGeneral ===");
+                if (tblParametros != null)
+                {
+                    foreach (DataRow row in tblParametros.Rows)
+                    {
+                        Console.WriteLine($"   Concepto: {row["Concepto"]}, Campo: {row["Campo"]}, Valores: {row["Valores"]}, Parámetros: {row["Parámetros"]}, Dato: {row["Dato"]}");
+                    }
+                }
+                Console.WriteLine("🔍 ================================\n");
                 string sQuery = " SELECT \r\n",
 
                  sSelect =
@@ -1698,25 +1706,51 @@ namespace CoorinWeb.Loki.Global
                                     string sCampo = drFila["Campo"].ToString().Replace("# ", "");
                                     sNot = drFila["Valores"].ToString().Contains("≠") ? "NOT" : "";
 
-                                    //Instancia de CatalogosService
+                                    Console.WriteLine($"🔍 Procesando campo: {sCampo}, Parámetros: {drFila["Parámetros"]}");
+
                                     var catalogosService = new CatalogosService(_dbContextFactory);
 
-                                    if (drFila["Campo"].ToString() == "Teléfono")
+                                    // CASO ESPECIAL: idCartera ya está en el WHERE principal, no necesita condición adicional
+                                    if (sCampo == "idCartera")
+                                    {
+                                        Console.WriteLine($"🔍 Campo idCartera omitido - ya está en WHERE principal");
+                                        break; // Salir de este caso, no agregar condición adicional
+                                    }
+                                    else if (drFila["Campo"].ToString() == "Teléfono")
+                                    {
                                         sWhere += "\t AND Z.NúmeroTelefónico " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
-
+                                        Console.WriteLine($"🔍 Agregando condición Teléfono");
+                                    }
                                     else if (drFila["Campo"].ToString() == "Clase")
+                                    {
                                         sWhere += "\t AND Z.idClase " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+                                        Console.WriteLine($"🔍 Agregando condición Clase");
+                                    }
                                     else if (drFila["Campo"].ToString() == "Telefonía")
+                                    {
                                         sWhere += "\t AND Z.idTelefonía " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+                                        Console.WriteLine($"🔍 Agregando condición Telefonía");
+                                    }
                                     else if (drFila["Campo"].ToString() == "Origen")
+                                    {
                                         sWhere += "\t AND Z.idOrígen " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+                                        Console.WriteLine($"🔍 Agregando condición Origen");
+                                    }
                                     else if (drFila["Campo"].ToString() == "Confirmado")
+                                    {
                                         sWhere += "\t AND Z.Confirmado " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+                                        Console.WriteLine($"🔍 Agregando condición Confirmado");
+                                    }
                                     else if (drFila["Campo"].ToString() == "EntidadFederativa")
+                                    {
                                         sWhere += "\t AND Z.Estado " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+                                        Console.WriteLine($"🔍 Agregando condición EntidadFederativa");
+                                    }
                                     else if (drFila["Campo"].ToString() == "EstatusNegociación")
-                                        sWhere += "\t AND EstatusNegociación " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";//DUDA  GTNeg.NúmeroTelefónico
-
+                                    {
+                                        sWhere += "\t AND EstatusNegociación " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
+                                        Console.WriteLine($"🔍 Agregando condición EstatusNegociación");
+                                    }
                                     else if (drFila["Campo"].ToString() == "HusoHorario")
                                     {
                                         for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
@@ -1724,7 +1758,7 @@ namespace CoorinWeb.Loki.Global
 
                                         if (!sFrom.Contains(" MarcaciónInternacional MI "))
                                             sFrom += "\t LEFT JOIN MarcaciónInternacional MI ON Z.idTelefonía = MI.idTelefonía AND MI.Clave = SUBSTRING(CONVERT(VARCHAR(20),Z.NúmeroTelefónico), 1,3) \r\n";
-
+                                        Console.WriteLine($"🔍 Agregando condición HusoHorario");
                                     }
                                     else if (sCampo == "HusoHorario")
                                     {
@@ -1734,6 +1768,7 @@ namespace CoorinWeb.Loki.Global
 
                                         if (!sFrom.Contains("MarcaciónInternacional MI"))
                                             sFrom += "\t LEFT JOIN MarcaciónInternacional MI ON Z.idTelefonía = MI.idTelefonía AND MI.Clave = SUBSTRING(CONVERT(VARCHAR(20),Z.NúmeroTelefónico), 1,3) \r\n";
+                                        Console.WriteLine($"🔍 Agregando condición HusoHorario (segundo caso)");
                                     }
                                     else if (sCampo == "MejorContacto")
                                     {
@@ -1751,15 +1786,14 @@ namespace CoorinWeb.Loki.Global
                                             sWhere += "\t AND MC.idContacto " + sNot + " IN (" + drFila["Parámetros"] + ") \r\n";
                                         }
 
-                                        //Se obtiene IDs relacionados mediante CatalogosService
                                         var idsRelacionados = await catalogosService.IdsRelacionesAsync(servidor, Convert.ToInt32(drFila["Parámetros"]));
-
                                         sWhere += $"\t AND MC.idContacto {sNot} IN ({idsRelacionados}) \r\n";
+                                        Console.WriteLine($"🔍 Agregando condición MejorContacto");
                                     }
                                     else if (sCampo == "Descolgaron_ViciDial" || sCampo == "Intentos_ViciDial")
                                     {
                                         if (!sFrom.Contains(") IVD"))
-                                        
+                                        {
                                             sFrom += "\t LEFT JOIN ( \r\n\t\t\t" +
                                      "SELECT IV.NúmeroTelefónico, \r\n\t\t\t\t" +
                                          "SUM(Contestaron) Descolgaron_ViciDial, \r\n\t\t\t\t" +
@@ -1767,50 +1801,62 @@ namespace CoorinWeb.Loki.Global
                                      "FROM Intentos_ViciDial IV  WITH (NOLOCK) INNER JOIN Equivalencias_ViciDial EV  WITH (NOLOCK) ON IV.Status_ViciDial = EV.Status_ViciDial \r\n\t\t\t" +
                                      "WHERE IV.Fecha_Insert >= '" + desde.ToString("yyyy-MM-dd") + "' \r\n\t\t\t" +
                                      "GROUP BY IV.NúmeroTelefónico ) IVD\r\n\t\t\t\tON IVD.NúmeroTelefónico = Z.NúmeroTelefónico \r\n ";
-                                            for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
-                                                sWhere += "\t AND ISNULL(IVD." + sCampo + ",0) " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
-
-                                        
+                                        }
+                                        for (int i = 0; i < drFila["Parámetros"].ToString().Split(',').Length; i++)
+                                            sWhere += "\t AND ISNULL(IVD." + sCampo + ",0) " + drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',')[i] + "\r\n";
+                                        Console.WriteLine($"🔍 Agregando condición {sCampo}");
                                     }
                                     else if (sCampo == "Extensión")
                                     {
                                         sWhere += "\t AND Z.Extensión";
+                                        Console.WriteLine($"🔍 Agregando condición Extensión");
                                     }
                                     else
                                     {
-                                        if (!bConteosTels)
+                                        // VERIFICA QUE EL CAMPO EXISTA EN ConteosTels ANTES DE AGREGAR LA CONDICIÓN
+                                        var camposConteosTels = new[] { "Titulares", "Conocidos", "Desconocidos", "SinContacto", "ÚltimaMarcación" };
+
+                                        if (camposConteosTels.Contains(sCampo))
                                         {
-                                            var idsRelacionados = await catalogosService.IdsRelacionesAsync(servidor, 1103);
+                                            if (!bConteosTels)
+                                            {
+                                                var idsRelacionados = await catalogosService.IdsRelacionesAsync(servidor, 1103);
 
-                                            sFrom += "\t LEFT JOIN ( \r\n" +
-                                                "SELECT GT.idCuenta, GT.NúmeroTelefónico, " +
-                                                $"SUM(CASE WHEN idContacto=1101 THEN 1 ELSE 0 END) AS 'Titulares', " +
-                                                $"SUM(CASE WHEN idContacto=1102 THEN 1 ELSE 0 END) AS 'Conocidos', " +
-                                              $"SUM(CASE WHEN idContacto IN ({idsRelacionados}) THEN 1 ELSE 0 END) AS 'Desconocidos', " +
-                                               $"SUM(CASE WHEN idContacto NOT IN (1101,1102,{idsRelacionados}) THEN 1 ELSE 0 END) AS 'SinContacto', " +
-                                                "MAX(Fecha_Insert) AS 'ÚltimaMarcación' " +
-                                                "FROM dbCollection..GestionesTelefónicas GT WITH (NOLOCK) " +
-                                                $"WHERE GT.idCartera = {idCartera} AND Fecha_Insert >= '{desde:yyyy-MM-dd}' " +
-                                                "GROUP BY GT.idCuenta, GT.NúmeroTelefónico ) ConteosTels " +
-                                                "ON ConteosTels.idCuenta = Z.idCuenta AND ConteosTels.NúmeroTelefónico = Z.NúmeroTelefónico \r\n";
-                                            bConteosTels = true;
+                                                sFrom += "\t LEFT JOIN ( \r\n" +
+                                                    "SELECT GT.idCuenta, GT.NúmeroTelefónico, " +
+                                                    $"SUM(CASE WHEN idContacto=1101 THEN 1 ELSE 0 END) AS 'Titulares', " +
+                                                    $"SUM(CASE WHEN idContacto=1102 THEN 1 ELSE 0 END) AS 'Conocidos', " +
+                                                  $"SUM(CASE WHEN idContacto IN ({idsRelacionados}) THEN 1 ELSE 0 END) AS 'Desconocidos', " +
+                                                   $"SUM(CASE WHEN idContacto NOT IN (1101,1102,{idsRelacionados}) THEN 1 ELSE 0 END) AS 'SinContacto', " +
+                                                    "MAX(Fecha_Insert) AS 'ÚltimaMarcación' " +
+                                                    "FROM dbCollection..GestionesTelefónicas GT WITH (NOLOCK) " +
+                                                    $"WHERE GT.idCartera = {idCartera} AND Fecha_Insert >= '{desde:yyyy-MM-dd}' " +
+                                                    "GROUP BY GT.idCuenta, GT.NúmeroTelefónico ) ConteosTels " +
+                                                    "ON ConteosTels.idCuenta = Z.idCuenta AND ConteosTels.NúmeroTelefónico = Z.NúmeroTelefónico \r\n";
+                                                bConteosTels = true;
+                                                Console.WriteLine($"🔍 Agregando JOIN ConteosTels");
+                                            }
+
+                                            var parametrosConteos = drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',');
+                                            for (int i = 0; i < parametrosConteos.Length; i++)
+                                            {
+                                                string condicion = $"\t AND ISNULL(ConteosTels.{sCampo},{(sCampo == "ÚltimaMarcación" ? "'1900-01-01'" : "0")}) {parametrosConteos[i]} \r\n";
+                                                sWhere += condicion;
+                                                Console.WriteLine($"🔍 Agregando condición ConteosTels: {condicion.Trim()}");
+                                            }
                                         }
-
-                                        if (sCampo == "Municipio")
+                                        else if (sCampo == "Municipio")
                                         {
                                             sWhere += $"\t AND Z.Municipio {sNot} IN ('{drFila["Parámetros"]}') \r\n";
+                                            Console.WriteLine($"🔍 Agregando condición Municipio");
                                         }
                                         else
                                         {
-                                            var parametrosConteos = drFila["Parámetros"].ToString().Replace("≠", "<>").Split(',');
-                                            for (int i = 0; i < parametrosConteos.Length; i++)
-                                                sWhere += $"\t AND ISNULL(ConteosTels.{sCampo},{(sCampo == "ÚltimaMarcación" ? "'1900-01-01'" : "0")}) {parametrosConteos[i]} \r\n";
+                                            Console.WriteLine($"⚠️ Campo no reconocido: {sCampo}, omitiendo...");
                                         }
                                     }
-
                                     break;
                                 }
-
 
                             case "Gestiones":
                                 sNot = (drFila["Valores"].ToString().Contains("≠") ? " NOT" : "");
@@ -1989,8 +2035,6 @@ namespace CoorinWeb.Loki.Global
                                 if (drFila["Campo"].ToString() == "Teléfono")
                                 {
                                     telefono = "1";
-                                    //sSelect += "\t ,Z.NúmeroTelefónico \r\n ";
-                                    //sGroupBy += "Z.NúmeroTelefónico, ";
                                 }
                                 else if (drFila["Campo"].ToString() == "Clase")
                                 {
@@ -2023,15 +2067,7 @@ namespace CoorinWeb.Loki.Global
                                                 + "\t ,Z.Fecha_Insert FechaAltaTeléfono \r\n ";
                                         sFrom += "\t LEFT JOIN dbCollection..Ejecutivos EO ON Z.idEjecutivo = EO.idEjecutivo AND EO.idEjecutivo > 1 \r\n";
                                     }
-
                                     sGroupBy += "Origen.Valor, ";
-                                }
-                                else if (drFila["Campo"].ToString() == "EstatusNegociación")
-                                {
-                                    estatusNego = "1";
-                                    sSelect += "\t ,EstatusNegociación \r\n";
-                                    sFrom += "\t LEFT JOIN (\r\n\t\t\t\t SELECT COUNT(*) EstatusNegociación, IdCuenta, NúmeroTelefónico FROM \r\n\t\t\t\t(\r\n\t\t\t\t SELECT idCartera, idCuenta,NúmeroTelefónico, Fecha_Insert,Segundo_Insert,idSituación \r\n\t\t\t\t FROM  dbCollection..GestionesTelefónicas \r\n\t\t\t\t WHERE idSituación = 1010 AND idCartera = " + idCartera + " \r\n\t\t\t\t UNION ALL \r\n\t\t\t\t SELECT idCartera, idCuenta,NúmeroTelefónico, Fecha_Insert,Segundo_Insert,idSituación \r\n\t\t\t\t FROM  dbCollection..GestionesChat \r\n\t\t\t\t WHERE idSituación = 1010 AND idCartera = " + idCartera + " \r\n\t\t\t\t) Gest GROUP BY IdCuenta, NúmeroTelefónico\r\n\t\t\t\t) GTNeg ON  Z.idCuenta = GTNeg.idCuenta AND Z.NúmeroTelefónico = GTNeg.NúmeroTelefónico\r\n";
-                                    sGroupBy += "EstatusNegociación,";//aqui GTNeg.NúmeroTelefónico
                                 }
                                 else if (drFila["Campo"].ToString() == "Confirmado")
                                 {
@@ -2167,20 +2203,7 @@ namespace CoorinWeb.Loki.Global
                                 }
 
                                 break;
-                            case "Clase": clase = "1"; break;
-                            case "Telefonía": telefonica = "1"; break;
-                            case "Origen": origen = "1"; break;
-                            case "Confirmado": confirmado = "1"; break;
-                            case "HusoHorario": huso = "1"; break;
-                            case "EntidadFederativa": entidad = "1"; break;
-                            case "ÚltimaMarcación": ultima = "1"; break;
-                            case "SinContacto": sinConocido = "1"; break;
-                            case "Desconocidos": desconocido = "1"; break;
-                            case "Conocidos": conocido = "1"; break;
-                            case "Titulares": titulares = "1"; break;
-                            case "Calificacion": calificacion = "1"; break;
-                            case "EstatusNegociacion": estatusNego = "1"; break;
-                            case "Ranking": ranking = "1"; break;
+                        
                         }
                     }
                 }

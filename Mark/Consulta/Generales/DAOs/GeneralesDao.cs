@@ -51,8 +51,6 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 if (idConsulta.HasValue)
                     AplicarConsultaGuardada(idConsulta.Value, ref idProducto, ref idCartera, ref fechaDesde);
                 else
-                    // tblParametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
-                    // Concepto = "Cuenta" (o el concepto que uses), Campo = "idCartera", Valores = idCartera, operador lógico = "AND", dato = "int"
                     tblParametros.Rows.Add("Cuenta", "idCartera", idCartera.ToString(), "AND", "int");
 
                 ProcesarParametrosExtra(parametrosExtra, tblParametros);
@@ -61,10 +59,14 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 var modoResultado = DeterminarModoDeResultado(tipoResultado);
 
                 var consulta = new ConsultaGenerador(_dbContFactory);
+
+                // CORREGIDO: Usar método para determinar concepto dinámicamente
+                string conceptoPrincipal = DeterminarConceptoPrincipal(parametrosExtra, agruparExtra);
+
                 string query = await consulta.QueryGeneral(
                     servidor,
                     idCartera,
-                    parametrosExtra?.FirstOrDefault()?.Concepto ?? "Cuenta",
+                    conceptoPrincipal,  // ← Concepto determinado dinámicamente
                     tblParametros,
                     tblAgrupar,
                     modoResultado,
@@ -172,17 +174,48 @@ namespace Loki.Mark.Consulta.Generales.DAOs
 
             foreach (var p in parametrosExtra)
             {
+                Console.WriteLine($"=== PROCESANDO PARÁMETRO ===");
+                Console.WriteLine($"Concepto: {p.Concepto}");
+                Console.WriteLine($"Campo: {p.Campo}");
+                Console.WriteLine($"Valores: {p.Valores}");
+                Console.WriteLine($"Parámetros: {p.Parámetros}");
+                Console.WriteLine($"Dato: {p.Dato}");
+
                 ValidarParametro(p);
 
-                string operador = ObtenerOperador(p.Parámetros);
                 string tipoDato = ObtenerTipoDato(p.Concepto, p.Campo, p.Dato);
 
-                if (EsDuplicado(tblParametros, p)) continue;
+                Console.WriteLine($"TipoDato determinado: {tipoDato}");
 
-                tblParametros.Rows.Add(p.Concepto, p.Campo, p.Valores, operador, tipoDato);
+                if (EsDuplicado(tblParametros, p))
+                {
+                    Console.WriteLine("❌ Parámetro duplicado, omitiendo...");
+                    continue;
+                }
+
+                // CORREGIDO: Usar p.Parámetros (los valores reales) en la columna "Parámetros"
+                tblParametros.Rows.Add(p.Concepto, p.Campo, p.Valores, p.Parámetros, tipoDato);
+
+                Console.WriteLine($"✅ Parámetro agregado correctamente");
+                Console.WriteLine($"=== FIN PARÁMETRO ===\n");
             }
-        }
 
+            // Debug final
+            Console.WriteLine("🎯 CONTENIDO FINAL DE tblParametros:");
+            if (tblParametros.Rows.Count == 0)
+            {
+                Console.WriteLine("   (vacío)");
+            }
+            else
+            {
+                for (int i = 0; i < tblParametros.Rows.Count; i++)
+                {
+                    var row = tblParametros.Rows[i];
+                    Console.WriteLine($"   [{i}] Concepto: {row["Concepto"]}, Campo: {row["Campo"]}, Valores: {row["Valores"]}, Parámetros: {row["Parámetros"]}, Dato: {row["Dato"]}");
+                }
+            }
+            Console.WriteLine("🎯 FIN CONTENIDO tblParametros\n");
+        }
         private void ValidarParametro(ParameterDto p)
         {
             if (string.IsNullOrWhiteSpace(p.Concepto))
@@ -201,27 +234,61 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 throw new Exception($"El tipo de dato '{tipoDato}' del campo '{p.Campo}' no es válido.");
         }
 
-        private string ObtenerOperador(string? operador) =>
-            string.IsNullOrWhiteSpace(operador) ? "AND" : operador.ToUpper();
+        // CORREGIDO: Método para determinar operador correctamente
+        private string ObtenerOperador(ParameterDto p)
+        {
+            // El operador siempre debe ser "AND" para estos parámetros
+            // El problema anterior era que tomaba el valor del parámetro en lugar del operador
+            return "AND";
+        }
 
+        // NUEVO MÉTODO: Determinar concepto principal dinámicamente
+        private string DeterminarConceptoPrincipal(IEnumerable<ParameterDto>? parametrosExtra, IEnumerable<AgruparDTO>? agruparExtra)
+        {
+            // Buscar concepto en parámetros
+            var conceptoParametros = parametrosExtra?.FirstOrDefault()?.Concepto;
+
+            // Buscar concepto en agrupamientos  
+            var conceptoAgrupar = agruparExtra?.FirstOrDefault()?.Concepto;
+
+            // Priorizar: parámetros > agrupamientos > default "Cuenta"
+            return conceptoParametros ?? conceptoAgrupar ?? "Cuenta";
+        }
+
+        // MÉTODO ACTUALIZADO: Manejar múltiples conceptos dinámicamente
         private string ObtenerTipoDato(string concepto, string campo, string? datoFromRequest)
         {
             if (!string.IsNullOrEmpty(datoFromRequest))
                 return datoFromRequest.ToLower();
 
+            // Manejar diferentes conceptos dinámicamente
             return concepto?.ToLower() switch
             {
+                "teléfonos" => campo?.ToLower() switch
+                {
+                    "confirmado" or "clase" or "origen" or "telefonía" => "list",
+                    "teléfono" or "número telefónico" or "númerotelefónico" => "char",
+                    "extensión" or "idclase" or "idtelefonía" or "idorígen" or "confirmado" => "int",
+                    _ => "string"
+                },
                 "cuenta" => campo?.ToLower() switch
                 {
                     "situación" or "nivel" or "sucursal" or "causanopago" => "list",
-                    "rfc" => "char",
-                    "bloqueo" => "int",
+                    "rfc" or "idcuenta" => "char",
+                    "bloqueo" or "idcartera" => "int",
+                    _ => "string"
+                },
+                "gestiones" or "negociaciones" or "seguimientos" or "chats" => campo?.ToLower() switch
+                {
+                    "fecha" or "fechacreación" or "fecha_insert" => "date",
+                    "hora" or "horacreación" or "segundo_insert" => "string",
+                    "duración" or "montonegociado" or "montopagado" => "int",
                     _ => "string"
                 },
                 "producto" => "char",
                 "conteos" => "int",
                 "fechas" => "date",
-                _ => "string"
+                _ => "string" // default para cualquier otro concepto
             };
         }
 
