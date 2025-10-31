@@ -151,6 +151,8 @@ using Loki.Mark.Administracion.Gespa.Frases.Services;
 using Loki.Mark.Consulta.Generales.Interfaces;
 using Loki.Mark.Consulta.Generales.Services;
 using Loki.Mark.Consulta.Generales.DAOs;
+using Loki.Mark.Captura.Visitas.DAOs;
+using Loki.Mark.Captura.Visitas.Services;
 
 
 
@@ -413,6 +415,13 @@ builder.Services.AddScoped<IBloqueoCuentasGespaDAOs, BloqueoCuentasGespaDAOs>();
 builder.Services.AddScoped<ICargoEnLineaGespaDAOs, CargoEnLineaGespaDAOs>();//padrino
 builder.Services.AddScoped<IEstadosDeCuentaGespaDAOs, EstadosDeCuentaGespaDAOs>();//padrino
 builder.Services.AddScoped<IDiaDelEjecutivoDAOs, DiaDelEjecutivoDAOs>();//padrino
+#endregion
+
+#region Visitas
+
+builder.Services.AddScoped<ICapturaVisitasService, CapturaVisitasService>();
+builder.Services.AddScoped<ICapturaVisitasDAO, CapturaVisitasDAO>();
+
 #endregion
 
 #endregion
