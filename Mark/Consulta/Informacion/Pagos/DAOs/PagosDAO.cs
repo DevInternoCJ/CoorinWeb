@@ -19,11 +19,12 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.DAOs
 		{
 			// El tipo de base parece ser fijo para esta consulta.
 			string tipoBase = "Collection";
+			const int timeoutSeconds = 1800;
 
 			using var connection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 
 			await connection.OpenAsync();
-			return await connection.QueryAsync<T>(sql, parametros);
+			return await connection.QueryAsync<T>(sql, parametros, commandTimeout: timeoutSeconds);
 		}
 	}
 }
