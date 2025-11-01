@@ -67,6 +67,15 @@ body {
   --color-background-secondary: #2b463c;
   --color-background-dashboard: #DEE5E5;
   --color-background-tertiary: #f5f5f5;
+  --animate-slide-x: slide-x 2s ease-in-out;
+  }
+   @keyframes slide-x {
+    0%, 100% {
+      transform: translateX(-8px);
+    }
+    50% {
+      transform: translateX(8px);
+    }
   }
 
 .perspective {

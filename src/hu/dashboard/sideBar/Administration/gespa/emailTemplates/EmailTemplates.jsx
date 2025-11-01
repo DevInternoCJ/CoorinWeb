@@ -4,8 +4,9 @@ import Template from "./Template";
 import LoadDates from "./LoadDates";
 import { PostLoadData } from "../../../../../../services/mark/albaz/LokiServices";
 import ModalBase from "../../../../board/ModalBase";
-import { IconScreens } from "../IconsTemplates";
-import { useWalletProducts } from "../../../../../login/WalletProduct"; 
+import { IconTemplate } from "../IconsTemplates";
+import { useWalletProducts } from "../../../../../login/WalletProduct"
+import IconCircular from "../../../../../../components/iconos/IconCircular"; 
 
 const EmailTemplates = ({ onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -15,7 +16,7 @@ const EmailTemplates = ({ onClose }) => {
   const [plantillas, setPlantillas] = useState([]);
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
-  const [datosDeudor, setDatosDeudor] = useState({}); // ✅ Nuevo estado para datosDeudor
+  const [datosDeudor, setDatosDeudor] = useState({}); // Nuevo estado para datosDeudor
   const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
   const { walletProducts} = useWalletProducts();
   const idProducto = walletProducts?.[0]?.idProducto;
@@ -68,7 +69,9 @@ const EmailTemplates = ({ onClose }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
-          icon={<IconScreens className="size-6" />}
+          icon={ <IconCircular size="size-10">
+               <IconTemplate className="size-6" />
+            </IconCircular>}
           title="Plantillas de Correo"
           onClose={onClose}
           selectedProduct={selectedProduct}

@@ -1,6 +1,7 @@
 import preline from "preline/plugin";
 import tailwindcssForms from "@tailwindcss/forms";
 import iconify from "@iconify/tailwind4";
+import tailwindcssAnimated from 'tailwindcss-animated'
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -26,5 +27,6 @@ export default {
     preline,
     tailwindcssForms,
     iconify,
+    tailwindcssAnimated,
   ],
 };

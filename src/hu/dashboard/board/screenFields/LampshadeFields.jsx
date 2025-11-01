@@ -13,33 +13,33 @@ const LampshadeFields = ({ isOpen, onClose }) => {
   const [verifyResult, setVerifyResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-   const handleRowSelect = useCallback((rowData) => {
+  const handleRowSelect = useCallback((rowData) => {
     console.log("LampshadeFields - Fila seleccionada:", rowData);
     setSelectedRowData(rowData);
   }, []);
 
-   const handleFieldNamesChange = useCallback((names) => {
+  const handleFieldNamesChange = useCallback((names) => {
     console.log("LampshadeFields - FieldNames recibidos:", names.length);
     setFieldNames(names);
   }, []);
 
-    // ✅ USAR useMemo para memoizar componentes y evitar re-montaje
+  // ✅ USAR useMemo para memoizar componentes y evitar re-montaje
   const memoizedTableEditFields = useMemo(() => {
     if (!selectedProduct || selectedProduct.value === 0) return null;
-    
+
     return (
       <TableEditFields
         key={`table-${selectedProduct.value}`} // ✅ Key única por producto
         idProducto={selectedProduct.value}
-        selectedRowData={selectedRowData} 
+        selectedRowData={selectedRowData}
         onFieldNamesChange={handleFieldNamesChange}
       />
     );
   }, [selectedProduct, selectedRowData, handleFieldNamesChange]);
-  
+
   const memoizedGridLampsFields = useMemo(() => {
     if (!selectedProduct || selectedProduct.value === 0) return null;
-    
+
     return (
       <GridLampsFields
         key={`grid-${selectedProduct.value}`} // ✅ Key única por producto
@@ -51,7 +51,7 @@ const LampshadeFields = ({ isOpen, onClose }) => {
 
   const memoizedInfoSection = useMemo(() => {
     if (!selectedProduct) return null;
-    
+
     return (
       <InfoSection
         key={`info-${selectedProduct.value}`} // ✅ Key única por producto
@@ -59,17 +59,19 @@ const LampshadeFields = ({ isOpen, onClose }) => {
         fieldNames={fieldNames}
       />
     );
-  }, [selectedProduct, fieldNames])
+  }, [selectedProduct, fieldNames]);
 
-   if (!isOpen) return null;
+  if (!isOpen) return null;
 
   return (
     <div className=" modal-blur-bg fixed inset-0 bg-opacity-70 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl max-w-6xl max-h-[90vh] overflow-hidden border border-gray-300">
         <ModalHeader
-          icon={ <IconCircular size="size-10">
+          icon={
+            <IconCircular size="size-10">
               <IconPantalla className="size-5" />
-            </IconCircular>}
+            </IconCircular>
+          }
           title="Campos Pantalla"
           onClose={onClose}
           selectedProduct={selectedProduct}

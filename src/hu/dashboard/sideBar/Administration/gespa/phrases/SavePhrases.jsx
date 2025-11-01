@@ -169,9 +169,9 @@ const SavePhrases = () => {
       </td>
      
       <td className="px-6 py-2 text-sm text-gray-800">
-         <kbd class="min-h-7.5 inline-flex justify-center items-center py-1 px-1.5 bg-gray-200 border border-transparent font-mono text-sm text-gray-800 rounded-md">
+         <kbd className="min-h-7.5 inline-flex justify-center items-center py-1 px-1.5 bg-gray-200 border border-transparent font-mono text-sm text-gray-800 rounded-md">
     {phrase.texto}
-  </kbd></td>
+       </kbd></td>
       <td className="px-6 py-2 whitespace-nowrap text-sm">{renderSwitch(phrase)}</td>
       <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-800">
         {phrase.fechaInsert}

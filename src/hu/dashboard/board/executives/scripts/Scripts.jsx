@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react";
 import ModalHeader from "../../../sideBar/Administration/gespa/ModalHeader";
 import ModalBase from "../../../board/ModalBase";
-import { IconScreens } from "../../../sideBar/Administration/gespa/IconsTemplates";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import EditionScripts from "./EditionScripts";
 import DataCharges from "./DataCharges";

@@ -1,12 +1,11 @@
 import React, { useState, useRef } from "react";
 import ModalHeader from "../ModalHeader";
 import ModalBase from "../../../../board/ModalBase";
-import { IconScreens } from "../IconsTemplates";
 import IconCircular from "../../../../../../components/iconos/IconCircular";
 import { InputPhrases } from "./InputPhrases";
 import SavePhrases from "./SavePhrases";
 import { IconWarning } from "../../../../board/executives/scripts/IconScripts";
-import {IconScripts} from "../../../../board/executives/IconesEjecutives";
+import {IconPhrases} from "../IconsTemplates";
 
 const Phrases = ({ onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -56,7 +55,7 @@ const Phrases = ({ onClose }) => {
         <ModalHeader
           icon={
             <IconCircular size="size-10">
-              <IconScripts className="size-6" />
+              <IconPhrases className="size-6" />
             </IconCircular>
           }
           title="Frases"
@@ -69,7 +68,6 @@ const Phrases = ({ onClose }) => {
           setLoading={setLoading}
         />
         <div className="flex-1 overflow-y-auto bg-gray-100">
-          {/* Controles - Checkboxes (solo visible cuando hay producto seleccionado) */}
           {selectedProduct && (
             <div className="flex items-center gap-6 px-6 py-4 bg-200 border-b border-gray-200">
               {checkboxOptions.map((option) => (
