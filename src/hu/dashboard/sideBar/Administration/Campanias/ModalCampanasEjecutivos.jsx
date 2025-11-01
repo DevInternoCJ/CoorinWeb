@@ -219,7 +219,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
         style={{
           overflowX: "auto",
           overflowY: "auto",
-          maxHeight: "35vh",
+          maxHeight: "45vh",
           height: "100%",
           flex: 1,
           width: "100%",
@@ -228,12 +228,13 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
         className="scrollbar-gray"
       >
         <table
-          className="modal-table"
+          className="modal-table text-base"
           style={{
             borderCollapse: "collapse",
             tableLayout: "fixed",
-            minWidth: "0",
+            minWidth: "260px",
             width: "100%",
+            maxWidth: "260px"
           }}
         >
           <thead>
@@ -243,10 +244,13 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
                 style={{
                   padding: "2px 2px",
                   fontWeight: 600,
-                  fontSize: "0.95rem",
+                  fontSize: "0.9rem",
                   textAlign: "center",
-                  width: "60px",
-                  minWidth: "40px",
+                  width: "32px",
+                  minWidth: "22px",
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2
                 }}
               >
                 Asignado
@@ -256,10 +260,13 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
                 style={{
                   padding: "2px 2px",
                   fontWeight: 600,
-                  fontSize: "0.95rem",
+                  fontSize: "0.9rem",
                   textAlign: "center",
                   width: "80px",
-                  minWidth: "60px",
+                  minWidth: "40px",
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2
                 }}
               >
                 Usuario
@@ -269,10 +276,13 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
                 style={{
                   padding: "2px 2px",
                   fontWeight: 600,
-                  fontSize: "0.95rem",
+                  fontSize: "0.9rem",
                   textAlign: "center",
-                  width: "60px",
-                  minWidth: "40px",
+                  width: "32px",
+                  minWidth: "22px",
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2
                 }}
               >
                 Restantes
@@ -281,14 +291,14 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
           </thead>
           <tbody>
             {ejecutivosOrdenados.map((row, i) => (
-              <tr key={i}>
+              <tr key={i} style={{ background: row.asignado ? 'var(--color-jerarquia1)' : undefined }}>
                 <td
                   className="modal-table-td"
                   style={{
                     padding: "2px 2px",
                     textAlign: "center",
-                    width: "60px",
-                    minWidth: "40px",
+                    width: "32px",
+                    minWidth: "22px",
                   }}
                 >
                   <input
@@ -305,10 +315,10 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
                     padding: "2px 2px",
                     textAlign: "center",
                     width: "80px",
-                    minWidth: "60px",
+                    minWidth: "40px",
                     fontFamily: "monospace",
                     letterSpacing: "1px",
-                    fontSize: "1rem",
+                    fontSize: "0.9rem",
                   }}
                 >
                   <span
@@ -326,8 +336,8 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
                   style={{
                     padding: "2px 2px",
                     textAlign: "center",
-                    width: "60px",
-                    minWidth: "40px",
+                    width: "32px",
+                    minWidth: "22px",
                   }}
                 >
                   {row.restantes ?? 0}

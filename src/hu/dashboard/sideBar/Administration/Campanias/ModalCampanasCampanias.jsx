@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import IconCircular from "../../../../../components/iconos/IconCircular";
 import ModalFilasCampañas from "./ModalFilasCampanias";
 import { campainghInCharge, enabledUnenabledCampaign, campaignDeleteada, campaignCleaning, AvanceCampaing } from "../../../../../services/mark/albaz/LokiServices";
 import { toast } from "sonner";
@@ -19,20 +20,20 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
     // Función para cargar campañas
     const cargarCampanas = async () => {
         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        const idEncargado = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.id ?? 1;
-        const idCartera = userData?.idCartera ?? userData?.idcartera ?? userData?.cartera ?? 1;
-        const idProducto = userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
+        const idEncargado = userData?.idEjecutivo ?? 0;
+        const idCartera = userData?.idCartera ?? 0;
+        const idProducto = userData?.idProducto ?? 0;
         const params = { idEncargado, idCartera, idProducto };
-        
+
         try {
             // Obtener las campañas
             const campanasData = await campainghInCharge(params);
             const campanasList = Array.isArray(campanasData) ? campanasData : [campanasData];
-            
+
             // Obtener el avance de las campañas
             const avanceResponse = await AvanceCampaing(idEncargado, idCartera, idProducto);
             const avanceData = Array.isArray(avanceResponse.data) ? avanceResponse.data : [avanceResponse.data];
-            
+
             // Combinar los datos: actualizar el campo Avance basado en idCampaña
             const campanasConAvance = campanasList.map(campana => {
                 const avanceInfo = avanceData.find(avance => avance.idCampaña === campana.idCampaña);
@@ -41,7 +42,7 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                     Avance: avanceInfo ? avanceInfo.avance : campana.Avance // Usar el nuevo avance si existe, sino mantener el original
                 };
             });
-            
+
             setCampanas(campanasConAvance);
         } catch (error) {
             console.error('Error al cargar campañas o avances:', error);
@@ -67,50 +68,57 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
     });
 
     return (
-        <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col" style={{ minWidth: 0 }}>
-            <div className="flex items-center mb-2 w-full">
+        <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col justify-between" style={{ minWidth: 0 }}>
+            <div>
+                <div className="flex items-center mb-2 w-full">
                     <span className="modal-span-1 pl-1 mr-4" style={{ color: "var(--color-jerarquia2)" }}>
                         Campañas - {campanas.length}
                     </span>
-            </div>
-            <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: "31vh", height: "100%", flex: 1 }} className="scrollbar-gray">
-                <table className="modal-table mb-2">
-                    <thead>
-                        <tr>
-                            <th style={{ textAlign: 'center' }}>Filas</th>
-                            <th style={{ textAlign: 'center' }}>Limpiar</th>
-                            <th style={{ textAlign: 'center' }}>Encendida</th>
-                            <th style={{ textAlign: 'left' }}>Creó</th>
-                            <th style={{ textAlign: 'left' }}>Nombre</th>
-                            <th style={{ textAlign: 'left' }}>Avance</th>
-                            <th style={{ textAlign: 'center' }}>Cuentas</th>
-                            <th style={{ textAlign: 'center' }}>Eliminar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {sortedCampanas.map((row, i) => (
-                            <tr
-                                key={i}
-                                style={{ minHeight: 0, height: '28px', lineHeight: '1.1', cursor: 'pointer' }}
-                                onClick={() => {
-                                    if (row.idCampaña) {
-                                        setSelectedId(row.idCampaña);
-                                        if (typeof onSeleccionCampaña === 'function') {
-                                            onSeleccionCampaña(row.idCampaña, row.Campaña);
+                </div>
+                <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: "40vh", height: "100%" }} className="scrollbar-gray">
+                    <table className="modal-table mb-2">
+                        <thead>
+                            <tr>
+                                <th style={{ textAlign: 'center', position: 'sticky', top: 0, zIndex: 2 }}>Filas</th>
+                                <th style={{ textAlign: 'center', position: 'sticky', top: 0, zIndex: 2 }}>Limpiar</th>
+                                <th style={{ textAlign: 'center', position: 'sticky', top: 0, zIndex: 2 }}>Encendida</th>
+                                <th style={{ textAlign: 'left', position: 'sticky', top: 0, zIndex: 2 }}>Creó</th>
+                                <th style={{ textAlign: 'left', position: 'sticky', top: 0, zIndex: 2 }}>Nombre</th>
+                                <th style={{ textAlign: 'left', position: 'sticky', top: 0, zIndex: 2 }}>Avance</th>
+                                <th style={{ textAlign: 'center', position: 'sticky', top: 0, zIndex: 2 }}>Cuentas</th>
+                                <th style={{ textAlign: 'center', position: 'sticky', top: 0, zIndex: 2 }}>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sortedCampanas.map((row, i) => (
+                                <tr
+                                    key={i}
+                                    style={{
+                                        minHeight: 0,
+                                        height: '28px',
+                                        lineHeight: '1.1',
+                                        cursor: 'pointer',
+                                        background: selectedId === row.idCampaña ? 'var(--color-jerarquia1)' : undefined
+                                    }}
+                                    onClick={() => {
+                                        if (row.idCampaña) {
+                                            setSelectedId(row.idCampaña);
+                                            if (typeof onSeleccionCampaña === 'function') {
+                                                onSeleccionCampaña(row.idCampaña, row.Campaña);
+                                            }
                                         }
-                                    }
-                                }}
-                                onDoubleClick={(e) => {
-                                    // Prevenir el doble clic si es sobre elementos interactivos
-                                    if (e.target.type === 'checkbox' || e.target.tagName === 'BUTTON') {
-                                        return;
-                                    }
-                                    if (row.idCampaña) {
-                                        setModalTop100({ open: true, idCampaña: row.idCampaña });
-                                    }
-                                }}
-                                className={selectedId === row.idCampaña ? "selected-campaign-row" : ""}
-                            >
+                                    }}
+                                    onDoubleClick={(e) => {
+                                        // Prevenir el doble clic si es sobre elementos interactivos
+                                        if (e.target.type === 'checkbox' || e.target.tagName === 'BUTTON') {
+                                            return;
+                                        }
+                                        if (row.idCampaña) {
+                                            setModalTop100({ open: true, idCampaña: row.idCampaña });
+                                        }
+                                    }}
+                                    className={selectedId === row.idCampaña ? "selected-campaign-row" : ""}
+                                >
                                 <td style={{ textAlign: 'center', height: '28px', lineHeight: '1.1', paddingTop: 0, paddingBottom: 0 }}>
                                     <button
                                         className="modal-btn modal-btn-table"
@@ -121,54 +129,85 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                                         }}
                                     >
                                         <span style={{ display: 'inline-flex', alignItems: 'center', padding: 0, margin: 0 }}>
-                                            {/* Icono de filas */}
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" style={{ width: 18, height: 18, margin: 0, padding: 0 }}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
-                                            </svg>
+                                            <IconCircular
+                                                bgColor="bg-green-200"
+                                                textColor="text-green-700"
+                                                borderColor="border-green-800"
+                                                size="size-5"
+                                                borderWidth="border-2"
+                                                tooltip="Filas"
+                                            >
+                                                {/* Icono original de filas con verde intenso */}
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+                                                    <path fill="#111" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+                                                </svg>
+                                            </IconCircular>
                                         </span>
                                     </button>
                                 </td>
                                 <td style={{ textAlign: 'center', height: '28px', lineHeight: '1.1', paddingTop: 0, paddingBottom: 0 }}>
                                     <span style={{ display: 'inline-flex', alignItems: 'center', padding: 0, margin: 0 }}>
-                                        {/* Icono limpiar */}
                                         <button
                                             className="modal-btn modal-btn-table"
                                             style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', margin: 0 }}
                                             onClick={() => setModalLimpiar({ open: true, idCampaña: row.idCampaña, nombre: row.Campaña })}
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" style={{ width: 18, height: 18, margin: 0, padding: 0 }}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
-                                            </svg>
+                                            <IconCircular
+                                                bgColor="bg-yellow-300"
+                                                textColor="text-yellow-900"
+                                                borderColor="border-orange-custom"
+                                                size="size-5"
+                                                borderWidth="border-2"
+                                                tooltip="Limpiar"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+                                                    <path fill="#111" d="M16 11h-1V3c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v8H8c-2.76 0-5 2.24-5 5v7h18v-7c0-2.76-2.24-5-5-5m-5-8h2v8h-2zm8 18h-2v-3c0-.55-.45-1-1-1s-1 .45-1 1v3h-2v-3c0-.55-.45-1-1-1s-1 .45-1 1v3H9v-3c0-.55-.45-1-1-1s-1 .45-1 1v3H5v-5c0-1.65 1.35-3 3-3h8c1.65 0 3 1.35 3 3z" />
+                                                </svg>
+                                            </IconCircular>
                                         </button>
                                     </span>
                                 </td>
                                 <td
                                     style={{ textAlign: 'center', height: '28px', lineHeight: '1.1', paddingTop: 0, paddingBottom: 0 }}
                                 >
-                                    <input
-                                        type="checkbox"
-                                        checked={updatingId === row.idCampaña ? !row.Encendida : row.Encendida}
-                                        readOnly
-                                        className="modal-checkbox-small"
-                                        style={{ cursor: 'pointer' }}
-                                        onDoubleClick={async (e) => {
-                                            e.stopPropagation();
-                                            if (!row.idCampaña) return;
-                                            setUpdatingId(row.idCampaña);
-                                            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-                                            const idEncargado = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.id ?? 1;
-                                            try {
-                                                const encender = !row.Encendida;
-                                                await enabledUnenabledCampaign({ idCampaña: row.idCampaña, idEncargado, encender });
-                                                toast.success(`Campaña "${row.Campaña}" ${encender ? "encendida" : "apagada"}`);
-                                                await cargarCampanas();
-                                            } catch (e) {
-                                                toast.error("Error al actualizar campaña", e);
-                                            } finally {
-                                                setUpdatingId(null);
-                                            }
-                                        }}
-                                    />
+                                    <div className="flex items-center justify-center">
+                                        <label
+                                            htmlFor={`switch-${row.idCampaña}`}
+                                            className="relative inline-block w-8 h-5 cursor-pointer"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                id={`switch-${row.idCampaña}`}
+                                                className="peer sr-only"
+                                                checked={updatingId === row.idCampaña ? !row.Encendida : row.Encendida}
+                                                onChange={async (e) => {
+                                                    e.stopPropagation();
+                                                    if (!row.idCampaña) return;
+                                                    setUpdatingId(row.idCampaña);
+                                                    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                                                    const idEncargado = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.id ?? 1;
+                                                    try {
+                                                        const encender = !row.Encendida;
+                                                        await enabledUnenabledCampaign({ idCampaña: row.idCampaña, idEncargado, encender });
+                                                        toast.success(`Campaña "${row.Campaña}" ${encender ? "encendida" : "apagada"}`);
+                                                        await cargarCampanas();
+                                                    } catch (e) {
+                                                        toast.error("Error al actualizar campaña", e);
+                                                    } finally {
+                                                        setUpdatingId(null);
+                                                    }
+                                                }}
+                                            />
+                                            <span className="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-jerarquia3"></span>
+                                            <span className="absolute top-1/2 start-0.5 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                                            <span className="absolute top-1/2 start-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-white transition-colors duration-200">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width={13} height={13} viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"></path></svg>
+                                            </span>
+                                            <span className="absolute top-1/2 end-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-jerarquia3 transition-colors duration-200 ">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width={13} height={13} viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"></path></svg>
+                                            </span>
+                                        </label>
+                                    </div>
                                 </td>
                                 <td style={{ textAlign: 'left', height: '28px', lineHeight: '1.1', paddingTop: 0, paddingBottom: 0 }}>{row.Usuario}</td>
                                 <td style={{ textAlign: 'left', height: '28px', lineHeight: '1.1', paddingTop: 0, paddingBottom: 0 }}>{row.Campaña}</td>
@@ -177,10 +216,21 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                                 <td style={{ textAlign: 'center', height: '28px', lineHeight: '1.1', paddingTop: 0, paddingBottom: 0 }}>
                                     <button
                                         className="modal-btn modal-btn-close"
-                                        style={{ fontSize: 18 }}
+                                        style={{ padding: 0, background: 'transparent', border: 'none', cursor: 'pointer' }}
                                         onClick={() => setModalEliminar({ open: true, idCampaña: row.idCampaña, nombre: row.Campaña })}
                                     >
-                                        &times;
+                                        <IconCircular
+                                            bgColor="bg-red-200"
+                                            textColor="text-red-700"
+                                            borderColor="border-red-800"
+                                            size="size-5"
+                                            borderWidth="border-2"
+                                            tooltip="Eliminar"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+                                                <path fill="#b91c1c" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z" />
+                                            </svg>
+                                        </IconCircular>
                                     </button>
                                 </td>
                             </tr>
@@ -191,7 +241,13 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
             {/* Componente para crear nueva campaña */}
             {/* Modal Top 100 */}
             <ModalToponeHundred open={modalTop100.open} idCampaña={modalTop100.idCampaña} onClose={() => setModalTop100({ open: false, idCampaña: null })} />
-            <NewCampaign onCreated={cargarCampanas} />
+            </div>
+            <div className="flex justify-center mt-4 mb-2">
+                <NewCampaign
+                    onCreated={cargarCampanas}
+                    buttonClassName="btn-success w-full sm:w-auto sm:min-w-[120px] px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                />
+            </div>
             {/* Modal visual de Filas de trabajo (Promesa Midprimes) */}
             <ModalFilasCampañas
                 open={modalFilas.open}
