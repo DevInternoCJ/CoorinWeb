@@ -15,7 +15,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
       try {
         const userData = JSON.parse(localStorage.getItem("userData"));
         const idEjecutivo =
-          userData?.idEjecutivo || userData?.idejecutivo || userData?.id;
+          userData?.idEjecutivo;
         if (!idEjecutivo) return;
         const data = await obetenerJerarquiaEncargados(idEjecutivo);
         // Mapeo: estructura completa según el endpoint
@@ -33,8 +33,8 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
             }))
           : [];
 
-        console.log("📊 Ejecutivos cargados del endpoint:", mapped.length);
-        console.log("🔍 Estructura de datos:", mapped.slice(0, 2)); // Mostrar primeros 2 para debug
+        console.log("Ejecutivos cargados del endpoint:", mapped.length);
+        console.log("Estructura de datos:", mapped.slice(0, 2)); // Mostrar primeros 2 para debug
         setExecutiveTree(mapped);
       } catch (error) {
         console.error("Error al cargar ejecutivos:", error);
@@ -98,8 +98,8 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
   const ejecutivosOrdenados = useMemo(() => {
     if (!executiveTree.length) return [];
 
-    console.log("🔍 Mostrando TODOS los ejecutivos de la jerarquía...");
-    console.log("📊 Total ejecutivos del endpoint:", executiveTree.length);
+    console.log("Mostrando TODOS los ejecutivos de la jerarquía...");
+    console.log("Total ejecutivos del endpoint:", executiveTree.length);
 
     const ejecutivosFiltrados = [];
 
@@ -153,15 +153,15 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
     );
 
     console.log(
-      "✅ Ejecutivos mostrados (TODOS los principales + subordinados al final):",
+      "Ejecutivos mostrados (TODOS los principales + subordinados al final):",
       ejecutivosFiltrados.length
     );
     console.log(
-      "📋 Ejecutivos principales:",
+      "Ejecutivos principales:",
       listaEjecutivosPrincipales.map((e) => e.usuario)
     );
     console.log(
-      "📋 Subordinados al final (orden inverso):",
+      "Subordinados al final (orden inverso):",
       listaSubordinados.map((e) => `${e.usuario} (hijo de ${e.encargadoPadre})`)
     );
 
@@ -301,13 +301,29 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
                     minWidth: "22px",
                   }}
                 >
-                  <input
-                    type="checkbox"
-                    checked={row.asignado || false}
-                    disabled={loadingRow === i}
-                    className="modal-checkbox-small"
-                    onChange={(e) => handleAsignar(e.target.checked, row, i)}
-                  />
+                  <div className="flex items-center justify-center">
+                    <label
+                      htmlFor={`switch-asignado-${row.idEjecutivo || i}`}
+                      className="relative inline-block w-8 h-5 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        id={`switch-asignado-${row.idEjecutivo || i}`}
+                        className="peer sr-only"
+                        checked={row.asignado || false}
+                        disabled={loadingRow === i}
+                        onChange={(e) => handleAsignar(e.target.checked, row, i)}
+                      />
+                      <span className="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-jerarquia3"></span>
+                      <span className="absolute top-1/2 start-0.5 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                      <span className="absolute top-1/2 start-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-white transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={13} height={13} viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"></path></svg>
+                      </span>
+                      <span className="absolute top-1/2 end-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-jerarquia3 transition-colors duration-200 ">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={13} height={13} viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"></path></svg>
+                      </span>
+                    </label>
+                  </div>
                 </td>
                 <td
                   className="modal-table-td"

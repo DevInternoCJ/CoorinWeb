@@ -14,7 +14,7 @@ const DarkListContent = () => {
     // Obtener idCartera desde localStorage
     const getIdCartera = () => {
         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        return userData?.idCartera || userData?.idcartera || userData?.cartera || 1; // fallback a 1 si no existe
+        return userData?.idCartera || 0; // fallback a 1 si no existe
     };
 
     // Reiniciar mensajes y valor al cambiar de tipo

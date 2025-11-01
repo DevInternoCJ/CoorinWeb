@@ -9,9 +9,9 @@ const EmailsContent = ({ mostrarTabla }) => {
         const [errorExcel, setErrorExcel] = useState(null);
     
         const userData = JSON.parse(localStorage.getItem("userData"));
-        const idCartera = userData?.idCartera || 1;
-        const idEjecutivo = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.ejecutivo ?? null;
-        const idProducto = userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
+        const idCartera = userData?.idCartera || 0;
+        const idEjecutivo = userData?.idEjecutivo ?? null;
+        const idProducto = userData?.idProducto ?? 0;
     
         const [cartera, setCartera] = useState(idCartera);
         // Opciones de cartera dinámicas

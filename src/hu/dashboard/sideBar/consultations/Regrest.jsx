@@ -12,20 +12,20 @@ const RegrestContent = ({ growModal, isExpanded }) => {
 
     const [cartera, setCartera] = useState(() => {
         const ud = JSON.parse(localStorage.getItem('userData') || '{}');
-        return ud?.idCartera || ud?.idcartera || ud?.cartera || 1;
+        return ud?.idCartera || 0;
     });
     const [carterasOptions, setCarterasOptions] = useState([]);
 
     // Obtener idCartera desde localStorage
     const getIdCartera = () => {
         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        return userData?.idCartera || userData?.idcartera || userData?.cartera || 1; // fallback a 1 si no existe
+        return userData?.idCartera || 0; // fallback a 1 si no existe
     };
 
     // Obtener idEjecutivo desde localStorage
     const getIdEjecutivo = () => {
         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        return userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.ejecutivo ?? null;
+        return userData?.idEjecutivo ?? null;
     };
 
     // Cargar carteras (similar a Addresses.jsx)

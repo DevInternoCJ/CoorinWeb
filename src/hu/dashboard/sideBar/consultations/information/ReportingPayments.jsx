@@ -8,10 +8,10 @@ import { infoEjecutivo, getExportReportPayments } from "../../../../../services/
 const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
     // Obtener datos de usuario
     const userData = JSON.parse(localStorage.getItem("userData"));
-    const idCartera = userData?.idCartera || 1;
-    const idEjecutivo = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.ejecutivo ?? null;
-    const idProductoDefault = userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
-    const jerarquiaDefault = userData?.jerarquia ?? userData?.Jerarquia ?? 4;
+    const idCartera = userData?.idCartera || 0;
+    const idEjecutivo = userData?.idEjecutivo ?? null;
+    const idProductoDefault = userData?.idProducto ?? 0;
+    const jerarquiaDefault = userData?.Jerarquía ?? 0;
 
     // Estados para filtros y datos
     // Bandera para controlar el toast de error
@@ -108,7 +108,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
         } finally {
             setLoadingTabla(false);
         }
-    }, [searchParams, paramsGuardados]);
+    }, [searchParams, paramsGuardados, errorToastShown]);
 
 
     // El primer click expande el modal y guarda los parámetros, el segundo hace la búsqueda con esos parámetros
@@ -346,7 +346,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                             Exportar
                         </button>
                     </div>
-                    <div style={{ width: '100%', maxWidth: 1100, minHeight: 500, maxHeight: 500, marginTop: 0, marginBottom: 0, borderRadius: 8, border: '1px solid #e0e0e0', background: '#fff', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+                    <div style={{ width: '100%', maxWidth: 1100, minHeight: 480, maxHeight: 480, marginTop: 0, marginBottom: 0, borderRadius: 8, border: '1px solid #e0e0e0', background: '#fff', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
                         <div style={{ width: '100%', height: '100%', overflowY: 'auto', flex: 1 }}>
                             <table className="modal-table" style={{ minWidth: 900, width: '100%', height: '100%', tableLayout: 'auto', borderCollapse: 'separate' }}>
                                 <thead style={{ position: 'sticky', top: 0, background: '#fff' }}>

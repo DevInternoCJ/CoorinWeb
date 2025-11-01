@@ -9,10 +9,10 @@ const CommentsContent = () => {
 
     // Obtener datos de usuario desde localStorage
     const userData = JSON.parse(localStorage.getItem("userData"));
-    const idCartera = userData?.idCartera || 1;
-    const idProducto = userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
-    const jerarquia = userData?.jerarquia ?? userData?.Jerarquia ?? 4;
-    const idEjecutivo = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.ejecutivo ?? null;
+    const idCartera = userData?.idCartera || 0;
+    const idProducto = userData?.idProducto ?? 0;
+    const jerarquia = userData?.Jerarquía ?? 0;
+    const idEjecutivo = userData?.idEjecutivo ?? null;
 
 
     // Estados para selects y fechas

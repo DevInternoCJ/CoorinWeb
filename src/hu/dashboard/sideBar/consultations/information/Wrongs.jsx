@@ -17,9 +17,12 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
         const saved = localStorage.getItem('wrongsParams');
         return saved ? JSON.parse(saved) : null;
     });
+    // Obtener idCartera desde localStorage
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    const idCartera = userData?.idCartera || 0;
     // Memorizar los parámetros actuales
     const searchParams = {
-        idCartera: 1,
+        idCartera,
         idDatoErroneo: datoErroneo === "" ? 0 : parseInt(datoErroneo, 10),
         desde,
         hasta
@@ -64,7 +67,6 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
             localStorage.removeItem('wrongsParams');
         } catch (err) {
             if (err?.response?.status === 404 && err?.response?.statusText === "Not Found") {
-                setErrorTabla("No se encontraron resultados.");
                 toast.warning("Su consulta no cuenta con registros en la fecha especificada.", { duration: 4000 });
             } else {
                 setErrorTabla("Error al obtener los datos erróneos.");
@@ -99,7 +101,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
         setTablaData([]);
         // SIEMPRE usar los parámetros actuales al buscar manualmente
         let params = {
-            idCartera: 1,
+            idCartera,
             idDatoErroneo: datoErroneo === "" ? 0 : parseInt(datoErroneo, 10),
             desde,
             hasta

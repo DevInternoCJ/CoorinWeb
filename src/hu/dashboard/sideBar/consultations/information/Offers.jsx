@@ -10,10 +10,10 @@ const OffersContent = () => {
 
     // Obtener datos de usuario desde localStorage
     const userData = JSON.parse(localStorage.getItem("userData"));
-    const idCartera = userData?.idCartera || 1;
-    const idProducto = userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
-    const jerarquia = userData?.jerarquia ?? userData?.Jerarquia ?? 4;
-    const idEjecutivo = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.ejecutivo ?? null;
+    const idCartera = userData?.idCartera || 0;
+    const idProducto = userData?.idProducto ?? 0;
+    const jerarquia = userData?.Jerarquía ?? 0;
+    const idEjecutivo = userData?.idEjecutivo ?? null;
 
 
     // Estados para selects y fechas
@@ -105,8 +105,9 @@ const OffersContent = () => {
                         console.error('Error al convertir a CSV:', e);
                         // No es JSON, dejar como está
                     }
-                    // Descargar como CSV limpio
-                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    // Descargar como CSV limpio, asegurando soporte de acentos y ñ (UTF-8 BOM)
+                    const BOM = '\uFEFF';
+                    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;

@@ -7,9 +7,9 @@ import { Toaster, toast } from "sonner";
 const PaymentsContent = () => {
     // Obtener datos de usuario desde localStorage
     const userData = JSON.parse(localStorage.getItem("userData"));
-    const idCartera = userData?.idCartera || 1;
-    const idProducto = userData?.idProducto ?? 1;
-    const jerarquia = userData?.Jerarquía ?? 4;
+    const idCartera = userData?.idCartera || 0;
+    const idProducto = userData?.idProducto ?? 0;
+    const jerarquia = userData?.Jerarquía ?? 0;
     const idEjecutivo = userData?.idEjecutivo ?? null;
 
 
