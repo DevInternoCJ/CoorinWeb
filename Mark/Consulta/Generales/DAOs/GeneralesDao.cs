@@ -31,15 +31,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
             _accionamientosQueryHelper = accionamientosQueryHelper;
         }
 
-        public async Task<SearchResultDto> RealizaBusqueda(
-            int idProducto,
-            int idCartera,
-            string servidor,
-            int tipoResultado,
-            int? idConsulta = null,
-            IEnumerable<ParameterDto>? parametrosExtra = null,
-            IEnumerable<AgruparDTO>? agruparExtra = null,
-            DateTime? desdeFecha = null)
+        public async Task<SearchResultDto> RealizaBusqueda(int idProducto, int idCartera,string servidor,int tipoResultado,int jerarquia,int? idConsulta = null,IEnumerable<ParameterDto>? parametrosExtra = null,IEnumerable<AgruparDTO>? agruparExtra = null,DateTime? desdeFecha = null)
         {
             try
             {
@@ -83,6 +75,24 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                     0,
                     idConsulta ?? 0);
 
+                // ======== AGREGAR AQUÍ ========
+                Console.WriteLine($"🔍 === INFORMACIÓN DE JERARQUÍA ===");
+                Console.WriteLine($"   Jerarquía recibida del JSON: {jerarquia}");
+                Console.WriteLine($"   Tipo resultado: {modoResultado}");
+                Console.WriteLine($"   Aplicar enmascaramiento: {(modoResultado == Resultado.Detalle && jerarquia < 3 ? "SÍ" : "NO")}");
+                Console.WriteLine($"🔍 ===============================\n");
+
+                // Aplicar enmascaramiento según jerarquía si es detalle
+                if (modoResultado == Resultado.Detalle && jerarquia < 3)
+                {
+                    query = AplicarEnmascaramientoCuenta(query, idCartera);
+                    Console.WriteLine($"✅ Enmascaramiento aplicado para jerarquía {jerarquia}");
+                }
+                else
+                {
+                    Console.WriteLine($"ℹ️  Sin enmascaramiento - Jerarquía: {jerarquia}, Modo: {modoResultado}");
+                }
+
                 Console.WriteLine(query);
 
                 string sql = $"WAITFOR DELAY '00:00:00'; USE dbCollection; SET DATEFORMAT YMD;\r\n{query}";
@@ -94,7 +104,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                     Mensaje = "Búsqueda terminada",
                     EsError = false,
                     TotalFilasEncontradas = tblCuentas.Rows.Count,
-                    Datos = ConvertirTablaRespuesta(tblCuentas)
+                    Datos = ConvertirTablaRespuesta(tblCuentas, idCartera, jerarquia)  // ← CORRECTO: Con parámetros
                 };
             }
             catch (Exception ex)
@@ -774,11 +784,34 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 r["Concepto"].ToString() == p.Concepto &&
                 r["Campo"].ToString() == p.Campo &&
                 r["Valores"].ToString() == p.Valores);
+        private string AplicarEnmascaramientoCuenta(string query, int idCartera)
+        {
 
-        private List<Dictionary<string, object>> ConvertirTablaRespuesta(DataTable tabla)
+
+            if (idCartera == 1)
+            {
+                string queryEnmascarado = query.Replace(
+                    "Z.idCuenta AS 'Cuenta'",
+                    "STUFF(STUFF(Z.idCuenta,1,2,'XX'),13, 2,'XX') [Cuenta]"
+                );
+
+                return queryEnmascarado;
+            }
+            else
+            {
+                string queryEnmascarado = query.Replace(
+                    "Z.idCuenta AS 'Cuenta'",
+                    "STUFF(Z.idCuenta,1,LEN(Z.idCuenta)-4,'XXX-XXX-') [Cuenta]"
+                );
+                return queryEnmascarado;
+            }
+        }
+
+        private List<Dictionary<string, object>> ConvertirTablaRespuesta(DataTable tabla, int idCartera, int jerarquia)
         {
             var lista = new List<Dictionary<string, object>>();
             if (tabla == null || tabla.Rows.Count == 0) return lista;
+
 
             foreach (DataRow row in tabla.Rows)
             {
@@ -787,11 +820,13 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 {
                     object value = row[col];
 
-                    if (col.ColumnName.Equals("Cuenta", StringComparison.OrdinalIgnoreCase) &&
+                    // Aplicar enmascaramiento adicional si es necesario (segunda capa de seguridad)
+                    if (jerarquia < 3 &&
+                        col.ColumnName.Equals("Cuenta", StringComparison.OrdinalIgnoreCase) &&
                         value != DBNull.Value &&
-                        value.ToString().Length > 4)
+                        !string.IsNullOrEmpty(value.ToString()))
                     {
-                        value = EnmascararCuenta(value.ToString());
+                        value = EnmascararCuentaPorJerarquia(value.ToString(), idCartera);
                     }
 
                     dict[col.ColumnName] = value == DBNull.Value ? null : value;
@@ -803,7 +838,39 @@ namespace Loki.Mark.Consulta.Generales.DAOs
             return lista;
         }
 
-        private string EnmascararCuenta(string cuenta) =>
-            new string('X', Math.Max(0, cuenta.Length - 5)) + cuenta[^5..];
+        private string EnmascararCuentaPorJerarquia(string cuenta, int idCartera)
+        {
+            if (string.IsNullOrEmpty(cuenta))
+                return cuenta;
+
+            // Si la cuenta ya está enmascarada (contiene XXX), no hacer nada
+            if (cuenta.Contains("XXX") || cuenta.Contains("XX"))
+                return cuenta;
+
+            if (idCartera == 1)
+            {
+                // Para cartera 1: STUFF(STUFF(Z.idCuenta,1,2,'XX'),13, 2,'XX')
+                if (cuenta.Length >= 13)
+                {
+                    return "XX" + cuenta.Substring(2, 11) + "XX";
+                }
+                else if (cuenta.Length >= 2)
+                {
+                    return "XX" + cuenta.Substring(2);
+                }
+            }
+            else
+            {
+                // Para otras carteras: STUFF(Z.idCuenta,1,LEN(Z.idCuenta)-4,'XXX-XXX-')
+                if (cuenta.Length > 4)
+                {
+                    return "XXX-XXX-" + cuenta.Substring(cuenta.Length - 4);
+                }
+            }
+
+            // Enmascaramiento por defecto
+            return new string('X', Math.Max(0, cuenta.Length - 5)) + cuenta[^5..];
+        }
+       
     }
 }

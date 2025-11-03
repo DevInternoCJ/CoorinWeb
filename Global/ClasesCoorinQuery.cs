@@ -2208,22 +2208,22 @@ namespace CoorinWeb.Loki.Global
                     sGroupBy = "";
                 }
 
-                using var connectionJer = _dbContextFactory.GetSqlConnection(servidor, "Collection");
-                int jerarquia = await ClasesCoorinMethods.ObtenerJerarquiaEjecutivo(connectionJer, idEjecutivo);
+                //using var connectionJer = _dbContextFactory.GetSqlConnection(servidor, "Collection");
+                //int jerarquia = await ClasesCoorinMethods.ObtenerJerarquiaEjecutivo(connectionJer, idEjecutivo);
 
-                if (conteo == Resultado.Detalle && jerarquia < 3)
-                {
-                    if (idCartera == 1)
-                        sSelect = sSelect.Replace(
-                            "Z.idCuenta AS 'Cuenta'",
-                            "STUFF(STUFF(Z.idCuenta,1,2,'XX'),13, 2,'XX') [Cuenta]"
-                        );
-                    else
-                        sSelect = sSelect.Replace(
-                            "Z.idCuenta AS 'Cuenta'",
-                            "STUFF(Z.idCuenta,1,LEN(Z.idCuenta)-4,'XXX-XXX-') [Cuenta]"
-                        );
-                }
+                //if (conteo == Resultado.Detalle && jerarquia < 3)
+                //{
+                //    if (idCartera == 1)
+                //        sSelect = sSelect.Replace(
+                //            "Z.idCuenta AS 'Cuenta'",
+                //            "STUFF(STUFF(Z.idCuenta,1,2,'XX'),13, 2,'XX') [Cuenta]"
+                //        );
+                //    else
+                //        sSelect = sSelect.Replace(
+                //            "Z.idCuenta AS 'Cuenta'",
+                //            "STUFF(Z.idCuenta,1,LEN(Z.idCuenta)-4,'XXX-XXX-') [Cuenta]"
+                //        );
+                //}
 
 
                 if (idCartera == 1 && telefono == "1" && clase == "1" && telefonica == "1" &&
