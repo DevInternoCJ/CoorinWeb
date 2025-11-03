@@ -145,7 +145,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                         tblCuentas.Load(reader);
                     }
                 }
-                // === Exportar a Excel si hay resultados ===
                 string rutaExcel = null;
                 bool excelExportFailed = false;
 
@@ -199,9 +198,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                             value != null && value != DBNull.Value)
                         {
                             string cuenta = value.ToString();
-
-                            // ✅ MISMA LÓGICA QUE TU QUERY ORIGINAL
-                            if (jerarquiaEjecutivo < 3) // ejecutivos de bajo nivel
+                            if (jerarquiaEjecutivo < 3) 
                             {
                                 if (idCartera == 1)
                                 {

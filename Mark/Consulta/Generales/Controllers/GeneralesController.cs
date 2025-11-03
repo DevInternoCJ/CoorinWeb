@@ -77,7 +77,7 @@ namespace Loki.Mark.Consulta.Generales.Controllers
         [Authorize]
         [SwaggerOperation(
             Summary = "realizar busqueda - irene",
-            Description = "realiza búsqueda por idConsulta o parámetros y agrupamientos"
+            Description = "Colocar el número en el tipo de resultado de acuerdo a lo siguiente: 1.- Contar, 2.- Detalle, 3.-Cuentas, 4.- Filas de Trabajo"
         )]
         public async Task<IActionResult> RealizaBusqueda([FromBody] SearchGeneral request)
         {
@@ -85,7 +85,8 @@ namespace Loki.Mark.Consulta.Generales.Controllers
                 request.IdProducto,
                 request.IdCartera,
                 request.Servidor,
-                request.TipoResultado,      
+                request.TipoResultado, 
+                request.Jerarquia,
                 request.IdConsulta,
                 request.ParametrosExtra,
                 request.AgruparExtra,

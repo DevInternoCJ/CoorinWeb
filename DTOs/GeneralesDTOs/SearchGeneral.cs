@@ -17,6 +17,7 @@ namespace Loki.DTOs.GeneralesDTOs
 
         public int? IdConsulta { get; set; }
 
+        public int Jerarquia { get; set; }
         public IEnumerable<ParameterDto>? ParametrosExtra { get; set; }
         public IEnumerable<AgruparDTO>? AgruparExtra { get; set; }
     }
