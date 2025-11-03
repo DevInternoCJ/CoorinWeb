@@ -21,7 +21,7 @@ namespace Loki.Mark.Consulta.Informacion.Ofrecimientos.Services
 		/// <summary>
 		/// Orquesta la consulta de ofrecimientos, aplicando filtros dinámicos.
 		/// </summary>
-		public async Task<IEnumerable<OfrecimientoDto>> ConsultarOfrecimientosAsync(string servidor, ConsultaPagosRequest request)
+		public async Task<IEnumerable<dynamic>> ConsultarOfrecimientosAsync(string servidor, ConsultaPagosRequest request)
 		{
 			var queryOptions = new QueryGenerationOptions { IdConsulta = request.IdConsulta, IdCartera = request.IdCartera };
 			var subQueryResult = await _queryGenerator.GenerarQueryCuentas(servidor, queryOptions);
@@ -47,7 +47,7 @@ namespace Loki.Mark.Consulta.Informacion.Ofrecimientos.Services
 				parametros.Add("IdCartera", request.IdCartera);
 			}
 
-			return await _dao.ObtenerDatosAsync<OfrecimientoDto>(servidor, sqlFinal, parametros);
+			return await _dao.ObtenerDatosAsync<dynamic>(servidor, sqlFinal, parametros);
 		}
 	}
 }

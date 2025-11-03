@@ -18,7 +18,7 @@ namespace Loki.Mark.Consulta.Informacion.Domicilios.Services
 			_queryGenerator = queryGenerator;
 		}
 
-		public async Task<IEnumerable<DomicilioDto>> ConsultarDomiciliosAsync(string servidor, int idCartera, int idConsulta)
+		public async Task<IEnumerable<dynamic>> ConsultarDomiciliosAsync(string servidor, int idCartera, int idConsulta)
 		{
 			// 1. REUTILIZAMOS el generador para la subconsulta de cuentas
 			var queryOptions = new QueryGenerationOptions { IdConsulta = idConsulta, IdCartera = idCartera };
@@ -47,7 +47,7 @@ namespace Loki.Mark.Consulta.Informacion.Domicilios.Services
 			}
 
 			// 4. Llamamos al DAO
-			return await _dao.ObtenerDatosAsync<DomicilioDto>(servidor, sqlFinal, parametros);
+			return await _dao.ObtenerDatosAsync<dynamic>(servidor, sqlFinal, parametros);
 		}
 	}
 }

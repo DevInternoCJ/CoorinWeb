@@ -24,7 +24,7 @@ namespace Loki.Mark.Consulta.Informacion.Ofrecimientos.Controllers
 			Summary = "Consultar Ofrecimientos de Herramientas - Yoshi",
 			Description = "Obtiene un historial de los ofrecimientos de herramientas a cuentas en un rango de fechas, con la opción de aplicar filtros de cuentas dinámicas."
 		)]
-		[ProducesResponseType(typeof(IEnumerable<OfrecimientoDto>), 200)]
+		[ProducesResponseType(typeof(IEnumerable<dynamic>), 200)]
 		public async Task<IActionResult> Consultar([FromBody] ConsultaPagosRequest request)
 		{
 			string? servidorClaim = User.FindFirst("Servidor")?.Value;

@@ -8,6 +8,6 @@ namespace Loki.Mark.Consulta.Informacion.Comentarios.Services
 		/// <summary>
 		/// Orquesta la consulta de comentarios de cuentas, aplicando filtros dinámicos.
 		/// </summary>
-		Task<IEnumerable<ComentarioDto>> ConsultarComentariosAsync(string servidor, ConsultaPagosRequest request);
+		Task<IEnumerable<dynamic>> ConsultarComentariosAsync(string servidor, ConsultaPagosRequest request);
 	}
 }

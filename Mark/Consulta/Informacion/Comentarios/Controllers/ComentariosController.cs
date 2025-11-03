@@ -25,7 +25,7 @@ namespace Loki.Mark.Consulta.Informacion.Comentarios.Controllers
 			Summary = "Consultar Comentarios de Cuentas - Yoshi",
 			Description = "Obtiene un historial de los comentarios o notas registradas en las cuentas en un rango de fechas, con la opción de aplicar filtros de cuentas dinámicas."
 		)]
-		[ProducesResponseType(typeof(IEnumerable<ComentarioDto>), 200)]
+		[ProducesResponseType(typeof(IEnumerable<dynamic>), 200)]
 		public async Task<IActionResult> Consultar([FromBody] ConsultaPagosRequest request)
 		{
 			string? servidorClaim = User.FindFirst("Servidor")?.Value;

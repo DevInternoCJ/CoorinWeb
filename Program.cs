@@ -424,7 +424,7 @@ builder.Services.AddScoped<ICapturaVisitasDAO, CapturaVisitasDAO>();
 
 #endregion
 
-#endregion
+#endregion	
 
 #region Reportes
 

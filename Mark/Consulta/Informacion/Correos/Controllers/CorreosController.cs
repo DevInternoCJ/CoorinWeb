@@ -23,7 +23,7 @@ namespace Loki.Mark.Consulta.Informacion.Correos.Controllers
 			Summary = "Consultar Correos de Cartera - Yoshi",
 			Description = "Obtiene una lista de correos para una cartera, con la opción de aplicar filtros de cuentas dinámicas basadas en un ID de consulta predefinido."
 		)]
-		[ProducesResponseType(typeof(IEnumerable<CorreoDto>), 200)]
+		[ProducesResponseType(typeof(IEnumerable<dynamic>), 200)]
 		public async Task<IActionResult> Consultar([FromQuery] int idCartera, [FromQuery] int idConsulta)
 		{
 			string? servidorClaim = User.FindFirst("Servidor")?.Value;

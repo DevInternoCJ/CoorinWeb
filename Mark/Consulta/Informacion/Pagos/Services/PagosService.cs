@@ -21,7 +21,7 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Services
 			_queryGenerator = queryGenerator;
 		}
 
-		public async Task<IEnumerable<PagoNegociacionDto>> ConsultarPagosAsync(string servidor, ConsultaPagosRequest request)
+		public async Task<IEnumerable<dynamic>> ConsultarPagosAsync(string servidor, ConsultaPagosRequest request)
 		{
 			// 1. Pedir la subconsulta al servicio especialista.
 			// (La interfaz debe ser ajustada para recibir 'servidor' si 'LlenaParametros' lo necesita)
@@ -49,6 +49,8 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Services
 			// El objeto de parámetros ahora solo contendrá los de la subconsulta
 			var parametros = new DynamicParameters();
 
+			parametros.Add("Desde", request.Desde);
+			parametros.Add("Hasta", request.Hasta);
 
 			// 3. Unir la subconsulta si existe.
 			if (!string.IsNullOrEmpty(subQueryResult.Sql))
@@ -64,7 +66,7 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Services
 			}
 
 			// 4. Llamar al DAO para la ejecución final.
-			return await _pagosDAO.ObtenerDatosAsync<PagoNegociacionDto>(servidor, sqlPrincipal, parametros);
+			return await _pagosDAO.ObtenerDatosAsync<dynamic>(servidor, sqlPrincipal, parametros);
 		}
 	}
 

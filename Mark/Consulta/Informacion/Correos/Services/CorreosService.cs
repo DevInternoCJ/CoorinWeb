@@ -26,7 +26,7 @@ namespace Loki.Mark.Consulta.Informacion.Correos.Services
 		/// <param name="idCartera">El ID de la cartera a consultar.</param>
 		/// <param name="idConsulta">El ID de la consulta predefinida para aplicar filtros de cuentas.</param>
 		/// <returns>Una colección de DTOs con la información de los correos encontrados.</returns>
-		public async Task<IEnumerable<CorreoDto>> ConsultarCorreosAsync(string servidor, int idCartera, int idConsulta)
+		public async Task<IEnumerable<dynamic>> ConsultarCorreosAsync(string servidor, int idCartera, int idConsulta)
 		{
 			// 1. REUTILIZAMOS el generador para la subconsulta de cuentas
 			var queryOptions = new QueryGenerationOptions { IdConsulta = idConsulta, IdCartera = idCartera };
@@ -54,7 +54,7 @@ namespace Loki.Mark.Consulta.Informacion.Correos.Services
 			}
 
 			// 4. Llamamos al DAO
-			return await _dao.ObtenerDatosAsync<CorreoDto>(servidor, sqlFinal, parametros);
+			return await _dao.ObtenerDatosAsync<dynamic>(servidor, sqlFinal, parametros);
 		}
 	}
 }
