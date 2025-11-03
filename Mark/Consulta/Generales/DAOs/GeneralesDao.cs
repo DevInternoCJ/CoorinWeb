@@ -543,6 +543,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
         {
             2 => Resultado.Detalle,
             3 => Resultado.Cuentas,
+            4 => Resultado.FilaDeTrabajo,  
             _ => Resultado.Contar
         };
 
