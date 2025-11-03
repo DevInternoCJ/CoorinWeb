@@ -24,6 +24,7 @@ import Phrases from "./sideBar/Administration/gespa/phrases/Phrases";
 import ConsultVisitContent from "./sideBar/processes/visits/ConsultaVisits";
 import CaptureVisit from "./sideBar/processes/visits/Capture/CaptureVisit";
 import LoadVisitsContent from "./sideBar/processes/visits/LoadVisits";
+import Comments from "./sideBar/processes/gespa/comments/Comments";
 
 
 export default function CoorinDashboard() {
@@ -78,7 +79,7 @@ export default function CoorinDashboard() {
     const informationComponents = [
       "Lista Negra", "Arrepentimientos",
       "Pagos", "Pagos reportados", "Datos Erroneos", "Domicilios", 
-      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios", "VGP",
+      "Correos", "Búsquedas", "Ofrecimientos", "VGP",
       "Consulta Visitas", "Captura Visitas", "Carga Visitas"
     ];
 
@@ -129,7 +130,7 @@ export default function CoorinDashboard() {
         case "Ofrecimientos":
           ContentComponent = OffersContent;
           break;
-        case "Comentarios":
+        case "Contultas Comentarios":
           ContentComponent = CommentsContent;
           break;
         case "VGP":
@@ -186,6 +187,8 @@ export default function CoorinDashboard() {
         return <EmailTemplates onClose={closeModal} />;
       case "Frases":
         return <Phrases onClose={closeModal} />;
+      case "Comentarios":
+        return <Comments onClose={closeModal} />;
       default:
         return null;
     }
@@ -232,16 +235,17 @@ export default function CoorinDashboard() {
       "5BBB": "Correos", // Correos
       "6BBB": "Búsquedas", // Búsquedas
       "7BBB": "Ofrecimientos", // Ofrecimientos
-      "8BBB": "Comentarios", // Comentarios
+      "8BBB": "Comentarios2", // Comentarios
       "9BBB": "VGP", // VGP
       "2AAA": "Plantillas Correo", // Plantillas Correo
       "1AA": "Campañas",
       "1DD": "Campañas",
       "1EE": "Campañas",
       "3AAA": "Frases",
-      "1CCC": "Consulta Visitas", // Consulta en Visitas (Procesos)
-      "2CCC": "Captura Visitas", // Captura en Visitas (Procesos)
-      "3CCC": "Carga Visitas", // Carga de Visitas (Procesos)
+      "1ZZZ": "Consulta Visitas", // Consulta en Visitas (Procesos)
+      "2ZZZ": "Captura Visitas", // Captura en Visitas (Procesos)
+      "3ZZZ": "Carga Visitas", // Carga de Visitas (Procesos)
+      "1CCC": "Comentarios", // Comentarios (Gespa)
     };
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
