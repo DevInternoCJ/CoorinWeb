@@ -132,12 +132,21 @@ namespace Loki.Mark.Consulta.Generales.DAOs
 
         private void ProcesarAgrupacionesExtra(IEnumerable<AgruparDTO>? agruparExtra, DataTable tblAgrupar)
         {
-            if (agruparExtra == null) return;
-
+            if (agruparExtra == null)
+            {
+                return;
+            }
             foreach (var a in agruparExtra)
             {
                 if (!AgrupacionExiste(tblAgrupar, a.Campo, a.Concepto))
+                {
                     tblAgrupar.Rows.Add(a.Campo, a.Concepto);
+
+                }
+                else
+                {
+
+                }
             }
         }
 
@@ -174,47 +183,33 @@ namespace Loki.Mark.Consulta.Generales.DAOs
 
             foreach (var p in parametrosExtra)
             {
-                Console.WriteLine($"=== PROCESANDO PARÁMETRO ===");
-                Console.WriteLine($"Concepto: {p.Concepto}");
-                Console.WriteLine($"Campo: {p.Campo}");
-                Console.WriteLine($"Valores: {p.Valores}");
-                Console.WriteLine($"Parámetros: {p.Parámetros}");
-                Console.WriteLine($"Dato: {p.Dato}");
 
                 ValidarParametro(p);
 
                 string tipoDato = ObtenerTipoDato(p.Concepto, p.Campo, p.Dato);
 
-                Console.WriteLine($"TipoDato determinado: {tipoDato}");
 
                 if (EsDuplicado(tblParametros, p))
                 {
-                    Console.WriteLine("❌ Parámetro duplicado, omitiendo...");
                     continue;
                 }
 
-                // CORREGIDO: Usar p.Parámetros (los valores reales) en la columna "Parámetros"
                 tblParametros.Rows.Add(p.Concepto, p.Campo, p.Valores, p.Parámetros, tipoDato);
 
-                Console.WriteLine($"✅ Parámetro agregado correctamente");
-                Console.WriteLine($"=== FIN PARÁMETRO ===\n");
             }
 
-            // Debug final
-            Console.WriteLine("🎯 CONTENIDO FINAL DE tblParametros:");
             if (tblParametros.Rows.Count == 0)
             {
-                Console.WriteLine("   (vacío)");
             }
             else
             {
                 for (int i = 0; i < tblParametros.Rows.Count; i++)
                 {
                     var row = tblParametros.Rows[i];
-                    Console.WriteLine($"   [{i}] Concepto: {row["Concepto"]}, Campo: {row["Campo"]}, Valores: {row["Valores"]}, Parámetros: {row["Parámetros"]}, Dato: {row["Dato"]}");
+                   
                 }
             }
-            Console.WriteLine("🎯 FIN CONTENIDO tblParametros\n");
+
         }
         private void ValidarParametro(ParameterDto p)
         {
@@ -234,15 +229,13 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 throw new Exception($"El tipo de dato '{tipoDato}' del campo '{p.Campo}' no es válido.");
         }
 
-        // CORREGIDO: Método para determinar operador correctamente
+
         private string ObtenerOperador(ParameterDto p)
         {
-            // El operador siempre debe ser "AND" para estos parámetros
-            // El problema anterior era que tomaba el valor del parámetro en lugar del operador
+
             return "AND";
         }
 
-        // NUEVO MÉTODO: Determinar concepto principal dinámicamente
         private string DeterminarConceptoPrincipal(IEnumerable<ParameterDto>? parametrosExtra, IEnumerable<AgruparDTO>? agruparExtra)
         {
             // Buscar concepto en parámetros
