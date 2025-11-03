@@ -7,6 +7,7 @@ using Loki.Global;
 using Loki.Mark.Consulta.Generales.Interfaces;
 using System.Collections;
 using System.Data;
+using System.Text.RegularExpressions;
 using static CoorinWeb.Loki.Global.AccionamientosQueryHelper;
 
 namespace Loki.Mark.Consulta.Generales.DAOs
@@ -34,7 +35,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
             int idProducto,
             int idCartera,
             string servidor,
-            int tipoResultado,           // 1=Contar, 2=Detalle, 3=Cuentas
+            int tipoResultado,
             int? idConsulta = null,
             IEnumerable<ParameterDto>? parametrosExtra = null,
             IEnumerable<AgruparDTO>? agruparExtra = null,
@@ -53,20 +54,28 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 else
                     tblParametros.Rows.Add("Cuenta", "idCartera", idCartera.ToString(), "AND", "int");
 
-                ProcesarParametrosExtra(parametrosExtra, tblParametros);
+                string errorValidacion = ProcesarParametrosExtraConValidacion(parametrosExtra, tblParametros);
+                if (!string.IsNullOrEmpty(errorValidacion))
+                {
+                    return new SearchResultDto
+                    {
+                        Mensaje = $"Error en validación de parámetros: {errorValidacion}",
+                        EsError = true
+                    };
+                }
+
                 ProcesarAgrupacionesExtra(agruparExtra, tblAgrupar);
 
                 var modoResultado = DeterminarModoDeResultado(tipoResultado);
 
                 var consulta = new ConsultaGenerador(_dbContFactory);
 
-                // CORREGIDO: Usar método para determinar concepto dinámicamente
                 string conceptoPrincipal = DeterminarConceptoPrincipal(parametrosExtra, agruparExtra);
 
                 string query = await consulta.QueryGeneral(
                     servidor,
                     idCartera,
-                    conceptoPrincipal,  // ← Concepto determinado dinámicamente
+                    conceptoPrincipal,
                     tblParametros,
                     tblAgrupar,
                     modoResultado,
@@ -96,6 +105,520 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                     EsError = true
                 };
             }
+        }
+
+        private string ProcesarParametrosExtraConValidacion(IEnumerable<ParameterDto>? parametrosExtra, DataTable tblParametros)
+        {
+            if (parametrosExtra == null) return null;
+
+            foreach (var p in parametrosExtra)
+            {
+                var (simbolo, valor) = ExtraerSimboloYValor(p.Valores);
+                var id = p.Parámetros;
+
+                string error = ValidarYAgregarParametro(p.Concepto, p.Campo, simbolo, valor, id, tblParametros);
+                if (!string.IsNullOrEmpty(error))
+                {
+                    return error;
+                }
+            }
+
+            return null;
+        }
+
+        private (string simbolo, string valor) ExtraerSimboloYValor(string valores)
+        {
+            if (string.IsNullOrEmpty(valores))
+                return ("=", "");
+
+            var simbolos = new[] { "≠", "≤", "≥", ">", "<", "=" };
+            foreach (var simbolo in simbolos)
+            {
+                if (valores.StartsWith(simbolo))
+                {
+                    return (simbolo, valores.Substring(simbolo.Length).Trim());
+                }
+            }
+
+            return ("=", valores.Trim());
+        }
+
+        private string ValidarYAgregarParametro(string concepto, string campo, string simbolo, string valor, string id, DataTable tblParametros)
+        {
+            long iNumero;
+            DateTime dtFecha;
+            TimeSpan tsTiempo;
+            string signos = simbolo;
+
+            valor = valor?.Replace("'", "") ?? "";
+
+            if (simbolo == "≤")
+                signos = "<=";
+            else if (simbolo == "≥")
+                signos = ">=";
+
+            DataRow drFila = null;
+            var filasExistentes = tblParametros.AsEnumerable()
+                .Where(r => r["Concepto"].ToString() == concepto && r["Campo"].ToString() == campo)
+                .ToList();
+
+            if (filasExistentes.Any())
+            {
+                drFila = filasExistentes.First();
+
+                if (drFila["Parámetros"].ToString().Contains(">") && (signos == "=" || signos.StartsWith(">")))
+                    return "Solo puede asignar una desigualdad en el otro sentido <.";
+
+                if (drFila["Parámetros"].ToString().Contains("<") && (signos == "=" || signos.StartsWith("<")))
+                    return "Solo puede asignar una desigualdad en el otro sentido >.";
+
+                if (drFila["Valores"].ToString().Contains("≠") && simbolo != "≠")
+                    return "Ya tiene un signo ≠, solo puede agregar más parámetros de ≠.";
+
+                if (drFila["Valores"].ToString().Contains("=") && simbolo != "=")
+                    return "Ya tiene un signo =, solo puede agregar más parámetros de =.";
+            }
+            else
+            {
+                drFila = tblParametros.Rows.Add(concepto, campo, "", "", "");
+            }
+
+            switch (concepto)
+            {
+                case "Teléfonos":
+                    return ValidarParametroTelefonos(campo, simbolo, valor, id, signos, drFila);
+                case "Gestiones":
+                    return ValidarParametroGestiones(campo, simbolo, valor, id, signos, drFila);
+                case "Negociaciones":
+                    return ValidarParametroNegociaciones(campo, simbolo, valor, id, signos, drFila);
+                case "Seguimientos":
+                    return ValidarParametroSeguimientos(campo, simbolo, valor, id, signos, drFila);
+                case "Chats":
+                    return ValidarParametroChats(campo, simbolo, valor, id, signos, drFila);
+                default:
+                    return ValidarParametroGeneral(campo, simbolo, valor, id, signos, drFila);
+            }
+        }
+
+        private string ValidarParametroTelefonos(string campo, string simbolo, string valor, string id, string signos, DataRow drFila)
+        {
+            long iNumero;
+            DateTime dtFecha;
+
+            switch (campo)
+            {
+                case "Teléfono":
+                    if (!long.TryParse(valor, out iNumero) || valor.Trim().Length != 10 || valor.Contains("-"))
+                        return "El número telefónico debe ser a 10 dígitos.";
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(simbolo + "\"" + valor.ToLower() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor + "\"", valor, "list");
+                    break;
+
+                case "EntidadFederativa":
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor.ToUpper() + "\"", "'" + valor.ToUpper() + "'", "list");
+                    break;
+
+                case "Clase":
+                case "Telefonía":
+                case "Origen":
+                case "Confirmado":
+                case "Municipio":
+                    if (drFila["Parámetros"].ToString().Contains(id))
+                        return "Ya estableció dicho parámetro.";
+
+                    if (campo == "Municipio")
+                        ActualizarFilaParametro(drFila, simbolo + " " + valor, "','" + id, "list");
+                    else
+                        ActualizarFilaParametro(drFila, simbolo + " " + valor, id, "list");
+                    break;
+
+                case "ÚltimaMarcación":
+                    if (!DateTime.TryParse(valor, out dtFecha))
+                        return "Ingrese una fecha válida, de preferencia en formato (yyyy-mm-dd).";
+
+                    valor = dtFecha.ToString("yyyy-MM-dd");
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(simbolo + valor.ToLower()))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, signos + "'" + valor + "'", "date");
+                    break;
+
+                default:
+                    if (!long.TryParse(valor, out iNumero))
+                        return "Indique una cantidad de números enteros.";
+
+                    if (drFila["Valores"].ToString().Contains(simbolo + valor))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, signos + iNumero, "int");
+                    break;
+            }
+
+            return null;
+        }
+
+        private string ValidarParametroGestiones(string campo, string simbolo, string valor, string id, string signos, DataRow drFila)
+        {
+            long iNumero;
+            DateTime dtFecha;
+            TimeSpan tsTiempo;
+
+            switch (campo)
+            {
+                case "Fecha":
+                    if (!DateTime.TryParse(valor, out dtFecha))
+                        return "Ingrese una fecha válida, de preferencia en formato (yyyy-mm-dd).";
+
+                    valor = dtFecha.ToString("yyyy-MM-dd");
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(simbolo + valor.ToLower()))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, signos + "'" + valor + "'", "date");
+                    break;
+
+                case "Hora":
+                case "Duración":
+                case "TiempoEnCuenta":
+                    if (!TimeSpan.TryParse(valor, out tsTiempo))
+                        return "El tiempo debe escribirse en formato de 24hrs (hh:mm:ss).";
+
+                    valor = tsTiempo.ToString(@"hh\:mm\:ss");
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(simbolo + valor.ToLower()))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, signos + "'" + valor + "'", "time");
+                    break;
+
+                case "Usuario":
+                    if (valor.Trim().Length < 4 || valor.Trim().Length > 5 || !SonLetras(valor))
+                        return "El usuario debe de ser de 4 o 5 letras.";
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor.ToUpper() + "\"", "'" + valor.ToUpper() + "'", "list");
+                    break;
+
+                case "Teléfono":
+                    if (!long.TryParse(valor, out iNumero) || valor.Trim().Length != 10 || valor.Contains("-"))
+                        return "El número telefónico debe ser a 10 dígitos.";
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor.ToUpper() + "\"", "'" + valor.ToUpper() + "'", "list");
+                    break;
+
+                case "Extensión":
+                    if (!long.TryParse(valor, out iNumero) || valor.Trim().Length > 5 || valor.Trim().Length < 3 || valor.Contains("-"))
+                        return "La extensión debe ser de 3 a 5 dígitos.";
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor.ToUpper() + "\"", "'" + valor.ToUpper() + "'", "list");
+                    break;
+
+                case "Comentario":
+                case "NombreContacto":
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor + "\"", "'%" + valor + "%'", "list");
+                    break;
+
+                default:
+                    if (drFila["Parámetros"].ToString().Contains(id))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, id, "list");
+                    break;
+            }
+
+            return null;
+        }
+
+        private string ValidarParametroNegociaciones(string campo, string simbolo, string valor, string id, string signos, DataRow drFila)
+        {
+            long iNumero;
+            DateTime dtFecha;
+            TimeSpan tsTiempo;
+
+            switch (campo)
+            {
+                case "FechaCreación":
+                case "FechaAcordada":
+                case "FechaFinNegociación":
+                case "Fecha_Plazo":
+                    if (!DateTime.TryParse(valor, out dtFecha))
+                        return "Ingrese una fecha válida, de preferencia en formato (yyyy-mm-dd).";
+
+                    valor = dtFecha.ToString("yyyy-MM-dd");
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(simbolo + valor.ToLower()))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, signos + "'" + valor + "'", "date");
+                    break;
+
+                case "Hora":
+                    if (!TimeSpan.TryParse(valor, out tsTiempo))
+                        return "El tiempo debe escribirse en formato de 24hrs (hh:mm:ss).";
+
+                    valor = tsTiempo.ToString(@"hh\:mm\:ss");
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(simbolo + valor.ToLower()))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, signos + "'" + valor + "'", "time");
+                    break;
+
+                case "Usuario":
+                case "Validador":
+                    if (valor.Trim().Length < 4 || valor.Trim().Length > 5 || !SonLetras(valor))
+                        return "El usuario debe de ser de 4 o 5 letras.";
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor.ToUpper() + "\"", "'" + valor.ToUpper() + "'", "list");
+                    break;
+
+                case "Correo":
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor.ToUpper() + "\"", "'" + valor.ToUpper() + "'", "list");
+                    break;
+
+                case "Pagos":
+                case "Plazos":
+                case "MontoNegociado":
+                case "MontoPagado":
+                case "SaldoNegociación":
+                    if (!long.TryParse(valor, out iNumero))
+                        return "Indique una cantidad de números enteros.";
+
+                    if (drFila["Valores"].ToString().Contains(simbolo + valor))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, signos + iNumero, "int");
+                    break;
+
+                default:
+                    if (drFila["Parámetros"].ToString().Contains(id))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, id, "list");
+                    break;
+            }
+
+            return null;
+        }
+
+        private string ValidarParametroSeguimientos(string campo, string simbolo, string valor, string id, string signos, DataRow drFila)
+        {
+            long iNumero;
+            DateTime dtFecha;
+            TimeSpan tsTiempo;
+
+            switch (campo)
+            {
+                case "FechaCreación":
+                case "FechaSeguimiento":
+                    if (!DateTime.TryParse(valor, out dtFecha))
+                        return "Ingrese una fecha válida, de preferencia en formato (yyyy-mm-dd).";
+
+                    valor = dtFecha.ToString("yyyy-MM-dd");
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(simbolo + valor.ToLower()))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, signos + "'" + valor + "'", "date");
+                    break;
+
+                case "HoraCreación":
+                case "HoraSeguimiento":
+                    if (!TimeSpan.TryParse(valor, out tsTiempo))
+                        return "El tiempo debe escribirse en formato de 24hrs (hh:mm:ss).";
+
+                    valor = tsTiempo.ToString(@"hh\:mm\:ss");
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(simbolo + valor.ToLower()))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, signos + "'" + valor + "'", "time");
+                    break;
+
+                case "Usuario":
+                    if (valor.Trim().Length < 4 || valor.Trim().Length > 5 || !SonLetras(valor))
+                        return "El usuario debe de ser de 4 o 5 letras.";
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor.ToUpper() + "\"", "'" + valor.ToUpper() + "'", "list");
+                    break;
+
+                case "Teléfono":
+                    if (!long.TryParse(valor, out iNumero) || valor.Trim().Length != 10 || valor.Contains("-"))
+                        return "El número telefónico debe ser a 10 dígitos.";
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor.ToUpper() + "\"", "'" + valor.ToUpper() + "'", "list");
+                    break;
+
+                case "Recordatorio":
+                case "Realizado":
+                    if (drFila["Parámetros"].ToString().Contains(id))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, id, "list");
+                    break;
+
+                default:
+                    if (drFila["Parámetros"].ToString().Contains(id))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, id, "list");
+                    break;
+            }
+
+            return null;
+        }
+
+        private string ValidarParametroChats(string campo, string simbolo, string valor, string id, string signos, DataRow drFila)
+        {
+            long iNumero;
+            DateTime dtFecha;
+            TimeSpan tsTiempo;
+
+            switch (campo)
+            {
+                case "Fecha":
+                    if (!DateTime.TryParse(valor, out dtFecha))
+                        return "Ingrese una fecha válida, de preferencia en formato (yyyy-mm-dd).";
+
+                    valor = dtFecha.ToString("yyyy-MM-dd");
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(simbolo + valor.ToLower()))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, signos + "'" + valor + "'", "date");
+                    break;
+
+                case "Hora":
+                case "Duración":
+                    if (!TimeSpan.TryParse(valor, out tsTiempo))
+                        return "El tiempo debe escribirse en formato de 24hrs (hh:mm:ss).";
+
+                    valor = tsTiempo.ToString(@"hh\:mm\:ss");
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(simbolo + valor.ToLower()))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, signos + "'" + valor + "'", "time");
+                    break;
+
+                case "Usuario":
+                    if (valor.Trim().Length < 4 || valor.Trim().Length > 5 || !SonLetras(valor))
+                        return "El usuario debe de ser de 4 o 5 letras.";
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor.ToUpper() + "\"", "'" + valor.ToUpper() + "'", "list");
+                    break;
+
+                case "Teléfono":
+                    if (!long.TryParse(valor, out iNumero) || valor.Trim().Length != 10 || valor.Contains("-"))
+                        return "El número telefónico debe ser a 10 dígitos.";
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor.ToUpper() + "\"", "'" + valor.ToUpper() + "'", "list");
+                    break;
+
+                case "Extensión":
+                    if (!long.TryParse(valor, out iNumero) || valor.Trim().Length > 5 || valor.Trim().Length < 3 || valor.Contains("-"))
+                        return "La extensión debe ser de 3 a 5 dígitos.";
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor.ToUpper() + "\"", "'" + valor.ToUpper() + "'", "list");
+                    break;
+
+                case "Comentario":
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToUpper().Contains("\"" + valor.ToUpper() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " \"" + valor + "\"", "'%" + valor + "%'", "list");
+                    break;
+
+                case "Salida":
+                    if (drFila["Parámetros"].ToString().Contains(id))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, id, "list");
+                    break;
+
+                default:
+                    if (drFila["Parámetros"].ToString().Contains(id))
+                        return "Ya estableció dicho parámetro.";
+
+                    ActualizarFilaParametro(drFila, simbolo + " " + valor, id, "list");
+                    break;
+            }
+
+            return null;
+        }
+
+        private string ValidarParametroGeneral(string campo, string simbolo, string valor, string id, string signos, DataRow drFila)
+        {
+            if (drFila["Parámetros"].ToString().Contains(id))
+                return "Ya estableció dicho parámetro.";
+
+            ActualizarFilaParametro(drFila, simbolo + " " + valor, id, "list");
+            return null;
+        }
+
+        private void ActualizarFilaParametro(DataRow drFila, string valores, string parametros, string tipoDato)
+        {
+            string valoresActual = drFila["Valores"].ToString();
+            string parametrosActual = drFila["Parámetros"].ToString();
+
+            if (!string.IsNullOrEmpty(valoresActual))
+            {
+                valoresActual += ", " + valores;
+                parametrosActual += ", " + parametros;
+            }
+            else
+            {
+                valoresActual = valores;
+                parametrosActual = parametros;
+            }
+
+            drFila["Valores"] = valoresActual.TrimStart(',', ' ');
+            drFila["Parámetros"] = parametrosActual.TrimStart(',', ' ');
+            drFila["Dato"] = tipoDato;
+        }
+
+        private bool SonLetras(string texto)
+        {
+            return !string.IsNullOrEmpty(texto) && texto.All(c => char.IsLetter(c));
         }
 
         private static DataTable CrearTablaParametros()
@@ -132,21 +655,12 @@ namespace Loki.Mark.Consulta.Generales.DAOs
 
         private void ProcesarAgrupacionesExtra(IEnumerable<AgruparDTO>? agruparExtra, DataTable tblAgrupar)
         {
-            if (agruparExtra == null)
-            {
-                return;
-            }
+            if (agruparExtra == null) return;
+
             foreach (var a in agruparExtra)
             {
                 if (!AgrupacionExiste(tblAgrupar, a.Campo, a.Concepto))
-                {
                     tblAgrupar.Rows.Add(a.Campo, a.Concepto);
-
-                }
-                else
-                {
-
-                }
             }
         }
 
@@ -183,34 +697,16 @@ namespace Loki.Mark.Consulta.Generales.DAOs
 
             foreach (var p in parametrosExtra)
             {
-
                 ValidarParametro(p);
-
                 string tipoDato = ObtenerTipoDato(p.Concepto, p.Campo, p.Dato);
 
-
                 if (EsDuplicado(tblParametros, p))
-                {
                     continue;
-                }
 
                 tblParametros.Rows.Add(p.Concepto, p.Campo, p.Valores, p.Parámetros, tipoDato);
-
             }
-
-            if (tblParametros.Rows.Count == 0)
-            {
-            }
-            else
-            {
-                for (int i = 0; i < tblParametros.Rows.Count; i++)
-                {
-                    var row = tblParametros.Rows[i];
-                   
-                }
-            }
-
         }
+
         private void ValidarParametro(ParameterDto p)
         {
             if (string.IsNullOrWhiteSpace(p.Concepto))
@@ -229,32 +725,20 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 throw new Exception($"El tipo de dato '{tipoDato}' del campo '{p.Campo}' no es válido.");
         }
 
-
-        private string ObtenerOperador(ParameterDto p)
-        {
-
-            return "AND";
-        }
+        private string ObtenerOperador(ParameterDto p) => "AND";
 
         private string DeterminarConceptoPrincipal(IEnumerable<ParameterDto>? parametrosExtra, IEnumerable<AgruparDTO>? agruparExtra)
         {
-            // Buscar concepto en parámetros
             var conceptoParametros = parametrosExtra?.FirstOrDefault()?.Concepto;
-
-            // Buscar concepto en agrupamientos  
             var conceptoAgrupar = agruparExtra?.FirstOrDefault()?.Concepto;
-
-            // Priorizar: parámetros > agrupamientos > default "Cuenta"
             return conceptoParametros ?? conceptoAgrupar ?? "Cuenta";
         }
 
-        // MÉTODO ACTUALIZADO: Manejar múltiples conceptos dinámicamente
         private string ObtenerTipoDato(string concepto, string campo, string? datoFromRequest)
         {
             if (!string.IsNullOrEmpty(datoFromRequest))
                 return datoFromRequest.ToLower();
 
-            // Manejar diferentes conceptos dinámicamente
             return concepto?.ToLower() switch
             {
                 "teléfonos" => campo?.ToLower() switch
@@ -281,7 +765,7 @@ namespace Loki.Mark.Consulta.Generales.DAOs
                 "producto" => "char",
                 "conteos" => "int",
                 "fechas" => "date",
-                _ => "string" // default para cualquier otro concepto
+                _ => "string"
             };
         }
 
