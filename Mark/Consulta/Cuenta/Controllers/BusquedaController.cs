@@ -87,28 +87,28 @@ namespace Loki.Controllers
         /// </summary>
         /// <param name="filename">El nombre del archivo Excel a descargar (sin ruta, solo el nombre).</param>
         /// <returns>El archivo Excel como un flujo de bytes para descarga.</returns>
-        [HttpGet("download-excel")]
-        [Authorize]
-        [SwaggerOperation(
-            Summary = "descargar excel - Ramón",
-            Description = "descarga en un excel los datos obtenidos de la busqueda"
-            )]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult DownloadExcel([FromQuery] string filename)
-        {
-            if (string.IsNullOrWhiteSpace(filename))
-                return BadRequest("El nombre del archivo es obligatorio.");
+        //[HttpGet("download-excel")]
+        //[Authorize]
+        //[SwaggerOperation(
+        //    Summary = "descargar excel - Ramón",
+        //    Description = "descarga en un excel los datos obtenidos de la busqueda"
+        //    )]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //public IActionResult DownloadExcel([FromQuery] string filename)
+        //{
+        //    if (string.IsNullOrWhiteSpace(filename))
+        //        return BadRequest("El nombre del archivo es obligatorio.");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports", filename);
+        //    string filePath = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports", filename);
 
-            if (!System.IO.File.Exists(filePath))
-                return NotFound("El archivo no existe o ya fue eliminado.");
+        //    if (!System.IO.File.Exists(filePath))
+        //        return NotFound("El archivo no existe o ya fue eliminado.");
 
-            var fileBytes = System.IO.File.ReadAllBytes(filePath);
-            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
-        }
+        //    var fileBytes = System.IO.File.ReadAllBytes(filePath);
+        //    return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+        //}
 
         [HttpPost("guardar-consulta")]
         [AllowAnonymous]
@@ -179,125 +179,125 @@ namespace Loki.Controllers
             return Ok(result);
         }
 
-        [HttpPost("carga-filas-trabajo")]
-        [SwaggerOperation(
-              Summary = "cargar filas de trabajo - Irene",
-              Description = "Carga filas de trabajo a una campaña en búsqueda (admite idConsulta + parámetros/agrupaciones dinámicos)"
-          )]
+        //[HttpPost("carga-filas-trabajo")]
+        //[SwaggerOperation(
+        //      Summary = "cargar filas de trabajo - Irene",
+        //      Description = "Carga filas de trabajo a una campaña en búsqueda (admite idConsulta + parámetros/agrupaciones dinámicos)"
+        //  )]
 
        
-        public async Task<IActionResult> CargarFilasDeTrabajo([FromBody] CargaFilasTrabajo request)
-        {
-            try
-            {
+        //public async Task<IActionResult> CargarFilasDeTrabajo([FromBody] CargaFilasTrabajo request)
+        //{
+        //    try
+        //    {
                 
-                string? servidorClaim = User.FindFirst("Servidor")?.Value;
-                if (string.IsNullOrWhiteSpace(servidorClaim))
-                    return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+        //        string? servidorClaim = User.FindFirst("Servidor")?.Value;
+        //        if (string.IsNullOrWhiteSpace(servidorClaim))
+        //            return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
 
         
-                await ConsultaGenerador.CargarDesdeBDAsync(_dbContextFactory, servidorClaim);
+        //        await ConsultaGenerador.CargarDesdeBDAsync(_dbContextFactory, servidorClaim);
 
-                ArrayList columnas = new ArrayList();
-                string queryFinal;
-
-
-                if (request.IdConsulta.HasValue)
-                {
-                    var consulta = ConsultaGenerador.ObtenerConsulta(request.IdConsulta.Value);
-                    if (consulta == null)
-                        return BadRequest(new { error = $"No se encontró la consulta con ID {request.IdConsulta.Value}" });
-
-                    _logger.LogInformation($"Consulta encontrada: {consulta["NombreConsulta"]}");
-
-                    var queryData = ConsultaGenerador.QueryCuentas(request.IdConsulta.Value, ref columnas);
-                    if (string.IsNullOrEmpty(queryData.Query))
-                        return BadRequest(new { error = "No se pudo generar la consulta SQL base." });
-
-                    queryFinal = queryData.Query;
-                }
-                else
-                {
-                    //  Generar consulta dinámica desde parámetros
-                    var tblParametros = AccionamientosQueryHelper.Ejecutivo1.TablaParámetros;
-                    var tblAgrupar = AccionamientosQueryHelper.Ejecutivo1.TablaAgrupar;
-
-                    tblParametros.Rows.Clear();
-                    tblAgrupar.Rows.Clear();
+        //        ArrayList columnas = new ArrayList();
+        //        string queryFinal;
 
 
-                    tblParametros.Rows.Add("idCartera", "=", request.IdCartera.ToString(), "AND", "int");
+        //        if (request.IdConsulta.HasValue)
+        //        {
+        //            var consulta = ConsultaGenerador.ObtenerConsulta(request.IdConsulta.Value);
+        //            if (consulta == null)
+        //                return BadRequest(new { error = $"No se encontró la consulta con ID {request.IdConsulta.Value}" });
 
-                    // Agregar parámetros adicionales dinámicamente
-                    foreach (var p in request.Parametros)
-                        tblParametros.Rows.Add(p.Concepto, p.Campo, p.Valores, "AND", p.Dato);
+        //            _logger.LogInformation($"Consulta encontrada: {consulta["NombreConsulta"]}");
 
-                    // Agregar agrupaciones dinámicas
-                    foreach (var g in request.Agrupar)
-                        tblAgrupar.Rows.Add(g.Concepto, g.Campo);
+        //            var queryData = ConsultaGenerador.QueryCuentas(request.IdConsulta.Value, ref columnas);
+        //            if (string.IsNullOrEmpty(queryData.Query))
+        //                return BadRequest(new { error = "No se pudo generar la consulta SQL base." });
 
-                    var queryData = ConsultaGenerador.GeneraQueryCuentas(
-                        request.IdCartera,
-                        tblParametros,
-                        tblAgrupar,
-                        Resultado.Detalle,
-                        DateTime.Today.AddMonths(-1),
-                        request.IdCartera,
-                        ref columnas
-                    );
+        //            queryFinal = queryData.Query;
+        //        }
+        //        else
+        //        {
+        //            //  Generar consulta dinámica desde parámetros
+        //            var tblParametros = AccionamientosQueryHelper.Ejecutivo1.TablaParámetros;
+        //            var tblAgrupar = AccionamientosQueryHelper.Ejecutivo1.TablaAgrupar;
 
-                    queryFinal = queryData.Query;
-                }
-
-                _logger.LogInformation($"Query generada final (antes de limpiar):\n{queryFinal}");
-
-                // 5Limpiar filtros vacíos para que la query no rompa
-                queryFinal = LimpiarFiltrosVacios(queryFinal);
-
-                _logger.LogInformation($"Query final limpia:\n{queryFinal}");
+        //            tblParametros.Rows.Clear();
+        //            tblAgrupar.Rows.Clear();
 
 
-                var resultado = await _carterasDao.CargaFilasConsulta(
-                    request.IdCampania,
-                    queryFinal,
-                    request.IncluirUsuario,
-                    request.IncluirTelefono,
-                    servidorClaim
-                );
+        //            tblParametros.Rows.Add("idCartera", "=", request.IdCartera.ToString(), "AND", "int");
+
+        //            // Agregar parámetros adicionales dinámicamente
+        //            foreach (var p in request.Parametros)
+        //                tblParametros.Rows.Add(p.Concepto, p.Campo, p.Valores, "AND", p.Dato);
+
+        //            // Agregar agrupaciones dinámicas
+        //            foreach (var g in request.Agrupar)
+        //                tblAgrupar.Rows.Add(g.Concepto, g.Campo);
+
+        //            var queryData = ConsultaGenerador.GeneraQueryCuentas(
+        //                request.IdCartera,
+        //                tblParametros,
+        //                tblAgrupar,
+        //                Resultado.Detalle,
+        //                DateTime.Today.AddMonths(-1),
+        //                request.IdCartera,
+        //                ref columnas
+        //            );
+
+        //            queryFinal = queryData.Query;
+        //        }
+
+        //        _logger.LogInformation($"Query generada final (antes de limpiar):\n{queryFinal}");
+
+        //        // 5Limpiar filtros vacíos para que la query no rompa
+        //        queryFinal = LimpiarFiltrosVacios(queryFinal);
+
+        //        _logger.LogInformation($"Query final limpia:\n{queryFinal}");
+
+
+        //        var resultado = await _carterasDao.CargaFilasConsulta(
+        //            request.IdCampania,
+        //            queryFinal,
+        //            request.IncluirUsuario,
+        //            request.IncluirTelefono,
+        //            servidorClaim
+        //        );
 
         
-                return Ok(new
-                {
-                    mensaje = "Filas de trabajo cargadas correctamente.",
-                    columnasGeneradas = columnas,
-                    queryGenerada = queryFinal,
-                    resultado
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al cargar filas de trabajo");
-                return StatusCode(500, new { error = $"Error al cargar filas de trabajo: {ex.Message}" });
-            }
-        }
+        //        return Ok(new
+        //        {
+        //            mensaje = "Filas de trabajo cargadas correctamente.",
+        //            columnasGeneradas = columnas,
+        //            queryGenerada = queryFinal,
+        //            resultado
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error al cargar filas de trabajo");
+        //        return StatusCode(500, new { error = $"Error al cargar filas de trabajo: {ex.Message}" });
+        //    }
+        //}
 
 
-        private string LimpiarFiltrosVacios(string query)
-        {
-            if (string.IsNullOrWhiteSpace(query)) return query;
+        //private string LimpiarFiltrosVacios(string query)
+        //{
+        //    if (string.IsNullOrWhiteSpace(query)) return query;
 
-            var lines = query.Split('\n')
-                             .Select(l => l.TrimEnd())
-                             .Where(l =>
-                             {
+        //    var lines = query.Split('\n')
+        //                     .Select(l => l.TrimEnd())
+        //                     .Where(l =>
+        //                     {
 
-                                 if (l.EndsWith("IN (AND)", StringComparison.OrdinalIgnoreCase)) return false;
-                                 if (l.EndsWith("AND") && l.Contains("C.id")) return false;
-                                 return true;
-                             });
+        //                         if (l.EndsWith("IN (AND)", StringComparison.OrdinalIgnoreCase)) return false;
+        //                         if (l.EndsWith("AND") && l.Contains("C.id")) return false;
+        //                         return true;
+        //                     });
 
-            return string.Join("\n", lines);
-        }
+        //    return string.Join("\n", lines);
+        //}
 
 
     }
