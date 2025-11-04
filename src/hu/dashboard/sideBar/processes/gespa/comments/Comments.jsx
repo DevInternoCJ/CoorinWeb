@@ -1,19 +1,18 @@
-import React, { useRef, useState} from 'react'
+import React, { useRef, useState } from "react";
 import ModalBase from "../../../../board/ModalBase";
 import ModalHeader from "../../../../sideBar/Administration/gespa/ModalHeader";
 import IconCircular from "../../../../../../components/iconos/IconCircular";
-import {IconPhrases} from "../../../../sideBar/Administration/gespa/IconsTemplates";
+import { IconPhrases } from "../../../../sideBar/Administration/gespa/IconsTemplates";
 
-const Comments = ( {onClose}) => {
+const Comments = ({ onClose }) => {
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [verifyResult, setVerifyResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  
 
   return (
-   <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div
         ref={modalRef}
         className={`${
@@ -36,12 +35,11 @@ const Comments = ( {onClose}) => {
           setLoading={setLoading}
         />
         <div>
-            <h1 className=' text-2xl'> Comments</h1>
+          <h1 className=" text-2xl"> Comments</h1>
         </div>
-
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Comments
+export default Comments;
