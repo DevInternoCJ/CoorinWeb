@@ -46,21 +46,27 @@ const CardConsultations = ({ onModalOpen, onModalClose }) => {
                 <div className="card-body p-3 mb-0">
                     <div className="flex justify-center">
                         <div className="avatar avatar-placeholder">
-                            <div className={`bg-neutral-300/${catalog.iconShadow} text-neutral-content w-15 h-15 rounded-full flex items-center justify-center`}>
+                            <div 
+                                className="w-15 h-15 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-300 group-hover:w-16 group-hover:h-16"
+                                style={{ 
+                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                    
+                                }}
+                            >
                                 {catalog.title === "Cuentas" ? (
-                                    <IconCuentas className="size-8" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <IconCuentas className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 ) : catalog.title === "Productividad" ? (
-                                    <IconProductividad className="size-8" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <IconProductividad className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 ) : catalog.title === "Generales" ? (
-                                    <IconGenerales className="size-8" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <IconGenerales className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 ) : catalog.title === "Historicos" ? (
-                                    <IconHistoricos className="size-8" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <IconHistoricos className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 ) : catalog.title === "Ejecutivos" ? (
-                                    <IconExecutive className="size-8" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <IconExecutive className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 ) : catalog.title === "Dia del Ejecutivo" ? (
-                                    <IconDayExecutive className="size-8" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <IconDayExecutive className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 ) : (
-                                    <ExecutiveChart className="size-8" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <ExecutiveChart className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 )}
                             </div>
                         </div>

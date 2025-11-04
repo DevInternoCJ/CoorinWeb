@@ -14,6 +14,7 @@ export const useUserStore = create((set) => ({
   clearUserData: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
+
     set({ user: null, isAuthenticated: false });
   }
 }));

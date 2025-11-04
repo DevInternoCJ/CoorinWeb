@@ -25,7 +25,7 @@ import ConsultVisitContent from "./sideBar/processes/visits/ConsultaVisits";
 import CaptureVisit from "./sideBar/processes/visits/Capture/CaptureVisit";
 import LoadVisitsContent from "./sideBar/processes/visits/LoadVisits";
 import IconCircular from "../../components/iconos/IconCircular";
-
+import ConsorcioLogo from "../../../src/assets//CoorinBlack.svg";
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedExecutiveId, setSelectedExecutiveId] = useState(null);
@@ -299,8 +299,8 @@ export default function CoorinDashboard() {
         >
           <div className=" py-5 sm:py-2">
             <div className="w-full px-0 lg:px-8 pt-0">
-              <div className="flex justify-between items-start mb-0 mt-0 p-0">
-                <span className="backdrop-blur-sm flex title-dashboard text-3xl font-medium tracking-tight text-balance sm:text-4xl">
+              <div className="flex justify-between items-center mb-0 mt-0 p-0">
+                <span className="rounded-2xl backdrop-blur-sm flex items-center gap-2 title-dashboard text-3xl font-medium tracking-tight text-balance sm:text-3xl">
                   <IconCircular
                     size="size-10"
                     borderWidth="border-2"
@@ -320,8 +320,32 @@ export default function CoorinDashboard() {
                       ></path>
                     </svg>
                   </IconCircular>
-                  &nbsp; Ejecutivos
+                  Ejecutivos
                 </span>
+                {/* Logo y texto con efecto de gota */}
+                <div className="flex items-center relative">
+                  <span 
+                    className="text-4xl font-medium text-black tracking-[-0.02em] flex items-center gap-3 relative"
+                    style={{
+                      background: 'linear-gradient(90deg, rgba(249, 250, 251, 0) 0%, rgba(249, 250, 251, 0.4) 20%, rgba(249, 250, 251, 0.8) 40%, #f9fafb 60%, #ffffff 100%)',
+                      padding: '6px 12px 6px 16px',
+                      borderRadius: '24px',
+                     
+                      zIndex: 1
+                    }}
+                  >
+                    Coorin
+                    <img
+                      src={ConsorcioLogo}
+                      alt="Consorcio Jurídico"
+                      style={{
+                        height: "48px",
+                        width: "48px",
+                        objectFit: "contain"
+                      }}
+                    />
+                  </span>
+                </div>
               </div>
               <div className="mt-2 grid grid-cols-6 gap-4 sm:mt-8 md:mt-8 lg:mt-0 xl:mt-0">
                 <div className="col-span-6">
@@ -333,14 +357,14 @@ export default function CoorinDashboard() {
               </div>
 
               <div className="col-span-6 row-start-2 ">
-                <div className="flex justify-between items-start mb-4 mt-4">
-                  <span className="flex title-dashboard text-3xl font-medium tracking-tight text-balance sm:text-4xl">
+                <div className="flex justify-between items-center mb-4 mt-4">
+                  <span className="rounded-2xl flex items-center gap-2 title-dashboard text-3xl font-medium tracking-tight text-balance sm:text-3xl">
                     <IconCircular
-                       size="size-10"
-                    borderWidth="border-2"
-                    bgColor="bg-jerarquia3/10"
-                    textColor="text-jerarquia2"
-                    borderColor="border-jerarquia3/20"
+                      size="size-10"
+                      borderWidth="border-2"
+                      bgColor="bg-jerarquia3/10"
+                      textColor="text-jerarquia2"
+                      borderColor="border-jerarquia3/20"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -354,7 +378,7 @@ export default function CoorinDashboard() {
                         ></path>
                       </svg>
                     </IconCircular>
-                    &nbsp; Consultas
+                    Consultas
                   </span>
                 </div>
                 <div className="-mt-2">
