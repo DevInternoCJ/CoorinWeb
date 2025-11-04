@@ -23,6 +23,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
         private readonly EjecutivoDao _ejecutivoDao;
         private readonly ExcelGeneratorService _excelGeneratorService;
         private readonly AccionamientosQueryHelper _accionamientosQueryHelper;
+        private DataTable _tblParametros;
 
         public BusquedasService(IDbContextFactory dbContFactory, DaoBase daoBase, EjecutivoDao ejecutivoDao,
                               ExcelGeneratorService excelGeneratorService, AccionamientosQueryHelper accionamientosQueryHelper)
@@ -32,6 +33,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             _ejecutivoDao = ejecutivoDao;
             _excelGeneratorService = excelGeneratorService;
             this._accionamientosQueryHelper = accionamientosQueryHelper;
+            _tblParametros = CrearTablaParametros();
         }
 
         public async Task<SearchResultDto> RealizaBusqueda(
@@ -43,223 +45,463 @@ namespace Loki.Mark.Consulta.Cuenta.Services
          int? idConsulta = null,
          IEnumerable<ParametroDto>? parametrosExtra = null,
          IEnumerable<AgruparDto>? agruparExtra = null,
-         DateTime? desdeFecha = null) 
+         DateTime? desdeFecha = null)
         {
             try
             {
+                var (finalIdProducto, finalIdCartera, fechaDesde) = await InicializarParametrosBusquedaAsync(
+                    idProducto, idCartera, idConsulta, desdeFecha, servidor);
 
-                await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidor);
+                var (tblParametros, tblAgrupar) = ConstruirParametrosConsulta(
+                    finalIdCartera, parametrosExtra, agruparExtra, idConsulta);
 
-                DataTable tblParametros = new DataTable();
-                tblParametros.Columns.Add("Concepto", typeof(string));
-                tblParametros.Columns.Add("Campo", typeof(string));
-                tblParametros.Columns.Add("Valores", typeof(string));
-                tblParametros.Columns.Add("Parámetros", typeof(string));
-                tblParametros.Columns.Add("Dato", typeof(string));
+                LogParametrosFinales(tblParametros, tblAgrupar);
 
-                DataTable tblAgrupar = new DataTable();
-                tblAgrupar.Columns.Add("Campo", typeof(string));
-                tblAgrupar.Columns.Add("Concepto", typeof(string));
+                var resultadoQuery = await EjecutarQueryBusquedaAsync(
+                    finalIdProducto, finalIdCartera, fechaDesde, tblParametros,
+                    tblAgrupar, esDetalleResultado, servidor);
 
-                DateTime fechaDesde = desdeFecha ?? DateTime.Today.AddMonths(-1);
-                Console.WriteLine($"=== Usando fecha desde: {fechaDesde:yyyy-MM-dd}");
+                var rutaExcel = await ExportarExccel(resultadoQuery);
 
-                // === Si hay idConsulta, obtener solo datos básicos (no parámetros/agrupaciones) ===
-                if (idConsulta.HasValue)
-                {
-                    var consultaRow = ConsultaGenerador.ObtenerConsulta(idConsulta.Value);
-                    if (consultaRow == null)
-                        throw new Exception($"No se encontró la consulta con ID {idConsulta.Value}");
+                var datosProcesados = ProcesarDatosResultado(resultadoQuery, jerarquiaEjecutivo, finalIdCartera);
 
-                    // Solo obtener datos básicos de la consulta
-                    idProducto = Convert.ToInt32(consultaRow["idProducto"]);
-                    idCartera = Convert.ToInt32(consultaRow["idCartera"]);
-
-                    // Usar la fecha de la consulta solo si no se proporcionó desdeFecha
-                    if (!desdeFecha.HasValue)
-                    {
-                        fechaDesde = Convert.ToDateTime(consultaRow["Desde"]);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("=== NO hay idConsulta, usando parámetros por defecto ===");
-                    // Parámetro básico de cartera cuando no hay idConsulta
-                    tblParametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
-                }
-
-                ProcesarParametrosExtra(parametrosExtra, tblParametros);
-
-                if (agruparExtra != null && agruparExtra.Any())
-                {
-                    foreach (var agrupar in agruparExtra)
-                    {
-                        if (!AgrupacionExiste(tblAgrupar, agrupar.Campo, agrupar.Concepto))
-                        {
-                            tblAgrupar.Rows.Add(agrupar.Campo, agrupar.Concepto);
-                            Console.WriteLine($"Agrupación extra cargada: {agrupar.Campo}, {agrupar.Concepto}");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Agrupación duplicada omitida: {agrupar.Campo}, {agrupar.Concepto}");
-                        }
-                    }
-                }
-
-                Console.WriteLine("=== PARÁMETROS FINALES ===");
-                foreach (DataRow row in tblParametros.Rows)
-                {
-                    Console.WriteLine($"Concepto: {row["Concepto"]}, Campo: {row["Campo"]}, Valores: {row["Valores"]}, Parámetros: {row["Parámetros"]}, Dato: {row["Dato"]}");
-                }
-
-                Console.WriteLine("=== AGRUPACIONES FINALES ===");
-                foreach (DataRow row in tblAgrupar.Rows)
-                {
-                    Console.WriteLine($"Campo: {row["Campo"]}, Concepto: {row["Concepto"]}");
-                }
-
-                var conteo = esDetalleResultado ? Resultado.Detalle : Resultado.Contar;
-                Console.WriteLine($"Fecha a usar en GeneraQueryCuentas: {fechaDesde:yyyy-MM-dd}");
-
-                ArrayList listaColumnas = new ArrayList();
-                var queryData = ConsultaGenerador.GeneraQueryCuentas(
-                    idProducto,
-                    tblParametros,
-                    tblAgrupar,
-                    conteo,
-                    fechaDesde,  
-                    idCartera,
-                    ref listaColumnas
-                );
-
-                string sQuery = "WAITFOR DELAY '00:00:00'; USE dbCollection; SET DATEFORMAT YMD;\r\n" + queryData.Query;
-                Console.WriteLine("=== Query generado ===\n" + sQuery);
-
-                // === Ejecutar query ===
-                DataTable tblCuentas = new("Cuentas");
-                using (var sqlConnection = _dbContFactory.GetSqlConnection(servidor, "Collection"))
-                {
-                    await sqlConnection.OpenAsync();
-                    using (var reader = await sqlConnection.ExecuteReaderAsync(sQuery))
-                    {
-                        tblCuentas.Load(reader);
-                    }
-                }
-                string rutaExcel = null;
-                bool excelExportFailed = false;
-
-                if (tblCuentas.Rows.Count > 0)
-                {
-                    try
-                    {
-                        string fileName = $"Cuentas_{Guid.NewGuid():N}.xlsx";
-                        string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports");
-                        Directory.CreateDirectory(uploadsFolder);
-                        string filePath = Path.Combine(uploadsFolder, fileName);
-
-                        // Intenta exportar a Excel. Si falla, lanza excepción (UnauthorizedAccessException, IOException, etc.)
-                        string sResultado = _excelGeneratorService.ExportToExcelSAX(ref tblCuentas, filePath);
-
-                        if (!string.IsNullOrEmpty(sResultado))
-                        {
-                            Console.WriteLine($"ADVERTENCIA: La exportación a Excel falló internamente: {sResultado}");
-                            excelExportFailed = true;
-                        }
-                        else
-                        {
-                            rutaExcel = $"/api/busquedas/download-excel?filename={fileName}";
-                            Console.WriteLine($"Excel generado: {rutaExcel}");
-                        }
-                    }
-                    catch (UnauthorizedAccessException ex)
-                    {
-                        excelExportFailed = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        excelExportFailed = true;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine(" No hay resultados para exportar a Excel ");
-                }
-                var datosResultado = new List<Dictionary<string, object>>();
-
-                foreach (DataRow row in tblCuentas.Rows)
-                {
-                    var item = new Dictionary<string, object>();
-
-                    foreach (DataColumn col in tblCuentas.Columns)
-                    {
-                        object value = row[col];
-
-                        if (col.ColumnName.Equals("Cuenta", StringComparison.OrdinalIgnoreCase) &&
-                            value != null && value != DBNull.Value)
-                        {
-                            string cuenta = value.ToString();
-                            if (jerarquiaEjecutivo < 3) 
-                            {
-                                if (idCartera == 1)
-                                {
-                                    // STUFF(STUFF(C.idCuenta,1,2,'XX'),13, 2,'XX') [Cuenta]
-                                    if (cuenta.Length >= 14)
-                                    {
-                                        char[] arr = cuenta.ToCharArray();
-                                        arr[0] = 'X';
-                                        arr[1] = 'X';
-                                        arr[12] = 'X';
-                                        arr[13] = 'X';
-                                        value = new string(arr);
-                                    }
-                                }
-                                else
-                                {
-                                    // STUFF(C.idCuenta,1,LEN(C.idCuenta)-4,'XXX-XXX-')
-                                    if (cuenta.Length > 4)
-                                    {
-                                        int ocultar = cuenta.Length - 4;
-                                        value = new string('X', ocultar) + cuenta.Substring(cuenta.Length - 4);
-                                    }
-                                }
-                            }
-                        }
-
-                        item[col.ColumnName] = value;
-                    }
-
-                    datosResultado.Add(item);
-                }
-
-            
-                return new SearchResultDto
-                {
-                    Mensaje = "Búsqueda terminada.",
-                    EsError = false,
-                    TotalFilasEncontradas = tblCuentas.Rows.Count,
-                    Datos = datosResultado,
-                    RutaDescargaExcel = rutaExcel
-                };
+                return ResultadoOk(datosProcesados, resultadoQuery.Rows.Count, rutaExcel);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"=== ERROR: {ex.Message}");
-                Console.WriteLine($"=== STACK TRACE: {ex.StackTrace}");
-
-                if (ex.Message.Contains("Incorrect syntax"))
-                {
-                    Console.WriteLine("=== ERROR DE SINTAXIS SQL DETECTADO ===");
-                }
-
-                return new SearchResultDto
-                {
-                    Mensaje = $"Error al realizar la búsqueda: {ex.Message}",
-                    EsError = true
-                };
+                LogErrorBusqueda(ex);
+                return ResultadoError(ex.Message);
             }
         }
 
-        //  Método auxiliar para verificar duplicados 
+        public string AgregaParametros(string sConcepto, string sCampo, string sSimbolo, string sValor, string sId)
+        {
+            int iNumero;
+            DateTime dtFecha = new DateTime();
+            string sSignos = sSimbolo,
+                   sDato = "int";
+            DataRow drFila;
+
+            sValor = sValor.Replace("'", "");
+
+            // Símbolo
+            if (sSimbolo == "≤")
+                sSignos = "<=";
+            else if (sSimbolo == "≥")
+                sSignos = ">=";
+
+            // Fila
+            drFila = _tblParametros.Rows.Cast<DataRow>()
+                .FirstOrDefault(row => row["Concepto"].ToString() == sConcepto && row["Campo"].ToString() == sCampo);
+
+            if (drFila == null)
+                drFila = _tblParametros.Rows.Add(sConcepto, sCampo, "", "", sDato);
+            else
+            {
+                if (drFila["Parámetros"].ToString().Contains(">") && (sSignos == "=" || sSignos.StartsWith(">")))
+                    return "Solo puede asignar una desigualdad en el otro sentido <.";
+
+                if (drFila["Parámetros"].ToString().Contains("<") && (sSignos == "=" || sSignos.StartsWith("<")))
+                    return "Solo puede asignar una desigualdad en el otro sentido >.";
+
+                if (drFila["Valores"].ToString().Contains("≠") && sSimbolo != "≠")
+                    return "Ya tiene un signo ≠, solo puede agregar más parámetros de ≠ .";
+
+                if (drFila["Valores"].ToString().Contains("=") && sSimbolo != "=")
+                    return "Ya tiene un signo =, solo puede agregar más parámetros de = .";
+            }
+
+            // Concepto
+            switch (sConcepto)
+            {
+                case "Cuenta":
+                    if (sCampo == "RFC")
+                    {
+                        sDato = "char";
+                        if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(sSimbolo + "\"" + sValor.ToLower() + "\""))
+                            return "Ya estableció dicho parámetro.";
+
+                        drFila.ItemArray = new object[] {
+                            sConcepto, sCampo,
+                            drFila["Valores"] + ", " + sSimbolo + "\"" + sValor + "\"",
+                            drFila["Parámetros"] + ", " + sSignos + sValor,
+                            sDato
+                        };
+                    }
+                    else
+                    {
+                        if (drFila["Parámetros"].ToString().Contains(sId))
+                            return "Ya estableció dicho parámetro.";
+                        drFila.ItemArray = new object[] {
+                            sConcepto, sCampo,
+                            drFila["Valores"] + ", " + sValor,
+                            drFila["Parámetros"] + "," + sId,
+                            "list"
+                        };
+                    }
+                    break;
+
+                case "Producto":
+                    sDato = "char";
+
+                    if (drFila["Dato"].ToString() == "int" && !int.TryParse(sValor, out iNumero))
+                        return "Debe comparar números con números.";
+
+                    if (drFila["Dato"].ToString() == "date" && !DateTime.TryParse(sValor, out dtFecha))
+                        return "Debe comparar fechas con fechas.";
+
+                    if (sSignos.Contains(">") || sSignos.Contains("<"))
+                    {
+                        if (!int.TryParse(sValor, out iNumero) && !DateTime.TryParse(sValor, out dtFecha))
+                            return "Para hacer comparaciones escriba una cantidad o una fecha.";
+
+                        if (sValor.Contains("/") || sValor.Contains("-"))
+                        {
+                            sValor = dtFecha.ToString("yyyy-MM-dd");
+                            sDato = "date";
+                        }
+                        else
+                            sDato = "int";
+                    }
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(sSimbolo + "\"" + sValor.ToLower() + "\""))
+                        return "Ya estableció dicho parámetro.";
+
+                    drFila.ItemArray = new object[] {
+                        sConcepto, sCampo,
+                        drFila["Valores"] + ", " + sSimbolo + (sDato == "char" ? "\"" + sValor + "\"" : sValor),
+                        drFila["Parámetros"] + ", " + sSignos + (sDato == "date" ? "'" + sValor + "'" : sValor),
+                        sDato
+                    };
+                    break;
+
+                case "Conteos":
+                    if (!int.TryParse(sValor, out iNumero))
+                        return "Indique una cantidad de números enteros.";
+
+                    if (drFila["Valores"].ToString().Contains(sSimbolo + sValor))
+                        return "Ya estableció dicho parámetro.";
+
+                    drFila.ItemArray = new object[] {
+                        sConcepto, sCampo,
+                        drFila["Valores"] + ", " + sSimbolo + sValor,
+                        drFila["Parámetros"] + ", " + sSignos + iNumero,
+                        sDato
+                    };
+                    break;
+
+                case "Fechas":
+                    if (!DateTime.TryParse(sValor, out dtFecha))
+                        return "Debe escribir una fecha válida.";
+
+                    sValor = dtFecha.ToString("yyyy-MM-dd");
+
+                    if (drFila["Valores"].ToString() != "" && drFila["Valores"].ToString().ToLower().Contains(sSimbolo + sValor.ToLower()))
+                        return "Ya estableció dicho parámetro.";
+
+                    drFila.ItemArray = new object[] {
+                        sConcepto, sCampo,
+                        drFila["Valores"] + ", " + sSimbolo + sValor,
+                        drFila["Parámetros"] + ", " + sSignos + "'" + sValor + "'",
+                        "date"
+                    };
+                    break;
+
+                default:
+                    return "";
+            }
+
+            // Limpiar valores
+            if (drFila["Dato"].ToString() == "list" && drFila["Valores"].ToString().StartsWith(","))
+                drFila["Valores"] = sSimbolo + " " + drFila["Valores"].ToString().TrimStart(new char[] { ',', ' ' });
+
+            drFila["Valores"] = drFila["Valores"].ToString().TrimStart(new char[] { ',', ' ' });
+            drFila["Parámetros"] = drFila["Parámetros"].ToString().TrimStart(new char[] { ',', ' ' });
+
+            return "";
+        }
+
+        private async Task<(int IdProducto, int IdCartera, DateTime FechaDesde)> InicializarParametrosBusquedaAsync(
+            int idProducto, int idCartera, int? idConsulta, DateTime? desdeFecha, string servidor)
+        {
+            DateTime fechaDesde = desdeFecha ?? DateTime.Today.AddMonths(-1);
+
+            if (idConsulta.HasValue)
+            {
+                var datosConsulta = await ObtenerDatosConsultaAsync(idConsulta.Value, servidor);
+                return (datosConsulta.IdProducto, datosConsulta.IdCartera, desdeFecha ?? datosConsulta.Desde);
+            }
+
+            return (idProducto, idCartera, fechaDesde);
+        }
+
+        private async Task<ConsultaData> ObtenerDatosConsultaAsync(int idConsulta, string servidor)
+        {
+            await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidor);
+            var consultaRow = ConsultaGenerador.ObtenerConsulta(idConsulta);
+
+            if (consultaRow == null)
+                throw new Exception($"No se encontró la consulta con ID {idConsulta}");
+
+            return new ConsultaData(
+                Convert.ToInt32(consultaRow["idProducto"]),
+                Convert.ToInt32(consultaRow["idCartera"]),
+                Convert.ToDateTime(consultaRow["Desde"])
+            );
+        }
+
+        private (DataTable Parametros, DataTable Agrupar) ConstruirParametrosConsulta(
+            int idCartera, IEnumerable<ParametroDto>? parametrosExtra, IEnumerable<AgruparDto>? agruparExtra, int? idConsulta)
+        {
+            var tblParametros = CrearTablaParametros();
+            var tblAgrupar = CrearTablaAgrupar();
+
+            // Solo agregar parámetro básico de cartera cuando no hay idConsulta
+            if (!idConsulta.HasValue)
+            {
+                tblParametros.Rows.Add("idCartera", "=", idCartera.ToString(), "AND", "int");
+            }
+
+            ProcesarParametrosExtra(parametrosExtra, tblParametros);
+            ProcesarAgruparExtra(agruparExtra, tblAgrupar);
+
+            return (tblParametros, tblAgrupar);
+        }
+
+        private DataTable CrearTablaParametros()
+        {
+            var tabla = new DataTable();
+            tabla.Columns.Add("Concepto", typeof(string));
+            tabla.Columns.Add("Campo", typeof(string));
+            tabla.Columns.Add("Valores", typeof(string));
+            tabla.Columns.Add("Parámetros", typeof(string));
+            tabla.Columns.Add("Dato", typeof(string));
+            return tabla;
+        }
+
+        private DataTable CrearTablaAgrupar()
+        {
+            var tabla = new DataTable();
+            tabla.Columns.Add("Campo", typeof(string));
+            tabla.Columns.Add("Concepto", typeof(string));
+            return tabla;
+        }
+
+        private void ProcesarParametrosExtra(IEnumerable<ParametroDto>? parametrosExtra, DataTable tblParametros)
+        {
+            if (parametrosExtra == null || !parametrosExtra.Any())
+                return;
+
+            foreach (var parametro in parametrosExtra)
+            {
+                string tipoDato = DeterminarTipoDato(parametro.Concepto, parametro.Campo, parametro.Dato);
+                string valoresProcesados = LimpiarValoresParametro(
+                    parametro.Valores ?? "", tipoDato, parametro.Concepto, parametro.Campo);
+
+                tblParametros.Rows.Add(
+                    parametro.Concepto,
+                    parametro.Campo,
+                    valoresProcesados,
+                    parametro.Parámetros ?? "AND",
+                    tipoDato
+                );
+
+                Console.WriteLine($"Parámetro cargado: {parametro.Concepto}, {parametro.Campo}, {valoresProcesados}, {tipoDato}");
+            }
+        }
+
+        private void ProcesarAgruparExtra(IEnumerable<AgruparDto>? agruparExtra, DataTable tblAgrupar)
+        {
+            if (agruparExtra == null || !agruparExtra.Any())
+                return;
+
+            foreach (var agrupar in agruparExtra)
+            {
+                if (!AgrupacionExiste(tblAgrupar, agrupar.Campo, agrupar.Concepto))
+                {
+                    tblAgrupar.Rows.Add(agrupar.Campo, agrupar.Concepto);
+                }
+                else
+                {
+                    // Agrupación duplicada - no hacer nada
+                }
+            }
+        }
+
+        private async Task<DataTable> EjecutarQueryBusquedaAsync(
+            int idProducto, int idCartera, DateTime fechaDesde, DataTable parametros,
+            DataTable agrupar, bool esDetalleResultado, string servidor)
+        {
+            await ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidor);
+
+            ArrayList listaColumnas = new ArrayList();
+            var conteo = esDetalleResultado ? Resultado.Detalle : Resultado.Contar;
+
+            var queryData = ConsultaGenerador.GeneraQueryCuentas(
+                idProducto, parametros, agrupar, conteo, fechaDesde, idCartera, ref listaColumnas);
+
+            string queryFinal = $"WAITFOR DELAY '00:00:00'; USE dbCollection; SET DATEFORMAT YMD;\r\n{queryData.Query}";
+            Console.WriteLine(" Query generado \n" + queryFinal);
+
+            return await EjecutarQueryAsync(queryFinal, servidor);
+        }
+
+        private async Task<DataTable> EjecutarQueryAsync(string query, string servidor)
+        {
+            var tablaResultados = new DataTable("Cuentas");
+
+            using (var sqlConnection = _dbContFactory.GetSqlConnection(servidor, "Collection"))
+            {
+                await sqlConnection.OpenAsync();
+                using (var reader = await sqlConnection.ExecuteReaderAsync(query))
+                {
+                    tablaResultados.Load(reader);
+                }
+            }
+
+            return tablaResultados;
+        }
+
+        private async Task<string?> ExportarExccel(DataTable datos)
+        {
+            if (datos.Rows.Count == 0)
+            {
+                Console.WriteLine(" No hay resultados para exportar a Excel ");
+                return null;
+            }
+
+            try
+            {
+                string nombreArchivo = $"Cuentas_{Guid.NewGuid():N}.xlsx";
+                string carpetaUploads = Path.Combine(Directory.GetCurrentDirectory(), "ExcelExports");
+                Directory.CreateDirectory(carpetaUploads);
+                string rutaArchivo = Path.Combine(carpetaUploads, nombreArchivo);
+
+                string resultado = _excelGeneratorService.ExportToExcelSAX(ref datos, rutaArchivo);
+
+                if (!string.IsNullOrEmpty(resultado))
+                {
+                    return null;
+                }
+
+                string rutaExcel = $"/api/busquedas/download-excel?filename={nombreArchivo}";
+
+                return rutaExcel;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        private List<Dictionary<string, object>> ProcesarDatosResultado(
+            DataTable tablaDatos, int jerarquiaEjecutivo, int idCartera)
+        {
+            var datosResultado = new List<Dictionary<string, object>>();
+
+            foreach (DataRow fila in tablaDatos.Rows)
+            {
+                var item = new Dictionary<string, object>();
+
+                foreach (DataColumn columna in tablaDatos.Columns)
+                {
+                    object valor = fila[columna];
+
+                    if (EsColumnaCuenta(columna.ColumnName) && valor != null && valor != DBNull.Value)
+                    {
+                        valor = EnmascararNumeroCuenta(valor.ToString()!, jerarquiaEjecutivo, idCartera);
+                    }
+
+                    item[columna.ColumnName] = valor;
+                }
+
+                datosResultado.Add(item);
+            }
+
+            return datosResultado;
+        }
+
+        private string EnmascararNumeroCuenta(string cuenta, int jerarquiaEjecutivo, int idCartera)
+        {
+            if (jerarquiaEjecutivo >= 3)
+                return cuenta;
+
+            if (idCartera == 1)
+            {
+                // STUFF(STUFF(C.idCuenta,1,2,'XX'),13, 2,'XX') [Cuenta]
+                if (cuenta.Length >= 14)
+                {
+                    char[] arr = cuenta.ToCharArray();
+                    arr[0] = 'X';
+                    arr[1] = 'X';
+                    arr[12] = 'X';
+                    arr[13] = 'X';
+                    return new string(arr);
+                }
+            }
+            else
+            {
+                // STUFF(C.idCuenta,1,LEN(C.idCuenta)-4,'XXX-XXX-')
+                if (cuenta.Length > 4)
+                {
+                    int ocultar = cuenta.Length - 4;
+                    return new string('X', ocultar) + cuenta.Substring(cuenta.Length - 4);
+                }
+            }
+
+            return cuenta;
+        }
+
+        private SearchResultDto ResultadoOk(
+            List<Dictionary<string, object>> datos, int totalFilas, string? rutaExcel)
+        {
+            return new SearchResultDto
+            {
+                Mensaje = "Búsqueda terminada.",
+                EsError = false,
+                TotalFilasEncontradas = totalFilas,
+                Datos = datos,
+                RutaDescargaExcel = rutaExcel
+            };
+        }
+
+        private SearchResultDto ResultadoError(string mensajeError)
+        {
+            return new SearchResultDto
+            {
+                Mensaje = $"Error al realizar la búsqueda: {mensajeError}",
+                EsError = true
+            };
+        }
+
+        private void LogParametrosFinales(DataTable parametros, DataTable agrupar)
+        {
+            foreach (DataRow row in parametros.Rows)
+            {
+                Console.WriteLine($"Concepto: {row["Concepto"]}, Campo: {row["Campo"]}, Valores: {row["Valores"]}, Parámetros: {row["Parámetros"]}, Dato: {row["Dato"]}");
+            }
+
+            foreach (DataRow row in agrupar.Rows)
+            {
+                Console.WriteLine($"Campo: {row["Campo"]}, Concepto: {row["Concepto"]}");
+            }
+        }
+
+        private void LogErrorBusqueda(Exception ex)
+        {
+            Console.WriteLine($"=== ERROR: {ex.Message}");
+            Console.WriteLine($"=== STACK TRACE: {ex.StackTrace}");
+
+            if (ex.Message.Contains("Incorrect syntax"))
+            {
+                Console.WriteLine(" ERROR DE SINTAXIS SQL DETECTADO ");
+            }
+        }
+
         private bool AgrupacionExiste(DataTable tblAgrupar, string campo, string concepto)
         {
             foreach (DataRow row in tblAgrupar.Rows)
@@ -272,28 +514,34 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             return false;
         }
 
-        private void ProcesarParametrosExtra(IEnumerable<ParametroDto> parametrosExtra, DataTable tblParametros)
+        private string DeterminarTipoDato(string concepto, string campo, string datoFromRequest)
         {
-            if (parametrosExtra == null || !parametrosExtra.Any())
-                return;
+            if (!string.IsNullOrEmpty(datoFromRequest))
+                return datoFromRequest.ToLower();
 
-            foreach (var p in parametrosExtra)
+            switch (concepto?.ToLower())
             {
-                string valoresProcesados = p.Valores ?? "";
+                case "cuenta":
+                    if (campo?.ToLower() == "situación" || campo?.ToLower() == "nivel" ||
+                        campo?.ToLower() == "sucursal" || campo?.ToLower() == "causanopago")
+                        return "list";
+                    else if (campo?.ToLower() == "rfc")
+                        return "char";
+                    else if (campo?.ToLower() == "bloqueo")
+                        return "int";
+                    break;
 
-                // Determinar automáticamente el tipo de dato
-                string tipoDato = DeterminarTipoDato(p.Concepto, p.Campo, p.Dato);
+                case "producto":
+                    return "char";
 
-                // Limpiar y formatear valores según el tipo de dato
-                valoresProcesados = LimpiarValoresParametro(valoresProcesados, tipoDato, p.Concepto, p.Campo);
+                case "conteos":
+                    return "int";
 
-                // Valores por defecto para parámetros opcionales
-                string parametrosValue = p.Parámetros ?? "AND";
-                string datoValue = tipoDato;
-
-                tblParametros.Rows.Add(p.Concepto, p.Campo, valoresProcesados, parametrosValue, datoValue);
-                Console.WriteLine($"Parámetro cargado: {p.Concepto}, {p.Campo}, {valoresProcesados}, {datoValue}");
+                case "fechas":
+                    return "date";
             }
+
+            return "string";
         }
 
         private string LimpiarValoresParametro(string valores, string tipoDato, string concepto, string campo)
@@ -311,7 +559,7 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     return "1042";
                 }
                 // Extraer solo números si hay texto
-                var match = System.Text.RegularExpressions.Regex.Match(valoresLimpios, @"\d+");
+                var match = Regex.Match(valoresLimpios, @"\d+");
                 if (match.Success)
                 {
                     return match.Value;
@@ -325,9 +573,9 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 valoresLimpios = valoresLimpios.Replace("≠", "<>").Replace("?", "<>");
 
                 // Agregar comillas simples si es necesario
-                if (!valoresLimpios.Contains("'") && System.Text.RegularExpressions.Regex.IsMatch(valoresLimpios, @"\d"))
+                if (!valoresLimpios.Contains("'") && Regex.IsMatch(valoresLimpios, @"\d"))
                 {
-                    var match = System.Text.RegularExpressions.Regex.Match(valoresLimpios, @"([<>]=?|=|<>)\s*(\d{4}-\d{2}-\d{2})");
+                    var match = Regex.Match(valoresLimpios, @"([<>]=?|=|<>)\s*(\d{4}-\d{2}-\d{2})");
                     if (match.Success)
                     {
                         valoresLimpios = $"{match.Groups[1].Value} '{match.Groups[2].Value}'";
@@ -354,42 +602,19 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                     valoresLimpios = valoresConComillas;
                 }
             }
+
             return valoresLimpios;
         }
 
-        private string DeterminarTipoDato(string concepto, string campo, string datoFromRequest)
+        private bool EsColumnaCuenta(string nombreColumna)
         {
-            // Si viene en el request, usarlo
-            if (!string.IsNullOrEmpty(datoFromRequest))
-                return datoFromRequest.ToLower();
-
-            // Determinar automáticamente basado en concepto y campo
-            switch (concepto?.ToLower())
-            {
-                case "cuenta":
-                    if (campo?.ToLower() == "situación" || campo?.ToLower() == "nivel" ||
-                        campo?.ToLower() == "sucursal" || campo?.ToLower() == "causanopago")
-                        return "list";
-                    else if (campo?.ToLower() == "rfc")
-                        return "char";
-                    else if (campo?.ToLower() == "bloqueo")
-                        return "int";
-                    break;
-
-                case "producto":
-                    return "char";
-
-                case "conteos":
-                    return "int";
-
-                case "fechas":
-                    return "date";
-            }
-
-            return "string";
+            return nombreColumna.Equals("Cuenta", StringComparison.OrdinalIgnoreCase);
         }
-        // === Método auxiliar para verificar duplicados ===
-       public static class Funciones
+
+        //  Clase interna para datos de consulta 
+        private record ConsultaData(int IdProducto, int IdCartera, DateTime Desde);
+
+        public static class Funciones
         {
             public static void ColumnaPorcentaje(ref DataTable tblTabla, string NombreColumna)
             {
@@ -416,7 +641,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 }
             }
 
-            // (divide entre 2, multiplica por 100)
             public static void ColumnaPorcentaje2(ref DataTable tblTabla, string NombreColumna)
             {
                 if (!tblTabla.Columns.Contains(NombreColumna))
@@ -481,7 +705,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
                 tblTabla = tblTabla.DefaultView.ToTable();
             }
 
-            // Detecta automáticamente columnas numéricas y agrega % a todas
             public static void AgregarPorcentajesAutomaticos(ref DataTable tblTabla)
             {
                 foreach (DataColumn col in tblTabla.Columns)
@@ -494,7 +717,6 @@ namespace Loki.Mark.Consulta.Cuenta.Services
             }
         }
 
-        // guardar eliminar consulta
         public async Task<string> GuardarConsulta(
             int idConsulta, string nombreConsulta, int idProducto, int idCartera,
             DataTable parametros, DataTable agrupar, DateTime desde, int idEjecutivo,
