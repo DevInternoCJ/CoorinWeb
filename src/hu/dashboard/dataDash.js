@@ -47,6 +47,7 @@ const dataDash = [
     icon: "ExecutiveChart",
     iconShadow: "50",
   },
+  
 ];
 
 export default dataDash;
