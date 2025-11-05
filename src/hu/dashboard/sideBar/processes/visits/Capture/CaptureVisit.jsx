@@ -51,23 +51,25 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla }) => {
                             <img src={ConsorcioLogo} alt="Logo Coorin" className="h-[4vw] w-[4vw] min-h-[2.5rem] min-w-[2.5rem] object-contain" />
                         </div>
                         {/* Cartera: más pequeño, responsive */}
-                        <div className="w-full flex flex-col items-center mb-2 sm:col-span-1 sm:w-[6.66vw] sm:mb-0">
-                            <label htmlFor="cartera-select-carga-visits" className="text-sm font-medium mb-[0.25rem]">Cartera</label>
+                        {/* Cartera - dropdown animado */}
+                        <div className="relative w-full min-w-0 flex flex-col items-center mb-2 sm:col-span-1 sm:w-[6.66vw] sm:mb-0">
                             <select
-                                className="peer p-[0.33rem] block w-full max-w-xs mx-auto bg-gray-50 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2"
+                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={cartera}
                                 onChange={e => setCartera(e.target.value)}
                                 id="cartera-select-carga-visits"
                             >
-                                <option value="">Seleccione cartera</option>
+                                <option value="" hidden></option>
                                 {carterasOptions.map((item) => (
                                     <option key={item.id} value={item.id}>{item.nombre}</option>
                                 ))}
                             </select>
+                            <label htmlFor="cartera-select-carga-visits" className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500">Cartera</label>
                         </div>
                         {/* Checkbox pegado a cartera, sin padding */}
+                        {/* Expe alineado verticalmente */}
                         <div className="w-full flex flex-col items-center justify-center mb-2 sm:col-span-1 sm:w-[6vw] sm:ml-[1vw] sm:mb-0">
-                            <label htmlFor="porExpediente" className="text-sm font-medium mb-[0.25rem] text-center">Expte.</label>
+                            <label htmlFor="porExpediente" className="text-sm font-medium mb-[0.25rem] text-center flex items-center justify-center h-full">Expte.</label>
                             <input
                                 id="porExpediente"
                                 type="checkbox"
@@ -77,10 +79,8 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla }) => {
                             />
                         </div>
                         {/* Input Cuenta: más grande y separado del checkbox */}
-                        <div className="w-full flex flex-col items-center justify-center mb-2 sm:col-span-3 sm:w-[8vw] sm:ml-[1vw] sm:mr-[-1vw] sm:mb-0">
-                            <label htmlFor="cuentaInput" className="modal-span-1 whitespace-nowrap text-sm font-medium mb-[0.25rem]">
-                                {porExpediente ? "Expediente:" : "Cuenta:"}
-                            </label>
+                        {/* Cuenta/Expediente - input animado */}
+                        <div className="relative w-full min-w-0 flex flex-col items-center justify-center mb-2 sm:col-span-3 sm:w-[8vw] sm:ml-[1vw] sm:mr-[-1vw] sm:mb-0">
                             <input
                                 id="cuentaInput"
                                 type="text"
@@ -92,44 +92,37 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla }) => {
                                     const valor = porExpediente ? e.target.value : e.target.value.replace(/\D/g, "");
                                     setIdCuenta(valor);
                                 }}
-                                placeholder={porExpediente ? "Ingrese el expediente" : "Ingrese el nú. de cuenta"}
-                                style={{ padding: "0.33rem", border: idCuenta.length < 6 ? "0.125rem solid #e53e3e" : "0.125rem solid #d1d5db", borderRadius: "0.5rem", fontSize: "0.875rem" }}
-                                className="w-full max-w-xs mx-auto"
+                                placeholder=" "
+                                style={{ color: 'var(--color-jerarquia3)' }}
+                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                             />
+                            <label htmlFor="cuentaInput" className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500">
+                                {porExpediente ? "Expediente:" : "Cuenta:"}
+                            </label>
                         </div>
                         {/* Dropdown extra: prioridad visual, ocupa el resto */}
-                        <div className="w-full flex flex-col items-center justify-center mb-2 sm:col-span-6 sm:w-[28vw] sm:ml-[-1vw] sm:mb-0">
-                            <label className="text-sm font-medium mb-[0.25rem]">Dirección</label>
-                            <select className="p-[0.33rem] border border-gray-300 rounded-lg text-sm bg-gray-50 w-full max-w-lg mx-auto">
-                                <option value="">Direcciones</option>
+                        {/* Dirección - dropdown animado */}
+                        <div className="relative w-full max-w-lg flex flex-col items-center justify-center mb-2 sm:col-span-6 sm:w-[28vw] sm:ml-[-1vw] sm:mb-0">
+                            <select className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2">
+                                <option value="" hidden></option>
                                 <option value="1">Opción 1</option>
                                 <option value="2">Opción 2</option>
                             </select>
+                            <label className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500">Dirección</label>
                         </div>
                     </div>
                 {/* Campos y áreas debajo de los elementos principales reorganizados */}
                 <div className="w-full flex flex-col gap-4 mb-6 mt-4">
-                    <div className="flex flex-col w-full gap-4 sm:grid sm:grid-cols-2 sm:gap-4" style={{ gridTemplateColumns: '1fr 2fr' }}>
-                        {/* F2 y F3 en columna 1, 1/3 exacto del modal */}
-                        <div className="flex flex-col gap-4 w-full mb-4 sm:mb-0">
-                            <CapturaVisitsF2 />
-                            <CapturaVisitsF3 />
-                        </div>
-                        {/* F4 expandido arriba de F5 y F7, 2/3 exacto del modal */}
-                        <div className="flex flex-col gap-4 w-full mb-4 sm:mb-0">
-                            <CapturaVisitsF4 />
-                            <div className="flex flex-col w-full gap-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                                <div className="flex flex-col gap-4 mb-4 sm:mb-0">
-                                    <CapturaVisitsF5 />
-                                </div>
-                                <div className="flex flex-col gap-4 mb-4 sm:mb-0">
-                                    <CapturaVisitsF6 />
-                                </div>
-                                <div className="flex flex-col h-full justify-stretch mb-4 sm:mb-0">
-                                    <CapturaVisitsF7 />
-                                </div>
-                            </div>
-                        </div>
+                    {/* Responsive: en mobile apilado, en desktop filas y columnas */}
+                    <div className="flex flex-col gap-4 sm:flex-row sm:gap-4 mb-4 w-full">
+                        <div className="w-full sm:flex-1 min-w-0"><CapturaVisitsF2 /></div>
+                        <div className="w-full sm:flex-[2] min-w-0"><CapturaVisitsF4 /></div>
+                    </div>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:gap-4 w-full">
+                        <div className="w-full sm:flex-1 min-w-0"><CapturaVisitsF3 /></div>
+                        <div className="w-full sm:basis-1/4 min-w-0"><CapturaVisitsF5 /></div>
+                        <div className="w-full sm:basis-1/6 min-w-0"><CapturaVisitsF6 /></div>
+                        <div className="w-full sm:basis-1/4 min-w-0"><CapturaVisitsF7 /></div>
                     </div>
                 </div>
                 {/* Botón Capturar centrado debajo de todos los F's */}
@@ -152,22 +145,23 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla }) => {
                             <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
                         </div>
                         <div className="flex flex-row w-full gap-4">
-                            <div className="flex flex-col flex-1 min-w-[120px] max-w-xs">
-                                <label htmlFor="cartera-select-carga-visits" className="text-sm font-medium mb-1">Cartera</label>
+                            {/* Cartera - dropdown animado modal pequeño */}
+                            <div className="relative flex-1 min-w-[120px] min-w-0">
                                 <select
-                                    className="peer p-2 block w-full bg-gray-50 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2"
+                                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                     value={cartera}
                                     onChange={e => setCartera(e.target.value)}
                                     id="cartera-select-carga-visits"
                                 >
-                                    <option value="">Seleccione cartera</option>
+                                    <option value="" hidden></option>
                                     {carterasOptions.map((item) => (
                                         <option key={item.id} value={item.id}>{item.nombre}</option>
                                     ))}
                                 </select>
+                                <label htmlFor="cartera-select-carga-visits" className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500">Cartera</label>
                             </div>
                             <div className="flex flex-col flex-1 items-center justify-start">
-                                <label htmlFor="porExpediente" className="text-sm font-medium mb-1 text-center">Por Expediente</label>
+                                <label htmlFor="porExpediente" className="text-sm font-medium mb-1 text-center flex items-center justify-center h-full">Expediente</label>
                                 <input
                                     id="porExpediente"
                                     type="checkbox"
@@ -180,34 +174,26 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla }) => {
                     </div>
                     <div className="w-full px-6 pb-4">
                         <div className="flex flex-row gap-4 w-full items-center">
-                            <div className="flex flex-col flex-1 justify-center">
-                                <label htmlFor="cuentaInput" className="modal-span-1 whitespace-nowrap text-sm font-medium mb-1">
+                            {/* Cuenta/Expediente - input animado modal pequeño */}
+                            <div className="relative flex-1 justify-center">
+                                <input
+                                    id="cuentaInput"
+                                    type="text"
+                                    inputMode={porExpediente ? "text" : "numeric"}
+                                    pattern={porExpediente ? undefined : "[0-9]*"}
+                                    value={idCuenta}
+                                    maxLength={porExpediente ? undefined : 16}
+                                    onChange={e => {
+                                        const valor = porExpediente ? e.target.value : e.target.value.replace(/\D/g, "");
+                                        setIdCuenta(valor);
+                                    }}
+                                    placeholder=" "
+                                    style={{ color: 'var(--color-jerarquia3)' }}
+                                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                />
+                                <label htmlFor="cuentaInput" className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500">
                                     {porExpediente ? "Expediente:" : "Cuenta:"}
                                 </label>
-                                <div className="flex flex-row items-center gap-2 w-full">
-                                    <input
-                                        id="cuentaInput"
-                                        type="text"
-                                        inputMode={porExpediente ? "text" : "numeric"}
-                                        pattern={porExpediente ? undefined : "[0-9]*"}
-                                        value={idCuenta}
-                                        maxLength={porExpediente ? undefined : 16}
-                                        onChange={e => {
-                                            const valor = porExpediente ? e.target.value : e.target.value.replace(/\D/g, "");
-                                            setIdCuenta(valor);
-                                        }}
-                                        placeholder={porExpediente ? "Ingrese el expediente" : "Ingrese el número de cuenta"}
-                                        style={{ padding: "0.5rem", border: idCuenta.length < 6 ? "2px solid #e53e3e" : "2px solid #d1d5db", borderRadius: "0.5rem", fontSize: "0.875rem" }}
-                                        className="w-full max-w-md"
-                                    />
-                                    {showDropdown && (
-                                        <select className="p-2 border border-gray-300 rounded-lg text-sm bg-gray-50">
-                                            <option value="">Opciones</option>
-                                            <option value="1">Opción 1</option>
-                                            <option value="2">Opción 2</option>
-                                        </select>
-                                    )}
-                                </div>
                             </div>
                         </div>
                     </div>

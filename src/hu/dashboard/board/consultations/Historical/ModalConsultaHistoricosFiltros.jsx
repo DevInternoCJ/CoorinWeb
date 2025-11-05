@@ -288,7 +288,14 @@ const ModalConsultaHistoricosFiltros = ({ onIndividualChange }) => {
 
   return (
     <>
-      <div style={{ minWidth: "400px", paddingRight: "1rem", overflowY: "auto", maxHeight: "70vh" }}>
+      <div
+        style={{
+          minWidth: "400px",
+          paddingRight: "1rem",
+          overflowY: isIndividual ? "auto" : "unset",
+          maxHeight: isIndividual ? "70vh" : "unset"
+        }}
+      >
         {/* Logo del Consorcio */}
         <div
           style={{

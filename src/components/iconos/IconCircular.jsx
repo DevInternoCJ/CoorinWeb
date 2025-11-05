@@ -37,9 +37,9 @@ const IconCircular = ({
         style={{ '--placement': tooltipPlacement }}
       >
         <span 
-          className={`hs-tooltip-toggle inline-flex justify-center items-center ${size} rounded-full ${borderWidth} ${bgColor} ${textColor} cursor-pointer`}
+          className={`inline-flex justify-center items-center ${size} rounded-full ${borderWidth} ${borderColor} ${bgColor} ${textColor} ${onClick ? 'cursor-pointer' : ''}`}
           onClick={onClick}
-          style={borderColor === "border-orange-custom" ? { border: '2px solid #fb923c' } : undefined}
+
         >
           {children}
           <span
@@ -55,8 +55,7 @@ const IconCircular = ({
 
   return (
     <span 
-      className={`inline-flex justify-center items-center ${size} rounded-full ${borderWidth} ${bgColor} ${textColor} ${onClick ? 'cursor-pointer' : ''}`}
-      style={borderColor === "border-orange-custom" ? { border: '2px solid #fb923c' } : undefined}
+      className={`inline-flex justify-center items-center ${size} rounded-full ${borderWidth} ${borderColor} ${bgColor} ${textColor} ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}
     >
       {children}

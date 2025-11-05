@@ -4,47 +4,140 @@ const CapturaVisitsF2 = () => (
   <div className="area-f2 p-2 rounded mb-2">
     <h3 className="font-bold text-sm mb-2">Vivienda – F2</h3>
     <div className="grid grid-cols-2 gap-2">
-      <div>
-        <label className="block text-xs mb-1">Mapeo</label>
-        <select disabled className="peer p-2 block w-full bg-gray-50 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2" />
+      {/* Mapeo */}
+      <div className="relative w-full sm:col-span-2">
+        <select
+          className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          id="mapeo-select"
+        >
+          <option value="" hidden></option>
+          <option value="opcion1">Opción 1</option>
+          <option value="opcion2">Opción 2</option>
+        </select>
+        <label
+          htmlFor="mapeo-select"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+        >
+          Mapeo
+        </label>
       </div>
-      <div>
-        <label className="block text-xs mb-1">Habitada Titular</label>
-        <select disabled className="peer p-2 block w-full bg-gray-50 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2" />
+  {/* Fachada */}
+  <div className="relative w-full sm:col-span-2">
+        <select
+          className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          id="fachada-select"
+        >
+          <option value="" hidden></option>
+          <option value="opcion1">Opción 1</option>
+          <option value="opcion2">Opción 2</option>
+        </select>
+        <label
+          htmlFor="fachada-select"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+        >
+          Fachada
+        </label>
       </div>
-      <div>
-        <label className="block text-xs mb-1">Fachada</label>
-        <select disabled className="peer p-2 block w-full bg-gray-50 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2" />
+  {/* Puerta */}
+  <div className="relative w-full sm:col-span-2">
+        <select
+          className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          id="puerta-select"
+        >
+          <option value="" hidden></option>
+          <option value="opcion1">Opción 1</option>
+          <option value="opcion2">Opción 2</option>
+        </select>
+        <label
+          htmlFor="puerta-select"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+        >
+          Puerta
+        </label>
       </div>
-      <div>
-        <label className="block text-xs mb-1">Puerta</label>
-        <select disabled className="peer p-2 block w-full bg-gray-50 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2" />
+  {/* Herrería */}
+  <div className="relative w-full sm:col-span-2">
+        <select
+          className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          id="herreria-select"
+        >
+          <option value="" hidden></option>
+          <option value="opcion1">Opción 1</option>
+          <option value="opcion2">Opción 2</option>
+        </select>
+        <label
+          htmlFor="herreria-select"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+        >
+          Herrería
+        </label>
       </div>
-      <div>
-        <label className="block text-xs mb-1">Herrería</label>
-        <select disabled className="peer p-2 block w-full bg-gray-50 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2" />
+  {/* NivelesPisos y N.Economico en la misma fila */}
+  <div className="relative w-full sm:col-span-2">
+        <select
+          className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          id="nivelespisos-select"
+        >
+          <option value="" hidden></option>
+          <option value="opcion1">Opción 1</option>
+          <option value="opcion2">Opción 2</option>
+        </select>
+        <label
+          htmlFor="nivelespisos-select"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+        >
+          NivelesPisos
+        </label>
       </div>
-      <div>
-        <label className="block text-xs mb-1">NivelesPisos</label>
-        <select disabled className="peer p-2 block w-full bg-gray-50 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2" />
+  <div className="relative w-full sm:col-span-2">
+        <select
+          className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          id="neconomico-select"
+        >
+          <option value="" hidden></option>
+          <option value="opcion1">Opción 1</option>
+          <option value="opcion2">Opción 2</option>
+        </select>
+        <label
+          htmlFor="neconomico-select"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+        >
+          N.Economico
+        </label>
       </div>
-      <div>
-        <label className="block text-xs mb-1">Vivienda</label>
-        <select disabled className="peer p-2 block w-full bg-gray-50 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2" />
+      {/* Vivienda */}
+      <div className="relative w-full sm:col-span-2">
+        <select
+          className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          id="vivienda-select"
+        >
+          <option value="" hidden></option>
+          <option value="opcion1">Opción 1</option>
+          <option value="opcion2">Opción 2</option>
+        </select>
+        <label
+          htmlFor="vivienda-select"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+        >
+          Vivienda
+        </label>
       </div>
-      <div>
-        <label className="block text-xs mb-1">N.Economico</label>
-        <select disabled className="peer p-2 block w-full bg-gray-50 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2" />
-      </div>
-      
     </div>
-    <div className="col-span-2" style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-      <label className="block text-xs mb-1">Propietario</label>
+    {/* Propietario - input animado */}
+    <div className="relative w-full min-w-0 sm:col-span-2 mt-4">
       <input
-        disabled
-        className="px-4 p-1 block w-full rounded-lg sm:text-sm bg-gray-50 border-transparent focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1"
+        type="text"
+        id="propietario-input"
+        placeholder=" "
+        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
         style={{ color: 'var(--color-jerarquia3)' }}
       />
+      <label
+        htmlFor="propietario-input"
+        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+      >
+        Propietario
+      </label>
     </div>
   </div>
 );
