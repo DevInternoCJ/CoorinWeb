@@ -2,7 +2,7 @@
 
 namespace Loki.Mark.Reportes.Productividad.Services
 {
-	public interface IProductividadService
+	public interface IProductividadInfoService
 	{
 		/// <summary>
 		/// Orquesta la consulta del reporte de productividad.

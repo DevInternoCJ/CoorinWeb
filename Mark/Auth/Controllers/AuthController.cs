@@ -42,7 +42,7 @@ namespace Loki.Mark.Auth.Controllers
 		[HttpPost("login")]
 		[AllowAnonymous]
 		[SwaggerOperation(
-			Summary = "Iniciar Sesión",
+			Summary = "Iniciar Sesión - Yoshi",
 			Description = "Verifica las credenciales proporcionadas y, de ser válidas, " +
 			"devuelve la información del ejecutivo junto con su JSON Web Token (JWT). El servidor " +
 			"escogido es agregado al JWT como claim, por lo que ya no será necesario enviarlo como " +
@@ -115,7 +115,7 @@ namespace Loki.Mark.Auth.Controllers
 		[HttpPost("validar-contrasenia")]
 		[AllowAnonymous]
 		[SwaggerOperation(
-			Summary = "Validar Contraseña de Ejecutivo",
+			Summary = "Validar Contraseña de Ejecutivo - Yoshi",
 			Description = "Verifica si las credenciales de un ejecutivo son correctas en el servidor especificado."
 		)]
 		[ProducesResponseType(typeof(List<object>), StatusCodes.Status200OK)]

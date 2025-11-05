@@ -23,10 +23,10 @@ namespace Loki.Mark.Consulta.Productividad.Controllers
 
         [HttpPost("get-productividad")]
         [SwaggerOperation(
-            Summary = "consulta productividad - irene",
+            Summary = "Consulta Productividad - Irene",
             Description = "Obtiene la productividad de uno o más ejecutivos."
         )]
-        public async Task<IActionResult> obtieneProductividad([FromBody] ProductividadRequest request)
+        public async Task<IActionResult> ObtieneProductividad([FromBody] ProductividadRequest request)
         {
             Console.WriteLine($"=== CONTROLLER: obtieneProductividad INICIADO ===");
             Console.WriteLine($"Request recibido:");
@@ -41,7 +41,7 @@ namespace Loki.Mark.Consulta.Productividad.Controllers
                 return BadRequest(new { error = "El indicador es requerido" });
             }
 
-            if (request.IdsEjecutivos == null || !request.IdsEjecutivos.Any())
+            if (request.IdsEjecutivos == null || request.IdsEjecutivos.Count == 0)
             {
                 Console.WriteLine($"❌ ERROR: Se requiere al menos un ID de ejecutivo");
                 return BadRequest(new { error = "Se requiere al menos un ID de ejecutivo" });

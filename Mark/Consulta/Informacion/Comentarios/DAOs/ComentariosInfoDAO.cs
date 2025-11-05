@@ -3,11 +3,11 @@ using Dapper;
 
 namespace Loki.Mark.Consulta.Informacion.Comentarios.DAOs
 {
-	public class ComentariosDAO : IComentariosDAO
+	public class ComentariosInfoDAO : IComentariosInfoDAO
 	{
 		private readonly IDbContextFactory _dbContextFactory;
 
-		public ComentariosDAO(IDbContextFactory dbContextFactory)
+		public ComentariosInfoDAO(IDbContextFactory dbContextFactory)
 		{
 			_dbContextFactory = dbContextFactory;
 		}

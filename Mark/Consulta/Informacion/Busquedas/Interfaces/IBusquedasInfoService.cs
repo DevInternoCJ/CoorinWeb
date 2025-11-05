@@ -3,7 +3,7 @@ using Loki.DTOs.Informacion.PagosDTOs; // Reutilizamos el DTO de Pagos
 
 namespace Loki.Mark.Consulta.Informacion.Busquedas.Interfaces
 {
-	public interface IBusquedasService
+	public interface IBusquedasInfoService
 	{ 
 		/// <summary>
 		/// Orquesta la consulta de búsquedas de cuentas, aplicando filtros dinámicos.

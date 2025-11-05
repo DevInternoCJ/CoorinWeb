@@ -11,18 +11,18 @@ namespace Loki.Mark.Consulta.Informacion.Busquedas.Controllers
 	[Authorize]
 	[ApiController]
 	[Route("api/informacion/[controller]")]
-	public class BusquedasController : ControllerBase
+	public class BusquedasInfoController : ControllerBase
 	{
-		private readonly IBusquedasService _service;
+		private readonly IBusquedasInfoService _service;
 
-		public BusquedasController(IBusquedasService service)
+		public BusquedasInfoController(IBusquedasInfoService service)
 		{
 			_service = service;
 		}
 
 		[HttpPost("consultar")]
 		[SwaggerOperation(
-			Summary = "Consultar Búsquedas de Cuentas",
+			Summary = "Consultar Búsquedas de Cuentas - Yoshi",
 			Description = "Obtiene un historial de las búsquedas de cuentas realizadas por los ejecutivos en un rango de fechas, con la opción de aplicar filtros de cuentas dinámicas."
 		)]
 		[ProducesResponseType(typeof(IEnumerable<BusquedaDto>), 200)]

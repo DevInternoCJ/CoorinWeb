@@ -24,7 +24,7 @@ namespace Loki.Mark.Captura.Visitas.Controllers
 
 		[HttpGet("buscar-cuenta")]
 		[SwaggerOperation(
-			Summary = "Buscar Cuenta y Domicilios",
+			Summary = "Buscar Cuenta y Domicilios - Yoshi",
 			Description = "Busca una cuenta por su ID o Expediente y devuelve sus datos básicos junto con la lista de domicilios asociados para la captura."
 		)]
 		[ProducesResponseType(typeof(CuentaConDomiciliosDto), 200)]
@@ -55,7 +55,7 @@ namespace Loki.Mark.Captura.Visitas.Controllers
 
 		[HttpPost("guardar")]
 		[SwaggerOperation(
-			Summary = "Guardar Captura de Visita",
+			Summary = "Guardar Captura de Visita - Yoshi",
 			Description = "Guarda los detalles de una gestión domiciliaria, incluyendo datos de la visita, del domicilio, teléfonos capturados y datos CFE (si aplica)."
 		)]
 		[ProducesResponseType(typeof(object), 200)] // Respuesta de éxito simple

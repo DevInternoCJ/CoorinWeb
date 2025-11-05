@@ -1,11 +1,11 @@
 
 # Coorin Web
 
-Coorin Web es la ultima versión del proyecto Legacy de gespa desk pero ahora con una versión desarrollada para llevar la gestion al siguiente versión teniendo un contenido mas claro y con mayor experiencia en el usuario
+Coorin Web es la última versión del proyecto Legacy de Gespa desktop, pero ahora desarrollada para llevar la gestión a la siguiente versión, teniendo un contenido más claro con una mejor experiencia para el usuario.
 
 ## Instalación
 
-Para la instalación de este proyecto se debe respetar cada rama de Igrasil, dado que cada entorno de desarrollo tiene su metodo de instalción para ello es cada uno de estos metodos
+Para la instalación de este proyecto, se debe respetar cada rama de Igrasil ya que cada entorno de desarrollo tiene su propio método de instalción. Dichos métods se encuentran aquí listados y documentados:
 
 ### HU-Omega
 ```bash
@@ -16,9 +16,9 @@ Para la instalación de este proyecto se debe respetar cada rama de Igrasil, dad
 
 ### Mark-Genesis
 ```bash
-  --Si es desde Visual Studio 2022
+  --Si es desde Visual Studio 2022:
   Solo basta dar en en Run o F5
-  --Si es desde VS Code
+  --Si es desde VS Code:
   dotnet restore
   dotnet build
   dotnet run
@@ -38,7 +38,7 @@ Para la instalación de este proyecto se debe respetar cada rama de Igrasil, dad
 
 
 
-## Ejecutar ultima versión estable
+## Ejecutar última versión estable
 
 Clonar este repo
 
@@ -46,19 +46,19 @@ Clonar este repo
   git clone https://github.com/DevInternoCJ/CoorinWeb/
 ```
 
-Ir al directorio del proyecto
+Ir al directorio del proyecto:
 
 ```bash
   cd my-project
 ```
 
-Instalar las dependencias
+Instalar las dependencias.
 
 ```bash
   npm install
 ```
 
-Iniciar Servidor
+Iniciar Servidor.
 
 ```bash
   npm run dev
@@ -66,7 +66,7 @@ Iniciar Servidor
 
 
 ## 👨🏻‍💻 PM Conjur
-Como desarrollador dentro de Conjur ocupe el apodo de LOKI para llevar el control de las ramas desarrolladas dentro de Igrasil podemos ocupar el proyecto estable dentro de este mismo repositorio con 4 entornos de desarrollo diferentes
+Como desarrollador dentro de Conjur, ocupé el apodo de LOKI para llevar el control de las ramas desarrolladas. Dentro de Igrasil, podemos ocupar el proyecto estable dentro de este mismo repositorio con 4 entornos de desarrollo diferentes.
 
 
 ## Desarrolladores
@@ -90,6 +90,6 @@ Como desarrollador dentro de Conjur ocupe el apodo de LOKI para llevar el contro
 
 
 ## Documentación
-Pendiente de aprobación
+Pendiente de aprobación.
 
 [Documentación](https://linktodocumentation)

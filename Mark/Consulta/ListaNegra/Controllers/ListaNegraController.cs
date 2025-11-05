@@ -24,8 +24,8 @@ namespace Loki.Mark.Consulta.ListaNegra.Controllers
 		[HttpGet("lista-negra")]
 		[Authorize]
 		[SwaggerOperation(
-		  Summary = "lista negra - irene",
-		  Description = ""
+		  Summary = "Lista Negra - Irene",
+		  Description = "Obtiene la lista negra de una cartera mediante un dato especificado."
 		  )]
 		public async Task<IActionResult> ListaNegra(
 		[FromQuery] int idCartera,

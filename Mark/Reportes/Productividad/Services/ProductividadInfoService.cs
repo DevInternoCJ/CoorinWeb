@@ -4,11 +4,11 @@ using Loki.Mark.Reportes.Productividad.DAOs;
 
 namespace Loki.Mark.Reportes.Productividad.Services
 {
-	public class ProductividadService : IProductividadService
+	public class ProductividadInfoService : IProductividadInfoService
 	{
-		private readonly IProductividadDAO _dao;
+		private readonly IProductividadInfoDAO _dao;
 
-		public ProductividadService(IProductividadDAO dao)
+		public ProductividadInfoService(IProductividadInfoDAO dao)
 		{
 			_dao = dao;
 		}

@@ -20,8 +20,8 @@ namespace Loki.Mark.Procesos.Gespa.Bloqueo_cuentas.Controllers
         [HttpPost("Buscar")]
         [AllowAnonymous]
         [SwaggerOperation(
-            Summary = "BloqueoCuentasGespaBusqueda - Padrino",
-            Description = "Hace una busqueda de la cuenta."
+            Summary = "Bloqueo Cuentas Gespa Búsqueda - Padrino",
+            Description = "Hace una búsqueda de la cuenta."
         )]
         public async Task<IActionResult> ValidateBloqueoCuentasBusqueda([FromBody] BloqueoCuentasBusqueda request)
         {
