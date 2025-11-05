@@ -26,8 +26,8 @@ namespace Loki.Mark.Consulta.Generales.Controllers
         [HttpGet("carga-herramientas")]
         [Authorize]
         [SwaggerOperation(
-            Summary = "carga herramientas - irene",
-            Description = ""
+            Summary = "Carga Herramientas - Irene",
+            Description = "Carga las herramientas de una cartera especificada."
         )]
         public async Task<IActionResult> CargaHerramientas([FromQuery] int idCartera)
         {
@@ -52,8 +52,8 @@ namespace Loki.Mark.Consulta.Generales.Controllers
         [HttpGet("carga-municipios")]
         [Authorize]
         [SwaggerOperation(
-            Summary = "carga municipios - irene",
-            Description = "Obtiene la lista de municipios activos de una cartera"
+            Summary = "Carga Municipios - Irene",
+            Description = "Obtiene la lista de municipios activos de una cartera."
         )]
         public async Task<IActionResult> CargaMunicipios([FromQuery] int idCartera)
         {

@@ -1,4 +1,4 @@
-﻿// En: /Mark/Consulta/Informacion/Comentarios/Controllers/ComentariosController.cs
+﻿// En: /Mark/Consulta/Informacion/Comentarios/Controllers/ComentariosInfoController.cs
 using Loki.DTOs.Informacion.ComentariosDTOs;
 using Loki.DTOs.Informacion.PagosDTOs;
 using Loki.Mark.Consulta.Informacion.Comentarios.Services;
@@ -10,12 +10,12 @@ namespace Loki.Mark.Consulta.Informacion.Comentarios.Controllers
 {
 	[Authorize]
 	[ApiController]
-	[Route("api/informacion/[controller]")]
-	public class ComentariosController : ControllerBase
+	[Route("api/informacion/comentarios-info")]
+	public class ComentariosInfoController : ControllerBase
 	{
-		private readonly IComentariosService _service;
+		private readonly IComentariosInfoService _service;
 
-		public ComentariosController(IComentariosService service)
+		public ComentariosInfoController(IComentariosInfoService service)
 		{
 			_service = service;
 		}

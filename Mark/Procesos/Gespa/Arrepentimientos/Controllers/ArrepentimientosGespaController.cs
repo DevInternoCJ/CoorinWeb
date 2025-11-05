@@ -21,8 +21,8 @@ namespace Loki.Mark.Procesos.Gespa.Arrepentimientos.Controllers
         [HttpPost("Buscar")]
         [AllowAnonymous]
         [SwaggerOperation(
-            Summary = "ArrepentimientosGespaBusqueda - Padrino",
-            Description = "Hace una busqueda de la cuenta segun el criterio seleccionado."
+            Summary = "Arrepentimientos Gespa Búsqueda - Padrino",
+            Description = "Hace una búsqueda de la cuenta segun el criterio seleccionado."
         )]
         public async Task<IActionResult> ValidateArrepentimientoBusqueda([FromBody]DefinicionBusqueda request)
         {
@@ -48,7 +48,7 @@ namespace Loki.Mark.Procesos.Gespa.Arrepentimientos.Controllers
         [HttpPost("Arrepentimiento")]
         [AllowAnonymous]
         [SwaggerOperation(
-            Summary = "ArrepentimientosGespa - Padrino",
+            Summary = "Arrepentimientos Gespa - Padrino",
             Description = "Realiza el arrepentimiento de la cuenta segun el criterio seleccionado."
         )]
         public async Task<IActionResult> ValidateArrepentimiento([FromBody] Arrepentimiento request)

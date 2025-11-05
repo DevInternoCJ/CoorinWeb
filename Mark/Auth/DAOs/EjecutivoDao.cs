@@ -7,7 +7,7 @@ using Loki.DTOs.BusquedaDTOs; // Para ParameterDto (si se usa en LlenaConsultaAs
 using System.Collections.Generic; // Para List
 using System; // Para DateTime
 
-namespace CoorinWeb.Loki.Mark.Auth.DAOs // Este es el namespace que 'BusquedasService' espera
+namespace CoorinWeb.Loki.Mark.Auth.DAOs // Este es el namespace que 'BusquedasInfoService' espera
 {
     public class EjecutivoDao
     {

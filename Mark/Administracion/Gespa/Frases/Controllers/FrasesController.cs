@@ -83,8 +83,8 @@ namespace Loki.Mark.Administracion.Gespa.Frases.Controllers
         [HttpGet("frases")]
         [Authorize]
         [SwaggerOperation(
-           Summary = "frases-irene",
-           Description = "obtiene un listado de las frases disponibles"
+           Summary = "Frases - Irene",
+           Description = "Obtiene un listado de las frases disponibles."
        )]
         public async Task<IActionResult> GetFrases([FromQuery] int ejecutivo)
         {
@@ -106,8 +106,8 @@ namespace Loki.Mark.Administracion.Gespa.Frases.Controllers
         [HttpPut("activar-frase")]
         [Authorize]
         [SwaggerOperation(
-         Summary = "activar frases - irene",
-         Description = "activa y desactiva una frase"
+         Summary = "Activar Frases - Irene",
+         Description = "Activa y desactiva una frase."
      )]
         public async Task<IActionResult> ActivarFrase([FromBody] ActivarFraseDTO request)
         {

@@ -1,4 +1,4 @@
-﻿// En: /Mark/Reportes/Productividad/Controllers/ProductividadController.cs
+﻿// En: /Mark/Reportes/Productividad/Controllers/ProductividadInfoController.cs
 using Loki.DTOs.Reportes.ProductividadDTOs;
 using Loki.Mark.Reportes.Productividad.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -14,11 +14,11 @@ namespace Loki.Mark.Reportes.Productividad.Controllers
 	[ApiController]
 	[Route("api/reportes/[controller]")]
 	[SwaggerTag("Reportes")]
-	public class ProductividadController : ControllerBase
+	public class ProductividadInfoController : ControllerBase
 	{
-		private readonly IProductividadService _service;
+		private readonly IProductividadInfoService _service;
 
-		public ProductividadController(IProductividadService service)
+		public ProductividadInfoController(IProductividadInfoService service)
 		{
 			_service = service;
 		}

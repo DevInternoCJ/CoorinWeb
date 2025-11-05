@@ -372,14 +372,14 @@ builder.Services.AddScoped<IDomiciliosDAO, DomiciliosDAO>();
 builder.Services.AddScoped<ICorreosService, CorreosService>();
 builder.Services.AddScoped<ICorreosDAO, CorreosDAO>();
 
-builder.Services.AddScoped<IBusquedasService, Loki.Mark.Consulta.Informacion.Busquedas.Services.BusquedasService>();
-builder.Services.AddScoped<IBusquedasDAO, BusquedasDAO>();
+builder.Services.AddScoped<IBusquedasInfoService, Loki.Mark.Consulta.Informacion.Busquedas.Services.BusquedasInfoService>();
+builder.Services.AddScoped<IBusquedasInfoDAO, BusquedasInfoDAO>();
 
 builder.Services.AddScoped<IOfrecimientosService, OfrecimientosService>();
 builder.Services.AddScoped<IOfrecimientosDAO, OfrecimientosDAO>();
 
-builder.Services.AddScoped<IComentariosService, ComentariosService>();
-builder.Services.AddScoped<IComentariosDAO, ComentariosDAO>();
+builder.Services.AddScoped<IComentariosInfoService, ComentariosInfoService>();
+builder.Services.AddScoped<IComentariosInfoDAO, ComentariosInfoDAO>();
 
 #endregion
 
@@ -432,7 +432,7 @@ builder.Services.AddScoped<IReportesClienteService, ReportesClienteService>();
 builder.Services.AddScoped<IReportesClienteDAO, ReportesClienteDAO>();
 
 builder.Services.AddScoped<IProductividadService, ProductividadService>();
-builder.Services.AddScoped<IProductividadDAO, ProductividadDAO>();
+builder.Services.AddScoped<IProductividadInfoDAO, ProductividadInfoDAO>();
 
 builder.Services.AddScoped<IReporteEjecutivosService, ReporteEjecutivosService>();
 builder.Services.AddScoped<IReporteEjecutivosDAO, ReporteEjecutivosDAO>();

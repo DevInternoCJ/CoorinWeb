@@ -1,38 +1,40 @@
 ﻿using Dapper;
 using Loki.DTOs.Global;
-using Loki.DTOs.Informacion.ComentariosDTOs;
+using Loki.DTOs.Informacion.BusquedasDTOs;
 using Loki.DTOs.Informacion.PagosDTOs;
 using Loki.Global;
-using Loki.Mark.Consulta.Informacion.Comentarios.DAOs;
+using Loki.Mark.Consulta.Informacion.Busquedas.Interfaces;
 
-namespace Loki.Mark.Consulta.Informacion.Comentarios.Services
+namespace Loki.Mark.Consulta.Informacion.Busquedas.Services
 {
-	public class ComentariosService : IComentariosService
+	public class BusquedasInfoService : IBusquedasInfoService
 	{
-		private readonly IComentariosDAO _dao;
+		private readonly IBusquedasInfoDAO _dao;
 		private readonly IQueryGeneratorService _queryGenerator;
 
-		public ComentariosService(IComentariosDAO dao, IQueryGeneratorService queryGenerator)
+		public BusquedasInfoService(IBusquedasInfoDAO dao, IQueryGeneratorService queryGenerator)
 		{
 			_dao = dao;
 			_queryGenerator = queryGenerator;
 		}
 
 		/// <summary>
-		/// Orquesta la consulta de comentarios de cuentas, aplicando filtros dinámicos.
+		/// Orquesta la consulta de búsquedas de cuentas, aplicando filtros dinámicos.
 		/// </summary>
-		public async Task<IEnumerable<dynamic>> ConsultarComentariosAsync(string servidor, ConsultaPagosRequest request)
+		public async Task<IEnumerable<BusquedaDto>> ConsultarBusquedasAsync(string servidor, ConsultaPagosRequest request)
 		{
 			var queryOptions = new QueryGenerationOptions { IdConsulta = request.IdConsulta, IdCartera = request.IdCartera };
 			var subQueryResult = await _queryGenerator.GenerarQueryCuentas(servidor, queryOptions);
 
-			string sqlPrincipal = "FROM dbCollection.dbo.fn_Comentarios(@Desde, @Hasta, @IdCartera) Z";
+			// Construimos la consulta principal, pasando los parámetros de fecha y cartera a la función
+			string sqlPrincipal = "FROM dbCollection.dbo.fn_BúsquedasPeriodo(@Desde, @Hasta, @IdCartera) Z";
 			string columnasDinamicas = subQueryResult.Columns.Cast<string>()
 				.Aggregate("", (current, col) => current + $", CC.[{col}]");
 
 			string sqlFinal = $"SELECT Z.* {columnasDinamicas} {sqlPrincipal}";
 
 			var parametros = new DynamicParameters(subQueryResult.Parameters);
+
 			parametros.Add("Desde", request.Desde);
 			parametros.Add("Hasta", request.Hasta);
 
@@ -46,8 +48,7 @@ namespace Loki.Mark.Consulta.Informacion.Comentarios.Services
 				parametros.Add("IdCartera", request.IdCartera);
 
 			}
-
-			return await _dao.ObtenerDatosAsync<dynamic>(servidor, sqlFinal, parametros);
+			return await _dao.ObtenerDatosAsync<BusquedaDto>(servidor, sqlFinal, parametros);
 		}
 	}
 }

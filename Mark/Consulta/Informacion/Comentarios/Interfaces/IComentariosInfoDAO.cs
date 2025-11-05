@@ -1,7 +1,7 @@
 ﻿
 namespace Loki.Mark.Consulta.Informacion.Comentarios.DAOs
 {
-	public interface IComentariosDAO
+	public interface IComentariosInfoDAO
 	{
 		/// <summary>
 		/// Ejecuta una consulta SQL y mapea los resultados a un tipo genérico T.

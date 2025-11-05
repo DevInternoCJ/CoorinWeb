@@ -2,7 +2,7 @@
 
 namespace Loki.Mark.Reportes.Productividad.DAOs
 {
-	public interface IProductividadDAO
+	public interface IProductividadInfoDAO
 	{
 		/// <summary>
 		/// Ejecuta el procedimiento almacenado del reporte de productividad.

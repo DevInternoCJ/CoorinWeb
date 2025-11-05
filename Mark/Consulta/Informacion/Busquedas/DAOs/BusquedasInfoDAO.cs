@@ -4,11 +4,11 @@ using Loki.Mark.Consulta.Informacion.Busquedas.Interfaces;
 
 namespace Loki.Mark.Consulta.Informacion.Busquedas.DAOs
 {
-	public class BusquedasDAO : IBusquedasDAO
+	public class BusquedasInfoDAO : IBusquedasInfoDAO
 	{
 		private readonly IDbContextFactory _dbContextFactory;
 
-		public BusquedasDAO(IDbContextFactory dbContextFactory)
+		public BusquedasInfoDAO(IDbContextFactory dbContextFactory)
 		{
 			_dbContextFactory = dbContextFactory;
 		}

@@ -1,6 +1,6 @@
 ﻿namespace Loki.Mark.Consulta.Informacion.Busquedas.Interfaces
 {
-	public interface IBusquedasDAO
+	public interface IBusquedasInfoDAO
 	{
 		/// <summary>
 		/// Ejecuta una consulta SQL y mapea los resultados a un tipo genérico T.

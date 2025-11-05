@@ -45,8 +45,8 @@ namespace Loki.Controllers
         [HttpPost("realizar-busqueda")]
         [Authorize]
         [SwaggerOperation(
-            Summary = "realizar busqueda - irene",
-            Description = "realiza una busqueda por medio de idconsulta o parametros y agrupamientos"
+            Summary = "Realizar Busqueda - Irene",
+            Description = "Realiza una búsqueda por medio de idConsulta o parametros y agrupamientos."
             )]
         public async Task<IActionResult> RealizarBusqueda([FromBody] SearchCriteriaDto criteria)
         {
@@ -113,8 +113,8 @@ namespace Loki.Controllers
         [HttpPost("guardar-consulta")]
         [AllowAnonymous]
         [SwaggerOperation(
-           Summary = "guardar/eliminar consulta - irene",
-           Description = "Se genera una consulta personalizada para reutilizarla posteriormente"
+           Summary = "Guardar/eliminar consulta - Irene",
+           Description = "Se genera una consulta personalizada para reutilizarla posteriormente."
         )]
 
         public async Task<ActionResult<string>> GuardarConsulta([FromBody] GuardarConsultaRequest request)

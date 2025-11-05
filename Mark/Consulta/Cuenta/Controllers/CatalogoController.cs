@@ -30,8 +30,8 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
         [HttpGet("cargaCatalogos")]
         [Authorize]
         [SwaggerOperation(
-     Summary = "carga catálogos - irene",
-     Description = "obtiene Carteras, Productos, Rechazos, Catalogos de consulta y Versiones"
+     Summary = "Carga Catálogos - Irene",
+     Description = "obtiene Carteras, Productos, Rechazos, Catalogos de consulta y Versiones."
  )]
         public async Task<IActionResult> CargarCatalogos([FromQuery] string servidor)
         {
@@ -53,8 +53,8 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
 
         [HttpGet("ColumnasProducto")]
         [SwaggerOperation(
-            Summary = "columnas producto - irene",
-            Description = "Obtiene la lista de nombres de columnas de un producto específico"
+            Summary = "Columnas Producto - Irene",
+            Description = "Obtiene la lista de nombres de columnas de un producto específico."
         )]
         public async Task<IActionResult> ColumnasProducto([FromQuery] string servidor, [FromQuery] int idProducto)
         {
@@ -67,8 +67,8 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
 
         [HttpGet("UsuariosRH")]
         [SwaggerOperation(
-            Summary = "usuarios RH - irene",
-            Description = "Obtiene los datos del usuario RH por nombre de usuario"
+            Summary = "Usuarios RH - Irene",
+            Description = "Obtiene los datos del usuario RH por nombre de usuario."
         )]
         public async Task<IActionResult> UsuariosRH([FromQuery] string servidor, [FromQuery] string usuario)
         {
@@ -81,8 +81,8 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
 
         [HttpGet("Versionamiento")]
         [SwaggerOperation(
-            Summary = "versionamiento - irene",
-            Description = "Obtiene las versiones de la aplicación Coorin"
+            Summary = "Versionamiento - Irene",
+            Description = "Obtiene las versiones de la aplicación Coorin."
         )]
         public async Task<IActionResult> Versionamiento([FromQuery] string servidor)
         {
