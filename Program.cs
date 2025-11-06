@@ -153,6 +153,8 @@ using Loki.Mark.Consulta.Generales.Services;
 using Loki.Mark.Consulta.Generales.DAOs;
 using Loki.Mark.Captura.Visitas.DAOs;
 using Loki.Mark.Captura.Visitas.Services;
+using Loki.Mark.Procesos.Procesos.Interfaces;
+using Loki.Mark.Procesos.Procesos.Services;
 
 
 
@@ -423,7 +425,8 @@ builder.Services.AddScoped<ICapturaVisitasService, CapturaVisitasService>();
 builder.Services.AddScoped<ICapturaVisitasDAO, CapturaVisitasDAO>();
 
 #endregion
-
+//supervidor
+builder.Services.AddScoped<ISupervisor, SupervisorService>();
 #endregion	
 
 #region Reportes

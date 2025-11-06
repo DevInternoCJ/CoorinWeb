@@ -43,6 +43,7 @@
   <ItemGroup>
     <Folder Include="Mark\Consulta\Arrepentimientos\DAOs\" />
     <Folder Include="Mark\Procesos\CapturaVisitas\DAOs\" />
+    <Folder Include="Mark\Procesos\Procesos\DAOs\" />
     <Folder Include="Mark\Procesos\Visitas\Consulta\" />
   </ItemGroup>
 
