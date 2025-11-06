@@ -2329,15 +2329,22 @@ export const putPhrases = async (idRegistro, activo) => {
 };
 
 
-export const getAddressesCapture = async (body) => {
+export const getAddressesCapture = async (idCartera, cuentaOrExpediente, esExpediente) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    console.log('📤 Enviando a /captura/visitas/buscar-cuenta', body);
+    // Si es expediente, enviar como string; si es cuenta, enviar como int
+    const cuentaParam = esExpediente ? cuentaOrExpediente : parseInt(cuentaOrExpediente, 10);
+    console.log('📤 Enviando a /captura/visitas/buscar-cuenta', { idCartera, cuentaOrExpediente: cuentaParam, esExpediente });
     // El interceptor añade el token automáticamente
-    const response = await api.post('/captura/visitas/buscar-cuenta', body, {
+    const response = await api.get('/captura/visitas/buscar-cuenta', {
+      params: {
+        idCartera,
+        cuentaOrExpediente: cuentaParam,
+        esExpediente
+      },
       headers: {
         'Accept': '*/*'
       }

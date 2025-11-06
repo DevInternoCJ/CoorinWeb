@@ -24,6 +24,7 @@ const MODAL_SIZES = {
 const ModalBaseInformacion = ({
     onClose,
     tipoInformacion,
+    infoCuenta, // { cuenta, expediente, nombreDeudor, _busquedaPorExpediente }
     children,
     size = "lg", // Nuevo: tamaño tipo ReusableModal
     modalStyle = {}, // Permite override de estilos
@@ -114,15 +115,10 @@ const ModalBaseInformacion = ({
     const isConsultaVisitas = tipoInformacion === "Consulta Visitas";
     const isCapturaVisitas = tipoInformacion === "Captura Visitas";
     const isCargaVisitas = tipoInformacion === "Carga Visitas";
-        const headerTitleStyle = isConsultaVisitas
+    const headerTitleStyle =
+        isConsultaVisitas || isCargaVisitas || isCapturaVisitas || isPagos || isPagosReportados || isListaNegra || isWrong || isDomicilios || isCorreos || isBusquedas || isComentarios || isOfrecimientos || isArrepentimientos
             ? { color: 'var(--color-jerarquia3)' }
-            : isCargaVisitas
-            ? { color: 'var(--color-jerarquia3)' }
-            : isPagos
-            ? { color: 'var(--color-jerarquia3)' }
-            : (isPagosReportados || isListaNegra || isWrong || isDomicilios || isCorreos || isBusquedas || isComentarios || isOfrecimientos || isArrepentimientos)
-                ? { color: 'var(--color-jerarquia3)' }
-                : { color: undefined };
+            : { color: undefined };
 
     // Icono para comentarios (definido como los demás)
     const comentariosIcon = (
@@ -261,12 +257,31 @@ const ModalBaseInformacion = ({
                                 <div className="flex items-center gap-3">
                                     {headerIcon}
                                     <h2 className="text-lg font-semibold truncate" style={headerTitleStyle}>{titulo}</h2>
+                                    {/* Info de cuenta/expediente y deudor en el header */}
+                                    {infoCuenta && infoCuenta.cuenta && (
+                                        <div className="flex flex-row ml-4" style={{ gap: '8.25rem' }}>
+                                                {infoCuenta._busquedaPorExpediente
+                                                    ? (
+                                                        <>
+                                                            <span className="font-semibold text-base text-jerarquia3" style={{ marginRight: '3.125rem' }}>{infoCuenta.cuenta.idCuenta}</span>
+                                                            <span className="font-semibold text-base text-jerarquia3"> {infoCuenta.cuenta.nombreDeudor}</span>
+                                                        </>
+                                                    )
+                                                    : (
+                                                        <>
+                                                            <span className="font-semibold text-base text-jerarquia3" style={{ marginRight: '3.125rem' }}>{infoCuenta.cuenta.expediente}</span>
+                                                            <span className="font-semibold text-base text-jerarquia3"> {infoCuenta.cuenta.nombreDeudor}</span>
+                                                        </>
+                                                    )
+                                                }
+                                        </div>
+                                    )}
                                 </div>
-                                                <CloseButtonCampanas onClose={() => {
-                                                    // notify that modal will close by close button, then call parent onClose
-                                                    try { window.dispatchEvent(new CustomEvent('coorin-modal-open', { detail: { open: false, byClose: true } })); } catch (err) { console.warn('dispatch close by button failed', err); }
-                                                    if (typeof onClose === 'function') onClose();
-                                                }} />
+                                <CloseButtonCampanas onClose={() => {
+                                    // notify that modal will close by close button, then call parent onClose
+                                    try { window.dispatchEvent(new CustomEvent('coorin-modal-open', { detail: { open: false, byClose: true } })); } catch (err) { console.warn('dispatch close by button failed', err); }
+                                    if (typeof onClose === 'function') onClose();
+                                }} />
                             </div>
                         )
                     )}

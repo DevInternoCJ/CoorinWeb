@@ -41,6 +41,8 @@ export default function CoorinDashboard() {
   // Función para cerrar el sidebar (será pasada al CoorinSidebar)
   const [closeSidebarFn, setCloseSidebarFn] = useState(null);
 
+    const [cuentaDataCapturaVisita, setCuentaDataCapturaVisita] = useState(null);
+
   // Mapeo directo para renderizar cada componente con su propio modal
 
   // Estado para controlar si la tabla de Pagos reportados está visible
@@ -142,7 +144,9 @@ export default function CoorinDashboard() {
           ContentComponent = CaptureVisit;
           contentProps = {
             mostrarTabla: captureVisitModalSize === "pagos-xl",
-            setMostrarTabla: grow => handleGrowCaptureVisitModal(grow)
+            setMostrarTabla: grow => handleGrowCaptureVisitModal(grow),
+            cuentaData: cuentaDataCapturaVisita,
+            setCuentaData: setCuentaDataCapturaVisita
           };
           break;
         case "Carga Visitas":
@@ -172,7 +176,12 @@ export default function CoorinDashboard() {
       }
 
       return (
-        <ModalBaseInformacion onClose={closeModal} tipoInformacion={selectedSidebarOption} size={size}>
+        <ModalBaseInformacion
+          onClose={closeModal}
+          tipoInformacion={selectedSidebarOption}
+          size={size}
+          infoCuenta={selectedSidebarOption === "Captura Visitas" ? cuentaDataCapturaVisita : undefined}
+        >
           {ContentComponent && <ContentComponent {...contentProps} />}
         </ModalBaseInformacion>
       );
