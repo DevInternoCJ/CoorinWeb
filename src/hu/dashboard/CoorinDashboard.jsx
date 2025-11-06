@@ -1,11 +1,10 @@
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, Suspense, lazy} from "react";
 import GridExecutives from "./board/executives/GridExecutives";
 import { CoorinSidebar } from "./sideBar/CoorinSidebar";
 import GridConsultations from "./board/consultations/GridConsultations";
 import TablaSesiones from "../dashboard/board/sessions/TablaSesiones";
 import RamificacionSesiones from "../dashboard/board/sessions/RamificacionSesiones";
-import ModalBase from "./board/ModalBase";
 import DarkListContent from "./sideBar/consultations/DarkList";
 import RegrestContent from "./sideBar/consultations/Regrest";
 import ModalBaseInformacion from "./sideBar/consultations/information/ModalBaseInformacion";
@@ -24,9 +23,11 @@ import Phrases from "./sideBar/Administration/gespa/phrases/Phrases";
 import ConsultVisitContent from "./sideBar/processes/visits/ConsultaVisits";
 import CaptureVisit from "./sideBar/processes/visits/Capture/CaptureVisit";
 import LoadVisitsContent from "./sideBar/processes/visits/LoadVisits";
-import Comments from "./sideBar/processes/gespa/comments/Comments";
 import IconCircular from "../../components/iconos/IconCircular";
 import ConsorcioLogo from "../../../src/assets//CoorinBlack.svg";
+
+const Comments = lazy(() => import("./sideBar/processes/gespa/comments/Comments"));
+
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedExecutiveId, setSelectedExecutiveId] = useState(null);
@@ -188,7 +189,9 @@ export default function CoorinDashboard() {
       case "Frases":
         return <Phrases onClose={closeModal} />;
       case "Comentarios":
-        return <Comments onClose={closeModal} />;
+        return   <Suspense fallback={<div className="text-center p-10">Cargando comentarios...</div>}>
+      <Comments onClose={closeModal} />
+    </Suspense>;
       default:
         return null;
     }

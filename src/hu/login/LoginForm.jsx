@@ -119,7 +119,7 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
   const handlePasswordValidationError = useCallback((error, onLoginSuccess) => {
     console.error("Error en validación de contraseña:", error);
     if (error.response?.status === 404) {
-      const errorMessage = error.response.data || ERROR_MESSAGES.LOGIN_ERROR;
+      const errorMessage = error.message || ERROR_MESSAGES.LOGIN_ERROR;
       toast.error(errorMessage);
       setApiError(errorMessage);
     } else if (error.response?.status === 400) {
@@ -222,7 +222,7 @@ const handleSubmit = async (e) => {
       // 1. La contraseña expiró (días <= 0) O 
       // 2. La contraseña está próxima a expirar (días < 30) Y es cambio opcional
       if (diasRestantes <= 0) {
-        console.log("🚨 CONTRASEÑA EXPIRADA - Cambio obligatorio");
+        console.log("CONTRASEÑA EXPIRADA - Cambio obligatorio");
         // ✅ Para contraseña expirada, usar onPasswordExpired para flujo directo a ChangePassword
         if (onPasswordExpired && typeof onPasswordExpired === 'function') {
           const expiredData = {
@@ -231,11 +231,11 @@ const handleSubmit = async (e) => {
             contraActual: formData.password,
             esExpirada: true
           };
-          console.log("📤 Ejecutando onPasswordExpired (contraseña expirada):", expiredData);
+          console.log("Ejecutando onPasswordExpired (contraseña expirada):", expiredData);
           onPasswordExpired(expiredData);
         }
       } else if (diasRestantes < 30) {
-        console.log("⚠️  CONTRASEÑA PRÓXIMA A EXPIRAR - Cambio recomendado");
+        console.log("CONTRASEÑA PRÓXIMA A EXPIRAR - Cambio recomendado");
         // ✅ Para contraseña próxima a expirar, usar onLoginSuccess para mostrar opción
         if (onLoginSuccess && typeof onLoginSuccess === 'function') {
           const successData = {
@@ -244,18 +244,18 @@ const handleSubmit = async (e) => {
             contraActual: formData.password,
             esExpirada: false
           };
-          console.log("📤 Ejecutando onLoginSuccess (cambio opcional):", successData);
+          console.log("Ejecutando onLoginSuccess (cambio opcional):", successData);
           onLoginSuccess(successData);
         }
       } else {
-        console.log("✅ CONTRASEÑA VÁLIDA - Login normal");
-        // ✅ Contraseña válida con muchos días restantes - login normal
+        console.log("CONTRASEÑA VÁLIDA - Login normal");
+        // Contraseña válida con muchos días restantes - login normal
         processSuccessfulLogin(
           response,
           passwordValidation,
           () => {
             // Callback vacío para no mostrar PasswordChangeContent
-            console.log("✅ Login exitoso, redirigiendo al dashboard");
+            console.log("Login exitoso, redirigiendo al dashboard");
             navigate("/dashboardPage");
           },
           navigate
@@ -266,84 +266,119 @@ const handleSubmit = async (e) => {
       console.error("Error en validación de contraseña:", validationError);
       handlePasswordValidationError(validationError, onLoginSuccess);
     }
-  } catch (error) {
-    console.error("❌ Error en el inicio de sesión:", error);
-    
-    // 🔥 DETECTAR CONTRASEÑA EXPIRADA (error 400 del servidor)
-    if (error.response?.status === 400 && 
-        error.response?.data?.loginResult?.Expiró === 1) {
-      
+    } catch (error) {
+    console.error("Error en el inicio de sesión:", error);
+
+    // 🔍 Extraer código de error de Axios
+    const status = error.response?.status;
+    const axiosCode = error.code;
+
+    // Error 503 (Servidor no disponible)
+    if (status === 503) {
+      const detail =
+        error.response?.data?.detail ||
+        "El servicio no está disponible en este momento. Intenta más tarde.";
+      toast.error("Servidor no disponible: " + detail);
+      console.error("Detalle del error 503:", detail);
+      setApiError(detail);
+      setLoading(false);
+      return;
+    }
+
+    // Error de red (sin conexión al servidor)
+    if (axiosCode === "ERR_NETWORK") {
+      toast.error("No se pudo conectar con el servidor. Verifica tu red o VPN.");
+      console.error("Error de red:", error.message);
+      setApiError("No se pudo establecer conexión con el servidor.");
+      setLoading(false);
+      return;
+    }
+
+    // Error de respuesta inválida del backend (por ejemplo SQL inaccesible)
+    if (axiosCode === "ERR_BAD_RESPONSE") {
+      const sqlError =
+        error.response?.data?.detail ||
+        "Error interno del servidor o base de datos no accesible.";
+      toast.error("Error en el servidor: " + sqlError);
+      console.error("🧩 Detalle SQL:", sqlError);
+      setApiError(sqlError);
+      setLoading(false);
+      return;
+    }
+
+    // Detectar contraseña expirada (400 con Expiró = 1)
+    if (status === 400 && error.response?.data?.loginResult?.Expiró === 1) {
       const diasRestantes = error.response?.data?.loginResult?.Días || 0;
-      const mensaje = error.response?.data?.loginResult?.Mensaje || "Su contraseña expiró y debe renovarla.";
-      
-      console.log("🔐 CONTRASEÑA EXPIRADA DETECTADA (error 400):", {
+      const mensaje =
+        error.response?.data?.loginResult?.Mensaje ||
+        "Su contraseña expiró y debe renovarla.";
+      console.log("CONTRASEÑA EXPIRADA DETECTADA:", {
         expiró: error.response.data.loginResult.Expiró,
         mensaje,
         días: diasRestantes,
-        usuario: formData.username,
-        contraActual: formData.password
       });
 
-      // ✅ LIMPIAR Y GUARDAR DATOS TEMPORALES
-      localStorage.removeItem('userData');
-      
+      localStorage.removeItem("userData");
       const tempUserData = {
         dias: diasRestantes,
         usuario: formData.username,
         contraActual: formData.password,
-        mensaje: mensaje,
-        esExpirada: true
+        mensaje,
+        esExpirada: true,
       };
       localStorage.setItem("userData", JSON.stringify(tempUserData));
-      
-      // ✅ GUARDAR EN STORE
+
       setUser({
         usuario: formData.username,
         contraActual: formData.password,
         dias: diasRestantes,
-        esExpirada: true
+        esExpirada: true,
       });
-      
-      // ✅ MOSTRAR TOAST INFORMATIVO
+
       toast.warning(mensaje, { duration: 5000 });
-      
-      // ✅ EJECUTAR CALLBACK PARA CAMBIO OBLIGATORIO
-      if (onPasswordExpired && typeof onPasswordExpired === 'function') {
-        const dataToSend = {
-          diasRestantes: diasRestantes,
+
+      if (onPasswordExpired && typeof onPasswordExpired === "function") {
+        onPasswordExpired({
+          diasRestantes,
           username: formData.username,
           contraActual: formData.password,
-          esExpirada: true
-        };
-        
-        console.log("📤 EJECUTANDO onPasswordExpired con:", dataToSend);
-        onPasswordExpired(dataToSend);
-      } else {
-        console.error("❌ onPasswordExpired no disponible");
+          esExpirada: true,
+        });
       }
-      
+
       setLoading(false);
       return;
     }
-    
-    // ✅ MANEJAR OTROS ERRORES 400
-    if (error.response?.status === 400) {
-      const errorMessage = error.response?.data?.loginResult?.Mensaje || 
-                          error.response?.data?.message || 
-                          ERROR_MESSAGES.LOGIN_ERROR;
-      setApiError(errorMessage);
+
+    // Otros errores 400 (credenciales inválidas, etc.)
+    if (status === 400) {
+      const errorMessage =
+        error.response?.data?.loginResult?.Mensaje ||
+        error.response?.data?.message ||
+        ERROR_MESSAGES.LOGIN_ERROR;
       toast.error(errorMessage);
+      setApiError(errorMessage);
       setLoading(false);
       return;
     }
-    
-    // ✅ MANEJO DE ERRORES GENÉRICOS
-    const errorMessage =
-      error.response?.data?.loginResult?.Mensaje ||
+
+    // otros errores 500
+    if (status === 500) {
+      toast.error("Error interno del servidor. Inténtalo más tarde.");
+      console.error(" Error 500:", error.response?.data);
+      setApiError("Error interno del servidor.");
+      setLoading(false);
+      return;
+    }
+
+    // Manejo genérico
+    const fallbackMessage =
       error.response?.data?.message ||
+      error.message ||
       ERROR_MESSAGES.LOGIN_ERROR;
-    setApiError(errorMessage);
-    toast.error(errorMessage);
+    toast.error(fallbackMessage);
+    setApiError(fallbackMessage);
+    setLoading(false);
   } finally {
     setLoading(false);
   }
@@ -383,7 +418,6 @@ const handleSubmit = async (e) => {
       {passwordError && (
         <p className="text-red-400 text-xs mt-1 mb-2">{passwordError}</p>
       )}
-      {apiError && <p className="text-red-500 text-sm mt-1 mb-2">{apiError}</p>}
       <ButtonLogin
         type="submit"
         loading={loading}

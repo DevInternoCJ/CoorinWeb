@@ -1,26 +1,59 @@
-import React from 'react'
-import { Routes, Route } from 'react-router-dom';
+import React, {lazy, Suspense} from 'react'
+import { Routes, Route} from 'react-router-dom';
 import './index.css'
 import './App.css'
-import LoginPage from '../src/hu/login/LoginPage';
-import CoorinDashboard from "./hu/dashboard/CoorinDashboard";
 import PrortectedRoute from './utils/ProtectedRoute';
 import { Toaster} from 'sonner';
+import LoaderSuspense from './components/loading/LoaderSuspense';
+import CoorinBlack from './assets/CoorinBlack.svg';
+
+const LoginPage = lazy(() => import('../src/hu/login/LoginPage'));
+const CoorinDashboard = lazy(() => import('./hu/dashboard/CoorinDashboard'));
+
+const Loader = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="relative">
+      <LoaderSuspense size='lg' color=' border-jerarquia3'/>
+      <img 
+        src={CoorinBlack} 
+        alt="logo-loader" 
+        className='h-18 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' 
+      />
+    </div>
+  </div>
+);
 
 function App() {
 
   return (
     <>
-      <div className="container-fluid min-h-screen">
-        <Toaster position=" top-right" richColors/>
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route element={<PrortectedRoute canActivate={true} redirectTo='/' />}>
-            <Route path="/dashboardPage" element={<CoorinDashboard />} />
-          </Route>
-          {/* <Route element={<PrortectedRoute canActivate={false} redirectTo='/login'/>}/> */}
-        </Routes>
-      </div>
+     <div className="container-fluid min-h-screen">
+      <Toaster position="top-right" richColors />
+      <Routes>
+        {/* Suspense para LoginPage */}
+        <Route
+          path="/"
+          element={
+            <Suspense fallback={<Loader />}>
+              <LoginPage />
+            </Suspense>
+          }
+        />
+        {/* Suspense para dashboardPage*/}
+        <Route
+          element={<PrortectedRoute canActivate={true} redirectTo="/" />}
+        >
+          <Route
+            path="/dashboardPage"
+            element={
+              <Suspense fallback={<Loader />}>
+                <CoorinDashboard />
+              </Suspense>
+            }
+          />
+        </Route>
+      </Routes>
+    </div>
     </>
   );
 }

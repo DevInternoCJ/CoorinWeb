@@ -2327,3 +2327,22 @@ export const putPhrases = async (idRegistro, activo) => {
     throw error;
   }
 };
+
+export const PostComments = async (data) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+
+    console.log('📤 /Scripts/guardar', data);   
+    const response = await api.post(
+      `/Scripts/guardar`,data
+    );  
+    console.log('📥 Respuesta:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error(' Error:', error);
+    throw error;
+  }
+};
