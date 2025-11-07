@@ -6,7 +6,7 @@ const InfoSection = ({
   idProducto,
   fieldNames = { fieldNames: [], aliasNames: [] },
 }) => {
-  // ✅ Recibir fieldNames como prop
+  // Recibir fieldNames como prop
   const [infoData, setInfoData] = useState(null);
   const [defaultData, setDefaultData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,7 @@ const InfoSection = ({
           response
         );
 
-        // ✅ CAMBIO 1: Convertir la respuesta inicial (objeto) a un Array de objetos
+        // CAMBIO 1: Convertir la respuesta inicial (objeto) a un Array de objetos
         const initialArrayData = Object.keys(response).map((key, index) => ({
           originalKey: key, // Clave estática original (para referencia)
           label: response[key].alias || key, // Usar la clave original como etiqueta inicial
@@ -55,7 +55,7 @@ const InfoSection = ({
     }
 
     console.log(`Procesando fieldName: "${fieldName}"`);
-    // ✅ MEJORA: Manejar múltiples campos separados por ; o \
+    // MEJORA: Manejar múltiples campos separados por ; o \
     if (fieldName.includes("[") && fieldName.includes("]")) {
       const regex = /\[(.*?)\]/g;
       let processedValue = fieldName;
@@ -72,7 +72,7 @@ const InfoSection = ({
           actualValue,
           ")"
         );
-        // ✅ CORRECCIÓN: Reemplazar SIEMPRE, incluso si es "N/A" o vacío
+        // CORRECCIÓN: Reemplazar SIEMPRE, incluso si es "N/A" o vacío
         processedValue = processedValue.replace(
           `[${fieldInBrackets}]`,
           formattedValue
@@ -82,13 +82,13 @@ const InfoSection = ({
           replacements.push(formattedValue);
         }
       }
-      // ✅ MEJORA: Si después del reemplazo solo quedan caracteres especiales, limpiar
+      // MEJORA: Si después del reemplazo solo quedan caracteres especiales, limpiar
       const cleanValue = processedValue.replace(/\[\];\\?]/g, "").trim();
       if (cleanValue === "") {
         if (replacements.length > 0) {
           processedValue = replacements[0];
         } else {
-          processedValue = ""; // ✅ Devolver string vacío en lugar de "N/A"
+          processedValue = ""; // Devolver string vacío en lugar de "N/A"
         }
       } else {
         processedValue = cleanValue;
@@ -108,7 +108,7 @@ const InfoSection = ({
       return formattedValue;
     }
   };
-  // ✅ Función para buscar valores en la fila seleccionada
+  // Función para buscar valores en la fila seleccionada
   const findValueInRow = (rowData, fieldName) => {
     if (!rowData || !fieldName) {
       console.log(`findValueInRow - Datos faltantes: fieldName=${fieldName}`);
@@ -136,13 +136,13 @@ const InfoSection = ({
     return "";
   };
 
-  // ✅ MEJORAR la función formatValue para devolver "" en lugar de "N/A" cuando sea apropiado
+  // MEJORAR la función formatValue para devolver "" en lugar de "N/A" cuando sea apropiado
   const formatValue = (value, fieldName = "") => {
     if (value === null || value === "NULL" || value === undefined) {
-      return ""; // ✅ Cambiar a string vacío en lugar de "N/A"
+      return ""; //Cambiar a string vacío en lugar de "N/A"
     }
     if (value === "" || value === " ") {
-      return ""; // ✅ Mantener string vacío
+      return ""; // Mantener string vacío
     }
     // Detectar campos monetarios por nombre
     const isMonetaryField =
@@ -161,7 +161,7 @@ const InfoSection = ({
           maximumFractionDigits: 2,
         })}`;
       }
-      return ""; // ✅ Si no es un número válido, devolver vacío
+      return ""; // Si no es un número válido, devolver vacío
     }
     // Formatear números
     if (typeof value === "number") {
@@ -194,7 +194,7 @@ const InfoSection = ({
         camposArray
       );
 
-      // ✅ CAMBIO 2: Trabajamos sobre una copia del array infoData (que ya está ordenado)
+      // CAMBIO 2: Trabajamos sobre una copia del array infoData (que ya está ordenado)
       let updatedArrayData = infoData.map((item, index) => {
         const dynamicAlias = aliasArray[index];
         const correspondingFieldName = camposArray[index]; // Asumimos que camposArray y aliasArray están alineados por índice
@@ -224,7 +224,7 @@ const InfoSection = ({
       );
       setInfoData(updatedArrayData);
     } else {
-      // ✅ Restauración a defaultData (que ahora es el array ordenado inicial)
+      // Restauración a defaultData (que ahora es el array ordenado inicial)
       let reason = "Razón: ";
       if (!selectedRowData) reason += "sin selectedRowData, ";
       if (selectedRowIndex === null) reason += "sin selectedRowIndex, ";
@@ -243,7 +243,7 @@ const InfoSection = ({
     aliasArray,
   ]); // Agregamos infoData a las dependencias
 
-  // ✅ CAMBIO 3: Simplificar getInfoArray para usar el array de estado
+  // CAMBIO 3: Simplificar getInfoArray para usar el array de estado
 const getInfoArray = () => {
     // Si infoData es el array, lo devolvemos, mapeando para el formato final
     if (!infoData || !Array.isArray(infoData)) return [];

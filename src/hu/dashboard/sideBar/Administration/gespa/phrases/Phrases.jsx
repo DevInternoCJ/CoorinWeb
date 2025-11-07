@@ -5,7 +5,7 @@ import IconCircular from "../../../../../../components/iconos/IconCircular";
 import { InputPhrases } from "./InputPhrases";
 import SavePhrases from "./SavePhrases";
 import { IconWarning } from "../../../../board/executives/scripts/IconScripts";
-import {IconPhrases} from "../IconsTemplates";
+import { IconPhrases } from "../IconsTemplates";
 
 const Phrases = ({ onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -93,16 +93,20 @@ const Phrases = ({ onClose }) => {
           {/* Contenido principal */}
           <div className="">
             {!selectedProduct && (
-              <div className="flex py-10 m-3 flex-col items-center justify-center rounded-lg bg-gray-200 text-gray-500">
+              <div className="flex py-10 m-5 flex-col items-center h-60 justify-center rounded-lg bg-gray-200 text-gray-500">
                 <IconWarning className="size-8 mb-2" />
-                <p className="text-sm font-medium">Selecciona un producto para continuar</p>
+                <p className="text-sm font-medium">
+                  Selecciona un producto para continuar
+                </p>
               </div>
             )}
             {/* Mensaje cuando hay producto pero no hay vista seleccionada */}
             {selectedProduct && !activeView && (
-              <div className="flex py-10 m-3 flex-col items-center justify-center rounded-lg bg-gray-200 text-gray-500">
-                <IconWarning className="size-8 mb-2" />
-                <p className="text-sm font-medium">Selecciona una opción</p>
+              <div className="flex flex-col items-center justify-center text-center text-gray-500 bg-gray-100 rounded-lg py-20">
+                <IconWarning className="size-8" />
+                <p className="text-sm text-gray-400 mt-1">
+                  Seleccione el producto para gestionar scripts.
+                </p>
               </div>
             )}
             {/* Vista: Agregar Frase */}

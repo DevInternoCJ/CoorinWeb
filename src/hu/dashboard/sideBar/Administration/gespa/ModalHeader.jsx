@@ -69,7 +69,6 @@ const ModalHeader = ({
         <div className="flex flex-col items-end">
           <div className="flex items-center gap-4 mb-3">
             <div>
-              <img src={LogoCoorin} alt="logo-conjur" className="h-10" />
             </div>
             <div className="block md:grid grid-cols-2 gap-4">
               <div>

@@ -5,6 +5,7 @@ import TableEditFields from "./TableEditFields";
 import GridLampsFields from "./GridLampsFields";
 import IconCircular from "../../../../components/iconos/IconCircular";
 import { IconPantalla } from "../../board/executives/IconesEjecutives";
+import { IconWarning } from "../../board/executives/scripts/IconScripts";
 
 const LampshadeFields = ({ isOpen, onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -23,13 +24,13 @@ const LampshadeFields = ({ isOpen, onClose }) => {
     setFieldNames(names);
   }, []);
 
-  // ✅ USAR useMemo para memoizar componentes y evitar re-montaje
+  // USAR useMemo para memoizar componentes y evitar re-montaje
   const memoizedTableEditFields = useMemo(() => {
     if (!selectedProduct || selectedProduct.value === 0) return null;
 
     return (
       <TableEditFields
-        key={`table-${selectedProduct.value}`} // ✅ Key única por producto
+        key={`table-${selectedProduct.value}`} // Key única por producto
         idProducto={selectedProduct.value}
         selectedRowData={selectedRowData}
         onFieldNamesChange={handleFieldNamesChange}
@@ -42,7 +43,7 @@ const LampshadeFields = ({ isOpen, onClose }) => {
 
     return (
       <GridLampsFields
-        key={`grid-${selectedProduct.value}`} // ✅ Key única por producto
+        key={`grid-${selectedProduct.value}`} // Key única por producto
         idProducto={selectedProduct.value}
         onRowClick={handleRowSelect}
       />
@@ -54,7 +55,7 @@ const LampshadeFields = ({ isOpen, onClose }) => {
 
     return (
       <InfoSection
-        key={`info-${selectedProduct.value}`} // ✅ Key única por producto
+        key={`info-${selectedProduct.value}`} // Key única por producto
         idProducto={selectedProduct.value}
         fieldNames={fieldNames}
       />
@@ -64,8 +65,8 @@ const LampshadeFields = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className=" modal-blur-bg fixed inset-0 bg-opacity-70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl max-w-6xl max-h-[90vh] overflow-hidden border border-gray-300">
+    <div className=" modal-blur-bg overflow-hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]">
         <ModalHeader
           icon={
             <IconCircular size="size-10">
@@ -81,6 +82,7 @@ const LampshadeFields = ({ isOpen, onClose }) => {
           loading={loading}
           setLoading={setLoading}
         />
+       {selectedProduct ? (  
         <div className="p-4 overflow-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
           {memoizedInfoSection}
           {selectedProduct && selectedProduct.value !== 0 && (
@@ -90,6 +92,16 @@ const LampshadeFields = ({ isOpen, onClose }) => {
             </>
           )}
         </div>
+        ) : (
+          <div>
+              <div className="flex m-5 flex-col items-center justify-center text-center text-gray-500 bg-gray-200 rounded-lg py-20">
+                          <IconWarning className="size-8"/>
+                          <p className="text-sm text-gray-400 mt-1">
+                            Seleccione el producto para gestionar scripts.
+                          </p>
+                        </div>
+                        </div>
+                      )}
       </div>
     </div>
   );

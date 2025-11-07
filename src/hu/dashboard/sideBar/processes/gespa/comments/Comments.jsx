@@ -6,7 +6,6 @@ import SaveButton from "../../../Administration/gespa/ButtonSave";
 import LogoCoorin from "../../../../../../assets/logo_coorin_7.svg";
 import { IconComment } from "../comments/IconsComments";
 
-// HOOKS PERSONALIZADOS (Single Responsibility)
 // Hook para manejar la lógica de vistas
 const useViewManager = () => {
   const [activeView, setActiveView] = useState(null);

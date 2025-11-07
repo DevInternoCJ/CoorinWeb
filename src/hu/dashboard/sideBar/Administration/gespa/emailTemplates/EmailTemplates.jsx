@@ -7,6 +7,7 @@ import ModalBase from "../../../../board/ModalBase";
 import { IconTemplate } from "../IconsTemplates";
 import { useWalletProducts } from "../../../../../login/WalletProduct"
 import IconCircular from "../../../../../../components/iconos/IconCircular"; 
+import { IconWarning } from "../../../../board/executives/scripts/IconScripts";
 
 const EmailTemplates = ({ onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -60,12 +61,12 @@ const EmailTemplates = ({ onClose }) => {
 
 
   return (
-    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div
         ref={modalRef}
         className={`${
           bounce ? " animate-bounce-modal" : ""
-        } bg-white rounded-lg shadow-2xl w-ful max-w-6xl max-h-[90vh] overflow-hidden border border-gray-300`}
+        } bg-white rounded-lg shadow-2xl w-full max-w-4xl overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -82,6 +83,7 @@ const EmailTemplates = ({ onClose }) => {
           setLoading={setLoading}
           setShowDataTables={setShowDataTables}
         />
+        {selectedProduct ? (
         <div
           className="px-6 pb-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4"
         >
@@ -105,6 +107,16 @@ const EmailTemplates = ({ onClose }) => {
             </div>
           )}
         </div>
+        ) : (
+           <div>
+                        <div className="flex m-5 flex-col items-center justify-center text-center text-gray-500 bg-gray-200 rounded-lg py-20">
+                                    <IconWarning className="size-8"/>
+                                    <p className="text-sm text-gray-400 mt-1">
+                                      Seleccione el producto para gestionar scripts.
+                                    </p>
+                                  </div>
+                                  </div>
+                                )}
       </div>
     </div>
   );

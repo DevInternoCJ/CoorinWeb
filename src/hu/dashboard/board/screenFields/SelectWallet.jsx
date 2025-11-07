@@ -6,13 +6,14 @@ const SelectWallet = ({
     defaultValue = "", 
     onChange, 
     label, 
-    ...props 
+    relative = true,
+    ...props
 }) => {
     // Generamos un ID único si no se proporciona para accesibilidad
     const selectId = props.id || `select-wallet-${Math.random().toString(36).substring(2, 9)}`;
 
     return (
-        <div className="relative">
+        <div className={relative ? "relative" : "static"}>
             <select
                 id={selectId} // 2. Asocia el ID para la accesibilidad
                 defaultValue={defaultValue}

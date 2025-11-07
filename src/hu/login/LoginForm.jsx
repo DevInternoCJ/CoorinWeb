@@ -175,7 +175,7 @@ const handleSubmit = async (e) => {
     
     const userInfo = response?.ejecutivo || response;
 
-    // ✅ GUARDAR DATOS COMPLETOS EN STORE Y LOCALSTORAGE
+    // GUARDAR DATOS COMPLETOS EN STORE Y LOCALSTORAGE
     const userStoreData = {
       idEjecutivo: userInfo.idEjecutivo,
       usuario: formData.username,
@@ -192,16 +192,16 @@ const handleSubmit = async (e) => {
       idLogIngreso: userInfo.idLogIngreso,
       idProducto: userInfo.idProducto,
       Segmento: userInfo.Segmento,
-      // ✅ NUEVO: Guardar también la contraseña actual temporalmente
+      // NUEVO: Guardar también la contraseña actual temporalmente
       contraActual: formData.password
     };
 
     setUser(userStoreData);
     
-    // ✅ GUARDAR EN LOCALSTORAGE CON CONTRASEÑA ACTUAL
+    // GUARDAR EN LOCALSTORAGE CON CONTRASEÑA ACTUAL
     const localStorageData = {
       ...userStoreData,
-      contraActual: formData.password // ✅ Guardar para ChangePassword
+      contraActual: formData.password // Guardar para ChangePassword
     };
     localStorage.setItem("userData", JSON.stringify(localStorageData));
     
@@ -214,16 +214,16 @@ const handleSubmit = async (e) => {
       );
       console.log("Respuesta de validación de contraseña:", passwordValidation);
 
-      // ✅ DETECTAR SI LA CONTRASEÑA ESTÁ PRÓXIMA A EXPIRAR (pero aún es válida)
+      // DETECTAR SI LA CONTRASEÑA ESTÁ PRÓXIMA A EXPIRAR (pero aún es válida)
       const diasRestantes = userInfo.Días;
       console.log("🔍 Días restantes para expirar:", diasRestantes);
 
-      // ✅ CONDICIÓN MODIFICADA: Mostrar PasswordChangeContent si:
+      // CONDICIÓN MODIFICADA: Mostrar PasswordChangeContent si:
       // 1. La contraseña expiró (días <= 0) O 
       // 2. La contraseña está próxima a expirar (días < 30) Y es cambio opcional
       if (diasRestantes <= 0) {
         console.log("CONTRASEÑA EXPIRADA - Cambio obligatorio");
-        // ✅ Para contraseña expirada, usar onPasswordExpired para flujo directo a ChangePassword
+        // Para contraseña expirada, usar onPasswordExpired para flujo directo a ChangePassword
         if (onPasswordExpired && typeof onPasswordExpired === 'function') {
           const expiredData = {
             diasRestantes: diasRestantes,
@@ -236,7 +236,7 @@ const handleSubmit = async (e) => {
         }
       } else if (diasRestantes < 30) {
         console.log("CONTRASEÑA PRÓXIMA A EXPIRAR - Cambio recomendado");
-        // ✅ Para contraseña próxima a expirar, usar onLoginSuccess para mostrar opción
+        // Para contraseña próxima a expirar, usar onLoginSuccess para mostrar opción
         if (onLoginSuccess && typeof onLoginSuccess === 'function') {
           const successData = {
             diasRestantes: diasRestantes,

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { toast } from "sonner";
 import OptionFields from "./OptionFields";
 import {
   GetScreenFields,
@@ -21,7 +22,8 @@ const TableEditFields = ({
   const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;
   const jerarquia = user?.Jerarquía;
-  // ✅ CORRECCIÓN: Usar useCallback para evitar recreación de función
+  const [confirming, setConfirming] = useState(false);
+
   const extractBracketFields = useCallback((text) => {
     if (!text) return [];
     const regex = /\[(.*?)\]/g;
@@ -32,20 +34,18 @@ const TableEditFields = ({
     }
     return matches;
   }, []);
-  // ✅ CORRECCIÓN: Usar useCallback y mover fuera del useEffect
+
   const getFieldValueFromRow = useCallback(
     (fieldName) => {
       if (!selectedRowData || !fieldName) return "";
-      // Buscar el campo en la fila seleccionada (case insensitive)
       const key = Object.keys(selectedRowData).find(
         (k) => k.toLowerCase() === fieldName.toLowerCase()
       );
-
       return key ? selectedRowData[key] : "";
     },
     [selectedRowData]
-  ); // ✅ Solo depende de selectedRowData
-  // ✅ CORRECCIÓN: Actualizar campos con selectedRowData
+  );
+
   useEffect(() => {
     if (!selectedRowData || editData.length === 0) return;
     const updatedData = editData.map((item) => {
@@ -64,7 +64,7 @@ const TableEditFields = ({
     });
     setEditData(updatedData);
   }, [selectedRowData, editData, extractBracketFields, getFieldValueFromRow]);
-  // ✅ CORRECCIÓN PRINCIPAL: Cargar datos solo una vez
+
   useEffect(() => {
     if (!idProducto || idProducto === 0 || initialLoadRef.current) return;
 
@@ -72,7 +72,7 @@ const TableEditFields = ({
       try {
         setLoading(true);
         setError(null);
-        initialLoadRef.current = true; // ✅ Marcar como cargado
+        initialLoadRef.current = true;
 
         console.log("TableEditFields - Cargando datos por primera vez...");
         const data = await GetScreenFields(idProducto);
@@ -88,50 +88,43 @@ const TableEditFields = ({
       } catch (err) {
         console.error("Error fetching screen fields:", err);
         setError(err.message || "Error al cargar los campos de pantalla");
-        initialLoadRef.current = false; // ✅ Permitir reintento si falla
+        initialLoadRef.current = false;
       } finally {
         setLoading(false);
       }
     };
     fetchScreenFields();
-  }, [idProducto]); // ✅ Eliminada dependencia de servidor
-  // ✅ CORRECCIÓN: Actualizar fieldNames solo si realmente cambiaron
-useEffect(() => {
+  }, [idProducto]);
+
+  useEffect(() => {
     if (editData.length === 0 || !onFieldNamesChange) return;
 
     const currentFieldNames = editData
-      .map(item => item.campos)
+      .map((item) => item.campos)
       .filter(Boolean);
-      
-    // ✅ NUEVO: Generar array de alias
-    const currentAliasNames = editData
-      .map(item => item.alias)
-      .filter(Boolean);
-    
-    // 💡 Enviamos un objeto que InfoSection pueda consumir para obtener ambas listas
+
+    const currentAliasNames = editData.map((item) => item.alias).filter(Boolean);
+
     if (currentFieldNames.length > 0) {
-      console.log("TableEditFields - Enviando data estructurada (alias/campos):", currentAliasNames.length);
-      // Se asume que onFieldNamesChange ahora acepta un objeto
-      onFieldNamesChange({ 
-          fieldNames: currentFieldNames, 
-          aliasNames: currentAliasNames 
+      console.log(
+        "TableEditFields - Enviando data estructurada (alias/campos):",
+        currentAliasNames.length
+      );
+      onFieldNamesChange({
+        fieldNames: currentFieldNames,
+        aliasNames: currentAliasNames,
       });
     }
-}, [editData, onFieldNamesChange]);
-
+  }, [editData, onFieldNamesChange]);
 
   const handleEditField = (index, field, value) => {
-    // Paso 1: Crear una nueva copia de editData y aplicar el cambio
     const newEditData = editData.map((item, i) =>
       i === index ? { ...item, [field]: value } : item
-    ); // Paso 2: Si el campo es 'alias', forzamos el setEditData //         incluso si el valor es idéntico, para garantizar una nueva referencia. //         Si no, simplemente usamos la nueva copia.
+    );
 
     if (field === "alias") {
-      // El uso de 'newEditData' garantiza la nueva referencia que dispara el useEffect
       setEditData(newEditData);
     } else {
-      // Para 'campos', el setEditData original ya era suficiente, pero lo mantenemos
-      // con la nueva copia para coherencia.
       setEditData(newEditData);
     }
   };
@@ -139,37 +132,68 @@ useEffect(() => {
   const handleSaveAll = async () => {
     setSaving(true);
     setSaveResult(null);
-
-    // ✅ PREPARAR datos para guardar - revertir los reemplazos si es necesario
+    setConfirming(false);
     const campos = editData.map((item) => {
-      // Si necesitas guardar los campos originales (con [ ]) en lugar de los reemplazados,
       return {
         posicion: item.position,
         alias: item.alias,
-        nombreCampo: item.campos, // Esto contendrá los valores reemplazados
+        nombreCampo: item.campos,
         formatoCampo: item.formato,
         resaltado: typeof item.resaltado === "number" ? item.resaltado : 1,
         editar: true,
       };
     });
+
     const payload = {
       idProducto,
       idEjecutivo,
       jerarquia,
       campos,
     };
+
     console.log("TableEditFields - Payload para guardar:", payload);
+
     try {
       await SaveScreenFields(payload);
       setSaveResult("Guardado correctamente");
+      toast.success("Cambios guardados correctamente", {
+        description: "Los campos de pantalla se han actualizado",
+        duration: 3000,
+      });
     } catch (error) {
       console.error("Error al guardar:", error);
       setSaveResult("Error al guardar");
+      toast.error("Error al guardar", {
+        description: error.message || "No se pudieron guardar los cambios",
+        duration: 4000,
+      });
     } finally {
       setSaving(false);
     }
   };
-  // ... (resto del componente igual: loading, error, return)
+
+  const handleSaveClick = () => {
+    setConfirming(true); // 👈 desactivar botón mientras el toast está activo
+    const toastId = toast.warning("¿Está seguro de guardar los cambios?", {
+      action: {
+        label: "Confirmar",
+         onClick: () => {
+          toast.dismiss(toastId); // cerrar manualmente el toast
+          handleSaveAll();
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+         onClick: () => {
+          setConfirming(false); // 👈 volver a habilitar si se cancela
+        },
+      },
+      duration: Infinity,
+      position: "top-center",
+      onAutoClose: () => setConfirming(false), // por si se cierra solo
+    });
+  };
+
   if (loading) {
     return (
       <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
@@ -210,18 +234,19 @@ useEffect(() => {
           </div>
         </div>
       </div>
-    ); 
+    );
   }
+
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm max-h-72 overflow-auto">
-      <div className="bg-background-secondary rounded-md grid grid-cols-12 gap-3 mb-4 py-2 px-3 font-semibold text-white text-sm">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm max-h-75 overflow-auto">
+      <div className="bg-background-secondary sticky top-0  rounded-t-lg grid grid-cols-12 gap-3 mb-4 border border-gray-200 shadow-sm py-2 px-3 font-semibold text-white text-sm">
         <div className="col-span-1 w-full">Position</div>
         <div className="col-span-3 w-full">Alias</div>
         <div className="col-span-4 w-full">Campos</div>
         <div className="col-span-2 w-full">Formato Campo</div>
         <div className="col-span-2 w-full">Resaltado</div>
       </div>
-      {/* ✅ Indicador de datos seleccionados */}
+
       {selectedRowData && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
           <p className="text-sm text-green-800">
@@ -230,6 +255,7 @@ useEffect(() => {
           </p>
         </div>
       )}
+
       <div className="space-y-2">
         {editData.map((item, idx) => (
           <OptionFields
@@ -239,20 +265,22 @@ useEffect(() => {
           />
         ))}
       </div>
+
       {editData.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           No hay campos de pantalla disponibles para los parámetros
           especificados
         </div>
       )}
-      <div className="flex justify-end my-3 mr-3">
+
+      <div className="flex justify-end my-3 mr-3 sticky bottom-0 bg-white py-2">
         <SaveButton
-          onClick={handleSaveAll}
+          onClick={handleSaveClick}
           loading={saving}
-          disabled={editData.length === 0 || saving}
+          disabled={editData.length === 0 || saving || confirming} // 👈 agregado
           size="medium"
           variant="primary"
-          className="btn-success  "
+          className="btn-success"
         />
         {saveResult && (
           <span

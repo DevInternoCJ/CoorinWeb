@@ -99,7 +99,7 @@ const OptionFields = ({ data, onEdit }) => {
       </td>
 
       {/* Alias - Editable CON DROP ZONE */}
-      <td className="col-span-3 relative w-full">
+      <td className="col-span-3 w-full">
         <input
           type="text"
           value={data.alias || ""}
@@ -128,7 +128,7 @@ const OptionFields = ({ data, onEdit }) => {
       </td>
 
       {/* Campos - Editable CON DROP ZONE */}
-      <td className="col-span-4 relative">
+      <td className="col-span-4">
         <input
           type="text"
           value={data.campos || ""}
@@ -154,20 +154,22 @@ const OptionFields = ({ data, onEdit }) => {
             </div>
         )}
       </td>
-      <td className="col-span-2">
+      <td className="col-span-2 !static">
         <SelectWallet
           options={formatOptions}
           defaultValue={data.formato}
-          className="text-sm italic"
+          className="text-sm italic !static"
           onChange={value => onEdit && onEdit("formato", value)}
+          relative={false}
         />
       </td>
-      <td className="col-span-2">
+      <td className="col-span-2 !static">
         <SelectWallet
           options={highlightOptions}
           defaultValue={data.resaltado}
-          className="text-sm italic"
+          className="text-sm italic !static"
           onChange={value => onEdit && onEdit("resaltado", value)}
+          relative={false}
         />
       </td>
     </tr>
