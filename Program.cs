@@ -113,6 +113,7 @@ using Loki.Mark.Procesos.Gespa.Definicion.DAOs;
 using Loki.Mark.Procesos.Gespa.Definicion.Interfaces;
 using Loki.Mark.Procesos.Gespa.Estados_de_cuenta.DAOs;
 using Loki.Mark.Procesos.Gespa.Estados_de_cuenta.Interfaces;
+using Loki.Mark.Procesos.Gestiones.DAOs;
 using Loki.Mark.Procesos.Gestiones.Interfaces;
 using Loki.Mark.Procesos.Gestiones.Services;
 using Loki.Mark.Procesos.Procesos.DAOs;
@@ -423,6 +424,7 @@ builder.Services.AddScoped<ISupervisorService, SupervisorService>();
 builder.Services.AddScoped<ISupervisorDao, SupervisorDao>();
 //gestiones
 builder.Services.AddScoped<IGestionesService, GestionesService>();
+builder.Services.AddScoped<IGestionesDao, GestionesDao>();
 #endregion	
 
 #region Reportes
