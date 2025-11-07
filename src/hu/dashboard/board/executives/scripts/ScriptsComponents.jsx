@@ -1,4 +1,8 @@
 import React from "react";
+import ButtonSave from "../../../sideBar/Administration/gespa/ButtonSave";
+import IconCircular from "../../../../../components/iconos/IconCircular";
+import { IconClean } from "./IconScripts";
+import { toast } from "sonner";
 
 export const ScriptHeader = ({ scriptOptions, selectedScript, onWalletChange, SelectWallet }) => (
   <div className="flex justify-between items-center mb-0.5">
@@ -44,7 +48,7 @@ export const FormatToolbar = ({ onInsertFormat, onCleanFormat, IconCircular, Ico
         textColor="text-gray-200" 
         borderColor="border-gray-800 hover:border-jerarquia3" 
         bgColor="bg-gray-800 hover:bg-jerarquia3" 
-        tooltip="Agregar/quitar resaltado"
+        tooltip="Agregar / Quitar resaltado"
       >
         N
       </IconCircular>
@@ -54,7 +58,7 @@ export const FormatToolbar = ({ onInsertFormat, onCleanFormat, IconCircular, Ico
         textColor="text-lime-500" 
         borderColor="border-gray-800 hover:border-jerarquia3" 
         bgColor="bg-gray-800 hover:bg-jerarquia3" 
-        tooltip="Agregar/quitar color"
+        tooltip="Agregar / Quitar color"
       >
         C
       </IconCircular>
@@ -64,7 +68,7 @@ export const FormatToolbar = ({ onInsertFormat, onCleanFormat, IconCircular, Ico
         textColor="text-gray-200" 
         borderColor="border-gray-800 hover:border-jerarquia3" 
         bgColor="bg-gray-800 hover:bg-jerarquia3" 
-        tooltip="Deshacer Cambios"
+        tooltip="Deshacer cambios"
       >
         <IconClean />
       </IconCircular>
@@ -72,35 +76,137 @@ export const FormatToolbar = ({ onInsertFormat, onCleanFormat, IconCircular, Ico
   </div>
 );
 
-export const PreviewControls = ({ showPreview, onTogglePreview, onSave, onClearScript, ButtonSave }) => (
-  <div className={`flex items-end gap-3 my-2 ${showPreview ? "ml-auto" : ""}`}>
-    <div className="text-center items-center">
-      <input 
-        type="checkbox" 
-        id="vista-previa" 
-        className="form-checkbox h-4 w-4 bg-blue-600 text-end text-jerarquia1 rounded cursor-pointer" 
-        checked={showPreview} 
-        onChange={(e) => onTogglePreview(e.target.checked)} 
-      />
-      <label 
-        htmlFor="vista-previa" 
-        style={{color: "#3eac91"}} 
-        className="ml-1 text-sm cursor-pointer text-end"
-      >
-        Vista Previa
-      </label>
-    </div>
-    {showPreview ? (
-      <div className="flex gap-2">
-        <ButtonSave onClick={onSave} className="btn-success" />
+export const PreviewControls = ({ 
+  showPreview, 
+  onTogglePreview, 
+  onSave, 
+  onClearScript, 
+  ButtonSave,
+  isConfirming,
+  toast
+}) => {
+  const handleSaveClick = () => {
+    toast.custom((t) => (
+      <div className="bg-amber-50 text-amber-700 px-4 py-3 rounded-lg shadow-lg flex flex-col gap-3 w-80">
+        <span className="font-medium text-sm">
+          ¿Está seguro de guardar los cambios?
+        </span>
+        <div className="flex justify-end gap-2">
+          <ButtonSave
+            onClick={() => {
+              toast.dismiss(t);
+              toast.info("Guardado cancelado");
+            }}
+            className="btn-danger hover:bg-red-600"
+          >
+            Cancelar
+          </ButtonSave>
+          <ButtonSave
+            onClick={() => {
+              toast.dismiss(t);
+              toast.promise(
+                onSave(),
+                {
+                  loading: "Guardando script...",
+                  success: "Script guardado correctamente",
+                  error: "Error al guardar el script",
+                }
+              );
+            }}
+            className="btn-success hover:bg-green-600"
+          >
+            Confirmar
+          </ButtonSave>
+        </div>
       </div>
-    ) : (
-      <button onClick={onClearScript} className="flex btn-danger">
-        Borrar
-      </button>
-    )}
-  </div>
-);
+    ), {
+      duration: Infinity,
+      position: "top-center",
+    });
+  };
+
+  const handleClearClick = () => {
+    toast.custom((t) => (
+      <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg shadow-lg flex flex-col gap-3 w-80">
+        <span className="font-medium text-sm">
+          ¿Está seguro de borrar el script?
+        </span>
+        <div className="flex justify-end gap-2">
+          <ButtonSave
+            onClick={() => {
+              toast.dismiss(t);
+              toast.info("Operación cancelada");
+            }}
+            className="btn-secondary hover:bg-gray-400"
+          >
+            Cancelar
+          </ButtonSave>
+          <ButtonSave
+            onClick={() => {
+              toast.dismiss(t);
+              toast.promise(
+                new Promise((resolve) => {
+                  onClearScript();
+                  resolve();
+                }),
+                {
+                  loading: "Borrando script...",
+                  success: "Script borrado correctamente",
+                  error: "Error al borrar el script",
+                }
+              );
+            }}
+            className="btn-danger hover:bg-red-600"
+          >
+            Confirmar
+          </ButtonSave>
+        </div>
+      </div>
+    ), {
+      duration: Infinity,
+      position: "top-center",
+    });
+  };
+
+  return (
+    <div className={`flex items-end gap-3 my-2 ${showPreview ? "ml-auto" : ""}`}>
+      <div className="text-center items-center">
+        <input 
+          type="checkbox" 
+          id="vista-previa" 
+          className="form-checkbox h-4 w-4 bg-blue-600 text-end text-jerarquia1 rounded cursor-pointer" 
+          checked={showPreview} 
+          onChange={(e) => onTogglePreview(e.target.checked)} 
+          disabled={isConfirming}
+        />
+        <label 
+          htmlFor="vista-previa" 
+          style={{color: "#3eac91"}} 
+          className={`ml-1 text-sm cursor-pointer text-end ${isConfirming ? 'opacity-50' : ''}`}
+        >
+          Vista Previa
+        </label>
+      </div>
+      {showPreview ? (
+        <div className="flex gap-2">
+          <ButtonSave 
+            onClick={handleSaveClick} 
+            className="btn-success"
+            disabled={isConfirming}
+          />
+        </div>
+      ) : (
+        <button 
+          onClick={handleClearClick} 
+          className="flex btn-danger"
+          disabled={isConfirming}
+        >
+          Borrar
+        </button>
+      )}
+    </div>
+  );
+};
 
 export const ScriptEditorToolbar = ({ 
   showPreview, 
@@ -111,7 +217,8 @@ export const ScriptEditorToolbar = ({
   onClearScript,
   IconCircular,
   IconClean,
-  ButtonSave 
+  ButtonSave,
+  isConfirming,
 }) => (
   <div className="block md:flex justify-between items-center my-1">
     {!showPreview && (
@@ -128,6 +235,8 @@ export const ScriptEditorToolbar = ({
       onSave={onSave}
       onClearScript={onClearScript}
       ButtonSave={ButtonSave}
+      isConfirming={isConfirming}
+      toast={toast}
     />
   </div>
 );

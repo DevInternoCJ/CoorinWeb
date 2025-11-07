@@ -54,42 +54,53 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
     label: script.nombre,
   }));
   // Reemplazo de placeholders
-  const replacePlaceholders = useCallback(
-    (text, preview = false) => {
-      if (!text) return "";
-      if (!preview) return text;
-      try {
-        const resultado = text.replace(/\[([^\]]+)\]/g, (match, placeholder) => {
-          let replacement;
-          switch (placeholder) {
-            case "NombreEjecutivo":
-              replacement = user?.nombre || match;
-              break;
-            case "NombreDeudor":
-            case "idCuenta":
-            case "RFC":
-            case "NúmeroCliente":
-            case "Saldo":
-              replacement =
-                placeholderValues[placeholder] != null
-                  ? formatValue(placeholderValues[placeholder], placeholder)
-                  : match;
-              break;
-            default:
-              replacement = Object.prototype.hasOwnProperty.call(placeholderValues, placeholder)
+  // Reemplazo de placeholders
+const replacePlaceholders = useCallback(
+  (text, preview = false) => {
+    if (!text) return "";
+    if (!preview) return text;
+
+    try {
+      const resultado = text.replace(/\[([^\]]+)\]/g, (match, placeholder) => {
+        let replacement = "";
+
+        switch (placeholder) {
+          case "NombreEjecutivo":
+            replacement = user?.nombre || "";
+            break;
+
+          case "NombreDeudor":
+          case "idCuenta":
+          case "RFC":
+          case "NúmeroCliente":
+          case "Saldo":
+            replacement =
+              placeholderValues[placeholder] != null &&
+              placeholderValues[placeholder] !== ""
                 ? formatValue(placeholderValues[placeholder], placeholder)
-                : match;
-          }
-          return replacement;
-        });
-        return resultado;
-      } catch (error) {
-        console.error("Error al reemplazar placeholders:", error);
-        return text;
-      }
-    },
-    [placeholderValues, user]
-  );
+                : "";
+            break;
+
+          default:
+            replacement = Object.prototype.hasOwnProperty.call(placeholderValues, placeholder)
+              ? (placeholderValues[placeholder] !== ""
+                  ? formatValue(placeholderValues[placeholder], placeholder)
+                  : "")
+              : "";
+        }
+
+        return replacement; // 👈 si no hay valor, retorna vacío (no muestra nada)
+      });
+
+      return resultado;
+    } catch (error) {
+      console.error("Error al reemplazar placeholders:", error);
+      return text;
+    }
+  },
+  [placeholderValues, user]
+);
+
   // Renderizado de script a HTML
   const renderFormattedScriptToHTML = useCallback(
     (text) => {
@@ -155,7 +166,7 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
   if (hasChanges) {
     const selected = scripts.find((s) => s.idScript.toString() === selectedValue);
     toast.custom((t) => (
-      <div className=" bg-background-tertiary text-red-800 px-4 py-3 rounded-lg shadow-lg flex flex-col gap-3 w-80">
+      <div className=" bg-amber-50 text-amber-700 px-4 py-3 rounded-lg shadow-lg flex flex-col gap-3 w-80">
         <span className="font-medium text-sm">
           Tienes cambios sin guardar. ¿Deseas continuar?
         </span>
@@ -204,8 +215,8 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
 
   const handleEditorChange = () => {
     if (!editableRef.current) return;
-    const newPosition = saveCursorPosition();
-    setCursorPosition(newPosition);
+     const position = saveCursorPosition(); // guardar antes de leer el HTML
+     setCursorPosition(position);
     
     const html = editableRef.current.innerHTML;
     let text = "";
@@ -230,25 +241,53 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
   };
 
   const insertFormatMarker = (marker) => {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return;
-    const selectedText = selection.toString();
-    if (!selectedText) return toast.error("Selecciona un texto para aplicar el formato");
-    const text = editedData.script;
-    const escapedMarker = marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const pattern = new RegExp(`${escapedMarker}([^${escapedMarker}]*)${escapedMarker}`, "g");
-    const isColored = pattern.test(selectedText);
-    let newText;
-    if (isColored) {
-      newText = text.replace(new RegExp(`${escapedMarker}${selectedText}${escapedMarker}`), selectedText);
-      toast.info("Formato eliminado");
-    } else {
-      newText = text.replace(selectedText, `${marker}${selectedText}${marker}`);
-      toast.success("Formato aplicado");
-    }
-    handleInputChange("script", newText);
-    setTimeout(() => editableRef.current?.focus(), 50);
-  };
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return toast.error("Selecciona un texto para aplicar el formato");
+
+  const range = selection.getRangeAt(0);
+  const selectedText = selection.toString();
+
+  if (!selectedText.trim()) {
+    return toast.error("Selecciona un texto válido para aplicar formato");
+  }
+
+  // Crear o quitar formato según el marcador
+  const span = document.createElement("span");
+  let styleApplied = "";
+
+  if (marker === "*") {
+    span.classList.add("font-bold");
+    styleApplied = "negrita";
+  } else if (marker === "&") {
+    span.classList.add("text-lime-500");
+    styleApplied = "color";
+  }
+
+  const parent = range.commonAncestorContainer.parentElement;
+
+  // Si el texto ya tiene formato, quitarlo
+  if (parent && parent.classList.contains(span.classList[0])) {
+    const unformatted = document.createTextNode(selectedText);
+    parent.replaceWith(unformatted);
+    toast.info(`Formato ${styleApplied} eliminado`);
+  } else {
+    span.textContent = selectedText;
+    range.deleteContents();
+    range.insertNode(span);
+    toast.success(`Formato ${styleApplied} aplicado`);
+  }
+
+  // Reubicar cursor al final del texto seleccionado
+  selection.removeAllRanges();
+  const newRange = document.createRange();
+  newRange.setStartAfter(span);
+  newRange.collapse(true);
+  selection.addRange(newRange);
+
+  // Actualizar el estado del script (sin regenerar HTML)
+  handleEditorChange();
+};
+
 
   const cleanFormatMarkers = () => {
     if (!selectedScript) return;
@@ -352,22 +391,26 @@ const EditionScripts = ({ scripts = [], placeholderValues = {}, onScriptsUpdate 
   };
 
   const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!showPreview) {
-      const droppedText = e.dataTransfer.getData("text/plain");
-      const selection = window.getSelection();
-      if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const span = document.createElement("span");
-        span.textContent = droppedText;
-        range.deleteContents();
-        range.insertNode(span);
-        selection.removeAllRanges();
-        handleEditorChange();
-      }
-    }
-  };
+  e.preventDefault();
+  e.stopPropagation();
+
+  const placeholder = e.dataTransfer.getData("text/plain"); // o el formato que uses
+  const selection = window.getSelection();
+
+  if (window._savedRange) {
+    selection.removeAllRanges();
+    selection.addRange(window._savedRange);
+  }
+
+  const range = selection.getRangeAt(0);
+  const textNode = document.createTextNode(placeholder);
+  range.insertNode(textNode);
+  range.setStartAfter(textNode);
+  range.setEndAfter(textNode);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  handleEditorChange();
+};
 
   return (
     <div className="rounded-lg">

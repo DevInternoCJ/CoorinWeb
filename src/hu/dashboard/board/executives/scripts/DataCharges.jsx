@@ -144,6 +144,13 @@ const DataCharges = ({ onDataLoaded }) => {
     }
     return String(value).trim();
   };
+
+  document.addEventListener("dragstart", () => {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    window._savedRange = selection.getRangeAt(0);
+  }
+});
   // Spinner de carga
   if (loading || isLoadingStore) {
     return (

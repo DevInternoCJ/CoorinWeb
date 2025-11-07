@@ -171,26 +171,52 @@ const TableEditFields = ({
       setSaving(false);
     }
   };
-
   const handleSaveClick = () => {
-    setConfirming(true); // 👈 desactivar botón mientras el toast está activo
-    const toastId = toast.warning("¿Está seguro de guardar los cambios?", {
-      action: {
-        label: "Confirmar",
-         onClick: () => {
-          toast.dismiss(toastId); // cerrar manualmente el toast
-          handleSaveAll();
-        },
-      },
-      cancel: {
-        label: "Cancelar",
-         onClick: () => {
-          setConfirming(false); // 👈 volver a habilitar si se cancela
-        },
-      },
+    setConfirming(true);
+    
+    toast.custom((t) => (
+      <div className="bg-amber-50 text-amber-700 px-4 py-3 rounded-lg shadow-lg flex flex-col gap-3 w-80">
+        <span className="font-medium text-sm">
+          ¿Está seguro de guardar los cambios?
+        </span>
+        <div className="flex justify-end gap-2">
+          <SaveButton
+            onClick={() => {
+              toast.dismiss(t);
+              setConfirming(false);
+              toast.info("Guardado cancelado");
+            }}
+            className="btn-danger hover:bg-red-600"
+          >
+            Cancelar
+          </SaveButton>
+          <SaveButton
+            onClick={() => {
+              toast.dismiss(t);
+              toast.promise(
+                new Promise((resolve, reject) => {
+                  handleSaveAll()
+                    .then(resolve)
+                    .catch(reject);
+                }),
+                {
+                  loading: "Guardando cambios...",
+                  success: "Cambios guardados correctamente",
+                  error: "Error al guardar los cambios",
+                }
+              );
+            }}
+            className="btn-success hover:bg-green-600"
+          >
+            Confirmar
+          </SaveButton>
+        </div>
+      </div>
+    ), {
       duration: Infinity,
       position: "top-center",
-      onAutoClose: () => setConfirming(false), // por si se cierra solo
+      onDismiss: () => setConfirming(false),
+      onAutoClose: () => setConfirming(false),
     });
   };
 
