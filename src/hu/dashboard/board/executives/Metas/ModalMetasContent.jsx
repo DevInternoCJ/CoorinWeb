@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 // import { Input, Label } from 'preline'
 import JerarquiaConR from "../../branchs/JerarquiaConR.jsx";
 import { Toaster, toast } from "sonner";
-import InputNumber from '../../../../../components/InputNumber/InputNumber.jsx';
+
 import { obetenerTablaMetas, actualizarMetas, obetenerJerarquiaEncargados } from "../../../../../services/mark/albaz/LokiServices.js";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 
@@ -25,61 +25,20 @@ const injectHideNumberArrowsStyles = () => {
     }
 };
 
-// Funciones para formateo de moneda
-const formatCurrency = (value) => {
-    if (!value || value === '') return '';
-    
-    // Remover todo excepto números y punto decimal
-    const cleanValue = value.toString().replace(/[^\d.]/g, '');
-    
-    // Si no hay números después de limpiar, retornar vacío
-    if (!cleanValue || cleanValue === '' || cleanValue === '.') return '';
-    
-    // Validar que no tenga más de un punto decimal
-    const parts = cleanValue.split('.');
-    if (parts.length > 2) return formatCurrency(parts[0] + '.' + parts[1]);
-    
-    let numberPart = parts[0];
-    let decimalPart = parts[1];
-    
-    // Si la parte entera está vacía pero hay decimales, agregar 0
-    if (!numberPart && decimalPart !== undefined) {
-        numberPart = '0';
-    }
-    
-    // Si no hay parte entera y no hay decimales, retornar vacío
-    if (!numberPart) return '';
-    
-    // Limitar a 9 dígitos enteros máximo (999,999,999)
-    if (numberPart && numberPart.length > 9) {
-        numberPart = numberPart.substring(0, 9);
-    }
-    
-    // Limitar a 2 decimales
-    if (decimalPart && decimalPart.length > 2) {
-        decimalPart = decimalPart.substring(0, 2);
-    }
-    
-    // Formatear la parte entera con separadores de miles
-    const formattedNumber = numberPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    
-    // Construir el valor final
-    let result = '$' + formattedNumber;
-    if (decimalPart !== undefined) {
-        result += '.' + decimalPart;
-    }
-    
-    return result;
-};
+// SVG de advertencia reutilizable
+const WarningIcon = (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" className="text-yellow-500 mr-1 cursor-pointer"><path fill="currentColor" d="M10.01 21.01c0 1.1.89 1.99 1.99 1.99s1.99-.89 1.99-1.99zM12 6c2.76 0 5 2.24 5 5v7H7v-7c0-2.76 2.24-5 5-5m0-4.5c-.83 0-1.5.67-1.5 1.5v1.17C7.36 4.85 5 7.65 5 11v6l-2 2v1h18v-1l-2-2v-6c0-3.35-2.36-6.15-5.5-6.83V3c0-.83-.67-1.5-1.5-1.5M11 8h2v4h-2zm0 6h2v2h-2z"/></svg>
+);
+
 
 // Función específica para formatear moneda en la tabla (siempre 2 decimales)
 const formatCurrencyForDisplay = (value) => {
     if (!value || value === '') return '$0.00';
-    
+
     // Convertir a número y asegurar 2 decimales
     const numValue = parseFloat(value);
     if (isNaN(numValue)) return '$0.00';
-    
+
     // Formatear con 2 decimales y separadores de miles
     return '$' + numValue.toLocaleString('en-US', {
         minimumFractionDigits: 2,
@@ -89,23 +48,23 @@ const formatCurrencyForDisplay = (value) => {
 
 const parseCurrencyToNumber = (formattedValue) => {
     if (!formattedValue || formattedValue === '') return '';
-    
+
     // Asegurar que sea una cadena
     const stringValue = formattedValue.toString();
-    
+
     // Remover $ y comas, mantener solo números y punto decimal
     const cleanValue = stringValue.replace(/[$,]/g, '');
-    
+
     return cleanValue;
 };
 
 const validateCurrencyInput = (value) => {
     // Permitir vacío
     if (value === '') return true;
-    
+
     // Remover formato para validar
     const cleanValue = parseCurrencyToNumber(value);
-    
+
     // Validar formato: máximo 9 enteros y 2 decimales
     const regex = /^\d{0,9}(\.\d{0,2})?$/;
     return regex.test(cleanValue) && parseFloat(cleanValue) >= 0;
@@ -113,6 +72,7 @@ const validateCurrencyInput = (value) => {
 
 
 const ModalMetasContent = () => {
+    const lastCrossField = React.useRef(null);
     const [tablaMetas, setTablaMetas] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -141,138 +101,274 @@ const ModalMetasContent = () => {
         horaEntrada: '',
         horaSalida: ''
     });
-    // Estado para errores de validación por campo
-    const [inputErrors, setInputErrors] = useState({});
+    
+    // Estado centralizado de validación por campo
+    // Estructura: { [campo]: { error: string|false, warning: string|false, showIcon: bool, toastShown: bool } }
+    const [validationState, setValidationState] = useState({
+    cuentas: { error: false, warning: false, showIcon: false, toastShown: false, requiredError: false },
+    titulares: { error: false, warning: false, showIcon: false, toastShown: false, requiredError: false },
+    negociaciones: { error: false, warning: false, showIcon: false, toastShown: false, requiredError: false },
+    cumplimientos: { error: false, warning: false, showIcon: false, toastShown: false, requiredError: false },
+    montoCumplido: { error: false, warning: false, showIcon: false, toastShown: false, requiredError: false },
+    saldoSolucionado: { error: false, warning: false, showIcon: false, toastShown: false, requiredError: false },
+    segmento: { error: false, warning: false, showIcon: false, toastShown: false, requiredError: false },
+    horaEntrada: { error: false, warning: false, showIcon: false, toastShown: false, requiredError: false },
+    horaSalida: { error: false, warning: false, showIcon: false, toastShown: false, requiredError: false }
+    });
 
-    // Validadores por campo: muestran toasts (sonner) y devuelven true si hay error
-    const validateField = (field, value) => {
-        switch (field) {
-            case 'cuentas': {
-                if (value === '' || value === null) {
-                    toast.warning('El campo Cuentas es requerido');
-                    return true;
-                }
-                if (!/^\d+$/.test(String(value))) {
-                    toast.warning('Cuentas: debe ser un número entero');
-                    return true;
-                }
-                return false;
+    // Función para actualizar el estado de validación de un campo
+    const updateValidation = (field, changes) => {
+        setValidationState(prev => ({
+            ...prev,
+            [field]: { ...prev[field], ...changes }
+        }));
+    };
+
+
+
+
+    // Función centralizada de validación y feedback visual
+    // Actualiza validationState, muestra toasts y activa iconos según reglas
+    const validateAndSetField = (field, value, allValues = inputValues, showToast = true) => {
+    // --- Validación cruzada Titulares vs Cuentas (bidireccional y limpieza de error) ---
+    if (field === 'titulares' || field === 'cuentas') {
+        const titularesNum = Number(field === 'titulares' ? value : allValues.titulares) || 0;
+        const cuentasNum = Number(field === 'cuentas' ? value : allValues.cuentas) || 0;
+        if (titularesNum > 0 && cuentasNum > 0 && titularesNum >= cuentasNum) {
+            if (field === 'titulares') {
+                error = 'Los contactos con titulares deben ser menor a las cuentas tocadas';
+                showIcon = true;
+                // Reflejar error en cuentas también
+                updateValidation('cuentas', { error: 'Las cuentas tocadas deben ser mayor a los titulares', showIcon: true });
+            } else if (field === 'cuentas') {
+                error = 'Las cuentas tocadas deben ser mayor a los titulares';
+                showIcon = true;
+                updateValidation('titulares', { error: 'Los contactos con titulares deben ser menor a las cuentas tocadas', showIcon: true });
             }
+        } else {
+            // Limpiar error cruzado si ya no aplica
+            updateValidation('titulares', { error: false, showIcon: false });
+            updateValidation('cuentas', { error: false, showIcon: false });
+        }
+    }
+    // --- Validación cruzada Cumplimientos vs Negociaciones (bidireccional y limpieza de error) ---
+    if (field === 'cumplimientos' || field === 'negociaciones') {
+        const cumplimientosNum = Number(field === 'cumplimientos' ? value : allValues.cumplimientos) || 0;
+        const negociacionesNum = Number(field === 'negociaciones' ? value : allValues.negociaciones) || 0;
+        if (cumplimientosNum > 0 && negociacionesNum > 0 && cumplimientosNum > negociacionesNum) {
+            if (field === 'cumplimientos') {
+                error = 'Los cumplimientos deben ser menor o igual a las negociaciones';
+                showIcon = true;
+                updateValidation('negociaciones', { error: 'Las negociaciones deben ser mayor o igual a los cumplimientos', showIcon: true });
+            } else if (field === 'negociaciones') {
+                error = 'Las negociaciones deben ser mayor o igual a los cumplimientos';
+                showIcon = true;
+                updateValidation('cumplimientos', { error: 'Los cumplimientos deben ser menor o igual a las negociaciones', showIcon: true });
+            }
+        } else {
+            updateValidation('cumplimientos', { error: false, showIcon: false });
+            updateValidation('negociaciones', { error: false, showIcon: false });
+        }
+    }
+    let error = false;
+    let showIcon = false;
+    let requiredError = false;
+
+    // Validaciones cruzadas para montoCumplido y saldoSolucionado
+    if (field === 'montoCumplido' || field === 'saldoSolucionado') {
+        const monto = Number(parseCurrencyToNumber(field === 'montoCumplido' ? value : allValues.montoCumplido)) || 0;
+        const saldo = Number(parseCurrencyToNumber(field === 'saldoSolucionado' ? value : allValues.saldoSolucionado)) || 0;
+        if (monto > 0 && saldo > 0 && monto >= saldo) {
+            if (field === 'montoCumplido') {
+                error = 'El Monto Cumplido debe ser menor al Saldo Solucionado';
+                showIcon = true;
+            } else if (field === 'saldoSolucionado') {
+                error = 'El Saldo Solucionado debe ser mayor al Monto Cumplido';
+                showIcon = true;
+            }
+        }
+    }
+        // Reglas por campo
+        switch (field) {
+            case 'cuentas':
+                if (value === '' || value === null) {
+                    error = 'El campo Cuentas es requerido';
+                    requiredError = true;
+                } else if (!/^\d+$/.test(String(value))) {
+                    error = 'Cuentas: debe ser un número entero';
+                    showIcon = true;
+                }
+                // Validación cruzada: si titulares ya tiene valor, forzar validación en titulares solo si no venimos de titulares
+                if (allValues.titulares !== undefined && allValues.titulares !== '' && lastCrossField.current !== 'titulares') {
+                    lastCrossField.current = 'cuentas';
+                    setTimeout(() => {
+                        validateAndSetField('titulares', allValues.titulares, { ...allValues, cuentas: value }, false);
+                        lastCrossField.current = null;
+                    }, 0);
+                }
+                break;
             case 'titulares': {
                 if (value === '' || value === null) {
-                    toast.warning('El campo Titulares es requerido');
-                    return true;
+                    error = 'El campo Titulares es requerido';
+                    requiredError = true;
+                } else if (!/^\d+$/.test(String(value))) {
+                    error = 'Titulares: debe ser un número entero';
+                    showIcon = true;
                 }
-                if (!/^\d+$/.test(String(value))) {
-                    toast.warning('Titulares: debe ser un número entero');
-                    return true;
+                // Validación cruzada: si cuentas ya tiene valor, forzar validación en cuentas solo si no venimos de cuentas
+                if (allValues.cuentas !== undefined && allValues.cuentas !== '' && lastCrossField.current !== 'cuentas') {
+                    lastCrossField.current = 'titulares';
+                    setTimeout(() => {
+                        validateAndSetField('cuentas', allValues.cuentas, { ...allValues, titulares: value }, false);
+                        lastCrossField.current = null;
+                    }, 0);
                 }
-                return false;
+                break;
             }
             case 'negociaciones': {
                 if (value === '' || value === null) {
-                    toast.warning('El campo Negociaciones es requerido');
-                    return true;
+                    error = 'El campo Negociaciones es requerido';
+                    requiredError = true;
+                } else {
+                    const n = Number(value);
+                    if (!Number.isInteger(n) || n < 0 || n > 255) {
+                        error = 'Negociaciones: debe estar entre 0 y 255';
+                        showIcon = true;
+                    }
                 }
-                const n = Number(value);
-                if (!Number.isInteger(n) || n < 0 || n > 255) {
-                    toast.warning('Negociaciones: debe estar entre 0 y 255');
-                    return true;
+                // Validación cruzada: si cumplimientos ya tiene valor, forzar validación en cumplimientos solo si no venimos de cumplimientos
+                if (allValues.cumplimientos !== undefined && allValues.cumplimientos !== '' && lastCrossField.current !== 'cumplimientos') {
+                    lastCrossField.current = 'negociaciones';
+                    setTimeout(() => {
+                        validateAndSetField('cumplimientos', allValues.cumplimientos, { ...allValues, negociaciones: value }, false);
+                        lastCrossField.current = null;
+                    }, 0);
                 }
-                return false;
+                break;
             }
             case 'cumplimientos': {
                 if (value === '' || value === null) {
-                    toast.warning('El campo Cumplimientos es requerido');
-                    return true;
+                    error = 'El campo Cumplimientos es requerido';
+                    requiredError = true;
+                } else {
+                    const n = Number(value);
+                    if (!Number.isInteger(n) || n < 0 || n > 255) {
+                        error = 'Cumplimientos: debe estar entre 0 y 255';
+                        showIcon = true;
+                    }
                 }
-                const n = Number(value);
-                if (!Number.isInteger(n) || n < 0 || n > 255) {
-                    toast.warning('Cumplimientos: debe estar entre 0 y 255');
-                    return true;
+                // Validación cruzada: si negociaciones ya tiene valor, forzar validación en negociaciones solo si no venimos de negociaciones
+                if (allValues.negociaciones !== undefined && allValues.negociaciones !== '' && lastCrossField.current !== 'negociaciones') {
+                    lastCrossField.current = 'cumplimientos';
+                    setTimeout(() => {
+                        validateAndSetField('negociaciones', allValues.negociaciones, { ...allValues, cumplimientos: value }, false);
+                        lastCrossField.current = null;
+                    }, 0);
                 }
-                const neg = Number(inputValues.negociaciones) || 0;
-                if (n > 0 && neg > 0 && n > neg) {
-                    toast.warning('Los cumplimientos deben ser menor o igual a las negociaciones');
-                    return true;
-                }
-                return false;
+                break;
             }
             case 'montoCumplido': {
                 if (value === '' || value === null) {
-                    toast.warning('El campo Monto Cumplido es requerido');
-                    return true;
+                    error = 'El campo Monto Cumplido es requerido';
+                    requiredError = true;
+                } else if (!validateCurrencyInput(value)) {
+                    error = 'Formato de moneda inválido en Monto Cumplido';
+                    showIcon = true;
                 }
-                if (!validateCurrencyInput(value)) {
-                    toast.warning('Formato de moneda inválido en Monto Cumplido');
-                    return true;
+                // Validación cruzada: si saldoSolucionado ya tiene valor, forzar validación en saldoSolucionado solo si no venimos de saldoSolucionado
+                if (allValues.saldoSolucionado !== undefined && allValues.saldoSolucionado !== '' && lastCrossField.current !== 'saldoSolucionado') {
+                    lastCrossField.current = 'montoCumplido';
+                    setTimeout(() => {
+                        validateAndSetField('saldoSolucionado', allValues.saldoSolucionado, { ...allValues, montoCumplido: value }, false);
+                        lastCrossField.current = null;
+                    }, 0);
                 }
-                return false;
+                break;
             }
             case 'saldoSolucionado': {
-                // Ahora saldoSolucionado es opcional (puede ser null/''), solo validar si viene valor
                 if (!value || value === '') {
-                    return false; // no es error
+                    error = false;
+                } else if (!validateCurrencyInput(value)) {
+                    error = 'Formato de moneda inválido en Saldo Solucionado';
+                    showIcon = true;
                 }
-                if (!validateCurrencyInput(value)) {
-                    toast.warning('Formato de moneda inválido en Saldo Solucionado');
-                    return 'Formato de moneda inválido en Saldo Solucionado';
+                // Validación cruzada: si montoCumplido ya tiene valor, forzar validación en montoCumplido solo si no venimos de montoCumplido
+                if (allValues.montoCumplido !== undefined && allValues.montoCumplido !== '' && lastCrossField.current !== 'montoCumplido') {
+                    lastCrossField.current = 'saldoSolucionado';
+                    setTimeout(() => {
+                        validateAndSetField('montoCumplido', allValues.montoCumplido, { ...allValues, saldoSolucionado: value }, false);
+                        lastCrossField.current = null;
+                    }, 0);
                 }
-                const monto = Number(parseCurrencyToNumber(inputValues.montoCumplido)) || 0;
-                const saldo = Number(parseCurrencyToNumber(value)) || 0;
-                if (monto > 0 && saldo > 0 && monto >= saldo) {
-                    toast.warning('El monto cumplido debe ser menor al saldo solucionado');
-                    return 
-                }
-                return false;
+                break;
             }
             case 'horaEntrada': {
                 if (value === '' || value === null) {
-                    toast.warning('El campo H. Entrada es requerido');
-                    return true;
+                    error = 'El campo H. Entrada es requerido';
+                    requiredError = true;
+                } else {
+                    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/;
+                    if (!timeRegex.test(String(value))) {
+                        error = 'Formato de hora inválido en H. Entrada';
+                        showIcon = true;
+                    } else {
+                        const [hh] = value.split(':').map(Number);
+                        if (hh < 7 || hh > 15) {
+                            error = 'El horario de entrada debe de ser entre las 7 y 15 horas.';
+                            showIcon = true;
+                        }
+                    }
                 }
-                // Validar formato HH:MM:SS (24h) o HH:MM
-                const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/;
-                if (!timeRegex.test(String(value))) {
-                    toast.warning('Formato de hora inválido en H. Entrada');
-                    return true;
-                }
-                // Extraer hh y mm
-                const [hh] = value.split(':').map(Number);
-                // Validar rango horario permitido: entre 07:00:00 y 15:59:59
-                if (hh < 7 || hh > 15) {
-                    toast.warning('El horario de entrada debe de ser entre las 7 y 15 horas.');
-                    return true;
-                }
-                return false;
+                break;
             }
             case 'horaSalida': {
                 if (value === '' || value === null) {
-                    toast.warning('El campo H. Salida es requerido');
-                    return true;
+                    error = 'El campo H. Salida es requerido';
+                    requiredError = true;
+                } else {
+                    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/;
+                    if (!timeRegex.test(String(value))) {
+                        error = 'Formato de hora inválido en H. Salida';
+                        showIcon = true;
+                    } else {
+                        // Validar rango de hora de salida entre 07:00 y 22:00
+                        const [hhSalida, mmSalida] = value.split(':').map(Number);
+                        if (hhSalida < 7 || hhSalida > 22) {
+                            error = 'El horario de salida debe ser entre las 07:00 y 22:00 horas.';
+                            showIcon = true;
+                        } else if (allValues.horaEntrada && /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/.test(allValues.horaEntrada)) {
+                            // Validar diferencia máxima de 10 horas entre entrada y salida
+                            const [hhEntrada, mmEntrada] = allValues.horaEntrada.split(':').map(Number);
+                            let diff = (hhSalida * 60 + (mmSalida || 0)) - (hhEntrada * 60 + (mmEntrada || 0));
+                            if (diff >= 600) { // 600 minutos = 10 horas
+                                error = 'Debe haber menos de 10 horas entre la entrada y la salida.';
+                                showIcon = true;
+                            }
+                        }
+                    }
                 }
-                const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-                if (!timeRegex.test(String(value))) {
-                    toast.warning('Formato de hora inválido en H. Salida');
-                    return true;
-                }
-                return false;
+                break;
             }
             default:
-                return false;
+                break;
         }
+        // Feedback visual y toast
+        if (error && showToast) {
+            toast.warning(error);
+        }
+    updateValidation(field, { error, showIcon, requiredError });
+        return !error;
     };
 
-    const validateAllRequired = () => {
-        // saldoSolucionado es opcional, no lo incluimos en required
+    // Validar todos los campos requeridos y actualizar el estado centralizado
+    const validateAllFields = (values = inputValues) => {
         const fields = ['cuentas', 'titulares', 'negociaciones', 'cumplimientos', 'montoCumplido', 'horaEntrada', 'horaSalida'];
-        const errors = {};
-        for (const f of fields) {
-            const hasError = validateField(f, inputValues[f]);
-            if (hasError) errors[f] = true;
-        }
-        setInputErrors(errors);
-        return Object.keys(errors).length === 0;
+        let allValid = true;
+        fields.forEach(f => {
+            const valid = validateAndSetField(f, values[f], values, false);
+            if (!valid) allValid = false;
+        });
+        return allValid;
     };
 
 
@@ -308,7 +404,7 @@ const ModalMetasContent = () => {
                 }
                 setExecutiveTree(tree);
             } catch (e) {
-                setErrorJerarquia('Error al obtener la jerarquía de ejecutivos',e);
+                setErrorJerarquia('Error al obtener la jerarquía de ejecutivos', e);
                 setExecutiveTree([]);
             } finally {
                 setLoadingJerarquia(false);
@@ -350,7 +446,7 @@ const ModalMetasContent = () => {
         };
         if (rootNode) {
             // ids subordinados directos
-                if (Array.isArray(rootNode.subordinados) && rootNode.subordinados.length > 0) {
+            if (Array.isArray(rootNode.subordinados) && rootNode.subordinados.length > 0) {
                 const idsSubordinados = rootNode.subordinados.map(sub => Number(sub.idEjecutivo)).filter(id => Number.isInteger(id) && id > 0);
                 setSelectedExecutives(idsSubordinados);
                 setSelectedExecutiveNode(idEjecutivo); // Iluminar solo el nodo raíz al inicio
@@ -427,35 +523,6 @@ const ModalMetasContent = () => {
             console.log('No se enviaron ids válidos a obetenerTablaMetas. selectedExecutives:', selectedExecutives);
         }
 
-        // // Lógica para ocultar la info de un subordinado directo o de un subordinado de un subordinado directo ("nieto") sin subordinados, solo cuando se selecciona uno a uno
-        // // Caso: solo hay un id seleccionado y ese nodo es subordinado directo o nieto directo y no tiene subordinados
-        // let debeOcultar = false;
-        // if (selectedExecutives.length === 1 && executiveTree.length > 0) {
-        //     const userData = JSON.parse(localStorage.getItem('userData'));
-        //     const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
-        //     const rootNode = executiveTree.find(n => n.idEjecutivo === Number(idEjecutivoSesion));
-        //     if (rootNode && Array.isArray(rootNode.subordinados)) {
-        //         // 1. Buscar si el seleccionado es subordinado directo de la raíz
-        //         const sub = rootNode.subordinados.find(s => s.idEjecutivo === Number(selectedExecutives[0]));
-        //         if (sub && (!Array.isArray(sub.subordinados) || sub.subordinados.length === 0)) {
-        //             debeOcultar = true;
-        //         }
-        //         // 2. Buscar si el seleccionado es subordinado de un subordinado directo (nieto)
-        //         if (!debeOcultar) {
-        //             for (const subDir of rootNode.subordinados) {
-        //                 if (Array.isArray(subDir.subordinados)) {
-        //                     const nieto = subDir.subordinados.find(n => n.idEjecutivo === Number(selectedExecutives[0]));
-        //                     if (nieto && (!Array.isArray(nieto.subordinados) || nieto.subordinados.length === 0)) {
-        //                         debeOcultar = true;
-        //                         break;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-        // if (!validIds.length || debeOcultar) {
-        // Usar idsToSend calculados (puede ser allHierarchyIds cuando aplica)
         if (!idsToSend.length) {
             setTablaMetas([]);
             return;
@@ -508,48 +575,24 @@ const ModalMetasContent = () => {
 
     // Handler para el botón Guardar
     const handleGuardar = async () => {
-        // Validar campos requeridos visualmente
-        if (!validateAllRequired()) {
-            toast.error('Corrija los campos marcados en rojo');
+        // Validar todos los campos requeridos visualmente y feedback
+        if (!validateAllFields()) {
+            toast.warning('Corrija los campos marcados en Amarillo');
             return;
         }
         // Validar tipos de datos TinyInt (0-255) para Negociaciones y Cumplimientos
         const negociaciones = Number(inputValues.negociaciones) || 0;
         const cumplimientos = Number(inputValues.cumplimientos) || 0;
-        
+
         if (negociaciones < 0 || negociaciones > 255) {
             toast.warning('Las negociaciones deben estar entre 0 y 255');
             return;
         }
-        
-        if (cumplimientos < 0 || cumplimientos > 255) {
-            toast.warning('Los cumplimientos deben estar entre 0 y 255');
-            return;
-        }
-        
-        // Validar relación: Los cumplimientos deben ser menor o igual a las negociaciones
-        if (cumplimientos > 0 && negociaciones > 0 && cumplimientos > negociaciones) {
-            toast.warning('Los cumplimientos deben ser menor o igual a las negociaciones');
-            return;
-        }
 
-        // Validar relación: Las negociaciones deben ser menor a los contactos con titulares
-        const titularesNumEdit = Number(inputValues.titulares) || 0;
-        if (negociaciones > 0 && titularesNumEdit > 0 && negociaciones >= titularesNumEdit) {
-            toast.warning('Las negociaciones deben ser menor a los contactos con titulares');
-            return;
-        }
-        
-    // Validar regla de negocio: Monto Cumplido debe ser menor al Saldo Solucionado
+        // Validar regla de negocio: Monto Cumplido debe ser menor al Saldo Solucionado
         const montoCumplido = Number(parseCurrencyToNumber(inputValues.montoCumplido)) || 0;
         const saldoSolucionado = Number(parseCurrencyToNumber(inputValues.saldoSolucionado)) || 0;
-        
-        if (montoCumplido > 0 && saldoSolucionado > 0 && montoCumplido >= saldoSolucionado) {
-            const msg = 'El monto cumplido debe ser menor al saldo solucionado';
-            // Only show toast; do not set field-level inputErrors here.
-            toast.error(msg);
-            return;
-        }
+
 
         // Alta de metas para todos los ejecutivos seleccionados (inputs de arriba)
         if (selectedExecutives.length > 0 && selectedRows.length === 0) {
@@ -572,8 +615,8 @@ const ModalMetasContent = () => {
                         montoCumplido,
                         saldoSolucionado,
                         segmento: inputValues.segmento || null,
-                            horaEntrada: inputValues.horaEntrada ? (inputValues.horaEntrada.length === 5 ? inputValues.horaEntrada + ':00' : inputValues.horaEntrada) : '',
-                            horaSalida: inputValues.horaSalida ? (inputValues.horaSalida.length === 5 ? inputValues.horaSalida + ':00' : inputValues.horaSalida) : '',
+                        horaEntrada: inputValues.horaEntrada ? (inputValues.horaEntrada.length === 5 ? inputValues.horaEntrada + ':00' : inputValues.horaEntrada) : '',
+                        horaSalida: inputValues.horaSalida ? (inputValues.horaSalida.length === 5 ? inputValues.horaSalida + ':00' : inputValues.horaSalida) : '',
                         nuevo: nuevoValor
                     };
                     await actualizarMetas(payload);
@@ -597,39 +640,36 @@ const ModalMetasContent = () => {
         }
         // Edición múltiple de filas seleccionadas en la tabla
         if (selectedRows.length === 0) return;
-        
+
         // Validar nuevamente para el caso de actualización de filas
         if (negociaciones < 0 || negociaciones > 255) {
+            showValidationWarningSVG('negociaciones', 'Las negociaciones deben estar entre 0 y 255');
             toast.warning('Las negociaciones deben estar entre 0 y 255');
             return;
         }
-        
-        if (cumplimientos < 0 || cumplimientos > 255) {
-            toast.warning('Los cumplimientos deben estar entre 0 y 255');
-            return;
-        }
-        
-        // Validar relación: Los cumplimientos deben ser menor o igual a las negociaciones
-        if (cumplimientos > 0 && negociaciones > 0 && cumplimientos > negociaciones) {
-            toast.warning('Los cumplimientos deben ser menor o igual a las negociaciones');
-            return;
-        }
 
-        // Validar relación: Los contactos con titulares deben ser menor a las cuentas tocadas
-        const titularesNum_forEdit = Number(inputValues.titulares) || 0;
-        const cuentasNum_forEdit = Number(inputValues.cuentas) || 0;
-        if (titularesNum_forEdit > 0 && cuentasNum_forEdit > 0 && titularesNum_forEdit >= cuentasNum_forEdit) {
-            toast.warning('Los contactos con titulares deben ser menor a las cuentas tocadas');
-            return;
-        }
 
-        if (montoCumplido > 0 && saldoSolucionado > 0 && montoCumplido >= saldoSolucionado) {
-            const msg = 'El monto cumplido debe ser menor al saldo solucionado';
-            // Only show toast; do not set field-level inputErrors here.
-            toast.warning(msg);
-            return;
-        }
-        
+
+    // Función para mostrar el SVG de advertencia en el campo de validación
+    const showValidationWarningSVG = (field, message) => {
+        setValidationState(prev => ({
+            ...prev,
+            [field]: {
+                ...prev[field],
+                error: message,
+                showIcon: true,
+                warningSVG: (
+                    <span className="relative group">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="text-yellow-500 mr-1 cursor-pointer"><path fill="currentColor" d="M10.01 21.01c0 1.1.89 1.99 1.99 1.99s1.99-.89 1.99-1.99zM12 6c2.76 0 5 2.24 5 5v7H7v-7c0-2.76 2.24-5 5-5m0-4.5c-.83 0-1.5.67-1.5 1.5v1.17C7.36 4.85 5 7.65 5 11v6l-2 2v1h18v-1l-2-2v-6c0-3.35-2.36-6.15-5.5-6.83V3c0-.83-.67-1.5-1.5-1.5M11 8h2v4h-2zm0 6h2v2h-2z"/></svg>
+                        <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300">
+                            {message}
+                        </span>
+                    </span>
+                )
+            }
+        }));
+    };
+
         try {
             for (const rowKey of selectedRows) {
                 const row = tablaMetas.find((r, i) => (r.id || r.usuario || i) === rowKey);
@@ -673,14 +713,9 @@ const ModalMetasContent = () => {
     };
 
     return (
-  <div className="metas-responsive-blocks h-full w-full" style={{ maxHeight: '90vh', overflow: 'hidden', display: 'flex', gap: '1rem' }}>
-        {/* Bloque 1: Logo + Jerarquía */}
-        <div className="metas-block metas-block-1" style={{ width: 'clamp(180px,22vw,320px)', minWidth: '160px', maxWidth: '28vw', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-            {/* Logo */}
-                {/* Logo */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2vh 0 1vh 0' }}>
-                    <img src={ConsorcioLogo} alt="Consorcio Jurídico" style={{ width: 'clamp(40px,7vw,90px)', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 0.3vh 1.2vh #bdbdbd)' }} />
-                </div>
+        <div className="metas-responsive-blocks h-full w-full" style={{ maxHeight: '90vh', overflow: 'hidden', display: 'flex', gap: '1rem' }}>
+            {/* Bloque 1: Logo + Jerarquía */}
+            <div className="metas-block metas-block-1" style={{ width: 'clamp(180px,22vw,320px)', minWidth: '160px', maxWidth: '28vw', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
                 {/* Jerarquía */}
                 <JerarquiaConR
                     executiveTree={executiveTree}
@@ -694,417 +729,359 @@ const ModalMetasContent = () => {
                 />
             </div>
 
-        {/* Bloque 2: Inputs */}
-        <div className="metas-block metas-block-2 flex-1 flex flex-col gap-3 min-w-0 w-full">
-                {/* Fila de inputs */}
-                <div className="bg-white rounded-lg p-2 sm:p-3 shadow border border-[var(--color-jerarquia1)] w-full" style={{overflowX: 'auto'}}>
-                    <div style={{ display: 'flex', flexDirection: 'row', gap: '2vw', minWidth: 'min(900px,100vw)', width: '100%' }}>
-                        {/* Cuentas */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '48px', width: 'clamp(48px,7vw,90px)' }}>
-                            <label>Cuentas</label>
-                            <div className="relative">
-                                <InputNumber
-                                    value={inputValues.cuentas}
-                                    onChange={(v) => {
-                                        setInputValues(prev => ({ ...prev, cuentas: v }));
-                                        // Clear error when corrected
-                                        if (inputErrors.cuentas) {
-                                            const hasError = validateField('cuentas', v);
-                                            if (!hasError) setInputErrors(prev => { const n = { ...prev }; delete n.cuentas; return n; });
-                                        }
-                                        // UX validation: titulares must be less than cuentas
-                                        const titularesNum_local = Number(inputValues.titulares) || 0;
-                                        const cuentasNum_local = Number(v) || 0;
-                                        if (titularesNum_local > 0 && cuentasNum_local > 0 && titularesNum_local >= cuentasNum_local) {
-                                            toast.warning('Los contactos con titulares deben ser menor a las cuentas tocadas');
-                                        }
-                                    }}
-                                    min={0}
-                                    step={1}
-                                    showButtons={false}
-                                    error={inputErrors.cuentas}
-                                    className="w-full"
-                                    id="input-cuentas"
-                                    onBlur={() => {
-                                        const msg = validateField('cuentas', inputValues.cuentas);
-                                        setInputErrors(prev => ({ ...prev, cuentas: msg }));
-                                    }}
-                                />
-                            </div>
-                            {/* inline error message removed: toasts + icon handle feedback */}
-                        </div>
-                        {/* Titulares */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '48px', width: 'clamp(48px,7vw,90px)' }}>
-                            <label>Titulares</label>
-                            <div className="relative">
-                                <InputNumber
-                                    value={inputValues.titulares}
-                                    onChange={(v) => {
-                                        setInputValues(prev => ({ ...prev, titulares: v }));
-                                        if (inputErrors.titulares) {
-                                            const hasError = validateField('titulares', v);
-                                            if (!hasError) setInputErrors(prev => { const n = { ...prev }; delete n.titulares; return n; });
-                                        }
-                                        // Validación UX: las negociaciones deben ser menor a los contactos con titulares
-                                        const negociacionesNum = Number(inputValues.negociaciones) || 0;
-                                        const titularesNum = Number(v) || 0;
-                                        if (negociacionesNum > 0 && titularesNum > 0 && negociacionesNum >= titularesNum) {
-                                            toast.warning('Las negociaciones deben ser menor a los contactos con titulares');
-                                        }
-                                    }}
-                                    min={0}
-                                    step={1}
-                                    showButtons={false}
-                                    error={inputErrors.titulares}
-                                    className="w-full"
-                                    id="input-titulares"
-                                    onBlur={() => {
-                                        const msg = validateField('titulares', inputValues.titulares);
-                                        setInputErrors(prev => ({ ...prev, titulares: msg }));
-                                    }}
-                                />
-                            </div>
-                            {/* inline error message removed: toasts + icon handle feedback */}
-                        </div>
-
-                        {/* Negociaciones */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '56px', width: 'clamp(56px,8vw,110px)' }}>
-                            <label>Negocians</label>
-                            <div className="relative">
-                                <InputNumber
-                                    value={inputValues.negociaciones}
-                                    onChange={(v) => {
-                                        setInputValues(prev => ({ ...prev, negociaciones: v }));
-                                        const numValue = Number(v) || 0;
-                                        const cumplimientos = Number(inputValues.cumplimientos) || 0;
-                                        if (numValue > 0 && cumplimientos > 0 && cumplimientos > numValue) {
-                                            toast.warning('Los cumplimientos deben ser menor o igual a las negociaciones');
-                                        }
-                                        // Validación UX: las negociaciones deben ser menor a los contactos con titulares
-                                        const titularesNum = Number(inputValues.titulares) || 0;
-                                        if (numValue > 0 && titularesNum > 0 && numValue >= titularesNum) {
-                                            toast.warning('Las negociaciones deben ser menor a los contactos con titulares');
-                                        }
-                                        if (numValue > 255) {
-                                            toast.warning('Las negociaciones deben estar entre 0 y 255');
-                                        }
-                                        if (inputErrors.negociaciones) {
-                                            const hasError = validateField('negociaciones', v);
-                                            if (!hasError) setInputErrors(prev => { const n = { ...prev }; delete n.negociaciones; return n; });
-                                        }
-                                    }}
-                                    min={0}
-                                    max={255}
-                                    step={1}
-                                    showButtons={false}
-                                    error={inputErrors.negociaciones}
-                                    id="input-negociaciones"
-                                    onBlur={() => {
-                                        const msg = validateField('negociaciones', inputValues.negociaciones);
-                                        setInputErrors(prev => ({ ...prev, negociaciones: msg }));
-                                    }}
-                                />
-                            </div>
-                            {/* inline error message removed: toasts + icon handle feedback */}
-                        </div>
-
-                        {/* Cumplimientos */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '56px', width: 'clamp(56px,8vw,110px)' }}>
-                            <label>Cmplmtos</label>
-                            <div className="relative">
-                                <InputNumber
-                                    value={inputValues.cumplimientos}
-                                    onChange={(v) => {
-                                        setInputValues(prev => ({ ...prev, cumplimientos: v }));
-                                        const numValue = Number(v) || 0;
-                                        const negociaciones = Number(inputValues.negociaciones) || 0;
-                                        if (numValue > 0 && negociaciones > 0 && numValue > negociaciones) {
-                                            toast.warning('Los cumplimientos deben ser menor o igual a las negociaciones');
-                                        }
-                                        if (numValue > 255) {
-                                            toast.warning('Los cumplimientos deben estar entre 0 y 255');
-                                        }
-                                        if (inputErrors.cumplimientos) {
-                                            const hasError = validateField('cumplimientos', v);
-                                            if (!hasError) setInputErrors(prev => { const n = { ...prev }; delete n.cumplimientos; return n; });
-                                        }
-                                    }}
-                                    min={0}
-                                    max={255}
-                                    step={1}
-                                    showButtons={false}
-                                    error={inputErrors.cumplimientos}
-                                    id="input-cumplimientos"
-                                    onBlur={() => {
-                                        const msg = validateField('cumplimientos', inputValues.cumplimientos);
-                                        setInputErrors(prev => ({ ...prev, cumplimientos: msg }));
-                                    }}
-                                />
-                            </div>
-                            {/* inline error message removed: toasts + icon handle feedback */}
-                        </div>
-
-                        {/* Monto Cumplido */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '80px', width: 'clamp(80px,12vw,160px)' }}>
-                            <label>M. Cumplido</label>
-                            <div className="relative">
-                                {(() => {
-                                    const err = inputErrors.montoCumplido;
-                                    return (
-                                        <>
-                                            <input
-                                                type="text"
-                                                value={inputValues.montoCumplido}
-                                                onChange={e => {
-                                                    const inputValue = e.target.value;
-                                                    // Si está vacío o solo contiene $ , limpiar completamente
-                                                    if (inputValue === '' || inputValue === '$') {
-                                                        setInputValues(v => ({ ...v, montoCumplido: '' }));
-                                                        return;
-                                                    }
-                                                    // Normalizar y truncar la parte entera a 9 dígitos
-                                                    const raw = String(inputValue).replace(/[^0-9.]/g, '');
-                                                    const parts = raw.split('.');
-                                                    let intPart = parts[0] || '';
-                                                    let decPart = parts[1] || '';
-                                                    if (intPart.length > 9) intPart = intPart.substring(0, 9);
-                                                    const rebuilt = decPart ? `${intPart}.${decPart}` : intPart;
-
-                                                    // Validar entrada
-                                                    if (validateCurrencyInput(rebuilt)) {
-                                                        // Formatear automáticamente
-                                                        const formatted = formatCurrency(rebuilt);
-                                                        setInputValues(v => ({ ...v, montoCumplido: formatted }));
-                                                        // clear error if fully valid
-                                                        if (inputErrors.montoCumplido) setInputErrors(prev => { const n = { ...prev }; delete n.montoCumplido; return n; });
-                                                    } else {
-                                                        // if the user typed at least one digit, hide the error icon (UX: immediate feedback)
-                                                        if (/\d/.test(rebuilt)) {
-                                                            if (inputErrors.montoCumplido) setInputErrors(prev => { const n = { ...prev }; delete n.montoCumplido; return n; });
-                                                        }
-                                                        // keep the raw truncated input until it can be formatted on valid pattern
-                                                        setInputValues(v => ({ ...v, montoCumplido: rebuilt }));
-                                                    }
-                                                }}
-                                                onKeyDown={e => {
-                                                    if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
-                                                        e.preventDefault();
-                                                    }
-                                                }}
-                                                onBlur={() => {
-                                                    const msg = validateField('montoCumplido', inputValues.montoCumplido);
-                                                    setInputErrors(prev => ({ ...prev, montoCumplido: msg }));
-                                                }}
-                                                placeholder="$0.00"
-                                                className={`  px-4 p-1 block w-full rounded-lg sm:text-sm ${err ? 'border-red-500 focus:border-red-500 focus:ring-red-500 bg-white' : 'bg-gray-50 border-transparent focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1'}`}
-                                                style={{ color: 'var(--color-jerarquia3)' }}
-                                            />
-                                            {err && (
-                                                <div className="absolute inset-y-0 end-0 flex items-center pointer-events-none pe-3">
-                                                    <svg className="shrink-0 size-4 text-red-500" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <circle cx="12" cy="12" r="10"></circle>
-                                                        <line x1="12" x2="12" y1="8" y2="12"></line>
-                                                        <line x1="12" x2="12.01" y1="16" y2="16"></line>
-                                                    </svg>
+            {/* Bloque 2: Inputs */}
+            <div className="metas-block metas-block-2 flex-1 flex flex-col gap-3 min-w-0 w-full">
+                                {/* Fila de inputs en dos filas */}
+                                <div className="bg-white rounded-lg p-2 sm:p-3 shadow border border-[var(--color-jerarquia1)] w-full" style={{ overflowX: 'auto' }}>
+                                    <div className="flex flex-col gap-2 min-w-[min(900px,100vw)] w-full">
+                                        {/* Primera fila: Cuentas, Titulares, Negociaciones, Cumplimientos, Monto Cumplido */}
+                                        <div className="flex flex-row gap-4 w-full">
+                                            {/* Cuentas */}
+                                            <div className="w-full">
+                                                <div className="relative w-full min-w-0">
+                                                    <input
+                                                        type="text"
+                                                        className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${validationState.cuentas.requiredError ? 'border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2' : 'border-transparent focus:ring-jerarquia1 focus:border-jerarquia1'}`}
+                                                        id="input-cuentas"
+                                                        placeholder=" "
+                                                        style={{ color: 'var(--color-jerarquia3)' }}
+                                                        value={inputValues.cuentas}
+                                                        onChange={e => {
+                                                            let v = e.target.value;
+                                                            v = v.replace(/[^0-9]/g, '');
+                                                            if (v.length > 9) v = v.substring(0, 9);
+                                                            setInputValues(prev => ({ ...prev, cuentas: v }));
+                                                            validateAndSetField('cuentas', v);
+                                                        }}
+                                                        min={0}
+                                                        step={1}
+                                                        onBlur={() => {
+                                                            validateAndSetField('cuentas', inputValues.cuentas);
+                                                        }}
+                                                    />
+                                                    <label
+                                                        htmlFor="input-cuentas"
+                                                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                                    >
+                                                        {/* Mostrar campanita si hay error tipo string y showIcon activo */}
+                                                        {typeof validationState.cuentas.error === 'string' && validationState.cuentas.showIcon && (
+                                                            <span className="relative group">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" className="text-yellow-500 mr-1 cursor-pointer"><path fill="currentColor" d="M10.01 21.01c0 1.1.89 1.99 1.99 1.99s1.99-.89 1.99-1.99zM12 6c2.76 0 5 2.24 5 5v7H7v-7c0-2.76 2.24-5 5-5m0-4.5c-.83 0-1.5.67-1.5 1.5v1.17C7.36 4.85 5 7.65 5 11v6l-2 2v1h18v-1l-2-2v-6c0-3.35-2.36-6.15-5.5-6.83V3c0-.83-.67-1.5-1.5-1.5M11 8h2v4h-2zm0 6h2v2h-2z"/></svg>
+                                                                <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300">
+                                                                    {validationState.cuentas.error}
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                        Cuentas
+                                                    </label>
                                                 </div>
-                                            )}
-                                        </>
-                                    );
-                                })()}
-                            </div>
-                            {inputErrors.montoCumplido && <p className="text-sm text-red-600 mt-2">{inputErrors.montoCumplido}</p>}
-                        </div>
-
-                        {/* Saldo Solucionado */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '80px', width: 'clamp(80px,12vw,160px)' }}>
-                            <label>S. Solunado</label>
-                            <div className="relative">
-                                {(() => {
-                                    const err = inputErrors.saldoSolucionado;
-                                    return (
-                                        <>
-                                            <input
-                                                type="text"
-                                                value={inputValues.saldoSolucionado}
-                                                onChange={e => {
-                                                    const inputValue = e.target.value;
-                                                    // Si está vacío o solo contiene $ , limpiar completamente
-                                                    if (inputValue === '' || inputValue === '$') {
-                                                        setInputValues(v => ({ ...v, saldoSolucionado: '' }));
-                                                        return;
-                                                    }
-                                                    // Normalizar y truncar la parte entera a 9 dígitos
-                                                    const raw = String(inputValue).replace(/[^0-9.]/g, '');
-                                                    const parts = raw.split('.');
-                                                    let intPart = parts[0] || '';
-                                                    let decPart = parts[1] || '';
-                                                    if (intPart.length > 9) intPart = intPart.substring(0, 9);
-                                                    const rebuilt = decPart ? `${intPart}.${decPart}` : intPart;
-
-                                                    // Validar entrada
-                                                    if (validateCurrencyInput(rebuilt)) {
-                                                        // Formatear automáticamente
-                                                        const formatted = formatCurrency(rebuilt);
-                                                        setInputValues(v => ({ ...v, saldoSolucionado: formatted }));
-                                                        // clear error if fully valid
-                                                        if (inputErrors.saldoSolucionado) setInputErrors(prev => { const n = { ...prev }; delete n.saldoSolucionado; return n; });
-                                                    } else {
-                                                        // if the user typed at least one digit, hide the error icon (UX: immediate feedback)
-                                                        if (/\d/.test(rebuilt)) {
-                                                            if (inputErrors.saldoSolucionado) setInputErrors(prev => { const n = { ...prev }; delete n.saldoSolucionado; return n; });
-                                                        }
-                                                        // keep the raw truncated input until it can be formatted on valid pattern
-                                                        setInputValues(v => ({ ...v, saldoSolucionado: rebuilt }));
-                                                    }
-                                                }}
-                                                onKeyDown={e => {
-                                                    if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
-                                                        e.preventDefault();
-                                                    }
-                                                }}
-                                                onBlur={() => {
-                                                    const msg = validateField('saldoSolucionado', inputValues.saldoSolucionado);
-                                                    setInputErrors(prev => ({ ...prev, saldoSolucionado: msg }));
-                                                }}
-                                                placeholder="$0.00"
-                                                className={`  px-4 p-1 block w-full rounded-lg sm:text-sm ${err ? 'border-red-500 focus:border-red-500 focus:ring-red-500 bg-white' : 'bg-gray-50 border-transparent focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1'}`}
-                                                style={{ color: 'var(--color-jerarquia3)' }}
-                                            />
-                                            {err && (
-                                                <div className="flex items-center ml-2 pointer-events-none">
-                                                    <svg className="shrink-0 size-4 text-red-500" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <circle cx="12" cy="12" r="10"></circle>
-                                                        <line x1="12" x2="12" y1="8" y2="12"></line>
-                                                        <line x1="12" x2="12.01" y1="16" y2="16"></line>
-                                                    </svg>
+                                            </div>
+                                            {/* Titulares */}
+                                            <div className="w-full">
+                                                <div className="relative w-full min-w-0">
+                                                    <input
+                                                        type="text"
+                                                        className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${validationState.titulares.requiredError ? 'border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2' : 'border-transparent focus:ring-jerarquia1 focus:border-jerarquia1'}`}
+                                                        id="input-titulares"
+                                                        placeholder=" "
+                                                        style={{ color: 'var(--color-jerarquia3)' }}
+                                                        value={inputValues.titulares}
+                                                        onChange={e => {
+                                                            let v = e.target.value;
+                                                            v = v.replace(/[^0-9]/g, '');
+                                                            if (v.length > 9) v = v.substring(0, 9);
+                                                            setInputValues(prev => ({ ...prev, titulares: v }));
+                                                            validateAndSetField('titulares', v);
+                                                        }}
+                                                        min={0}
+                                                        step={1}
+                                                        onBlur={() => {
+                                                            validateAndSetField('titulares', inputValues.titulares);
+                                                        }}
+                                                    />
+                                                    <label
+                                                        htmlFor="input-titulares"
+                                                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                                    >
+                                                        {typeof validationState.titulares.error === 'string' && validationState.titulares.showIcon && (
+                                                            <span className="relative group">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" className="text-yellow-500 mr-1 cursor-pointer"><path fill="currentColor" d="M10.01 21.01c0 1.1.89 1.99 1.99 1.99s1.99-.89 1.99-1.99zM12 6c2.76 0 5 2.24 5 5v7H7v-7c0-2.76 2.24-5 5-5m0-4.5c-.83 0-1.5.67-1.5 1.5v1.17C7.36 4.85 5 7.65 5 11v6l-2 2v1h18v-1l-2-2v-6c0-3.35-2.36-6.15-5.5-6.83V3c0-.83-.67-1.5-1.5-1.5M11 8h2v4h-2zm0 6h2v2h-2z"/></svg>
+                                                                <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300">
+                                                                    {validationState.titulares.error}
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                        Titulares
+                                                    </label>
                                                 </div>
-                                            )}
-                                        </>
-                                    );
-                                })()}
-                            </div>
-                            {inputErrors.saldoSolucionado && <p className="text-sm text-red-600 mt-2">{inputErrors.saldoSolucionado}</p>}
-                        </div>
-
-                        {/* Segmento */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '56px', width: 'clamp(56px,8vw,110px)' }}>
-                            <label>Segmento</label>
-                            <input
-                                type="text"
-                                value={inputValues.segmento}
-                                onChange={e => setInputValues(v => ({ ...v, segmento: e.target.value }))}
-                                className="peer p-1 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
-                                style={{ color: 'var(--color-jerarquia3)' }}
-                            />
-                        </div>
-
-                        {/* Hora Entrada */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '72px', width: 'clamp(72px,10vw,140px)', position: 'relative' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <label>H. Entrada</label>
-                                {inputErrors.horaEntrada && (
-                                    <svg className="shrink-0 size-4 text-red-500" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <line x1="12" x2="12" y1="8" y2="12"></line>
-                                        <line x1="12" x2="12.01" y1="16" y2="16"></line>
-                                    </svg>
-                                )}
-                            </div>
-                            <div className="relative">
-                                {(() => {
-                                    const err = inputErrors.horaEntrada;
-                                    return (
-                                        <input
-                                            type="time"
-                                            value={inputValues.horaEntrada === null ? '' : inputValues.horaEntrada}
-                                            onChange={e => {
-                                                const val = e.target.value === '' ? null : e.target.value;
-                                                setInputValues(v => ({ ...v, horaEntrada: val }));
-                                                // Clear error when user starts typing a valid pattern
-                                                if (inputErrors.horaEntrada) {
-                                                    const timeRegex = /^([01]\\d|2[0-3]):([0-5]\\d)$/;
-                                                    if (val && timeRegex.test(String(val))) {
-                                                        setInputErrors(prev => { const n = { ...prev }; delete n.horaEntrada; return n; });
-                                                    }
-                                                }
-                                            }}
-                                            onBlur={() => {
-                                                const msg = validateField('horaEntrada', inputValues.horaEntrada);
-                                                setInputErrors(prev => ({ ...prev, horaEntrada: msg }));
-                                            }}
-                                            className={`large-time-input block rounded-lg sm:text-sm transition-all duration-150 pr-2 ${err ? 'border-red-500 focus:border-red-500 focus:ring-red-500 bg-white' : 'bg-gray-50 border-transparent focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1'}`}
-                                            style={{
-                                                backgroundColor: "var(--color-bgcolor2)",
-                                                color: "#111",
-                                                border: "1px solid var(--color-jerarquia1)",
-                                                borderRadius: "0.25rem",
-                                                padding: "0.25rem 0.5rem",
-                                                fontSize: "0.75rem",
-                                                fontWeight: "400",
-                                            }}
-                                        />
-                                    );
-                                })()}
-                            </div>
-                            {inputErrors.horaEntrada && <p className="text-sm text-red-600 mt-2">{inputErrors.horaEntrada}</p>}
-                        </div>
-
-                        {/* Hora Salida */}
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: '72px', width: 'clamp(72px,10vw,140px)', position: 'relative' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <label>H. Salida</label>
-                                {inputErrors.horaSalida && (
-                                    <svg className="shrink-0 size-4 text-red-500" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <line x1="12" x2="12" y1="8" y2="12"></line>
-                                        <line x1="12" x2="12.01" y1="16" y2="16"></line>
-                                    </svg>
-                                )}
-                            </div>
-                            <div className="relative">
-                                {(() => {
-                                    const err = inputErrors.horaSalida;
-                                    return (
-                                        <input
-                                            type="time"
-                                            value={inputValues.horaSalida === null ? '' : inputValues.horaSalida}
-                                            onChange={e => {
-                                                const val = e.target.value === '' ? null : e.target.value;
-                                                setInputValues(v => ({ ...v, horaSalida: val }));
-                                                if (inputErrors.horaSalida) {
-                                                    const timeRegex = /^([01]\\d|2[0-3]):([0-5]\\d)$/;
-                                                    if (val && timeRegex.test(String(val))) {
-                                                        setInputErrors(prev => { const n = { ...prev }; delete n.horaSalida; return n; });
-                                                    }
-                                                }
-                                            }}
-                                            onBlur={() => {
-                                                const msg = validateField('horaSalida', inputValues.horaSalida);
-                                                setInputErrors(prev => ({ ...prev, horaSalida: msg }));
-                                            }}
-                                            className={`large-time-input block rounded-lg sm:text-sm transition-all duration-150 pr-2 ${err ? 'border-red-500 focus:border-red-500 focus:ring-red-500 bg-white' : 'bg-gray-50 border-transparent focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1'}`}
-                                            style={{
-                                                backgroundColor: "var(--color-bgcolor2)",
-                                                color: "#111",
-                                                border: "1px solid var(--color-jerarquia1)",
-                                                borderRadius: "0.25rem",
-                                                padding: "0.25rem 0.5rem",
-                                                fontSize: "0.75rem",
-                                                fontWeight: "400",
-                                            }}
-                                        />
-                                    );
-                                })()}
-                            </div>
-                            {inputErrors.horaSalida && <p className="text-sm text-red-600 mt-2">{inputErrors.horaSalida}</p>}
-                        </div>
-                    </div>
-                </div>
+                                            </div>
+                                            {/* Negociaciones */}
+                                            <div className="w-full">
+                                                <div className="relative w-full min-w-0">
+                                                    <input
+                                                        type="text"
+                                                        className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${validationState.negociaciones.requiredError ? 'border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2' : 'border-transparent focus:ring-jerarquia1 focus:border-jerarquia1'}`}
+                                                        id="input-negociaciones"
+                                                        placeholder=" "
+                                                        style={{ color: 'var(--color-jerarquia3)' }}
+                                                        value={inputValues.negociaciones}
+                                                        onChange={e => {
+                                                            let v = e.target.value;
+                                                            v = v.replace(/[^0-9]/g, '');
+                                                            if (v.length > 9) v = v.substring(0, 9);
+                                                            setInputValues(prev => ({ ...prev, negociaciones: v }));
+                                                            validateAndSetField('negociaciones', v);
+                                                        }}
+                                                        min={0}
+                                                        step={1}
+                                                        onBlur={() => {
+                                                            validateAndSetField('negociaciones', inputValues.negociaciones);
+                                                        }}
+                                                    />
+                                                    <label
+                                                        htmlFor="input-negociaciones"
+                                                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                                    >
+                                                        {typeof validationState.negociaciones.error === 'string' && validationState.negociaciones.showIcon && (
+                                                            <span className="relative group">
+                                                                {WarningIcon}
+                                                                <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300">
+                                                                    {validationState.negociaciones.error}
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                        Negociaciones
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            {/* Cumplimientos */}
+                                            <div className="w-full">
+                                                <div className="relative w-full min-w-0">
+                                                    <input
+                                                        type="text"
+                                                        className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${validationState.cumplimientos.requiredError ? 'border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2' : 'border-transparent focus:ring-jerarquia1 focus:border-jerarquia1'}`}
+                                                        id="input-cumplimientos"
+                                                        placeholder=" "
+                                                        style={{ color: 'var(--color-jerarquia3)' }}
+                                                        value={inputValues.cumplimientos}
+                                                        onChange={e => {
+                                                            let v = e.target.value;
+                                                            v = v.replace(/[^0-9]/g, '');
+                                                            if (v.length > 9) v = v.substring(0, 9);
+                                                            setInputValues(prev => ({ ...prev, cumplimientos: v }));
+                                                            validateAndSetField('cumplimientos', v);
+                                                        }}
+                                                        min={0}
+                                                        step={1}
+                                                        onBlur={() => {
+                                                            validateAndSetField('cumplimientos', inputValues.cumplimientos);
+                                                        }}
+                                                    />
+                                                    <label
+                                                        htmlFor="input-cumplimientos"
+                                                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                                    >
+                                                        {typeof validationState.cumplimientos.error === 'string' && validationState.cumplimientos.showIcon && (
+                                                            <span className="relative group">
+                                                                {WarningIcon}
+                                                                <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300">
+                                                                    {validationState.cumplimientos.error}
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                        Cumplimientos
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            {/* Monto Cumplido */}
+                                            <div className="w-full">
+                                                <div className="relative w-full min-w-0">
+                                                    <input
+                                                        type="text"
+                                                        className={`peer pl-6 pr-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${validationState.montoCumplido.requiredError ? 'border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2' : 'border-transparent focus:ring-jerarquia1 focus:border-jerarquia1'}`}
+                                                        id="input-montoCumplido"
+                                                        placeholder=" "
+                                                        style={{ color: 'var(--color-jerarquia3)' }}
+                                                        value={inputValues.montoCumplido}
+                                                        onChange={e => {
+                                                            let v = e.target.value;
+                                                            v = v.replace(/[^0-9.]/g, '');
+                                                            const parts = v.split('.');
+                                                            let intPart = parts[0] || '';
+                                                            let decPart = parts[1] || '';
+                                                            if (intPart.length > 9) intPart = intPart.substring(0, 9);
+                                                            if (decPart.length > 2) decPart = decPart.substring(0, 2);
+                                                            v = decPart ? `${intPart}.${decPart}` : intPart;
+                                                            setInputValues(prev => ({ ...prev, montoCumplido: v }));
+                                                            validateAndSetField('montoCumplido', v);
+                                                        }}
+                                                        onBlur={() => {
+                                                            validateAndSetField('montoCumplido', inputValues.montoCumplido);
+                                                        }}
+                                                    />
+                                                    <label
+                                                        htmlFor="input-montoCumplido"
+                                                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                                    >
+                                                        {typeof validationState.montoCumplido.error === 'string' && validationState.montoCumplido.showIcon && (
+                                                            <span className="relative group">
+                                                                {WarningIcon}
+                                                                <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300">
+                                                                    {validationState.montoCumplido.error}
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                        Monto Cumplido
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Segunda fila: Saldo Solucionado, Segmento, H. Entrada, H. Salida */}
+                                        <div className="flex flex-row gap-4 w-full">
+                                            {/* Saldo Solucionado */}
+                                            <div className="w-full">
+                                                <div className="relative w-full min-w-0">
+                                                    <input
+                                                        type="text"
+                                                        className={`peer pl-6 pr-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${validationState.saldoSolucionado.requiredError ? 'border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2' : 'border-transparent focus:ring-jerarquia1 focus:border-jerarquia1'}`}
+                                                        id="input-saldoSolucionado"
+                                                        placeholder=" "
+                                                        style={{ color: 'var(--color-jerarquia3)' }}
+                                                        value={inputValues.saldoSolucionado}
+                                                        onChange={e => {
+                                                            let v = e.target.value;
+                                                            v = v.replace(/[^0-9.]/g, '');
+                                                            const parts = v.split('.');
+                                                            let intPart = parts[0] || '';
+                                                            let decPart = parts[1] || '';
+                                                            if (intPart.length > 9) intPart = intPart.substring(0, 9);
+                                                            if (decPart.length > 2) decPart = decPart.substring(0, 2);
+                                                            v = decPart ? `${intPart}.${decPart}` : intPart;
+                                                            setInputValues(prev => ({ ...prev, saldoSolucionado: v }));
+                                                            validateAndSetField('saldoSolucionado', v);
+                                                        }}
+                                                        onBlur={() => {
+                                                            validateAndSetField('saldoSolucionado', inputValues.saldoSolucionado);
+                                                        }}
+                                                    />
+                                                    <label
+                                                        htmlFor="input-saldoSolucionado"
+                                                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                                    >
+                                                        {typeof validationState.saldoSolucionado.error === 'string' && validationState.saldoSolucionado.showIcon && (
+                                                            <span className="relative group">
+                                                                {WarningIcon}
+                                                                <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300">
+                                                                    {validationState.saldoSolucionado.error}
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                        Saldo Solucionado
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            {/* Segmento */}
+                                            <div className="w-full">
+                                                <div className="relative w-full min-w-0">
+                                                    <input
+                                                        type="text"
+                                                        className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${validationState.segmento.requiredError ? 'border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2' : 'border-transparent focus:ring-jerarquia1 focus:border-jerarquia1'}`}
+                                                        id="input-segmento"
+                                                        placeholder=" "
+                                                        style={{ color: 'var(--color-jerarquia3)' }}
+                                                        value={inputValues.segmento}
+                                                        onChange={e => setInputValues(v => ({ ...v, segmento: e.target.value }))}
+                                                    />
+                                                    <label
+                                                        htmlFor="input-segmento"
+                                                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                                    >
+                                                        Segmento
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            {/* Hora Entrada */}
+                                            <div className="w-full">
+                                                <div className="relative w-full min-w-0">
+                                                    <input
+                                                        type="time"
+                                                        min="07:00"
+                                                        max="19:00"
+                                                        className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${validationState.horaEntrada.requiredError ? 'border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2' : 'border-transparent focus:ring-jerarquia1 focus:border-jerarquia1'}`}
+                                                        id="input-horaEntrada"
+                                                        placeholder="00:00"
+                                                        style={{ color: 'var(--color-jerarquia3)' }}
+                                                        value={inputValues.horaEntrada === null ? '' : inputValues.horaEntrada}
+                                                        onChange={e => {
+                                                            const val = e.target.value === '' ? null : e.target.value;
+                                                            setInputValues(v => ({ ...v, horaEntrada: val }));
+                                                            validateAndSetField('horaEntrada', val);
+                                                        }}
+                                                        onBlur={() => {
+                                                            validateAndSetField('horaEntrada', inputValues.horaEntrada);
+                                                        }}
+                                                    />
+                                                    <label
+                                                        htmlFor="input-horaEntrada"
+                                                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                                    >
+                                                        {typeof validationState.horaEntrada.error === 'string' && validationState.horaEntrada.showIcon && (
+                                                            <span className="relative group">
+                                                                {WarningIcon}
+                                                                <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300">
+                                                                    {validationState.horaEntrada.error}
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                        Hora Entrada
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            {/* Hora Salida */}
+                                            <div className="w-full">
+                                                <div className="relative w-full min-w-0">
+                                                    <input
+                                                        type="time"
+                                                        min="07:00"
+                                                        max="19:00"
+                                                        className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${validationState.horaSalida.requiredError ? 'border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2' : 'border-transparent focus:ring-jerarquia1 focus:border-jerarquia1'}`}
+                                                        id="input-horaSalida"
+                                                        placeholder="00:00"
+                                                        style={{ color: 'var(--color-jerarquia3)' }}
+                                                        value={inputValues.horaSalida === null ? '' : inputValues.horaSalida}
+                                                        onChange={e => {
+                                                            const val = e.target.value === '' ? null : e.target.value;
+                                                            setInputValues(v => ({ ...v, horaSalida: val }));
+                                                            validateAndSetField('horaSalida', val);
+                                                        }}
+                                                        onBlur={() => {
+                                                            validateAndSetField('horaSalida', inputValues.horaSalida);
+                                                        }}
+                                                    />
+                                                    <label
+                                                        htmlFor="input-horaSalida"
+                                                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                                    >
+                                                        {typeof validationState.horaSalida.error === 'string' && validationState.horaSalida.showIcon && (
+                                                            <span className="relative group">
+                                                                {WarningIcon}
+                                                                <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300">
+                                                                    {validationState.horaSalida.error}
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                        Hora Salida
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
                 {/* Tabla principal */}
-        <div className="metas-block metas-block-3 bg-white rounded-lg p-2 sm:p-3 shadow border border-[var(--color-jerarquia1)] flex-1 flex flex-col min-w-0 min-h-0 w-full mt-2">
-            <div style={{ maxHeight: "32vh", overflow: "auto" }} className="scrollbar-gray w-full">
-                <table className="modal-table">
+                <div className="metas-block metas-block-3 bg-white rounded-lg p-2 sm:p-3 shadow border border-[var(--color-jerarquia1)] flex-1 flex flex-col min-w-0 min-h-0 w-full mt-2">
+                    <div style={{ maxHeight: "32vh", overflow: "auto" }} className="scrollbar-gray w-full">
+                        <table className="modal-table">
                             <thead>
                                 <tr>
                                     <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>
@@ -1118,17 +1095,17 @@ const ModalMetasContent = () => {
                                             Cambiar
                                         </span>
                                     </th>
-                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Ejecutivo</th>
-                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Usuario</th>
-                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Cuentas</th>
-                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Titulares</th>
-                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Negociaciones</th>
-                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Cumplimientos</th>
-                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Monto Cumplido</th>
-                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Saldo Solucionado</th>
-                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>Segmento</th>
-                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>H.Entrada</th>
-                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2}}>H.Salida</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Ejecutivo</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Usuario</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Cuentas</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Titulares</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Negociaciones</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Cumplimientos</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Monto Cumplido</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Saldo Solucionado</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Segmento</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>H.Entrada</th>
+                                    <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>H.Salida</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1175,9 +1152,9 @@ const ModalMetasContent = () => {
                                         // Normalizar valores para que siempre se pinte algo aunque vengan null/undefined
                                         const safe = (val, def = '') => val !== null && val !== undefined ? val : def;
                                         return (
-                                            <tr 
-                                                key={rowKey} 
-                                                className={selectedRows.includes(rowKey) ? 'row-selected' : ''} 
+                                            <tr
+                                                key={rowKey}
+                                                className={selectedRows.includes(rowKey) ? 'row-selected' : ''}
                                                 style={selectedRows.includes(rowKey)
                                                     ? { cursor: 'pointer', background: 'var(--color-jerarquia1)', color: '#000' }
                                                     : { cursor: 'pointer' }}
@@ -1244,21 +1221,13 @@ const ModalMetasContent = () => {
                             const saldoSolucionado = Number(parseCurrencyToNumber(inputValues.saldoSolucionado)) || 0;
                             const negociaciones = Number(inputValues.negociaciones) || 0;
                             const cumplimientos = Number(inputValues.cumplimientos) || 0;
-                            
+
                             const hasMoneyValidationError = montoCumplido > 0 && saldoSolucionado > 0 && montoCumplido >= saldoSolucionado;
                             const hasTinyIntValidationError = negociaciones > 255 || cumplimientos > 255;
                             const hasRelationValidationError = cumplimientos > 0 && negociaciones > 0 && cumplimientos > negociaciones;
                             const hasValidationError = hasMoneyValidationError || hasTinyIntValidationError || hasRelationValidationError;
                             const isDisabled = selectedRows.length === 0 || hasValidationError;
 
-                            let tooltipText = '';
-                            if (hasMoneyValidationError) {
-                                tooltipText = 'El monto cumplido debe ser menor al saldo solucionado';
-                            } else if (hasTinyIntValidationError) {
-                                tooltipText = 'Negociaciones y cumplimientos deben estar entre 0 y 255';
-                            } else if (hasRelationValidationError) {
-                                tooltipText = 'Los cumplimientos deben ser menor o igual a las negociaciones';
-                            }
 
                             return (
                                 <button
@@ -1268,7 +1237,6 @@ const ModalMetasContent = () => {
                                     }
                                     onClick={handleGuardar}
                                     disabled={isDisabled}
-                                    title={tooltipText}
                                 >
                                     Guardar
                                 </button>

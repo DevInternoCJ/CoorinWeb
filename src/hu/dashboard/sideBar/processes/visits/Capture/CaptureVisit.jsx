@@ -19,7 +19,6 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
         { id: "2", nombre: "Cartera 2" }
     ]);
     const [porExpediente, setPorExpediente] = useState(false);
-    const [customInput, setCustomInput] = useState("");
     const [idCuenta, setIdCuenta] = useState("");
 
 
@@ -29,6 +28,8 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
     // cuentaData y setCuentaData ahora vienen del padre (CoorinDashboard)
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    // Estado para dirección seleccionada
+    const [direccionSeleccionada, setDireccionSeleccionada] = useState("");
 
         // Limpiar input cada vez que cambia el checkbox (a true o false)
         useEffect(() => {
@@ -167,7 +168,12 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                         </div>
                         {/* Dirección - dropdown animado */}
                         <div className="relative w-full max-w-lg flex flex-col items-center justify-center mb-2 sm:col-span-6 sm:w-[28vw] sm:ml-[-1vw] sm:mb-0">
-                            <select title="Selecciona alguno" className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2">
+                            <select
+                                title="Selecciona alguno"
+                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={direccionSeleccionada}
+                                onChange={e => setDireccionSeleccionada(e.target.value)}
+                            >
                                 <option value="" hidden></option>
                                 {cuentaData && Array.isArray(cuentaData.domicilios) && cuentaData.domicilios.length > 0 &&
                                     cuentaData.domicilios.map((dom, idx) => (
@@ -179,7 +185,16 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                         </div>
                     </div>
                     {/* Campos y áreas debajo de los elementos principales reorganizados */}
-                    <div className="w-full flex flex-col gap-4 mb-6 mt-4">
+                    <div
+                        className="w-full flex flex-col gap-4 mb-6 mt-4"
+                        style={direccionSeleccionada ? {} : { pointerEvents: 'none', opacity: 0.6 }}
+                        onClick={e => {
+                            if (!direccionSeleccionada) {
+                                e.stopPropagation();
+                                toast.warning("Primero selecciona un domicilio antes de continuar");
+                            }
+                        }}
+                    >
                         <div className="flex flex-col gap-4 sm:flex-row sm:gap-4 mb-4 w-full">
                             <div className="w-full sm:flex-1 min-w-0"><CapturaVisitsF2 /></div>
                             <div className="w-full sm:flex-[2] min-w-0"><CapturaVisitsF4 /></div>
@@ -194,8 +209,16 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                     <div className="w-full mt-4 flex justify-center">
                         <button
                             type="button"
-                            className="btn-success w-full sm:w-auto sm:min-w-[120px] px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
-                            onClick={() => { }}
+                            className={`btn-success w-full sm:w-auto sm:min-w-[120px] px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center ${!direccionSeleccionada ? 'opacity-60 cursor-not-allowed' : ''}`}
+                            disabled={!direccionSeleccionada}
+                            onClick={e => {
+                                if (!direccionSeleccionada) {
+                                    e.preventDefault();
+                                    toast.warning("Primero selecciona un domicilio antes de continuar");
+                                    return;
+                                }
+                                // Aquí va la lógica real de captura
+                            }}
                         >
                             Capturar
                         </button>

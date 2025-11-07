@@ -2024,16 +2024,16 @@ export const getSearchesInformation = async (body) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    console.log('Enviando a /informacion/Busquedas/consultar:', body);
+    console.log('Enviando a /informacion/BusquedasInfo/consultar:', body);
     // El interceptor añade el token automáticamente
-    const response = await api.post('/informacion/Busquedas/consultar', body, {
+    const response = await api.post('/informacion/BusquedasInfo/consultar', body, {
       headers: {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
       responseType: 'blob'
     });
-    console.log(' Respuesta de /informacion/Busquedas/consultar:', response);
+    console.log(' Respuesta de /informacion/BusquedasInfo/consultar:', response);
     return response;
   } catch (error) {
     console.error('Error al obtener busquedas', error);
@@ -2098,16 +2098,16 @@ export const getCommentsInformation = async (body) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    console.log('Enviando a /informacion/Comentarios/consultar:', body);
+    console.log('Enviando a /informacion/comentarios-info/consultar:', body);
     // El interceptor añade el token automáticamente
-    const response = await api.post('/informacion/Comentarios/consultar', body, {
+    const response = await api.post('/informacion/comentarios-info/consultar', body, {
       headers: {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
       responseType: 'blob'
     });
-    console.log(' Respuesta de /informacion/Comentarios/consultar:', response);
+    console.log(' Respuesta de /informacion/comentarios-info/consultar:', response);
     return response;
   } catch (error) {
     console.error('Error al obtener Comentarios', error);

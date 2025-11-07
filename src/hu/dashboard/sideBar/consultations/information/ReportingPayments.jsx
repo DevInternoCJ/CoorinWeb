@@ -383,14 +383,14 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                     )}
                                     {!loadingTabla && tablaData.map((row, idx) => (
                                         <tr key={idx}>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.cartera}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.cuenta}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.nombreEjecutivo}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.fechaPago ? row.fechaPago.replace(/T00:00:00$/, "") : ""}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.hora}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.montoPago !== undefined && row.montoPago !== null ? `$${row.montoPago}` : ""}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.referencia}</td>
-                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.sucursal}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.Cartera}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.Cuenta}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.NombreEjecutivo}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.FechaPago ? row.FechaPago.replace(/T00:00:00$/, "") : ""}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.Hora}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.MontoPago !== undefined && row.MontoPago !== null ? `$${row.MontoPago}` : ""}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.Referencia}</td>
+                                            <td style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{row.Sucursal}</td>
                                         </tr>
                                     ))}
                                 </tbody>
