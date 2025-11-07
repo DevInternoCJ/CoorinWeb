@@ -6,7 +6,7 @@ using System.Data;
 
 namespace Loki.Mark.Procesos.Procesos.Services
 {
-    public class SupervisorService: ISupervisor
+    public class SupervisorService: ISupervisorService
     {
         private readonly CustomDbContextFactory _dbContFactory;
 

@@ -1,130 +1,106 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
-
-// This file is part of Thor
-using Loki.ThorLibrary.ModelsAllocation;
-using Loki.ThorLibrary.ModelsCollection;
-using Loki.ThorLibrary.ModelsHistory;
-using Loki.ThorLibrary.ModelsMemory;
-
-// This file is part of Asura
-using Loki.AsuraLibrary.ModelsBBVA_VGP;
-using Loki.AsuraLibrary.ModelsAllocation;
-using Loki.AsuraLibrary.ModelsCollection;
-using Loki.AsuraLibrary.ModelsHistory;
-using Loki.AsuraLibrary.ModelsMemory;
-
-// This file is part of Cronoss
-using Loki.DbAllocation.ModelsCronoss;
-using Loki.DbCollection.ModelsCronoss;
-using Loki.DbHistory.ModelsCronoss;
-using Loki.DbMemory.ModelsCronoss;
-
+using CoorinWeb.Loki.Global;
+// Utilizables
+using CoorinWeb.Loki.Mark.Auth.DAOs;
+using CoorinWeb.Loki.Mark.Auth.DAOs.AuthDAOs;
+using CoorinWeb.Loki.Mark.Auth.Interfaces;
+using GaiaLibrary.ModelsDbAllocation;
+using GaiaLibrary.ModelsDbCollection;
+using GaiaLibrary.ModelsDbHistory;
 // This file is part of Gaia
 using GaiaLibrary.ModelsDbMemory;
-using GaiaLibrary.ModelsDbHistory;
-using GaiaLibrary.ModelsDbCollection;
-using GaiaLibrary.ModelsDbAllocation;
-
-// This file is part Mictlan
-using Loki.ModelsDbAllocationMictlan;
-using Loki.ModelsDbHistoryMictlan;
-using Loki.ModelsDbMemoryMictlan;
-
 // This file is part of Hades
 using HadesLibrary.ModelsDbAllocation;
 using HadesLibrary.ModelsDbCollection;
 using HadesLibrary.ModelsDbHistory;
 using HadesLibrary.ModelsDbMemory;
-
 // This file is part of Izalith
 using Izalith.ModelsdbAllocation;
 using Izalith.ModelsdbCollection;
 using Izalith.ModelsdbHistory;
 using Izalith.ModelsdbMemory;
-
 using Loki.AlbazLibrary;
-
-
-// Utilizables
-using CoorinWeb.Loki.Mark.Auth.DAOs;
-using CoorinWeb.Loki.Mark.Auth.Interfaces;
-using CoorinWeb.Loki.Global;
-using CoorinWeb.Loki.Mark.Auth.DAOs.AuthDAOs;
-using Scalar.AspNetCore;
+using Loki.AsuraLibrary.ModelsAllocation;
+// This file is part of Asura
+using Loki.AsuraLibrary.ModelsBBVA_VGP;
+using Loki.AsuraLibrary.ModelsCollection;
+using Loki.AsuraLibrary.ModelsHistory;
+using Loki.AsuraLibrary.ModelsMemory;
+// This file is part of Cronoss
+using Loki.DbAllocation.ModelsCronoss;
+using Loki.DbCollection.ModelsCronoss;
+using Loki.DbHistory.ModelsCronoss;
+using Loki.DbMemory.ModelsCronoss;
+using Loki.EncryptorDecryptor;
 using Loki.Global;
+using Loki.Global.DAOs;
 using Loki.Mark.Administracion.Campanias.DAOs;
 using Loki.Mark.Administracion.Campanias.Interfaces;
+using Loki.Mark.Administracion.Carteras.DAOs;
+using Loki.Mark.Administracion.Carteras.Interfaces;
 using Loki.Mark.Administracion.Carteras.Services;
-using Loki.Mark.Administracion.Ejecutivos.Sesiones.Interfaces;
-using Loki.Mark.Administracion.Ejecutivos.Sesiones.Services;
-using Loki.Mark.Administracion.Gespa.Catalogos.Services;
-using Loki.Mark.Administracion.Gespa.Catalogos.Interfaces;
+//using Loki.Mark.Administracion.Campanias.Services;
+using Loki.Mark.Administracion.Consulta.Arrepentimientos.Interfaces;
 using Loki.Mark.Administracion.Ejecutivos.Encargados.Interfaces;
 using Loki.Mark.Administracion.Ejecutivos.Encargados.Services;
-using Loki.Middleware;
-using Loki.EncryptorDecryptor;
-using Serilog;
-using Microsoft.AspNetCore.ResponseCompression;
-using Loki.Mark.Administracion.Ejecutivos.Validadores.DAOs;
-using Loki.Mark.Administracion.Ejecutivos.Validadores.Interfaces;
-using Loki.Mark.Administracion.Ejecutivos.Validadores.Services;
 using Loki.Mark.Administracion.Ejecutivos.Metas.DAOs;
 using Loki.Mark.Administracion.Ejecutivos.Metas.Interfaces;
 using Loki.Mark.Administracion.Ejecutivos.Metas.Services;
-using Loki.Mark.Consulta.ListaNegra.DAOs;
-using Loki.Mark.Consulta.ListaNegra.Interfaces;
-using Loki.Mark.Consulta.ListaNegra.Services;
-using Loki.Mark.Consulta.Historico.Interfaces;
-using Loki.Mark.Consulta.Historico.Services;
-//using Loki.Mark.Consulta.Historico.DAOs;
-using Loki.Mark.Consulta.PlantillasCorreo.Interfaces;
-using Loki.Mark.Consulta.PlantillasCorreo.Services;
-using Loki.Mark.Consulta.PlantillasCorreo.DAOs;
-//using Loki.Mark.Administracion.Campanias.Services;
-using Loki.Mark.Administracion.Consulta.Arrepentimientos.Interfaces;
-using Loki.Mark.Consulta.Arrepentimientos.Services;
-using Loki.Mark.Consulta.Productividad.Services;
-using Loki.Mark.Consulta.Productividad.Interfaces;
-using Loki.Mark.Consulta.Historico.DAOs;
-using Loki.Mark.Administracion.Carteras.Interfaces;
-using Loki.Mark.Administracion.Carteras.DAOs;
+using Loki.Mark.Administracion.Ejecutivos.Sesiones.Interfaces;
+using Loki.Mark.Administracion.Ejecutivos.Sesiones.Services;
+using Loki.Mark.Administracion.Ejecutivos.Validadores.DAOs;
+using Loki.Mark.Administracion.Ejecutivos.Validadores.Interfaces;
+using Loki.Mark.Administracion.Ejecutivos.Validadores.Services;
+using Loki.Mark.Administracion.Gespa.CamposPantalla.DAOs;
 using Loki.Mark.Administracion.Gespa.CamposPantalla.Interfaces;
 using Loki.Mark.Administracion.Gespa.CamposPantalla.Services;
-using Loki.Mark.Administracion.Gespa.CamposPantalla.DAOs;
-using System.Text.Json;
+using Loki.Mark.Administracion.Gespa.Catalogos.Interfaces;
+using Loki.Mark.Administracion.Gespa.Catalogos.Services;
+using Loki.Mark.Administracion.Gespa.Frases.Interfaces;
+using Loki.Mark.Administracion.Gespa.Frases.Services;
+using Loki.Mark.Administracion.Gespa.Scripts.Interfaces;
+using Loki.Mark.Administracion.Gespa.Scripts.Services;
+using Loki.Mark.Captura.Visitas.DAOs;
+using Loki.Mark.Captura.Visitas.Services;
+using Loki.Mark.Consulta.Arrepentimientos.Services;
 using Loki.Mark.Consulta.Cuenta.Interfaces;
 using Loki.Mark.Consulta.Cuenta.Services;
-using CatalogosService = Loki.Mark.Administracion.Gespa.Catalogos.Services.CatalogosService;
-using Loki.Mark.Consulta.Informacion.Pagos.Interfaces;
-using Loki.Mark.Consulta.Informacion.Pagos.Services;
-using Loki.Mark.Consulta.Informacion.Pagos.DAOs;
-using Loki.Global.DAOs;
-using Loki.Mark.Consulta.Informacion.PagosReportados.Interfaces;
-using Loki.Mark.Consulta.Informacion.PagosReportados.Services;
-using Loki.Mark.Consulta.Informacion.PagosReportados.DAOs;
+using Loki.Mark.Consulta.Generales.DAOs;
+using Loki.Mark.Consulta.Generales.Interfaces;
+using Loki.Mark.Consulta.Generales.Services;
+using Loki.Mark.Consulta.Historico.DAOs;
+using Loki.Mark.Consulta.Historico.Interfaces;
+using Loki.Mark.Consulta.Historico.Services;
+using Loki.Mark.Consulta.Informacion.Busquedas.DAOs;
+using Loki.Mark.Consulta.Informacion.Busquedas.Interfaces;
+using Loki.Mark.Consulta.Informacion.Busquedas.Services;
+using Loki.Mark.Consulta.Informacion.Comentarios.DAOs;
+using Loki.Mark.Consulta.Informacion.Comentarios.Services;
+using Loki.Mark.Consulta.Informacion.Correos.DAOs;
+using Loki.Mark.Consulta.Informacion.Correos.Interfaces;
+using Loki.Mark.Consulta.Informacion.Correos.Services;
 using Loki.Mark.Consulta.Informacion.DatosErroneos.DAOs;
 using Loki.Mark.Consulta.Informacion.DatosErroneos.Interfaces;
 using Loki.Mark.Consulta.Informacion.DatosErroneos.Services;
 using Loki.Mark.Consulta.Informacion.Domicilios.DAOs;
 using Loki.Mark.Consulta.Informacion.Domicilios.Interfaces;
 using Loki.Mark.Consulta.Informacion.Domicilios.Services;
-using Loki.Mark.Consulta.Informacion.Correos.DAOs;
-using Loki.Mark.Consulta.Informacion.Correos.Interfaces;
-using Loki.Mark.Consulta.Informacion.Correos.Services;
-using Loki.Mark.Consulta.Informacion.Ofrecimientos.Services;
 using Loki.Mark.Consulta.Informacion.Ofrecimientos.DAOs;
-using Loki.Mark.Consulta.Informacion.Comentarios.DAOs;
-using Loki.Mark.Consulta.Informacion.Comentarios.Services;
-using Loki.Mark.Consulta.Informacion.Busquedas.Services;
-using Loki.Mark.Consulta.Informacion.Busquedas.Interfaces;
-using Loki.Mark.Consulta.Informacion.Busquedas.DAOs;
-using BusquedasService = Loki.Mark.Consulta.Cuenta.Services.BusquedasService;
-using Loki.Mark.Reportes.Ejecutivos.DAOs;
-using Loki.Mark.Reportes.Ejecutivos.Services;
+using Loki.Mark.Consulta.Informacion.Ofrecimientos.Services;
+using Loki.Mark.Consulta.Informacion.Pagos.DAOs;
+using Loki.Mark.Consulta.Informacion.Pagos.Interfaces;
+using Loki.Mark.Consulta.Informacion.Pagos.Services;
+using Loki.Mark.Consulta.Informacion.PagosReportados.DAOs;
+using Loki.Mark.Consulta.Informacion.PagosReportados.Interfaces;
+using Loki.Mark.Consulta.Informacion.PagosReportados.Services;
+using Loki.Mark.Consulta.ListaNegra.DAOs;
+using Loki.Mark.Consulta.ListaNegra.Interfaces;
+using Loki.Mark.Consulta.ListaNegra.Services;
+using Loki.Mark.Consulta.PlantillasCorreo.DAOs;
+//using Loki.Mark.Consulta.Historico.DAOs;
+using Loki.Mark.Consulta.PlantillasCorreo.Interfaces;
+using Loki.Mark.Consulta.PlantillasCorreo.Services;
+using Loki.Mark.Consulta.Productividad.Interfaces;
+using Loki.Mark.Consulta.Productividad.Services;
 using Loki.Mark.Procesos.Gespa.Arrepentimientos.DAOs;
 using Loki.Mark.Procesos.Gespa.Arrepentimientos.Interfaces;
 using Loki.Mark.Procesos.Gespa.Bloqueo_cuentas.DAOs;
@@ -137,24 +113,41 @@ using Loki.Mark.Procesos.Gespa.Definicion.DAOs;
 using Loki.Mark.Procesos.Gespa.Definicion.Interfaces;
 using Loki.Mark.Procesos.Gespa.Estados_de_cuenta.DAOs;
 using Loki.Mark.Procesos.Gespa.Estados_de_cuenta.Interfaces;
-using Loki.Mark.Reportes.DiaDelEjecutivo.DAOs;
-using Loki.Mark.Reportes.DiaDelEjecutivo.Interfaces;
-using Loki.Mark.Administracion.Gespa.Scripts.Interfaces;
-using Loki.Mark.Administracion.Gespa.Frases.Interfaces;
-using Loki.Mark.Administracion.Gespa.Scripts.Services;
-using Loki.Mark.Reportes.Productividad.DAOs;
-using Loki.Mark.Reportes.Cliente.DAOs;
-using Loki.Mark.Reportes.Cliente.Services;
-using Swashbuckle.AspNetCore.Filters;
-using System.Reflection;
-using Loki.Mark.Administracion.Gespa.Frases.Services;
-using Loki.Mark.Consulta.Generales.Interfaces;
-using Loki.Mark.Consulta.Generales.Services;
-using Loki.Mark.Consulta.Generales.DAOs;
-using Loki.Mark.Captura.Visitas.DAOs;
-using Loki.Mark.Captura.Visitas.Services;
+using Loki.Mark.Procesos.Gestiones.Interfaces;
+using Loki.Mark.Procesos.Gestiones.Services;
+using Loki.Mark.Procesos.Procesos.DAOs;
 using Loki.Mark.Procesos.Procesos.Interfaces;
 using Loki.Mark.Procesos.Procesos.Services;
+using Loki.Mark.Reportes.Cliente.DAOs;
+using Loki.Mark.Reportes.Cliente.Services;
+using Loki.Mark.Reportes.DiaDelEjecutivo.DAOs;
+using Loki.Mark.Reportes.DiaDelEjecutivo.Interfaces;
+using Loki.Mark.Reportes.Ejecutivos.DAOs;
+using Loki.Mark.Reportes.Ejecutivos.Services;
+using Loki.Mark.Reportes.Productividad.DAOs;
+using Loki.Middleware;
+// This file is part Mictlan
+using Loki.ModelsDbAllocationMictlan;
+using Loki.ModelsDbHistoryMictlan;
+using Loki.ModelsDbMemoryMictlan;
+// This file is part of Thor
+using Loki.ThorLibrary.ModelsAllocation;
+using Loki.ThorLibrary.ModelsCollection;
+using Loki.ThorLibrary.ModelsHistory;
+using Loki.ThorLibrary.ModelsMemory;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
+using Serilog;
+using Swashbuckle.AspNetCore.Filters;
+using System.Reflection;
+using System.Text;
+using System.Text.Json;
+using BusquedasService = Loki.Mark.Consulta.Cuenta.Services.BusquedasService;
+using CatalogosService = Loki.Mark.Administracion.Gespa.Catalogos.Services.CatalogosService;
 
 
 
@@ -426,7 +419,10 @@ builder.Services.AddScoped<ICapturaVisitasDAO, CapturaVisitasDAO>();
 
 #endregion
 //supervidor
-builder.Services.AddScoped<ISupervisor, SupervisorService>();
+builder.Services.AddScoped<ISupervisorService, SupervisorService>();
+builder.Services.AddScoped<ISupervisorDao, SupervisorDao>();
+//gestiones
+builder.Services.AddScoped<IGestionesService, GestionesService>();
 #endregion	
 
 #region Reportes

@@ -1,4 +1,5 @@
 ﻿using CoorinWeb.Loki.Global;
+using Loki.DTOs.SupervisorDTO;
 using Loki.Mark.Consulta.Generales.Interfaces;
 using Loki.Mark.Procesos.Procesos.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -12,11 +13,13 @@ namespace Loki.Mark.Procesos.Procesos.Controllers
     public class SupervisoresController : ControllerBase
     {
         private readonly IDbContextFactory _dbContextFactory;
-        private readonly ISupervisor _supervisor;
-        public SupervisoresController(IDbContextFactory dbContextFactory, ISupervisor supervisor)
+        private readonly ISupervisorService _supervisorService;
+        private readonly ISupervisorDao _supervisorDao;
+        public SupervisoresController(IDbContextFactory dbContextFactory, ISupervisorService supervisor, ISupervisorDao supervisorDao )
         {
             _dbContextFactory = dbContextFactory;
-            _supervisor = supervisor;
+            _supervisorService = supervisor;
+            _supervisorDao = supervisorDao;
         }
 
         [HttpGet("supervisores")]
@@ -33,7 +36,7 @@ namespace Loki.Mark.Procesos.Procesos.Controllers
 
             try
             {
-                var supervisores = await _supervisor.obtieneSupervisores(servidorClaim, idCartera);
+                var supervisores = await _supervisorService.obtieneSupervisores(servidorClaim, idCartera);
                 return Ok(supervisores);
             }
             catch (Exception ex)
@@ -59,7 +62,7 @@ namespace Loki.Mark.Procesos.Procesos.Controllers
 
             try
             {
-                var cuentas = await _supervisor.obtieneCuentas(servidorClaim, idCartera, fechaDesde, fechaHasta);
+                var cuentas = await _supervisorService.obtieneCuentas(servidorClaim, idCartera, fechaDesde, fechaHasta);
                 return Ok(cuentas);
             }
             catch (Exception ex)
@@ -67,6 +70,41 @@ namespace Loki.Mark.Procesos.Procesos.Controllers
                 return StatusCode(500, new { message = "Error al obtener las cuentas", error = ex.Message });
             }
         }
+
+        [HttpPost("inserta-cuentas")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "inserta cuentas - irene",
+            Description = "inserta o elimina cuentas"
+        )]
+
+        public async Task<IActionResult> asignarCuentas([FromBody] AsignarCuentasRequest request)
+        {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+
+            try
+            {
+                var (success, message) = await _supervisorDao.insertaCuentas(
+                    servidorClaim,
+                    request.idCartera,
+                    request.idConsulta,
+                    request.iFilas,
+                    request.ejecutivos);
+
+                if (success)
+                    return Ok(new { message });
+                else
+                    return BadRequest(new { error = message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al asignar cuentas", error = ex.Message });
+            }
+        }
+
+   
 
     }
 }
