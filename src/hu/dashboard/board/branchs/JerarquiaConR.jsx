@@ -206,9 +206,9 @@ const JerarquiaConR = ({
             style={{
                 overflowX: 'auto',
                 overflowY: 'auto',
-                height: 'clamp(220px, 48vh, 520px)',
-                maxHeight: 'min(56vh, 420px)',
-                width: 'clamp(160px, 22vw, 320px)',
+                height: 'auto',
+                maxHeight: 'auto',
+                width: 'auto',
                 background: '#ffffff',
                 borderRadius: 8,
                 border: '1px solid #e0e0e0',
@@ -219,12 +219,14 @@ const JerarquiaConR = ({
             {idEjecutivoSesion && (
                 <div
                     className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? ' selected' : ''}`}
-                    title="Mostrar metas de los subordinados directos del ejecutivo de la sesión"
+                    title="Mostrar metas de todos los subordinados del ejecutivo de la sesión"
                     onClick={() => {
                         const rootNode = Array.isArray(executiveTree) ? executiveTree.find(n => Number(n.idEjecutivo) === Number(idEjecutivoSesion)) : null;
-                        if (rootNode && Array.isArray(rootNode.subordinados) && rootNode.subordinados.length > 0) {
-                            const idsSubordinados = rootNode.subordinados.map(sub => Number(sub.idEjecutivo)).filter(Boolean);
-                            setSelectedExecutives(idsSubordinados);
+                        if (rootNode) {
+                            // Recolecta todos los ids subordinados recursivamente, excluyendo el propio idEjecutivoSesion
+                            const allIds = collectAllIds(rootNode).filter(id => id !== Number(idEjecutivoSesion));
+                            if (allIds.length > 0) setSelectedExecutives(allIds);
+                            else setSelectedExecutives([Number(idEjecutivoSesion)]);
                         } else {
                             setSelectedExecutives([Number(idEjecutivoSesion)]);
                         }
@@ -268,3 +270,39 @@ const JerarquiaConR = ({
 };
 
 export default JerarquiaConR;
+// Inyectar estilos responsivos para el contenedor de la ramificación
+if (typeof document !== 'undefined' && !document.head.querySelector('style[data-ramificacion-responsive]')) {
+    const style = document.createElement('style');
+    style.setAttribute('data-ramificacion-responsive', 'true');
+    style.textContent = `
+        .productividad-branch {
+            width: 100%;
+            min-width: 160px;
+            height: 100%;
+            transition: width 0.2s;
+            box-sizing: border-box;
+        }
+        @media (min-width: 1201px) {
+            .productividad-branch {
+                max-width: 100%;
+            }
+        }
+        @media (max-width: 1200px) {
+            .productividad-branch {
+                max-width: 100%;
+            }
+        }
+        @media (max-width: 900px) {
+            .productividad-branch {
+                width: 100vw !important;
+                max-width: 100vw !important;
+                min-width: 0 !important;
+                border-radius: 0 !important;
+                padding-left: 0.5vw !important;
+                padding-right: 0.5vw !important;
+                height: auto !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
