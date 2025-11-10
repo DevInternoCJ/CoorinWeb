@@ -6,6 +6,7 @@ using Loki.Mark.Procesos.Procesos.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Data;
 
 namespace Loki.Mark.Procesos.Gestiones.Controllers
 {
@@ -75,6 +76,73 @@ namespace Loki.Mark.Procesos.Gestiones.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Error al actualizar el comentario", error = ex.Message });
+            }
+        }
+        [HttpPost("carga-llamadas")]
+        [Authorize]
+        [RequestSizeLimit(100_000_000)] // 100MB
+        [SwaggerOperation(
+             Summary = "cargar llamadas - irene",
+             Description = "Carga un archivo CSV o Excel con registros de llamadas"
+         )]
+        public async Task<IActionResult> CargaLlamadas(
+        [FromForm] CargaLlamadasRequest request)
+        {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+
+            try
+            {
+                var (success, message, errores) = await _gestionesDao.CargarLlamadasAsync(request, servidorClaim);
+
+                if (success)
+                {
+                    var response = new
+                    {
+                        message,
+                        registrosConError = errores?.Rows.Count ?? 0,
+                        // Convertir DataTable a lista de objetos para evitar ciclos
+                        detallesErrores = errores != null ? _gestionesDao.ConvertDataTableToList(errores) : null
+                    };
+                    return Ok(response);
+                }
+                else
+                {
+                    // Para errores, solo enviar mensaje y contar, no el DataTable completo
+                    return BadRequest(new
+                    {
+                        error = message,
+                        registrosConError = errores?.Rows.Count ?? 0
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al cargar las llamadas", error = ex.Message });
+            }
+        }
+        [HttpGet("realiza-busqueda")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "realiza busqueda - irene",
+            Description = "obtiene las gestiones"
+        )]
+        public async Task<IActionResult> realizabusqueda([FromQuery] int idCartera, DateTime fechaInicial, DateTime fechaFinal) 
+        {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+
+            try
+            {
+                var gestiones = await _gestionesService.buscaGestiones(servidorClaim, idCartera, fechaInicial, fechaFinal);
+                return Ok(gestiones);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al obtener las gestiones", error = ex.Message });
             }
         }
     }

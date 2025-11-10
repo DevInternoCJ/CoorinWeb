@@ -14,7 +14,7 @@ namespace Loki.Mark.Procesos.Gestiones.Services
             _dbContFactory = new CustomDbContextFactory(serviceProvider);
 
         }
-
+        #region editarComentario
         public async Task<List<object>> buscaComentarios(string servidor, int idCartera, string cuenta)
         {
             using var sqlConnection = _dbContFactory.GetSqlConnection(servidor, "Collection");
@@ -48,5 +48,38 @@ namespace Loki.Mark.Procesos.Gestiones.Services
 
             return resultados.ToList();
         }
+        #endregion
+
+
+
+        #region consultaGestiones
+        public async Task<List<object>> buscaGestiones(string servidor, int idCartera, DateTime fechaInicial, DateTime fechaFinal)
+        {
+            using var sqlConnection = _dbContFactory.GetSqlConnection(servidor, "Collection");
+
+            string sql = @"
+            WAITFOR DELAY '00:00:00'; 
+            SELECT * FROM dbComplemento.dbo.fn_Gestiones(@idCartera, @FechaInicial, @FechaFinal)";
+
+            var parameters = new
+            {
+                idCartera,
+                FechaInicial = fechaInicial,
+                FechaFinal = fechaFinal
+            };
+
+            if (sqlConnection.State != ConnectionState.Open)
+                await sqlConnection.OpenAsync();
+
+            var resultados = await sqlConnection.QueryAsync(sql, parameters);
+
+            if (resultados == null || !resultados.Any())
+            {
+                return new List<object>();
+            }
+
+            return resultados.ToList();
+        }
+        #endregion
     }
 }
