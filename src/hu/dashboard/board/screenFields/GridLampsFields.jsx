@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { GetGridFields } from "../../../../services/mark/albaz/LokiServices";
 import useSelectedRowStore from "./selectedRowStore";
 import { useWalletProducts } from "../../../login/WalletProduct";
-
+import  {IconDrag}  from "../../../../components/iconos/IconDrag"
 const GridLampsFields = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -123,10 +123,12 @@ const GridLampsFields = () => {
                     ${draggedHeader === key ? 'opacity-50 scale-95 bg-slate-500' : ''}
                   `}
                   title="Arrastra este encabezado a Alias o Campos"
-                >
-                  <span className="inline-flex items-center gap-2">   
+                ><div className="flex text-sm items-center gap-1">
+                    <IconDrag className=" text-bgsuccess"/>
+                  <span className="inline-flex items-center">   
                     {key}
                   </span>
+                </div>
                 </th>
               ))}
             </tr>

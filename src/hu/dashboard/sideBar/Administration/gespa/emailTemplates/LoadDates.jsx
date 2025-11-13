@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { PostLoadData } from "../../../../../../services/mark/albaz/LokiServices";
 import { useWalletProducts } from "../../../../../login/WalletProduct"; // Importa el hook
+import { IconDrag } from "../../../../../../components/iconos/IconDrag";
 
 const LoadDates = ({
   isModalOpen,
@@ -265,9 +266,12 @@ const LoadDates = ({
                 `}
                 title="Arrastra el texto al campo mensaje"
               >
-                <span className="inline-flex items-center text-sm font-semibold gap-1 rounded-lg">
+                <div className=" flex items-center gap-1">
+                  <IconDrag />
+                  <span className="inline-flex items-center text-base font-semibold gap-1 rounded-lg">
                   {item.label}
-                </span>
+                  </span>
+                </div>
               </div>
               <div className={`text-sm text-${item.color}-700`}>
                 {item.value}
@@ -306,11 +310,14 @@ const LoadDates = ({
                     `}
                     title="Arrastra el texto al campo mensaje"
                   >
+                    <div className=" flex items-center gap-1">
+                             <IconDrag className=""/>
                     <span className="inline-flex items-center text-background-tertiary gap-2">
                       {key
                         .replace(/([A-Z])/g, " $1")
                         .replace(/^./, (str) => str.toUpperCase())}
                     </span>
+                    </div>
                   </th>
                 ))}
               </tr>

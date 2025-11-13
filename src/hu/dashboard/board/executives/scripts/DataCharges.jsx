@@ -3,6 +3,7 @@ import { PostDataCharge } from "../../../../../services/mark/albaz/LokiServices"
 import { useWalletProducts } from "../../../../login/WalletProduct";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
 import { IconError } from "./IconScripts";
+import { IconDrag } from "../../../../../components/iconos/IconDrag";
 
 const DataCharges = ({ onDataLoaded }) => {
   // Estados
@@ -244,10 +245,12 @@ const DataCharges = ({ onDataLoaded }) => {
                     draggedLabel === item.label ? "opacity-50 scale-95" : ""
                   }`}
                   title="Arrastra el texto al campo mensaje"
-                >
+                ><div className=" flex items-center gap-1">
+                   <IconDrag className=" text-jerarquia3"/>
                   <span className="inline-flex items-center text-sm font-semibold gap-1">
                     {item.label}
                   </span>
+                </div>
                 </div>
                 <div
                   className={`text-sm text-${item.color}-700 font-medium break-words`}
@@ -276,9 +279,12 @@ const DataCharges = ({ onDataLoaded }) => {
                         }`}
                         title="Arrastra el texto al campo mensaje"
                       >
-                        <span className="inline-flex items-center gap-2">
+                        <div className=" flex items-center gap-1">
+                        <IconDrag className=" text-bgsuccess"/>
+                        <span className="inline-fle text-sm items-center gap-2">
                           {key.replace(/([A-Z])/g, " $1").trim()}
                         </span>
+                        </div>
                       </th>
                     ))}
                   </tr>
