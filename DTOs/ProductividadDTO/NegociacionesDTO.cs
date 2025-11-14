@@ -2,8 +2,8 @@
 {
     public class NegociacionesDTO
     {
-        public string Encargado { get; set; }
-        public string Ejecutivo { get; set; }
+        public int? EncargadoId { get; set; }
+        public int? IdEjecutivo { get; set; }
         public int? Negociaciones { get; set; }
         public decimal? MontoNegociaciones { get; set; }
         public decimal? SaldoSolucionado { get; set; }

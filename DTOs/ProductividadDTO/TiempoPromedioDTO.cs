@@ -2,8 +2,8 @@
 {
     public class TiempoPromedioDTO
     {
-        public string Encargado { get; set; }
-        public string Ejecutivo { get; set; }
+        public int? EncargadoId { get; set; }
+        public int? IdEjecutivo { get; set; }
         public TimeSpan? Negociaciones { get; set; }
         public TimeSpan? Cuentas { get; set; }
         public TimeSpan? Titulares { get; set; }

@@ -2,8 +2,8 @@
 {
     public class ContactosDTO
     {
-        public string Encargado { get; set; }
-        public string Ejecutivo { get; set; }
+        public int? EncargadoId { get; set; }
+        public int? IdEjecutivo { get; set; }
         public int? Cuentas { get; set; }
         public int? Gestiones { get; set; }
         public int? Entrada { get; set; }

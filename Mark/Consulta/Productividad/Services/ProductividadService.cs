@@ -1,12 +1,13 @@
-﻿using System.Data;
-using CoorinWeb.Loki.Global;
+﻿using CoorinWeb.Loki.Global;
 using Dapper;
 using Loki.DTOs.ProductividadDTO;
+using Loki.Global;
 using Loki.Mark.Consulta.Productividad.Interfaces;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Data.SqlClient;
-using Loki.Global;
+using System.Data;
+using System.Dynamic;
 
 namespace Loki.Mark.Consulta.Productividad.Services
 {
@@ -21,276 +22,481 @@ namespace Loki.Mark.Consulta.Productividad.Services
             _logger = logger;
         }
 
-        public async Task<object> obtieneProductividad(string indicador, int idEjecutivo, string servidor, bool esModoHora = false)
+        public async Task<ProductividaddDTO> ObtenerProductividad(string indicador, int? ejecutivoId, string servidor)
         {
-            Console.WriteLine($"=== INICIANDO obtieneProductividad ===");
-            Console.WriteLine($"Indicador: {indicador}");
-            Console.WriteLine($"idEjecutivo: {idEjecutivo}");
-            Console.WriteLine($"servidor: {servidor}");
-            Console.WriteLine($"esModoHora: {esModoHora}");
-
-            var indicadoresDia = new[] { "Sesiones", "Contactos", "Negociaciones", "Porcentajes", "Tiempos", "TiempoPromedio" };
-            var indicadoresHora = new[] {
-                "Cuentas", "Titulares", "Conocidos", "Desconocidos",
-                "SinContacto", "Negociaciones", "MontoNegociaciones", "SaldoSolucionado"
-            };
-
-            if (esModoHora && !indicadoresHora.Contains(indicador, StringComparer.OrdinalIgnoreCase))
-            {
-                throw new ArgumentException($"Indicador '{indicador}' no válido para modo hora");
-            }
-            if (!esModoHora && !indicadoresDia.Contains(indicador, StringComparer.OrdinalIgnoreCase))
-            {
-                throw new ArgumentException($"Indicador '{indicador}' no válido para modo día");
-            }
-
             try
             {
-                if (esModoHora)
+                _logger.LogInformation("Obteniendo productividad - Indicador: {Indicador}, EjecutivoId: {EjecutivoId}, Servidor: {Servidor}",
+                    indicador, ejecutivoId, servidor);
+
+                int idEjecutivo = ejecutivoId ?? 0;
+
+                using (var context = _dbContFactory.GetDbContext(servidor, "Memory"))
                 {
-                    Console.WriteLine($"MODO: HORA (PIVOT)");
-                    return await EjecutarConsultaPivot(indicador, idEjecutivo, servidor);
-                }
-                else
-                {
-                    Console.WriteLine($"MODO: DÍA (STORED PROCEDURE)");
-                    return await EjecutarStoredProcedure(indicador, idEjecutivo, servidor);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ ERROR en obtieneProductividad: {ex.Message}");
-                Console.WriteLine($"Stack: {ex.StackTrace}");
-                _logger.LogError(ex, $"Error en obtieneProductividad: {ex.Message}");
-                throw;
-            }
-        }
+                    var connection = context.Database.GetDbConnection();
+                    await connection.OpenAsync();
 
-        private async Task<object> EjecutarStoredProcedure(string indicador, int idEjecutivo, string servidor)
-        {
-            Console.WriteLine($"=== EJECUTANDO STORED PROCEDURE ===");
-            Console.WriteLine($"Indicador: {indicador}");
-            Console.WriteLine($"idEjecutivo: {idEjecutivo}");
-            Console.WriteLine($"servidor: {servidor}");
+                    var sqlConnection = (SqlConnection)connection;
 
-            var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
-            var connection = dbContext.Database.GetDbConnection();
+                    var tblEjecutivos = await CrearTablaEjecutivos(sqlConnection, idEjecutivo);
 
-            Console.WriteLine($"Cadena conexión: {connection.ConnectionString}");
+                    var parameters = new
+                    {
+                        Indicador = indicador,
+                        idEjecutivo = idEjecutivo,
+                        tbl_Ejecutivos = tblEjecutivos.AsTableValuedParameter("PS.tbl_Ejecutivos")
+                    };
 
-            try
-            {
-                Console.WriteLine($"Abriendo conexión...");
-                await connection.OpenAsync();
-                Console.WriteLine($"✅ Conexión abierta");
-
-                Console.WriteLine($"Obteniendo ejecutivos propios...");
-                var ejecutivos = await ClasesCoorinMethods.ObtieneEjecutivosPropios((SqlConnection)connection, idEjecutivo);
-                Console.WriteLine($"✅ Ejecutivos obtenidos: {ejecutivos?.Count ?? 0}");
-
-                DataTable tblEjecutivos = new DataTable();
-                tblEjecutivos.Columns.Add("idEjecutivo", typeof(int));
-                tblEjecutivos.Columns.Add("Usuario", typeof(string));
-                tblEjecutivos.Columns.Add("idEncargado", typeof(int));
-                tblEjecutivos.Columns.Add("Encargado", typeof(string));
-                tblEjecutivos.Columns.Add("Jerarquía", typeof(byte));
-                tblEjecutivos.Columns.Add("NombreEjecutivo", typeof(string));
-
-                Console.WriteLine($"Llenando DataTable...");
-                foreach (var e in ejecutivos)
-                {
-                    Console.WriteLine($"  - Ejecutivo: {e.IdEjecutivo}, Usuario: {e.Usuario}");
-                    tblEjecutivos.Rows.Add(
-                        e.IdEjecutivo,
-                        e.Usuario,
-                        e.IdEncargado ?? 0,
-                        DBNull.Value,
-                        DBNull.Value,
-                        e.NombreEjecutivo
-                    );
-                }
-                Console.WriteLine($"✅ DataTable llenado: {tblEjecutivos.Rows.Count} filas");
-
-                int idEjecutivoParaSP = idEjecutivo;
-                if (tblEjecutivos.Rows.Count > 1)
-                {
-                    // Si hay más de un ejecutivo, forzamos el modo grupal en el SP
-                    idEjecutivoParaSP = 0;
-                    Console.WriteLine($"Ajustando @idEjecutivo a 0 (Modo Grupal) ya que hay {tblEjecutivos.Rows.Count} ejecutivos.");
-                }
-
-                var parameters = new DynamicParameters();
-                parameters.Add("@Indicador", indicador);
-                parameters.Add("@idEjecutivo", idEjecutivoParaSP); // Usar el valor ajustado
-                parameters.Add("@tbl_Ejecutivos", tblEjecutivos.AsTableValuedParameter("PS.tbl_Ejecutivos"));
-
-                Console.WriteLine($"Parámetros SP:");
-                Console.WriteLine($"  - @Indicador: {indicador}");
-                Console.WriteLine($"  - @idEjecutivo: {idEjecutivoParaSP}"); // Log del nuevo valor
-                Console.WriteLine($"  - @tbl_Ejecutivos: {tblEjecutivos.Rows.Count} filas");
-
-                object result;
-
-                // CORRECCIÓN: Usar switch tradicional en lugar de switch expression
-                if (idEjecutivo == 0)
-                {
-                    Console.WriteLine($"MODO: GRUPAL (idEjecutivo = 0)");
+                    var dto = new ProductividaddDTO
+                    {
+                        Indicador = indicador,
+                        IdEjecutivo = ejecutivoId
+                    };
 
                     switch (indicador.ToLower())
                     {
                         case "sesiones":
-                            result = await connection.QueryAsync<SesionesDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
+                            var resultadosSesiones = await sqlConnection.QueryAsync<dynamic>(
+                                "PS.ProductividadEnLínea", parameters, commandType: CommandType.StoredProcedure);
+
+                            var sesiones = new List<SesionesDTO>();
+                            foreach (var row in resultadosSesiones)
+                            {
+                                var rowDict = (IDictionary<string, object>)row;
+                                var sesion = new SesionesDTO();
+
+                                // Mapeo manual de columnas disponibles
+                                if (rowDict.ContainsKey("Extensión"))
+                                    sesion.Extensión = rowDict["Extensión"]?.ToString();
+
+                                if (rowDict.ContainsKey("Ingreso"))
+                                    sesion.Ingreso = ConvertirFecha(rowDict["Ingreso"]);
+
+                                if (rowDict.ContainsKey("Salida"))
+                                    sesion.Salida = ConvertirFecha(rowDict["Salida"]);
+
+                                if (rowDict.ContainsKey("PrimerGestión"))
+                                    sesion.PrimerGestión = ConvertirFecha(rowDict["PrimerGestión"]);
+
+                                if (rowDict.ContainsKey("Modo"))
+                                    sesion.Modo = rowDict["Modo"]?.ToString();
+
+                                if (rowDict.ContainsKey("TiempoEnModo") && rowDict["TiempoEnModo"] != null)
+                                    sesion.TiempoEnModo = TimeSpan.Parse(rowDict["TiempoEnModo"].ToString());
+
+                                // Obtener información del ejecutivo y encargado (IDs)
+                                var infoEjecutivo = await ObtenerInformacionEjecutivoCompleta(sqlConnection, idEjecutivo);
+                                sesion.EncargadoId = infoEjecutivo.EncargadoId;
+                                sesion.IdEjecutivo = infoEjecutivo.IdEjecutivo;
+
+                                sesiones.Add(sesion);
+                            }
+                            dto.Datos = sesiones;
                             break;
+
                         case "contactos":
-                            result = await connection.QueryAsync<ContactosDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
+                            var resultadosContactos = await sqlConnection.QueryAsync<dynamic>(
+                                "PS.ProductividadEnLínea", parameters, commandType: CommandType.StoredProcedure);
+
+                            var contactos = new List<ContactosDTO>();
+                            foreach (var row in resultadosContactos)
+                            {
+                                var rowDict = (IDictionary<string, object>)row;
+                                var contacto = new ContactosDTO();
+
+                                // Para contactos, el stored procedure sí retorna Encargado y Ejecutivo cuando idEjecutivo = 0
+                                if (idEjecutivo == 0)
+                                {
+                                    if (rowDict.ContainsKey("Encargado"))
+                                        contacto.EncargadoId = rowDict["Encargado"] != null ? Convert.ToInt32(rowDict["Encargado"]) : (int?)null;
+                                    if (rowDict.ContainsKey("Ejecutivo"))
+                                        contacto.IdEjecutivo = rowDict["Ejecutivo"] != null ? Convert.ToInt32(rowDict["Ejecutivo"]) : (int?)null;
+                                }
+                                else
+                                {
+                                    var infoEjecutivo = await ObtenerInformacionEjecutivoCompleta(sqlConnection, idEjecutivo);
+                                    contacto.EncargadoId = infoEjecutivo.EncargadoId;
+                                    contacto.IdEjecutivo = infoEjecutivo.IdEjecutivo;
+                                }
+
+                                if (rowDict.ContainsKey("Cuentas"))
+                                    contacto.Cuentas = rowDict["Cuentas"] != null ? Convert.ToInt32(rowDict["Cuentas"]) : (int?)null;
+                                if (rowDict.ContainsKey("Gestiones"))
+                                    contacto.Gestiones = rowDict["Gestiones"] != null ? Convert.ToInt32(rowDict["Gestiones"]) : (int?)null;
+                                if (rowDict.ContainsKey("Entrada"))
+                                    contacto.Entrada = rowDict["Entrada"] != null ? Convert.ToInt32(rowDict["Entrada"]) : (int?)null;
+                                if (rowDict.ContainsKey("Titulares"))
+                                    contacto.Titulares = rowDict["Titulares"] != null ? Convert.ToInt32(rowDict["Titulares"]) : (int?)null;
+                                if (rowDict.ContainsKey("Conocidos"))
+                                    contacto.Conocidos = rowDict["Conocidos"] != null ? Convert.ToInt32(rowDict["Conocidos"]) : (int?)null;
+                                if (rowDict.ContainsKey("Desconocidos"))
+                                    contacto.Desconocidos = rowDict["Desconocidos"] != null ? Convert.ToInt32(rowDict["Desconocidos"]) : (int?)null;
+                                if (rowDict.ContainsKey("SinContacto"))
+                                    contacto.SinContacto = rowDict["SinContacto"] != null ? Convert.ToInt32(rowDict["SinContacto"]) : (int?)null;
+
+                                contactos.Add(contacto);
+                            }
+                            dto.Datos = contactos;
                             break;
+
                         case "porcentajes":
-                            result = await connection.QueryAsync<PorcentajesDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
+                            var resultadosPorcentajes = await sqlConnection.QueryAsync<dynamic>(
+                                "PS.ProductividadEnLínea", parameters, commandType: CommandType.StoredProcedure);
+
+                            var porcentajes = new List<PorcentajesDTO>();
+                            foreach (var row in resultadosPorcentajes)
+                            {
+                                var rowDict = (IDictionary<string, object>)row;
+                                var porcentaje = new PorcentajesDTO();
+
+                                if (rowDict.ContainsKey("Encargado"))
+                                    porcentaje.EncargadoId = rowDict["Encargado"] != null ? Convert.ToInt32(rowDict["Encargado"]) : (int?)null;
+                                if (rowDict.ContainsKey("Ejecutivo"))
+                                    porcentaje.IdEjecutivo = rowDict["Ejecutivo"] != null ? Convert.ToInt32(rowDict["Ejecutivo"]) : (int?)null;
+                                if (rowDict.ContainsKey("Negociación"))
+                                    porcentaje.Negociación = rowDict["Negociación"] != null ? Convert.ToDecimal(rowDict["Negociación"]) : (decimal?)null;
+                                if (rowDict.ContainsKey("Gestión"))
+                                    porcentaje.Gestión = rowDict["Gestión"] != null ? Convert.ToDecimal(rowDict["Gestión"]) : (decimal?)null;
+                                if (rowDict.ContainsKey("Entrada"))
+                                    porcentaje.Entrada = rowDict["Entrada"] != null ? Convert.ToDecimal(rowDict["Entrada"]) : (decimal?)null;
+                                if (rowDict.ContainsKey("Titulares"))
+                                    porcentaje.Titulares = rowDict["Titulares"] != null ? Convert.ToDecimal(rowDict["Titulares"]) : (decimal?)null;
+                                if (rowDict.ContainsKey("Conocidos"))
+                                    porcentaje.Conocidos = rowDict["Conocidos"] != null ? Convert.ToDecimal(rowDict["Conocidos"]) : (decimal?)null;
+                                if (rowDict.ContainsKey("Desconocidos"))
+                                    porcentaje.Desconocidos = rowDict["Desconocidos"] != null ? Convert.ToDecimal(rowDict["Desconocidos"]) : (decimal?)null;
+                                if (rowDict.ContainsKey("SinContacto"))
+                                    porcentaje.SinContacto = rowDict["SinContacto"] != null ? Convert.ToDecimal(rowDict["SinContacto"]) : (decimal?)null;
+
+                                porcentajes.Add(porcentaje);
+                            }
+                            dto.Datos = porcentajes;
                             break;
+
                         case "negociaciones":
-                            result = await connection.QueryAsync<NegociacionesDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
+                            var resultadosNegociaciones = await sqlConnection.QueryAsync<dynamic>(
+                                "PS.ProductividadEnLínea", parameters, commandType: CommandType.StoredProcedure);
+
+                            var negociaciones = new List<NegociacionesDTO>();
+                            foreach (var row in resultadosNegociaciones)
+                            {
+                                var rowDict = (IDictionary<string, object>)row;
+                                var negociacion = new NegociacionesDTO();
+
+                                if (rowDict.ContainsKey("Encargado"))
+                                    negociacion.EncargadoId = rowDict["Encargado"] != null ? Convert.ToInt32(rowDict["Encargado"]) : (int?)null;
+                                if (rowDict.ContainsKey("Ejecutivo"))
+                                    negociacion.IdEjecutivo = rowDict["Ejecutivo"] != null ? Convert.ToInt32(rowDict["Ejecutivo"]) : (int?)null;
+                                if (rowDict.ContainsKey("Negociaciones"))
+                                    negociacion.Negociaciones = rowDict["Negociaciones"] != null ? Convert.ToInt32(rowDict["Negociaciones"]) : (int?)null;
+                                if (rowDict.ContainsKey("MontoNegociaciones"))
+                                    negociacion.MontoNegociaciones = rowDict["MontoNegociaciones"] != null ? Convert.ToDecimal(rowDict["MontoNegociaciones"]) : (decimal?)null;
+                                if (rowDict.ContainsKey("SaldoSolucionado"))
+                                    negociacion.SaldoSolucionado = rowDict["SaldoSolucionado"] != null ? Convert.ToDecimal(rowDict["SaldoSolucionado"]) : (decimal?)null;
+                                if (rowDict.ContainsKey("MontoPromedio"))
+                                    negociacion.MontoPromedio = rowDict["MontoPromedio"] != null ? Convert.ToDecimal(rowDict["MontoPromedio"]) : (decimal?)null;
+                                if (rowDict.ContainsKey("SaldoPromedio"))
+                                    negociacion.SaldoPromedio = rowDict["SaldoPromedio"] != null ? Convert.ToDecimal(rowDict["SaldoPromedio"]) : (decimal?)null;
+
+                                negociaciones.Add(negociacion);
+                            }
+                            dto.Datos = negociaciones;
                             break;
-                        case "tiempos":
-                            result = await connection.QueryAsync<TiemposDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
-                        case "tiempopromedio":
-                            result = await connection.QueryAsync<TiempoPromedioDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
+
                         default:
-                            throw new ArgumentException($"Indicador '{indicador}' no soportado para modo grupal");
+                            var resultadosDefault = await sqlConnection.QueryAsync<dynamic>(
+                                "PS.ProductividadEnLínea", parameters, commandType: CommandType.StoredProcedure);
+
+                            var datosDinamicos = new List<Dictionary<string, object>>();
+                            foreach (var row in resultadosDefault)
+                            {
+                                var dict = new Dictionary<string, object>();
+                                var rowDict = (IDictionary<string, object>)row;
+
+                                // Si es para ejecutivo individual y no tiene encargado/ejecutivo, agregarlos
+                                if (idEjecutivo > 0 && !rowDict.ContainsKey("Encargado"))
+                                {
+                                    var infoEjecutivo = await ObtenerInformacionEjecutivoCompleta(sqlConnection, idEjecutivo);
+                                    dict["EncargadoId"] = infoEjecutivo.EncargadoId;
+                                    dict["EjecutivoId"] = infoEjecutivo.IdEjecutivo;
+                                }
+
+                                foreach (var prop in rowDict)
+                                {
+                                    if (prop.Value != null && (prop.Key.Contains("Ingreso") || prop.Key.Contains("Salida") || prop.Key.Contains("Gestión")))
+                                    {
+                                        dict[prop.Key] = ConvertirFecha(prop.Value);
+                                    }
+                                    else
+                                    {
+                                        dict[prop.Key] = prop.Value;
+                                    }
+                                }
+                                datosDinamicos.Add(dict);
+                            }
+                            dto.Datos = datosDinamicos;
+                            break;
                     }
+
+                    return dto;
                 }
-                else
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener productividad");
+                throw;
+            }
+        }
+
+        private async Task<DataTable> CrearTablaEjecutivos(SqlConnection connection, int idEjecutivo)
+        {
+            var tblEjecutivos = new DataTable();
+
+            tblEjecutivos.Columns.Add("idEjecutivo", typeof(int));
+            tblEjecutivos.Columns.Add("Usuario", typeof(string));
+            tblEjecutivos.Columns.Add("Encargado", typeof(string));
+            tblEjecutivos.Columns.Add("Extensión", typeof(string));
+            tblEjecutivos.Columns.Add("Jerarquía", typeof(int));
+            tblEjecutivos.Columns.Add("Activo", typeof(bool));
+
+            if (idEjecutivo == 0)
+            {
+                int idEncargadoRaiz = 1;
+                var ejecutivos = await ClasesCoorinMethods.ObtieneEjecutivosPropios(connection, idEncargadoRaiz);
+
+                foreach (var ejecutivo in ejecutivos)
                 {
-                    Console.WriteLine($"MODO: INDIVIDUAL (idEjecutivo = {idEjecutivo})");
+                    tblEjecutivos.Rows.Add(
+                        ejecutivo.IdEjecutivo,
+                        ejecutivo.Usuario,
+                        ejecutivo.IdEncargado.ToString(), // Usar IdEncargado en lugar de Encargado
+                        string.Empty,
+                        ejecutivo.Jerarquía,
+                        true
+                    );
+                }
+            }
+            else
+            {
+                int idEncargado = await ObtenerIdEncargado(connection, idEjecutivo);
+                var ejecutivos = await ClasesCoorinMethods.ObtieneEjecutivosPropios(connection, idEncargado);
+
+                foreach (var ejecutivo in ejecutivos)
+                {
+                    tblEjecutivos.Rows.Add(
+                        ejecutivo.IdEjecutivo,
+                        ejecutivo.Usuario,
+                        ejecutivo.IdEncargado.ToString(), // Usar IdEncargado en lugar de Encargado
+                        string.Empty,
+                        ejecutivo.Jerarquía,
+                        true
+                    );
+                }
+            }
+
+            return tblEjecutivos;
+        }
+
+        private async Task<int> ObtenerIdEncargado(SqlConnection connection, int idEjecutivo)
+        {
+            try
+            {
+                var sql = "SELECT idEncargado FROM dbCollection..Ejecutivos WHERE idEjecutivo = @idEjecutivo";
+                var idEncargado = await connection.QueryFirstOrDefaultAsync<int?>(sql, new { idEjecutivo });
+                return idEncargado ?? idEjecutivo;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "No se pudo obtener el idEncargado para el ejecutivo {IdEjecutivo}, usando el mismo ID", idEjecutivo);
+                return idEjecutivo;
+            }
+        }
+
+        // Método para obtener información completa del ejecutivo (IDs)
+        private async Task<EjecutivoInfoDTO> ObtenerInformacionEjecutivoCompleta(SqlConnection connection, int idEjecutivo)
+        {
+            try
+            {
+                var sql = @"
+                    SELECT 
+                        E1.idEjecutivo as IdEjecutivo,
+                        E1.idEncargado as EncargadoId
+                    FROM dbCollection..Ejecutivos E1
+                    WHERE E1.idEjecutivo = @idEjecutivo";
+
+                var resultado = await connection.QueryFirstOrDefaultAsync<EjecutivoInfoDTO>(sql, new { idEjecutivo });
+
+                return resultado ?? new EjecutivoInfoDTO
+                {
+                    IdEjecutivo = idEjecutivo,
+                    EncargadoId = 0 // 0 si no tiene encargado
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "No se pudo obtener información del ejecutivo {IdEjecutivo}", idEjecutivo);
+                return new EjecutivoInfoDTO
+                {
+                    IdEjecutivo = idEjecutivo,
+                    EncargadoId = 0
+                };
+            }
+        }
+
+        private DateTime? ConvertirFecha(object valor)
+        {
+            if (valor == null || valor == DBNull.Value)
+                return null;
+
+            try
+            {
+                if (valor is DateTime fecha)
+                    return fecha;
+
+                if (DateTime.TryParse(valor.ToString(), out DateTime resultado))
+                    return resultado;
+
+                if (valor is TimeSpan tiempo)
+                    return DateTime.Today.Add(tiempo);
+
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        // Método alternativo usando SqlCommand
+        public async Task<ProductividaddDTO> ObtenerProductividadConCommand(string indicador, int? Idejecutivo, string servidor)
+        {
+            try
+            {
+                int idEjecutivo = Idejecutivo ?? 0;
+
+                using (var context = _dbContFactory.GetDbContext(servidor, "Memory"))
+                {
+                    var connection = context.Database.GetDbConnection();
+                    await connection.OpenAsync();
+
+                    var sqlConnection = (SqlConnection)connection;
+
+                    using var command = sqlConnection.CreateCommand();
+                    command.CommandText = "PS.ProductividadEnLínea";
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    command.Parameters.AddWithValue("@Indicador", indicador);
+                    command.Parameters.AddWithValue("@idEjecutivo", idEjecutivo);
+
+                    var tblEjecutivos = await CrearTablaEjecutivos(sqlConnection, idEjecutivo);
+                    var param = command.Parameters.AddWithValue("@tbl_Ejecutivos", tblEjecutivos);
+                    param.SqlDbType = SqlDbType.Structured;
+                    param.TypeName = "PS.tbl_Ejecutivos";
+
+                    var dto = new ProductividaddDTO
+                    {
+                        Indicador = indicador,
+                        IdEjecutivo = Idejecutivo
+                    };
+
+                    using var reader = await command.ExecuteReaderAsync();
 
                     switch (indicador.ToLower())
                     {
                         case "sesiones":
-                            result = await connection.QueryAsync<SesionesIndividualDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
+                            var sesiones = new List<SesionesDTO>();
+                            while (await reader.ReadAsync())
+                            {
+                                var sesion = new SesionesDTO();
+
+                                for (int i = 0; i < reader.FieldCount; i++)
+                                {
+                                    var columnName = reader.GetName(i);
+                                    var value = reader.GetValue(i);
+
+                                    switch (columnName.ToLower())
+                                    {
+                                        case "extensión":
+                                            sesion.Extensión = value?.ToString();
+                                            break;
+                                        case "ingreso":
+                                            sesion.Ingreso = value != DBNull.Value ? ConvertirFecha(value) : null;
+                                            break;
+                                        case "salida":
+                                            sesion.Salida = value != DBNull.Value ? ConvertirFecha(value) : null;
+                                            break;
+                                        case "primergestión":
+                                            sesion.PrimerGestión = value != DBNull.Value ? ConvertirFecha(value) : null;
+                                            break;
+                                        case "modo":
+                                            sesion.Modo = value?.ToString();
+                                            break;
+                                        case "tiempoenmodo":
+                                            if (value != DBNull.Value && TimeSpan.TryParse(value.ToString(), out TimeSpan tiempo))
+                                                sesion.TiempoEnModo = tiempo;
+                                            break;
+                                    }
+                                }
+
+                                // Obtener información del ejecutivo (IDs)
+                                var infoEjecutivo = await ObtenerInformacionEjecutivoCompleta(sqlConnection, idEjecutivo);
+                                sesion.EncargadoId = infoEjecutivo.EncargadoId;
+                                sesion.IdEjecutivo = infoEjecutivo.IdEjecutivo;
+
+                                sesiones.Add(sesion);
+                            }
+                            dto.Datos = sesiones;
                             break;
-                        case "contactos":
-                            result = await connection.QueryAsync<ProductividadIndividualDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
-                        case "negociaciones":
-                            result = await connection.QueryAsync<NegociacionesIndividualDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
+
                         default:
-                            throw new ArgumentException($"Indicador '{indicador}' no soportado para modo individual");
+                            var datos = new List<Dictionary<string, object>>();
+                            while (await reader.ReadAsync())
+                            {
+                                var registro = new Dictionary<string, object>();
+
+                                // Agregar encargado y ejecutivo para casos individuales
+                                if (idEjecutivo > 0)
+                                {
+                                    var infoEjecutivo = await ObtenerInformacionEjecutivoCompleta(sqlConnection, idEjecutivo);
+                                    registro["EncargadoId"] = infoEjecutivo.EncargadoId;
+                                    registro["EjecutivoId"] = infoEjecutivo.IdEjecutivo;
+                                }
+
+                                for (int i = 0; i < reader.FieldCount; i++)
+                                {
+                                    var columnName = reader.GetName(i);
+                                    var value = reader.GetValue(i);
+
+                                    if (value != DBNull.Value && (columnName.Contains("Ingreso") || columnName.Contains("Salida") || columnName.Contains("Gestión")))
+                                    {
+                                        registro[columnName] = ConvertirFecha(value);
+                                    }
+                                    else
+                                    {
+                                        registro[columnName] = value == DBNull.Value ? null : value;
+                                    }
+                                }
+                                datos.Add(registro);
+                            }
+                            dto.Datos = datos;
+                            break;
                     }
-                }
 
-                // Convertir a lista y contar resultados
-                var resultList = (result as System.Collections.IEnumerable)?.Cast<object>().ToList() ?? new List<object>();
-                Console.WriteLine($"✅ SP ejecutado. Resultados: {resultList.Count} filas");
-
-                if (resultList.Count > 0)
-                {
-                    foreach (var item in resultList)
-                    {
-                        Console.WriteLine($"  - Item: {System.Text.Json.JsonSerializer.Serialize(item)}");
-                    }
+                    return dto;
                 }
-                else
-                {
-                    Console.WriteLine($"  - ⚠️  NO HAY RESULTADOS");
-                }
-
-                return resultList;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ ERROR en EjecutarStoredProcedure: {ex.Message}");
-                Console.WriteLine($"Stack: {ex.StackTrace}");
-                _logger.LogError(ex, $"Error en EjecutarStoredProcedure: {ex.Message}");
+                _logger.LogError(ex, "Error en ObtenerProductividadConCommand");
                 throw;
             }
-            finally
-            {
-                Console.WriteLine($"Cerrando conexión...");
-                await connection.CloseAsync();
-                Console.WriteLine($"✅ Conexión cerrada");
-            }
         }
+    }
 
-        private async Task<object> EjecutarConsultaPivot(string indicador, int idEjecutivo, string servidor)
-        {
-            Console.WriteLine($"=== EJECUTANDO CONSULTA PIVOT ===");
-            Console.WriteLine($"Indicador: {indicador}");
-            Console.WriteLine($"idEjecutivo: {idEjecutivo}");
-            Console.WriteLine($"servidor: {servidor}");
-
-            var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
-            var connection = dbContext.Database.GetDbConnection();
-
-            try
-            {
-                await connection.OpenAsync();
-
-                var ejecutivos = await ClasesCoorinMethods.ObtieneEjecutivosPropios((SqlConnection)connection, idEjecutivo);
-
-                DataTable tblEjecutivos = new DataTable();
-                tblEjecutivos.Columns.Add("idEjecutivo", typeof(int));
-                tblEjecutivos.Columns.Add("Usuario", typeof(string));
-                tblEjecutivos.Columns.Add("idEncargado", typeof(int));
-                tblEjecutivos.Columns.Add("Encargado", typeof(string));
-                tblEjecutivos.Columns.Add("Jerarquía", typeof(byte));
-                tblEjecutivos.Columns.Add("NombreEjecutivo", typeof(string));
-
-                foreach (var e in ejecutivos)
-                {
-                    tblEjecutivos.Rows.Add(
-                        e.IdEjecutivo,
-                        e.Usuario,
-                        e.IdEncargado ?? 0,
-                        DBNull.Value,
-                        DBNull.Value,
-                        e.NombreEjecutivo
-                    );
-                }
-
-                string queryPivot = @"
-                    SELECT 
-                        Encargado, Ejecutivo, [6] as Hora6, [7] as Hora7, [8] as Hora8, [9] as Hora9, 
-                        [10] as Hora10, [11] as Hora11, [12] as Hora12, [13] as Hora13, [14] as Hora14, 
-                        [15] as Hora15, [16] as Hora16, [17] as Hora17, [18] as Hora18, [19] as Hora19, 
-                        [20] as Hora20, [21] as Hora21, [22] as Hora22
-                    FROM (
-                        SELECT 
-                            E.Encargado, E.Usuario as Ejecutivo, P.Hora, P.{0} as Valor 
-                        FROM dbMemory.PS.Productividad P 
-                        INNER JOIN @tblEjecutivos E ON P.idEjecutivo = E.idEjecutivo 
-                    ) P 
-                    PIVOT (
-                        SUM(Valor) FOR Hora IN ([6], [7], [8], [9], [10], [11], [12], [13], [14], [15], [16], [17], [18], [19], [20], [21], [22])
-                    ) AS PVT";
-
-                queryPivot = string.Format(queryPivot, indicador);
-
-                var parameters = new DynamicParameters();
-                parameters.Add("@tblEjecutivos", tblEjecutivos.AsTableValuedParameter("PS.tbl_Ejecutivos"));
-
-                var result = await connection.QueryAsync<PivotedProductividadDTO>(
-                    queryPivot,
-                    parameters,
-                    commandType: CommandType.Text
-                );
-
-                var resultList = result.ToList();
-                Console.WriteLine($"✅ PIVOT ejecutado. Resultados: {resultList.Count} filas");
-
-                return resultList;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ ERROR en EjecutarConsultaPivot: {ex.Message}");
-                _logger.LogError(ex, $"Error en EjecutarConsultaPivot: {ex.Message}");
-                throw;
-            }
-            finally
-            {
-                await connection.CloseAsync();
-            }
-        }
+    // DTO auxiliar para información del ejecutivo (IDs)
+    public class EjecutivoInfoDTO
+    {
+        public int IdEjecutivo { get; set; }
+        public int EncargadoId { get; set; }
     }
 }
