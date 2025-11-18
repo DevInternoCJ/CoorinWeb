@@ -9,6 +9,9 @@ const DefaultModalHeader = ({
     className = "",
     titleClassName = "",
     iconClassName = "",
+    validadoresCounter,
+    arrepentimientosCheckbox,
+    nodoEjecutivoHeader,
     ...props
 }) => {
     // Si se pasan children, usar esos en lugar del header por defecto
@@ -17,52 +20,101 @@ const DefaultModalHeader = ({
             <div className={`px-3 pt-4 pb-3 sm:px-4 sm:pt-5 sm:pb-4 md:px-6 md:pt-6 md:pb-4 
                             bg-white border-b border-gray-200 
                             ${className}`} {...props}>
+                {/* Si el título se pasa como prop, mostrarlo arriba de los children */}
+                {title && (
+                    <div className="flex items-center gap-2 mb-2">
+                        {Icon && (
+                            <Icon className={`size-5 sm:size-6 flex-shrink-0 ${iconClassName}`} style={{ color: iconClassName?.includes('#147f5e') ? '#147f5e' : undefined }} />
+                        )}
+                        <h2 className={`text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate sm:whitespace-normal leading-tight ${titleClassName}`}>{title}</h2>
+                    </div>
+                )}
                 {children}
             </div>
         );
     }
 
-    // Header por defecto con título, ícono y botón de cerrar
+    // Header por defecto con título, ícono, selectores y botón de cerrar
     return (
-    <div className={`px-3 pt-4 pb-1 sm:px-4 sm:pt-5 sm:pb-2 md:px-6 md:pt-6 md:pb-2 
-             bg-white border-b border-gray-200 
-             flex items-center justify-between 
-             gap-3 ${className}`} {...props}>
-            
-            {/* Sección izquierda: Ícono y título */}
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                {Icon && (
-                    <Icon 
-                        className={`size-5 sm:size-6 flex-shrink-0 ${iconClassName}`}
-                        style={{ color: iconClassName?.includes('#147f5e') ? '#147f5e' : undefined }}
-                    />
-                )}
-                {title && (
-                    <div className="min-w-0">
-                        <h2 className={`text-base sm:text-lg md:text-xl font-semibold 
-                                       text-gray-900 
-                                       truncate sm:whitespace-normal
-                                       leading-tight ${titleClassName}`}>
-                            {title}
-                        </h2>
+        <>
+            <div className={`px-3 pt-4 pb-1 sm:px-4 sm:pt-5 sm:pb-2 md:px-6 md:pt-6 md:pb-2 bg-white border-b border-gray-200 w-full ${className}`} {...props}>
+                {/* Fila principal: título/ícono a la izquierda, dropdowns a la derecha, botón cerrar extremo derecho */}
+                <div className="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between relative gap-2">
+                    {/* Título, ícono y dropdowns en la misma fila */}
+                    <div className="flex flex-col w-full lg:flex-row lg:items-center lg:gap-4">
+                        <div className="flex items-center gap-2 min-w-0 lg:flex-shrink-0">
+                            {Icon && (
+                                <Icon className={`size-5 sm:size-6 flex-shrink-0 ${iconClassName}`} style={{ color: iconClassName?.includes('#147f5e') ? '#147f5e' : undefined }} />
+                            )}
+                            {title && (
+                                <div className="min-w-0">
+                                    <h2 className={`text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate sm:whitespace-normal leading-tight ${titleClassName}`}>{title}</h2>
+                                </div>
+                            )}
+                        </div>
+                        {/* Dropdowns alineados a la derecha del título */}
+                        <div className="flex flex-col gap-2 w-full mt-2 lg:mt-0 lg:flex-row lg:gap-4 lg:w-auto lg:items-center">
+                            {props.carteraSelector && (
+                                <div className="w-full lg:w-auto">{props.carteraSelector}</div>
+                            )}
+                            {props.productoSelector && (
+                                <div className="w-full lg:w-auto">{props.productoSelector}</div>
+                            )}
+                            {props.encargadoSelector && (
+                                <div className="w-full lg:w-auto">{props.encargadoSelector}</div>
+                            )}
+                            {/* Checkbox solo en mobile debajo de producto */}
+                            {arrepentimientosCheckbox && (
+                                <div className="w-full flex justify-center lg:hidden">{arrepentimientosCheckbox}</div>
+                            )}
+                        </div>
                     </div>
-                )}
-            </div>
-            
-            {/* Botón de cerrar */}
-            {showCloseButton && (
-                <div className="flex-shrink-0">
-                    <button
-                        onClick={onClose}
-                        className="text-jerarquia3 hover:bg-background-dashboard hover:text-red-600 text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors"
-                        aria-label="Cerrar modal"
-                        type="button"
-                    >
-                        &times;
-                    </button>
+                    {/* Botón cerrar */}
+                    {showCloseButton && (
+                        <button
+                            onClick={onClose}
+                            className="absolute right-0 top-0 text-jerarquia3 hover:bg-background-dashboard hover:text-red-600 text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors lg:static lg:ml-4"
+                            aria-label="Cerrar modal"
+                            type="button"
+                        >
+                            &times;
+                        </button>
+                    )}
                 </div>
-            )}
-        </div>
+                {/* Fila secundaria: solo en desktop, contador, nodo ejecutivo, checkbox */}
+                <div className="grid grid-cols-1 gap-2 w-full mt-2 lg:grid-cols-3 lg:gap-4 lg:items-center">
+                    {/* Contador de encargados para modales de encargados */}
+                    {props.contadorEncargados && (
+                        <div className="w-full flex justify-center lg:justify-start lg:flex">
+                            {React.isValidElement(props.contadorEncargados)
+                                ? props.contadorEncargados
+                                : (typeof props.contadorEncargados === 'object' && props.contadorEncargados !== null
+                                    ? (
+                                        <span className="font-semibold text-jerarquia3 text-base">
+                                            Encargados ({props.contadorEncargados.asignados ?? 0} / {props.contadorEncargados.total ?? 0})
+                                        </span>
+                                    )
+                                    : props.contadorEncargados)
+                            }
+                        </div>
+                    )}
+                    {/* Contador de validadores para modales de validadores */}
+                    {validadoresCounter && (
+                        <div className="w-full flex justify-center lg:justify-start lg:flex">{validadoresCounter}</div>
+                    )}
+                    {props.cambiarButton && (
+                        <div className="w-full flex justify-center">{props.cambiarButton}</div>
+                    )}
+                    {nodoEjecutivoHeader && (
+                        <div className="w-full flex justify-center">{nodoEjecutivoHeader}</div>
+                    )}
+                    {/* Checkbox solo en desktop */}
+                    {arrepentimientosCheckbox && (
+                        <div className="w-full hidden lg:flex justify-end">{arrepentimientosCheckbox}</div>
+                    )}
+                </div>
+            </div>
+        </>
     );
 };
 

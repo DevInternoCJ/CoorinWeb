@@ -137,20 +137,151 @@ const ModalProductividadContent = ({
     });
   };
 
+  // Obtener títulos de cabecera como array (útil para formateos basados en nombre de columna)
+  const getTableHeaderTitles = () => {
+    if (selectedIndicator === "Negociaciones") {
+      if (timeFilter === "Dia") {
+        // Backend returns fields for negociaciones as: hora, montoNegociaciones, montoPromedio, negociaciones, saldoPromedio, saldoSolucionado
+        return [
+          "hora",
+          "montoNegociaciones",
+          "montoPromedio",
+          "negociaciones",
+          "saldoPromedio",
+          "saldoSolucionado",
+        ];
+      } else {
+        return [
+          "Encargado",
+          "Ejecutivo",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "Total",
+        ];
+      }
+    }
+
+    switch (selectedIndicator) {
+      case "Sesiones":
+        return ["Extensión", "Ingreso", "Primer Gestión", "Modo", "TiempoEnModo"];
+      case "Contactos":
+        return [
+          "conocidos",
+          "cuentas",
+          "desconocidos",
+          "entrada",
+          "gestiones",
+          "hora",
+          "montoNegociaciones",
+          "montoPromedio",
+          "negociaciones",
+          "saldoPromedio",
+          "saldoSolucionado",
+          "sinContacto",
+          "titulares",
+        ];
+      case "Porcentajes":
+        return [
+          "Encargado",
+          "Ejecutivo",
+          "Negociación",
+          "Gestiones x Cuenta",
+          "Entrada",
+          "Titulares",
+          "Conocidos",
+          "Desconocidos",
+          "SinContacto",
+        ];
+      case "Tiempos":
+        return [
+          "Encargado",
+          "Ejecutivo",
+          "Sesión",
+          "Cuentas",
+          "Pausas",
+          "Muerto",
+          "Consulta",
+          "Gestión",
+          "Permiso",
+          "Curso",
+          "Comida",
+          "Baño",
+        ];
+      case "Tiempo Promedio":
+        return [
+          "Encargado",
+          "Ejecutivo",
+          "Negociaciones",
+          "Cuentas",
+          "Titulares",
+          "Conocidos",
+          "Desconocidos",
+          "SinContacto",
+        ];
+      case "Cuentas":
+      case "Titulares":
+      case "Conocidos":
+      case "Desconocidos":
+      case "Sin Contacto":
+      case "Monto Negociaciones":
+      case "Saldo Solucionado":
+        return [
+          "Encargado",
+          "Ejecutivo",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "Total",
+        ];
+      default:
+        return [];
+    }
+  };
+
+
   // Función para renderizar las columnas de la tabla según el indicador
   const renderTableHeaders = () => {
     // Distinguir entre "Negociaciones" de Día vs Hora
     if (selectedIndicator === "Negociaciones") {
       if (timeFilter === "Dia") {
+        // Mostrar columnas que envía el backend para "Negociaciones" en modo Día
         return (
           <>
-            <th>Encargado</th>
-            <th>Ejecutivo</th>
-            <th>Negociaciones</th>
-            <th>MontoNegociaciones</th>
-            <th>SaldoSolucionado</th>
-            <th>MontoPromedio</th>
-            <th>SaldoPromedio</th>
+            <th>hora</th>
+            <th>montoNegociaciones</th>
+            <th>montoPromedio</th>
+            <th>negociaciones</th>
+            <th>saldoPromedio</th>
+            <th>saldoSolucionado</th>
           </>
         );
       } else {
@@ -187,28 +318,29 @@ const ModalProductividadContent = ({
       case "Sesiones":
         return (
           <>
-            <th>Extensiòn</th>
-            <th>Ejecutivo</th>
             <th>Extensión</th>
             <th>Ingreso</th>
-            <th>Salida</th>
             <th>Primer Gestión</th>
             <th>Modo</th>
-            <th>TiempoEnModo</th>
+            <th>Tiempo En Modo</th>
           </>
         );
       case "Contactos":
         return (
           <>
-            <th>Encargado</th>
-            <th>Ejecutivo</th>
-            <th>Cuentas</th>
-            <th>Gestiones</th>
-            <th>Entrada</th>
-            <th>Titulares</th>
-            <th>Conocidos</th>
-            <th>Desconocidos</th>
-            <th>SinContacto</th>
+            <th>conocidos</th>
+            <th>cuentas</th>
+            <th>desconocidos</th>
+            <th>entrada</th>
+            <th>gestiones</th>
+            <th>hora</th>
+            <th>montoNegociaciones</th>
+            <th>montoPromedio</th>
+            <th>negociaciones</th>
+            <th>saldoPromedio</th>
+            <th>saldoSolucionado</th>
+            <th>sinContacto</th>
+            <th>titulares</th>
           </>
         );
       case "Porcentajes":
@@ -295,7 +427,7 @@ const ModalProductividadContent = ({
     // Distinguir entre "Negociaciones" de Día vs Hora
     if (selectedIndicator === "Negociaciones") {
       if (timeFilter === "Dia") {
-        return 7; // Encargado, Ejecutivo, Negociaciones, MontoNegociaciones, SaldoSolucionado, MontoPromedio, SaldoPromedio
+        return 6; // hora, montoNegociaciones, montoPromedio, negociaciones, saldoPromedio, saldoSolucionado
       } else {
         return 20; // Encargado, Ejecutivo, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, Total
       }
@@ -304,9 +436,9 @@ const ModalProductividadContent = ({
     switch (selectedIndicator) {
       // Radio Button "Día"
       case "Sesiones":
-        return 8; // Encargado, Ejecutivo, Extensión, Ingreso, Salida, Primer Gestión, Modo, TiempoEnModo
+        return 5; // Extensión, Ingreso, 1erGestión, Modo, TiempoEnModo
       case "Contactos":
-        return 9; // Encargado, Ejecutivo, Cuentas, Gestiones, Entrada, Titulares, Conocidos, Desconocidos, SinContacto
+        return 13; // campos mapeados según respuesta: conocidos, cuentas, desconocidos, entrada, gestiones, hora, montoNegociaciones, montoPromedio, negociaciones, saldoPromedio, saldoSolucionado, sinContacto, titulares
       case "Porcentajes":
         return 9; // Encargado, Ejecutivo, Negociación, Gestiones x Cuenta, Entrada, Titulares, Conocidos, Desconocidos, SinContacto
       case "Tiempos":
@@ -364,28 +496,72 @@ const ModalProductividadContent = ({
     return productivityData.map((item, index) => {
       // Convertir el objeto a array de valores, manejando diferentes estructuras
       let values = [];
+      const columnCount = getColumnCount();
+
       if (Array.isArray(item)) {
         values = item;
       } else if (typeof item === "object" && item !== null) {
-        values = Object.values(item);
+        // Mapeamos explícitamente por nombre de columna para evitar desalineamiento
+        const headers = getTableHeaderTitles();
+        const headerToKey = (h) => {
+          if (!h) return null;
+          const map = {
+            "Extensión": "extension",
+            "Ingreso": "ingreso",
+            "Salida": "salida",
+            "Primera Gestión": "primerGestion",
+            "Modo": "modo",
+            "Tiempo En Modo": "tiempoEnModo"
+          };
+          if (map[h]) return map[h];
+          // fallback: normalizar
+          const normalized = h.replace(/\s+/g, "").replace(/\W/g, "");
+          return normalized.charAt(0).toLowerCase() + normalized.slice(1);
+        };
+
+        if (headers && headers.length > 0) {
+          values = headers.map((h) => {
+            const key = headerToKey(h);
+            const v = key && Object.prototype.hasOwnProperty.call(item, key) ? item[key] : undefined;
+            return v !== undefined ? v : "-";
+          });
+        } else {
+          values = Object.values(item);
+        }
       } else {
         values = [item];
       }
-
-      const columnCount = getColumnCount();
 
       // Asegurar que tenemos el número correcto de columnas
       while (values.length < columnCount) {
         values.push("-");
       }
 
+      const headers = getTableHeaderTitles();
+
       return (
         <tr key={index}>
-          {values.slice(0, columnCount).map((value, idx) => (
-            <td key={idx} className={idx === 0 ? "font-semibold" : ""}>
-              {value !== null && value !== undefined ? String(value) : "-"}
-            </td>
-          ))}
+          {values.slice(0, columnCount).map((value, idx) => {
+            let display = value !== null && value !== undefined ? String(value) : "-";
+            const header = headers[idx] || "";
+
+            // Si la columna es 'Ingreso', extraer la parte de hora tras la 'T' (HH:MM:SS)
+            if (header === "Ingreso") {
+              const m = display.match(/T(\d{2}:\d{2}:\d{2})/);
+              if (m && m[1]) {
+                display = m[1];
+              } else {
+                const m2 = display.match(/(\d{2}:\d{2}:\d{2})/);
+                if (m2 && m2[1]) display = m2[1];
+              }
+            }
+
+            return (
+              <td key={idx} className={idx === 0 ? "font-semibold" : ""}>
+                {display}
+              </td>
+            );
+          })}
         </tr>
       );
     });
@@ -410,37 +586,13 @@ const ModalProductividadContent = ({
 
         {/* Columna derecha - Tabla de datos */}
         <div
-          className="flex-1 bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] flex flex-col"
+          className="flex-1 bg-white rounded-lg pt-[1.5vh] pb-3 px-[1vw] shadow border border-[var(--color-jerarquia1)] flex flex-col"
           style={{ minWidth: 0 }}
         >
           {/* Información del ejecutivo seleccionado */}
-          {selectedExecutiveNode && (
-            <div className="flex items-center gap-2 mb-3">
-              <span className="modal-span-1">Ejecutivo:</span>
-              <span className="modal-span-2">
-                {(() => {
-                  // Buscar recursivamente en toda la jerarquía
-                  const findExecutive = (tree, id) => {
-                    for (const node of tree) {
-                      if (node.idEjecutivo === id) return node;
-                      if (node.subordinados && node.subordinados.length > 0) {
-                        const found = findExecutive(node.subordinados, id);
-                        if (found) return found;
-                      }
-                    }
-                    return null;
-                  };
-                  const executive = findExecutive(
-                    executiveTree,
-                    selectedExecutiveNode
-                  );
-                  return executive
-                    ? `${executive.usuario} - ${executive.nombreEjecutivo}`
-                    : "Ejecutivo seleccionado";
-                })()}
-              </span>
-            </div>
-          )}
+          {/* Aquí irá el header con los selectores; se renderiza desde el padre */}
+
+          {/* Ejecutivo info removed as per request - not showing executive above productivity table */}
 
           {/* Fila de información */}
           <div className="flex items-center mb-2 w-full">

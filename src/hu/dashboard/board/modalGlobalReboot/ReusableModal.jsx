@@ -10,8 +10,8 @@ const MODAL_SIZES = {
     "metas-sm": "w-full max-w-[clamp(220px,80vw,700px)] min-w-[clamp(120px,40vw,400px)]",
     productivity: "w-full max-w-[clamp(320px,92vw,1400px)] min-w-[clamp(220px,60vw,900px)]",
     catalogos: "w-full max-w-[clamp(280px,88vw,1100px)] min-w-[clamp(180px,50vw,700px)]",
-    validadores: "w-full max-w-[clamp(180px,60vw,600px)] min-w-[clamp(120px,30vw,300px)]",
-    encargados: "w-full max-w-[clamp(180px,60vw,600px)] min-w-[clamp(120px,30vw,300px)]",
+    validadores: "w-full max-w-[clamp(270px,84vw,900px)] min-w-[clamp(180px,45vw,500px)]",
+    encargados: "w-full max-w-[clamp(320px,95vw,1200px)] min-w-[clamp(280px,90vw,700px)]",
     historicos: "w-full max-w-[clamp(220px,80vw,900px)] min-w-[clamp(120px,40vw,400px)]",
     "historicos-inicial": "w-[340px] min-w-[220px] h-[120px] max-h-[160px]",
     custom: ""

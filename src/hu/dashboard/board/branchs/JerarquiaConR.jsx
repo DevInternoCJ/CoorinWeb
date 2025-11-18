@@ -11,7 +11,8 @@ const JerarquiaConR = ({
     useCheckbox = false,
     usuariosValidadores = [],
     handleSeleccionarUsuario = () => {},
-    producto = null
+    producto = null,
+    omitSessionExecutive = false
 }) => {
     // Logo y datos de sesión
     const userData = JSON.parse(localStorage.getItem('userData'));
@@ -215,8 +216,8 @@ const JerarquiaConR = ({
                 padding: '1.5vh 1vw'
             }}
         >
-            {/* Usuario y Ejecutivo principal */}
-            {idEjecutivoSesion && (
+            {/* Usuario y Ejecutivo principal (solo si no se omite) */}
+            {!omitSessionExecutive && idEjecutivoSesion && (
                 <div
                     className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? ' selected' : ''}`}
                     title="Mostrar metas de todos los subordinados del ejecutivo de la sesión"

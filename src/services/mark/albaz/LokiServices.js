@@ -390,25 +390,25 @@ export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
     const idNum = Number(idEjecutivo);
     const requestData = [idNum];
     const url = `/Encargados/ejecutivos-propios/${idNum}`;
-    console.log('📤 Enviando a', url, 'con:', requestData);
+    console.log('Enviando a', url, 'con:', requestData);
     // El interceptor añade el token automáticamente
     const response = await api.get(url, requestData);
-    console.log('📥 Respuesta de', url + ':', response.data);
+    console.log('Respuesta de', url + ':', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error al obtener la ramificación de encargados:', error);
+    console.error('Error al obtener la ramificación de encargados:', error);
     if (error.response?.status === 401) {
-      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      console.warn('Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
     }
     if (error.response) {
-      console.error('📊 Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
     } else if (error.request) {
-      console.error('❌ No se recibió respuesta del servidor:', error.request);
+      console.error('No se recibió respuesta del servidor:', error.request);
     } else {
-      console.error('❌ Error al configurar la solicitud:', error.message);
+      console.error('Error al configurar la solicitud:', error.message);
     }
     throw error;
   }
