@@ -24,6 +24,8 @@ namespace Loki.Mark.Procesos.Gestiones.Controllers
             _gestionesDao = gestionesDao;
         }
 
+
+        #region Comentario
         [HttpGet("comentarios")]
         [Authorize]
         [SwaggerOperation(
@@ -44,7 +46,7 @@ namespace Loki.Mark.Procesos.Gestiones.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error al obtener las frases", error = ex.Message });
+                return StatusCode(500, new { message = "Error al obtener los comentarios", error = ex.Message });
             }
         }
 
@@ -78,16 +80,30 @@ namespace Loki.Mark.Procesos.Gestiones.Controllers
                 return StatusCode(500, new { message = "Error al actualizar el comentario", error = ex.Message });
             }
         }
-        [HttpPost("carga-llamadas")]
+
+        #endregion
+
+        #region Carga Gestiones Tel
+        //carga llamadas
+
+        #endregion
+
+        #region Consulta gestiones tel
+        [HttpGet("consulta-llamadas")]
         [Authorize]
-        [RequestSizeLimit(100_000_000)] // 100MB
         [SwaggerOperation(
-             Summary = "cargar llamadas - irene",
-             Description = "Carga un archivo CSV o Excel con registros de llamadas"
-         )]
-        public async Task<IActionResult> CargaLlamadas(
-        [FromForm] CargaLlamadasRequest request)
+          Summary = "consulta llamadas - Irene",
+          Description = "Obtiene las gestiones por cartera y rango de fechas"
+      )]
+
+        public async Task<IActionResult> RealizaBusqueda(
+        [FromQuery] int idCartera,
+        [FromQuery] DateTime fechaInicial,
+        [FromQuery] DateTime fechaFinal,
+        [FromQuery] int jerarquia, 
+        [FromQuery] int? idProducto = null)
         {
+           
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
             if (string.IsNullOrWhiteSpace(servidorClaim))
@@ -95,55 +111,86 @@ namespace Loki.Mark.Procesos.Gestiones.Controllers
 
             try
             {
-                var (success, message, errores) = await _gestionesDao.CargarLlamadasAsync(request, servidorClaim);
+               
+                var gestiones = await _gestionesService.RealizaBusqueda(
+                    servidorClaim,
+                    idCartera,
+                    fechaInicial,
+                    fechaFinal,
+                    jerarquia,
+                    idProducto
+                );
 
-                if (success)
-                {
-                    var response = new
-                    {
-                        message,
-                        registrosConError = errores?.Rows.Count ?? 0,
-                        // Convertir DataTable a lista de objetos para evitar ciclos
-                        detallesErrores = errores != null ? _gestionesDao.ConvertDataTableToList(errores) : null
-                    };
-                    return Ok(response);
-                }
-                else
-                {
-                    // Para errores, solo enviar mensaje y contar, no el DataTable completo
-                    return BadRequest(new
-                    {
-                        error = message,
-                        registrosConError = errores?.Rows.Count ?? 0
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al cargar las llamadas", error = ex.Message });
-            }
-        }
-        [HttpGet("realiza-busqueda")]
-        [Authorize]
-        [SwaggerOperation(
-            Summary = "realiza busqueda - irene",
-            Description = "obtiene las gestiones"
-        )]
-        public async Task<IActionResult> realizabusqueda([FromQuery] int idCartera, DateTime fechaInicial, DateTime fechaFinal) 
-        {
-            string? servidorClaim = User.FindFirst("Servidor")?.Value;
-            if (string.IsNullOrWhiteSpace(servidorClaim))
-                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
-
-            try
-            {
-                var gestiones = await _gestionesService.buscaGestiones(servidorClaim, idCartera, fechaInicial, fechaFinal);
                 return Ok(gestiones);
+            }
+           
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { message = "Permisos insuficientes", error = ex.Message });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Error al obtener las gestiones", error = ex.Message });
             }
         }
+        #endregion
+
+        #region editar gestiones
+        [HttpGet("gestiones-cuenta")]
+        [Authorize]
+        [SwaggerOperation(
+          Summary = "consultar gestiones - Irene",
+          Description = ""
+      )]
+
+        public async Task<IActionResult> GetGestionesCuenta([FromQuery] int idCartera, string idCuenta)
+        {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+
+            try
+            {
+                var gestiones = await _gestionesService.buscarGestiones(servidorClaim, idCartera, idCuenta);
+                return Ok(gestiones);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al obtener las gestiones", error = ex.Message });
+
+
+            }
+        }
+        [HttpPut("editar-gestiones")]
+        [Authorize]
+        [SwaggerOperation(
+          Summary = "editar gestiones - Irene",
+          Description = ""
+      )]
+
+        public async Task<IActionResult> EditarGestion([FromQuery] int idCartera, [FromQuery] string idCuenta, [FromQuery] DateTime fecha, [FromQuery] TimeSpan hora, [FromQuery] string comentario)
+        {
+            var servidor = User.FindFirst("Servidor")?.Value;
+            var idEjecutivo = int.Parse(User.FindFirst("idEjecutivo")?.Value ?? "0");
+
+            if (string.IsNullOrWhiteSpace(servidor))
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+
+            try
+            {
+                var resultado = await _gestionesDao.EditarGestion(servidor, idCartera, idCuenta, fecha, hora, comentario, idEjecutivo);
+                return Ok(new { registrosAfectados = resultado });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al editar la gestión", error = ex.Message });
+            }
+        }
+
+        #endregion
+
+        #region Intentos Vicidial
+        //carga intentos vicidial
+        #endregion
     }
 }
