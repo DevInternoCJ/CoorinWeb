@@ -37,7 +37,7 @@ const DefaultModalHeader = ({
     // Header por defecto con título, ícono, selectores y botón de cerrar
     return (
         <>
-            <div className={`px-3 pt-4 pb-1 sm:px-4 sm:pt-5 sm:pb-2 md:px-6 md:pt-6 md:pb-2 bg-white border-b border-gray-200 w-full ${className}`} {...props}>
+            <div className={`px-3 pt-4 pb-1 sm:px-4 sm:pt-5 sm:pb-2 md:px-6 md:pt-6 md:pb-2 bg-white border-b border-gray-200 w-full ${className}`} {...Object.fromEntries(Object.entries(props).filter(([key]) => key !== 'carteraSelector'))}>
                 {/* Fila principal: título/ícono a la izquierda, dropdowns a la derecha, botón cerrar extremo derecho */}
                 <div className="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between relative gap-2">
                     {/* Título, ícono y dropdowns en la misma fila */}

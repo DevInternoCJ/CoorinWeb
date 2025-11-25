@@ -12,8 +12,8 @@ const MODAL_SIZES = {
     catalogos: "w-full max-w-[clamp(280px,88vw,1100px)] min-w-[clamp(180px,50vw,700px)]",
     validadores: "w-full max-w-[clamp(270px,84vw,900px)] min-w-[clamp(180px,45vw,500px)]",
     encargados: "w-full max-w-[clamp(320px,95vw,1200px)] min-w-[clamp(280px,90vw,700px)]",
-    historicos: "w-full max-w-[clamp(220px,80vw,900px)] min-w-[clamp(120px,40vw,400px)]",
-    "historicos-inicial": "w-[340px] min-w-[220px] h-[120px] max-h-[160px]",
+    historicos: "w-full max-w-[clamp(280px,65vw,725px)] min-w-[clamp(150px,42vw,425px)]",
+    "historicos-inicial": "w-[340px] min-w-[220px] h-[56px] max-h-[70px]",
     custom: ""
 };
 
@@ -121,7 +121,7 @@ const ReusableModal = ({
                 ref={modalRef}
                 className={`bg-white rounded-lg sm:rounded-xl shadow-2xl 
                            ${sizeClass}
-                           max-h-[clamp(320px,92vh,900px)] min-h-[clamp(220px,40vh,400px)]
+                           max-h-[clamp(320px,80vh,700px)] min-h-[clamp(220px,40vh,400px)]
                            overflow-hidden 
                            transition-all duration-300 ease-out
                            grid grid-rows-[auto_1fr_auto]
