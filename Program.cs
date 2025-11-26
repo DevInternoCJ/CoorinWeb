@@ -119,6 +119,9 @@ using Loki.Mark.Procesos.Gestiones.Services;
 using Loki.Mark.Procesos.Procesos.DAOs;
 using Loki.Mark.Procesos.Procesos.Interfaces;
 using Loki.Mark.Procesos.Procesos.Services;
+using Loki.Mark.Procesos.Metas.Services;
+using Loki.Mark.Procesos.Metas.Interfaces;
+using Loki.Mark.Procesos.Metas.DAOs;
 using Loki.Mark.Reportes.Cliente.DAOs;
 using Loki.Mark.Reportes.Cliente.Services;
 using Loki.Mark.Reportes.DiaDelEjecutivo.DAOs;
@@ -149,6 +152,8 @@ using System.Text;
 using System.Text.Json;
 using BusquedasService = Loki.Mark.Consulta.Cuenta.Services.BusquedasService;
 using CatalogosService = Loki.Mark.Administracion.Gespa.Catalogos.Services.CatalogosService;
+using MetasService = Loki.Mark.Administracion.Ejecutivos.Metas.Services.MetasService;
+using MetasDao = Loki.Mark.Administracion.Ejecutivos.Metas.DAOs.MetasDao;
 
 
 
@@ -314,7 +319,7 @@ builder.Services.AddScoped<IInfoEjecutivoDao, InfoEjecutivoDao>();
 builder.Services.AddScoped<IValidadoresDAOs, ValidadoresDao>();
 builder.Services.AddScoped<IValidadoresService, ValidadoresServices>();
 //metas
-builder.Services.AddScoped<IMetasService, MetasService>();
+builder.Services.AddScoped<Loki.Mark.Administracion.Ejecutivos.Metas.Interfaces.IMetasService, MetasService>();
 builder.Services.AddScoped<IMetasDAOs, MetasDao>();
 //encargados
 builder.Services.AddScoped<IEncargadosService, EncargadosService>();
@@ -425,6 +430,9 @@ builder.Services.AddScoped<ISupervisorDao, SupervisorDao>();
 //gestiones
 builder.Services.AddScoped<IGestionesService, GestionesService>();
 builder.Services.AddScoped<IGestionesDao, GestionesDao>();
+//metas
+builder.Services.AddScoped<Loki.Mark.Procesos.Metas.Interfaces.IMetasService, Loki.Mark.Procesos.Metas.Services.MetasService>();
+builder.Services.AddScoped<Loki.Mark.Procesos.Metas.Interfaces.IMetasDao, Loki.Mark.Procesos.Metas.DAOs.MetasDao>();
 #endregion	
 
 #region Reportes

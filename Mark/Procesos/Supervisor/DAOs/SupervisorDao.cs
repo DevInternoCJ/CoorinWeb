@@ -42,14 +42,12 @@ namespace Loki.Mark.Procesos.Procesos.DAOs
 
             if (consultaRow == null) return (false, $"El idConsulta {request.idConsulta} no existe.");
 
-            // 2. GENERACIÓN DEL QUERY
             int iFilas = request.NumeroCuentasAAsignar;
             ArrayList alColumnas = new ArrayList();
 
             var cuentasQueryData = AccionamientosQueryHelper.ConsultaGenerador.QueryCuentas(request.idConsulta, ref alColumnas);
             string sQuerya = cuentasQueryData.Query;
 
-            // --- LOG 1: VERIFICAR EL QUERY INTERNO ---
             Console.WriteLine($"[DEBUG] ID CONSULTA: {request.idConsulta}");
             Console.WriteLine(sQuerya); 
 
