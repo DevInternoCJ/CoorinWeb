@@ -21,73 +21,86 @@ namespace Loki.Mark.Procesos.Procesos.DAOs
             _accionamientosQueryHelper = accionamientosQueryHelper;
         }
 
-        public async Task<(bool success, string message)> insertaCuentas(string servidor,int idCartera,int idConsulta,int iFilas,List<EjecutivoDto> ejecutivos)
+        /// <summary>
+        /// Inserta cuentas a revisión para los ejecutivos seleccionados.
+        /// </summary>
+        public async Task<(bool Success, string Message)> InsertarCuentas(InsertarCuentasRequest request, string servidor)
         {
-            using var sqlConnection = _dbContFactory.GetSqlConnection(servidor, "Collection");
+            var consultaRow = AccionamientosQueryHelper.ConsultaGenerador.ObtenerConsulta(request.idConsulta);
+            if (consultaRow == null)
+            {
+                try
+                {
+                    await AccionamientosQueryHelper.ConsultaGenerador.CargarDesdeBDAsync(_dbContFactory, servidor);
+                    consultaRow = AccionamientosQueryHelper.ConsultaGenerador.ObtenerConsulta(request.idConsulta);
+                }
+                catch (Exception ex)
+                {
+                    return (false, $"Error crítico al cargar configuraciones: {ex.Message}");
+                }
+            }
 
-            if (sqlConnection.State != ConnectionState.Open)
-                await sqlConnection.OpenAsync();
+            if (consultaRow == null) return (false, $"El idConsulta {request.idConsulta} no existe.");
 
-            using var transaction = await sqlConnection.BeginTransactionAsync();
+            // 2. GENERACIÓN DEL QUERY
+            int iFilas = request.NumeroCuentasAAsignar;
+            ArrayList alColumnas = new ArrayList();
+
+            var cuentasQueryData = AccionamientosQueryHelper.ConsultaGenerador.QueryCuentas(request.idConsulta, ref alColumnas);
+            string sQuerya = cuentasQueryData.Query;
+
+            // --- LOG 1: VERIFICAR EL QUERY INTERNO ---
+            Console.WriteLine($"[DEBUG] ID CONSULTA: {request.idConsulta}");
+            Console.WriteLine(sQuerya); 
+
+
+            if (string.IsNullOrEmpty(sQuerya))
+            {
+                return (false, "Falló al generar el query base. String vacío.");
+            }
+
+            string sQueryInsertBase =
+                  "DELETE FROM dbCollection.dbo.Revisiones WHERE idEjecutivo = @idEjecutivo AND Fecha = CONVERT(DATE, GETDATE()); \n" +
+                  "INSERT INTO dbCollection.dbo.Revisiones (Fecha, idEjecutivo, idCartera, idCuenta) ";
 
             try
             {
-                int totalInsertados = 0;
-                var alColumnas = new ArrayList();
+                using var conn = _dbContFactory.GetSqlConnection(servidor, "Collection");
+                await conn.OpenAsync();
 
-                // Obtener SqlQueryData
-                SqlQueryData queryData = ConsultaGenerador.QueryCuentas(idConsulta, ref alColumnas);
+                using var transaction = conn.BeginTransaction();
 
-                // Verificar si el query data es válido
-                if (queryData == null || string.IsNullOrEmpty(queryData.Query))
+                foreach (var ejecutivo in request.Ejecutivos)
                 {
-                    return (false, "No se pudo generar la consulta de cuentas");
+                    if (ejecutivo.Asignar)
+                    {
+                        string sTop5 =
+                            $"SELECT TOP {iFilas} GETDATE() Fecha, {ejecutivo.idEjecutivo}, CC.idCartera, CC.idCuenta \r\n" +
+                            "FROM ( \r\n " + sQuerya + "\t) CC  \r\n " +
+                            "WHERE NOT EXISTS ( \r\n " +
+                            "   SELECT 1 FROM dbCollection.dbo.Revisiones R WITH (NOLOCK) \r\n " +
+                            "    WHERE R.idCartera = CC.idCartera AND R.idCuenta = CC.idCuenta \n\r" +
+                            "AND (R.Realizado = 1 AND R.Fecha >= DATEADD(DAY, - 30, GETDATE()) \n\r" +
+                            " OR R.Fecha = CAST(GETDATE() AS DATE) ) \n\r" +
+                            ") ORDER BY NEWID() ";
+
+                        string finalQuery = sQueryInsertBase + "\r\n" + sTop5;
+                        if (request.Ejecutivos.IndexOf(ejecutivo) == 0)
+                        {
+
+                        }
+
+                        var parameters = new { idEjecutivo = ejecutivo.idEjecutivo };
+                        await conn.ExecuteAsync(finalQuery, parameters, transaction);
+                    }
                 }
 
-                string sQuerya = queryData.Query;
-
-                foreach (var ejecutivo in ejecutivos.Where(e => e.Asignar))
-                {
-                    // Primero eliminar registros existentes del día
-                    string deleteQuery = @"
-                        DELETE FROM dbCollection.dbo.Revisiones 
-                        WHERE idEjecutivo = @idEjecutivo 
-                        AND Fecha = CONVERT(DATE, GETDATE())";
-
-                    await sqlConnection.ExecuteAsync(deleteQuery,
-                        new { idEjecutivo = ejecutivo.idEjecutivo }, transaction);
-
-                    // Insertar nuevas cuentas
-                    string insertQuery = $@"
-                        INSERT INTO dbCollection.dbo.Revisiones (Fecha, idEjecutivo, idCartera, idCuenta)
-                        SELECT TOP {iFilas} 
-                            GETDATE() AS Fecha, 
-                            {ejecutivo.idEjecutivo} AS idEjecutivo, 
-                            CC.idCartera, 
-                            CC.idCuenta 
-                        FROM ({sQuerya}) CC  
-                        WHERE NOT EXISTS (
-                            SELECT 1 FROM dbCollection.dbo.Revisiones R 
-                            WHERE R.idCartera = CC.idCartera 
-                            AND R.idCuenta = CC.idCuenta 
-                            AND (
-                                (R.Realizado = 1 AND R.Fecha >= DATEADD(DAY, -30, GETDATE())) 
-                                OR R.Fecha = CAST(GETDATE() AS DATE)
-                            )
-                        ) 
-                        ORDER BY NEWID()";
-
-                    int filasInsertadas = await sqlConnection.ExecuteAsync(insertQuery, null, transaction);
-                    totalInsertados += filasInsertadas;
-                }
-
-                await transaction.CommitAsync();
-                return (true, $"Cuentas insertadas correctamente. Total: {totalInsertados}");
+                transaction.Commit();
+                return (true, "Cuentas insertadas correctamente.");
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
-                return (false, $"Error al insertar cuentas: {ex.Message}");
+                return (false, $"Falló al insertar cuentas a revisión. Error: {ex.Message}");
             }
         }
     }

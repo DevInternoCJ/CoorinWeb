@@ -4,6 +4,6 @@ namespace Loki.Mark.Procesos.Procesos.Interfaces
 {
     public interface ISupervisorDao
     {
-        Task<(bool success, string message)> insertaCuentas(string servidor, int idCartera, int idConsulta, int iFilas, List<EjecutivoDto> ejecutivos);
+        Task<(bool Success, string Message)> InsertarCuentas(InsertarCuentasRequest request, string servidor);
     }
 }
