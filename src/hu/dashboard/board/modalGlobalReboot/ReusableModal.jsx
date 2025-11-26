@@ -149,7 +149,7 @@ const ReusableModal = ({
                 {/* Contenido del modal - Responsive con scroll mejorado y grid */}
                 <div
                     className={`pt-1 pb-3 px-3 sm:pt-2 sm:pb-4 sm:px-4 md:pt-2 md:pb-6 md:px-6
-                               overflow-y-auto overflow-x-hidden 
+                               overflow-y-auto overflow-x-hidden max-h-[70vh]
                                scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100
                                hover:scrollbar-thumb-gray-400 transition-colors
                                flex-1 min-h-0

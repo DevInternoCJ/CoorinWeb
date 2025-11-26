@@ -72,23 +72,22 @@ const HistoricosModal = ({
             enableShakeOnBackdropClick={enableShakeOnBackdropClick}
             enableBounceOnBackdropOrEscape={enableBounceOnBackdropOrEscape}
             closeOnBackdropClick={closeOnBackdropClick}
-            contentClassName="flex flex-col gap-4 h-full !overflow-hidden"
-            modalClassName="border-0 shadow-2xl h-[30vh] overflow-hidden"
+            contentClassName="flex flex-col gap-4 h-full" // Elimina !overflow-hidden
+            modalClassName="border-0 shadow-2xl h-[30vh]" // Elimina overflow-hidden
             {...props}
         >
             {/* Contenido principal con filtros */}
-            <div className="flex justify-center w-full flex-1 overflow-hidden">
-                <ModalConsultaHistoricosFiltros
-                    onIndividualChange={handleIndividualChange}
-                    cartera={cartera}
-                    setCartera={setCartera}
-                    carteras={carteras}
-                    carterasProductosData={carterasProductosData}
-                    setProductos={setProductos}
-                    setProducto={setProducto}
-                    isIndividual={isIndividual}
-                    setTipoSeleccionado={setTipoSeleccionado}
-                />
+            <div className="flex justify-center w-full flex-1">                 <ModalConsultaHistoricosFiltros
+                onIndividualChange={handleIndividualChange}
+                cartera={cartera}
+                setCartera={setCartera}
+                carteras={carteras}
+                carterasProductosData={carterasProductosData}
+                setProductos={setProductos}
+                setProducto={setProducto}
+                isIndividual={isIndividual}
+                setTipoSeleccionado={setTipoSeleccionado}
+            />
             </div>
         </ReusableModal>
     );

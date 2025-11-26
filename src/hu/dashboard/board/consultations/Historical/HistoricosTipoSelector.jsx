@@ -3,12 +3,12 @@ import React from "react";
 const HistoricosTipoSelector = ({ cartera, setCartera, carteras, carterasProductosData, setProductos, setProducto, producto, productos, isIndividual, setTipoSeleccionado, handleTipoSeleccion, modoHeader }) => (
     <>
         {modoHeader ? (
-            // Layout alineado para el header del modal expandido
-            <div className="flex flex-row items-center gap-6 justify-center w-full">
+            // Grid responsivo igual en header y body
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 w-full">
                 {/* Dropdown Cartera */}
-                <div className="relative max-w-[11rem]">
+                <div className="relative w-full">
                     <select
-                        className="peer p-4 pe-9 block bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 w-[11rem]"
+                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         value={cartera}
                         onChange={e => {
                             setCartera(e.target.value);
@@ -33,33 +33,33 @@ const HistoricosTipoSelector = ({ cartera, setCartera, carteras, carterasProduct
                         Cartera
                     </label>
                 </div>
-                {/* Radios alineados en la misma fila */}
-                <div className="flex flex-row items-center gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                {/* Radio Individual y Archivo con espacio */}
+                <div className="flex items-center w-full gap-x-4">
+                    <label className="flex items-center gap-2 cursor-pointer w-full">
                         <input
                             type="radio"
                             name="tipo"
                             checked={isIndividual === true}
-                            onChange={function () {
+                            onChange={() => {
                                 setTipoSeleccionado(true);
                                 handleTipoSeleccion(true);
                             }}
                             className="modal-radio"
                         />
-                        <span className="modal-span-2">Individual</span>
+                            <span className="modal-span-2 w-full text-base">Individual</span>
                     </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className="flex items-center gap-2 cursor-pointer w-full">
                         <input
                             type="radio"
                             name="tipo"
                             checked={isIndividual === false}
-                            onChange={function () {
+                            onChange={() => {
                                 setTipoSeleccionado(false);
                                 handleTipoSeleccion(false);
                             }}
                             className="modal-radio"
                         />
-                        <span className="modal-span-2">Archivo</span>
+                            <span className="modal-span-2 w-full text-base">Archivo</span>
                     </label>
                 </div>
             </div>
@@ -93,36 +93,36 @@ const HistoricosTipoSelector = ({ cartera, setCartera, carteras, carterasProduct
                         Cartera
                     </label>
                 </div>
-                <div style={{ marginBottom: "1.5rem" }}>
-                    <div style={{ display: "flex", gap: "2rem", justifyContent: "center" }}>
-                        <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
-                            <input
-                                type="radio"
-                                name="tipo"
-                                checked={isIndividual === true}
-                                onChange={function () {
-                                    setTipoSeleccionado(true);
-                                    handleTipoSeleccion(true);
-                                }}
-                                className="modal-radio"
-                            />
-                            <span className="modal-span-2 text-sm">Individual</span>
-                        </label>
-                        <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
-                            <input
-                                type="radio"
-                                name="tipo"
-                                checked={isIndividual === false}
-                                onChange={function () {
-                                    setTipoSeleccionado(false);
-                                    handleTipoSeleccion(false);
-                                }}
-                                className="modal-radio"
-                            />
-                            <span className="modal-span-2 text-sm">Archivo</span>
-                        </label>
-                    </div>
-                </div>
+                                <div className="mb-6 w-full flex justify-center">
+                                    <div className="grid grid-cols-1 gap-4 w-full justify-center md:grid-cols-2 md:gap-6 md:items-center md:justify-center sm:grid-cols-2 sm:gap-6 sm:items-center sm:justify-center gap-x-4">
+                                        <label className="flex items-center gap-2 cursor-pointer justify-center">
+                                            <input
+                                                type="radio"
+                                                name="tipo"
+                                                checked={isIndividual === true}
+                                                onChange={function () {
+                                                    setTipoSeleccionado(true);
+                                                    handleTipoSeleccion(true);
+                                                }}
+                                                className="modal-radio"
+                                            />
+                                            <span className="modal-span-2 text-base">Individual</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer justify-center">
+                                            <input
+                                                type="radio"
+                                                name="tipo"
+                                                checked={isIndividual === false}
+                                                onChange={function () {
+                                                    setTipoSeleccionado(false);
+                                                    handleTipoSeleccion(false);
+                                                }}
+                                                className="modal-radio"
+                                            />
+                                            <span className="modal-span-2 text-base">Archivo</span>
+                                        </label>
+                                    </div>
+                                </div>
             </>
         )}
     </>
