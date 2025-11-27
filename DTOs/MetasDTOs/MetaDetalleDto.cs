@@ -9,7 +9,7 @@
         public string Nombre_Del_Personal { get; set; }
         public string Num_Telefonico_Celular { get; set; }
         public string Puesto { get; set; }
-        public DateTime Fecha_De_Ingreso_A_La_Cartera { get; set; }
+        public string Fecha_De_Ingreso_A_La_Cartera { get; set; }
         public string Cartera { get; set; }
         public string Segmento_Producto { get; set; }
         public string Promesas_por_dia { get; set; }
@@ -24,9 +24,9 @@
         public string Sucursal { get; set; }
         public string Comentarios { get; set; }
         public string Sucursal_ { get; set; }
-        public object Calidad { get; set; } // Tipo 'object' para manejar posible null/string/decimal
-        public object Promesas { get; set; }
-        public object Cumplimiento { get; set; }
+        public string Calidad { get; set; }
+        public string Promesas { get; set; }
+        public string Cumplimiento { get; set; }
         public string Semana_1_del_1_al_7 { get; set; }
         public string Semana_2_del_8_al_14 { get; set; }
         public string Semana_3_del_15_al_21 { get; set; }

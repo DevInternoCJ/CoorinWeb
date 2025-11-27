@@ -123,7 +123,6 @@ namespace Loki.Global
 
                         if (table.Rows.Count == 0)
                         {
-                            // ✅ SOLO MOSTRAR HEADERS DE COLUMNAS (SIN MENSAJE DE "NO HAY DATOS")
                             for (int col = 0; col < table.Columns.Count; col++)
                             {
                                 worksheet.Cell(1, col + 1).Value = table.Columns[col].ColumnName;
@@ -131,12 +130,10 @@ namespace Loki.Global
                                 worksheet.Cell(1, col + 1).Style.Fill.BackgroundColor = XLColor.LightGray;
                             }
 
-                            // ✅ AJUSTAR ANCHO DE COLUMNAS
                             worksheet.Columns().AdjustToContents();
                             continue;
                         }
 
-                        // ✅ INSERTAR TABLA CON DATOS
                         worksheet.Cell(1, 1).InsertTable(table);
                         worksheet.Columns().AdjustToContents();
                     }

@@ -6,6 +6,7 @@ namespace Loki.DTOs.MetasDTOs
     {
         public bool Success { get; set; }
         public string Message { get; set; }
-        public DataTable? Errores { get; set; }
+        public List<Dictionary<string, object>>? Errores { get; set; }
     }
+
 }

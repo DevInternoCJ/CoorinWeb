@@ -16,8 +16,8 @@ namespace Loki.Mark.Procesos.Metas.DAOs
             _dbContFactory = new CustomDbContextFactory(serviceProvider);
 
         }
-     
-    public async Task<Bloqueo> Bloqueo(string usuario, string servidor)
+        #region Métodos
+        public async Task<Bloqueo> Bloqueo(string usuario, string servidor)
             {
                 const string sql = "SELECT * FROM [dbCollection].[dbo].[BloqueoMetasEjecutivo] WHERE Usuario = @Usuario";
 
@@ -25,29 +25,25 @@ namespace Loki.Mark.Procesos.Metas.DAOs
                 {
                     using var conn = _dbContFactory.GetSqlConnection(servidor, "Collection");
 
-                    // Usamos Dapper para obtener el valor del campo 'Bloqueo' (puede ser null)
                     var bloqueo = await conn.QueryFirstOrDefaultAsync<int?>(sql, new { Usuario = usuario });
 
                     DateTime minDate, maxDate;
                     DateTime today = DateTime.Today;
                     DateTime firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
 
-                    // ----------------------------------------------------
-                    // LÓGICA DE FECHAS (Traducción del código WinForms)
-                    // ----------------------------------------------------
                     if (bloqueo.HasValue && bloqueo.Value == 1)
                     {
-                        // Bloqueo == 1 (Permite los primeros 10 días del mes)
-                        minDate = firstDayOfMonth; // Día 1
-                        maxDate = firstDayOfMonth.AddDays(9); // Hasta el día 10
+
+                        minDate = firstDayOfMonth; 
+                        maxDate = firstDayOfMonth.AddDays(9); 
                     }
                     else if (bloqueo.HasValue && bloqueo.Value == 0)
                     {
-                        // Bloqueo == 0 (Permite 180 días atrás hasta hoy)
+ 
                         minDate = today.AddDays(-180);
                         maxDate = today;
                     }
-                    else // No hay registro en la tabla (aplica la lógica de Bloqueo == 1 por defecto)
+                    else 
                     {
                         minDate = firstDayOfMonth;
                         maxDate = firstDayOfMonth.AddDays(9);
@@ -70,90 +66,79 @@ namespace Loki.Mark.Procesos.Metas.DAOs
                     };
                 }
             }
-    public async Task<CargarMetasResponse> cargarMetas(CargarMetasRequest request, int idEjecutivo, string servidor)
+
+        public async Task<CargarMetasResponse> CargarMetas(CargarMetasRequest request,int idEjecutivo,string servidor)
         {
             if (request.DatosMetas == null || !request.DatosMetas.Any())
-            {
                 return new CargarMetasResponse { Success = false, Message = "La lista de metas está vacía." };
-            }
 
-            // Se usa el ConvertListToDataTable completo
             DataTable dtInfo = ConvertListToDataTable(request.DatosMetas);
             string tempTableName = $"CargaMetas_{idEjecutivo}";
             string errorTableName = $"Error_CargaMetas_{idEjecutivo}";
 
-
-            using var conn = _dbContFactory.GetSqlConnection(servidor, "dbComplemento");
+            using var conn = _dbContFactory.GetSqlConnection(servidor, "Complemento");
             await conn.OpenAsync();
-            // Nota: Es crucial usar System.Data.SqlClient.SqlTransaction, pero la conversión de
-            // DbConnection/DbTransaction a los tipos específicos de Dapper/ADO.NET es compleja.
-            // Para simplificar, asumimos que GetSqlConnection devuelve un SqlConnection o es convertible.
-            using var transaction = conn.BeginTransaction() as SqlTransaction;
+
+            using var transaction = conn.BeginTransaction();
 
             try
             {
-                // ... (El código de DROP/CREATE TABLE y BULK INSERT, VALIDACIÓN e INSERCIÓN FINAL 
-                // que tenías está bien y no necesita cambios sustanciales, se mantiene igual) ...
-
-                #region Código de la Lógica de Carga (Omitido para brevedad, ya lo tenías)
+                // 1. Crear tablas temporales
                 await conn.ExecuteAsync($@"
-                 IF OBJECT_ID('dbComplemento.Temp.{tempTableName}') IS NOT NULL 
-                     DROP TABLE dbComplemento.Temp.{tempTableName};
-                 
-                 IF OBJECT_ID('dbComplemento.Temp.{errorTableName}') IS NOT NULL 
-                     DROP TABLE dbComplemento.Temp.{errorTableName};
-                 
-                 CREATE TABLE dbComplemento.Temp.{tempTableName} (
-                     Tipo_Personal [VARCHAR](8000) NULL,
-                     No_Empleado [VARCHAR](8000) NULL,
-                     Login [VARCHAR](8000) NULL,
-                     Status [VARCHAR](8000) NULL,
-                     Nombre_Del_Personal [VARCHAR](8000) NULL,
-                     Num_Telefonico_Celular [VARCHAR](8000) NULL,
-                     Puesto [VARCHAR](8000) NULL,
-                     Fecha_De_Ingreso_A_La_Cartera [DATE],
-                     Cartera [VARCHAR](8000) NULL,
-                     Segmento_Producto [VARCHAR](8000) NULL,
-                     Promesas_por_dia [VARCHAR](8000) NULL,
-                     Gestiones_por_dia [VARCHAR](8000) NULL,
-                     Direccion [VARCHAR](8000) NULL,
-                     SubDirector [VARCHAR](8000) NULL,
-                     Gerente [VARCHAR](8000) NULL,
-                     Coordinador [VARCHAR](8000) NULL,
-                     Supervisor [VARCHAR](8000) NULL,
-                     Turno [VARCHAR](8000) NULL,
-                     Horario [VARCHAR](100),
-                     Sucursal [VARCHAR](8000) NULL,
-                     Comentarios [VARCHAR](8000) NULL,
-                     Sucursal_ [VARCHAR](8000) NULL,
-                     Calidad [VARCHAR](8000) NULL,
-                     Promesas [VARCHAR](8000) NULL,
-                     Cumplimiento [VARCHAR](8000) NULL,
-                     Semana_1_del_1_al_7 [VARCHAR](100),
-                     Semana_2_del_8_al_14 [VARCHAR](100),
-                     Semana_3_del_15_al_21 [VARCHAR](100),
-                     Semana_4_del_22_al_31 [VARCHAR](100),
-                     Meta_Total [VARCHAR](100)
-                 );
-             ", transaction: transaction);
+                IF OBJECT_ID('dbComplemento.Temp.{tempTableName}') IS NOT NULL
+                    DROP TABLE dbComplemento.Temp.{tempTableName};
 
-                // 3. BULK INSERT
+                IF OBJECT_ID('dbComplemento.Temp.{errorTableName}') IS NOT NULL
+                    DROP TABLE dbComplemento.Temp.{errorTableName};
+
+                CREATE TABLE dbComplemento.Temp.{tempTableName} (
+                    Tipo_Personal VARCHAR(8000),
+                    No_Empleado VARCHAR(8000),
+                    Login VARCHAR(8000),
+                    Status VARCHAR(8000),
+                    Nombre_Del_Personal VARCHAR(8000),
+                    Num_Telefonico_Celular VARCHAR(8000),
+                    Puesto VARCHAR(8000),
+                    Fecha_De_Ingreso_A_La_Cartera DATE,
+                    Cartera VARCHAR(8000),
+                    Segmento_Producto VARCHAR(8000),
+                    Promesas_por_dia VARCHAR(8000),
+                    Gestiones_por_dia VARCHAR(8000),
+                    Direccion VARCHAR(8000),
+                    SubDirector VARCHAR(8000),
+                    Gerente VARCHAR(8000),
+                    Coordinador VARCHAR(8000),
+                    Supervisor VARCHAR(8000),
+                    Turno VARCHAR(8000),
+                    Horario VARCHAR(100),
+                    Sucursal VARCHAR(8000),
+                    Comentarios VARCHAR(8000),
+                    Sucursal_ VARCHAR(8000),
+                    Calidad VARCHAR(8000),
+                    Promesas VARCHAR(8000),
+                    Cumplimiento VARCHAR(8000),
+                    Semana_1_del_1_al_7 VARCHAR(100),
+                    Semana_2_del_8_al_14 VARCHAR(100),
+                    Semana_3_del_15_al_21 VARCHAR(100),
+                    Semana_4_del_22_al_31 VARCHAR(100),
+                    Meta_Total VARCHAR(100)
+                );
+            ", transaction: transaction);
+
+                // 2. BULK COPY
                 using (var bulk = new SqlBulkCopy((SqlConnection)conn, SqlBulkCopyOptions.Default, transaction))
                 {
                     bulk.DestinationTableName = $"dbComplemento.Temp.{tempTableName}";
                     bulk.BulkCopyTimeout = 600;
 
-
-                    foreach (DataColumn column in dtInfo.Columns)
-                    {
-                        bulk.ColumnMappings.Add(column.ColumnName, column.ColumnName);
-                    }
+                    foreach (DataColumn col in dtInfo.Columns)
+                        bulk.ColumnMappings.Add(col.ColumnName, col.ColumnName);
 
                     await bulk.WriteToServerAsync(dtInfo);
                 }
 
-                // 4. VALIDACIÓN de datos (EXEC dbComplemento.dbo.[1.2.2.ValidaEjecutivoMetas])
-                DataTable tblVerifica = new DataTable();
+                // 3. Validación
+                var tblVerifica = new DataTable();
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = "EXEC dbComplemento.dbo.[1.2.2.ValidaEjecutivoMetas] @idEjecutivo_insert, @Fecha_Meta";
@@ -161,26 +146,24 @@ namespace Loki.Mark.Procesos.Metas.DAOs
                     cmd.Parameters.Add(new SqlParameter("@Fecha_Meta", request.FechaMeta.ToString("yyyy-MM-dd")));
                     cmd.Transaction = transaction;
 
-                    using (var reader = await cmd.ExecuteReaderAsync())
-                    {
-                        tblVerifica.Load(reader);
-                    }
+                    using var reader = await cmd.ExecuteReaderAsync();
+                    tblVerifica.Load(reader);
                 }
 
                 if (tblVerifica.Rows.Count > 0)
                 {
-                    // Validación fallida: Devolvemos los errores
                     transaction.Rollback();
                     return new CargarMetasResponse
                     {
                         Success = false,
-                        Message = "Se encontraron errores de validación. Revise la tabla de errores.",
-                        Errores = tblVerifica
+                        Message = "Errores de validación.",
+                        Errores = ConvertDataTableToJsonFriendly(tblVerifica)
                     };
                 }
 
-                // 5. INSERCIÓN FINAL (EXEC dbComplemento.dbo.[1.2.InsertaEjecutivoMetas])
-                DataTable tblMetas = new DataTable();
+
+                // 4. Inserción final
+                var tblMetas = new DataTable();
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = "EXEC dbComplemento.dbo.[1.2.InsertaEjecutivoMetas] @idEjecutivo_insert, @Fecha_Meta";
@@ -188,62 +171,143 @@ namespace Loki.Mark.Procesos.Metas.DAOs
                     cmd.Parameters.Add(new SqlParameter("@Fecha_Meta", request.FechaMeta.ToString("yyyy-MM-dd")));
                     cmd.Transaction = transaction;
 
-                    using (var reader = await cmd.ExecuteReaderAsync())
-                    {
-                        tblMetas.Load(reader);
-                    }
+                    using var reader = await cmd.ExecuteReaderAsync();
+                    tblMetas.Load(reader);
                 }
 
                 int eliminacion = (tblMetas.Rows.Count > 0 && tblMetas.Columns.Contains("Eliminacion"))
-                          ? Convert.ToInt32(tblMetas.Rows[0]["Eliminacion"]) : 0;
+                            ? Convert.ToInt32(tblMetas.Rows[0]["Eliminacion"]) : 0;
 
-                // Commit y respuesta
                 transaction.Commit();
 
-                string mensaje = eliminacion == 1
-                        ? "Carga de metas exitosa. Se eliminó el registro del mes anterior y se cargó el actualizado."
-                        : "Carga de metas exitosa.";
-
-                return new CargarMetasResponse { Success = true, Message = mensaje };
-                #endregion
+                return new CargarMetasResponse
+                {
+                    Success = true,
+                    Message = eliminacion == 1
+                        ? "Carga de metas exitosa. Se eliminó el registro anterior."
+                        : "Carga de metas exitosa."
+                };
             }
             catch (Exception ex)
             {
-                if (transaction != null) transaction.Rollback();
-                return new CargarMetasResponse { Success = false, Message = $"Fallo crítico en el proceso de carga: {ex.Message}" };
+                transaction.Rollback();
+                return new CargarMetasResponse { Success = false, Message = ex.Message };
             }
         }
+        #endregion
 
-        
-        private DataTable ConvertListToDataTable<T>(List<T> items)
+        #region Auxiliares
+        private DataTable ConvertListToDataTable(List<MetaDetalleDto> list)
         {
-            DataTable dataTable = new DataTable(typeof(T).Name);
-            PropertyInfo[] props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var dt = new DataTable();
 
-            foreach (PropertyInfo prop in props)
+            foreach (var prop in typeof(MetaDetalleDto).GetProperties())
+                dt.Columns.Add(prop.Name, typeof(string));
+
+            foreach (var item in list)
             {
-               
-                Type colType = prop.PropertyType;
-                if (colType.IsGenericType && colType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                {
-                    colType = Nullable.GetUnderlyingType(colType)!;
-                }
-                dataTable.Columns.Add(prop.Name, colType);
+                var row = dt.NewRow();
+                foreach (var prop in typeof(MetaDetalleDto).GetProperties())
+                    row[prop.Name] = prop.GetValue(item) ?? "";
+                dt.Rows.Add(row);
             }
 
-            foreach (T item in items)
-            {
-                var values = new object[props.Length];
-                for (int i = 0; i < props.Length; i++)
-                {
-
-                    values[i] = props[i].GetValue(item)!;
-                }
-                dataTable.Rows.Add(values);
-            }
-
-            return dataTable;
+            return dt;
         }
+        private List<Dictionary<string, object>> ConvertDataTableToJsonFriendly(DataTable dt)
+        {
+            var list = new List<Dictionary<string, object>>();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                var dict = new Dictionary<string, object>();
+
+                foreach (DataColumn col in dt.Columns)
+                    dict[col.ColumnName] = row[col];
+
+                list.Add(dict);
+            }
+
+            return list;
+        }
+        public DataTable LeerMetasDesdeExcel(IFormFile archivo)
+        {
+            var tabla = new DataTable();
+
+            using (var stream = archivo.OpenReadStream())
+            using (var workbook = new ClosedXML.Excel.XLWorkbook(stream))
+            {
+                var worksheet = workbook.Worksheets.First();
+
+                var headerRow = worksheet.FirstRowUsed();
+
+                foreach (var cell in headerRow.Cells())
+                {
+                    string columnName = cell.GetString().Trim();
+                    if (string.IsNullOrWhiteSpace(columnName))
+                        columnName = "Col_" + (tabla.Columns.Count + 1);
+                    tabla.Columns.Add(columnName, typeof(string));
+                }
+
+                int totalCols = tabla.Columns.Count;
+
+                foreach (var row in worksheet.RowsUsed().Skip(1))
+                {
+                    var newRow = tabla.NewRow();
+                    for (int c = 1; c <= totalCols; c++)
+                        newRow[c - 1] = row.Cell(c).GetString()?.Trim();
+                    tabla.Rows.Add(newRow);
+                }
+            }
+
+            return tabla;
+        }
+        public List<MetaDetalleDto> ConvertDatatableToList(DataTable dt)
+        {
+            var list = new List<MetaDetalleDto>();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                var item = new MetaDetalleDto
+                {
+                    Tipo_Personal = row["Tipo_Personal"]?.ToString(),
+                    No_Empleado = row["No_Empleado"]?.ToString(),
+                    Login = row["Login"]?.ToString(),
+                    Status = row["Status"]?.ToString(),
+                    Nombre_Del_Personal = row["Nombre_Del_Personal"]?.ToString(),
+                    Num_Telefonico_Celular = row["Num_Telefonico_Celular"]?.ToString(),
+                    Puesto = row["Puesto"]?.ToString(),
+                    Fecha_De_Ingreso_A_La_Cartera = row["Fecha_De_Ingreso_A_La_Cartera"]?.ToString(),
+                    Cartera = row["Cartera"]?.ToString(),
+                    Segmento_Producto = row["Segmento_Producto"]?.ToString(),
+                    Promesas_por_dia = row["Promesas_por_dia"]?.ToString(),
+                    Gestiones_por_dia = row["Gestiones_por_dia"]?.ToString(),
+                    Direccion = row["Direccion"]?.ToString(),
+                    SubDirector = row["SubDirector"]?.ToString(),
+                    Gerente = row["Gerente"]?.ToString(),
+                    Coordinador = row["Coordinador"]?.ToString(),
+                    Supervisor = row["Supervisor"]?.ToString(),
+                    Turno = row["Turno"]?.ToString(),
+                    Horario = row["Horario"]?.ToString(),
+                    Sucursal = row["Sucursal"]?.ToString(),
+                    Comentarios = row["Comentarios"]?.ToString(),
+                    Sucursal_ = row["Sucursal_"]?.ToString(),
+                    Calidad = row["Calidad"]?.ToString(),
+                    Promesas = row["Promesas"]?.ToString(),
+                    Cumplimiento = row["Cumplimiento"]?.ToString(),
+                    Semana_1_del_1_al_7 = row["Semana_1_del_1_al_7"]?.ToString(),
+                    Semana_2_del_8_al_14 = row["Semana_2_del_8_al_14"]?.ToString(),
+                    Semana_3_del_15_al_21 = row["Semana_3_del_15_al_21"]?.ToString(),
+                    Semana_4_del_22_al_31 = row["Semana_4_del_22_al_31"]?.ToString(),
+                    Meta_Total = row["Meta_Total"]?.ToString()
+                };
+
+                list.Add(item);
+            }
+
+            return list;
+        }
+        #endregion
     }
 }
 

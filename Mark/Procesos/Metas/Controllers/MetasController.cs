@@ -11,19 +11,19 @@ using IMetasService = Loki.Mark.Procesos.Metas.Interfaces.IMetasService;
 
 namespace Loki.Mark.Procesos.Metas.Controllers
 {
-    public class MetasController : ControllerBase
+    public class ProcesosMetasController : ControllerBase
     {
         private readonly IDbContextFactory _dbContextFactory;
         private readonly IMetasService _metasService;
         private readonly IMetasDao _metasDao;
 
-        public MetasController(IDbContextFactory dbContextFactory, IMetasService metasSrvice, IMetasDao metasDao)
+        public ProcesosMetasController(IDbContextFactory dbContextFactory, IMetasService metasSrvice, IMetasDao metasDao)
         {
             _dbContextFactory = dbContextFactory;
             _metasService = metasSrvice;
             _metasDao = metasDao;
         }
-        [HttpGet("bloqueo")]
+        [HttpGet("bloqueo - irene")]
         [Authorize]
         [SwaggerOperation(
             Summary = "bloqueo",
@@ -50,78 +50,44 @@ namespace Loki.Mark.Procesos.Metas.Controllers
                 return StatusCode(500, new { message = "Error interno al verificar el bloqueo de metas.", error = ex.Message });
             }
         }
+        //controller carga metas
         [HttpPost("cargar-metas")]
         [Authorize]
         [SwaggerOperation(
-                Summary = "Carga y valida metas de ejecutivos desde un JSON pre-parseado.",
-                Description = "El cliente envía el contenido del Excel ya procesado como JSON. La API realiza la carga y validación SQL."
-            )]
-        // *** CAMBIO CLAVE: Volvemos a [FromBody] ***
-        public async Task<IActionResult> CargarMetas([FromBody] CargarMetasRequest request, int idEjecutivo)
+            Summary = "cargar-metas - irene",
+            Description = "Procesa y valida la información de metas cargadas para los ejecutivos. Verifica formatos, campos obligatorios, sumatorias y reglas de negocio, retornando un listado de errores si existen inconsistencias."
+          )]
+        public async Task<IActionResult> CargarMetas([FromForm] CargarMetasRequest request)
         {
-            // 1. Obtener Claims necesarios del token
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
-           
-
-            // 2. Validar Claims
             if (string.IsNullOrWhiteSpace(servidorClaim))
                 return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
 
-            // 3. Validar Request
-            if (request == null || request.DatosMetas == null || request.DatosMetas.Count == 0)
-            {
-                return BadRequest(new { error = "La solicitud está vacía o no contiene datos de metas." });
-            }
+            if (request.Archivo == null || request.Archivo.Length == 0)
+                return BadRequest("Debe subir un archivo válido.");
 
-            try
-            {
-                // 4. Llamar al DAO (que ahora devuelve CargarMetasResponse)
-                var response = await _metasDao.cargarMetas(request, idEjecutivo, servidorClaim);
+            DataTable dtExcel;
+            var extension = Path.GetExtension(request.Archivo.FileName).ToLowerInvariant();
 
-                if (response.Success)
+            if (extension == ".xlsx")
+                dtExcel = _metasDao.LeerMetasDesdeExcel(request.Archivo);
+            else
+                return BadRequest("Formato no soportado. Solo .xlsx");
+
+            var listaMetas = _metasDao.ConvertDatatableToList(dtExcel);
+
+            var result = await _metasDao.CargarMetas(
+                new CargarMetasRequest
                 {
-                    return Ok(new { message = response.Message });
-                }
-                else
-                {
-                    // 5. Manejar error de validación 
-                    if (response.Errores != null && response.Errores.Rows.Count > 0)
-                    {
-                        // Asumiendo que ConvertDataTableToList sigue disponible
-                        var erroresList = ConvertDataTableToList(response.Errores);
+                    FechaMeta = request.FechaMeta,
+                    DatosMetas = listaMetas
+                },
+                request.IdEjecutivo,
+                servidorClaim
+            );
 
-                        return BadRequest(new
-                        {
-                            error = response.Message,
-                            detalle = "Se encontró un error en el archivo, favor de revisar la tabla de errores y volver a cargar.",
-                            errores = erroresList
-                        });
-                    }
-
-                    // 6. Manejar error crítico
-                    return StatusCode(500, new { error = response.Message });
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error interno al procesar la carga de metas.", error = ex.Message });
-            }
+            return Ok(result);
         }
-
-        // Método auxiliar (sin cambios)
-        private List<Dictionary<string, object>> ConvertDataTableToList(DataTable dt)
-        {
-            var list = new List<Dictionary<string, object>>();
-            foreach (DataRow row in dt.Rows)
-            {
-                var dict = new Dictionary<string, object>();
-                foreach (DataColumn col in dt.Columns)
-                {
-                    dict.Add(col.ColumnName, row[col] == DBNull.Value ? null : row[col]);
-                }
-                list.Add(dict);
-            }
-            return list;
-        }
+        
     }
 }
