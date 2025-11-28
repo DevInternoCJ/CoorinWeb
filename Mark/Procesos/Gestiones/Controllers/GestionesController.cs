@@ -1,5 +1,6 @@
 ﻿using CoorinWeb.Loki.Global;
 using Loki.DTOs.GestionesDTOs;
+using Loki.DTOs.MetasDTOs;
 using Loki.Mark.Procesos.Gestiones.Interfaces;
 using Loki.Mark.Procesos.Procesos.Interfaces;
 using Loki.Mark.Procesos.Procesos.Services;
@@ -96,12 +97,7 @@ namespace Loki.Mark.Procesos.Gestiones.Controllers
           Description = "Obtiene las gestiones por cartera y rango de fechas"
       )]
 
-        public async Task<IActionResult> RealizaBusqueda(
-        [FromQuery] int idCartera,
-        [FromQuery] DateTime fechaInicial,
-        [FromQuery] DateTime fechaFinal,
-        [FromQuery] int jerarquia, 
-        [FromQuery] int? idProducto = null)
+        public async Task<IActionResult> RealizaBusqueda([FromQuery] int idCartera,[FromQuery] DateTime fechaInicial,[FromQuery] DateTime fechaFinal,[FromQuery] int jerarquia, [FromQuery] int? idProducto = null)
         {
            
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
@@ -190,7 +186,56 @@ namespace Loki.Mark.Procesos.Gestiones.Controllers
         #endregion
 
         #region Intentos Vicidial
-        //carga intentos vicidial
+
+
+        [HttpPost("cargar-intentos-vicidial")]
+        [Authorize]
+        [SwaggerOperation(
+         Summary = "carga intentos vicidial - Irene",
+         Description = "Procesa archivo Vicidial, limpia gestiones con contacto, las inserta en tabla temporal y ejecuta validaciones SP."
+     )]
+        
+        public async Task<IActionResult> CargarVicidial([FromForm] CargarIntentosRequest request)
+        {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+
+            if (request.Archivo == null || request.Archivo.Length == 0)
+                return BadRequest("Debe subir un archivo válido.");
+
+            DataTable dtVici;
+
+            string ext = Path.GetExtension(request.Archivo.FileName).ToLower();
+
+            if (ext == ".csv")
+            {
+                dtVici = _gestionesDao.LeerIntentosCsv(request.Archivo);
+            }
+            else if (ext == ".xlsx")
+            {
+                dtVici = _gestionesDao.LeerIntentosExcel(request.Archivo);
+            }
+            else
+            {
+                return BadRequest("Formato no aceptado. Solo CSV o XLSX.");
+            }
+
+            // 2. Limpiar status
+            var dtLimpio = _gestionesDao.LimpiarGestiones(dtVici);
+
+            // 3. Insertar
+            var result = await _gestionesDao.CargarIntentos(
+                dtLimpio,
+                request.IdCartera,
+                request.IdEjecutivo,
+                servidorClaim
+            );
+
+            return Ok(result);
+        }
+
+
         #endregion
     }
 }

@@ -54,7 +54,7 @@ namespace Loki.Mark.Procesos.Metas.Controllers
         [HttpPost("cargar-metas")]
         [Authorize]
         [SwaggerOperation(
-            Summary = "cargar-metas - irene",
+            Summary = "cargar metas - irene",
             Description = "Procesa y valida la información de metas cargadas para los ejecutivos. Verifica formatos, campos obligatorios, sumatorias y reglas de negocio, retornando un listado de errores si existen inconsistencias."
           )]
         public async Task<IActionResult> CargarMetas([FromForm] CargarMetasRequest request)

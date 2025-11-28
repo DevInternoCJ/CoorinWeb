@@ -148,5 +148,179 @@ namespace Loki.Mark.Procesos.Gestiones.DAOs
             return await conn.ExecuteAsync(sql, parameters);
         }
         #endregion
+
+        #region Intentos Vicidial
+        public async Task<CargarIntentosResponse> CargarIntentos( DataTable dt,int idCartera, int idEjecutivo, string servidor)
+        {
+            var tempTable = $"Temp.GES_VICI_{idEjecutivo}";
+
+            using var conn = _dbContFactory.GetSqlConnection(servidor, "Complemento");
+            await conn.OpenAsync();
+
+            using var transaction = conn.BeginTransaction();
+
+            try
+            {
+                // 1. Crear tabla temporal
+                await conn.ExecuteAsync(
+                    "EXEC dbComplemento.dbo.[1.5.Gestiones_Vicidial] @idEjecutivo, @Selector, @idCartera",
+                    new
+                    {
+                        idEjecutivo,
+                        Selector = "CreaTabla",
+                        idCartera
+                    },
+                    transaction
+                );
+
+                // 2. Cargar registros (BulkCopy)
+                using (var bulk = new SqlBulkCopy((SqlConnection)conn, SqlBulkCopyOptions.Default, transaction))
+                {
+                    bulk.DestinationTableName = $"dbComplemento.{tempTable}";
+                    bulk.BulkCopyTimeout = 600;
+
+                    foreach (DataColumn column in dt.Columns)
+                        bulk.ColumnMappings.Add(column.ColumnName, column.ColumnName);
+
+                    await bulk.WriteToServerAsync(dt);
+                }
+
+                // 3. Insertar gestiones
+                var lista = await conn.QueryAsync<int>(
+                   "EXEC dbComplemento.dbo.[1.5.Gestiones_Vicidial] @idEjecutivo, @Selector, @idCartera",
+                    new
+                    {
+                        idEjecutivo,
+                        Selector = "InsertarCuentas",
+                        idCartera
+                    },
+                    transaction
+                );
+
+                transaction.Commit();
+
+                return new CargarIntentosResponse
+                {
+                    Success = true,
+                    Insertadas = lista.FirstOrDefault(),
+                    Message = $"Se insertaron {lista.FirstOrDefault()} gestiones nuevas."
+                };
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+
+                return new CargarIntentosResponse
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        #endregion
+
+
+        #region Auxiliares
+        public DataTable LeerIntentosCsv(IFormFile archivo)
+        {
+            var dt = CrearTablaVici();
+
+            using var stream = new StreamReader(archivo.OpenReadStream());
+            bool header = true;
+
+            while (!stream.EndOfStream)
+            {
+                var line = stream.ReadLine();
+                if (line == null) continue;
+
+                var cols = line.Split(',').Select(c => c.Trim()).ToList();
+
+                if (header)
+                {
+                    header = false;
+                    continue;
+                }
+
+                // DEBUG
+                Console.WriteLine($"CSV → {cols.Count} columnas");
+
+                if (cols.Count == 5)
+                    cols.Insert(1, cols[0]);
+
+                dt.Rows.Add(cols.ToArray());
+            }
+
+            return dt;
+        }
+
+        public DataTable LeerIntentosExcel(IFormFile archivo)
+        {
+            var dt = CrearTablaVici();
+
+            using var stream = archivo.OpenReadStream();
+            using var workbook = new XLWorkbook(stream);
+            var ws = workbook.Worksheet(1);
+
+            bool isHeader = true;
+
+            foreach (var row in ws.RowsUsed())
+            {
+                var cells = row.CellsUsed().Select(c => c.GetValue<string>().Trim()).ToList();
+
+                // DEBUG
+                Console.WriteLine($"EXCEL → {cells.Count} columnas");
+
+                if (isHeader)
+                {
+                    isHeader = false;
+                    continue;
+                }
+
+                if (cells.Count == 5)
+                    cells.Insert(1, cells[0]);
+
+                dt.Rows.Add(cells.ToArray());
+            }
+
+            return dt;
+        }
+        private DataTable CrearTablaVici()
+        {
+            var dt = new DataTable();
+
+            dt.Columns.Add("last_local_call_time");
+            dt.Columns.Add("last_local_call_time2");
+            dt.Columns.Add("phone_number");
+            dt.Columns.Add("status");
+            dt.Columns.Add("user");
+            dt.Columns.Add("vendor_lead_code");
+
+            return dt;
+        }
+
+        private readonly HashSet<string> STATUS_CON_CONTACTO = new()
+        {
+            "NEW","PPV","PPI","NOD","NEP","FAM","TER","TEQ","CLC",
+            "COLGADO","COLGO ANTES DE ESCUCHAR LLAMADA COMPLETA",
+            "COMPLETADO","CONTESTO","DROP","EN COLA","ENVIADO","NOC",
+            "PDROP","PU","CELULAR CASA","CASA TITULAR","FAMILIAR",
+            "TERCERO","OFICINA TITULAR"
+        };
+        public DataTable LimpiarGestiones(DataTable dt)
+        {
+            var copia = dt.Copy();
+
+            foreach (DataRow row in copia.Rows.Cast<DataRow>().ToList())
+            {
+                string status = row["status"]?.ToString()?.Trim() ?? "";
+
+                if (STATUS_CON_CONTACTO.Contains(status))
+                    row.Delete();
+            }
+
+            copia.AcceptChanges();
+            return copia;
+        }
+        #endregion
     }
 }
