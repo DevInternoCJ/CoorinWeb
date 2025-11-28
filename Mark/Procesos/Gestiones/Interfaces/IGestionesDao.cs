@@ -11,5 +11,7 @@ namespace Loki.Mark.Procesos.Gestiones.Interfaces
         public DataTable LeerIntentosExcel(IFormFile archivo);
         DataTable LimpiarGestiones(DataTable dt);
         Task<CargarIntentosResponse> CargarIntentos(DataTable dt, int idCartera, int idEjecutivo, string servidor);
+        Task<CargaLlamadasResponse> CargarLlamadasAsync(DataTable tabla, int idCartera, int idEjecutivo, string servidor);
+        DataTable LeerArchivo(IFormFile archivo);
     }
 }

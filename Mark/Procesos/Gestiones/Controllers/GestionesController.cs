@@ -87,6 +87,37 @@ namespace Loki.Mark.Procesos.Gestiones.Controllers
         #region Carga Gestiones Tel
         //carga llamadas
 
+        [HttpPost("carga-llamadas")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "carga de llamadas - Irene",
+            Description = "Recibe archivo Excel/CSV de llamadas, crea tabla temporal y ejecuta SP de inserción."
+        )]
+        public async Task<IActionResult> CargarLlamadas([FromForm] CargarLlamadas2Request request)
+        {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+                return BadRequest(new { success = false, message = "No se encontró el claim 'Servidor' en el token." });
+
+            if (request.Archivo == null || request.Archivo.Length == 0)
+                return BadRequest(new { success = false, message = "Debe enviar un archivo válido." });
+
+            // 1. Leer archivo → DataTable
+            var dt = _gestionesDao.LeerArchivo(request.Archivo);
+            if (dt.Rows.Count == 0)
+                return BadRequest(new { success = false, message = "El archivo está vacío." });
+
+            // 2. Llamar al DAO
+            var result = await _gestionesDao.CargarLlamadasAsync(
+                dt,
+                request.IdCartera,
+                request.IdEjecutivo,
+                servidorClaim
+            );
+
+            return Ok(result);
+        }
+
         #endregion
 
         #region Consulta gestiones tel

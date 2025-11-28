@@ -116,6 +116,195 @@ namespace Loki.Mark.Procesos.Gestiones.DAOs
 
         //carga gestiones
         #region carga gestiones tel
+        public async Task<CargaLlamadasResponse> CargarLlamadasAsync( DataTable tabla, int idCartera, int idEjecutivo, string servidor)
+        {
+            string baseName = "dbComplemento";
+            string schema = "Temp";
+            string tempTable = $"LLAM_{idEjecutivo}";
+
+            string tableFull = $"{baseName}.{schema}.{tempTable}";
+            string tableQuoted = $"[{baseName}].[{schema}].[{tempTable}]";
+
+            using var conn = _dbContFactory.GetSqlConnection(servidor, "Collection");
+            await conn.OpenAsync();
+
+            try
+            {
+                // Crear tabla solo una vez, si no existe
+                var sqlCreate = $@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM sys.tables t
+                    JOIN sys.schemas s ON t.schema_id = s.schema_id
+                    WHERE t.name = '{tempTable}' AND s.name = '{schema}'
+                )
+                BEGIN
+                    CREATE TABLE {tableQuoted} (
+                ";
+
+                foreach (DataColumn col in tabla.Columns)
+                {
+                    string tipo =
+                        (col.ColumnName == "FechaGestion" ||
+                         col.ColumnName == "HoraGestion" ||
+                         col.ColumnName == "Duracion")
+                        ? "DATETIME NULL"
+                        : "VARCHAR(8000) NULL";
+
+                    sqlCreate += $" [{col.ColumnName}] {tipo},";
+                }
+
+                sqlCreate += @"
+                        idLlamada INT NOT NULL IDENTITY(1,1) PRIMARY KEY
+                    );
+                END
+                ";
+
+                await conn.ExecuteAsync(sqlCreate);
+
+                // Borrar registros ANTES del bulk
+                await conn.ExecuteAsync($"DELETE FROM {tableQuoted};");
+
+                using var trx = conn.BeginTransaction();
+
+                try
+                {
+                    // === BULKCOPY ===
+                    using (var bulk = new SqlBulkCopy((SqlConnection)conn, SqlBulkCopyOptions.Default, trx))
+                    {
+                        bulk.DestinationTableName = tableQuoted;
+                        bulk.BulkCopyTimeout = 1800;
+
+                        foreach (DataColumn col in tabla.Columns)
+                            bulk.ColumnMappings.Add(col.ColumnName, col.ColumnName);
+
+                        await bulk.WriteToServerAsync(tabla);
+                    }
+
+                    // === Ejecutar el SP con tabla llena ===
+                    var errores = await conn.QueryAsync(
+                        $@"EXEC {baseName}.dbo.[1.0.InsertaLlamadas]
+                   @idCartera, @idEjecutivo, @Base",
+                        new
+                        {
+                            idCartera,
+                            idEjecutivo,
+                            Base = baseName
+                        },
+                        transaction: trx
+                    );
+
+                    trx.Commit();
+
+                    int total = tabla.Rows.Count;
+                    int incorrectos = errores.Count();
+                    int insertados = total - incorrectos;
+
+                    return new CargaLlamadasResponse
+                    {
+                        Success = true,
+                        Total = total,
+                        Insertados = insertados,
+                        Incorrectos = incorrectos,
+                        Errores = errores,
+                        Message = "Carga de llamadas finalizada correctamente."
+                    };
+                }
+                catch (Exception exBulk)
+                {
+                    try { trx.Rollback(); } catch { }
+
+                    return new CargaLlamadasResponse
+                    {
+                        Success = false,
+                        Message = $"Error durante Bulk/SP: {exBulk.Message}"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new CargaLlamadasResponse
+                {
+                    Success = false,
+                    Message = $"Error creando tabla temporal: {ex.Message}"
+                };
+            }
+        }
+
+        public DataTable LeerArchivo(IFormFile archivo)
+        {
+            var extension = Path.GetExtension(archivo.FileName).ToLower();
+            var tabla = new DataTable();
+
+            if (extension == ".csv")
+            {
+                using var reader = new StreamReader(archivo.OpenReadStream());
+
+                bool header = true;
+                while (!reader.EndOfStream)
+                {
+                    var line = reader.ReadLine();
+                    if (line == null) continue;
+
+                    var cols = line.Split(',');
+
+                    if (header)
+                    {
+                        foreach (var col in cols)
+                        {
+                            string columnName = string.IsNullOrWhiteSpace(col)
+                                ? "Col_" + (tabla.Columns.Count + 1)
+                                : col.Trim();
+
+                            tabla.Columns.Add(columnName, typeof(string));
+                        }
+
+                        header = false;
+                        continue;
+                    }
+
+                    tabla.Rows.Add(cols);
+                }
+
+                return tabla;
+            }
+
+            if (extension == ".xlsx" || extension == ".xls")
+            {
+                using var stream = archivo.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+
+                var worksheet = workbook.Worksheets.First();
+
+                var headerRow = worksheet.FirstRowUsed();
+
+                // Crear columnas
+                foreach (var cell in headerRow.Cells())
+                {
+                    string name = cell.GetString().Trim();
+                    if (string.IsNullOrWhiteSpace(name))
+                        name = "Col_" + (tabla.Columns.Count + 1);
+
+                    tabla.Columns.Add(name, typeof(string));
+                }
+
+                int totalCols = tabla.Columns.Count;
+
+                // Leer filas
+                foreach (var row in worksheet.RowsUsed().Skip(1))
+                {
+                    var newRow = tabla.NewRow();
+                    for (int c = 1; c <= totalCols; c++)
+                        newRow[c - 1] = row.Cell(c).GetString()?.Trim();
+
+                    tabla.Rows.Add(newRow);
+                }
+
+                return tabla;
+            }
+
+            throw new Exception("Formato no soportado. Solo CSV o Excel.");
+        }
+
 
         #endregion
 
