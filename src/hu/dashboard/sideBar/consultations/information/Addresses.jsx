@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { infoEjecutivo, getAddress } from "../../../../../services/mark/albaz/LokiServices";
+import { exportDataToCSV, processAPIResponse } from "../../../../../utils/ExcelExporter";
 
 const AddressesContent = ({ mostrarTabla }) => {
     // Mensaje de footer dinámico
@@ -62,84 +63,61 @@ const AddressesContent = ({ mostrarTabla }) => {
     }, [idEjecutivo, cartera, idProducto]);
 
 
-    // Handler para exportar domicilios a Excel/CSV
+    // Handler para exportar domicilios a Excel/CSV usando ExcelExporter
     const handleDownloadExcel = async () => {
-    setLoadingExcel(true);
-    setErrorExcel(null);
-    setFooterMsg("Consulta terminada. Guardando libro de Excell.");
+        setLoadingExcel(true);
+        setErrorExcel(null);
+        setFooterMsg("Consulta terminada. Guardando libro de Excel.");
         try {
-            // Usar los parámetros actuales
             const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
             const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
             const response = await getAddress(idCarteraInt, idConsultaInt);
-            console.log('RESPONSE DE DOMICILIOS:', response);
-            let data = Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : (typeof response === 'object' ? [response] : []));
-            if (data.length === 0) {
-                toast.warning("Su consulta no cuenta con registros en la fecha especificada", { duration: 4000 });
-                throw new Error('No hay datos para exportar.');
+            
+            // Obtener nombre de la consulta para mensajes
+            let nombreConsulta = "Domicilios";
+            if (consulta !== "" && consulta !== 0) {
+                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
+                if (consultaObj?.nombreConsulta) nombreConsulta = consultaObj.nombreConsulta;
             }
-            // Obtener headers y loguearlos para revisión
-            const headers = Object.keys(data[0]);
-            // setHeadersRecibidos(headers); // Ya no se usa para mostrar en pantalla
-            console.log('HEADERS RECIBIDOS:', headers);
-            // Convertir a CSV asegurando formato correcto
-            const rows = data.map(obj => headers.map(h => {
-                let value = obj[h];
-                // Forzar que cuentas largas se exporten como texto (evitar notación científica)
-                if (h.toLowerCase().includes('cuenta')) {
-                    if (typeof value === 'number') {
-                        value = '\t' + value.toString();
-                    } else if (typeof value === 'string') {
-                        // Si ya es string, solo anteponer tabulación y quitar comas y comillas
-                        value = '\t' + value.replace(/,/g, '').replace(/"/g, '');
-                    }
-                    return value;
+
+            // Procesar respuesta usando ExcelExporter
+            const data = await processAPIResponse(response, { consultaName: nombreConsulta });
+            
+            if (!data) {
+                setFooterMsg("Consulta terminada sin registros.");
+                return;
+            }
+
+            const result = exportDataToCSV(
+                data,
+                `domicilios_${idCarteraInt}_${idConsultaInt || 'todas'}`,
+                {
+                    accountFields: ['cuenta'],
+                    showToast: true,
+                    successMessage: "Libro de Excel Guardado."
                 }
-                // Si es string, quitar comas y asegurar codificación UTF-8
-                if (typeof value === 'string') {
-                    value = value.replace(/,/g, '');
-                    // Escapar comillas dobles
-                    value = value.replace(/"/g, '""');
-                    // Envolver en comillas si contiene caracteres especiales o espacios
-                    if (/[^\w\d]/.test(value)) value = '"' + value + '"';
-                }
-                return value;
-            }).join(","));
-            // Encabezados en UTF-8
-            const csvContent = '\uFEFF' + headers.join(",") + "\n" + rows.join("\n");
-            // Descargar como CSV (UTF-8)
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `domicilios_${idCarteraInt}_${idConsultaInt || 'todas'}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            setFooterMsg("Libro de Excell Guardado.");
+            );
+
+            if (result) {
+                setFooterMsg("Libro de Excel Guardado.");
+            } else {
+                setFooterMsg("Consulta terminada sin registros.");
+            }
         } catch (err) {
-            // Validar error 404 y mensaje específico del backend
             const status = err?.response?.status;
-            const statusText = err?.response?.statusText;
             const mensajeBackend = err?.response?.data?.mensaje;
-            if (status === 404 && statusText === "Not Found" && mensajeBackend === "No se encontraron registros para los Domicilios.") {
-                // Buscar el nombre de la consulta seleccionada
+            if (status === 404 && mensajeBackend === "No se encontraron registros para los Domicilios.") {
                 let nombreConsulta = "Domicilios";
-                if (consulta === "" || consulta === 0) {
-                    nombreConsulta = "Domicilios";
-                } else {
+                if (consulta !== "" && consulta !== 0) {
                     const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
-                    if (consultaObj && consultaObj.nombreConsulta) {
-                        nombreConsulta = consultaObj.nombreConsulta;
-                    }
+                    if (consultaObj?.nombreConsulta) nombreConsulta = consultaObj.nombreConsulta;
                 }
                 toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros.`, { duration: 4000 });
                 setErrorExcel(null);
                 setFooterMsg("Consulta terminada sin registros.");
             } else {
                 setErrorExcel('Error al exportar los domicilios.');
-                setFooterMsg("Ocurrió un error al guardar el libro de Excell.");
+                setFooterMsg("Ocurrió un error al guardar el libro de Excel.");
             }
             console.error('Error al exportar los domicilios:', err);
         } finally {
@@ -152,10 +130,9 @@ const AddressesContent = ({ mostrarTabla }) => {
             {/* Layout dinámico según mostrarTabla */}
             {mostrarTabla ? (
                 <>
-                    {/* Row centrado con logo, cartera y consulta */}
+                    {/* Row centrado con cartera y consulta */}
                     <div className="w-full flex justify-center items-center gap-6 mb-4 max-w-5xl">
-                        <img src="/logo_coorin_7.svg" alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
-                        <div className="relative w-full max-w-xs">
+                        <div className="relative w-full max-w-sm">
                             <select
                                 className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={cartera}
@@ -177,7 +154,7 @@ const AddressesContent = ({ mostrarTabla }) => {
                                 Cartera
                             </label>
                         </div>
-                        <div className="relative w-full max-w-xs">
+                        <div className="relative w-full max-w-sm">
                             <select
                                 className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={consulta}
@@ -210,7 +187,7 @@ const AddressesContent = ({ mostrarTabla }) => {
                     <div className="flex gap-3 w-full justify-center mb-4">
                         <button
                             type="button"
-                            className="btn-success w-full sm:w-auto min-w-[120px] max-w-xs px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                            className="btn-success w-full sm:w-auto min-w-[120px] max-w-sm px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
                             style={{ margin: '0 auto', display: 'block' }}
                             onClick={handleDownloadExcel}
                             disabled={loadingExcel}
@@ -222,11 +199,8 @@ const AddressesContent = ({ mostrarTabla }) => {
                 </>
             ) : (
                 <>
-                    <div className="w-full flex justify-center items-center mb-2 mt-2">
-                        <img src="/logo_coorin_7.svg" alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
-                    </div>
-                    <div className="flex flex-col items-center w-full" style={{ marginTop: '1.2rem' }}>
-                        <div className="relative w-full max-w-xs" style={{ marginBottom: '0.7rem' }}>
+                    <div className="flex flex-col items-center w-full">
+                        <div className="relative w-full max-w-sm" style={{ marginBottom: '0.7rem' }}>
                             <select
                                 className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={cartera}
@@ -248,7 +222,7 @@ const AddressesContent = ({ mostrarTabla }) => {
                                 Cartera
                             </label>
                         </div>
-                        <div className="relative w-full max-w-xs" style={{ marginBottom: '0.7rem' }}>
+                        <div className="relative w-full max-w-sm" style={{ marginBottom: '0.7rem' }}>
                             <select
                                 className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={consulta}
@@ -280,7 +254,7 @@ const AddressesContent = ({ mostrarTabla }) => {
                         <div className="flex gap-3 w-full justify-center mb-4">
                             <button
                                 type="button"
-                                className="btn-success w-full sm:w-auto min-w-[120px] max-w-xs px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center items-center"
+                                className="btn-success w-full sm:w-auto min-w-[120px] max-w-sm px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center items-center"
                                 style={{ margin: '0 auto', display: 'block' }}
                                 onClick={handleDownloadExcel}
                                 disabled={loadingExcel}
@@ -302,7 +276,7 @@ const AddressesContent = ({ mostrarTabla }) => {
             )}
 
             {/* Footer con mensaje dinámico */}
-            <div className="w-full flex justify-center items-center" style={{ marginTop: '60px', marginBottom: '8px' }}>
+            <div className="w-full flex justify-center items-center mt-4">
                 <span className="text-xs text-gray-600">{footerMsg}</span>
             </div>
 

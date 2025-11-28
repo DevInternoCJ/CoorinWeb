@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import ConsorcioLogo from "../../../../assets/logo_coorin_7.svg";
 import { darkListV2 } from "../../../../services/mark/albaz/LokiServices";
 
 const DarkListContent = () => {
@@ -134,12 +133,9 @@ const DarkListContent = () => {
     }
 
     return (
-    <div className="w-full max-w-lg mx-auto p-6 box-border flex flex-col min-h-[360px]">
+    <div className="w-full max-w-xl mx-auto box-border flex flex-col">
             <div className="flex flex-col w-full">
-                <div className="mb-3">
-                    <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
-                </div>
-                {/* Radio buttons abajo del logo */}
+                {/* Radio buttons */}
                 <div className="flex justify-center gap-6 mb-4 w-full">
                     <label className="inline-flex items-center gap-2">
                         <input
@@ -238,7 +234,7 @@ const DarkListContent = () => {
 
                 {/* Footer-like: ayuda bajada al final */}
                 {ayuda && (
-                    <div className="mt-auto pt-8">
+                    <div className="pt-8">
                         <div className="text-sm text-gray-600">{ayuda}</div>
                     </div>
                 )}

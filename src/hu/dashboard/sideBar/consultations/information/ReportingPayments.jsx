@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Toaster, toast } from "sonner";
-import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { infoEjecutivo, getExportReportPayments } from "../../../../../services/mark/albaz/LokiServices";
+import { exportDataToCSV } from "../../../../../utils/ExcelExporter";
 
 
 const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
@@ -29,6 +29,16 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
     const [loadingTabla, setLoadingTabla] = useState(false);
     const [errorTabla, setErrorTabla] = useState(null);
     const [tablaData, setTablaData] = useState([]);
+
+    // Toast informativo al montar el componente (solo si no está mostrando tabla)
+    useEffect(() => {
+        // Solo mostrar al montar, no al cambiar mostrarTabla
+        const initialMostrarTabla = mostrarTabla;
+        if (!initialMostrarTabla) {
+            toast.info("Seleccione un intervalo y la consulta para mostrar los pagos reportados y dé click en 'Buscar'.", { duration: 5000 });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Cargar opciones de consulta igual que Payments.jsx
     useEffect(() => {
@@ -85,10 +95,10 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
             let data = response?.data ?? response;
             if (Array.isArray(data)) {
                 setTablaData(data);
-                toast.success("Consulta realizada correctamente.");
+                toast.info("Búsqueda realizada exitosamente, oprima 'Exportar' si desea exportar a Excel.", { duration: 5000 });
             } else if (Array.isArray(data?.data)) {
                 setTablaData(data.data);
-                toast.success("Consulta realizada correctamente.");
+                toast.info("Búsqueda realizada exitosamente, oprima 'Exportar' si desea exportar a Excel.", { duration: 5000 });
             } else {
                 setTablaData([]);
                 setErrorTabla("No se encontraron resultados.");
@@ -140,82 +150,70 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mostrarTabla, paramsGuardados]);
 
-    // Exportar a Excel (CSV)
+    // Exportar a Excel (CSV) usando ExcelExporter
     const handleExportar = () => {
         if (!tablaData.length) return;
-        const headers = [
-            "cartera",
-            "cuenta",
-            "nombreEjecutivo",
-            "fechaPago",
-            "hora",
-            "montoPago",
-            "referencia",
-            "sucursal"
-        ];
-        const rows = tablaData.map(obj => headers.map(h => {
-            let value = obj[h];
-            if (h === "cuenta" && typeof value === "number") value = `'${value.toString()}`;
-            if (h === "cuenta" && typeof value === "string") value = `'${value}`;
-            if (h === "fechaPago" && typeof value === "string") value = value.replace(/T00:00:00$/, "");
-            if (h === "montoPago" && value !== undefined && value !== null) value = `$${value}`;
-            if (typeof value === "string") value = value.replace(/,/g, "");
-            return value;
-        }).join(","));
-        const csvContent = headers.join(",") + "\n" + rows.join("\n");
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `pagos_reportados_${desde}_a_${hasta}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        toast.success("Archivo exportado correctamente. Ábrelo en Excel para visualizar los pagos.");
+        
+        exportDataToCSV(tablaData, `pagos_reportados_${desde}_a_${hasta}`, {
+            headers: ["Cartera", "Cuenta", "NombreEjecutivo", "FechaPago", "Hora", "MontoPago", "Referencia", "Sucursal"],
+            dateFields: ["FechaPago"],
+            currencyFields: ["MontoPago"],
+            accountFields: ["Cuenta"],
+            successMessage: "Archivo exportado correctamente. Ábrelo en Excel para visualizar los pagos."
+        });
     };
 
     return (
     <>
-    <div style={{ width: '100%' }} className="flex flex-col items-center">
+    <div style={{ width: '100%', height: '100%' }} className="flex flex-col items-center">
             {/* Layout dinámico según mostrarTabla (modo pagos-xl) */}
             {!mostrarTabla && (
                 <>
-                    {/* Logo centrado arriba de los campos */}
-                    <div className="flex flex-col items-center w-full">
-                        <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
-                    </div>
                     {/* Contenedor centralizado para los campos y botones */}
                     <div
                         className="flex flex-col items-center w-full"
-                        style={{ flex: 1, marginTop: '1.2rem', transition: 'margin-top 0.2s' }}
+                        style={{ flex: 1, transition: 'margin-top 0.2s' }}
                     >
-                        <div className="flex gap-3 w-full max-w-xs justify-center" style={{ marginBottom: '1.2rem' }}>
-                            <div className="hs-input-group w-full">
-                                <span className="hs-input-group-text min-w-[90px]">Desde</span>
+                        <div className="flex gap-3 w-full max-w-sm justify-center" style={{ marginBottom: '1.2rem' }}>
+                            <div className="relative w-full min-w-0">
                                 <input
                                     type="date"
-                                    className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                    id="fecha-desde-reporting"
+                                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                     value={desde}
                                     onChange={e => setDesde(e.target.value)}
                                     min="2016-01-01"
                                     max={new Date().toISOString().slice(0, 10)}
+                                    placeholder=" "
                                 />
+                                <label
+                                    htmlFor="fecha-desde-reporting"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                >
+                                    Desde
+                                </label>
                             </div>
-                            <div className="hs-input-group w-full">
-                                <span className="hs-input-group-text min-w-[90px]">Hasta</span>
+                            <div className="relative w-full min-w-0">
                                 <input
                                     type="date"
-                                    className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                    id="fecha-hasta-reporting"
+                                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                     value={hasta}
                                     onChange={e => setHasta(e.target.value)}
                                     min="2016-01-01"
                                     max={new Date().toISOString().slice(0, 10)}
+                                    placeholder=" "
                                 />
+                                <label
+                                    htmlFor="fecha-hasta-reporting"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                >
+                                    Hasta
+                                </label>
                             </div>
                         </div>
                         {/* Dropdown Consulta con estilos de Preline */}
-                        <div className="relative w-full max-w-xs" style={{ marginBottom: '0.7rem' }}>
+                        <div className="relative w-full max-w-sm" style={{ marginBottom: '0.7rem' }}>
                             <select
                                 className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={consulta}
@@ -243,7 +241,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                 <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
                             )}
                         </div>
-                        <div className="flex gap-3 w-full max-w-xs justify-center">
+                        <div className="flex gap-3 w-full max-w-sm justify-center">
                             <button
                                 type="button"
                                 className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
@@ -267,46 +265,56 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                 </>
             )}
             {mostrarTabla && (
-                <>
-                    {/* Grid row: logo en columna 2, campos en 3, 4, 5, consulta en 5, columna 6 vacía */}
-                    <div className="w-full grid grid-cols-6 gap-4 items-center mb-4 max-w-5xl">
-                        <div></div>
-                        <div className="flex justify-center">
-                            <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain" />
-                        </div>
-                        <div>
-                            <div className="hs-input-group w-full">
-                                <span className="hs-input-group-text min-w-[90px]">Desde</span>
+                <div className="flex flex-col w-full" style={{ flex: 1, minHeight: 0 }}>
+                    {/* Grid responsivo: lg=5cols | md=3cols+botones abajo | sm=1col apilado */}
+                    <div className="w-full mb-4">
+                        {/* Fila de campos: lg=5cols (con botones), md=3cols, sm=1col */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 items-center">
+                            {/* Desde */}
+                            <div className="relative w-full min-w-0">
                                 <input
                                     type="date"
-                                    className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                    id="fecha-desde-reporting-ext"
+                                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                     value={desde}
                                     onChange={e => setDesde(e.target.value)}
                                     min="2016-01-01"
                                     max={new Date().toISOString().slice(0, 10)}
+                                    placeholder=" "
                                 />
+                                <label
+                                    htmlFor="fecha-desde-reporting-ext"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                >
+                                    Desde
+                                </label>
                             </div>
-                        </div>
-                        <div>
-                            <div className="hs-input-group w-full">
-                                <span className="hs-input-group-text min-w-[90px]">Hasta</span>
+                            {/* Hasta */}
+                            <div className="relative w-full min-w-0">
                                 <input
                                     type="date"
-                                    className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                    id="fecha-hasta-reporting-ext"
+                                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                     value={hasta}
                                     onChange={e => setHasta(e.target.value)}
                                     min="2016-01-01"
                                     max={new Date().toISOString().slice(0, 10)}
+                                    placeholder=" "
                                 />
+                                <label
+                                    htmlFor="fecha-hasta-reporting-ext"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                >
+                                    Hasta
+                                </label>
                             </div>
-                        </div>
-                        <div>
+                            {/* Consulta */}
                             <div className="relative w-full">
                                 <select
                                     className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                     value={consulta}
                                     onChange={e => setConsulta(e.target.value)}
-                                    id="consulta-select-reporting"
+                                    id="consulta-select-reporting-ext"
                                     disabled={loadingConsultas || errorConsultas}
                                 >
                                     <option value="0">- Todas -</option>
@@ -317,37 +325,56 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                     ))}
                                 </select>
                                 <label
-                                    htmlFor="consulta-select-reporting"
+                                    htmlFor="consulta-select-reporting-ext"
                                     className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
                                 >
                                     Consulta
                                 </label>
                             </div>
+                            {/* Botones: visibles en lg dentro del grid de 5 cols */}
+                            <div className="hidden lg:flex justify-center">
+                                <button
+                                    type="button"
+                                    className="btn-success w-full min-w-[120px] px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                                    onClick={handleBuscar}
+                                    disabled={loadingTabla}
+                                >
+                                    {loadingTabla ? "Buscando..." : "Buscar"}
+                                </button>
+                            </div>
+                            <div className="hidden lg:flex justify-center">
+                                <button
+                                    type="button"
+                                    className="btn-info w-full min-w-[120px] px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                                    onClick={handleExportar}
+                                    disabled={!tablaData.length}
+                                >
+                                    Exportar
+                                </button>
+                            </div>
                         </div>
-                        <div></div>
+                        {/* Botones: visibles solo en md y sm (debajo de los campos) */}
+                        <div className="flex lg:hidden gap-4 mt-4 justify-center">
+                            <button
+                                type="button"
+                                className="btn-success flex-1 sm:flex-none min-w-[120px] px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                                onClick={handleBuscar}
+                                disabled={loadingTabla}
+                            >
+                                {loadingTabla ? "Buscando..." : "Buscar"}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn-info flex-1 sm:flex-none min-w-[120px] px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                                onClick={handleExportar}
+                                disabled={!tablaData.length}
+                            >
+                                Exportar
+                            </button>
+                        </div>
                     </div>
-                    <div className="flex gap-3 w-full justify-center mb-4">
-                        <button
-                            type="button"
-                            className="btn-success w-full sm:w-auto min-w-[120px] max-w-xs px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
-                            style={{ margin: '0 auto', display: 'block' }}
-                            onClick={handleBuscar}
-                            disabled={loadingTabla}
-                        >
-                            {loadingTabla ? "Buscando..." : "Buscar"}
-                        </button>
-                        <button
-                            type="button"
-                            className="btn-info w-full sm:w-auto min-w-[120px] max-w-xs px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
-                            style={{ margin: '0 auto', display: 'block' }}
-                            onClick={handleExportar}
-                            disabled={!tablaData.length}
-                        >
-                            Exportar
-                        </button>
-                    </div>
-                    <div style={{ width: '100%', maxWidth: 1100, minHeight: 480, maxHeight: 480, marginTop: 0, marginBottom: 0, borderRadius: 8, border: '1px solid #e0e0e0', background: '#fff', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-                        <div style={{ width: '100%', height: '100%', overflowY: 'auto', flex: 1 }}>
+                    <div style={{ width: '100%', flex: 1, minHeight: 0, borderRadius: 8, border: '1px solid #e0e0e0', background: '#fff', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ width: '100%', height: '100%', overflowY: 'auto', flex: 1, minHeight: 0 }}>
                             <table className="modal-table" style={{ minWidth: 900, width: '100%', height: '100%', tableLayout: 'auto', borderCollapse: 'separate' }}>
                                 <thead style={{ position: 'sticky', top: 0, background: '#fff' }}>
                                     <tr>
@@ -364,7 +391,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                 <tbody style={{ background: '#b6d6f6' }}>
                                     {loadingTabla && (
                                         <tr>
-                                            <td colSpan={8} style={{ textAlign: 'center', height: 320, verticalAlign: 'middle' }}>
+                                            <td colSpan={8} style={{ textAlign: 'center', height: 200, verticalAlign: 'middle' }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                                                     <div className="animate-spin" style={{ border: '4px solid #e0e0e0', borderTop: '4px solid #3b82f6', borderRadius: '50%', width: 48, height: 48, marginBottom: 12 }}></div>
                                                     <span className="text-gray-500">Cargando...</span>
@@ -374,7 +401,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                                     )}
                                     {!loadingTabla && tablaData.length === 0 && (
                                         <tr>
-                                            <td colSpan={8} style={{ textAlign: 'center', height: 320, verticalAlign: 'middle' }}>
+                                            <td colSpan={8} style={{ textAlign: 'center', height: 200, verticalAlign: 'middle' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                                                     <span className="text-gray-500" style={{ fontSize: 18 }}>Aún no hay registros</span>
                                                 </div>
@@ -408,27 +435,8 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla }) => {
                         `}</style>
                     </div>
                     {errorTabla && <div className="text-red-500 text-xs text-center mt-1">{errorTabla}</div>}
-                </>
+                </div>
             )}
-            <div
-                style={{
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'flex-start',
-                    alignItems: 'center',
-                    marginTop: !mostrarTabla ? 52 : 0
-                }}
-            >
-                {!mostrarTabla ? (
-                    <span className="text-gray-600 text-sm pl-2">
-                        Seleccione un intervalo y la consulta para mostrar los pagos reportados y dé click en "Buscar".
-                    </span>
-                ) : (
-                    <span className="text-gray-600 text-sm pl-2">
-                        Búsqueda realizada exitosamente, oprima 'Exportar' si desea que el se exporte a Excel
-                    </span>
-                )}
-            </div>
         </div>
         </>
     );

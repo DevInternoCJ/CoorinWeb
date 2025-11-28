@@ -16,8 +16,9 @@ const TableMetas = ({
     // Normalizar valores para que siempre se pinte algo aunque vengan null/undefined
     const safe = (val, def = '') => val !== null && val !== undefined ? val : def;
     return (
-        <div className="metas-block metas-block-3 bg-white rounded-lg p-2 sm:p-3 shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full mt-2" style={{ flex: 1, height: '58vh', minWidth: '900px' }}>
-            <div className="scrollbar-gray w-full max-h-[54vh] min-h-[32vh] min-w-[900px] overflow-y-auto">
+        <div className="metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full" style={{ flex: 1, maxHeight: '54vh', minWidth: '520px', paddingBottom: 0, marginTop: 0 }}>
+            {/* La altura máxima ahora es igual a la del árbol (54vh) para alineación visual */}
+            <div className="scrollbar-gray w-full max-h-[32vh] min-h-[20vh] min-w-[520px] overflow-y-auto">
                 <table className="modal-table">
                     <thead>
                         <tr>

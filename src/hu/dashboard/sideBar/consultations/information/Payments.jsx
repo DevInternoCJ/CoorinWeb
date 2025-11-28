@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { infoEjecutivo, getPaymentsInformation } from "../../../../../services/mark/albaz/LokiServices";
 import { Toaster, toast } from "sonner";
+import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
 
 const PaymentsContent = () => {
@@ -54,7 +54,7 @@ const PaymentsContent = () => {
             .finally(() => setLoadingConsultas(false));
     }, [idCartera, idProducto, idEjecutivo]);
 
-    // Función para consumir el endpoint y descargar el Excel
+    // Función para consumir el endpoint y descargar el Excel usando ExcelExporter
     const handleDownloadExcel = async () => {
         setLoadingExcel(true);
         setErrorExcel(null);
@@ -69,90 +69,51 @@ const PaymentsContent = () => {
                 jerarquia
             };
             const response = await getPaymentsInformation(params);
-            // response.data es un Blob
-            if (response && response.data instanceof Blob) {
-                // Leer el contenido del blob como texto
-                const text = await response.data.text();
-                let csvContent = text;
-                // Si parece JSON, convertir a CSV
-                try {
-                    const json = JSON.parse(text);
-                    if (Array.isArray(json) && json.length > 0 && typeof json[0] === 'object') {
-                        const headers = Object.keys(json[0]);
-                        const rows = json.map(obj => headers.map(h => {
-                            let value = obj[h];
-                            // Formato especial para cada campo
-                            if (h.toLowerCase() === 'cuenta' && typeof value === 'number') {
-                                // Forzar a string para evitar notación científica
-                                value = `'${value.toString()}`;
-                            } else if (h.toLowerCase() === 'cuenta' && typeof value === 'string') {
-                                value = `'${value}`;
-                            }
-                            if (h.toLowerCase() === 'fechapago' && typeof value === 'string') {
-                                value = value.replace(/T00:00:00$/, '');
-                            }
-                            if (h.toLowerCase() === 'montopago' && value !== undefined && value !== null) {
-                                value = `$${value}`;
-                            }
-                            // Quitar comas internas para no romper el CSV
-                            if (typeof value === 'string') value = value.replace(/,/g, '');
-                            return value;
-                        }).join(","));
-                        csvContent = headers.join(",") + "\n" + rows.join("\n");
-                    }
-                } catch (e) {
-                    console.error('Error al convertir a CSV:', e);
-                    // No es JSON, dejar como está
+            
+            const result = await exportFromAPIResponse(
+                response,
+                `pagos_${desde}_a_${hasta}`,
+                {
+                    consultaName: "Pagos",
+                    accountFields: ['cuenta'],
+                    dateFields: ['fechapago', 'fechaPago'],
+                    currencyFields: ['montopago', 'montoPago'],
+                    showToast: true,
+                    successMessage: "Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos."
                 }
-                // Descargar como CSV limpio
-                const blob = new Blob([csvContent], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `pagos_${desde}_a_${hasta}.csv`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+            );
+
+            if (result) {
+                setFooterMsg("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
+                setFooterColor("text-green-600");
             } else {
-                setErrorExcel('No se pudo descargar el archivo.');
+                setConsultaSinRegistros(true);
+                setFooterMsg("Consulta terminada sin registros");
+                setFooterColor("text-black");
             }
-    if (response && response.data instanceof Blob) {
-        // ...descarga exitosa...
-        setFooterMsg("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
-        setFooterColor("text-green-600");
-    } else {
-        setErrorExcel('No se pudo descargar el archivo.');
-        setFooterMsg("No se pudo descargar el archivo de pagos o la descarga fue cancelada.");
-        setFooterColor("text-red-600");
-    }
-} catch (err) {
-    const status = err?.response?.status;
-    const statusText = err?.response?.statusText;
-    if (status === 404 && statusText === "Not Found") {
-        setConsultaSinRegistros(true);
-        setErrorExcel(null);
-        setFooterMsg("Consulta terminada sin registros");
-        setFooterColor("text-black");
-        toast.warning("Su consulta no cuenta con registros en la fecha especificada", {
-            duration: 4000,
-        });
-    } else {
-        setConsultaSinRegistros(false);
-        setErrorExcel('Error al obtener los pagos.');
-        setFooterMsg("No se pudo descargar el archivo de pagos.");
-        setFooterColor("text-red-600");
-    }
-} finally {
-    setLoadingExcel(false);
-}
+        } catch (err) {
+            const status = err?.response?.status;
+            const statusText = err?.response?.statusText;
+            if (status === 404 && statusText === "Not Found") {
+                setConsultaSinRegistros(true);
+                setErrorExcel(null);
+                setFooterMsg("Consulta terminada sin registros");
+                setFooterColor("text-black");
+                toast.warning("Su consulta no cuenta con registros en la fecha especificada", {
+                    duration: 4000,
+                });
+            } else {
+                setConsultaSinRegistros(false);
+                setErrorExcel('Error al obtener los pagos.');
+                setFooterMsg("No se pudo descargar el archivo de pagos.");
+                setFooterColor("text-red-600");
+            }
+        } finally {
+            setLoadingExcel(false);
+        }
     };
     return (
-        <div className="w-full max-w-xs mx-auto flex flex-col items-center" style={{ minHeight: 0, height: 'auto' }}>
-            {/* Logo centrado arriba de Cartera */}
-            <div className="flex justify-center mb-4 w-full">
-                <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
-            </div>
+        <div className="w-full flex flex-col items-center" style={{ minHeight: 0, height: 'auto' }}>
             <div className="w-full relative">
                 {/* Cartera y Consulta en el mismo row */}
                 <div className="flex flex-row gap-3 w-full mb-3">
@@ -206,28 +167,42 @@ const PaymentsContent = () => {
                 {/* Fechas */}
                 <div className="flex gap-3 mb-3">
                     {/* Desde */}
-                    <div className="hs-input-group w-full">
-                        <span className="hs-input-group-text min-w-[90px]">Desde</span>
+                    <div className="relative w-full min-w-0">
                         <input
                             type="date"
-                            className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                            id="fecha-desde-payments"
+                            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                             value={desde}
                             min="2016-01-01"
                             max={new Date().toISOString().slice(0, 10)}
                             onChange={e => setDesde(e.target.value)}
+                            placeholder=" "
                         />
+                        <label
+                            htmlFor="fecha-desde-payments"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                        >
+                            Desde
+                        </label>
                     </div>
                     {/* Hasta */}
-                    <div className="hs-input-group w-full">
-                        <span className="hs-input-group-text min-w-[90px]">Hasta</span>
+                    <div className="relative w-full min-w-0">
                         <input
                             type="date"
-                            className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                            id="fecha-hasta-payments"
+                            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                             value={hasta}
                             min="2016-01-01"
                             max={new Date().toISOString().slice(0, 10)}
                             onChange={e => setHasta(e.target.value)}
+                            placeholder=" "
                         />
+                        <label
+                            htmlFor="fecha-hasta-payments"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                        >
+                            Hasta
+                        </label>
                     </div>
                 </div>
                 <div className="flex justify-center items-end w-full">

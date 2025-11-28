@@ -335,7 +335,7 @@ label {
   color: var(--color-jerarquia3);
   font-size: 2.0rem;
   border-radius: 50%;
-  padding: 0.25rem 0.5rem;
+  padding: 0;
   border: none;
   cursor: pointer;
   transition: color 0.2s, background 0.2s;

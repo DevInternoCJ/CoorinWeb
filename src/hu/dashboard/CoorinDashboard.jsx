@@ -17,7 +17,6 @@ import EmailsContent from "./sideBar/consultations/information/Emails";
 import SearchesContent from "./sideBar/consultations/information/Searches";
 import OffersContent from "./sideBar/consultations/information/Offers";
 import CommentsContent from "./sideBar/consultations/information/Comments";
-import VGPContent from "./sideBar/consultations/information/VGP";
 import EmailTemplates from "./sideBar/Administration/gespa/emailTemplates/EmailTemplates";
 import ModalBaseCampanas from "./sideBar/Administration/Campanias/ModalBaseCampanas";
 import Phrases from "./sideBar/Administration/gespa/phrases/Phrases";
@@ -74,13 +73,15 @@ export default function CoorinDashboard() {
       setModalSidebarOpen(false);
       setMostrarTablaPagosReportados(false); // Reiniciar al cerrar
       setCaptureVisitModalSize("capturaVisit"); // Reiniciar tamaño al cerrar
+      setCuentaDataCapturaVisita(null); // Limpiar datos de cuenta al cerrar
     };
 
     // Componentes de información que usan el ModalBaseInformacion
     const informationComponents = [
+      "información", // Carrusel circular con todos los componentes
       "Lista Negra", "Arrepentimientos",
       "Pagos", "Pagos reportados", "Datos Erroneos", "Domicilios", 
-      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios", "VGP",
+      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
       "Consulta Visitas", "Captura Visitas", "Carga Visitas"
     ];
 
@@ -88,6 +89,10 @@ export default function CoorinDashboard() {
       let ContentComponent;
       let contentProps = {};
       switch (selectedSidebarOption) {
+        case "información":
+          // No necesita ContentComponent - ModalBaseInformacion muestra ModalCicle directamente
+          ContentComponent = null;
+          break;
         case "Lista Negra":
           ContentComponent = DarkListContent;
           break;
@@ -134,9 +139,6 @@ export default function CoorinDashboard() {
         case "Comentarios":
           ContentComponent = CommentsContent;
           break;
-        case "VGP":
-          ContentComponent = VGPContent;
-          break;
         case "Consulta Visitas":
           ContentComponent = ConsultVisitContent;
           break;
@@ -163,7 +165,9 @@ export default function CoorinDashboard() {
 
       // Usar size='pagos' por default y size='pagos-xl' cuando mostrarTablaPagosReportados o mostrarTablaDomicilios sea true
       let size = undefined;
-      if (selectedSidebarOption === "Pagos reportados") {
+      if (selectedSidebarOption === "información") {
+        size = "pagos"; // Carrusel en tamaño normal, se expande con mostrarTabla
+      } else if (selectedSidebarOption === "Pagos reportados") {
         size = mostrarTablaPagosReportados ? "pagos-xl" : "pagos";
       } else if (selectedSidebarOption === "Domicilios") {
         size = mostrarTablaDomicilios ? "pagos-xl" : "pagos";
@@ -232,6 +236,7 @@ export default function CoorinDashboard() {
 
     // Mapeo de IDs del sidebar a opciones del modal
     const sidebarOptionsMap = {
+      "1BB": "información", // Información - abre carrusel circular
       "2BB": "Lista Negra", // Lista Negra
       "3BB": "Arrepentimientos", // Arrepentimientos
       "1BBB": "Pagos", // Pagos
@@ -242,7 +247,6 @@ export default function CoorinDashboard() {
       "6BBB": "Búsquedas", // Búsquedas
       "7BBB": "Ofrecimientos", // Ofrecimientos
       "8BBB": "Comentarios", // Comentarios
-      "9BBB": "VGP", // VGP
       "2AAA": "Plantillas Correo", // Plantillas Correo
       "1AA": "Campañas",
       "1DD": "Campañas",

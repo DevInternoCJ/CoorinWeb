@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { getCatalogoValueCard, getWrongsInformation } from "../../../../../services/mark/albaz/LokiServices";
 
 const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
@@ -64,6 +63,9 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                 return;
             }
             setTablaData(Array.isArray(json) ? json : []);
+            if (Array.isArray(json) && json.length > 0) {
+                toast.info("Búsqueda realizada exitosamente.", { duration: 5000 });
+            }
             localStorage.removeItem('wrongsParams');
         } catch (err) {
             if (err?.response?.status === 404 && err?.response?.statusText === "Not Found") {
@@ -75,6 +77,15 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
             setLoadingTabla(false);
         }
     };
+    // Toast informativo al montar el componente
+    useEffect(() => {
+        const initialMostrarTabla = mostrarTabla;
+        if (!initialMostrarTabla) {
+            toast.info("Seleccione un intervalo y el dato erróneo para mostrar los registros y dé click en 'Buscar'.", { duration: 5000 });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     // Cargar catálogo al montar
     useEffect(() => {
         getCatalogoValueCard()
@@ -124,6 +135,9 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                 return;
             }
             setTablaData(Array.isArray(json) ? json : []);
+            if (Array.isArray(json) && json.length > 0) {
+                toast.info("Búsqueda realizada exitosamente.", { duration: 5000 });
+            }
             localStorage.removeItem('wrongsParams');
         } catch (err) {
             if (err?.response?.status === 404 && err?.response?.statusText === "Not Found") {
@@ -139,41 +153,49 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
 
     return (
         <div style={{ width: '100%', height: '100%' }} className="flex flex-col items-center min-h-0 h-full">
-            {/* Logo centrado arriba de los campos solo si mostrarTabla es falso */}
-            {!mostrarTabla && (
-                <div className="flex flex-col items-center w-full mb-2">
-                    <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
-                </div>
-            )}
             {/* Layout extendido si mostrarTabla=true */}
             {!mostrarTabla ? (
                 <div className="flex flex-col items-center w-full" style={{ flex: 1 }}>
-                    <div className="flex gap-3 mb-3 w-full max-w-xs justify-center">
-                        <div className="hs-input-group w-full">
-                            <span className="hs-input-group-text min-w-[90px]">Desde</span>
+                    <div className="flex gap-3 mb-3 w-full max-w-sm justify-center">
+                        <div className="relative w-full min-w-0">
                             <input
                                 type="date"
-                                className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                id="fecha-desde-wrongs"
+                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={desde}
                                 onChange={e => setDesde(e.target.value)}
                                 min="2016-01-01"
                                 max={(() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10); })()}
+                                placeholder=" "
                             />
+                            <label
+                                htmlFor="fecha-desde-wrongs"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                            >
+                                Desde
+                            </label>
                         </div>
-                        <div className="hs-input-group w-full">
-                            <span className="hs-input-group-text min-w-[90px]">Hasta</span>
+                        <div className="relative w-full min-w-0">
                             <input
                                 type="date"
-                                className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                id="fecha-hasta-wrongs"
+                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={hasta}
                                 onChange={e => setHasta(e.target.value)}
                                 min="2016-01-01"
                                 max={new Date().toISOString().slice(0, 10)}
+                                placeholder=" "
                             />
+                            <label
+                                htmlFor="fecha-hasta-wrongs"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                            >
+                                Hasta
+                            </label>
                         </div>
                     </div>
                     {/* Dropdown Datos Erróneos */}
-                    <div className="relative w-full max-w-xs mb-3">
+                    <div className="relative w-full max-w-sm mb-3">
                         <select
                             className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                             value={datoErroneo}
@@ -192,7 +214,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                             Datos Erróneos
                         </label>
                     </div>
-                    <div className="flex gap-3 w-full max-w-xs justify-center">
+                    <div className="flex gap-3 w-full max-w-sm justify-center">
                         <button
                             type="button"
                             className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
@@ -204,72 +226,80 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                     </div>
                 </div>
             ) : (
-                <>
-                    {/* Row de 6 columnas para controles */}
-                    <div className="w-full grid grid-cols-6 items-center mb-2 max-w-5xl" style={{ minHeight: 70 }}>
-                        {/* Col 1 vacía */}
-                        <div></div>
-                        {/* Col 2: Logo */}
-                        <div className="flex items-center justify-center">
-                            <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
+                <div className="flex flex-col w-full items-center" style={{ flex: 1, minHeight: 0 }}>
+                    {/* Grid responsivo: lg=4cols | md=2cols x 2filas | sm=1col apilado */}
+                    <div className="w-full max-w-4xl mb-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+                            {/* Desde */}
+                            <div className="relative w-full min-w-0">
+                                <input
+                                    type="date"
+                                    id="fecha-desde-wrongs-ext"
+                                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                    value={desde}
+                                    onChange={e => setDesde(e.target.value)}
+                                    min="2016-01-01"
+                                    max={new Date().toISOString().slice(0, 10)}
+                                    placeholder=" "
+                                />
+                                <label
+                                    htmlFor="fecha-desde-wrongs-ext"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                >
+                                    Desde
+                                </label>
+                            </div>
+                            {/* Hasta */}
+                            <div className="relative w-full min-w-0">
+                                <input
+                                    type="date"
+                                    id="fecha-hasta-wrongs-ext"
+                                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                    value={hasta}
+                                    onChange={e => setHasta(e.target.value)}
+                                    min="2016-01-01"
+                                    max={new Date().toISOString().slice(0, 10)}
+                                    placeholder=" "
+                                />
+                                <label
+                                    htmlFor="fecha-hasta-wrongs-ext"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                >
+                                    Hasta
+                                </label>
+                            </div>
+                            {/* Dato Erróneo */}
+                            <div className="relative w-full">
+                                <select
+                                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                    value={datoErroneo}
+                                    onChange={e => setDatoErroneo(e.target.value)}
+                                    id="datos-erroneos-select-ext"
+                                >
+                                    <option value="">--Todos--</option>
+                                    {catalogoOptions.map(item => (
+                                        <option key={item.idValor} value={item.idValor}>{item.valor}</option>
+                                    ))}
+                                </select>
+                                <label
+                                    htmlFor="datos-erroneos-select-ext"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                                >
+                                    Datos Erróneos
+                                </label>
+                            </div>
+                            {/* Buscar */}
+                            <div className="flex justify-center">
+                                <button
+                                    type="button"
+                                    className="btn-success w-full min-w-[120px] px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                                    onClick={handleBuscar}
+                                    disabled={loadingTabla}
+                                >
+                                    {loadingTabla ? "Buscando..." : "Buscar"}
+                                </button>
+                            </div>
                         </div>
-                        {/* Col 3: Dropdown Dato Erróneo */}
-                        <div className="relative">
-                            <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={datoErroneo}
-                                onChange={e => setDatoErroneo(e.target.value)}
-                                id="datos-erroneos-select"
-                            >
-                                <option value="">--Todos--</option>
-                                {catalogoOptions.map(item => (
-                                    <option key={item.idValor} value={item.idValor}>{item.valor}</option>
-                                ))}
-                            </select>
-                            <label
-                                htmlFor="datos-erroneos-select"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Datos Erróneos
-                            </label>
-                        </div>
-                        {/* Col 4: Calendario Desde */}
-                        <div className="hs-input-group">
-                            <span className="hs-input-group-text min-w-[90px]">Desde</span>
-                            <input
-                                type="date"
-                                className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
-                                value={desde}
-                                onChange={e => setDesde(e.target.value)}
-                                min="2016-01-01"
-                                max={new Date().toISOString().slice(0, 10)}
-                            />
-                        </div>
-                        {/* Col 5: Calendario Hasta */}
-                        <div className="hs-input-group">
-                            <span className="hs-input-group-text min-w-[90px]">Hasta</span>
-                            <input
-                                type="date"
-                                className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
-                                value={hasta}
-                                onChange={e => setHasta(e.target.value)}
-                                min="2016-01-01"
-                                max={new Date().toISOString().slice(0, 10)}
-                            />
-                        </div>
-                        {/* Col 6 vacía */}
-                        <div></div>
-                    </div>
-                    {/* Botón buscar en un row abajo, centrado */}
-                    <div className="w-full flex justify-center mb-4">
-                        <button
-                            type="button"
-                            className="btn-success min-w-[120px] px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
-                            onClick={handleBuscar}
-                            disabled={loadingTabla}
-                        >
-                            {loadingTabla ? "Buscando..." : "Buscar"}
-                        </button>
                     </div>
                         <div style={{ width: '100%', maxWidth: 1100, flex: '1 1 auto', minHeight: 0, marginTop: 0, marginBottom: 0, borderRadius: 8, border: '1px solid #e0e0e0', background: '#fff', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
                             <div style={{ width: '100%', height: '100%', overflowY: 'auto', flex: 1, minHeight: 0 }}>
@@ -332,19 +362,8 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                             `}</style>
                         </div>
                     {errorTabla && <div className="text-red-500 text-xs text-center mt-1">{errorTabla}</div>}
-                </>
+                </div>
             )}
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginTop: !mostrarTabla ? 52 : 0 }}>
-                {!mostrarTabla ? (
-                    <span className="text-gray-600 text-sm pl-2">
-                        Seleccione un intervalo y el dato erróneo para mostrar los registros y dé click en "Buscar".
-                    </span>
-                ) : (
-                    <span className="text-gray-600 text-sm pl-2">
-                        Búsqueda realizada exitosamente.
-                    </span>
-                )}
-            </div>
         </div>
     );
 };

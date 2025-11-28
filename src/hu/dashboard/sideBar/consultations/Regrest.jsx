@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import ConsorcioLogo from "../../../../assets/logo_coorin_7.svg";
 import { getRegrest, infoEjecutivo } from "../../../../services/mark/albaz/LokiServices";
 import { toast } from 'sonner';
 
@@ -84,12 +83,11 @@ const RegrestContent = ({ growModal, isExpanded }) => {
 
     // El layout horizontal solo aplica si el modal está expandido (pagos-xl)
     return (
-        <div className="w-full pt-0 px-6 pb-6 box-border flex flex-col min-h-[360px]">
+        <div className="w-full pt-0 px-6 pb-6 box-border flex flex-col">
             {isExpanded ? (
                 <div className="md:grid md:grid-cols-6 gap-0 items-center mb-2 w-full">
                     {/* Mobile: elementos apilados uno sobre otro y centrados */}
                     <div className="flex flex-col w-full items-center md:hidden">
-                        <img src={ConsorcioLogo} alt="Logo Coorin" className="h-16 w-16 object-contain mb-2" />
                         <div className="relative w-full mb-2">
                             <select
                                 id="cartera-select"
@@ -131,9 +129,7 @@ const RegrestContent = ({ growModal, isExpanded }) => {
                     </div>
                     {/* Desktop: grid de 6 columnas */}
                     <div className="hidden md:flex md:col-span-1 justify-center items-center"></div>
-                    <div className="hidden md:flex md:col-span-1 justify-center items-center">
-                        <img src={ConsorcioLogo} alt="Logo Coorin" className="h-16 w-16 object-contain" />
-                    </div>
+                    <div className="hidden md:flex md:col-span-1 justify-center items-center"></div>
                     <div className="hidden md:flex md:col-span-1 items-center">
                         <div className="relative w-full">
                             <select
@@ -179,8 +175,7 @@ const RegrestContent = ({ growModal, isExpanded }) => {
             ) : (
                 <>
                     <div className="mb-3">
-                        <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
-                        <div className="relative w-full max-w-[160px] mb-3 mx-auto">
+                        <div className="relative w-full max-w-sm mb-3 mx-auto">
                             <select
                                 id="cartera-select"
                                 className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
@@ -202,20 +197,20 @@ const RegrestContent = ({ growModal, isExpanded }) => {
                     </div>
 
                     <div className="flex flex-col items-center gap-3 mb-4">
-                        <div className="mx-auto">
+                        <div className="relative w-full max-w-sm mx-auto">
                             <input
                                 type="text"
                                 value={valor}
                                 onChange={e => setValor(e.target.value)}
                                 placeholder="Ingrese nú. de cuenta"
-                                className="block w-full max-w-[160px] bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
+                                className="block w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
                                 disabled={loading}
                             />
                         </div>
 
                         <div className="w-full flex justify-center">
                             <button
-                                className="btn-success min-w-[95px] px-4 py-2 rounded-lg text-white text-sm font-medium shadow-sm hover:brightness-95 inline-flex items-center justify-center"
+                                className="btn-success w-full sm:w-auto min-w-[120px] max-w-sm px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
                                 onClick={handleBuscar}
                                 disabled={loading}
                             >

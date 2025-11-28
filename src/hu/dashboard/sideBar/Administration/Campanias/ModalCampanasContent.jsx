@@ -17,23 +17,19 @@ const ModalCampanas = ({ onClose }) => {
 		<div className="modal-xl-container" style={{ maxWidth: "98vw", overflowX: "hidden" }}>
 			<ModalCampanasHeader onClose={onClose} />
 
-			{/* ...existing code... */}
+			{/* Layout responsivo: lg=2cols lado a lado, md/sm=1col apiladas */}
 			<div
+				className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 w-full scrollbar-gray"
 				style={{
-					display: "flex",
-					flexDirection: "row",
-					gap: "1rem",
-					overflowX: "auto",
-					width: "100%",
 					minHeight: "1px",
-					alignItems: "stretch"
+					alignItems: "stretch",
+					overflowX: "auto"
 				}}
-				className="scrollbar-gray"
 			>
-				<div style={{ minWidth: 0, flex: 1, display: "flex", flexDirection: "column" }}>
+				<div className="min-w-0 flex flex-col">
 					<ModalCampanasCampanias onSeleccionCampaña={handleSeleccionCampaña} />
 				</div>
-				<div style={{ minWidth: 0, flex: "0 0 450px", maxWidth: "300px", display: "flex", flexDirection: "column" }}>
+				<div className="min-w-0 flex flex-col">
 					<ModalCampanasEjecutivos idCampaña={campañaSeleccionada.id} nombreCampaña={campañaSeleccionada.nombre} />
 				</div>
 			</div>

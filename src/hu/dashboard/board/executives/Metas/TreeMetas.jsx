@@ -85,7 +85,21 @@ const TreeMetas = ({
     }, [executiveTree, setSelectedExecutiveNode, setSelectedExecutives]);
 
     return (
-        <div className="metas-block metas-block-1" style={{ width: 'auto', minWidth: '160px', maxWidth: '28vw', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+        <div
+            className="metas-block metas-block-1"
+            style={{
+                width: 'auto',
+                minWidth: '160px',
+                maxWidth: '28vw',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.5rem',
+                flexShrink: 0,
+                maxHeight: '62vh', // Limita la altura máxima del árbol
+                overflowY: 'auto' // Permite scroll solo en el árbol si excede la altura
+            }}
+        >
             <JerarquiaConR
                 executiveTree={executiveTree}
                 loadingJerarquia={loadingJerarquia}

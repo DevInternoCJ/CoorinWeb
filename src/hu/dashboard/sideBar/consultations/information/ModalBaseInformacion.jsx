@@ -1,23 +1,18 @@
 import React, { useRef, useEffect, useState } from "react";
 import ModalBase from "../../../board/ModalBase";
 import CloseButtonCampanas from "../../../components/CloseButtonReusable";
+import ModalCicle, { tabsList, COMPONENT_ICONS } from "./ModalCicle";
+import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 
-// Tamaños tipo ReusableModal
+// Tamaños tipo ReusableModal - Solo Visitas e Información (carrusel) - Con responsividad
 const MODAL_SIZES = {
-    pagos: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
-    "pagos-xl": { maxWidth: "1104px", minWidth: "828px", height: "760px" },
-    listaNegra: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
-    arrepentimientos: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
-    datosErroneos: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
-    domicilios: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
-    correos: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
-    busquedas: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
-    consultaVisits: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
-    capturaVisit: { maxWidth: "966px", minWidth: "444px", width: "444px", height: "380px", maxHeight: "506px"  },
-    ofrecimientos: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
-    comentarios: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
-    vgp: { maxWidth: "644px", minWidth: "483px", width: "483px", height: "506px", maxHeight: "506px" },
-    cargaVisitas: { maxWidth: "1104px", minWidth: "828px", width: "900px", height: "220px", maxHeight: "320px" },
+    informacion: { maxWidth: "min(648px, 95vw)", minWidth: "408px", width: "min(600px, 95vw)", height: "340px", maxHeight: "85vh" },
+    "informacion-xl": { maxWidth: "min(1100px, 95vw)", minWidth: "320px", width: "min(1200px, 95vw)", height: "auto", minHeight: "300px", maxHeight: "90vh" },
+    "pagos-xl": { maxWidth: "min(1800px, 95vw)", minWidth: "320px", width: "min(1700px, 95vw)", height: "85vh", maxHeight: "90vh" },
+    pagos: { maxWidth: "min(420px, 95vw)", minWidth: "280px", width: "min(380px, 95vw)", height: "340px", maxHeight: "85vh" },
+    consultaVisits: { maxWidth: "min(644px, 95vw)", minWidth: "320px", width: "min(483px, 95vw)", height: "506px", maxHeight: "90vh" },
+    capturaVisit: { maxWidth: "min(805px, 95vw)", minWidth: "320px", width: "min(370px, 95vw)", height: "380px", maxHeight: "90vh" },
+    cargaVisitas: { maxWidth: "min(1104px, 95vw)", minWidth: "320px", width: "min(900px, 95vw)", height: "220px", maxHeight: "85vh" },
     custom: {},
 };
 
@@ -44,172 +39,67 @@ const ModalBaseInformacion = ({
     const modalRef = useRef(null);
     const { bounce } = ModalBase.useModalLogic?.() || { bounce: false };
     const [localBounce, setLocalBounce] = useState(false);
+    
+    // Estado para la navegación del carrusel (cuando es información)
+    const [carouselNav, setCarouselNav] = useState(null);
+    
+    // Estado para el tamaño dinámico del modal (carrusel información)
+    const [dynamicSize, setDynamicSize] = useState("informacion");
 
-    // helper to trigger bounce animation
+    // Helper para activar animación bounce
     const triggerBounce = () => {
-        try {
-            setLocalBounce(false);
-            // force reflow for restarting animation
-            void document?.body?.offsetHeight;
-        } catch (err) { console.warn('triggerBounce reflow failed', err); }
+        if (!enableBounce) return;
         setLocalBounce(true);
         setTimeout(() => setLocalBounce(false), 500);
     };
 
-    // Títulos
+    // Títulos según tipo
     const titulos = {
-        "Lista Negra": "Lista Negra",
-        "Arrepentimientos": "Arrepentimientos",
-        "Pagos": "Pagos",
-        "Pagos reportados": "Pagos Reportados",
-        "Datos Erroneos": "Datos Erróneos",
-        "Domicilios": "Domicilios",
-        "Correos": "Correos",
-        "Búsquedas": "Búsquedas",
-        "Ofrecimientos": "Ofrecimientos",
-        "Comentarios": "Comentarios",
-        "VGP": "VGP",
+        "información": "Información",
         "Consulta Visitas": "Consulta Visitas - Coorin",
         "Captura Visitas": "Captura Visitas - Coorin",
         "Carga Visitas": "Carga de Visitas - Coorin"
     };
     const titulo = titulos[tipoInformacion] || "Información";
 
-    // Estilo responsive y override
-    // Normaliza el nombre del tipo para buscar el tamaño correcto
-    let normalizedSize = size;
-    if (!size || size === 'lg') {
-        // Si no se pasa size, usar el nombre del tipo
-        switch (tipoInformacion) {
-            case "Lista Negra": normalizedSize = "listaNegra"; break;
-            case "Arrepentimientos": normalizedSize = "arrepentimientos"; break;
-            case "Pagos": normalizedSize = "pagos"; break;
-            case "Pagos reportados": normalizedSize = "pagos"; break;
-            case "Datos Erroneos": normalizedSize = "datosErroneos"; break;
-            case "Domicilios": normalizedSize = "domicilios"; break;
-            case "Correos": normalizedSize = "correos"; break;
-            case "Búsquedas": normalizedSize = "busquedas"; break;
-            case "Ofrecimientos": normalizedSize = "ofrecimientos"; break;
-            case "Comentarios": normalizedSize = "comentarios"; break;
-            case "VGP": normalizedSize = "vgp"; break;
-            case "Consulta Visitas": normalizedSize = "consultaVisits"; break;
-            case "Captura Visitas": normalizedSize = "capturaVisits"; break;
-            case "Carga Visitas": normalizedSize = "cargaVisitas"; break;
-            default: normalizedSize = size;
-        }
-    }
-    let defaultModalStyle = MODAL_SIZES[normalizedSize] || MODAL_SIZES.lg;
-    const mergedModalStyle = { ...defaultModalStyle, ...modalStyle };
-
-    // Header icon and title color según tipoInformacion
-    const isPagos = tipoInformacion === "Pagos";
-    const isPagosReportados = tipoInformacion === "Pagos reportados";
-    const isListaNegra = tipoInformacion === "Lista Negra";
-    const isWrong = tipoInformacion === "Datos Erroneos";
-    const isArrepentimientos = tipoInformacion === "Arrepentimientos";
-    const isDomicilios = tipoInformacion === "Domicilios";
-    const isCorreos = tipoInformacion === "Correos";
-    const isOfrecimientos = tipoInformacion === "Ofrecimientos";
-    const isBusquedas = tipoInformacion === "Búsquedas";
-    const isComentarios = tipoInformacion === "Comentarios";
+    // Determinar si es un modal de Visitas
     const isConsultaVisitas = tipoInformacion === "Consulta Visitas";
     const isCapturaVisitas = tipoInformacion === "Captura Visitas";
     const isCargaVisitas = tipoInformacion === "Carga Visitas";
-    const headerTitleStyle =
-        isConsultaVisitas || isCargaVisitas || isCapturaVisitas || isPagos || isPagosReportados || isListaNegra || isWrong || isDomicilios || isCorreos || isBusquedas || isComentarios || isOfrecimientos || isArrepentimientos
-            ? { color: 'var(--color-jerarquia3)' }
-            : { color: undefined };
+    const isVisitas = isConsultaVisitas || isCapturaVisitas || isCargaVisitas;
 
-    // Icono para comentarios (definido como los demás)
-    const comentariosIcon = (
+    // Determinar si es el carrusel de información
+    const isInformacion = tipoInformacion === "información";
+
+    // Determinar tamaño del modal
+    let normalizedSize = size;
+    if (isConsultaVisitas) normalizedSize = "consultaVisits";
+    else if (isCapturaVisitas) normalizedSize = size === "pagos-xl" ? "informacion-xl" : "capturaVisit";
+    else if (isCargaVisitas) normalizedSize = "cargaVisitas";
+    else if (isInformacion) normalizedSize = dynamicSize; // Usar tamaño dinámico para información
+
+    const defaultModalStyle = MODAL_SIZES[normalizedSize] || MODAL_SIZES.informacion;
+    const mergedModalStyle = { ...defaultModalStyle, ...modalStyle };
+
+    // Icono del header según tipo
+    const headerIcon = isVisitas ? (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+        </svg>
+    ) : (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
         </svg>
     );
 
-    // Icono para arrepentimientos (se usa en el header cuando aplica)
-    const arrepentimientosIcon = (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-        </svg>
-    );
-
-    const headerIcon = tipoInformacion === "Captura Visitas"
-        ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8 h-8 text-jerarquia2" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-            </svg>
-        )
-        : isPagos ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-jerarquia3" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
-        )
-        : isPagosReportados ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-jerarquia3" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
-            </svg>
-        )
-        : isWrong ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-jerarquia3" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-            </svg>
-        )
-        : isDomicilios ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-jerarquia3" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205 3 1m1.5.5-1.5-.5M6.75 7.364V3h-3v18m3-13.636 10.5-3.819" />
-            </svg>
-        )
-        : isCorreos ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-jerarquia3" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m7.875 14.25 1.214 1.942a2.25 2.25 0 0 0 1.908 1.058h2.006c.776 0 1.497-.4 1.908-1.058l1.214-1.942M2.41 9h4.636a2.25 2.25 0 0 1 1.872 1.002l.164.246a2.25 2.25 0 0 0 1.872 1.002h2.092a2.25 2.25 0 0 0 1.872-1.002l.164-.246A2.25 2.25 0 0 1 16.954 9h4.636M2.41 9a2.25 2.25 0 0 0-.16.832V12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 12V9.832c0-.287-.055-.57-.16-.832M2.41 9a2.25 2.25 0 0 1 .382-.632l3.285-3.832a2.25 2.25 0 0 1 1.708-.786h8.43c.657 0 1.281.287 1.709.786l3.284 3.832c.163.19.291.404.382.632M4.5 20.25h15A2.25 2.25 0 0 0 21.75 18v-2.625c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125V18a2.25 2.25 0 0 0 2.25 2.25Z" />
-            </svg>
-        )
-        : isOfrecimientos ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-jerarquia3" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-            </svg>
-        )
-        : isBusquedas ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-jerarquia3" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-        )
-        : isComentarios ? (
-            comentariosIcon
-        )
-        : isConsultaVisitas ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-            </svg>
-        )
-        : isArrepentimientos ? (
-            arrepentimientosIcon
-        )
-        : isCargaVisitas ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" />
-            </svg>
-        )
-        : isListaNegra ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-jerarquia3" style={{ color: 'var(--color-jerarquia3)' }} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-            </svg>
-        )
-        : (
-            // default icon
-            <img src="/public/logo_coorin_7.svg" alt="Logo Coorin" style={{ height: 36, marginRight: 8 }} />
-        );
-
-    // Backdrop click: do NOT close. Trigger bounce instead.
+    // Backdrop click: activar bounce en lugar de cerrar
     const handleBackdropClick = (e) => {
         if (e.target === e.currentTarget) {
-            // attempt to close via backdrop -> play bounce and keep modal open
             triggerBounce();
         }
     };
 
-    // Intercept Escape key to prevent closing; play bounce instead
+    // Interceptar Escape para prevenir cierre y activar bounce
     useEffect(() => {
         const handleKey = (e) => {
             if (e.key === "Escape") {
@@ -220,103 +110,159 @@ const ModalBaseInformacion = ({
         };
         window.addEventListener("keydown", handleKey, true);
         return () => window.removeEventListener("keydown", handleKey, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // When modal mounts, notify sidebar that a modal opened
+    // Notificar al sidebar que el modal está abierto
     useEffect(() => {
         try {
             window.dispatchEvent(new CustomEvent('coorin-modal-open', { detail: { open: true } }));
         } catch (err) { console.warn('dispatch open failed', err); }
         return () => {
-            // If unmounted without close via button, still notify closed (byClose:false)
             try {
                 window.dispatchEvent(new CustomEvent('coorin-modal-open', { detail: { open: false, byClose: false } }));
             } catch (err) { console.warn('dispatch close failed', err); }
         };
     }, []);
 
-        return (
-            <div className="modal-blur-bg">
-                <div
-                    className={`modal-overlay ${overlayClassName} ${backdropBlur ? 'backdrop-blur-sm' : ''}`}
-                    onClick={handleBackdropClick}
-                />
-                <div
-                    ref={modalRef}
-                    className={`modal-content modal-xl-container bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col ${modalClassName} ${((bounce || localBounce) && enableBounce) ? "animate-bounce-modal" : ""}`}
-                    style={mergedModalStyle}
-                    onClick={e => e.stopPropagation()}
-                    {...props}
-                >
-                    {/* Header reusabilidad máxima */}
-                    {showHeader && (
-                        CustomHeader ? (
-                            <CustomHeader onClose={onClose} {...headerProps} />
-                        ) : (
-                            <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-                                <div className="flex items-center gap-3">
-                                    {headerIcon}
-                                    <h2 className="text-lg font-semibold truncate" style={headerTitleStyle}>{titulo}</h2>
-                                    {/* Info de cuenta/expediente y deudor en el header */}
-                                    {infoCuenta && infoCuenta.cuenta && (
-                                        <div className="flex flex-row ml-4" style={{ gap: '8.25rem' }}>
-                                                {infoCuenta._busquedaPorExpediente
-                                                    ? (
-                                                        <>
-                                                            <span className="font-semibold text-base text-jerarquia3" style={{ marginRight: '3.125rem' }}>{infoCuenta.cuenta.idCuenta}</span>
-                                                            <span className="font-semibold text-base text-jerarquia3"> {infoCuenta.cuenta.nombreDeudor}</span>
-                                                        </>
-                                                    )
-                                                    : (
-                                                        <>
-                                                            <span className="font-semibold text-base text-jerarquia3" style={{ marginRight: '3.125rem' }}>{infoCuenta.cuenta.expediente}</span>
-                                                            <span className="font-semibold text-base text-jerarquia3"> {infoCuenta.cuenta.nombreDeudor}</span>
-                                                        </>
-                                                    )
-                                                }
-                                        </div>
-                                    )}
-                                </div>
+    return (
+        <div className="modal-blur-bg">
+            <div
+                className={`modal-overlay ${overlayClassName} ${backdropBlur ? 'backdrop-blur-sm' : ''}`}
+                onClick={handleBackdropClick}
+            />
+            <div
+                ref={modalRef}
+                className={`modal-content modal-xl-container bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col ${modalClassName} ${((bounce || localBounce) && enableBounce) ? "animate-bounce-modal" : ""}`}
+                style={mergedModalStyle}
+                onClick={e => e.stopPropagation()}
+                {...props}
+            >
+                {/* Header */}
+                {showHeader && (
+                    CustomHeader ? (
+                        <CustomHeader onClose={onClose} {...headerProps} />
+                    ) : isInformacion ? (
+                        /* Header con tabs: Logo | Tabs centrados | Botón cerrar */
+                        <div className="flex items-center justify-between border-b border-gray-200">
+                            {/* Logo izquierda */}
+                            <div className="flex items-center shrink-0">
+                                <img src={ConsorcioLogo} alt="Coorin" className="h-6 w-auto" />
+                            </div>
+                            
+                            {/* Tabs centrados con tamaño definido y responsive */}
+                            <nav 
+                                className="flex border border-gray-200 rounded-lg overflow-hidden" 
+                                aria-label="Tabs" 
+                                role="tablist"
+                            >
+                                {tabsList.map((tab, index) => (
+                                    <button
+                                        key={tab.key}
+                                        type="button"
+                                        className={`
+                                            relative w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 
+                                            first:border-s-0 border-s border-b-2 
+                                            text-xs text-center overflow-hidden 
+                                            focus:z-10 focus:outline-hidden 
+                                            disabled:opacity-50 disabled:pointer-events-none
+                                            transition-colors duration-200
+                                            flex items-center justify-center shrink-0
+                                            cursor-pointer hover:bg-jerarquia1
+                                            ${carouselNav?.currentIndex === index 
+                                                ? 'border-b-jerarquia2 bg-jerarquia2 font-bold' 
+                                                : 'bg-white border-b-gray-200 text-gray-500 font-medium'
+                                            }
+                                        `}
+                                        aria-selected={carouselNav?.currentIndex === index}
+                                        aria-label={tab.key}
+                                        title={tab.key}
+                                        role="tab"
+                                        onClick={() => carouselNav?.onTabChange?.(index)}
+                                    >
+                                        <span className={carouselNav?.currentIndex === index ? 'text-white' : 'text-black'}>
+                                            {COMPONENT_ICONS[tab.key]}
+                                        </span>
+                                    </button>
+                                ))}
+                            </nav>
+                            
+                            {/* Botón cerrar derecha */}
+                            <div className="shrink-0">
                                 <CloseButtonCampanas onClose={() => {
-                                    // notify that modal will close by close button, then call parent onClose
                                     try { window.dispatchEvent(new CustomEvent('coorin-modal-open', { detail: { open: false, byClose: true } })); } catch (err) { console.warn('dispatch close by button failed', err); }
                                     if (typeof onClose === 'function') onClose();
                                 }} />
                             </div>
-                        )
-                    )}
-
-                    {/* Contenido */}
-                    <div className={`flex-1 w-full overflow-auto ${contentClassName}`}>{children}</div>
-
-                    {/* Footer reusabilidad máxima */}
-                    {showFooter && (
-                        CustomFooter ? (
-                            <CustomFooter {...footerProps} />
-                        ) : (
-                            <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end gap-2">
-                                <button onClick={onClose} className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-100">Cerrar</button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+                            <div className="flex items-center gap-3">
+                                {headerIcon}
+                                <h2 className="text-lg font-semibold truncate" style={{ color: 'var(--color-jerarquia3)' }}>{titulo}</h2>
+                                {infoCuenta && infoCuenta.cuenta && (
+                                    <div className="flex flex-row ml-4" style={{ gap: '8.25rem' }}>
+                                        {infoCuenta._busquedaPorExpediente ? (
+                                            <>
+                                                <span className="font-semibold text-base text-jerarquia3" style={{ marginRight: '3.125rem' }}>{infoCuenta.cuenta.idCuenta}</span>
+                                                <span className="font-semibold text-base text-jerarquia3">{infoCuenta.cuenta.nombreDeudor}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="font-semibold text-base text-jerarquia3" style={{ marginRight: '3.125rem' }}>{infoCuenta.cuenta.expediente}</span>
+                                                <span className="font-semibold text-base text-jerarquia3">{infoCuenta.cuenta.nombreDeudor}</span>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
                             </div>
-                        )
-                    )}
+                            <CloseButtonCampanas onClose={() => {
+                                try { window.dispatchEvent(new CustomEvent('coorin-modal-open', { detail: { open: false, byClose: true } })); } catch (err) { console.warn('dispatch close by button failed', err); }
+                                if (typeof onClose === 'function') onClose();
+                            }} />
+                        </div>
+                    )
+                )}
 
-                    {/* Animación bounce */}
-                    <style>{`
-                        @keyframes bounce-modal {
-                            0% { transform: scale(1); }
-                            20% { transform: scale(1.05, 0.95); }
-                            40% { transform: scale(0.95, 1.05); }
-                            60% { transform: scale(1.03, 0.97); }
-                            80% { transform: scale(0.97, 1.03); }
-                            100% { transform: scale(1); }
-                        }
-                        .animate-bounce-modal {
-                            animation: bounce-modal 0.5s;
-                        }
-                    `}</style>
+                {/* Contenido: Carrusel para información, children para Visitas */}
+                <div className={`flex-1 w-full overflow-auto mt-4 ${contentClassName}`}>
+                    {isInformacion ? (
+                        <ModalCicle 
+                            renderNavInHeader={true} 
+                            onNavigationReady={setCarouselNav}
+                            onSizeChange={setDynamicSize}
+                        />
+                    ) : children}
                 </div>
+
+                {/* Footer */}
+                {showFooter && (
+                    CustomFooter ? (
+                        <CustomFooter {...footerProps} />
+                    ) : (
+                        <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end gap-2">
+                            <button onClick={onClose} className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-100">Cerrar</button>
+                        </div>
+                    )
+                )}
+
+                {/* Animación bounce */}
+                <style>{`
+                    @keyframes bounce-modal {
+                        0% { transform: scale(1); }
+                        20% { transform: scale(1.05, 0.95); }
+                        40% { transform: scale(0.95, 1.05); }
+                        60% { transform: scale(1.03, 0.97); }
+                        80% { transform: scale(0.97, 1.03); }
+                        100% { transform: scale(1); }
+                    }
+                    .animate-bounce-modal {
+                        animation: bounce-modal 0.5s;
+                    }
+                `}</style>
             </div>
-        );
+        </div>
+    );
 };
 
 export default ModalBaseInformacion;

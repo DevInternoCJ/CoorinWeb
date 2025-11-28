@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { infoEjecutivo, getCommentsInformation } from "../../../../../services/mark/albaz/LokiServices";
+import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
 const CommentsContent = () => {
     // Mensaje de footer dinámico
@@ -61,13 +61,12 @@ const CommentsContent = () => {
             .finally(() => setLoadingConsultas(false));
     }, [idEjecutivo, cartera, idProducto]);
     
-        // Handler para exportar búsquedas a Excel/CSV
+        // Handler para exportar comentarios a Excel/CSV usando ExcelExporter
         const handleDownloadExcel = async () => {
             setLoadingExcel(true);
             setErrorExcel(null);
             setFooterMsg("Consulta terminada. Guardando libro de Excel.");
             try {
-                // Usar los parámetros actuales
                 const idConsulta = consulta === "" ? 0 : parseInt(consulta, 10);
                 const params = {
                     idCartera: cartera,
@@ -78,114 +77,35 @@ const CommentsContent = () => {
                     jerarquia
                 };
                 const response = await getCommentsInformation(params);
-                // response.data es un Blob
-                if (response && response.data instanceof Blob) {
-                    // Leer el contenido del blob como texto
-                    const text = await response.data.text();
-                    let csvContent = text;
-                    // Si parece JSON, convertir a CSV
-                    try {
-                        const json = JSON.parse(text);
-                        if (Array.isArray(json) && json.length === 0) {
-                            let nombreConsulta = "Comentarios";
-                            if (consulta === "" || consulta === 0) {
-                                nombreConsulta = "Comentarios";
-                            } else {
-                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
-                                if (consultaObj && consultaObj.nombreConsulta) {
-                                    nombreConsulta = consultaObj.nombreConsulta;
-                                }
-                            }
-                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros en la fecha especificada.`, { duration: 4000 });
-                            throw new Error('No hay datos para exportar.');
-                        }
-                        if (Array.isArray(json) && json.length > 0 && typeof json[0] === 'object') {
-                            const headers = Object.keys(json[0]);
-                            const rows = json.map(obj => headers.map(h => {
-                                let value = obj[h];
-                                // Si el campo es cuenta y es número, exportar como texto para evitar notación científica
-                                if (h.toLowerCase().includes('cuenta')) {
-                                    if (typeof value === 'number') {
-                                        value = '\t"' + value.toString() + '"';
-                                    } else if (typeof value === 'string') {
-                                        // Si ya es string, anteponer tabulación y envolver en comillas
-                                        value = '\t"' + value.replace(/,/g, '').replace(/"/g, '') + '"';
-                                    }
-                                    return value;
-                                }
-                                // Quitar comas internas para no romper el CSV
-                                if (typeof value === 'string') {
-                                    value = value.replace(/,/g, '');
-                                    // Escapar comillas dobles
-                                    value = value.replace(/"/g, '""');
-                                    // Envolver en comillas si contiene caracteres especiales o espacios
-                                    if (/[",\sñáéíóúü]/i.test(value)) value = '"' + value + '"';
-                                }
-                                return value;
-                            }).join(","));
-                            // Encabezados en UTF-8 con BOM para español
-                            csvContent = '\uFEFF' + headers.join(",") + "\n" + rows.join("\n");
-                        }
-                    } catch (e) {
-                        // Si el error es por mensaje de backend, mostrar toast
-                        if (response?.status === 404 && response?.statusText === "Not Found") {
-                            try {
-                                const jsonError = JSON.parse(text);
-                                if (jsonError?.mensaje && jsonError.mensaje.includes("No se encontraron registros")) {
-                                    let nombreConsulta = "Comentarios";
-                                    if (consulta === "" || consulta === 0) {
-                                        nombreConsulta = "Comentarios";
-                                    } else {
-                                        const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
-                                        if (consultaObj && consultaObj.nombreConsulta) {
-                                            nombreConsulta = consultaObj.nombreConsulta;
-                                        }
-                                    }
-                                    toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros en la fecha especificada.`, { duration: 4000 });
-                                }
-                            } catch {/* empty */}
-                        }
-                        console.error('Error al convertir a CSV:', e);
-                        // No es JSON, dejar como está
+                
+                // Obtener nombre de la consulta para mensajes
+                let nombreConsulta = "Comentarios";
+                if (consulta !== "" && consulta !== 0) {
+                    const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
+                    if (consultaObj?.nombreConsulta) nombreConsulta = consultaObj.nombreConsulta;
+                }
+
+                const result = await exportFromAPIResponse(
+                    response,
+                    `comentarios_${desde}_a_${hasta}`,
+                    {
+                        consultaName: nombreConsulta,
+                        accountFields: ['cuenta'],
+                        dateFields: ['fecha'],
+                        showToast: true,
+                        successMessage: "Libro de Excel Guardado."
                     }
-                    // Descargar como CSV limpio
-                    const blob = new Blob([csvContent], { type: 'text/csv' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `comentarioso${desde}_a_${hasta}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
+                );
+
+                if (result) {
                     setFooterMsg("Libro de Excel Guardado.");
                 } else {
-                    setErrorExcel('No se pudo descargar el archivo.');
                     setFooterMsg("Consulta terminada sin registros.");
                 }
             } catch (err) {
-                // Validar error 404 y mensaje específico del backend
-                const status = err?.response?.status;
-                const statusText = err?.response?.statusText;
-                if (status === 404 && statusText === "Not Found" && err?.response?.data instanceof Blob) {
-                    try {
-                        const text = await err.response.data.text();
-                        const jsonError = JSON.parse(text);
-                        if (jsonError?.mensaje && jsonError.mensaje.includes("No se encontraron registros")) {
-                            let nombreConsulta = "Comentarios";
-                            if (consulta === "" || consulta === 0) {
-                                nombreConsulta = "-Todas-";
-                            } else {
-                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
-                                if (consultaObj && consultaObj.nombreConsulta) {
-                                    nombreConsulta = consultaObj.nombreConsulta;
-                                }
-                            }
-                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros en la fecha especificada.`, { duration: 4000 });
-                        }
-                    } catch {/* empty */}
-                }
-                setFooterMsg("Consulta terminada sin registros.");
+                console.error('Error al exportar comentarios:', err);
+                setErrorExcel('Error al exportar los comentarios.');
+                setFooterMsg("Ocurrió un error al guardar el libro de Excel.");
             } finally {
                 setLoadingExcel(false);
             }
@@ -193,11 +113,7 @@ const CommentsContent = () => {
     
 
     return (
-        <div className="w-full max-w-xs mx-auto flex flex-col items-center" style={{ minHeight: 0, height: 'auto' }}>
-            {/* Logo centrado arriba de Cartera */}
-            <div className="flex justify-center mb-4 w-full">
-                <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
-            </div>
+        <div className="w-full flex flex-col items-center" style={{ minHeight: 0, height: 'auto' }}>
             <div className="w-full relative">
                 {/* Cartera y Consulta en el mismo row */}
                 <div className="flex flex-row gap-3 w-full mb-3">
@@ -256,28 +172,42 @@ const CommentsContent = () => {
                 {/* Fechas */}
                 <div className="flex gap-3 mb-3">
                     {/* Desde */}
-                    <div className="hs-input-group w-full">
-                        <span className="hs-input-group-text min-w-[90px]">Desde</span>
+                    <div className="relative w-full min-w-0">
                         <input
                             type="date"
-                            className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                            id="fecha-desde-comments"
+                            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                             value={desde}
                             min={minDate}
                             max={maxDate}
                             onChange={e => setDesde(e.target.value)}
+                            placeholder=" "
                         />
+                        <label
+                            htmlFor="fecha-desde-comments"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                        >
+                            Desde
+                        </label>
                     </div>
                     {/* Hasta */}
-                    <div className="hs-input-group w-full">
-                        <span className="hs-input-group-text min-w-[90px]">Hasta</span>
+                    <div className="relative w-full min-w-0">
                         <input
                             type="date"
-                            className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                            id="fecha-hasta-comments"
+                            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                             value={hasta}
                             min={minDate}
                             max={maxDate}
                             onChange={e => setHasta(e.target.value)}
+                            placeholder=" "
                         />
+                        <label
+                            htmlFor="fecha-hasta-comments"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                        >
+                            Hasta
+                        </label>
                     </div>
                 </div>
                 <div className="flex justify-center items-end w-full">
