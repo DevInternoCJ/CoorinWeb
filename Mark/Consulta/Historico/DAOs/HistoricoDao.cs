@@ -21,7 +21,7 @@ namespace Loki.Mark.Consulta.Historico.DAOs
             _logger = logger;
         }
 
-        public async Task<DataSet> BuscarCuentasIndividualAsync(string cuenta, ConsultaBaseRequest parametros, string servidor)
+        public async Task<DataSet> BuscarCuentasIndividual(string cuenta, ConsultaBaseRequest parametros, string servidor)
         {
             var dataSet = new DataSet();
             string nombreBaseDatos = "History";
@@ -202,11 +202,7 @@ namespace Loki.Mark.Consulta.Historico.DAOs
 
 
         //historico archivo
-        public async Task<DataSet> BuscarCuentasPorArchivoAsync(
-         DataTable cuentas,
-         ConsultaBaseRequest parametros,
-         string servidor,
-         string idEjecutivo)
+        public async Task<DataSet> BuscarCuentasArchivo(DataTable cuentas,ConsultaBaseRequest parametros,string servidor,string idEjecutivo)
         {
             var ds = new DataSet();
             string dbHistory = "History";
@@ -333,31 +329,52 @@ namespace Loki.Mark.Consulta.Historico.DAOs
                 if (parametros.IncluirPagos)
                 {
                     string query;
+                    bool consultaEjecutada = false; 
+
                     if (parametros.IdCartera == 1)
                     {
-                        query = $@"
-                    SELECT DISTINCT GT.* 
-                    FROM dbHistory.dbo.vw_PagosAmex GT
-                    INNER JOIN dbComplemento.Temp.{tempTableName} HS
-                        ON GT.idCartera = @idCartera
-                        AND GT.idCuenta = HS.Cuenta";
+                        try
+                        {
+                            query = $@"
+                            SELECT DISTINCT GT.*
+                            FROM dbHistory.dbo.vw_PagosAmex GT
+                            INNER JOIN dbComplemento.Temp.{tempTableName} HS
+                                ON GT.idCartera = @idCartera
+                                AND GT.idCuenta = HS.Cuenta";
+
+                            if (parametros.UsarPeriodo)
+                                query += " AND FechaPago BETWEEN @Desde AND @Hasta";
+
+                            
+                            ds.Tables.Add(await EjecutarConsultaAsync(conn, query, parametros, "Pagos"));
+                            consultaEjecutada = true;
+                        }
+                        catch (SqlException sqlEx) when (sqlEx.Number == 208 || sqlEx.Message.Contains("binding errors"))
+                        {
+                           
+                            consultaEjecutada = true; 
+                        }
+                       
                     }
                     else
                     {
                         query = $@"
-                    SELECT DISTINCT GT.*
-                    FROM dbHistory.dbo.Pagos GT
-                    INNER JOIN dbComplemento.Temp.{tempTableName} HS
-                        ON GT.idCartera = @idCartera
-                        AND GT.idCuenta = HS.Cuenta";
+                            SELECT DISTINCT GT.*
+                            FROM dbHistory.dbo.Pagos GT
+                            INNER JOIN dbComplemento.Temp.{tempTableName} HS
+                                ON GT.idCartera = @idCartera
+                                AND GT.idCuenta = HS.Cuenta";
+
+                        if (parametros.UsarPeriodo)
+                            query += " AND FechaPago BETWEEN @Desde AND @Hasta";
+
+                        ds.Tables.Add(await EjecutarConsultaAsync(conn, query, parametros, "Pagos"));
+                        consultaEjecutada = true;
                     }
-                    if (parametros.UsarPeriodo)
-                        query += " AND FechaPago BETWEEN @Desde AND @Hasta";
-                    ds.Tables.Add(await EjecutarConsultaAsync(conn, query, parametros, "Pagos"));
                 }
 
-                // Renombrar las tablas según las columnas
-                foreach (DataTable tblDatos in ds.Tables)
+                    // Renombrar las tablas según las columnas
+                    foreach (DataTable tblDatos in ds.Tables)
                 {
                     if (tblDatos.Columns.Contains("RFC"))
                         tblDatos.TableName = "Cuenta";
@@ -396,11 +413,7 @@ namespace Loki.Mark.Consulta.Historico.DAOs
             }
         }
 
-        private async Task<DataTable> EjecutarConsultaAsync(
-            DbConnection conn,
-            string query,
-            ConsultaBaseRequest parametros,
-            string tableName)
+        private async Task<DataTable> EjecutarConsultaAsync(DbConnection conn, string query,ConsultaBaseRequest parametros,string tableName)
         {
             using var cmd = conn.CreateCommand();
             cmd.CommandText = query;

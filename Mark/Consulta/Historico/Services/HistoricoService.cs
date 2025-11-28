@@ -34,30 +34,13 @@ namespace Loki.Mark.Consulta.Historico.Services
             {
                 ValidarRequest(request);
 
-                _logger.LogInformation($"Buscando cuenta individual: {request.Cuenta} en servidor: {servidor}");
-
-                return await _historicoDAO.BuscarCuentasIndividualAsync(request.Cuenta, request, servidor);
+                return await _historicoDAO.BuscarCuentasIndividual(request.Cuenta, request, servidor);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error buscando cuenta individual: {request.Cuenta}");
                 throw;
             }
-        }
-
-        public async Task<ExcelResponse> GenerarExcelAsync(DataSet data)
-        {
-            if (data == null || data.Tables.Count == 0)
-                throw new ArgumentException("No hay datos para generar el Excel");
-
-            var resultado = _excelService.ExportDataSetToExcel(data);
-
-            return new ExcelResponse
-            {
-                NombreArchivo = $"Historico_{DateTime.Now:yyyyMMddHHmmss}.xlsx",
-                Contenido = resultado.ToArray(),
-                ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            };
         }
 
         public void ValidarRequest(ConsultaBaseRequest request)
@@ -81,28 +64,6 @@ namespace Loki.Mark.Consulta.Historico.Services
             }
         }
 
-
-        //historico aechivo
-
-        //private DataTable LeerCuentasDesdeExcel(IFormFile archivo)
-        //{
-        //    var cuentas = new DataTable();
-        //    cuentas.Columns.Add("Cuenta", typeof(string));
-
-        //    using (var stream = archivo.OpenReadStream())
-        //    using (var workbook = new ClosedXML.Excel.XLWorkbook(stream))
-        //    {
-        //        var worksheet = workbook.Worksheets.First(); // primera hoja
-        //        foreach (var row in worksheet.RowsUsed())
-        //        {
-        //            var cellValue = row.Cell(1).GetString().Trim(); // primera columna
-        //            if (!string.IsNullOrEmpty(cellValue))
-        //                cuentas.Rows.Add(cellValue);
-        //        }
-        //    }
-
-        //    return cuentas;
-        //}
 
         private DataTable LeerCuentasDesdeExcel(IFormFile archivo)
         {
@@ -165,8 +126,7 @@ namespace Loki.Mark.Consulta.Historico.Services
                 throw new ArgumentException("Formato de archivo no soportado. Solo CSV o XLSX.");
             }
 
-            // Ya no necesitamos generar tempTable aquí, el DAO usará idEjecutivo
-            return await _historicoDAO.BuscarCuentasPorArchivoAsync(cuentas, request, servidor, idEjecutivo);
+            return await _historicoDAO.BuscarCuentasArchivo(cuentas, request, servidor, idEjecutivo);
         }
 
     }

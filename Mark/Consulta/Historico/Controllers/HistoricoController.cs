@@ -107,44 +107,61 @@ namespace Loki.Mark.Consulta.Historico.Controllers
 
 
         [HttpPost("archivo")]
-		[SwaggerOperation(
-		 Summary = "Archivo - Irene",
-		 Description = "Obtiene histórico a traves del archivo de cuentas."
-	 )]
+        [SwaggerOperation(
+            Summary = "archivo - Irene",
+            Description = "Obtiene histórico a través del archivo de cuentas."
+        )]
+        [ProducesResponseType(typeof(object), 200)]
+        [ProducesResponseType(typeof(BadRequestObjectResult), 400)]
+        [ProducesResponseType(typeof(UnauthorizedObjectResult), 401)]
+        [ProducesResponseType(typeof(ObjectResult), 500)]
+        public async Task<IActionResult> BuscarPorArchivo([FromForm] HistoricoArchivo request)
+        {
+            try
+            {
+                if (request.Archivo == null || request.Archivo.Length == 0)
+                    return BadRequest(new { error = "Debe enviar un archivo válido" });
 
-		public async Task<IActionResult> BuscarPorArchivo([FromForm] HistoricoArchivo request)
-		{
-			try
-			{
-				if (request.Archivo == null || request.Archivo.Length == 0)
-					return BadRequest(new { error = "Debe enviar un archivo válido" });
+                string? servidorClaim = User.FindFirst("Servidor")?.Value;
+                if (string.IsNullOrWhiteSpace(servidorClaim))
+                    return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
 
-				string? servidorClaim = User.FindFirst("Servidor")?.Value;
-				if (string.IsNullOrWhiteSpace(servidorClaim))
-					return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+                // Usar solo GUID para evitar colisiones
+                string idEjecutivo = $"Temp_{Guid.NewGuid():N}";
 
-				// Usar solo GUID para evitar colisiones
-				string idEjecutivo = $"Temp_{Guid.NewGuid():N}";
+                // --- Obtener el DataSet ---
+                var resultado = await _historicoService.BuscarCuentasPorArchivoAsync(request, servidorClaim, idEjecutivo);
 
-				var resultado = await _historicoService.BuscarCuentasPorArchivoAsync(request, servidorClaim, idEjecutivo);
+                // --- Convertir cada DataTable a lista de diccionarios ---
+                var jsonResult = resultado.Tables.Cast<DataTable>()
+                    .ToDictionary(
+                        table => table.TableName,
+                        table => table.AsEnumerable()
+                                      .Select(row => table.Columns.Cast<DataColumn>()
+                                                     .ToDictionary(col => col.ColumnName, col => row[col]))
+                                      .ToList()
+                    );
 
-				var excelResponse = await _historicoService.GenerarExcelAsync(resultado);
-
-				return File(excelResponse.Contenido, excelResponse.ContentType, excelResponse.NombreArchivo);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new { error = ex.Message });
-			}
-			catch (UnauthorizedAccessException ex)
-			{
-				return Unauthorized(new { error = ex.Message });
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error inesperado en búsqueda por archivo");
-				return StatusCode(500, new { error = $"Error interno del servidor: {ex.Message}" });
-			}
-		}
-	}
+                // --- Devolver JSON ---
+                return new JsonResult(jsonResult, new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                    WriteIndented = true
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error inesperado en búsqueda por archivo");
+                return StatusCode(500, new { error = $"Error interno del servidor: {ex.Message}" });
+            }
+        }
+    }
 }

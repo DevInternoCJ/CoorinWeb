@@ -7,11 +7,11 @@ namespace Loki.Mark.Consulta.Historico.Interfaces
 {
     public interface IHistoricoDao
     {
-        Task<DataSet> BuscarCuentasIndividualAsync(string cuenta, ConsultaBaseRequest parametros, string servidor);
+        Task<DataSet> BuscarCuentasIndividual(string cuenta, ConsultaBaseRequest parametros, string servidor);
         //Task<DataTable> EjecutarConsultaSimple(DbConnection connection, string query, string cuenta, ConsultaBaseRequest parametros);
         Task<DataTable> EjecutarConsultaSimple(DbConnection connection, string query, string cuenta, ConsultaBaseRequest parametros, string tablaNombre, bool ignorarPeriodo = false);
 
-        Task<DataSet> BuscarCuentasPorArchivoAsync(DataTable cuentas, ConsultaBaseRequest parametros, string servidor, string tempTable);
+        Task<DataSet> BuscarCuentasArchivo(DataTable cuentas, ConsultaBaseRequest parametros, string servidor, string tempTable);
 
     }
 }
