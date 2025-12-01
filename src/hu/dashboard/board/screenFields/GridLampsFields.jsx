@@ -118,9 +118,9 @@ const GridLampsFields = () => {
                   className={`
                     py-2 px-3 text-left text-xs font-bold text-neutral-100 whitespace-nowrap
                     cursor-grabb ing select-none
-                    hover:bg-slate-600 active:bg-slate-500
+                    hover:bg-green-950 bg-green-950
                     transition-all duration-150
-                    ${draggedHeader === key ? 'opacity-50 scale-95 bg-slate-500' : ''}
+                    ${draggedHeader === key ? 'opacity-50 scale-95 bg-green-950' : ''}
                   `}
                   title="Arrastra este encabezado a Alias o Campos"
                 ><div className="flex text-sm items-center gap-1">
