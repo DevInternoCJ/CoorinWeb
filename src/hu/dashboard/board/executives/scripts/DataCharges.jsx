@@ -231,7 +231,7 @@ const DataCharges = ({ onDataLoaded }) => {
             {cardData.map((item, index) => (
               <div
                 key={index}
-                className="bg-background-tertiary p-2 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-200"
+                className="bg-background-tertiary p-2 rounded-lg border-none"
               >
                 <div
                   draggable="true"
@@ -245,9 +245,9 @@ const DataCharges = ({ onDataLoaded }) => {
                     draggedLabel === item.label ? "opacity-50 scale-95" : ""
                   }`}
                   title="Arrastra el texto al campo mensaje"
-                ><div className=" flex items-center gap-1">
+                ><div className=" flex items-center gap-1 bg-jerarquia1/50 px-1 rounded-sm hover:bg-jerarquia3/30 hover:shadow-jerarquia3 shadow-sm  hover:shadow-md transition-shadow duration-200">
                    <IconDrag className=" text-jerarquia3"/>
-                  <span className="inline-flex items-center text-sm font-semibold gap-1">
+                  <span className="inline-flex items-center text-sm font-semibold gap-1 text-jerarquia4">
                     {item.label}
                   </span>
                 </div>

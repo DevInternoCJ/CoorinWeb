@@ -117,7 +117,7 @@ const GridLampsFields = () => {
                   onDragEnd={handleDragEnd}
                   className={`
                     py-2 px-3 text-left text-xs font-bold text-neutral-100 whitespace-nowrap
-                    cursor-grabbing select-none
+                    cursor-grabb ing select-none
                     hover:bg-slate-600 active:bg-slate-500
                     transition-all duration-150
                     ${draggedHeader === key ? 'opacity-50 scale-95 bg-slate-500' : ''}
