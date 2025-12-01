@@ -13,7 +13,8 @@ namespace Loki.Mark.Captura.Visitas.Controllers
 	[ApiController]
 	[Route("api/captura/visitas")]
 	[SwaggerTag("Captura de Visitas")]
-	public class CapturaVisitasController : ControllerBase
+    [Tags("Procesos - CapturaVisitas")]
+    public class CapturaVisitasController : ControllerBase
 	{
 		private readonly ICapturaVisitasService _service;
 

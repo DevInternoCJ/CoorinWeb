@@ -11,7 +11,8 @@ namespace Loki.Mark.Administracion.Gespa.Frases.Controllers
 {
 	[ApiController] // Indica que esta clase es un controlador de API sin vistas
 	[Route("api/[controller]")] // Define la ruta base para este controlador, por ejemplo: /api/Frases
-	public class FrasesController : ControllerBase
+    [Tags("Administración - Frases")]
+    public class FrasesController : ControllerBase
 	{
 		private readonly IFrases _frasesDao;
         private readonly IFrasesService _frasesService;

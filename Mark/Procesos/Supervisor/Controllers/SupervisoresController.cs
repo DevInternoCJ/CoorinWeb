@@ -9,7 +9,8 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Loki.Mark.Procesos.Procesos.Controllers
 {
     [ApiController] 
-    [Route("api/[controller]")] 
+    [Route("api/[controller]")]
+    [Tags("Procesos - Supervisores")]
     public class SupervisoresController : ControllerBase
     {
         private readonly IDbContextFactory _dbContextFactory;

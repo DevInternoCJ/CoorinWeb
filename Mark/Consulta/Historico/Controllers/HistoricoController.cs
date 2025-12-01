@@ -18,7 +18,8 @@ namespace Loki.Mark.Consulta.Historico.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
-	[Authorize]
+    [Tags("Consulta - Historico")]
+    [Authorize]
 	public class HistoricoController : ControllerBase
 	{
 		private readonly IHistoricoService _historicoService;

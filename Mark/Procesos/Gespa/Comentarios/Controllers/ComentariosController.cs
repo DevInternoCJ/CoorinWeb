@@ -10,6 +10,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Loki.Mark.Procesos.Gespa.Comentarios.Controllers
 {
     [Route("api/[controller]")]
+    [Tags("Procesos - Comentarios")]
     [ApiController]
     [SwaggerTag("Controlador de la pestaña Gespa/Comentarios.")]
 

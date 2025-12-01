@@ -15,7 +15,8 @@ namespace Loki.Mark.Administracion.Gespa.Scripts.Controllers
 
 	[ApiController]
 	[Route("api/[controller]")]
-	public class ScriptsController : ControllerBase
+    [Tags("Administración - Scripts")]
+    public class ScriptsController : ControllerBase
 	{
 		private readonly IScriptsDAO _scriptsDao;
 		private readonly IScriptService _scriptService;

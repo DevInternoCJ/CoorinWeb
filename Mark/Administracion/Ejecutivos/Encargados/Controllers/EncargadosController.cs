@@ -10,7 +10,8 @@ using System.Collections.Generic;
 namespace Loki.Mark.Administracion.Ejecutivos.Encargados.Controllers
 {
 	[Route("api/[controller]")]
-	[ApiController]
+    [Tags("Administración - Encargados")]
+    [ApiController]
 	public class EncargadosController : ControllerBase
 	{
 		private readonly IEncargadosService _encargadosService;

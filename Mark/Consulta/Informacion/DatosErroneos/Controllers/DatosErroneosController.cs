@@ -10,7 +10,8 @@ namespace Loki.Mark.Consulta.Informacion.DatosErroneos.Controllers
 {
 	[Authorize]
 	[Route("api/informacion/[controller]")]
-	[ApiController]
+    [Tags("Consulta - DatosErroneos")]
+    [ApiController]
 	public class DatosErroneosController : ControllerBase
 	{
 		private readonly IDatosErroneosService _service;

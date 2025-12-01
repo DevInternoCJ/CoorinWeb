@@ -239,6 +239,65 @@ builder.Services.AddSwaggerGen(options =>
 			Array.Empty<string>()
 		}
 	});
+
+    //filtros para ordenar la API
+    options.DocumentFilter<TagOrderDocumentFilter>(new List<string>
+{
+    "Auth",
+
+    // Grupo: Administración
+     "Administración - campanias",
+    "Administración - Campañas",
+    "Administración - Carteras",
+    "Administración - InfoEjecutivo",
+    "Administración - Encargados",
+    "Administración - Metas",
+    "Administración - Sesiones",
+    "Administración - Validadores",
+    "Administración - CamposPantalla",
+    "Administración - Catalogos",
+    "Administración - Frases",
+    "Administración - Scripts",
+
+    // Grupo: Consulta
+    "Consulta - Arrepentimientos",
+    "Consulta - Busqueda",
+    "Consulta - Catalogo",
+    "Consulta - Reportes",
+    "Consulta - Generales",
+    "Consulta - Historico",
+    "Consulta - BusquedaInfo",
+    "Consulta - Comentarios",
+    "Consulta - Correos",
+    "Consulta - DatosErroneos",
+    "Consulta - Domicilios",
+    "Consulta - Ofrecimientos",
+    "Consulta - Pagos",
+    "Consulta - PagosReportados",
+    "Consulta - ListaNegra",
+    "Consulta - PlantillasCorreo",
+    "Consulta - Productividad",
+
+    // Grupo: Procesos
+    "Procesos - CapturaVisitas",
+    "Procesos - ArrepentimientosGespa",
+    "Procesos - BloqueoCuentasGespa",
+    "Procesos - CargoEnLineaGespa",
+    "Procesos - Comentarios",
+    "Procesos - DefinicionGespaBusca",
+    "Procesos - EstadosDeCuentaGespa",
+    "Procesos - Gestiones",
+    "Procesos - Metas",
+    "Procesos - Supervisores",
+
+    // Grupo: Reportes
+    "Reportes - ReportesCliente",
+    "Reportes - DiaDelEjecutivo",
+    "Reportes - ReporteEjecutivos",
+    "Reportes - ProductividadInfo",
+
+    "Auditoria"
+});
 });
 
 #region Contextos

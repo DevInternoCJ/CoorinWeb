@@ -6,7 +6,8 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Loki.Mark.Administracion.Gespa.Catalogos.Controllers
 {
 	[Route("api/[controller]")]
-	[ApiController]
+    [Tags("Administración - Catalogos")]
+    [ApiController]
 	public class CatalogosController : ControllerBase
 	{
 		private readonly ICatalogosService _catalogosService;

@@ -9,6 +9,7 @@ namespace Loki.Mark.Reportes.DiaDelEjecutivo.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [SwaggerTag("Controladores de DiaDelEjecutivo")]
+    [Tags("Reportes - DiaDelEjecutivo")]
     public class DiaDelEjecutivoController : ControllerBase
     {
         private readonly IDiaDelEjecutivoDAOs _diaDelEjecutivoInterfaces;

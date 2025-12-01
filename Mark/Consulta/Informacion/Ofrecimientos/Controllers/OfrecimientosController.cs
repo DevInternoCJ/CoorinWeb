@@ -10,7 +10,8 @@ namespace Loki.Mark.Consulta.Informacion.Ofrecimientos.Controllers
 	[Authorize]
 	[ApiController]
 	[Route("api/informacion/[controller]")]
-	public class OfrecimientosController : ControllerBase
+    [Tags("Consulta - Ofrecimientos")]
+    public class OfrecimientosController : ControllerBase
 	{
 		private readonly IOfrecimientosService _service;
 

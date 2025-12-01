@@ -11,6 +11,7 @@ namespace Loki.Mark.Consulta.Generales.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Tags("Consulta - Generales")]
     public class GeneralesController : ControllerBase
     {
         private readonly IGeneralesService _generalesService; 

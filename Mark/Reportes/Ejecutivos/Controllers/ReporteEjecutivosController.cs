@@ -10,8 +10,8 @@ namespace Loki.Mark.Reportes.Ejecutivos.Controllers
 	[ApiController]
 	[Route("api/reportes/[controller]")]
 	[SwaggerTag("Endpoints para la generación de reportes de productividad y otros indicadores.")]
-
-	public class ReporteEjecutivosController : ControllerBase
+    [Tags("Reportes - ReporteEjecutivos")]
+    public class ReporteEjecutivosController : ControllerBase
 	{
 		private readonly IReporteEjecutivosService _service;
 		public ReporteEjecutivosController(IReporteEjecutivosService service) => _service = service;

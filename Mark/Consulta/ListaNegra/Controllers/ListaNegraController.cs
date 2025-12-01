@@ -10,7 +10,8 @@ namespace Loki.Mark.Consulta.ListaNegra.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
-	[Authorize]
+    [Tags("Consulta - ListaNegra")]
+    [Authorize]
 	public class ListaNegraController : ControllerBase
 	{
 		private readonly IListaNegraService _listanegraService;

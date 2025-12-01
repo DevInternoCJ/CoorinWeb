@@ -7,6 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Loki.Mark.Procesos.Gespa.Bloqueo_cuentas.Controllers
 {
     [Route("api/[controller]")]
+    [Tags("Procesos - BloqueoCuentasGespa")]
     [ApiController]
     [SwaggerTag("Controladores de la pestaña Gespa/Bloqueo_Cuentas.")]
     public class BloqueoCuentasGespaController : ControllerBase

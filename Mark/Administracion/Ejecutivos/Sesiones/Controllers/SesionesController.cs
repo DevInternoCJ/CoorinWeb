@@ -13,7 +13,8 @@ using System.Data;
 namespace Loki.Mark.Administracion.Ejecutivos.Sesiones.Controllers
 {
 	[Route("api/[controller]")]
-	[ApiController]
+    [Tags("Administración - Sesiones")]
+    [ApiController]
 	[Authorize]
 	public class SesionesController : ControllerBase
 	{

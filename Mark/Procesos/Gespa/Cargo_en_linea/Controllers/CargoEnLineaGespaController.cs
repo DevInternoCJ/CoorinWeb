@@ -8,6 +8,7 @@ namespace Loki.Mark.Procesos.Gespa.Cargo_en_linea.Controllers
 {
 
     [Route("api/[controller]")]
+    [Tags("Procesos - CargoEnLineaGespa")]
     [ApiController]
     [SwaggerTag("Controladores de la pestaña Gespa/CargoEnLinea.")]
     public class CargoEnLineaGespaController : ControllerBase

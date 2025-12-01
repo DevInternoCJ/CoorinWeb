@@ -7,6 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Loki.Mark.Procesos.Gespa.Arrepentimientos.Controllers
 {
     [Route("api/[controller]")]
+    [Tags("Procesos - ArrepentimientosGespa")]
     [ApiController]
     [SwaggerTag("Controladores de la pestaña Gespa/Arrepentimientos.")]
     public class ArrepentimientosGespaController : ControllerBase

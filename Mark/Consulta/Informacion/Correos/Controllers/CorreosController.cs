@@ -9,7 +9,8 @@ namespace Loki.Mark.Consulta.Informacion.Correos.Controllers
 	[Authorize]
 	[ApiController]
 	[Route("api/informacion/[controller]")]
-	public class CorreosController : ControllerBase
+    [Tags("Consulta - Correos")]
+    public class CorreosController : ControllerBase
 	{
 		private readonly ICorreosService _service;
 

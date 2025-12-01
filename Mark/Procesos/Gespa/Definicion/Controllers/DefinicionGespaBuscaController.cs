@@ -8,6 +8,7 @@ namespace Loki.Mark.Procesos.Gespa.Definicion.Controllers
 {
 
     [Route("api/[controller]")]
+    [Tags("Procesos - DefinicionGespaBusca")]
     [ApiController]
     [SwaggerTag("Controladores de la pestaña Gespa/Definicion.")]
     public class DefinicionGespaBuscaController : ControllerBase

@@ -14,7 +14,8 @@ namespace Loki.Mark.Administracion.Carteras.Controllers
 
 	[ApiController]
 	[Route("api/carteras")]
-	public class CarterasController : ControllerBase
+    [Tags("Administración - carteras")]
+    public class CarterasController : ControllerBase
 	{
 		private readonly ICarterasService _carterasService;
 		private readonly ICarterasDAOs _carterasDao;

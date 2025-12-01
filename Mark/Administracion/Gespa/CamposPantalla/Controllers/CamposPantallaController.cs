@@ -10,7 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 namespace Loki.Mark.Administracion.Gespa.CamposPantalla.Controllers
 {
 	[Route("api/[controller]")]
-	[ApiController]
+    [Tags("Administración - CamposPantalla")]
+    [ApiController]
 	[SwaggerTag("Operaciones relacionadas con Campos Pantalla. Recuerda llenar antes los dropdowns llamando los endpoints de Cartera y Producto.")]
 	public class CamposPantallaController : ControllerBase
 	{

@@ -11,6 +11,7 @@ namespace Loki.Mark.Consulta.Cuenta.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Tags("Consulta - Catalogo")]
     [Authorize]
     public class CatalogoController : ControllerBase
     {

@@ -11,7 +11,8 @@ namespace Loki.Mark.Consulta.Informacion.Comentarios.Controllers
 	[Authorize]
 	[ApiController]
 	[Route("api/informacion/comentarios-info")]
-	public class ComentariosInfoController : ControllerBase
+    [Tags("Consulta - Comentarios")]
+    public class ComentariosInfoController : ControllerBase
 	{
 		private readonly IComentariosInfoService _service;
 

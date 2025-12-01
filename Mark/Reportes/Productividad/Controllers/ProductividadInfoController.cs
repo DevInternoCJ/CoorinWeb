@@ -14,7 +14,8 @@ namespace Loki.Mark.Reportes.Productividad.Controllers
 	[ApiController]
 	[Route("api/reportes/[controller]")]
 	[SwaggerTag("Reportes")]
-	public class ProductividadInfoController : ControllerBase
+    [Tags("Reportes - ProductividadInfo")]
+    public class ProductividadInfoController : ControllerBase
 	{
 		private readonly IProductividadInfoService _service;
 

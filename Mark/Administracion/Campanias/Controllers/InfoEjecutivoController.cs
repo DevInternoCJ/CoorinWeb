@@ -13,7 +13,8 @@ namespace Loki.Mark.Administracion.Campanias.Controllers
 
 	[ApiController]
 	[Route("api/info-ejecutivo")]
-	public class InfoEjecutivoController : ControllerBase
+    [Tags("Administración - InfoEjecutivo")]
+    public class InfoEjecutivoController : ControllerBase
 	{
 		private readonly IInfoEjecutivoDao _infoEjecutivoDao;
 

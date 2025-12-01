@@ -9,7 +9,8 @@ namespace TuAplicacion.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
-	public class ReportesController : ControllerBase
+    [Tags("Consulta - Reportes")]
+    public class ReportesController : ControllerBase
 	{
 		private readonly ReporteGeneradorService _reporteGeneradorService;
 

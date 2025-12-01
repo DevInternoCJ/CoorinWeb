@@ -8,7 +8,8 @@ namespace Loki.Mark.Consulta.Informacion.Pagos.Controllers
 {
 	[Authorize]
 	[Route("api/informacion/[controller]")]
-	[ApiController]
+    [Tags("Consulta - Pagos")]
+    [ApiController]
 	public class PagosController : ControllerBase
 	{
 		private readonly IPagosService _pagosService;

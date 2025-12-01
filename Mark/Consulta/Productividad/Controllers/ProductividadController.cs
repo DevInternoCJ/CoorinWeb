@@ -9,6 +9,7 @@ namespace Loki.Mark.Consulta.Productividad.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Tags("Consulta - Productividad")]
     [Authorize]
     public class ProductividadController : ControllerBase
     {

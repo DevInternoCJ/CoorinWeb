@@ -10,7 +10,8 @@ namespace Loki.Mark.Consulta.Informacion.PagosReportados.Controllers
 {
 	[Authorize]
 	[Route("api/informacion/[controller]")]
-	[ApiController]
+    [Tags("Consulta - PagosReportados")]
+    [ApiController]
 	public class PagosReportadosController : ControllerBase
 	{
 		private readonly IPagosReportadosService _service;

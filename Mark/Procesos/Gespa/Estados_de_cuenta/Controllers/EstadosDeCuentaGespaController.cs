@@ -7,6 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Loki.Mark.Procesos.Gespa.Estados_de_cuenta.Controllers
 {
     [Route("api/[controller]")]
+    [Tags("Procesos - EstadosDeCuentaGespa")]
     [ApiController]
     [SwaggerTag("Controladores de la pestaña Gespa/EstadosDeCuenta.")]
     public class EstadosDeCuentaGespaController : ControllerBase

@@ -17,7 +17,8 @@ namespace Loki.Mark.Auth.Controllers
 
 	[ApiController]
 	[Route("api/[controller]")]
-	[SwaggerTag("Controladores relacionados con el inicio y renovación de sesión/tokens.")]
+    [Tags("Auth")]
+    [SwaggerTag("Controladores relacionados con el inicio y renovación de sesión/tokens.")]
 
 	//[Authorize]
 	public class AuthController : ControllerBase

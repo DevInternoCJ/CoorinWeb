@@ -19,6 +19,7 @@ namespace Loki.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Tags("Consulta - Busqueda")]
     //[Authorize] // Asegura que solo usuarios autenticados puedan acceder a este controlador
     public class BusquedasController : ControllerBase
     {

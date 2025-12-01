@@ -11,6 +11,9 @@ using IMetasService = Loki.Mark.Procesos.Metas.Interfaces.IMetasService;
 
 namespace Loki.Mark.Procesos.Metas.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
+    [Tags("Procesos - Metas")]
     public class ProcesosMetasController : ControllerBase
     {
         private readonly IDbContextFactory _dbContextFactory;

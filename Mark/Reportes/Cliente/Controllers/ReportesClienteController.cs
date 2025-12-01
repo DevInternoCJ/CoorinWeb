@@ -12,8 +12,8 @@ namespace Loki.Mark.Reportes.Cliente.Controllers
 	[Authorize]
 	[ApiController]
 	[Route("api/reportes-cliente")]
-	[SwaggerTag("Reportes al Cliente")] // Mantenemos el tag simple
-	public class ReportesClienteController : ControllerBase
+    [Tags("Reportes - ReportesCliente")]
+    public class ReportesClienteController : ControllerBase
 	{
 		private readonly IReportesClienteService _service;
 

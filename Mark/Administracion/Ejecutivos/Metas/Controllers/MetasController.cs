@@ -13,7 +13,8 @@ namespace Loki.Mark.Administracion.Metas.Controllers
 
 	[ApiController]
 	[Route("api/carteras")]
-	[Authorize]
+    [Tags("Administración - Metas")]
+    [Authorize]
 	public class MetasController : ControllerBase
 	{
 		private readonly IMetasService _metasService;

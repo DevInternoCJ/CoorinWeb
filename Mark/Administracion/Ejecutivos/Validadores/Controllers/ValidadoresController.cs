@@ -11,6 +11,7 @@ namespace Loki.Mark.Administracion.Ejecutivos.Validadores.Controllers
 {
     [ApiController]
     [Route("api/ejecutivos")]
+    [Tags("Administración - Validadores")]
     public class ValidadoresController : ControllerBase
     {
         private readonly IDbContextFactory _dbContFactory;

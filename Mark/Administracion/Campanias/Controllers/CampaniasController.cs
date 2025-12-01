@@ -12,7 +12,8 @@ namespace Loki.Mark.Administracion.Campanias.Controllers
 
 	[ApiController]
 	[Route("api/campañas")]
-	public class CampaniasController : ControllerBase
+    [Tags("Administración - campanias")]
+    public class CampaniasController : ControllerBase
 	{
 		private readonly ICampaniasService _campaniasService;
 		private readonly ICampaniasDao _campaniasDao;

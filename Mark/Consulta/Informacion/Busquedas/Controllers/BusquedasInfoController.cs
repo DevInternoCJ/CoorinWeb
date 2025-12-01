@@ -11,7 +11,8 @@ namespace Loki.Mark.Consulta.Informacion.Busquedas.Controllers
 	[Authorize]
 	[ApiController]
 	[Route("api/informacion/[controller]")]
-	public class BusquedasInfoController : ControllerBase
+    [Tags("Consulta - BusquedaInfo")]
+    public class BusquedasInfoController : ControllerBase
 	{
 		private readonly IBusquedasInfoService _service;
 

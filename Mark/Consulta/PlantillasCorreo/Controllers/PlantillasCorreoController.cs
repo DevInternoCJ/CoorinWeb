@@ -13,6 +13,7 @@ namespace Loki.Mark.Consulta.PlantillasCorreo.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Tags("Consulta - PlantillasCorreo")]
     [Authorize]
     public class PlantillasCorreoController : Controller
     {

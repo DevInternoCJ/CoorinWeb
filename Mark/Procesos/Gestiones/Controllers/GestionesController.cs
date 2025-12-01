@@ -13,6 +13,7 @@ namespace Loki.Mark.Procesos.Gestiones.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Tags("Procesos - Gestiones")]
     public class GestionesController : ControllerBase
     {
         private readonly IDbContextFactory _dbContextFactory;

@@ -11,6 +11,7 @@ namespace Loki.Mark.Administracion.Consulta.Controllers
 
     [ApiController]
     [Route("api/arrepentimientos")]
+    [Tags("Consulta - Arrepentimientos")]
     public class ArrepentimientosController : ControllerBase
     {
         private readonly IArrepentimientosService _arrepentimientoService;
