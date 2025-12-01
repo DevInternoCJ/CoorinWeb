@@ -71,12 +71,12 @@ const JerarquiaConR = ({
             >
                 {/* Heading */}
                 <div
-                    className="hs-accordion-heading py-0.5 rounded-md flex items-center gap-x-0.5 w-full"
+                    className="hs-accordion-heading py-px rounded-md flex items-center gap-x-0.5 w-full"
                     style={isSelected ? { background: 'var(--color-jerarquia1)', color: '#2b463c' } : {}}
                 >
                     {hasSub && (
                         <button
-                            className="hs-accordion-toggle size-6 flex justify-center items-center rounded-md focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
+                            className="hs-accordion-toggle size-5 flex justify-center items-center rounded-md focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
                             aria-expanded={!isCollapsed}
                             aria-controls={`hs-cco-${nodeKey}-collapse`}
                             type="button"
@@ -109,7 +109,7 @@ const JerarquiaConR = ({
                         }}
                         title={node.usuario + ' - ' + node.nombreEjecutivo}
                     >
-                        <span className="text-sm font-medium w-full" style={{ color: isSelected ? '#2b463c' : '#147f5e', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block' }}>
+                        <span className="text-xs font-medium w-full" style={{ color: isSelected ? '#2b463c' : '#147f5e', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block' }}>
                             {node.usuario} - {node.nombreEjecutivo}
                         </span>
                     </div>
@@ -117,7 +117,7 @@ const JerarquiaConR = ({
                 {/* Collapse */}
                 {hasSub && !isCollapsed && (
                     <div id={`hs-cco-${nodeKey}-collapse`} className="hs-accordion-content overflow-hidden transition-[height] duration-300" role="group" aria-labelledby={`hs-cco-${nodeKey}-heading`}>
-                        <div className="ps-7 border-l border-gray-100 dark:border-neutral-700 pl-3" style={{ minWidth: 'max-content' }}>
+                        <div className="ps-5 border-l border-gray-100 dark:border-neutral-700 pl-2" style={{ minWidth: 'max-content' }}>
                             {node.subordinados.map((child, cidx) => renderNode(child, level + 1, `${nodeKey}-${cidx}`))}
                         </div>
                     </div>
@@ -205,15 +205,13 @@ const JerarquiaConR = ({
             ref={ramificacionRef}
             className="productividad-branch"
             style={{
-                overflowX: 'auto',
-                overflowY: 'auto',
                 height: 'auto',
-                maxHeight: 'auto',
+                maxHeight: 'none',
                 width: 'auto',
                 background: '#ffffff',
                 borderRadius: 8,
                 border: '1px solid #e0e0e0',
-                padding: '1.5vh 1vw'
+                padding: '1vh 0.8vw'
             }}
         >
             {/* Usuario y Ejecutivo principal (solo si no se omite) */}

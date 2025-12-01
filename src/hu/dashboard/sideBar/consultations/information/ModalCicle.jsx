@@ -115,7 +115,7 @@ export const CarouselNavigation = ({ currentIndex, currentName }) => {
     );
 };
 
-const ModalCicle = ({ onNavigationReady, onSizeChange }) => {
+const ModalCicle = ({ mostrarTabla, setMostrarTabla, onNavigationReady, onSizeChange, headerControlsActive = false, headerStates = {} }) => {
     const [activeTab, setActiveTab] = useState(0);
     
     // Estados para props de componentes que los requieren
@@ -130,12 +130,18 @@ const ModalCicle = ({ onNavigationReady, onSizeChange }) => {
 
     // Reiniciar todos los estados cuando cambia el tab activo
     useEffect(() => {
-        setMostrarTablaReporting(false);
-        setMostrarTablaWrongs(false);
+        // Solo limpiar mostrarTablaReporting si el tab activo NO es Pagos Reportados
+        if (tabsList[activeTab].key !== COMPONENT_KEYS.REPORTING_PAYMENTS) {
+            setMostrarTablaReporting(false);
+            localStorage.removeItem('reportingPaymentsParams');
+        }
+        // Solo limpiar mostrarTablaWrongs si el tab activo NO es Datos Erróneos
+        if (tabsList[activeTab].key !== COMPONENT_KEYS.WRONGS) {
+            setMostrarTablaWrongs(false);
+            localStorage.removeItem('wrongsParams');
+        }
         setRegrestExpanded(false);
         setComponentKey(prev => prev + 1);
-        localStorage.removeItem('reportingPaymentsParams');
-        localStorage.removeItem('wrongsParams');
     }, [activeTab]);
 
     // Notificar al padre cuando cambia el tamaño
@@ -165,8 +171,8 @@ const ModalCicle = ({ onNavigationReady, onSizeChange }) => {
             case COMPONENT_KEYS.REPORTING_PAYMENTS:
                 return (
                     <ReportingPaymentsContent
-                        mostrarTabla={mostrarTablaReporting}
-                        setMostrarTabla={setMostrarTablaReporting}
+                        mostrarTabla={mostrarTabla}
+                        setMostrarTabla={setMostrarTabla}
                     />
                 );
             case COMPONENT_KEYS.WRONGS:
@@ -188,7 +194,7 @@ const ModalCicle = ({ onNavigationReady, onSizeChange }) => {
                     />
                 );
             case COMPONENT_KEYS.OFFERS:
-                return <OffersContent />;
+                return <OffersContent headerControlsActive={headerControlsActive} headerStates={headerStates} />;
             case COMPONENT_KEYS.PAYMENTS:
                 return <PaymentsContent />;
             case COMPONENT_KEYS.SEARCHES:

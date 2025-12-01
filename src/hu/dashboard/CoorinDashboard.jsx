@@ -80,7 +80,7 @@ export default function CoorinDashboard() {
     const informationComponents = [
       "información", // Carrusel circular con todos los componentes
       "Lista Negra", "Arrepentimientos",
-      "Pagos", "Pagos reportados", "Datos Erroneos", "Domicilios", 
+      "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios", 
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
       "Consulta Visitas", "Captura Visitas", "Carga Visitas"
     ];
@@ -106,7 +106,7 @@ export default function CoorinDashboard() {
         case "Pagos":
           ContentComponent = PaymentsContent;
           break;
-        case "Pagos reportados":
+        case "Pagos Reportados":
           ContentComponent = ReportingPaymentsContent;
           contentProps = {
             mostrarTabla: mostrarTablaPagosReportados,
@@ -167,7 +167,7 @@ export default function CoorinDashboard() {
       let size = undefined;
       if (selectedSidebarOption === "información") {
         size = "pagos"; // Carrusel en tamaño normal, se expande con mostrarTabla
-      } else if (selectedSidebarOption === "Pagos reportados") {
+      } else if (selectedSidebarOption === "Pagos Reportados") {
         size = mostrarTablaPagosReportados ? "pagos-xl" : "pagos";
       } else if (selectedSidebarOption === "Domicilios") {
         size = mostrarTablaDomicilios ? "pagos-xl" : "pagos";
@@ -182,7 +182,9 @@ export default function CoorinDashboard() {
       return (
         <ModalBaseInformacion
           onClose={closeModal}
-          tipoInformacion={selectedSidebarOption}
+          tipoInformacion="información"
+          mostrarTabla={mostrarTablaPagosReportados}
+          setMostrarTabla={setMostrarTablaPagosReportados}
           size={size}
           infoCuenta={selectedSidebarOption === "Captura Visitas" ? cuentaDataCapturaVisita : undefined}
         >
@@ -240,7 +242,7 @@ export default function CoorinDashboard() {
       "2BB": "Lista Negra", // Lista Negra
       "3BB": "Arrepentimientos", // Arrepentimientos
       "1BBB": "Pagos", // Pagos
-      "2BBB": "Pagos reportados", // Pagos reportados
+      "2BBB": "Pagos Rportados", // Pagos reportados
       "3BBB": "Datos Erroneos", // Datos Erróneos
       "4BBB": "Domicilios", // Domicilios
       "5BBB": "Correos", // Correos

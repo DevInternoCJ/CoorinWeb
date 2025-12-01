@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import JerarquiaConR from "../../branchs/JerarquiaConR.jsx";
 import { obetenerJerarquiaEncargados } from "../../../../../services/mark/albaz/LokiServices.js";
-import { toast } from "sonner";
 
 const TreeMetas = ({
     setSelectedExecutives,
@@ -86,19 +85,8 @@ const TreeMetas = ({
 
     return (
         <div
-            className="metas-block metas-block-1"
-            style={{
-                width: 'auto',
-                minWidth: '160px',
-                maxWidth: '28vw',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '0.5rem',
-                flexShrink: 0,
-                maxHeight: '62vh', // Limita la altura máxima del árbol
-                overflowY: 'auto' // Permite scroll solo en el árbol si excede la altura
-            }}
+            className="metas-block metas-block-1 w-full lg:w-auto bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] p-1.5"
+            style={{ fontSize: '0.92em' }}
         >
             <JerarquiaConR
                 executiveTree={executiveTree}

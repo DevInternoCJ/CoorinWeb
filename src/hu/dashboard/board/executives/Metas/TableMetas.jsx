@@ -8,17 +8,14 @@ const TableMetas = ({
     selectAll,
     handleSelectAll,
     handleRowCheckbox,
-    inputValues,
-    formatCurrencyForDisplay,
-    handleGuardar,
-    parseCurrencyToNumber
+    formatCurrencyForDisplay
 }) => {
     // Normalizar valores para que siempre se pinte algo aunque vengan null/undefined
     const safe = (val, def = '') => val !== null && val !== undefined ? val : def;
     return (
-        <div className="metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full" style={{ flex: 1, maxHeight: '54vh', minWidth: '520px', paddingBottom: 0, marginTop: 0 }}>
-            {/* La altura máxima ahora es igual a la del árbol (54vh) para alineación visual */}
-            <div className="scrollbar-gray w-full max-h-[32vh] min-h-[20vh] min-w-[520px] overflow-y-auto">
+        <div className="metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full h-full overflow-hidden">
+            {/* Contenedor de tabla con scroll */}
+            <div className="scrollbar-gray w-full flex-1 overflow-auto">
                 <table className="modal-table">
                     <thead>
                         <tr>
@@ -148,34 +145,7 @@ const TableMetas = ({
                     </tbody>
                 </table>
             </div>
-            {/* Botón Guardar dentro del contenedor de la tabla pero fuera del scroll */}
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: '2vh' }}>
-                {(() => {
-                    const montoCumplido = Number(parseCurrencyToNumber(inputValues.montoCumplido)) || 0;
-                    const saldoSolucionado = Number(parseCurrencyToNumber(inputValues.saldoSolucionado)) || 0;
-                    const negociaciones = Number(inputValues.negociaciones) || 0;
-                    const cumplimientos = Number(inputValues.cumplimientos) || 0;
 
-                    const hasMoneyValidationError = montoCumplido > 0 && saldoSolucionado > 0 && montoCumplido >= saldoSolucionado;
-                    const hasTinyIntValidationError = negociaciones > 255 || cumplimientos > 255;
-                    const hasRelationValidationError = cumplimientos > 0 && negociaciones > 0 && cumplimientos > negociaciones;
-                    const hasValidationError = hasMoneyValidationError || hasTinyIntValidationError || hasRelationValidationError;
-                    const isDisabled = selectedRows.length === 0 || hasValidationError;
-
-                    return (
-                        <button
-                            type="button"
-                            className={
-                                `btn-success w-full sm:w-auto sm:min-w-[120px] px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center${isDisabled ? ' opacity-50 cursor-not-allowed' : ''}`
-                            }
-                            onClick={handleGuardar}
-                            disabled={isDisabled}
-                        >
-                            Guardar
-                        </button>
-                    );
-                })()}
-            </div>
         </div>
     );
 };
