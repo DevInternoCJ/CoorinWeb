@@ -24,7 +24,7 @@ export const useWalletProductStore = create((set) => ({
   isLoading: false,
   error: null,
 
-  // ✅ Acción mejorada que se puede llamar desde cualquier componente
+  // Acción mejorada que se puede llamar desde cualquier componente
   loadWalletProducts: async () => {
     const token = localStorage.getItem("token");
     if (!token) {

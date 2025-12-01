@@ -43,7 +43,7 @@ const EmailTemplates = ({ onClose }) => {
   const handleDatosDeudorChange = (nuevosDatosDeudor) => {
     setDatosDeudor(nuevosDatosDeudor);
   };
-  // ✅ NUEVA FUNCIÓN: Actualizar datosProductoCompleto desde LoadDates
+  //  NUEVA FUNCIÓN: Actualizar datosProductoCompleto desde LoadDates
   const handleDatosProductoCompletoChange = (nuevosDatosProducto) => {
     setDatosProductoCompleto(nuevosDatosProducto);
   }

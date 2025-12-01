@@ -23,7 +23,7 @@ const ModalHeader = ({
   setShowDataTables,
 }) => {
 
-  const servidor = "Thor"; // ✅ Efecto para la verificación del producto (MOVIDO DESDE WalletSection)
+  const servidor = "Thor"; // Efecto para la verificación del producto (MOVIDO DESDE WalletSection)
   useEffect(() => {
     console.log("selectedProduct for verification:", selectedProduct);
     if (!selectedProduct || selectedProduct.value === 0) {
@@ -39,14 +39,14 @@ const ModalHeader = ({
       });
       try {
         const result = await GetVerifyProduct(selectedProduct.value);
-        toast.success("✅ Producto verificado correctamente.", {
+        toast.success("Producto verificado correctamente.", {
           id: toastId,
           duration: 3000,
         });
         setVerifyResult(result);
       } catch (error) {
         const errorMessage = error.message || "Error al verificar el producto.";
-        toast.error(`❌ ${errorMessage}`, {
+        toast.error(` ${errorMessage}`, {
           id: toastId,
           duration: 5000,
         });
@@ -80,7 +80,7 @@ const ModalHeader = ({
               </div>
               <div>
                 <CustomSelect
-                  options={PRODUCT_OPTIONS} // ✅ APLICAMOS EL LABEL FLOTANTE
+                  options={PRODUCT_OPTIONS} // APLICAMOS EL LABEL FLOTANTE
                   label="Producto"
                   onChange={(value) => {
                     const found = PRODUCT_OPTIONS.find(

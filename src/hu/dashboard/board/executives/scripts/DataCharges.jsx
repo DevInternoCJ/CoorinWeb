@@ -80,7 +80,7 @@ const DataCharges = ({ onDataLoaded }) => {
             }
             // Notificar al componente padre con todos los datos
             if (onDataLoaded) {
-              console.log("📤 Enviando datos al EditionScripts:", {
+              console.log("Enviando datos al EditionScripts:", {
                 scripts: response.scripts || [],
                 placeholders: allValues,
               });

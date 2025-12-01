@@ -21,18 +21,18 @@ const Logout = ({
                 idEjecutivo: idEjecutivo,
                 idLogIngreso: idLogIngreso
             };
-            console.log('🚀 Iniciando proceso de logout...', logoutData);
+            console.log(' Iniciando proceso de logout...', logoutData);
             const response = await putLogout(logoutData);   
-            console.log('✅ Logout exitoso:', response);
+            console.log('Logout exitoso:', response);
         } catch (error) {
-            console.error('❌ Error durante el logout:', error);
+            console.error(' Error durante el logout:', error);
         } finally {
             logout();
             if (onLogout && typeof onLogout === 'function') {
                 onLogout();
             }
             navigate('/');       
-            console.log('🔒 Sesión cerrada y redirigiendo al login');
+            console.log(' Sesión cerrada y redirigiendo al login');
         }
     };
 

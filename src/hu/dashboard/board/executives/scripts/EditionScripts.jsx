@@ -89,7 +89,7 @@ const replacePlaceholders = useCallback(
               : "";
         }
 
-        return replacement; // 👈 si no hay valor, retorna vacío (no muestra nada)
+        return replacement; // si no hay valor, retorna vacío (no muestra nada)
       });
 
       return resultado;

@@ -10,13 +10,13 @@ import { toast } from "sonner";
 const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje}) => {
   const user = useUserStore((state) => state.user);
   
-  // ✅ MODIFICADO: Usar directamente los props que vienen de LoginCard
+  //  MODIFICADO: Usar directamente los props que vienen de LoginCard
   const currentUsername = username;
   const currentContraActual = contraActual;
   
-  console.log("🔍 ChangePassword - Datos recibidos:", {
-    contraActual: currentContraActual ? `✅ "${currentContraActual}" (${currentContraActual.length} chars)` : "❌ UNDEFINED",
-    username: currentUsername || "❌ UNDEFINED",
+  console.log("ChangePassword - Datos recibidos:", {
+    contraActual: currentContraActual ? ` "${currentContraActual}" (${currentContraActual.length} chars)` : "UNDEFINED",
+    username: currentUsername || "UNDEFINED",
     passwordData: passwordData,
     userFromStore: user
   });
@@ -68,10 +68,10 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // ✅ MODIFICADO: Validar que tengamos la contraseña actual de los props
+    //  MODIFICADO: Validar que tengamos la contraseña actual de los props
     if (!currentContraActual) {
       toast.error("No se encontró la contraseña actual. Por favor, inicia sesión nuevamente.");
-      console.error("❌ Error: contraActual no disponible en props:", {
+      console.error("Error: contraActual no disponible en props:", {
         contraActual: currentContraActual,
         username: currentUsername,
         passwordData
@@ -96,9 +96,9 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
     setLoading(true);
 
     try {
-      console.log("📤 Enviando solicitud de cambio de contraseña:", {
+      console.log(" Enviando solicitud de cambio de contraseña:", {
         usuario: currentUsername,
-        contraActual: currentContraActual ? "✅ PRESENTE" : "❌ AUSENTE",
+        contraActual: currentContraActual ? " PRESENTE" : " AUSENTE",
         nuevaContra: newPassword,
         servidor: "Albaz"
       });
@@ -107,25 +107,25 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
       const response = await UpdatePassword({
         usuario: currentUsername,
         servidor: "Albaz",
-        nuevaContra: newPassword, // ✅ La nueva contraseña
-        contra: currentContraActual, // ✅ La contraseña con la que intentó hacer login (de los props)
+        nuevaContra: newPassword, // La nueva contraseña
+        contra: currentContraActual, // La contraseña con la que intentó hacer login (de los props)
       });
 
-      console.log("✅ Respuesta de actualización exitosa:", response);
+      console.log("Respuesta de actualización exitosa:", response);
       toast.success("Contraseña actualizada exitosamente");
       
       // Limpiar los campos
       setNewPassword("");
       setConfirmPassword("");
       
-      // ✅ MODIFICADO: Limpiar la contraseña temporal del store por seguridad
+      // Limpiar la contraseña temporal del store por seguridad
       const clearUser = useUserStore.getState().setUser;
       clearUser({
         ...user,
         contraActual: undefined
       });
       
-      // ✅ MODIFICADO: Limpiar del localStorage de manera más completa
+      // Limpiar del localStorage de manera más completa
       try {
         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
         delete userData.contraActual;
@@ -137,11 +137,11 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
         console.error("Error limpiando localStorage:", error);
       }
       
-      console.log("✅ Cambio de contraseña completado, cerrando modal...");
+      console.log("Cambio de contraseña completado, cerrando modal...");
       onClose();
       
     } catch (error) {
-      console.error("❌ Error al cambiar la contraseña:", error);
+      console.error("Error al cambiar la contraseña:", error);
       
       let errorMessage = "Error al cambiar la contraseña. Intenta nuevamente.";
 
@@ -157,17 +157,17 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
     }
   };
 
-  // ✅ NUEVO: Efecto para debug adicional cuando se monta el componente
+  // Efecto para debug adicional cuando se monta el componente
   useEffect(() => {
-    console.log("🚀 ChangePassword montado con los siguientes datos:", {
+    console.log("ChangePassword montado con los siguientes datos:", {
       props: {
-        contraActual: contraActual ? `✅ "${contraActual}"` : "❌ NO RECIBIDA",
-        username: username || "❌ NO RECIBIDO", 
+        contraActual: contraActual ? `"${contraActual}"` : " NO RECIBIDA",
+        username: username || " NO RECIBIDO", 
         passwordData: passwordData
       },
       derived: {
         currentUsername,
-        currentContraActual: currentContraActual ? "✅ DISPONIBLE" : "❌ NO DISPONIBLE"
+        currentContraActual: currentContraActual ? " DISPONIBLE" : " NO DISPONIBLE"
       }
     });
   }, [contraActual, username, passwordData, currentUsername, currentContraActual]);
@@ -194,10 +194,10 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
         </button>
       </div>
 
-      {/* ✅ NUEVO: Panel de información de debug */}
+      {/*  Panel de información de debug */}
       {!currentContraActual && (
         <div className="bg-yellow-100 border border-yellow-400 p-3 rounded-lg mb-4 w-full">
-          <p className="text-yellow-800 font-bold">⚠️ Advertencia</p>
+          <p className="text-yellow-800 font-bold">Advertencia</p>
           <p className="text-yellow-700 text-sm">
             No se recibió la contraseña actual. Esto puede causar errores al actualizar.
           </p>
@@ -218,10 +218,10 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
       )}
 
       <form onSubmit={handleSubmit} className="w-full">
-  {/* ✅ MOSTRAR MENSAJE SOLO SI dias ES 0 O NO ES NÚMERO */}
+  {/* MOSTRAR MENSAJE SOLO SI dias ES 0 O NO ES NÚMERO */}
   {passwordData?.mensaje && (passwordData?.diasRestantes === 0 || isNaN(passwordData?.diasRestantes)) && (
     <kbd className="min-h-7.5 inline-flex mb-3 justify-center items-center py-1 px-1.5 bg-background-dashboard border border-transparent font-semibold text-sm text-red-800 rounded-md">
-      {passwordData.mensaje} {/* ✅ Usar passwordData.mensaje */}
+      {passwordData.mensaje} {/* Usar passwordData.mensaje */}
     </kbd>
   )}
   <div className="modal-body">

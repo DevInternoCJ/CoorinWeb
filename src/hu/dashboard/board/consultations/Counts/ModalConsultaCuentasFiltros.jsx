@@ -167,7 +167,7 @@ const ModalConsultaCuentasFiltros = ({ onGetSituacionOptions, onGetAllAvailableO
                     return;
                 }
                 // Si "≠" NO existe pero hay otros operadores de comparación, permitir agregar "≠"
-                // (caso: >= 12, <= 12 -> agregar ≠ 12 ✅)
+                // (caso: >= 12, <= 12 -> agregar ≠ 12 )
             }
 
             // Validación especial: Si el PRIMER operador fue "≠", no permitir agregar operadores de comparación

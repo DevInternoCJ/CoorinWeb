@@ -14,7 +14,7 @@ const LoadDates = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [draggedLabel, setDraggedLabel] = useState(""); 
-  // ✅ Hook corregido
+  //  Hook corregido
   const { walletProducts, isLoading: isLoadingStore, error: errorStore } = useWalletProducts(); 
   // Extraer IDs con validación
   const idProducto = walletProducts?.[0]?.idProducto;
@@ -179,7 +179,7 @@ const LoadDates = ({
       </div>
     </div>
   );
-  // ✅ Mejorar los estados de carga con el spinner
+  //  Mejorar los estados de carga con el spinner
   if (isLoadingStore && !walletProducts) {
     return <SpinnerLoader message="Cargando productos del portafolio..." />;
   }

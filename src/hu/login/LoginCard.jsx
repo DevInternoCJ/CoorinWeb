@@ -24,32 +24,32 @@ const LoginCard = ({
     }
   }, []);
 
-  // ✅ CORREGIDO: Función mejorada con más debug y manejo de estado
-  // ✅ MODIFICADO: Recibir datos de contraseña expirada  
+  // Función mejorada con más debug y manejo de estado
+  //  Recibir datos de contraseña expirada  
 const handlePasswordExpired = (data) => {
-  console.log("🔐 Contraseña expirada con datos:", data);
+  console.log(" Contraseña expirada con datos:", data);
   setPasswordExpiredData(data);
   setDiasRestantes(data.diasRestantes);
   setShowPasswordContent(false);
-  setShowChangePassword(true); // ✅ Mostrar directamente ChangePassword
+  setShowChangePassword(true); //  Mostrar directamente ChangePassword
 };
 
  const handleLoginSuccess = (data) => {
-  console.log("🎯 handleLoginSuccess EJECUTADO con:", data);
+  console.log(" handleLoginSuccess EJECUTADO con:", data);
   
   if (!data) {
-    console.error("❌ ERROR: data es null/undefined");
+    console.error(" ERROR: data es null/undefined");
     return;
   }
   
-  console.log("🔄 Actualizando estado...");
+  console.log("Actualizando estado...");
   setPasswordExpiredData(data);
   setDiasRestantes(data.diasRestantes);
   setShowPasswordContent(true);
   
   // Verificar que el estado se actualizó
   setTimeout(() => {
-    console.log("📊 Estado después de handleLoginSuccess:", {
+    console.log("Estado después de handleLoginSuccess:", {
       showPasswordContent,
       showChangePassword, 
       diasRestantes,
@@ -60,14 +60,14 @@ const handlePasswordExpired = (data) => {
 
   // Función para manejar el click en "Sí" en PasswordChangeContent
   const handleAcceptPasswordChange = () => {
-    console.log("✅ Usuario aceptó cambiar contraseña. Datos disponibles:", {
+    console.log("Usuario aceptó cambiar contraseña. Datos disponibles:", {
       passwordExpiredData,
-      tieneContraActual: passwordExpiredData?.contraActual ? "✅ SÍ" : "❌ NO",
+      tieneContraActual: passwordExpiredData?.contraActual ? " SÍ" : " NO",
       usuario: passwordExpiredData?.username
     });
     
     if (!passwordExpiredData) {
-      console.error("❌ ERROR: No hay passwordExpiredData para cambiar contraseña");
+      console.error("ERROR: No hay passwordExpiredData para cambiar contraseña");
       return;
     }
     
@@ -88,17 +88,17 @@ const handlePasswordExpired = (data) => {
     setDiasRestantes(null);
   };
 
-  // ✅ NUEVO: useEffect para debug del estado
+  // NUEVO: useEffect para debug del estado
   useEffect(() => {
-    console.log("🔄 LoginCard - Estado actualizado:", {
+    console.log(" LoginCard - Estado actualizado:", {
       showPasswordContent,
       showChangePassword,
       passwordExpiredData: passwordExpiredData ? {
         username: passwordExpiredData.username,
-        contraActual: passwordExpiredData.contraActual ? "✅ PRESENTE" : "❌ AUSENTE",
+        contraActual: passwordExpiredData.contraActual ? "PRESENTE" : " AUSENTE",
         diasRestantes: passwordExpiredData.diasRestantes,
         mensaje: passwordExpiredData.mensaje
-      } : "❌ NULL",
+      } : "NULL",
       diasRestantes
     });
   }, [showPasswordContent, showChangePassword, passwordExpiredData, diasRestantes]);
@@ -106,12 +106,12 @@ const handlePasswordExpired = (data) => {
   const defaultContent = formComponent ? (
     React.createElement(formComponent, { 
       onLoginSuccess: handleLoginSuccess,
-      onPasswordExpired: handlePasswordExpired // ✅ Pasar el callback
+      onPasswordExpired: handlePasswordExpired //  Pasar el callback
     })
   ) : (
     <LoginForm 
       onLoginSuccess={handleLoginSuccess} 
-      onPasswordExpired={handlePasswordExpired} // ✅ Pasar el callback
+      onPasswordExpired={handlePasswordExpired} //  Pasar el callback
     />
   );
 
@@ -150,7 +150,7 @@ const handlePasswordExpired = (data) => {
           ) : showChangePassword ? (
             <>
               
-              {/* ✅ RENDER CONDICIONAL BASADO EN DATOS */}
+              {/*  RENDER CONDICIONAL BASADO EN DATOS */}
               {passwordExpiredData && passwordExpiredData.contraActual ? (
                 <ChangePassword 
                   onClose={handleCloseChangePassword} 

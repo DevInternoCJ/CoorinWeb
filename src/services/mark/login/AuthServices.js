@@ -18,7 +18,7 @@ export const loginUser = async (userData) => {
       version: "3.4.2",
       servidor: "Albaz"
     };
-    console.log('📤 Enviando a /Auth/login:', requestData);
+    console.log('Enviando a /Auth/login:', requestData);
     const response = await api.post('/Auth/login', requestData, {
       headers: {
         'Accept': 'application/json, text/plain, */*',
@@ -36,10 +36,10 @@ export const loginUser = async (userData) => {
  
     if (response.data && response.data.ejecutivo && response.data.ejecutivo.Token) {
       localStorage.setItem('token', response.data.ejecutivo.Token);
-      console.log('✅ Token guardado en localStorage:', response.data.ejecutivo.Token);   
+      console.log(' Token guardado en localStorage:', response.data.ejecutivo.Token);   
       // Verificar que realmente se guardó
       const savedToken = localStorage.getItem('token');
-      console.log('🔍 Token recuperado de localStorage:', savedToken);
+      console.log('Token recuperado de localStorage:', savedToken);
       // Guardar datos del usuario
       localStorage.setItem('userData', JSON.stringify({
         idEjecutivo: response.data.ejecutivo.idEjecutivo,
@@ -49,12 +49,12 @@ export const loginUser = async (userData) => {
         Jerarquía: response.data.ejecutivo.Jerarquía
       }));
     } else {
-      console.warn('⚠️ No se recibió token en la respuesta');
-      console.warn('⚠️ Estructura completa de la respuesta:', response.data);
+      console.warn('No se recibió token en la respuesta');
+      console.warn('Estructura completa de la respuesta:', response.data);
     }    
     return response.data;
   } catch (error) {
-    console.error('❌ Error en el inicio de sesión:', error);
+    console.error('Error en el inicio de sesión:', error);
     if (error.response && typeof error.response.data === 'string') {
       const customError = new Error(error.response.data);
       customError.response = error.response;
@@ -73,12 +73,12 @@ export const loginUser = async (userData) => {
 //       // servidor: "Cronoss",
 //       // idEjecutivo
 //     };
-//     console.log('📤 Enviando a /Auth/validar-contrasenia:', requestData);
+//     console.log('Enviando a /Auth/validar-contrasenia:', requestData);
 //     const response = await api.post('/Auth/validar-contrasenia', requestData);
-//     console.log('📥 Respuesta de /Auth/validar-contrasenia:', response.data);
+//     console.log('Respuesta de /Auth/validar-contrasenia:', response.data);
 //     return response.data;
 //   } catch (error) {
-//     console.error('❌ Error en validación de contraseña:', error);
+//     console.error('Error en validación de contraseña:', error);
 //     throw error;
 //   }
 // };

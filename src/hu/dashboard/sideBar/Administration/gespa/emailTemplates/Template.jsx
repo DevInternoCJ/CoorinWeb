@@ -124,11 +124,11 @@ const Template = ({
   const formatValueForPreview = (value, key) => {
     // Si no hay valor, retornar cadena vacía en lugar del placeholder
     if (value === null || value === undefined || value === "") {
-      return ""; // ✅ Cambiado: ahora retorna cadena vacía
+      return ""; // Cambiado: ahora retorna cadena vacía
     }
 
     if (typeof value === "object" && Object.keys(value).length === 0) {
-      return ""; // ✅ Cambiado: ahora retorna cadena vacía
+      return ""; // Cambiado: ahora retorna cadena vacía
     }
 
     // Formatear números como moneda (similar a LoadDates)
@@ -247,7 +247,7 @@ const Template = ({
     }
   };
 
-  // ✅ Función para manejar el cambio del checkbox de vista previa
+  //  Función para manejar el cambio del checkbox de vista previa
   const handleVistaPreviaChange = (e) => {
     const isChecked = e.target.checked;
     setVistaPrevia(isChecked);
@@ -326,7 +326,7 @@ const Template = ({
                   vistaPrevia
                     ? "cursor-not-allowed opacity-80 bg-gray-800 bg-opacity-30"
                     : "cursor-text"
-                } // ✅ Estilos para indicar que está bloqueado
+                } //  Estilos para indicar que está bloqueado
               `}
               placeholder={
                 vistaPrevia
@@ -352,7 +352,7 @@ const Template = ({
               </div>
             )}
 
-            {/* ✅ Indicador de solo lectura en vista previa */}
+            {/*  Indicador de solo lectura en vista previa */}
             {vistaPrevia && (
               <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
                 <svg
