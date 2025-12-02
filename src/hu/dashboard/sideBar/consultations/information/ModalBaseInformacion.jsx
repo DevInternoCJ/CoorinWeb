@@ -63,7 +63,7 @@ const ModalBaseInformacion = ({
     const isVisitas = isConsultaVisitas || isCapturaVisitas || isCargaVisitas;
     const isInformacion = tipoInformacion === "información";
 
-    // Estados para controles de Ofertas en el header
+    // Estados para controles de Ofrecimientos en el header
     const userData = JSON.parse(localStorage.getItem("userData"));
     const idCartera = userData?.idCartera || 0;
     const idProducto = userData?.idProducto ?? 0;
@@ -94,7 +94,7 @@ const ModalBaseInformacion = ({
         }
     };
 
-    // useEffect para cargar datos del ejecutivo (solo para Ofertas)
+    // useEffect para cargar datos del ejecutivo (solo para Ofrecimientos)
     useEffect(() => {
         if (!idEjecutivo || !isInformacion) return;
         setLoadingConsultas(true);
@@ -195,7 +195,15 @@ const ModalBaseInformacion = ({
     if (isConsultaVisitas) normalizedSize = "consultaVisits";
     else if (isCapturaVisitas) normalizedSize = size === "pagos-xl" ? "informacion-xl" : "capturaVisit";
     else if (isCargaVisitas) normalizedSize = "cargaVisitas";
-    else if (isInformacion) normalizedSize = dynamicSize; // Usar tamaño dinámico para información
+    else if (isInformacion) {
+        // Si el tab activo es Pagos Reportados y mostrarTabla=true, expandir modal
+        const isPagosReportadosTab = carouselNav && tabsList[carouselNav.currentIndex]?.key === "Pagos Reportados";
+        if (isPagosReportadosTab && mostrarTabla) {
+            normalizedSize = "informacion-xl";
+        } else {
+            normalizedSize = dynamicSize;
+        }
+    }
 
     // Log para verificar el tab activo y el tamaño del modal
     if (carouselNav) {
@@ -280,7 +288,7 @@ const ModalBaseInformacion = ({
                                 <nav className="flex gap-x-0.5 justify-center" aria-label="Tabs" role="tablist" aria-orientation="horizontal">
                                     {tabsList.map((tab, index) => {
                                         const shortText = {
-                                            "Ofrecimientos": "Ofertas",
+                                            "Ofrecimientos": "Ofrecimientos",
                                             "Pagos": "Pagos", 
                                             "Pagos Reportados": "P. Rep.",
                                             "Búsquedas": "Búsq.",
@@ -357,7 +365,7 @@ const ModalBaseInformacion = ({
                 <div className={`flex-1 w-full overflow-auto ${contentClassName}`}>
                     {isInformacion ? (
                         <>
-                            {/* Controles funcionales para Ofertas (solo si es la pestaña activa) */}
+                            {/* Controles funcionales para Ofrecimeintos (solo si es la pestaña activa) */}
                             {isOffersTab && (
                                 <div className="flex items-center gap-3 px-4 pt-4 pb-2 justify-center">
                                     {/* Col 1: Cartera */}

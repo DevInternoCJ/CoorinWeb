@@ -29,6 +29,7 @@ const OffersContent = ({ headerControlsActive = false }) => {
     const [showToast, setShowToast] = useState(false);
     const [footerMsg, setFooterMsg] = useState("Elija la consulta de las cuentas que desee los pagos y el periodo de los pagos.");
     const [footerColor, setFooterColor] = useState("text-gray-600")
+    // Eliminado: processAPIResponse ya no es necesario
 
     const minDate = "2016-01-01";
     const maxDate = new Date().toISOString().slice(0, 10);
@@ -75,21 +76,22 @@ const OffersContent = ({ headerControlsActive = false }) => {
             };
             const response = await getOffersInformation(params);
 
+            // Usar la función centralizada para exportar y mostrar toasts
             const result = await exportFromAPIResponse(
                 response,
                 `ofrecimientos_${desde}_a_${hasta}`,
                 {
-                    consultaName: "Pagos",
+                    consultaName: "Ofrecimientos",
                     accountFields: ['cuenta'],
-                    dateFields: ['fechapago', 'fechaPago'],
-                    currencyFields: ['montopago', 'montoPago'],
+                    dateFields: ['fechaofrecimiento', 'fechaOfrecimiento'],
+                    currencyFields: ['montoofrecimiento', 'montoOfrecimiento'],
                     showToast: true,
-                    successMessage: "Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos."
+                    successMessage: "Archivo descargado correctamente. Abre el archivo en Excel para visualizar los ofrecimientos.",
+                    errorMessage: "No se pudo descargar el archivo de ofrecimientos."
                 }
             );
-
             if (result) {
-                setFooterMsg("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
+                setFooterMsg("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los ofrecimientos.");
                 setFooterColor("text-green-600");
             } else {
                 setConsultaSinRegistros(true);
@@ -109,8 +111,8 @@ const OffersContent = ({ headerControlsActive = false }) => {
                 });
             } else {
                 setConsultaSinRegistros(false);
-                setErrorExcel('Error al obtener los pagos.');
-                setFooterMsg("No se pudo descargar el archivo de pagos.");
+                setErrorExcel('Error al obtener los ofrecimientos.');
+                setFooterMsg("No se pudo descargar el archivo de ofrecimientos.");
                 setFooterColor("text-red-600");
             }
         } finally {
@@ -128,9 +130,9 @@ const OffersContent = ({ headerControlsActive = false }) => {
                 <div className="w-full relative">
                     <div className="flex flex-row gap-3 w-full mb-3">
                         {/* Cartera */}
-                        <div className="relative w-full">
+                        <div className="flex-1 min-w-0">
                             <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                className="block w-full bg-white border border-gray-200 rounded-lg p-2 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
                                 value={cartera}
                                 onChange={e => setCartera(e.target.value)}
                                 id="cartera-select-ofrecimiento"
@@ -142,17 +144,11 @@ const OffersContent = ({ headerControlsActive = false }) => {
                                     ))
                                 }
                             </select>
-                            <label
-                                htmlFor="cartera-select-ofrecimiento"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Cartera
-                            </label>
                         </div>
                         {/* Consulta */}
-                        <div className="relative w-full">
+                        <div className="flex-1 min-w-0">
                             <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                className="block w-full bg-white border border-gray-200 rounded-lg p-2 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
                                 value={consulta}
                                 onChange={e => setConsulta(e.target.value)}
                                 id="consulta-select-ofrecimiento"
@@ -165,66 +161,42 @@ const OffersContent = ({ headerControlsActive = false }) => {
                                     </option>
                                 ))}
                             </select>
-                            <label
-                                htmlFor="consulta-select-ofrecimiento"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Consulta
-                            </label>
-                            {loadingConsultas && (
-                                <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
-                            )}
-                            {errorConsultas && (
-                                <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
-                            )}
                         </div>
                         {/* Desde */}
-                        <div className="relative w-full min-w-0">
+                        <div className="flex-1 min-w-0">
                             <input
                                 type="date"
                                 id="fecha-desde-offers"
-                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                className="block w-full bg-white border border-gray-200 rounded-lg p-2 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1"
                                 value={desde}
                                 min={minDate}
                                 max={maxDate}
                                 onChange={e => setDesde(e.target.value)}
-                                placeholder=" "
                             />
-                            <label
-                                htmlFor="fecha-desde-offers"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                            >
-                                Desde
-                            </label>
                         </div>
                         {/* Hasta */}
-                        <div className="relative w-full min-w-0">
+                        <div className="flex-1 min-w-0">
                             <input
                                 type="date"
                                 id="fecha-hasta-offers"
-                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                className="block w-full bg-white border border-gray-200 rounded-lg p-2 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1"
                                 value={hasta}
                                 min={minDate}
                                 max={maxDate}
                                 onChange={e => setHasta(e.target.value)}
-                                placeholder=" "
                             />
-                            <label
-                                htmlFor="fecha-hasta-offers"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                            >
-                                Hasta
-                            </label>
                         </div>
-                        <button
-                            type="button"
-                            className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
-                            style={{ margin: '0 auto', display: 'block', height: '32px' }}
-                            onClick={handleDownloadExcel}
-                            disabled={loadingExcel}
-                        >
-                            {loadingExcel ? "Exportando..." : "Guardar Excel"}
-                        </button>
+                        {/* Botón */}
+                        <div className="flex-1 min-w-0 flex justify-center">
+                            <button
+                                type="button"
+                                className="btn-success w-full px-4 py-2 rounded-lg text-white text-sm font-medium shadow-sm hover:brightness-95 flex justify-center"
+                                onClick={handleDownloadExcel}
+                                disabled={loadingExcel}
+                            >
+                                {loadingExcel ? "Exportando..." : "Guardar Excel"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

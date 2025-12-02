@@ -1,136 +1,127 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { infoEjecutivo, getEmailsInfo } from "../../../../../services/mark/albaz/LokiServices";
-import { exportDataToCSV, processAPIResponse } from "../../../../../utils/ExcelExporter";
+import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
+
 
 const EmailsContent = ({ mostrarTabla }) => {
 
-    const [footerMsg, setFooterMsg] = useState("Elija la consulta de las cuentas que desee los correos.");
-        const [loadingExcel, setLoadingExcel] = useState(false);
-        const [errorExcel, setErrorExcel] = useState(null);
-    
-        const userData = JSON.parse(localStorage.getItem("userData"));
-        const idCartera = userData?.idCartera || 0;
-        const idEjecutivo = userData?.idEjecutivo ?? null;
-        const idProducto = userData?.idProducto ?? 0;
-    
-        const [cartera, setCartera] = useState(idCartera);
-        // Opciones de cartera dinámicas
-        const [carterasOptions, setCarterasOptions] = useState([]); 
-        const [consulta, setConsulta] = useState("");
-        const [consultasOptions, setConsultasOptions] = useState([]);
-        const [loadingConsultas, setLoadingConsultas] = useState(false);
-        const [errorConsultas, setErrorConsultas] = useState(null);
+    const [loadingExcel, setLoadingExcel] = useState(false);
+    const [errorExcel, setErrorExcel] = useState(null);
 
-                // Al abrir el modal (cuando se monta el componente o cambia mostrarTabla a true), mostrar mensaje inicial
-            useEffect(() => {
-                if (mostrarTabla) {
-                    setFooterMsg("Elija la consulta de las cuentas que desee los correos.");
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    const idCartera = userData?.idCartera || 0;
+    const idEjecutivo = userData?.idEjecutivo ?? null;
+    const idProducto = userData?.idProducto ?? 0;
+
+    const [cartera, setCartera] = useState(idCartera);
+    // Opciones de cartera dinámicas
+    const [carterasOptions, setCarterasOptions] = useState([]);
+    const [consulta, setConsulta] = useState("");
+    const [consultasOptions, setConsultasOptions] = useState([]);
+    const [loadingConsultas, setLoadingConsultas] = useState(false);
+    const [errorConsultas, setErrorConsultas] = useState(null);
+
+    // Al abrir el modal (cuando se monta el componente o cambia mostrarTabla a true), mostrar mensaje inicial
+useEffect(() => {
+    toast.info("Elija la consulta de las cuentas que desee los correos.");
+}, []);
+
+    // Cargar opciones de consulta
+    useEffect(() => {
+        if (!idEjecutivo) return;
+        setLoadingConsultas(true);
+        setErrorConsultas(null);
+        infoEjecutivo(idEjecutivo)
+            .then((data) => {
+                // Extraer carteras únicas
+                const carterasUnicas = Array.isArray(data)
+                    ? Array.from(
+                        new Map(
+                            data.map(item => [item.idCartera, { id: item.idCartera, nombre: item.NombreCartera || `Cartera ${item.idCartera}` }])
+                        ).values()
+                    )
+                    : [];
+                setCarterasOptions(carterasUnicas);
+                // Filtrar consultas por cartera e idProducto
+                const filtered = Array.isArray(data.consultas)
+                    ? data.consultas.filter(
+                        (item) => String(item.idCartera) === String(cartera) && String(item.idProducto) === String(idProducto)
+                    )
+                    : [];
+                setConsultasOptions(filtered);
+            })
+            .catch(() => {
+                setErrorConsultas("Error al cargar las consultas");
+                setConsultasOptions([]);
+                setCarterasOptions([]);
+            })
+            .finally(() => setLoadingConsultas(false));
+    }, [idEjecutivo, cartera, idProducto]);
+
+    // Handler para exportar correos a Excel/CSV usando ExcelExporter
+    const handleDownloadExcel = async () => {
+        setLoadingExcel(true);
+        setErrorExcel(null);
+        try {
+            const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
+            const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
+            const response = await getEmailsInfo(idCarteraInt, idConsultaInt);
+
+            let nombreConsulta = "Correos";
+            if (consulta !== "" && consulta !== 0) {
+                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
+                if (consultaObj?.nombreConsulta) nombreConsulta = consultaObj.nombreConsulta;
+            }
+
+            const result = await exportFromAPIResponse(
+                response,
+                `correos_${idCarteraInt}_${idConsultaInt || 'todas'}`,
+                {
+                    consultaName: nombreConsulta,
+                    accountFields: ['cuenta'],
+                    showToast: true,
+                    successMessage: "Libro de Excel Guardado.",
+                    errorMessage: "Error al exportar los correos."
                 }
-            }, [mostrarTabla]);
-        
-             // Cargar opciones de consulta
-                useEffect(() => {
-                    if (!idEjecutivo) return;
-                    setLoadingConsultas(true);
-                    setErrorConsultas(null);
-                    infoEjecutivo(idEjecutivo)
-                        .then((data) => {
-                            // Extraer carteras únicas
-                            const carterasUnicas = Array.isArray(data)
-                                ? Array.from(
-                                    new Map(
-                                        data.map(item => [item.idCartera, { id: item.idCartera, nombre: item.NombreCartera || `Cartera ${item.idCartera}` }])
-                                    ).values()
-                                )
-                                : [];
-                            setCarterasOptions(carterasUnicas);
-                            // Filtrar consultas por cartera e idProducto
-                            const filtered = Array.isArray(data.consultas)
-                                ? data.consultas.filter(
-                                    (item) => String(item.idCartera) === String(cartera) && String(item.idProducto) === String(idProducto)
-                                )
-                                : [];
-                            setConsultasOptions(filtered);
-                        })
-                        .catch(() => {
-                            setErrorConsultas("Error al cargar las consultas");
-                            setConsultasOptions([]);
-                            setCarterasOptions([]);
-                        })
-                        .finally(() => setLoadingConsultas(false));
-                }, [idEjecutivo, cartera, idProducto]);
+            );
 
-            // Handler para exportar correos a Excel/CSV usando ExcelExporter
-                const handleDownloadExcel = async () => {
-                    setLoadingExcel(true);
-                    setErrorExcel(null);
-                    setFooterMsg("Consulta terminada. Guardando libro de Excel.");
-                    try {
-                        const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
-                        const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
-                        const response = await getEmailsInfo(idCarteraInt, idConsultaInt);
-                        
-                        // Obtener nombre de la consulta para mensajes
-                        let nombreConsulta = "Correos";
-                        if (consulta !== "" && consulta !== 0) {
-                            const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
-                            if (consultaObj?.nombreConsulta) nombreConsulta = consultaObj.nombreConsulta;
-                        }
-
-                        // Procesar respuesta usando ExcelExporter
-                        const data = await processAPIResponse(response, { consultaName: nombreConsulta });
-                        
-                        if (!data) {
-                            setFooterMsg("Consulta terminada sin registros.");
-                            return;
-                        }
-
-                        const result = exportDataToCSV(
-                            data,
-                            `correos_${idCarteraInt}_${idConsultaInt || 'todas'}`,
-                            {
-                                accountFields: ['cuenta'],
-                                showToast: true,
-                                successMessage: "Libro de Excel Guardado."
-                            }
-                        );
-
-                        if (result) {
-                            setFooterMsg("Libro de Excel Guardado.");
-                        } else {
-                            setFooterMsg("Consulta terminada sin registros.");
-                        }
-                    } catch (err) {
-                        const status = err?.response?.status;
-                        const mensajeBackend = err?.response?.data?.mensaje;
-                        if (status === 404 && mensajeBackend?.includes("No se encontraron registros para los Correos")) {
-                            let nombreConsulta = "Correos";
-                            if (consulta !== "" && consulta !== 0) {
-                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
-                                if (consultaObj?.nombreConsulta) nombreConsulta = consultaObj.nombreConsulta;
-                            }
-                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros.`, { duration: 4000 });
-                            setErrorExcel(null);
-                            setFooterMsg("Consulta terminada sin registros.");
-                        } else {
-                            setErrorExcel('Error al exportar los correos.');
-                            setFooterMsg("Ocurrió un error al guardar el libro de Excel.");
-                        }
-                        console.error('Error al exportar los correos:', err);
-                    } finally {
-                        setLoadingExcel(false);
-                    }
-                };
+            if (result) {
+                toast.success("Libro de Excel Guardado.");
+            } else {
+                toast.warning("Consulta terminada sin registros.");
+            }
+        } catch (err) {
+            const status = err?.response?.status;
+            const mensajeBackend = err?.response?.data?.mensaje;
+            if (status === 404 && mensajeBackend?.includes("No se encontraron registros para los Correos")) {
+                let nombreConsulta = "Correos";
+                if (consulta !== "" && consulta !== 0) {
+                    const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
+                    if (consultaObj?.nombreConsulta) nombreConsulta = consultaObj.nombreConsulta;
+                }
+                toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros.`, { duration: 4000 });
+                setErrorExcel(null);
+                toast.warning("Consulta terminada sin registros.");
+            } else {
+                setErrorExcel('Error al exportar los correos.');
+                toast.error("Ocurrió un error al guardar el libro de Excel.");
+            }
+            console.error('Error al exportar los correos:', err);
+        } finally {
+            setLoadingExcel(false);
+        }
+    };
 
     return (
         <div style={{ width: '100%' }} className="flex flex-col items-center">
             {/* Layout dinámico según mostrarTabla */}
             {mostrarTabla ? (
                 <>
-                    {/* Row centrado con cartera y consulta */}
-                    <div className="w-full flex justify-center items-center gap-6 mb-4 max-w-5xl">
+                    {/* Row con cartera, consulta y botón en una sola fila */}
+                    <div className="w-full flex flex-row justify-center items-center gap-6 mb-4 max-w-5xl">
                         <div className="relative w-full max-w-sm">
+                            {/* Dropdown cartera */}
                             <select
                                 className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={cartera}
@@ -153,6 +144,7 @@ const EmailsContent = ({ mostrarTabla }) => {
                             </label>
                         </div>
                         <div className="relative w-full max-w-sm">
+                            {/* Dropdown consulta */}
                             <select
                                 className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={consulta}
@@ -180,9 +172,7 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
                             )}
                         </div>
-                    </div>
-                    {/* Botón Guardar Excel centrado debajo */}
-                    <div className="flex gap-3 w-full justify-center mb-4">
+                        {/* Botón Guardar Excel */}
                         <button
                             type="button"
                             className="btn-success w-full sm:w-auto min-w-[120px] max-w-sm px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
@@ -197,8 +187,10 @@ const EmailsContent = ({ mostrarTabla }) => {
                 </>
             ) : (
                 <>
-                    <div className="flex flex-col items-center w-full">
-                        <div className="relative w-full max-w-sm" style={{ marginBottom: '0.7rem' }}>
+                    {/* Row con cartera, consulta y botón en una sola fila */}
+                    <div className="w-full flex flex-row justify-center items-center gap-6 mb-4 max-w-5xl">
+                        <div className="relative w-full max-w-sm">
+                            {/* Dropdown cartera */}
                             <select
                                 className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={cartera}
@@ -220,12 +212,13 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 Cartera
                             </label>
                         </div>
-                        <div className="relative w-full max-w-sm" style={{ marginBottom: '0.7rem' }}>
+                        <div className="relative w-full max-w-sm">
+                            {/* Dropdown consulta */}
                             <select
                                 className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={consulta}
                                 onChange={e => setConsulta(e.target.value)}
-                                id="consulta-select-emials"
+                                id="consulta-select-emails"
                                 disabled={loadingConsultas || errorConsultas}
                             >
                                 <option value="">- Todas -</option>
@@ -248,36 +241,28 @@ const EmailsContent = ({ mostrarTabla }) => {
                                 <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
                             )}
                         </div>
-                        {/* Botón Guardar Excel centrado debajo */}
-                        <div className="flex gap-3 w-full justify-center mb-4">
-                            <button
-                                type="button"
-                                className="btn-success w-full sm:w-auto min-w-[120px] max-w-sm px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center items-center"
-                                style={{ margin: '0 auto', display: 'block' }}
-                                onClick={handleDownloadExcel}
-                                disabled={loadingExcel}
-                            >
-                                {loadingExcel
-                                    ? (
-                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                                        </svg>
-                                    )
-                                    : "Guardar Excel"
-                                }
-                            </button>
-                        </div>
-                        {errorExcel && <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>}
+                        {/* Botón Guardar Excel */}
+                        <button
+                            type="button"
+                            className="btn-success w-full sm:w-auto min-w-[120px] max-w-sm px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center items-center"
+                            style={{ margin: '0 auto', display: 'block' }}
+                            onClick={handleDownloadExcel}
+                            disabled={loadingExcel}
+                        >
+                            {loadingExcel
+                                ? (
+                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                    </svg>
+                                )
+                                : "Guardar Excel"
+                            }
+                        </button>
                     </div>
+                    {errorExcel && <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>}
                 </>
             )}
-
-            {/* Footer con mensaje dinámico */}
-            <div className="w-full flex justify-center items-center mt-4">
-                <span className="text-xs text-gray-600">{footerMsg}</span>
-            </div>
-
         </div>
     );
 }

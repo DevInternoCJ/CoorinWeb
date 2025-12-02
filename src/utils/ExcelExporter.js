@@ -1,3 +1,32 @@
+import * as XLSX from 'xlsx';
+/**
+ * Exporta datos a Excel (.xlsx) con ajuste automático de ancho de columna
+ * @param {Array} data - Array de objetos con los datos
+ * @param {string} filename - Nombre del archivo (sin extensión)
+ * @param {Object} options - Opciones de configuración
+ */
+export const exportDataToXLSX = (data, filename = 'export', options = {}) => {
+    if (!data || !Array.isArray(data) || data.length === 0) {
+        toast.warning('No hay datos para exportar.');
+        return false;
+    }
+    const ws = XLSX.utils.json_to_sheet(data);
+    // Calcular el ancho máximo de cada columna
+    const keys = Object.keys(data[0]);
+    const cols = keys.map(key => {
+        const maxLen = Math.max(
+            key.length,
+            ...data.map(row => (row[key] ? row[key].toString().length : 0))
+        );
+        return { wch: maxLen + 2 };
+    });
+    ws['!cols'] = cols;
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Datos');
+    XLSX.writeFile(wb, filename + '.xlsx');
+    toast.success('Archivo Excel exportado correctamente.');
+    return true;
+};
 /**
  * ExcelExporter - Componente maestro para exportar datos a Excel/CSV
  * 
@@ -17,7 +46,7 @@
  *   accountFields: ['cuenta'],
  *   onSuccess: () => toast.success('Exportado'),
  *   onError: (err) => toast.error('Error')
- * });
+            const result = exportDataToXLSX(data, filename, exportOptions);
  */
 
 import { useState } from 'react';
@@ -283,31 +312,71 @@ export const processAPIResponse = async (response, options = {}) => {
  * @param {string} filename - Nombre del archivo
  * @param {Object} options - Opciones de exportación
  */
-export const exportFromAPIResponse = async (response, filename, options = {}) => {
-    const { consultaName = 'Consulta', ...exportOptions } = options;
+// ...existing code...
 
-    try {
-        const data = await processAPIResponse(response, { consultaName });
-        
-        if (!data) {
+    export const exportFromAPIResponse = async (response, filename, options = {}) => {
+        const {
+            consultaName = 'Consulta',
+            showToast = true,
+            successMessage = 'Archivo exportado correctamente.',
+            errorMessage = 'Error al exportar los datos, verifique la conexión a internet.',
+            ...exportOptions
+        } = options;
+
+        let loadingToast;
+        if (showToast) {
+            loadingToast = toast.loading("Exportando datos...", { duration: Infinity });
+        }
+
+        try {
+            const data = await processAPIResponse(response, { consultaName });
+
+            if (!data) {
+                if (showToast) toast.dismiss(loadingToast);
+                return false;
+            }
+
+            // Si es CSV raw, intentar convertir a objeto para exportar a XLSX
+            if (data.rawCSV) {
+                // Intentar convertir CSV a JSON
+                const rows = data.rawCSV.split('\n').map(row => row.split(','));
+                const headers = rows[0];
+                const jsonData = rows.slice(1).map(row => {
+                    const obj = {};
+                    headers.forEach((h, i) => {
+                        obj[h] = row[i];
+                    });
+                    return obj;
+                });
+                const result = exportDataToXLSX(jsonData, filename, exportOptions);
+                if (showToast) {
+                    toast.dismiss(loadingToast);
+                    if (result) {
+                        toast.success(successMessage);
+                    }
+                }
+                return result;
+            }
+
+            // Exportar a XLSX siempre
+            const result = exportDataToXLSX(data, filename, exportOptions);
+
+            if (showToast) {
+                toast.dismiss(loadingToast);
+                if (result) {
+                    toast.success(successMessage);
+                }
+            }
+            return result;
+
+        } catch (error) {
+            if (showToast) {
+                toast.dismiss(loadingToast);
+                toast.error(errorMessage);
+            }
             return false;
         }
-
-        // Si es CSV raw
-        if (data.rawCSV) {
-            downloadCSV('\uFEFF' + data.rawCSV, filename);
-            toast.success('Archivo exportado correctamente.');
-            return true;
-        }
-
-        return exportDataToCSV(data, filename, exportOptions);
-
-    } catch (error) {
-        console.error('Error procesando respuesta API:', error);
-        toast.error('Error al procesar los datos para exportar.');
-        return false;
-    }
-};
+    };
 
 /**
  * Hook personalizado para manejar exportación con estado

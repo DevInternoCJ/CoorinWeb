@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { infoEjecutivo, getAddress } from "../../../../../services/mark/albaz/LokiServices";
-import { exportDataToCSV, processAPIResponse } from "../../../../../utils/ExcelExporter";
+import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
 const AddressesContent = ({ mostrarTabla }) => {
     // Mensaje de footer dinámico
@@ -72,29 +72,22 @@ const AddressesContent = ({ mostrarTabla }) => {
             const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
             const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
             const response = await getAddress(idCarteraInt, idConsultaInt);
-            
-            // Obtener nombre de la consulta para mensajes
+
             let nombreConsulta = "Domicilios";
             if (consulta !== "" && consulta !== 0) {
                 const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
                 if (consultaObj?.nombreConsulta) nombreConsulta = consultaObj.nombreConsulta;
             }
 
-            // Procesar respuesta usando ExcelExporter
-            const data = await processAPIResponse(response, { consultaName: nombreConsulta });
-            
-            if (!data) {
-                setFooterMsg("Consulta terminada sin registros.");
-                return;
-            }
-
-            const result = exportDataToCSV(
-                data,
+            const result = await exportFromAPIResponse(
+                response,
                 `domicilios_${idCarteraInt}_${idConsultaInt || 'todas'}`,
                 {
+                    consultaName: nombreConsulta,
                     accountFields: ['cuenta'],
                     showToast: true,
-                    successMessage: "Libro de Excel Guardado."
+                    successMessage: "Libro de Excel Guardado.",
+                    errorMessage: "Error al exportar los domicilios."
                 }
             );
 
@@ -128,153 +121,153 @@ const AddressesContent = ({ mostrarTabla }) => {
     return (
         <div style={{ width: '100%' }} className="flex flex-col items-center">
             {/* Layout dinámico según mostrarTabla */}
-            {mostrarTabla ? (
-                <>
-                    {/* Row centrado con cartera y consulta */}
-                    <div className="w-full flex justify-center items-center gap-6 mb-4 max-w-5xl">
-                        <div className="relative w-full max-w-sm">
-                            <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={cartera}
-                                onChange={e => setCartera(e.target.value)}
-                                id="cartera-select-addresses-row"
-                                disabled={loadingConsultas}
-                            >
-                                {carterasOptions.length === 0
-                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
-                                    : carterasOptions.map((item) => (
-                                        <option key={item.id} value={item.id}>{item.nombre}</option>
-                                    ))
-                                }
-                            </select>
-                            <label
-                                htmlFor="cartera-select-addresses-row"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Cartera
-                            </label>
-                        </div>
-                        <div className="relative w-full max-w-sm">
-                            <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={consulta}
-                                onChange={e => setConsulta(e.target.value)}
-                                id="consulta-select-addresses-row"
-                                disabled={loadingConsultas || errorConsultas}
-                            >
-                                <option value="">- Todas -</option>
-                                {consultasOptions.map((item) => (
-                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
-                                        {item.nombreConsulta}
-                                    </option>
-                                ))}
-                            </select>
-                            <label
-                                htmlFor="consulta-select-addresses-row"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Consulta
-                            </label>
-                            {loadingConsultas && (
-                                <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
-                            )}
-                            {errorConsultas && (
-                                <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
-                            )}
-                        </div>
-                    </div>
-                    {/* Botón Guardar Excel centrado debajo */}
-                    <div className="flex gap-3 w-full justify-center mb-4">
-                        <button
-                            type="button"
-                            className="btn-success w-full sm:w-auto min-w-[120px] max-w-sm px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
-                            style={{ margin: '0 auto', display: 'block' }}
-                            onClick={handleDownloadExcel}
-                            disabled={loadingExcel}
-                        >
-                            {loadingExcel ? "Exportando..." : "Guardar Excel"}
-                        </button>
-                    </div>
-                    {errorExcel && <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>}
-                </>
-            ) : (
-                <>
-                    <div className="flex flex-col items-center w-full">
-                        <div className="relative w-full max-w-sm" style={{ marginBottom: '0.7rem' }}>
-                            <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={cartera}
-                                onChange={e => setCartera(e.target.value)}
-                                id="cartera-select-addresses"
-                                disabled={loadingConsultas}
-                            >
-                                {carterasOptions.length === 0
-                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
-                                    : carterasOptions.map((item) => (
-                                        <option key={item.id} value={item.id}>{item.nombre}</option>
-                                    ))
-                                }
-                            </select>
-                            <label
-                                htmlFor="cartera-select-addresses"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Cartera
-                            </label>
-                        </div>
-                        <div className="relative w-full max-w-sm" style={{ marginBottom: '0.7rem' }}>
-                            <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={consulta}
-                                onChange={e => setConsulta(e.target.value)}
-                                id="consulta-select-addresses"
-                                disabled={loadingConsultas || errorConsultas}
-                            >
-                                <option value="">- Todas -</option>
-                                {consultasOptions.map((item) => (
-                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
-                                        {item.nombreConsulta}
-                                    </option>
-                                ))}
-                            </select>
-                            <label
-                                htmlFor="consulta-select-addresses"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Consulta
-                            </label>
-                            {loadingConsultas && (
-                                <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
-                            )}
-                            {errorConsultas && (
-                                <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
-                            )}
-                        </div>
-                        {/* Botón Guardar Excel centrado debajo */}
-                        <div className="flex gap-3 w-full justify-center mb-4">
-                            <button
-                                type="button"
-                                className="btn-success w-full sm:w-auto min-w-[120px] max-w-sm px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center items-center"
-                                style={{ margin: '0 auto', display: 'block' }}
-                                onClick={handleDownloadExcel}
-                                disabled={loadingExcel}
-                            >
-                                {loadingExcel
-                                    ? (
-                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                                        </svg>
-                                    )
-                                    : "Guardar Excel"
-                                }
-                            </button>
-                        </div>
-                        {errorExcel && <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>}
-                    </div>
-                </>
-            )}
-
+{mostrarTabla ? (
+    <>
+        {/* Row con cartera, consulta y botón en una sola fila */}
+        <div className="w-full flex flex-row justify-center items-center gap-6 mb-4 max-w-5xl">
+            <div className="relative w-full max-w-sm">
+                {/* Dropdown cartera */}
+                <select
+                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                    value={cartera}
+                    onChange={e => setCartera(e.target.value)}
+                    id="cartera-select-addresses-row"
+                    disabled={loadingConsultas}
+                >
+                    {carterasOptions.length === 0
+                        ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                        : carterasOptions.map((item) => (
+                            <option key={item.id} value={item.id}>{item.nombre}</option>
+                        ))
+                    }
+                </select>
+                <label
+                    htmlFor="cartera-select-addresses-row"
+                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                >
+                    Cartera
+                </label>
+            </div>
+            <div className="relative w-full max-w-sm">
+                {/* Dropdown consulta */}
+                <select
+                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                    value={consulta}
+                    onChange={e => setConsulta(e.target.value)}
+                    id="consulta-select-addresses-row"
+                    disabled={loadingConsultas || errorConsultas}
+                >
+                    <option value="">- Todas -</option>
+                    {consultasOptions.map((item) => (
+                        <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                            {item.nombreConsulta}
+                        </option>
+                    ))}
+                </select>
+                <label
+                    htmlFor="consulta-select-addresses-row"
+                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                >
+                    Consulta
+                </label>
+                {loadingConsultas && (
+                    <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                )}
+                {errorConsultas && (
+                    <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                )}
+            </div>
+            {/* Botón Guardar Excel */}
+            <button
+                type="button"
+                className="btn-success w-full sm:w-auto min-w-[120px] max-w-sm px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                style={{ margin: '0 auto', display: 'block' }}
+                onClick={handleDownloadExcel}
+                disabled={loadingExcel}
+            >
+                {loadingExcel ? "Exportando..." : "Guardar Excel"}
+            </button>
+        </div>
+        {errorExcel && <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>}
+    </>
+) : (
+    <>
+        {/* Row con cartera, consulta y botón en una sola fila */}
+        <div className="w-full flex flex-row justify-center items-center gap-6 mb-4 max-w-5xl">
+            <div className="relative w-full max-w-sm">
+                {/* Dropdown cartera */}
+                <select
+                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                    value={cartera}
+                    onChange={e => setCartera(e.target.value)}
+                    id="cartera-select-addresses"
+                    disabled={loadingConsultas}
+                >
+                    {carterasOptions.length === 0
+                        ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                        : carterasOptions.map((item) => (
+                            <option key={item.id} value={item.id}>{item.nombre}</option>
+                        ))
+                    }
+                </select>
+                <label
+                    htmlFor="cartera-select-addresses"
+                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                >
+                    Cartera
+                </label>
+            </div>
+            <div className="relative w-full max-w-sm">
+                {/* Dropdown consulta */}
+                <select
+                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                    value={consulta}
+                    onChange={e => setConsulta(e.target.value)}
+                    id="consulta-select-addresses"
+                    disabled={loadingConsultas || errorConsultas}
+                >
+                    <option value="">- Todas -</option>
+                    {consultasOptions.map((item) => (
+                        <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                            {item.nombreConsulta}
+                        </option>
+                    ))}
+                </select>
+                <label
+                    htmlFor="consulta-select-addresses"
+                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                >
+                    Consulta
+                </label>
+                {loadingConsultas && (
+                    <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                )}
+                {errorConsultas && (
+                    <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                )}
+            </div>
+            {/* Botón Guardar Excel */}
+            <button
+                type="button"
+                className="btn-success w-full sm:w-auto min-w-[120px] max-w-sm px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center items-center"
+                style={{ margin: '0 auto', display: 'block' }}
+                onClick={handleDownloadExcel}
+                disabled={loadingExcel}
+            >
+                {loadingExcel
+                    ? (
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                    )
+                    : "Guardar Excel"
+                }
+            </button>
+        </div>
+        {errorExcel && <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>}
+    </>
+)}
             {/* Footer con mensaje dinámico */}
             <div className="w-full flex justify-center items-center mt-4">
                 <span className="text-xs text-gray-600">{footerMsg}</span>
