@@ -48,7 +48,15 @@ const WALLET_OPTIONS = [
   { value: "numero de cuenta", label: "Numero de cuenta" },
   { value: "expediente", label: "Expediente" },
 ];
-
+const SITUATION_OPTIONS = [
+  { value: "activa", label: "Activa" },
+  { value: "suspendida", label: "Suspendida" },
+  { value: "en_proceso", label: "En Proceso" },
+  { value: "cerrada", label: "Cerrada" },
+  { value: "pendiente", label: "Pendiente" },
+  { value: "escalada", label: "Escalada" },
+  { value: "resuelta", label: "Resuelta" },
+];
 const VIEW_TYPES = {
   ADD: "add",
   LIST: "list",
@@ -57,14 +65,14 @@ const VIEW_TYPES = {
 const createCheckboxOptions = (activeView, onViewChange) => [
   {
     id: "add-checkbox",
-    label: "Agregar",
+    label: "Cambiar situacion",
     view: VIEW_TYPES.ADD,
     checked: activeView === VIEW_TYPES.ADD,
     onChange: () => onViewChange(VIEW_TYPES.ADD),
   },
   {
     id: "list-checkbox",
-    label: "Ver Lista",
+    label: "Insertar comentarios",
     view: VIEW_TYPES.LIST,
     checked: activeView === VIEW_TYPES.LIST,
     onChange: () => onViewChange(VIEW_TYPES.LIST),
@@ -73,18 +81,13 @@ const createCheckboxOptions = (activeView, onViewChange) => [
 
 // COMPONENTES ATÓMICOS (Single Responsibility)
 const ModalHeader = ({ onClose }) => (
-  <header className="bg-neutral-100 px-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-gray-200">
+  <header className="bg-neutral-100 p-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-gray-200">
     <div className="block md:flex items-start justify-between w-2/4 gap-3">
       <div className="flex items-center gap-2 text-jerarquia3">
         <IconCircular>
           <IconComment className="size-5" />
         </IconCircular>
         <h2 className="text-xl font-bold text-jerarquia3">Comentarios</h2>
-      </div>
-      <div className="flex flex-col items-center">
-        <div className="flex items-center gap-4 mb-3">
-          <img src={LogoCoorin} alt="logo-coorin" className="h-10" />
-        </div>
       </div>
     </div>
     <button
@@ -96,7 +99,9 @@ const ModalHeader = ({ onClose }) => (
   </header>
 );
 
-const CheckboxGroup = ({ options }) => (
+const CheckboxGroup = ({ options, situationOptions,
+  selectedSituation,
+  onSituationChange,}) => (
   <div className="w-1/2 flex flex-col justify-between items-start gap-3">
     {options.map((option) => (
       <label
@@ -115,6 +120,13 @@ const CheckboxGroup = ({ options }) => (
         </span>
       </label>
     ))}
+        <SelectWallet
+      options={situationOptions}
+      value={selectedSituation}
+      onChange={onSituationChange}
+      label="Seleccionar Situación"
+      id="situation-select"
+    />
   </div>
 );
 
@@ -186,18 +198,61 @@ const ControlsSection = ({
   onWalletChange,
   searchValue,
   onSearchChange,
+  activeView,
+  situationOptions,
+  selectedSituation,
+  onSituationChange,
 }) => (
   <section className="flex w-full justify-center items-start px-6 py-4 bg-white border-b border-gray-200">
     <CheckboxGroup options={checkboxOptions} />
-    <SelectSection
-      walletOptions={walletOptions}
-      selectedWallet={selectedWallet}
-      onWalletChange={onWalletChange}
-      searchValue={searchValue}
-      onSearchChange={onSearchChange}
-    />
+    {activeView === VIEW_TYPES.ADD ? (
+      <SituationSelectSection
+        walletOptions={walletOptions}
+        selectedWallet={selectedWallet}
+        onWalletChange={onWalletChange}
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
+        situationOptions={situationOptions}
+        selectedSituation={selectedSituation}
+        onSituationChange={onSituationChange}
+      />
+    ) : (
+      <SelectSection
+        walletOptions={walletOptions}
+        selectedWallet={selectedWallet}
+        onWalletChange={onWalletChange}
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
+      />
+    )}
   </section>
 );
+// NUEVO: Componente para select de situaciones
+const SituationSelectSection = ({
+  walletOptions,
+  selectedWallet,
+  onWalletChange,
+  searchValue,
+  onSearchChange,
+}) => (
+  <div className="w-1/2 space-y-3">
+    <SelectWallet
+      options={walletOptions}
+      value={selectedWallet}
+      onChange={onWalletChange}
+      label="Seleccionar"
+      id="wallet-select"
+    />
+    <FloatingInput
+      id="search-input"
+      label="Buscar"
+      value={searchValue}
+      onChange={(e) => onSearchChange(e.target.value)}
+    />
+
+  </div>
+);
+
 
 const CommentForm = ({ commentText, onCommentChange, onSave }) => (
   <div className="bg-gray-50">
@@ -215,14 +270,6 @@ const CommentForm = ({ commentText, onCommentChange, onSave }) => (
   </div>
 );
 
-const AddView = ({ wallet }) => (
-  <div className="transition-all duration-300 ease-in-out p-6 bg-white m-5 rounded-lg">
-    <h2 className="text-xl font-semibold mb-4">Agregar Comentario</h2>
-    <p className="text-sm text-gray-600">
-      Cartera seleccionada: <span className="font-semibold">{wallet || "Ninguna"}</span>
-    </p>
-  </div>
-);
 
 const ListView = ({ wallet }) => (
   <div className="transition-all duration-300 ease-in-out p-6 bg-white m-5 rounded-lg">
@@ -237,13 +284,15 @@ const Comments = ({ onClose, onSaveComment }) => {
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
   const { activeView, toggleView } = useViewManager();
-  const {
+   const {
     selectedWallet,
     setSelectedWallet,
     searchValue,
     setSearchValue,
     commentText,
     setCommentText,
+    selectedSituation,
+    setSelectedSituation,
     resetForm,
     getFormData,
   } = useCommentForm();
@@ -270,20 +319,23 @@ const Comments = ({ onClose, onSaveComment }) => {
       >
         <ModalHeader onClose={onClose} />
         <div className="flex-1 overflow-y-auto bg-gray-50">
-          <ControlsSection
+               <ControlsSection
             checkboxOptions={checkboxOptions}
             walletOptions={WALLET_OPTIONS}
             selectedWallet={selectedWallet}
             onWalletChange={setSelectedWallet}
             searchValue={searchValue}
             onSearchChange={setSearchValue}
+            activeView={activeView}
+            situationOptions={SITUATION_OPTIONS}
+            selectedSituation={selectedSituation}
+            onSituationChange={setSelectedSituation}
           />
           <CommentForm
             commentText={commentText}
             onCommentChange={setCommentText}
             onSave={handleSave}
           />
-          {activeView === VIEW_TYPES.ADD && <AddView wallet={selectedWallet} />}
           {activeView === VIEW_TYPES.LIST && <ListView wallet={selectedWallet} />}
         </div>
       </div>

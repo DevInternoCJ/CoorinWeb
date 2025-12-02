@@ -1,7 +1,7 @@
 import React from "react";
 
 const SelectWallet = ({ 
-    options, 
+      options = [], // ⭐ Valor por defecto para evitar el error
     value, 
     defaultValue = "", 
     onChange, 

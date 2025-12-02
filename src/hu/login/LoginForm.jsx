@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { ValidatePassword } from "../../services/mark/albaz/LokiServices";
+//import { ValidatePassword } from "../../services/mark/albaz/LokiServices";
 import { loginUser } from "../../services/mark/login/AuthServices";
 import ButtonLogin from "./ButtonLogin";
 import { LoginUser, LoginKey } from "./LoginIcons";
@@ -115,22 +115,22 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
     }
   }, []);
 
-  // Manejar errores de validación de contraseña
-  const handlePasswordValidationError = useCallback((error, onLoginSuccess) => {
-    console.error("Error en validación de contraseña:", error);
-    if (error.response?.status === 404) {
-      const errorMessage = error.message || ERROR_MESSAGES.LOGIN_ERROR;
-      toast.error(errorMessage);
-      setApiError(errorMessage);
-    } else if (error.response?.status === 400) {
-      toast.info("Por favor, actualiza tu contraseña.");
-      onLoginSuccess?.();
-    } else {
-      const genericError = error.message || ERROR_MESSAGES.PASSWORD_VALIDATION;
-      toast.error(genericError);
-      setApiError(genericError);
-    }
-  }, []);
+  // // Manejar errores de validación de contraseña
+  // const handlePasswordValidationError = useCallback((error, onLoginSuccess) => {
+  //   console.error("Error en validación de contraseña:", error);
+  //   if (error.response?.status === 404) {
+  //     const errorMessage = error.message || ERROR_MESSAGES.LOGIN_ERROR;
+  //     toast.error(errorMessage);
+  //     setApiError(errorMessage);
+  //   } else if (error.response?.status === 400) {
+  //     toast.info("Por favor, actualiza tu contraseña.");
+  //     onLoginSuccess?.();
+  //   } else {
+  //     const genericError = error.message || ERROR_MESSAGES.PASSWORD_VALIDATION;
+  //     toast.error(genericError);
+  //     setApiError(genericError);
+  //   }
+  // }, []);
 
   // Procesar login exitoso
   const processSuccessfulLogin = useCallback(
@@ -207,65 +207,69 @@ const handleSubmit = async (e) => {
     
     console.log("Datos guardados en store y localStorage:", userStoreData);
 
-    try {
-      const passwordValidation = await ValidatePassword(
-        { contrasenia: formData.password, servidor: "Thor" },
-        idEjecutivo
-      );
-      console.log("Respuesta de validación de contraseña:", passwordValidation);
+    // try {
+    //   const passwordValidation = await ValidatePassword(
+    //     { contrasenia: formData.password, servidor: "Thor" },
+    //     idEjecutivo
+    //   );
+    //   console.log("Respuesta de validación de contraseña:", passwordValidation);
 
-      // DETECTAR SI LA CONTRASEÑA ESTÁ PRÓXIMA A EXPIRAR (pero aún es válida)
-      const diasRestantes = userInfo.Días;
-      console.log("🔍 Días restantes para expirar:", diasRestantes);
+    //   // DETECTAR SI LA CONTRASEÑA ESTÁ PRÓXIMA A EXPIRAR (pero aún es válida)
+    //   const diasRestantes = userInfo.Días;
+    //   console.log("🔍 Días restantes para expirar:", diasRestantes);
 
-      // CONDICIÓN MODIFICADA: Mostrar PasswordChangeContent si:
-      // 1. La contraseña expiró (días <= 0) O 
-      // 2. La contraseña está próxima a expirar (días < 30) Y es cambio opcional
-      if (diasRestantes <= 0) {
-        console.log("CONTRASEÑA EXPIRADA - Cambio obligatorio");
-        // Para contraseña expirada, usar onPasswordExpired para flujo directo a ChangePassword
-        if (onPasswordExpired && typeof onPasswordExpired === 'function') {
-          const expiredData = {
-            diasRestantes: diasRestantes,
-            username: formData.username,
-            contraActual: formData.password,
-            esExpirada: true
-          };
-          console.log("Ejecutando onPasswordExpired (contraseña expirada):", expiredData);
-          onPasswordExpired(expiredData);
-        }
-      } else if (diasRestantes < 30) {
-        console.log("CONTRASEÑA PRÓXIMA A EXPIRAR - Cambio recomendado");
-        // Para contraseña próxima a expirar, usar onLoginSuccess para mostrar opción
-        if (onLoginSuccess && typeof onLoginSuccess === 'function') {
-          const successData = {
-            diasRestantes: diasRestantes,
-            username: formData.username,
-            contraActual: formData.password,
-            esExpirada: false
-          };
-          console.log("Ejecutando onLoginSuccess (cambio opcional):", successData);
-          onLoginSuccess(successData);
-        }
-      } else {
-        console.log("CONTRASEÑA VÁLIDA - Login normal");
-        // Contraseña válida con muchos días restantes - login normal
-        processSuccessfulLogin(
-          response,
-          passwordValidation,
-          () => {
-            // Callback vacío para no mostrar PasswordChangeContent
-            console.log("Login exitoso, redirigiendo al dashboard");
-            navigate("/dashboardPage");
-          },
-          navigate
-        );
-      }
+    //   // CONDICIÓN MODIFICADA: Mostrar PasswordChangeContent si:
+    //   // 1. La contraseña expiró (días <= 0) O 
+    //   // 2. La contraseña está próxima a expirar (días < 30) Y es cambio opcional
+    //   if (diasRestantes <= 0) {
+    //     console.log("CONTRASEÑA EXPIRADA - Cambio obligatorio");
+    //     // Para contraseña expirada, usar onPasswordExpired para flujo directo a ChangePassword
+    //     if (onPasswordExpired && typeof onPasswordExpired === 'function') {
+    //       const expiredData = {
+    //         diasRestantes: diasRestantes,
+    //         username: formData.username,
+    //         contraActual: formData.password,
+    //         esExpirada: true
+    //       };
+    //       console.log("Ejecutando onPasswordExpired (contraseña expirada):", expiredData);
+    //       onPasswordExpired(expiredData);
+    //     }
+    //   } else if (diasRestantes < 30) {
+    //     console.log("CONTRASEÑA PRÓXIMA A EXPIRAR - Cambio recomendado");
+    //     // Para contraseña próxima a expirar, usar onLoginSuccess para mostrar opción
+    //     if (onLoginSuccess && typeof onLoginSuccess === 'function') {
+    //       const successData = {
+    //         diasRestantes: diasRestantes,
+    //         username: formData.username,
+    //         contraActual: formData.password,
+    //         esExpirada: false
+    //       };
+    //       console.log("Ejecutando onLoginSuccess (cambio opcional):", successData);
+    //       onLoginSuccess(successData);
+    //     }
+    //   } else {
+    //     console.log("CONTRASEÑA VÁLIDA - Login normal");
+    //     // Contraseña válida con muchos días restantes - login normal
+    //     processSuccessfulLogin(
+    //       response,
+    //       passwordValidation,
+    //       () => {
+    //         // Callback vacío para no mostrar PasswordChangeContent
+    //         console.log("Login exitoso, redirigiendo al dashboard");
+    //         navigate("/dashboardPage");
+    //       },
+    //       navigate
+    //     );
+    //   }
 
-    } catch (validationError) {
-      console.error("Error en validación de contraseña:", validationError);
-      handlePasswordValidationError(validationError, onLoginSuccess);
-    }
+    // } catch (validationError) {
+    //   console.error("Error en validación de contraseña:", validationError);
+    //   handlePasswordValidationError(validationError, onLoginSuccess);
+    // }
+    console.log("Login exitoso sin validación de contraseña");
+      toast.success("¡Inicio de sesión exitoso!");
+      saveUserData(response);
+      navigate("/dashboardPage");
     } catch (error) {
     console.error("Error en el inicio de sesión:", error);
 
