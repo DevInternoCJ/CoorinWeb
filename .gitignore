@@ -1,0 +1,114 @@
+## ===========================
+## .NET / C# API IGNORE FILE
+## ===========================
+
+# Compiled binaries
+bin/
+obj/
+
+# Visual Studio files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.psess
+*.vsp
+*.pdb
+
+# VS Code
+.vscode/
+.history/
+*.code-workspace
+
+# JetBrains Rider
+.idea/
+
+# Logs
+*.log
+logs/
+Log/
+log/
+*.tlog
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Ll]og/
+
+# Publish output
+publish/
+out/
+dist/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET temporary files
+aspnet_client/
+bundleconfig.json
+*.cache
+*.tmp
+
+# Auto-generated files
+Generated/
+generated/
+*.g.cs
+*.Designer.cs
+
+# Environment files
+.env
+*.env
+
+# ----------------------------
+# CONFIGURACIÓN SENSIBLE
+# ----------------------------
+
+# Evitar subir configuraciones con secretos
+appsettings.Development.json
+appsettings.Local.json
+appsettings.Test.json
+appsettings.Staging.json
+appsettings.Production.json
+appsettings.*.json
+
+# (Opcional) Si NO quieres subir el appsettings.json principal:
+# appsettings.json
+
+# Keys / certificates
+*.cer
+*.key
+*.pfx
+certs/
+
+# Docker
+docker-compose.override.yml
+docker-compose.*.yml
+.docker/
+Dockerfile.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Node tools (si usas Swagger UI custom o frontend dentro del proyecto)
+node_modules/
+npm-debug.log
+
+# Coverage
+coverage/
+*.coverage
+*.coveragexml
+
+# Temporary
+temp/
+tmp/

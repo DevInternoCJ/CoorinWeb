@@ -1,0 +1,105 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace HadesLibrary.ModelsDbCollection;
+
+public partial class Producto28Old
+{
+    public string? PrestCoor { get; set; }
+
+    public string? Prestamo { get; set; }
+
+    public string? MAplcAct { get; set; }
+
+    public string? Division { get; set; }
+
+    public string? TipoQuita { get; set; }
+
+    public string? CartAct { get; set; }
+
+    public string Idcuenta { get; set; } = null!;
+
+    public string? SegEstrategia { get; set; }
+
+    public string? Despacho { get; set; }
+
+    public string? Plaza { get; set; }
+
+    public string? Product { get; set; }
+
+    public string? SdoAplcA { get; set; }
+
+    public string? Grupo { get; set; }
+
+    public string? _ { get; set; }
+
+    public string? CartIniCuadre { get; set; }
+
+    public string? Comentario { get; set; }
+
+    public string? Encargado { get; set; }
+
+    public string? Estrategia { get; set; }
+
+    public string? FecAplcBr { get; set; }
+
+    public string? FecAsigCuadre { get; set; }
+
+    public string? FechaLimAplicacion { get; set; }
+
+    public string? FechaVinculación { get; set; }
+
+    public string? Fechaarchivopagos { get; set; }
+
+    public string? MontoVinculación { get; set; }
+
+    public string? MoraAplcCuadre { get; set; }
+
+    public string? PagoInicial { get; set; }
+
+    public string? Prioridad { get; set; }
+
+    public string? Scv { get; set; }
+
+    public string? StatusBr { get; set; }
+
+    public string? Statusvinculacion { get; set; }
+
+    public string? VigVdaFall { get; set; }
+
+    public decimal? SdoCorpA { get; set; }
+
+    public int? MaxMora { get; set; }
+
+    public string? Descuentotabla { get; set; }
+
+    public string ProductoDesc { get; set; } = null!;
+
+    public decimal? MontoLiquidacion { get; set; }
+
+    public string? ProductoPyme { get; set; }
+
+    public string? MtoUlPg { get; set; }
+
+    public string? FUltPago { get; set; }
+
+    public string? CalleNum { get; set; }
+
+    public string? Colonia { get; set; }
+
+    public string? Poblacion { get; set; }
+
+    public string? Cp { get; set; }
+
+    public string? Estado { get; set; }
+
+    public string? Mail { get; set; }
+
+    public string? SdoVen { get; set; }
+
+    public string? Sucursal { get; set; }
+
+    public string? Periferia { get; set; }
+
+    public string? FechaActualizacion { get; set; }
+}

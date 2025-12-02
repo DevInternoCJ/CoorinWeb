@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Loki": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "scalar",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:49642;http://localhost:49643"
+    }
+  }
+}
