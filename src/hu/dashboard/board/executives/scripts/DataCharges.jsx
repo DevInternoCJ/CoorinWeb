@@ -245,7 +245,7 @@ const DataCharges = ({ onDataLoaded }) => {
                     draggedLabel === item.label ? "opacity-50 scale-95" : ""
                   }`}
                   title="Arrastra el texto al campo mensaje"
-                ><div className=" flex items-center gap-1 bg-jerarquia1/50 px-1 rounded-sm hover:bg-jerarquia3/30 hover:shadow-jerarquia3 shadow-sm  hover:shadow-md transition-shadow duration-200">
+                ><div className=" flex items-center gap-1 bg-jerarquia1/50 pt-1 pr-1 rounded-sm hover:bg-jerarquia3/30 hover:shadow-jerarquia3 shadow-sm  hover:shadow-md transition-shadow duration-200">
                    <IconDrag className=" text-jerarquia3"/>
                   <span className="inline-flex items-center text-sm font-semibold gap-1 text-jerarquia4">
                     {item.label}

@@ -248,7 +248,7 @@ const LoadDates = ({
           ].map((item, index) => (
             <div
               key={index}
-              className="bg-background-tertiary p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-200"
+              className="bg-bgcolor1 p-3 rounded-lg border-none  transition-shadow duration-200"
             >
               {/* Label con drag and drop */}
               <div
@@ -260,20 +260,20 @@ const LoadDates = ({
                   cursor-grabbing select-none
                   hover:bg-gray-100 hover:text-${item.color}-700
                   active:opacity-50
-                  py-1 rounded-md inline-block
+                  rounded-md inline-block
                   transition-all duration-150
                   ${draggedLabel === item.label ? "opacity-50 scale-95" : ""}
                 `}
                 title="Arrastra el texto al campo mensaje"
               >
-                <div className=" flex items-center gap-1">
-                  <IconDrag />
-                  <span className="inline-flex items-center text-base font-semibold gap-1 rounded-lg">
+                <div className=" flex items-center gap-1 bg-jerarquia1/50 pt-1 pr-1 rounded-sm hover:bg-jerarquia3/30 hover:shadow-jerarquia3 shadow-sm  hover:shadow-md transition-shadow duration-200">
+                  <IconDrag className=" text-jerarquia3"/>
+                  <span className="inline-flex items-center text-sm font-semibold gap-1 rounded-lg">
                   {item.label}
                   </span>
                 </div>
               </div>
-              <div className={`text-sm text-${item.color}-700`}>
+              <div className={`text-xs text-${item.color}-700`}>
                 {item.value}
               </div>
             </div>
@@ -311,8 +311,8 @@ const LoadDates = ({
                     title="Arrastra el texto al campo mensaje"
                   >
                     <div className=" flex items-center gap-1">
-                             <IconDrag className=""/>
-                    <span className="inline-flex items-center text-background-tertiary gap-2">
+                             <IconDrag className=" text-bgsuccess"/>
+                    <span className="inline-flex items-center gap-2">
                       {key
                         .replace(/([A-Z])/g, " $1")
                         .replace(/^./, (str) => str.toUpperCase())}
