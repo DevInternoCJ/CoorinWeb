@@ -115,154 +115,75 @@ useEffect(() => {
 
     return (
         <div style={{ width: '100%' }} className="flex flex-col items-center">
-            {/* Layout dinámico según mostrarTabla */}
-            {mostrarTabla ? (
-                <>
-                    {/* Row con cartera, consulta y botón en una sola fila */}
-                    <div className="w-full flex flex-row justify-center items-center gap-6 mb-4 max-w-5xl">
-                        <div className="relative w-full max-w-sm">
-                            {/* Dropdown cartera */}
-                            <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={cartera}
-                                onChange={e => setCartera(e.target.value)}
-                                id="cartera-select-emails-row"
-                                disabled={loadingConsultas}
-                            >
-                                {carterasOptions.length === 0
-                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
-                                    : carterasOptions.map((item) => (
-                                        <option key={item.id} value={item.id}>{item.nombre}</option>
-                                    ))
-                                }
-                            </select>
-                            <label
-                                htmlFor="cartera-select-emails-row"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Cartera
-                            </label>
-                        </div>
-                        <div className="relative w-full max-w-sm">
-                            {/* Dropdown consulta */}
-                            <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={consulta}
-                                onChange={e => setConsulta(e.target.value)}
-                                id="consulta-select-emails-row"
-                                disabled={loadingConsultas || errorConsultas}
-                            >
-                                <option value="">- Todas -</option>
-                                {consultasOptions.map((item) => (
-                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
-                                        {item.nombreConsulta}
-                                    </option>
-                                ))}
-                            </select>
-                            <label
-                                htmlFor="consulta-select-emails-row"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Consulta
-                            </label>
-                            {loadingConsultas && (
-                                <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
-                            )}
-                            {errorConsultas && (
-                                <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
-                            )}
-                        </div>
-                        {/* Botón Guardar Excel */}
+            {/* Grid responsivo con 3 columnas, fila única en xl/2xl */}
+            <div className="w-full mb-4 max-w-4xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-4 items-center">
+                    {/* Dropdown cartera */}
+                    <div className="relative w-full min-w-0">
+                        <select
+                            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                            value={cartera}
+                            onChange={e => setCartera(e.target.value)}
+                            id="cartera-select-emails"
+                            disabled={loadingConsultas}
+                        >
+                            {carterasOptions.length === 0
+                                ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                : carterasOptions.map((item) => (
+                                    <option key={item.id} value={item.id}>{item.nombre}</option>
+                                ))
+                            }
+                        </select>
+                        <label
+                            htmlFor="cartera-select-emails"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        >
+                            Cartera
+                        </label>
+                    </div>
+                    {/* Dropdown consulta */}
+                    <div className="relative w-full min-w-0">
+                        <select
+                            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                            value={consulta}
+                            onChange={e => setConsulta(e.target.value)}
+                            id="consulta-select-emails"
+                            disabled={loadingConsultas || errorConsultas}
+                        >
+                            <option value="">- Todas -</option>
+                            {consultasOptions.map((item) => (
+                                <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                    {item.nombreConsulta}
+                                </option>
+                            ))}
+                        </select>
+                        <label
+                            htmlFor="consulta-select-emails"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        >
+                            Consulta
+                        </label>
+                        {loadingConsultas && (
+                            <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                        )}
+                        {errorConsultas && (
+                            <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                        )}
+                    </div>
+                    {/* Botón Guardar Excel */}
+                    <div className="flex min-w-0">
                         <button
                             type="button"
-                            className="btn-success w-full sm:w-auto min-w-[120px] max-w-sm px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
-                            style={{ margin: '0 auto', display: 'block' }}
+                            className="btn-success w-full min-w-[120px] px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
                             onClick={handleDownloadExcel}
                             disabled={loadingExcel || !consulta}
                         >
                             {loadingExcel ? "Exportando..." : "Guardar Excel"}
                         </button>
                     </div>
-                    {errorExcel && <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>}
-                </>
-            ) : (
-                <>
-                    {/* Row con cartera, consulta y botón en una sola fila */}
-                    <div className="w-full flex flex-row justify-center items-center gap-6 mb-4 max-w-5xl">
-                        <div className="relative w-full max-w-sm">
-                            {/* Dropdown cartera */}
-                            <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={cartera}
-                                onChange={e => setCartera(e.target.value)}
-                                id="cartera-select-emails"
-                                disabled={loadingConsultas}
-                            >
-                                {carterasOptions.length === 0
-                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
-                                    : carterasOptions.map((item) => (
-                                        <option key={item.id} value={item.id}>{item.nombre}</option>
-                                    ))
-                                }
-                            </select>
-                            <label
-                                htmlFor="cartera-select-emails"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Cartera
-                            </label>
-                        </div>
-                        <div className="relative w-full max-w-sm">
-                            {/* Dropdown consulta */}
-                            <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={consulta}
-                                onChange={e => setConsulta(e.target.value)}
-                                id="consulta-select-emails"
-                                disabled={loadingConsultas || errorConsultas}
-                            >
-                                <option value="">- Todas -</option>
-                                {consultasOptions.map((item) => (
-                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
-                                        {item.nombreConsulta}
-                                    </option>
-                                ))}
-                            </select>
-                            <label
-                                htmlFor="consulta-select-emails"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Consulta
-                            </label>
-                            {loadingConsultas && (
-                                <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
-                            )}
-                            {errorConsultas && (
-                                <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
-                            )}
-                        </div>
-                        {/* Botón Guardar Excel */}
-                        <button
-                            type="button"
-                            className="btn-success w-full sm:w-auto min-w-[120px] max-w-sm px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center items-center"
-                            style={{ margin: '0 auto', display: 'block' }}
-                            onClick={handleDownloadExcel}
-                            disabled={loadingExcel}
-                        >
-                            {loadingExcel
-                                ? (
-                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                                    </svg>
-                                )
-                                : "Guardar Excel"
-                            }
-                        </button>
-                    </div>
-                    {errorExcel && <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>}
-                </>
-            )}
+                </div>
+            </div>
+            {errorExcel && <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>}
         </div>
     );
 }

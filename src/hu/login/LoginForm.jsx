@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { ValidatePassword } from "../../services/mark/albaz/LokiServices";
+// import { ValidatePassword } from "../../services/mark/albaz/LokiServices";
 import { loginUser } from "../../services/mark/login/AuthServices";
 import ButtonLogin from "./ButtonLogin";
 import { LoginUser, LoginKey } from "./LoginIcons";
@@ -9,7 +9,7 @@ import { useUserStore } from "../../contextGlobal/userStore";
 
 // Constantes para mensajes de error
 const ERROR_MESSAGES = {
-  PASSWORD_LENGTH: "La contraseña debe tener al menos 8 caracteres.",
+  // PASSWORD_LENGTH: "La contraseña debe tener al menos 8 caracteres.",
   REQUIRED_FIELDS: "Por favor, ingresa tu usuario y contraseña.",
   NO_ID_EJECUTIVO: "No se pudo obtener el idEjecutivo de la respuesta",
   PASSWORD_VALIDATION:
@@ -170,7 +170,7 @@ const handleSubmit = async (e) => {
   try {
     const response = await loginUser(userData);
     console.log("Respuesta de inicio de sesión exitosa:", response);
-    const idEjecutivo = extractIdEjecutivo(response);
+    // const idEjecutivo = extractIdEjecutivo(response);
     localStorage.setItem("username", formData.username);
     const userInfo = response?.ejecutivo || response;
 
@@ -207,11 +207,11 @@ const handleSubmit = async (e) => {
     console.log("Datos guardados en store y localStorage:", userStoreData);
 
     try {
-      const passwordValidation = await ValidatePassword(
-        { contrasenia: formData.password, servidor: "Thor" },
-        idEjecutivo
-      );
-      console.log("Respuesta de validación de contraseña:", passwordValidation);
+      // const passwordValidation = await ValidatePassword(
+      //   { contrasenia: formData.password, servidor: "Thor" },
+      //   idEjecutivo
+      // );
+      // console.log("Respuesta de validación de contraseña:", passwordValidation);
 
       // ✅ DETECTAR SI LA CONTRASEÑA ESTÁ PRÓXIMA A EXPIRAR (pero aún es válida)
       const diasRestantes = userInfo.Días;
@@ -247,7 +247,7 @@ const handleSubmit = async (e) => {
     // Fallback: redirigir directamente si no hay callback
     processSuccessfulLogin(
       response,
-      passwordValidation,
+      // passwordValidation,
       () => navigate("/dashboardPage"),
       navigate
     );

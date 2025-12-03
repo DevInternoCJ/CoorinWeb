@@ -266,8 +266,7 @@ const ModalBaseInformacion = ({
             />
             <div
                 ref={modalRef}
-                className={`modal-content modal-xl-container bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col ${modalClassName} ${((bounce || localBounce) && enableBounce) ? "animate-bounce-modal" : ""}`}
-                style={mergedModalStyle}
+                className={`modal-content bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col w-full max-w-2xl sm:max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto my-8 max-h-[90vh] h-auto ${modalClassName} ${((bounce || localBounce) && enableBounce) ? "animate-bounce-modal" : ""}`}
                 onClick={e => e.stopPropagation()}
                 {...props}
             >
@@ -285,7 +284,12 @@ const ModalBaseInformacion = ({
                             </div>
                             {/* Tabs en el header */}
                             <div className="flex-1 min-w-0">
-                                <nav className="flex gap-x-0.5 justify-center" aria-label="Tabs" role="tablist" aria-orientation="horizontal">
+                                <nav
+                                    className="grid grid-cols-3 sm:grid-cols-10 md:grid-cols-10 lg:grid-cols-5 xl:grid-cols-10 2xl:grid-cols-10 gap-x-0.5 gap-y-0.5 justify-center"
+                                    aria-label="Tabs"
+                                    role="tablist"
+                                    aria-orientation="horizontal"
+                                >
                                     {tabsList.map((tab, index) => {
                                         const shortText = {
                                             "Ofrecimientos": "Ofrecimientos",
@@ -304,7 +308,7 @@ const ModalBaseInformacion = ({
                                                 key={tab.key}
                                                 type="button"
                                                 className={`
-                                                    -mb-px py-2 px-4 inline-flex items-center gap-x-1 text-xs font-medium text-center 
+                                                    py-2 px-2 lg:px-3 xl:px-4 inline-flex items-center gap-x-1 text-xs font-medium text-center 
                                                     border border-gray-200 rounded-t-lg transition-colors duration-200
                                                     hover:bg-jerarquia1 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none
                                                     ${carouselNav?.currentIndex === index 
@@ -323,7 +327,32 @@ const ModalBaseInformacion = ({
                                                 <span className={carouselNav?.currentIndex === index ? 'text-jerarquia3' : 'text-gray-500'}>
                                                     {COMPONENT_ICONS[tab.key]}
                                                 </span>
-                                                <span className="hidden sm:inline">{shortText}</span>
+                                                {/*
+                                                    - 2xl y xl: icono + texto (normal, una fila)
+                                                    - lg: solo icono
+                                                    - md: icono + texto (2 filas)
+                                                    - sm y menos: solo icono (3 filas)
+                                                */}
+                                                {/*
+                                                    - sm y menores: solo icono, una fila, muy juntos
+                                                    - md y mayores: icono + texto
+                                                */}
+                                                {/*
+                                                    - md: solo icono, una fila
+                                                    - lg, xl, 2xl: icono + texto
+                                                */}
+                                                {/*
+                                                    - md: solo icono, 2 filas de 5
+                                                    - lg, xl, 2xl: icono + texto
+                                                */}
+                                                {/*
+                                                    - md: solo icono, una fila
+                                                    - sm: solo icono, 2 filas de 5
+                                                    - lg, xl, 2xl: icono + texto
+                                                */}
+                                                <span
+                                                    className="hidden md:hidden lg:inline xl:inline 2xl:inline"
+                                                >{shortText}</span>
                                             </button>
                                         );
                                     })}
@@ -367,8 +396,10 @@ const ModalBaseInformacion = ({
                         <>
                             {/* Controles funcionales para Ofrecimeintos (solo si es la pestaña activa) */}
                             {isOffersTab && (
-                                <div className="flex items-center gap-3 px-4 pt-4 pb-2 justify-center">
-                                    {/* Col 1: Cartera */}
+                                <div
+                                    className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-5 gap-3 px-4 pt-4 pb-2 w-full"
+                                >
+                                    {/* Cartera */}
                                     <div className="relative flex-1 min-w-0 max-w-xs">
                                         <select
                                             className="peer p-2 pe-8 block w-full bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-4 focus:pb-0 not-placeholder-shown:pt-4 not-placeholder-shown:pb-0"
@@ -390,7 +421,7 @@ const ModalBaseInformacion = ({
                                             Cartera
                                         </label>
                                     </div>
-                                    {/* Col 2: Consulta */}
+                                    {/* Consulta */}
                                     <div className="relative flex-1 min-w-0 max-w-xs">
                                         <select
                                             className="peer p-2 pe-8 block w-full bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-4 focus:pb-0 not-placeholder-shown:pt-4 not-placeholder-shown:pb-0"
@@ -419,7 +450,7 @@ const ModalBaseInformacion = ({
                                             <span className="text-[8px] text-red-500 absolute right-8 top-1">{errorConsultas}</span>
                                         )}
                                     </div>
-                                    {/* Col 3: Desde */}
+                                    {/* Desde */}
                                     <div className="relative flex-1 min-w-0 max-w-xs">
                                         <input
                                             type="date"
@@ -438,7 +469,7 @@ const ModalBaseInformacion = ({
                                             Desde
                                         </label>
                                     </div>
-                                    {/* Col 4: Hasta */}
+                                    {/* Hasta */}
                                     <div className="relative flex-1 min-w-0 max-w-xs">
                                         <input
                                             type="date"
@@ -457,8 +488,8 @@ const ModalBaseInformacion = ({
                                             Hasta
                                         </label>
                                     </div>
-                                    {/* Col 5: Botón Excel */}
-                                    <div className="shrink-0">
+                                    {/* Botón Excel */}
+                                    <div className="shrink-0 flex items-center justify-center">
                                         <button
                                             type="button"
                                             className="btn-success min-w-[100px] px-4 py-2 text-xs font-medium rounded-lg shadow-sm flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"

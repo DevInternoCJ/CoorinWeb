@@ -117,115 +117,312 @@ const CommentsContent = ({ headerControlsActive = false }) => {
     };
 
     return (
-        <div className="w-full flex flex-col items-center" style={{ minHeight: 0, height: 'auto' }}>
-            {headerControlsActive ? (
-                <div className="w-full p-4 text-center">
-                    {/* Espacio vacío - controles en header */}
+        <div className="w-full relative">
+            {/* xl y 2xl: 1 fila, 5 columnas */}
+            <div className="hidden xl:grid grid-cols-5 gap-3 w-full mb-3">
+                {/* ...igual que antes... */}
+                <div className="relative w-full">
+                    <select
+                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={cartera}
+                        onChange={e => setCartera(e.target.value)}
+                        id="cartera-select-comments-xl"
+                        disabled={loadingConsultas}
+                    >
+                        {carterasOptions.length === 0
+                            ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                            : carterasOptions.map((item) => (
+                                <option key={item.id} value={item.id}>{item.nombre}</option>
+                            ))
+                        }
+                    </select>
+                    <label
+                        htmlFor="cartera-select-comments-xl"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                    >
+                        Cartera
+                    </label>
                 </div>
-            ) : (
-                <div className="w-full relative">
-                    <div className="flex flex-row gap-3 w-full mb-3">
-                        {/* Cartera */}
-                        <div className="relative w-full">
-                            <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={cartera}
-                                onChange={e => setCartera(e.target.value)}
-                                id="cartera-select-ofrecimiento"
-                            >
-                                {carterasOptions.length === 0
-                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
-                                    : carterasOptions.map((item) => (
-                                        <option key={item.id} value={item.id}>{item.nombre}</option>
-                                    ))
-                                }
-                            </select>
-                            <label
-                                htmlFor="cartera-select-ofrecimiento"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Cartera
-                            </label>
-                        </div>
-                        {/* Consulta */}
-                        <div className="relative w-full">
-                            <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={consulta}
-                                onChange={e => setConsulta(e.target.value)}
-                                id="consulta-select-ofrecimiento"
-                                disabled={loadingConsultas || errorConsultas}
-                            >
-                                <option value="">- Todas -</option>
-                                {consultasOptions.map((item) => (
-                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
-                                        {item.nombreConsulta}
-                                    </option>
-                                ))}
-                            </select>
-                            <label
-                                htmlFor="consulta-select-ofrecimiento"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Consulta
-                            </label>
-                            {loadingConsultas && (
-                                <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
-                            )}
-                            {errorConsultas && (
-                                <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
-                            )}
-                        </div>
-                        {/* Desde */}
-                        <div className="relative w-full min-w-0">
-                            <input
-                                type="date"
-                                id="fecha-desde-offers"
-                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={desde}
-                                min={minDate}
-                                max={maxDate}
-                                onChange={e => setDesde(e.target.value)}
-                                placeholder=" "
-                            />
-                            <label
-                                htmlFor="fecha-desde-offers"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                            >
-                                Desde
-                            </label>
-                        </div>
-                        {/* Hasta */}
-                        <div className="relative w-full min-w-0">
-                            <input
-                                type="date"
-                                id="fecha-hasta-offers"
-                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={hasta}
-                                min={minDate}
-                                max={maxDate}
-                                onChange={e => setHasta(e.target.value)}
-                                placeholder=" "
-                            />
-                            <label
-                                htmlFor="fecha-hasta-offers"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                            >
-                                Hasta
-                            </label>
-                        </div>
-                        <button
-                            type="button"
-                            className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
-                            style={{ margin: '0 auto', display: 'block', height: '32px' }}
-                            onClick={handleDownloadExcel}
-                            disabled={loadingExcel}
+                <div className="relative w-full">
+                    <select
+                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={consulta}
+                        onChange={e => setConsulta(e.target.value)}
+                        id="consulta-select-comments-xl"
+                        disabled={loadingConsultas || errorConsultas}
+                    >
+                        <option value="">- Todas -</option>
+                        {consultasOptions.map((item) => (
+                            <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                {item.nombreConsulta}
+                            </option>
+                        ))}
+                    </select>
+                    <label
+                        htmlFor="consulta-select-comments-xl"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                    >
+                        Consulta
+                    </label>
+                    {loadingConsultas && (
+                        <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                    )}
+                    {errorConsultas && (
+                        <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                    )}
+                </div>
+                <div className="relative w-full min-w-0">
+                    <input
+                        type="date"
+                        id="fecha-desde-comments-xl"
+                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={desde}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={e => setDesde(e.target.value)}
+                        placeholder=" "
+                    />
+                    <label
+                        htmlFor="fecha-desde-comments-xl"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                    >
+                        Desde
+                    </label>
+                </div>
+                <div className="relative w-full min-w-0">
+                    <input
+                        type="date"
+                        id="fecha-hasta-comments-xl"
+                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={hasta}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={e => setHasta(e.target.value)}
+                        placeholder=" "
+                    />
+                    <label
+                        htmlFor="fecha-hasta-comments-xl"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                    >
+                        Hasta
+                    </label>
+                </div>
+                <div className="flex items-center justify-center">
+                    <button
+                        type="button"
+                        className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
+                        style={{ margin: '0 auto', display: 'block', height: '32px' }}
+                        onClick={handleDownloadExcel}
+                        disabled={loadingExcel || !consulta}
+                    >
+                        {loadingExcel ? "Exportando..." : "Guardar Excel"}
+                    </button>
+                </div>
+            </div>
+            {/* md: 3 filas, 2 col + 2 col + 1 col */}
+            <div className="hidden md:grid xl:hidden w-full gap-3 mb-3">
+                <div className="grid grid-cols-2 gap-3">
+                    {/* Cartera */}
+                    <div className="relative w-full">
+                        <select
+                            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                            value={cartera}
+                            onChange={e => setCartera(e.target.value)}
+                            id="cartera-select-comments-md"
                         >
-                            {loadingExcel ? "Exportando..." : "Guardar Excel"}
-                        </button>
+                            {carterasOptions.length === 0
+                                ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                : carterasOptions.map((item) => (
+                                    <option key={item.id} value={item.id}>{item.nombre}</option>
+                                ))
+                            }
+                        </select>
+                        <label
+                            htmlFor="cartera-select-comments-md"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        >
+                            Cartera
+                        </label>
+                    </div>
+                    {/* Consulta */}
+                    <div className="relative w-full">
+                        <select
+                            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                            value={consulta}
+                            onChange={e => setConsulta(e.target.value)}
+                            id="consulta-select-comments-md"
+                            disabled={loadingConsultas || errorConsultas}
+                        >
+                            <option value="">- Todas -</option>
+                            {consultasOptions.map((item) => (
+                                <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                    {item.nombreConsulta}
+                                </option>
+                            ))}
+                        </select>
+                        <label
+                            htmlFor="consulta-select-comments-md"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        >
+                            Consulta
+                        </label>
+                        {loadingConsultas && (
+                            <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                        )}
+                        {errorConsultas && (
+                            <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                        )}
                     </div>
                 </div>
-            )}
+                <div className="grid grid-cols-2 gap-3">
+                    {/* Desde */}
+                    <div className="relative w-full min-w-0">
+                        <input
+                            type="date"
+                            id="fecha-desde-comments-md"
+                            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                            value={desde}
+                            min={minDate}
+                            max={maxDate}
+                            onChange={e => setDesde(e.target.value)}
+                            placeholder=" "
+                        />
+                        <label
+                            htmlFor="fecha-desde-comments-md"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                        >
+                            Desde
+                        </label>
+                    </div>
+                    {/* Hasta */}
+                    <div className="relative w-full min-w-0">
+                        <input
+                            type="date"
+                            id="fecha-hasta-comments-md"
+                            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                            value={hasta}
+                            min={minDate}
+                            max={maxDate}
+                            onChange={e => setHasta(e.target.value)}
+                            placeholder=" "
+                        />
+                        <label
+                            htmlFor="fecha-hasta-comments-md"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                        >
+                            Hasta
+                        </label>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                    <button
+                        type="button"
+                        className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
+                        style={{ margin: '0 auto', display: 'block', height: '32px' }}
+                        onClick={handleDownloadExcel}
+                        disabled={loadingExcel || !consulta}
+                    >
+                        {loadingExcel ? "Exportando..." : "Guardar Excel"}
+                    </button>
+                </div>
+            </div>
+            {/* sm: 5 filas, 1 columna cada una */}
+            <div className="grid md:hidden w-full grid-cols-1 gap-3 mb-3">
+                <div className="relative w-full">
+                    <select
+                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={cartera}
+                        onChange={e => setCartera(e.target.value)}
+                        id="cartera-select-comments-sm"
+                    >
+                        {carterasOptions.length === 0
+                            ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                            : carterasOptions.map((item) => (
+                                <option key={item.id} value={item.id}>{item.nombre}</option>
+                            ))
+                        }
+                    </select>
+                    <label
+                        htmlFor="cartera-select-comments-sm"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                    >
+                        Cartera
+                    </label>
+                </div>
+                <div className="relative w-full">
+                    <select
+                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={consulta}
+                        onChange={e => setConsulta(e.target.value)}
+                        id="consulta-select-comments-sm"
+                        disabled={loadingConsultas || errorConsultas}
+                    >
+                        <option value="">- Todas -</option>
+                        {consultasOptions.map((item) => (
+                            <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                {item.nombreConsulta}
+                            </option>
+                        ))}
+                    </select>
+                    <label
+                        htmlFor="consulta-select-comments-sm"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                    >
+                        Consulta
+                    </label>
+                    {loadingConsultas && (
+                        <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                    )}
+                    {errorConsultas && (
+                        <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                    )}
+                </div>
+                <div className="relative w-full min-w-0">
+                    <input
+                        type="date"
+                        id="fecha-desde-comments-sm"
+                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={desde}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={e => setDesde(e.target.value)}
+                        placeholder=" "
+                    />
+                    <label
+                        htmlFor="fecha-desde-comments-sm"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                    >
+                        Desde
+                    </label>
+                </div>
+                <div className="relative w-full min-w-0">
+                    <input
+                        type="date"
+                        id="fecha-hasta-comments-sm"
+                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={hasta}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={e => setHasta(e.target.value)}
+                        placeholder=" "
+                    />
+                    <label
+                        htmlFor="fecha-hasta-comments-sm"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                    >
+                        Hasta
+                    </label>
+                </div>
+                <button
+                    type="button"
+                    className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
+                    style={{ margin: '0 auto', display: 'block', height: '32px' }}
+                    onClick={handleDownloadExcel}
+                    disabled={loadingExcel || !consulta}
+                >
+                    {loadingExcel ? "Exportando..." : "Guardar Excel"}
+                </button>
+            </div>
         </div>
     );
 };

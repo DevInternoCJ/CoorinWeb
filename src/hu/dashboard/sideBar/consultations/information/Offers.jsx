@@ -128,9 +128,11 @@ const OffersContent = ({ headerControlsActive = false }) => {
                 </div>
             ) : (
                 <div className="w-full relative">
-                    <div className="flex flex-row gap-3 w-full mb-3">
+                    <div
+                        className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-5 gap-3 w-full mb-3"
+                    >
                         {/* Cartera */}
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 border border-blue-500 bg-blue-50">
                             <select
                                 className="block w-full bg-white border border-gray-200 rounded-lg p-2 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
                                 value={cartera}
@@ -146,7 +148,7 @@ const OffersContent = ({ headerControlsActive = false }) => {
                             </select>
                         </div>
                         {/* Consulta */}
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 border border-green-500 bg-green-50">
                             <select
                                 className="block w-full bg-white border border-gray-200 rounded-lg p-2 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
                                 value={consulta}
@@ -163,7 +165,7 @@ const OffersContent = ({ headerControlsActive = false }) => {
                             </select>
                         </div>
                         {/* Desde */}
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 border border-yellow-500 bg-yellow-50">
                             <input
                                 type="date"
                                 id="fecha-desde-offers"
@@ -175,7 +177,7 @@ const OffersContent = ({ headerControlsActive = false }) => {
                             />
                         </div>
                         {/* Hasta */}
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 border border-pink-500 bg-pink-50">
                             <input
                                 type="date"
                                 id="fecha-hasta-offers"
@@ -187,7 +189,7 @@ const OffersContent = ({ headerControlsActive = false }) => {
                             />
                         </div>
                         {/* Botón */}
-                        <div className="flex-1 min-w-0 flex justify-center">
+                        <div className="flex-1 min-w-0 flex justify-center border border-purple-500 bg-purple-50">
                             <button
                                 type="button"
                                 className="btn-success w-full px-4 py-2 rounded-lg text-white text-sm font-medium shadow-sm hover:brightness-95 flex justify-center"

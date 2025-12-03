@@ -126,15 +126,14 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
                 </div>
             ) : (
                 <div className="w-full relative">
-                    {/* Cartera y Consulta en el mismo row */}
-                    <div className="flex flex-row gap-3 w-full mb-3">
-                        {/* Cartera */}
-                        <div className="relative w-full">
+                    {/* xl y 2xl: 1 fila, 5 columnas, visible desde xl en adelante */}
+                    <div className="hidden xl:grid grid-cols-5 gap-3 w-full mb-3">
+                        <div className="relative w-full">{/* Cartera */}
                             <select
                                 className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={cartera}
                                 onChange={e => setCartera(e.target.value)}
-                                id="cartera-select-ofrecimiento"
+                                id="cartera-select-ofrecimiento-2xl"
                             >
                                 {carterasOptions.length === 0
                                     ? <option value={cartera}>{`Cartera ${cartera}`}</option>
@@ -144,19 +143,18 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
                                 }
                             </select>
                             <label
-                                htmlFor="cartera-select-ofrecimiento"
+                                htmlFor="cartera-select-ofrecimiento-2xl"
                                 className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
                             >
                                 Cartera
                             </label>
                         </div>
-                        {/* Consulta */}
-                        <div className="relative w-full">
+                        <div className="relative w-full">{/* Consulta */}
                             <select
                                 className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={consulta}
                                 onChange={e => setConsulta(e.target.value)}
-                                id="consulta-select-ofrecimiento"
+                                id="consulta-select-ofrecimiento-2xl"
                                 disabled={loadingConsultas || errorConsultas}
                             >
                                 <option value="">- Todas -</option>
@@ -167,7 +165,7 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
                                 ))}
                             </select>
                             <label
-                                htmlFor="consulta-select-ofrecimiento"
+                                htmlFor="consulta-select-ofrecimiento-2xl"
                                 className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
                             >
                                 Consulta
@@ -179,11 +177,10 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
                                 <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
                             )}
                         </div>
-                        {/* Desde */}
-                        <div className="relative w-full min-w-0">
+                        <div className="relative w-full min-w-0">{/* Desde */}
                             <input
                                 type="date"
-                                id="fecha-desde-offers"
+                                id="fecha-desde-offers-2xl"
                                 className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={desde}
                                 min={minDate}
@@ -192,17 +189,16 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
                                 placeholder=" "
                             />
                             <label
-                                htmlFor="fecha-desde-offers"
+                                htmlFor="fecha-desde-offers-2xl"
                                 className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
                             >
                                 Desde
                             </label>
                         </div>
-                        {/* Hasta */}
-                        <div className="relative w-full min-w-0">
+                        <div className="relative w-full min-w-0">{/* Hasta */}
                             <input
                                 type="date"
-                                id="fecha-hasta-offers"
+                                id="fecha-hasta-offers-2xl"
                                 className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                 value={hasta}
                                 min={minDate}
@@ -211,7 +207,213 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
                                 placeholder=" "
                             />
                             <label
-                                htmlFor="fecha-hasta-offers"
+                                htmlFor="fecha-hasta-offers-2xl"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                            >
+                                Hasta
+                            </label>
+                        </div>
+                        <div className="flex items-center justify-center">
+                            <button
+                                type="button"
+                                className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
+                                style={{ margin: '0 auto', display: 'block', height: '32px' }}
+                                onClick={handleDownloadExcel}
+                                disabled={loadingExcel}
+                            >
+                                {loadingExcel ? "Exportando..." : "Guardar Excel"}
+                            </button>
+                        </div>
+                    </div>
+                    {/* md: 3 filas, 2 col + 2 col + 1 col, solo visible en md */}
+                    <div className="hidden md:grid xl:hidden w-full gap-3 mb-3">
+                        <div className="grid grid-cols-2 gap-3">
+                            {/* Cartera */}
+                            <div className="relative w-full">{/* ...código cartera... */}
+                                <select
+                                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                    value={cartera}
+                                    onChange={e => setCartera(e.target.value)}
+                                    id="cartera-select-ofrecimiento-md"
+                                >
+                                    {carterasOptions.length === 0
+                                        ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                        : carterasOptions.map((item) => (
+                                            <option key={item.id} value={item.id}>{item.nombre}</option>
+                                        ))
+                                    }
+                                </select>
+                                <label
+                                    htmlFor="cartera-select-ofrecimiento-md"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                                >
+                                    Cartera
+                                </label>
+                            </div>
+                            {/* Consulta */}
+                            <div className="relative w-full">{/* ...código consulta... */}
+                                <select
+                                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                    value={consulta}
+                                    onChange={e => setConsulta(e.target.value)}
+                                    id="consulta-select-ofrecimiento-md"
+                                    disabled={loadingConsultas || errorConsultas}
+                                >
+                                    <option value="">- Todas -</option>
+                                    {consultasOptions.map((item) => (
+                                        <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                            {item.nombreConsulta}
+                                        </option>
+                                    ))}
+                                </select>
+                                <label
+                                    htmlFor="consulta-select-ofrecimiento-md"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                                >
+                                    Consulta
+                                </label>
+                                {loadingConsultas && (
+                                    <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                                )}
+                                {errorConsultas && (
+                                    <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            {/* Desde */}
+                            <div className="relative w-full min-w-0">{/* ...código desde... */}
+                                <input
+                                    type="date"
+                                    id="fecha-desde-offers-md"
+                                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                    value={desde}
+                                    min={minDate}
+                                    max={maxDate}
+                                    onChange={e => setDesde(e.target.value)}
+                                    placeholder=" "
+                                />
+                                <label
+                                    htmlFor="fecha-desde-offers-md"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                >
+                                    Desde
+                                </label>
+                            </div>
+                            {/* Hasta */}
+                            <div className="relative w-full min-w-0">{/* ...código hasta... */}
+                                <input
+                                    type="date"
+                                    id="fecha-hasta-offers-md"
+                                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                    value={hasta}
+                                    min={minDate}
+                                    max={maxDate}
+                                    onChange={e => setHasta(e.target.value)}
+                                    placeholder=" "
+                                />
+                                <label
+                                    htmlFor="fecha-hasta-offers-md"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                >
+                                    Hasta
+                                </label>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-3">
+                            <button
+                                type="button"
+                                className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
+                                style={{ margin: '0 auto', display: 'block', height: '32px' }}
+                                onClick={handleDownloadExcel}
+                                disabled={loadingExcel}
+                            >
+                                {loadingExcel ? "Exportando..." : "Guardar Excel"}
+                            </button>
+                        </div>
+                    </div>
+                    {/* sm: 5 filas, 1 columna cada una, solo visible en sm */}
+                    <div className="grid md:hidden w-full grid-cols-1 gap-3 mb-3">
+                        <div className="relative w-full">{/* ...código cartera... */}
+                            <select
+                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={cartera}
+                                onChange={e => setCartera(e.target.value)}
+                                id="cartera-select-ofrecimiento-sm"
+                            >
+                                {carterasOptions.length === 0
+                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                    : carterasOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>{item.nombre}</option>
+                                    ))
+                                }
+                            </select>
+                            <label
+                                htmlFor="cartera-select-ofrecimiento-sm"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                            >
+                                Cartera
+                            </label>
+                        </div>
+                        <div className="relative w-full">{/* ...código consulta... */}
+                            <select
+                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={consulta}
+                                onChange={e => setConsulta(e.target.value)}
+                                id="consulta-select-ofrecimiento-sm"
+                                disabled={loadingConsultas || errorConsultas}
+                            >
+                                <option value="">- Todas -</option>
+                                {consultasOptions.map((item) => (
+                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                        {item.nombreConsulta}
+                                    </option>
+                                ))}
+                            </select>
+                            <label
+                                htmlFor="consulta-select-ofrecimiento-sm"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                            >
+                                Consulta
+                            </label>
+                            {loadingConsultas && (
+                                <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                            )}
+                            {errorConsultas && (
+                                <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                            )}
+                        </div>
+                        <div className="relative w-full min-w-0">{/* ...código desde... */}
+                            <input
+                                type="date"
+                                id="fecha-desde-offers-sm"
+                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={desde}
+                                min={minDate}
+                                max={maxDate}
+                                onChange={e => setDesde(e.target.value)}
+                                placeholder=" "
+                            />
+                            <label
+                                htmlFor="fecha-desde-offers-sm"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                            >
+                                Desde
+                            </label>
+                        </div>
+                        <div className="relative w-full min-w-0">{/* ...código hasta... */}
+                            <input
+                                type="date"
+                                id="fecha-hasta-offers-sm"
+                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={hasta}
+                                min={minDate}
+                                max={maxDate}
+                                onChange={e => setHasta(e.target.value)}
+                                placeholder=" "
+                            />
+                            <label
+                                htmlFor="fecha-hasta-offers-sm"
                                 className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
                             >
                                 Hasta
@@ -219,7 +421,7 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
                         </div>
                         <button
                             type="button"
-                            className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
+                            className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
                             style={{ margin: '0 auto', display: 'block', height: '32px' }}
                             onClick={handleDownloadExcel}
                             disabled={loadingExcel}
