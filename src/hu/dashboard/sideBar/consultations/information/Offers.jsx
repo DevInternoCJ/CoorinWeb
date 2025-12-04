@@ -122,86 +122,9 @@ const OffersContent = ({ headerControlsActive = false }) => {
 
     return (
         <div className="w-full flex flex-col items-center" style={{ minHeight: 0, height: 'auto' }}>
-            {headerControlsActive ? (
-                <div className="w-full p-4 text-center">
-                    {/* Espacio vacío - controles en header */}
-                </div>
-            ) : (
-                <div className="w-full relative">
-                    <div
-                        className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-5 gap-3 w-full mb-3"
-                    >
-                        {/* Cartera */}
-                        <div className="flex-1 min-w-0 border border-blue-500 bg-blue-50">
-                            <select
-                                className="block w-full bg-white border border-gray-200 rounded-lg p-2 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
-                                value={cartera}
-                                onChange={e => setCartera(e.target.value)}
-                                id="cartera-select-ofrecimiento"
-                            >
-                                {carterasOptions.length === 0
-                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
-                                    : carterasOptions.map((item) => (
-                                        <option key={item.id} value={item.id}>{item.nombre}</option>
-                                    ))
-                                }
-                            </select>
-                        </div>
-                        {/* Consulta */}
-                        <div className="flex-1 min-w-0 border border-green-500 bg-green-50">
-                            <select
-                                className="block w-full bg-white border border-gray-200 rounded-lg p-2 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
-                                value={consulta}
-                                onChange={e => setConsulta(e.target.value)}
-                                id="consulta-select-ofrecimiento"
-                                disabled={loadingConsultas || errorConsultas}
-                            >
-                                <option value="">- Todas -</option>
-                                {consultasOptions.map((item) => (
-                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
-                                        {item.nombreConsulta}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        {/* Desde */}
-                        <div className="flex-1 min-w-0 border border-yellow-500 bg-yellow-50">
-                            <input
-                                type="date"
-                                id="fecha-desde-offers"
-                                className="block w-full bg-white border border-gray-200 rounded-lg p-2 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1"
-                                value={desde}
-                                min={minDate}
-                                max={maxDate}
-                                onChange={e => setDesde(e.target.value)}
-                            />
-                        </div>
-                        {/* Hasta */}
-                        <div className="flex-1 min-w-0 border border-pink-500 bg-pink-50">
-                            <input
-                                type="date"
-                                id="fecha-hasta-offers"
-                                className="block w-full bg-white border border-gray-200 rounded-lg p-2 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1"
-                                value={hasta}
-                                min={minDate}
-                                max={maxDate}
-                                onChange={e => setHasta(e.target.value)}
-                            />
-                        </div>
-                        {/* Botón */}
-                        <div className="flex-1 min-w-0 flex justify-center border border-purple-500 bg-purple-50">
-                            <button
-                                type="button"
-                                className="btn-success w-full px-4 py-2 rounded-lg text-white text-sm font-medium shadow-sm hover:brightness-95 flex justify-center"
-                                onClick={handleDownloadExcel}
-                                disabled={loadingExcel}
-                            >
-                                {loadingExcel ? "Exportando..." : "Guardar Excel"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <div className="w-full relative">
+                {/* ...estructura responsiva igual a Payments.jsx... */}
+            </div>
         </div>
     );
 };

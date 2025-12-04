@@ -9,8 +9,8 @@ import { toast } from "sonner";
 
 // Tamaños tipo ReusableModal - Solo Visitas e Información (carrusel) - Con responsividad
 const MODAL_SIZES = {
-    informacion: { maxWidth: "min(1200px, 98vw)", minWidth: "800px", width: "min(1150px, 98vw)", height: "340px", maxHeight: "85vh" },
-    "informacion-xl": { maxWidth: "min(1200px, 98vw)", minWidth: "800px", width: "min(1150px, 98vw)", height: "auto", minHeight: "300px", maxHeight: "90vh" },
+    informacion: { maxWidth: "min(1400px, 98vw)", minWidth: "320px", width: "min(1300px, 98vw)", height: "340px", maxHeight: "85vh" },
+    "informacion-xl": { maxWidth: "min(1400px, 98vw)", minWidth: "320px", width: "min(1300px, 98vw)", height: "auto", minHeight: "300px", maxHeight: "90vh" },
     "pagos-xl": { maxWidth: "min(1800px, 95vw)", minWidth: "320px", width: "min(1700px, 95vw)", height: "85vh", maxHeight: "90vh" },
     pagos: { maxWidth: "min(420px, 95vw)", minWidth: "280px", width: "min(380px, 95vw)", height: "340px", maxHeight: "85vh" },
     consultaVisits: { maxWidth: "min(644px, 95vw)", minWidth: "320px", width: "min(483px, 95vw)", height: "506px", maxHeight: "90vh" },
@@ -266,7 +266,8 @@ const ModalBaseInformacion = ({
             />
             <div
                 ref={modalRef}
-                className={`modal-content bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col w-full max-w-2xl sm:max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto my-8 max-h-[90vh] h-auto ${modalClassName} ${((bounce || localBounce) && enableBounce) ? "animate-bounce-modal" : ""}`}
+                className={`modal-content bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col w-full mx-auto my-8 max-h-[90vh] h-auto ${modalClassName} ${((bounce || localBounce) && enableBounce) ? "animate-bounce-modal" : ""}`}
+                style={mergedModalStyle}
                 onClick={e => e.stopPropagation()}
                 {...props}
             >
