@@ -3,22 +3,42 @@ import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import ModalProductividadContent from "./ModalProductividadContent";
 import { IconProductividad } from "../IconesConsultations";
 import { getProductivity } from "../../../../../services/mark/albaz/LokiServices";
-import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
+// Logo eliminado: controles movidos al contenido del modal
 
-// Flecha tipo chevron moderna usando clase global
-const DropdownArrow = () => (
-    <span className="modal-dropdown-arrow">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <path
-                d="M6 8l4 4 4-4"
-                stroke="#2b463c"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-        </svg>
-    </span>
-);
+// Nota: el dropdown usará el estilo tipo 'peer' con label flotante (ver abajo)
+
+// Header personalizado para centrar el selector entre el título y el botón cerrar
+const ProductivityHeader = ({ title, icon: Icon, onClose, encargadoSelector, titleClassName = '', iconClassName = '' }) => {
+    return (
+        <div className={`px-3 pt-4 pb-2 sm:px-4 sm:pt-5 sm:pb-2 md:px-6 md:pt-6 md:pb-2 bg-white border-b border-gray-200`}>
+            <div className="relative w-full flex items-center">
+                <div className="flex items-center gap-2 z-10 flex-shrink-0 min-w-[220px]">
+                    {Icon && (
+                        <Icon className={`size-5 sm:size-6 flex-shrink-0 ${iconClassName}`} />
+                    )}
+                    {title && (
+                        <h2 className={`text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate leading-tight ${titleClassName}`}>{title}</h2>
+                    )}
+                </div>
+
+                {/* Contenedor centrado absolutamente para el selector */}
+                <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+                    <div className="pointer-events-auto">{encargadoSelector}</div>
+                </div>
+
+                {/* Botón cerrar a la derecha */}
+                <button
+                    onClick={onClose}
+                    className="ml-auto text-jerarquia3 hover:bg-background-dashboard hover:text-red-600 text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors z-20"
+                    aria-label="Cerrar modal"
+                    type="button"
+                >
+                    &times;
+                </button>
+            </div>
+        </div>
+    );
+};
 
 const ProductivityModal = ({
     isOpen,
@@ -60,6 +80,66 @@ const ProductivityModal = ({
         "Saldo Solucionado",
     ];
 
+    // JSX para pasar como selector al header del modal (centrado junto al título)
+    const indicadoresSelector = (
+        <div className="flex items-center justify-center lg:justify-center">
+            <div className="flex items-center gap-6 lg:gap-8 bg-transparent">
+                <div className="relative w-[260px]">
+                    <select
+                        id="indicador-select"
+                        value={selectedIndicator}
+                        onChange={(e) => setSelectedIndicator(e.target.value)}
+                        className="peer pt-6 pb-2 px-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                        <option value="" disabled hidden></option>
+                        {(timeFilter === "Dia" ? indicadoresDia : indicadoresHora).map((indicador) => (
+                            <option key={indicador} value={indicador}>
+                                {indicador}
+                            </option>
+                        ))}
+                    </select>
+                    <label
+                        htmlFor="indicador-select"
+                        className="absolute left-3 top-1 text-xs text-gray-500 pointer-events-none"
+                    >
+                        Indicadores
+                    </label>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-1 text-gray-700 text-sm font-medium">
+                        <input
+                            type="radio"
+                            name="timeFilter"
+                            value="Dia"
+                            checked={timeFilter === "Dia"}
+                            onChange={(e) => {
+                                setTimeFilter(e.target.value);
+                                setSelectedIndicator("Sesiones");
+                            }}
+                            className="modal-radio"
+                        />
+                        Día
+                    </label>
+                    <label className="flex items-center gap-1 text-gray-700 text-sm font-medium">
+                        <input
+                            type="radio"
+                            name="timeFilter"
+                            value="Hora"
+                            checked={timeFilter === "Hora"}
+                            onChange={(e) => {
+                                setTimeFilter(e.target.value);
+                                setSelectedIndicator("Cuentas");
+                            }}
+                            className="modal-radio"
+                        />
+                        Hora
+                    </label>
+                </div>
+            </div>
+        </div>
+    );
+
     // Función para obtener datos de productividad
     const fetchProductivityData = async (indicador, idsEjecutivos) => {
         if (!indicador || !idsEjecutivos || idsEjecutivos.length === 0) return;
@@ -75,6 +155,7 @@ const ProductivityModal = ({
 
             console.log("📤 Enviando datos de productividad:", requestData);
             const data = await getProductivity(requestData);
+            console.log("📥 Respuesta raw del endpoint de productividad:", data);
 
             // Manejar diferentes tipos de respuesta del servidor
             if (Array.isArray(data)) {
@@ -86,6 +167,7 @@ const ProductivityModal = ({
             } else if (data && typeof data === "object") {
                 // Si es un objeto, intentar extraer array de datos
                 const dataArray = Object.values(data).find((val) => Array.isArray(val));
+                console.log("📥 Respuesta procesada (array encontrado):", dataArray);
                 setProductivityData(dataArray || []);
             } else {
                 setProductivityData([]);
@@ -113,10 +195,15 @@ const ProductivityModal = ({
             onClose={onClose}
             size={size}
             showHeader={true}
-            title="Productividad en Línea - Coorin"
-            icon={IconProductividad}
-            iconClassName="text-jerarquia3"
-            headerProps={{ titleClassName: "text-jerarquia3" }}
+            // Pasamos un headerComponent personalizado para controlar el layout exacto
+            headerComponent={ProductivityHeader}
+            headerProps={{
+                title: "Productividad en Línea - Coorin",
+                icon: IconProductividad,
+                titleClassName: "text-jerarquia3",
+                iconClassName: "text-jerarquia3",
+                encargadoSelector: indicadoresSelector
+            }}
             enableBounce={enableBounce}
             enableShakeOnBackdropClick={enableShakeOnBackdropClick}
             enableBounceOnBackdropOrEscape={enableBounceOnBackdropOrEscape}
@@ -125,72 +212,7 @@ const ProductivityModal = ({
             {...props}
         >
             <div className="space-y-4">
-                {/* Controles superiores - Responsive */}
-                <div className="flex flex-col lg:flex-row gap-4 p-4 border-b border-gray-200">
-                    {/* Logo del Consorcio Jurídico */}
-                    <div className="flex justify-center lg:w-72 lg:justify-center">
-                        <img
-                            src={ConsorcioLogo}
-                            alt="Consorcio Jurídico"
-                            className="h-12 w-auto object-contain"
-                        />
-                    </div>
-
-                    {/* Controles de Indicadores - Responsive */}
-                    <div className="flex-1 flex flex-col sm:flex-row justify-center items-center gap-4">
-                        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
-                            <span className="text-sm font-medium text-gray-700">Indicadores</span>
-                            <div className="relative">
-                                <select
-                                    value={selectedIndicator}
-                                    onChange={(e) => setSelectedIndicator(e.target.value)}
-                                    className="appearance-none bg-white border border-gray-300 rounded px-3 py-1 pr-8 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    {(timeFilter === "Dia" ? indicadoresDia : indicadoresHora).map(
-                                        (indicador) => (
-                                            <option key={indicador} value={indicador}>
-                                                {indicador}
-                                            </option>
-                                        )
-                                    )}
-                                </select>
-                                <DropdownArrow />
-                            </div>
-                        </div>
-
-                        {/* Radio buttons responsive */}
-                        <div className="flex items-center gap-4">
-                            <label className="flex items-center gap-1 text-gray-700 text-sm font-medium">
-                                <input
-                                    type="radio"
-                                    name="timeFilter"
-                                    value="Dia"
-                                    checked={timeFilter === "Dia"}
-                                    onChange={(e) => {
-                                        setTimeFilter(e.target.value);
-                                        setSelectedIndicator("Sesiones");
-                                    }}
-                                    className="text-blue-500"
-                                />
-                                Día
-                            </label>
-                            <label className="flex items-center gap-1 text-gray-700 text-sm font-medium">
-                                <input
-                                    type="radio"
-                                    name="timeFilter"
-                                    value="Hora"
-                                    checked={timeFilter === "Hora"}
-                                    onChange={(e) => {
-                                        setTimeFilter(e.target.value);
-                                        setSelectedIndicator("Cuentas");
-                                    }}
-                                    className="text-blue-500"
-                                />
-                                Hora
-                            </label>
-                        </div>
-                    </div>
-                </div>
+                {/* Controles movidos al contenido de la derecha. Header simplificado. */}
 
                 {/* Contenido principal */}
                 <div className="min-h-[400px] max-h-[60vh] overflow-y-auto">
@@ -202,6 +224,10 @@ const ProductivityModal = ({
                         productivityData={productivityData}
                         loadingProductivity={loadingProductivity}
                         errorProductivity={errorProductivity}
+                        setTimeFilter={setTimeFilter}
+                        setSelectedIndicator={setSelectedIndicator}
+                        indicadoresDia={indicadoresDia}
+                        indicadoresHora={indicadoresHora}
                     />
                 </div>
             </div>

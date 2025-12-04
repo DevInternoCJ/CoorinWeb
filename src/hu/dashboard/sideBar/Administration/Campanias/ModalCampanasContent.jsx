@@ -4,7 +4,6 @@ import ModalCampanasHeader from "./ModalCampanasHeader";
 import ModalCampanasCampanias from "./ModalCampanasCampanias";
 import ModalCampanasEjecutivos from "./ModalCampanasEjecutivos";
 import ModalCampanasFooter from "./ModalCampanasFooter";
-import logoCoorin from "../../../../../assets/logo_coorin_7.svg";
 
 
 const ModalCampanas = ({ onClose }) => {
@@ -17,45 +16,20 @@ const ModalCampanas = ({ onClose }) => {
 	return (
 		<div className="modal-xl-container" style={{ maxWidth: "98vw", overflowX: "hidden" }}>
 			<ModalCampanasHeader onClose={onClose} />
-			{/* Elementos debajo del título, en dos filas */}
-			<div style={{ width: "100%", marginTop: "8px", marginBottom: "6px", display: "flex", flexDirection: "row", alignItems: "center", gap: "12px" }}>
-				{/* Columna 1: Cartera y Producto (más compacto) */}
-				<div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "8px", minWidth: 120 }}>
-					<div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "6px" }}>
-						<span style={{ fontWeight: 600, color: '#2d4739', minWidth: 60, fontSize: 13 }}>Cartera</span>
-						<span style={{ color: '#2d4739', fontSize: 13 }}>American Express</span>
-					</div>
-					<div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "6px" }}>
-						<span style={{ fontWeight: 600, color: '#2d4739', minWidth: 60, fontSize: 13 }}>Producto</span>
-						<select style={{ padding: "2px 6px", borderRadius: "4px", border: "1px solid #ccc", minWidth: "80px", fontSize: 13 }}>
-							<option value="amex">Amex</option>
-						</select>
-					</div>
-				</div>
-				{/* Columna 2: Logo centrado (más pequeño) */}
-				<div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-					<img src={logoCoorin} alt="Logo Coorin" style={{ height: 36, margin: "0 auto" }} />
-				</div>
-				{/* Columna 3: Vacía pero existe */}
-				<div style={{ flex: 1 }}></div>
-			</div>
-			{/* ...existing code... */}
+
+			{/* Layout responsivo: lg=2cols lado a lado, md/sm=1col apiladas */}
 			<div
+				className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 w-full scrollbar-gray"
 				style={{
-					display: "flex",
-					flexDirection: "row",
-					gap: "1rem",
-					overflowX: "auto",
-					width: "100%",
 					minHeight: "1px",
-					alignItems: "stretch"
+					alignItems: "stretch",
+					overflowX: "auto"
 				}}
-				className="scrollbar-gray"
 			>
-				<div style={{ minWidth: 0, flex: 1, display: "flex", flexDirection: "column" }}>
+				<div className="min-w-0 flex flex-col">
 					<ModalCampanasCampanias onSeleccionCampaña={handleSeleccionCampaña} />
 				</div>
-				<div style={{ minWidth: 0, flex: "0 0 450px", maxWidth: "300px", display: "flex", flexDirection: "column" }}>
+				<div className="min-w-0 flex flex-col">
 					<ModalCampanasEjecutivos idCampaña={campañaSeleccionada.id} nombreCampaña={campañaSeleccionada.nombre} />
 				</div>
 			</div>

@@ -11,7 +11,8 @@ const JerarquiaConR = ({
     useCheckbox = false,
     usuariosValidadores = [],
     handleSeleccionarUsuario = () => {},
-    producto = null
+    producto = null,
+    omitSessionExecutive = false
 }) => {
     // Logo y datos de sesión
     const userData = JSON.parse(localStorage.getItem('userData'));
@@ -70,12 +71,12 @@ const JerarquiaConR = ({
             >
                 {/* Heading */}
                 <div
-                    className="hs-accordion-heading py-0.5 rounded-md flex items-center gap-x-0.5 w-full"
+                    className="hs-accordion-heading py-px rounded-md flex items-center gap-x-0.5 w-full"
                     style={isSelected ? { background: 'var(--color-jerarquia1)', color: '#2b463c' } : {}}
                 >
                     {hasSub && (
                         <button
-                            className="hs-accordion-toggle size-6 flex justify-center items-center rounded-md focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
+                            className="hs-accordion-toggle size-5 flex justify-center items-center rounded-md focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
                             aria-expanded={!isCollapsed}
                             aria-controls={`hs-cco-${nodeKey}-collapse`}
                             type="button"
@@ -108,7 +109,7 @@ const JerarquiaConR = ({
                         }}
                         title={node.usuario + ' - ' + node.nombreEjecutivo}
                     >
-                        <span className="text-sm font-medium w-full" style={{ color: isSelected ? '#2b463c' : '#147f5e', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block' }}>
+                        <span className="text-xs font-medium w-full" style={{ color: isSelected ? '#2b463c' : '#147f5e', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block' }}>
                             {node.usuario} - {node.nombreEjecutivo}
                         </span>
                     </div>
@@ -116,7 +117,7 @@ const JerarquiaConR = ({
                 {/* Collapse */}
                 {hasSub && !isCollapsed && (
                     <div id={`hs-cco-${nodeKey}-collapse`} className="hs-accordion-content overflow-hidden transition-[height] duration-300" role="group" aria-labelledby={`hs-cco-${nodeKey}-heading`}>
-                        <div className="ps-7 border-l border-gray-100 dark:border-neutral-700 pl-3" style={{ minWidth: 'max-content' }}>
+                        <div className="ps-5 border-l border-gray-100 dark:border-neutral-700 pl-2" style={{ minWidth: 'max-content' }}>
                             {node.subordinados.map((child, cidx) => renderNode(child, level + 1, `${nodeKey}-${cidx}`))}
                         </div>
                     </div>
@@ -204,27 +205,27 @@ const JerarquiaConR = ({
             ref={ramificacionRef}
             className="productividad-branch"
             style={{
-                overflowX: 'auto',
-                overflowY: 'auto',
-                height: 'clamp(220px, 48vh, 520px)',
-                maxHeight: 'min(56vh, 420px)',
-                width: 'clamp(160px, 22vw, 320px)',
+                height: 'auto',
+                maxHeight: 'none',
+                width: 'auto',
                 background: '#ffffff',
                 borderRadius: 8,
                 border: '1px solid #e0e0e0',
-                padding: '1.5vh 1vw'
+                padding: '1vh 0.8vw'
             }}
         >
-            {/* Usuario y Ejecutivo principal */}
-            {idEjecutivoSesion && (
+            {/* Usuario y Ejecutivo principal (solo si no se omite) */}
+            {!omitSessionExecutive && idEjecutivoSesion && (
                 <div
                     className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? ' selected' : ''}`}
-                    title="Mostrar metas de los subordinados directos del ejecutivo de la sesión"
+                    title="Mostrar metas de todos los subordinados del ejecutivo de la sesión"
                     onClick={() => {
                         const rootNode = Array.isArray(executiveTree) ? executiveTree.find(n => Number(n.idEjecutivo) === Number(idEjecutivoSesion)) : null;
-                        if (rootNode && Array.isArray(rootNode.subordinados) && rootNode.subordinados.length > 0) {
-                            const idsSubordinados = rootNode.subordinados.map(sub => Number(sub.idEjecutivo)).filter(Boolean);
-                            setSelectedExecutives(idsSubordinados);
+                        if (rootNode) {
+                            // Recolecta todos los ids subordinados recursivamente, excluyendo el propio idEjecutivoSesion
+                            const allIds = collectAllIds(rootNode).filter(id => id !== Number(idEjecutivoSesion));
+                            if (allIds.length > 0) setSelectedExecutives(allIds);
+                            else setSelectedExecutives([Number(idEjecutivoSesion)]);
                         } else {
                             setSelectedExecutives([Number(idEjecutivoSesion)]);
                         }
@@ -268,3 +269,39 @@ const JerarquiaConR = ({
 };
 
 export default JerarquiaConR;
+// Inyectar estilos responsivos para el contenedor de la ramificación
+if (typeof document !== 'undefined' && !document.head.querySelector('style[data-ramificacion-responsive]')) {
+    const style = document.createElement('style');
+    style.setAttribute('data-ramificacion-responsive', 'true');
+    style.textContent = `
+        .productividad-branch {
+            width: 100%;
+            min-width: 160px;
+            height: 100%;
+            transition: width 0.2s;
+            box-sizing: border-box;
+        }
+        @media (min-width: 1201px) {
+            .productividad-branch {
+                max-width: 100%;
+            }
+        }
+        @media (max-width: 1200px) {
+            .productividad-branch {
+                max-width: 100%;
+            }
+        }
+        @media (max-width: 900px) {
+            .productividad-branch {
+                width: 100vw !important;
+                max-width: 100vw !important;
+                min-width: 0 !important;
+                border-radius: 0 !important;
+                padding-left: 0.5vw !important;
+                padding-right: 0.5vw !important;
+                height: auto !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}

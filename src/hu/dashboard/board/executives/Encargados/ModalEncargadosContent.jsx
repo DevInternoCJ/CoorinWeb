@@ -4,7 +4,7 @@ import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 import { toast } from "sonner";
 import JerarquiaConR from '../../branchs/JerarquiaConR';
 // Flecha tipo chevron moderna
-const ModalEncargadosContent = () => {
+const ModalEncargadosContent = (props) => {
     // Estados para dropdowns y logo
     const [cartera, setCartera] = React.useState("");
     const [producto, setProducto] = React.useState("");
@@ -18,9 +18,17 @@ const ModalEncargadosContent = () => {
     const [error] = React.useState(null);
     const [isChangingAssignment, setIsChangingAssignment] = React.useState(false);
 
-    // Estados para la jerarquía de encargados (igual que en ModalValidadoresContent)
+
+        // Estados para la jerarquía de encargados (igual que en ModalValidadoresContent)
     const [executiveTree, setExecutiveTree] = useState([]);
     const [usuariosEncargados, setUsuariosEncargados] = useState([]);
+    // Memo para obtener el nombre del ejecutivo de sesión (nodo raíz)
+    const nombreEjecutivoSesion = useMemo(() => {
+        if (executiveTree.length > 0) {
+            return executiveTree[0].nombreEjecutivo || "";
+        }
+        return "";
+    }, [executiveTree]);
 
     // Fetch carteras, productos y encargados desde endpoints específicos
     useEffect(() => {
@@ -138,18 +146,39 @@ const ModalEncargadosContent = () => {
             try {
                 const userData = JSON.parse(localStorage.getItem('userData'));
                 const idEjecutivo = userData?.idEjecutivo;
+                const usuarioSesion = userData?.usuario || userData?.Usuario || '';
+                const nombreSesion = userData?.nombre || '';
                 if (!idEjecutivo) return;
                 const data = await obetenerJerarquiaEncargados(idEjecutivo);
-                // El nodo raíz será el ejecutivo de la sesión, y todos los demás serán sus subordinados directos
-                const rootNode = {
-                    usuario: userData.usuario || '',
-                    nombreEjecutivo: userData.nombreEjecutivo,
-                    subordinados: Array.isArray(data) ? data : [],
-                    idEjecutivo: idEjecutivo,
-                    idEncargado: null,
-                    seleccionado: false
+                // Filtrar solo ejecutivos propios de nivel 1 (igual que en validadores)
+                const hijos = Array.isArray(data)
+                  ? data
+                      .filter(e => (e.jerarquia === undefined || e.jerarquia > 0))
+                      .map((e) => ({
+                        usuario: e.usuario,
+                        nombreEjecutivo: e.nombreEjecutivo || '',
+                        subordinados: Array.isArray(e.subordinados)
+                          ? e.subordinados.filter(s => (s.jerarquia === undefined || s.jerarquia > 0))
+                          : [],
+                        idEjecutivo: e.idEjecutivo,
+                        idEncargado: e.idEncargado || null,
+                        seleccionado: false,
+                        jerarquia: e.jerarquia || 1,
+                      }))
+                  : [];
+
+                // Nodo raíz del usuario de sesión
+                const nodoSesion = {
+                  usuario: usuarioSesion,
+                  nombreEjecutivo: nombreSesion,
+                  subordinados: hijos,
+                  idEjecutivo: idEjecutivo,
+                  idEncargado: null,
+                  seleccionado: false,
+                  jerarquia: 1,
                 };
-                setExecutiveTree([rootNode]);
+
+                setExecutiveTree([nodoSesion]);
             } catch (error) {
                 toast.error('Error al cargar ejecutivos para encargados:', error);
                 setExecutiveTree([]);
@@ -238,7 +267,7 @@ const ModalEncargadosContent = () => {
                 // El nodo raíz será el ejecutivo de la sesión, y todos los demás serán sus subordinados directos
                 const rootNode = {
                     usuario: userData.usuario || '',
-                    nombreEjecutivo: userData.nombre || userData.nombreEjecutivo || userData.ejecutivo || '',
+                    nombreEjecutivo: userData.nombreEjecutivo || '',
                     subordinados: Array.isArray(jerarquiaData) ? jerarquiaData : [],
                     idEjecutivo: idEjecutivo,
                     idEncargado: null,
@@ -261,6 +290,20 @@ const ModalEncargadosContent = () => {
         const encargadosAsignados = usuariosEncargados.filter(u => u.seleccionado).length;
         return { asignados: encargadosAsignados, total: totalEncargados };
     }, [usuariosEncargados]);
+
+    // Enviar el contador filtrado al padre cada vez que cambie
+    useEffect(() => {
+        if (typeof props.onContadorChange === 'function') {
+            props.onContadorChange(contadorEncargados);
+        }
+    }, [contadorEncargados]);
+
+    // Enviar la función de cambiar asignación al padre
+    useEffect(() => {
+        if (typeof props.onCambiarAsignacionCallback === 'function') {
+            props.onCambiarAsignacionCallback(handleCambiarAsignacion);
+        }
+    }, [props.onCambiarAsignacionCallback]);
 
     // Handler para seleccionar/deseleccionar usuarios
     const handleSeleccionarUsuario = (usuario, index) => {
@@ -395,117 +438,8 @@ const ModalEncargadosContent = () => {
 
     return (
     <div className="flex flex-col md:flex-row w-full h-full gap-4 overflow-y-auto max-h-screen">
-            {/* Bloque de controles: logo, dropdowns, botón */}
-            <div className="flex flex-col w-full md:w-[300px] md:order-2 gap-2">
-                <div className="flex justify-center items-center mb-4">
-                    <img src={ConsorcioLogo} alt="Consorcio Jurídico" className="h-16 object-contain" />
-                </div>
-                {/* Cartera */}
-                <div className="relative w-full mb-2">
-                    <select
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                        value={cartera}
-                        onChange={e => {
-                            setCartera(e.target.value);
-                            const productosFiltrados = carterasProductosData
-                                .filter(item => item.cartera === e.target.value)
-                                .map(item => item.producto);
-                            const productosConDefault = ["-Sin Producto-", ...productosFiltrados];
-                            setProductos(productosConDefault);
-                            setProducto("-Sin Producto-");
-                        }}
-                        id="cartera-select"
-                    >
-                        {carteras.length === 0 && <option value="" disabled hidden></option>}
-                        {carteras.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                        ))}
-                    </select>
-                    <label
-                        htmlFor="cartera-select"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                    >
-                        Cartera
-                    </label>
-                </div>
-                {/* Producto */}
-                <div className="relative w-full mb-2">
-                    <select
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                        value={producto}
-                        onChange={e => {
-                            setProducto(e.target.value);
-                        }}
-                        id="producto-select"
-                    >
-                        {productos.length === 0 && <option value="" disabled hidden></option>}
-                        {productos.map(p => (
-                            <option key={p} value={p}>{p}</option>
-                        ))}
-                    </select>
-                    <label
-                        htmlFor="producto-select"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                    >
-                        Producto
-                    </label>
-                </div>
-                {/* Encargado */}
-                <div className="relative w-full mb-2">
-                    {loading ? (
-                        <div className="p-4 text-gray-500">Cargando encargados...</div>
-                    ) : error ? (
-                        <div className="p-4 text-red-500">{error}</div>
-                    ) : (
-                        <>
-                            <select
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                value={selectedEncargado || (encargadosFiltrados && encargadosFiltrados.length > 0 ? "" : "VACIO")}
-                                onChange={e => setSelectedEncargado(e.target.value)}
-                                id="encargado-select"
-                            >
-                                {encargadosFiltrados && encargadosFiltrados.length > 0 ? (
-                                    <>
-                                        {selectedEncargado ? null : <option value="">Seleccionar...</option>}
-                                        {encargadosFiltrados
-                                            .slice()
-                                            .sort((a, b) => (a.nombreEjecutivo || '').localeCompare(b.nombreEjecutivo || ''))
-                                            .map(item => (
-                                                <option key={item.idEjecutivo} value={item.idEjecutivo}>
-                                                    {item.nombreEjecutivo}
-                                                </option>
-                                            ))}
-                                    </>
-                                ) : (
-                                    <option value="Null"></option>
-                                )}
-                            </select>
-                            <label
-                                htmlFor="encargado-select"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Encargado
-                            </label>
-                        </>
-                    )}
-                </div>
-                {/* Botón Cambiar */}
-                <div className="flex justify-center mt-4">
-                    <button
-                        type="button"
-                        className={`btn-success w-full sm:w-auto sm:min-w-[120px] px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center${isChangingAssignment || loading ? ' opacity-70 cursor-not-allowed' : ''}`}
-                        onClick={handleCambiarAsignacion}
-                        disabled={isChangingAssignment || loading}
-                    >
-                        {isChangingAssignment ? "Procesando..." : "Cambiar"}
-                    </button>
-                </div>
-            </div>
-            {/* Bloque árbol y contador */}
-            <div className="flex flex-col w-full md:w-[300px] md:order-1 max-h-[60vh] overflow-y-auto md:max-h-none md:overflow-visible">
-                <label className="modal-span-1" style={{ color: "var(--color-jerarquia3)", marginBottom: 8 }}>
-                    Encargados ({contadorEncargados.asignados} / {contadorEncargados.total})
-                </label>
+            {/* Bloque de controles eliminado: los dropdowns y botón ahora están en el header */}
+            {/* Bloque árbol y contador extendido a todo el ancho */}
                 <JerarquiaConR
                     executiveTree={executiveTree}
                     loadingJerarquia={loading}
@@ -518,9 +452,9 @@ const ModalEncargadosContent = () => {
                     usuariosValidadores={usuariosEncargados}
                     handleSeleccionarUsuario={handleSeleccionarUsuario}
                     producto={producto}
+                    omitSessionExecutive={true}
                 />
             </div>
-        </div>
     );
 };
 

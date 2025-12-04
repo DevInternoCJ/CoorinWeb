@@ -48,27 +48,7 @@ const dataSidebar = {
               id: "1BB",
               title: "información",
               icon: "UserGroupIcon",
-              subMenus2: [
-                { id: "1BBB", title: "Pagos", icon: "EnvelopeIcon" },
-                { id: "2BBB", title: "Pagos reportados", icon: "BookOpenIcon" },
-                { id: "3BBB", title: "Datos Erroneos", icon: "BookOpenIcon" },
-                { id: "4BBB", title: "Domicilios", icon: "BookOpenIcon" },
-                { id: "5BBB", title: "Correos", icon: "BookOpenIcon" },
-                { id: "6BBB", title: "Búsquedas", icon: "BookOpenIcon" },
-                { id: "7BBB", title: "Ofrecimientos", icon: "BookOpenIcon" },
-                { id: "8BBB", title: "Comentarios", icon: "BookOpenIcon" },
-            
-              ],
-            },
-            {
-              id: "2BB",
-              title: "Lista Negra",
-              icon: "UserIcon",
-            },
-            {
-              id: "3BB",
-              title: "Arrepentimientos",
-              icon: "UserIcon",
+              // Sin subMenus2 - abre el carrusel circular con todos los componentes
             },
           ],
         },

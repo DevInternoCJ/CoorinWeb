@@ -18,13 +18,15 @@ const ModalBaseCampanas = ({ open, onClose }) => {
                 className={`modal-content modal-xl-container${bounce ? " animate-bounce-modal" : ""}`}
                 onClick={e => e.stopPropagation()}
                 style={{
-                    maxWidth: "1200px",
-                    minWidth: "1200px",
-                    height: "660px",
+                    maxWidth: "min(1200px, 95vw)",
+                    minWidth: "min(1200px, 95vw)",
+                    width: "min(1200px, 95vw)",
+                    height: "min(660px, 90vh)",
                     display: "flex",
                     flexDirection: "column",
                     position: "relative",
-                    overflowX: "hidden"
+                    overflowX: "hidden",
+                    overflowY: "auto"
                 }}
             >
                 {/* Header y contenido principal */}

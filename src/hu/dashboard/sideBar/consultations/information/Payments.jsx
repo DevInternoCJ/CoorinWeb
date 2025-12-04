@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from "react";
-import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { infoEjecutivo, getPaymentsInformation } from "../../../../../services/mark/albaz/LokiServices";
 import { Toaster, toast } from "sonner";
+import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
 
-const PaymentsContent = () => {
+const PaymentsContent = ({ headerControlsActive = false }) => {
     // Obtener datos de usuario desde localStorage
     const userData = JSON.parse(localStorage.getItem("userData"));
-    const idCartera = userData?.idCartera || 1;
-    const idProducto = userData?.idProducto ?? 1;
-    const jerarquia = userData?.Jerarquía ?? 4;
+    const idCartera = userData?.idCartera || 0;
+    const idProducto = userData?.idProducto ?? 0;
+    const jerarquia = userData?.Jerarquía ?? 0;
     const idEjecutivo = userData?.idEjecutivo ?? null;
 
 
     // El valor mostrado en el dropdown es idCartera
     const [cartera, setCartera] = useState(idCartera);
+    const [carterasOptions, setCarterasOptions] = useState([]);
     const [consulta, setConsulta] = useState("");
     const [desde, setDesde] = useState(new Date().toISOString().slice(0, 10));
     const [hasta, setHasta] = useState(new Date().toISOString().slice(0, 10));
@@ -26,7 +27,10 @@ const PaymentsContent = () => {
     const [consultaSinRegistros, setConsultaSinRegistros] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [footerMsg, setFooterMsg] = useState("Elija la consulta de las cuentas que desee los pagos y el periodo de los pagos.");
-    const [footerColor, setFooterColor] = useState("text-gray-600");
+    const [footerColor, setFooterColor] = useState("text-gray-600")
+
+    const minDate = "2016-01-01";
+    const maxDate = new Date().toISOString().slice(0, 10);
 
     useEffect(() => {
         if (!idEjecutivo) return;
@@ -54,7 +58,7 @@ const PaymentsContent = () => {
             .finally(() => setLoadingConsultas(false));
     }, [idCartera, idProducto, idEjecutivo]);
 
-    // Función para consumir el endpoint y descargar el Excel
+    // Función para consumir el endpoint y descargar el Excel usando ExcelExporter
     const handleDownloadExcel = async () => {
         setLoadingExcel(true);
         setErrorExcel(null);
@@ -69,190 +73,362 @@ const PaymentsContent = () => {
                 jerarquia
             };
             const response = await getPaymentsInformation(params);
-            // response.data es un Blob
-            if (response && response.data instanceof Blob) {
-                // Leer el contenido del blob como texto
-                const text = await response.data.text();
-                let csvContent = text;
-                // Si parece JSON, convertir a CSV
-                try {
-                    const json = JSON.parse(text);
-                    if (Array.isArray(json) && json.length > 0 && typeof json[0] === 'object') {
-                        const headers = Object.keys(json[0]);
-                        const rows = json.map(obj => headers.map(h => {
-                            let value = obj[h];
-                            // Formato especial para cada campo
-                            if (h.toLowerCase() === 'cuenta' && typeof value === 'number') {
-                                // Forzar a string para evitar notación científica
-                                value = `'${value.toString()}`;
-                            } else if (h.toLowerCase() === 'cuenta' && typeof value === 'string') {
-                                value = `'${value}`;
-                            }
-                            if (h.toLowerCase() === 'fechapago' && typeof value === 'string') {
-                                value = value.replace(/T00:00:00$/, '');
-                            }
-                            if (h.toLowerCase() === 'montopago' && value !== undefined && value !== null) {
-                                value = `$${value}`;
-                            }
-                            // Quitar comas internas para no romper el CSV
-                            if (typeof value === 'string') value = value.replace(/,/g, '');
-                            return value;
-                        }).join(","));
-                        csvContent = headers.join(",") + "\n" + rows.join("\n");
-                    }
-                } catch (e) {
-                    console.error('Error al convertir a CSV:', e);
-                    // No es JSON, dejar como está
+
+            const result = await exportFromAPIResponse(
+                response,
+                `pagos_${desde}_a_${hasta}`,
+                {
+                    consultaName: "Pagos",
+                    accountFields: ['cuenta'],
+                    dateFields: ['fechapago', 'fechaPago'],
+                    currencyFields: ['montopago', 'montoPago'],
+                    showToast: true,
+                    successMessage: "Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos."
                 }
-                // Descargar como CSV limpio
-                const blob = new Blob([csvContent], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `pagos_${desde}_a_${hasta}.csv`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+            );
+
+            if (result) {
+                setFooterMsg("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
+                setFooterColor("text-green-600");
             } else {
-                setErrorExcel('No se pudo descargar el archivo.');
+                setConsultaSinRegistros(true);
+                setFooterMsg("Consulta terminada sin registros");
+                setFooterColor("text-black");
             }
-    if (response && response.data instanceof Blob) {
-        // ...descarga exitosa...
-        setFooterMsg("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
-        setFooterColor("text-green-600");
-    } else {
-        setErrorExcel('No se pudo descargar el archivo.');
-        setFooterMsg("No se pudo descargar el archivo de pagos o la descarga fue cancelada.");
-        setFooterColor("text-red-600");
-    }
-} catch (err) {
-    const status = err?.response?.status;
-    const statusText = err?.response?.statusText;
-    if (status === 404 && statusText === "Not Found") {
-        setConsultaSinRegistros(true);
-        setErrorExcel(null);
-        setFooterMsg("Consulta terminada sin registros");
-        setFooterColor("text-black");
-        toast.warning("Su consulta no cuenta con registros en la fecha especificada", {
-            duration: 4000,
-        });
-    } else {
-        setConsultaSinRegistros(false);
-        setErrorExcel('Error al obtener los pagos.');
-        setFooterMsg("No se pudo descargar el archivo de pagos.");
-        setFooterColor("text-red-600");
-    }
-} finally {
-    setLoadingExcel(false);
-}
+        } catch (err) {
+            const status = err?.response?.status;
+            const statusText = err?.response?.statusText;
+            if (status === 404 && statusText === "Not Found") {
+                setConsultaSinRegistros(true);
+                setErrorExcel(null);
+                setFooterMsg("Consulta terminada sin registros");
+                setFooterColor("text-black");
+                toast.warning("Su consulta no cuenta con registros en la fecha especificada", {
+                    duration: 4000,
+                });
+            } else {
+                setConsultaSinRegistros(false);
+                setErrorExcel('Error al obtener los pagos.');
+                setFooterMsg("No se pudo descargar el archivo de pagos.");
+                setFooterColor("text-red-600");
+            }
+        } finally {
+            setLoadingExcel(false);
+        }
     };
+
     return (
-        <div className="w-full max-w-xs mx-auto flex flex-col items-center" style={{ minHeight: 0, height: 'auto' }}>
-            {/* Logo centrado arriba de Cartera */}
-            <div className="flex justify-center mb-4 w-full">
-                <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
-            </div>
-            <div className="w-full relative">
-                {/* Cartera y Consulta en el mismo row */}
-                <div className="flex flex-row gap-3 w-full mb-3">
-                    {/* Cartera */}
-                    <div className="relative w-1/2">
-                        <select
-                            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                            value={cartera}
-                            onChange={e => setCartera(e.target.value)}
-                            id="cartera-select-payments"
-                        >
-                            <option value={idCartera}>{`Cartera ${idCartera}`}</option>
-                        </select>
-                        <label
-                            htmlFor="cartera-select-payments"
-                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                        >
-                            Cartera
-                        </label>
-                    </div>
-                    {/* Consulta */}
-                    <div className="relative w-1/2">
-                        <select
-                            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                            value={consulta}
-                            onChange={e => setConsulta(e.target.value)}
-                            id="consulta-select-payments"
-                            disabled={loadingConsultas || errorConsultas}
-                        >
-                            <option value="0" className="text-gray-900">- Todas -</option>
-                            {consultasOptions.map((item) => (
-                                <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta} className="text-gray-900">
-                                    {item.nombreConsulta}
-                                </option>
-                            ))}
-                        </select>
-                        <label
-                            htmlFor="consulta-select-payments"
-                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                        >
-                            Consulta
-                        </label>
-                        {loadingConsultas && (
-                            <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
-                        )}
-                        {errorConsultas && (
-                            <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
-                        )}
-                    </div>
+        <div className="w-full flex flex-col items-center" style={{ minHeight: 0, height: 'auto' }}>
+            {headerControlsActive ? (
+                /* Contenido cuando los controles están en el header */
+                <div className="w-full p-4 text-center">
+                    {/* Espacio vacío - controles en header */}
                 </div>
-                {/* Fechas */}
-                <div className="flex gap-3 mb-3">
-                    {/* Desde */}
-                    <div className="hs-input-group w-full">
-                        <span className="hs-input-group-text min-w-[90px]">Desde</span>
-                        <input
-                            type="date"
-                            className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
-                            value={desde}
-                            min="2016-01-01"
-                            max={new Date().toISOString().slice(0, 10)}
-                            onChange={e => setDesde(e.target.value)}
-                        />
+            ) : (
+                <div className="w-full relative">
+                    {/* xl y 2xl: 1 fila, 5 columnas, visible desde xl en adelante */}
+                    <div className="hidden xl:grid grid-cols-5 gap-3 w-full mb-3">
+                        <div className="relative w-full">{/* Cartera */}
+                            <select
+                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={cartera}
+                                onChange={e => setCartera(e.target.value)}
+                                id="cartera-select-ofrecimiento-2xl"
+                            >
+                                {carterasOptions.length === 0
+                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                    : carterasOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>{item.nombre}</option>
+                                    ))
+                                }
+                            </select>
+                            <label
+                                htmlFor="cartera-select-ofrecimiento-2xl"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                            >
+                                Cartera
+                            </label>
+                        </div>
+                        <div className="relative w-full">{/* Consulta */}
+                            <select
+                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={consulta}
+                                onChange={e => setConsulta(e.target.value)}
+                                id="consulta-select-ofrecimiento-2xl"
+                                disabled={loadingConsultas || errorConsultas}
+                            >
+                                <option value="">- Todas -</option>
+                                {consultasOptions.map((item) => (
+                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                        {item.nombreConsulta}
+                                    </option>
+                                ))}
+                            </select>
+                            <label
+                                htmlFor="consulta-select-ofrecimiento-2xl"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                            >
+                                Consulta
+                            </label>
+                            {loadingConsultas && (
+                                <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                            )}
+                            {errorConsultas && (
+                                <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                            )}
+                        </div>
+                        <div className="relative w-full min-w-0">{/* Desde */}
+                            <input
+                                type="date"
+                                id="fecha-desde-offers-2xl"
+                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={desde}
+                                min={minDate}
+                                max={maxDate}
+                                onChange={e => setDesde(e.target.value)}
+                                placeholder=" "
+                            />
+                            <label
+                                htmlFor="fecha-desde-offers-2xl"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                            >
+                                Desde
+                            </label>
+                        </div>
+                        <div className="relative w-full min-w-0">{/* Hasta */}
+                            <input
+                                type="date"
+                                id="fecha-hasta-offers-2xl"
+                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={hasta}
+                                min={minDate}
+                                max={maxDate}
+                                onChange={e => setHasta(e.target.value)}
+                                placeholder=" "
+                            />
+                            <label
+                                htmlFor="fecha-hasta-offers-2xl"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                            >
+                                Hasta
+                            </label>
+                        </div>
+                        <div className="flex items-center justify-center">
+                            <button
+                                type="button"
+                                className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
+                                style={{ margin: '0 auto', display: 'block', height: '32px' }}
+                                onClick={handleDownloadExcel}
+                                disabled={loadingExcel}
+                            >
+                                {loadingExcel ? "Exportando..." : "Guardar Excel"}
+                            </button>
+                        </div>
                     </div>
-                    {/* Hasta */}
-                    <div className="hs-input-group w-full">
-                        <span className="hs-input-group-text min-w-[90px]">Hasta</span>
-                        <input
-                            type="date"
-                            className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
-                            value={hasta}
-                            min="2016-01-01"
-                            max={new Date().toISOString().slice(0, 10)}
-                            onChange={e => setHasta(e.target.value)}
-                        />
+                    {/* md: 3 filas, 2 col + 2 col + 1 col, solo visible en md */}
+                    <div className="hidden md:grid xl:hidden w-full gap-3 mb-3">
+                        <div className="grid grid-cols-2 gap-3">
+                            {/* Cartera */}
+                            <div className="relative w-full">{/* ...código cartera... */}
+                                <select
+                                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                    value={cartera}
+                                    onChange={e => setCartera(e.target.value)}
+                                    id="cartera-select-ofrecimiento-md"
+                                >
+                                    {carterasOptions.length === 0
+                                        ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                        : carterasOptions.map((item) => (
+                                            <option key={item.id} value={item.id}>{item.nombre}</option>
+                                        ))
+                                    }
+                                </select>
+                                <label
+                                    htmlFor="cartera-select-ofrecimiento-md"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                                >
+                                    Cartera
+                                </label>
+                            </div>
+                            {/* Consulta */}
+                            <div className="relative w-full">{/* ...código consulta... */}
+                                <select
+                                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                    value={consulta}
+                                    onChange={e => setConsulta(e.target.value)}
+                                    id="consulta-select-ofrecimiento-md"
+                                    disabled={loadingConsultas || errorConsultas}
+                                >
+                                    <option value="">- Todas -</option>
+                                    {consultasOptions.map((item) => (
+                                        <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                            {item.nombreConsulta}
+                                        </option>
+                                    ))}
+                                </select>
+                                <label
+                                    htmlFor="consulta-select-ofrecimiento-md"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                                >
+                                    Consulta
+                                </label>
+                                {loadingConsultas && (
+                                    <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                                )}
+                                {errorConsultas && (
+                                    <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            {/* Desde */}
+                            <div className="relative w-full min-w-0">{/* ...código desde... */}
+                                <input
+                                    type="date"
+                                    id="fecha-desde-offers-md"
+                                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                    value={desde}
+                                    min={minDate}
+                                    max={maxDate}
+                                    onChange={e => setDesde(e.target.value)}
+                                    placeholder=" "
+                                />
+                                <label
+                                    htmlFor="fecha-desde-offers-md"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                >
+                                    Desde
+                                </label>
+                            </div>
+                            {/* Hasta */}
+                            <div className="relative w-full min-w-0">{/* ...código hasta... */}
+                                <input
+                                    type="date"
+                                    id="fecha-hasta-offers-md"
+                                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                    value={hasta}
+                                    min={minDate}
+                                    max={maxDate}
+                                    onChange={e => setHasta(e.target.value)}
+                                    placeholder=" "
+                                />
+                                <label
+                                    htmlFor="fecha-hasta-offers-md"
+                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                >
+                                    Hasta
+                                </label>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-3">
+                            <button
+                                type="button"
+                                className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
+                                style={{ margin: '0 auto', display: 'block', height: '32px' }}
+                                onClick={handleDownloadExcel}
+                                disabled={loadingExcel}
+                            >
+                                {loadingExcel ? "Exportando..." : "Guardar Excel"}
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <div className="flex justify-center items-end w-full">
-                    <button
-                        type="button"
-                        className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
-                        style={{ margin: '0 auto', display: 'block' }}
-                        onClick={handleDownloadExcel}
-                        disabled={loadingExcel}
-                    >
-                        {loadingExcel ? "Descargando..." : "Guardar Excel"}
-                    </button>
-                </div>
-                {errorExcel && (
-                    <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>
-                )}
-            </div>
-            {/* Footer informativo */}
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginTop: 52 }}>
-                <span className={`${footerColor} text-sm pl-2`}>{footerMsg}</span>
-            </div>
-            {showToast && (
-                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-yellow-200 text-yellow-800 border-l-4 border-yellow-500 px-4 py-2 rounded shadow-lg z-50 transition-all flex items-center gap-2">
-                    <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M4.93 19a10 10 0 1114.14 0H4.93z" /></svg>
-                    <button className="ml-4 text-yellow-800 font-bold" onClick={() => setShowToast(false)}>Cerrar</button>
+                    {/* sm: 5 filas, 1 columna cada una, solo visible en sm */}
+                    <div className="grid md:hidden w-full grid-cols-1 gap-3 mb-3">
+                        <div className="relative w-full">{/* ...código cartera... */}
+                            <select
+                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={cartera}
+                                onChange={e => setCartera(e.target.value)}
+                                id="cartera-select-ofrecimiento-sm"
+                            >
+                                {carterasOptions.length === 0
+                                    ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                                    : carterasOptions.map((item) => (
+                                        <option key={item.id} value={item.id}>{item.nombre}</option>
+                                    ))
+                                }
+                            </select>
+                            <label
+                                htmlFor="cartera-select-ofrecimiento-sm"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                            >
+                                Cartera
+                            </label>
+                        </div>
+                        <div className="relative w-full">{/* ...código consulta... */}
+                            <select
+                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={consulta}
+                                onChange={e => setConsulta(e.target.value)}
+                                id="consulta-select-ofrecimiento-sm"
+                                disabled={loadingConsultas || errorConsultas}
+                            >
+                                <option value="">- Todas -</option>
+                                {consultasOptions.map((item) => (
+                                    <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                        {item.nombreConsulta}
+                                    </option>
+                                ))}
+                            </select>
+                            <label
+                                htmlFor="consulta-select-ofrecimiento-sm"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                            >
+                                Consulta
+                            </label>
+                            {loadingConsultas && (
+                                <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                            )}
+                            {errorConsultas && (
+                                <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                            )}
+                        </div>
+                        <div className="relative w-full min-w-0">{/* ...código desde... */}
+                            <input
+                                type="date"
+                                id="fecha-desde-offers-sm"
+                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={desde}
+                                min={minDate}
+                                max={maxDate}
+                                onChange={e => setDesde(e.target.value)}
+                                placeholder=" "
+                            />
+                            <label
+                                htmlFor="fecha-desde-offers-sm"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                            >
+                                Desde
+                            </label>
+                        </div>
+                        <div className="relative w-full min-w-0">{/* ...código hasta... */}
+                            <input
+                                type="date"
+                                id="fecha-hasta-offers-sm"
+                                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                                value={hasta}
+                                min={minDate}
+                                max={maxDate}
+                                onChange={e => setHasta(e.target.value)}
+                                placeholder=" "
+                            />
+                            <label
+                                htmlFor="fecha-hasta-offers-sm"
+                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                            >
+                                Hasta
+                            </label>
+                        </div>
+                        <button
+                            type="button"
+                            className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
+                            style={{ margin: '0 auto', display: 'block', height: '32px' }}
+                            onClick={handleDownloadExcel}
+                            disabled={loadingExcel}
+                        >
+                            {loadingExcel ? "Exportando..." : "Guardar Excel"}
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

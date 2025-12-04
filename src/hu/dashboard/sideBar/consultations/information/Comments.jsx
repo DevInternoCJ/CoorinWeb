@@ -1,34 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { infoEjecutivo, getCommentsInformation } from "../../../../../services/mark/albaz/LokiServices";
+import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
-const CommentsContent = () => {
+const CommentsContent = ({ headerControlsActive = false }) => {
     // Mensaje de footer dinámico
-    const [footerMsg, setFooterMsg] = useState("Elija la consulta de las cuentas que desee el comentarioso y el periodo.");
-
     // Obtener datos de usuario desde localStorage
     const userData = JSON.parse(localStorage.getItem("userData"));
-    const idCartera = userData?.idCartera || 1;
-    const idProducto = userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
-    const jerarquia = userData?.jerarquia ?? userData?.Jerarquia ?? 4;
-    const idEjecutivo = userData?.idEjecutivo ?? userData?.idejecutivo ?? userData?.ejecutivo ?? null;
+    const idCartera = userData?.idCartera || 0;
+    const idProducto = userData?.idProducto ?? 0;
+    const jerarquia = userData?.Jerarquía ?? 0;
+    const idEjecutivo = userData?.idEjecutivo ?? null;
 
 
-    // Estados para selects y fechas
+    // El valor mostrado en el dropdown es idCartera
     const [cartera, setCartera] = useState(idCartera);
     const [carterasOptions, setCarterasOptions] = useState([]);
     const [consulta, setConsulta] = useState("");
+    const [desde, setDesde] = useState(new Date().toISOString().slice(0, 10));
+    const [hasta, setHasta] = useState(new Date().toISOString().slice(0, 10));
     const [consultasOptions, setConsultasOptions] = useState([]);
-    // Limitar fechas: mínimo 2016-01-01, máximo hoy
-    const minDate = "2016-01-01";
-    const maxDate = new Date().toISOString().slice(0, 10);
-    const [desde, setDesde] = useState(maxDate);
-    const [hasta, setHasta] = useState(maxDate);
     const [loadingConsultas, setLoadingConsultas] = useState(false);
     const [errorConsultas, setErrorConsultas] = useState(null);
     const [loadingExcel, setLoadingExcel] = useState(false);
     const [errorExcel, setErrorExcel] = useState(null);
+    const [consultaSinRegistros, setConsultaSinRegistros] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [footerColor, setFooterColor] = useState("text-gray-600")
+
+    const minDate = "2016-01-01";
+    const maxDate = new Date().toISOString().slice(0, 10);
 
     useEffect(() => {
         if (!idEjecutivo) return;
@@ -36,200 +37,220 @@ const CommentsContent = () => {
         setErrorConsultas(null);
         infoEjecutivo(idEjecutivo)
             .then((data) => {
-                // Extraer carteras únicas
-                const carterasUnicas = Array.isArray(data)
-                    ? Array.from(
-                        new Map(
-                            data.map(item => [item.idCartera, { id: item.idCartera, nombre: item.NombreCartera || `Cartera ${item.idCartera}` }])
-                        ).values()
-                    )
-                    : [];
-                setCarterasOptions(carterasUnicas);
-                // Filtrar consultas por cartera e idProducto
-                const filtered = Array.isArray(data.consultas)
+                console.log('Respuesta infoEjecutivo:', data);
+                // Filtrar por idCartera e idProducto sobre data.consultas
+                let filtered = Array.isArray(data?.consultas)
                     ? data.consultas.filter(
-                        (item) => String(item.idCartera) === String(cartera) && String(item.idProducto) === String(idProducto)
+                        (item) =>
+                            String(item.idCartera) === String(idCartera) &&
+                            String(item.idProducto) === String(idProducto)
                     )
                     : [];
+                console.log('Consultas filtradas:', filtered);
                 setConsultasOptions(filtered);
             })
-            .catch(() => {
+            .catch((err) => {
                 setErrorConsultas("Error al cargar las consultas");
                 setConsultasOptions([]);
-                setCarterasOptions([]);
+                console.error('Error en infoEjecutivo:', err);
             })
             .finally(() => setLoadingConsultas(false));
-    }, [idEjecutivo, cartera, idProducto]);
-    
-        // Handler para exportar búsquedas a Excel/CSV
-        const handleDownloadExcel = async () => {
-            setLoadingExcel(true);
-            setErrorExcel(null);
-            setFooterMsg("Consulta terminada. Guardando libro de Excel.");
-            try {
-                // Usar los parámetros actuales
-                const idConsulta = consulta === "" ? 0 : parseInt(consulta, 10);
-                const params = {
-                    idCartera: cartera,
-                    idConsulta,
-                    idProducto,
-                    desde,
-                    hasta,
-                    jerarquia
-                };
-                const response = await getCommentsInformation(params);
-                // response.data es un Blob
-                if (response && response.data instanceof Blob) {
-                    // Leer el contenido del blob como texto
-                    const text = await response.data.text();
-                    let csvContent = text;
-                    // Si parece JSON, convertir a CSV
-                    try {
-                        const json = JSON.parse(text);
-                        if (Array.isArray(json) && json.length === 0) {
-                            let nombreConsulta = "Comentarios";
-                            if (consulta === "" || consulta === 0) {
-                                nombreConsulta = "Comentarios";
-                            } else {
-                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
-                                if (consultaObj && consultaObj.nombreConsulta) {
-                                    nombreConsulta = consultaObj.nombreConsulta;
-                                }
-                            }
-                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros en la fecha especificada.`, { duration: 4000 });
-                            throw new Error('No hay datos para exportar.');
-                        }
-                        if (Array.isArray(json) && json.length > 0 && typeof json[0] === 'object') {
-                            const headers = Object.keys(json[0]);
-                            const rows = json.map(obj => headers.map(h => {
-                                let value = obj[h];
-                                // Si el campo es cuenta y es número, exportar como texto para evitar notación científica
-                                if (h.toLowerCase().includes('cuenta')) {
-                                    if (typeof value === 'number') {
-                                        value = '\t"' + value.toString() + '"';
-                                    } else if (typeof value === 'string') {
-                                        // Si ya es string, anteponer tabulación y envolver en comillas
-                                        value = '\t"' + value.replace(/,/g, '').replace(/"/g, '') + '"';
-                                    }
-                                    return value;
-                                }
-                                // Quitar comas internas para no romper el CSV
-                                if (typeof value === 'string') {
-                                    value = value.replace(/,/g, '');
-                                    // Escapar comillas dobles
-                                    value = value.replace(/"/g, '""');
-                                    // Envolver en comillas si contiene caracteres especiales o espacios
-                                    if (/[",\sñáéíóúü]/i.test(value)) value = '"' + value + '"';
-                                }
-                                return value;
-                            }).join(","));
-                            // Encabezados en UTF-8 con BOM para español
-                            csvContent = '\uFEFF' + headers.join(",") + "\n" + rows.join("\n");
-                        }
-                    } catch (e) {
-                        // Si el error es por mensaje de backend, mostrar toast
-                        if (response?.status === 404 && response?.statusText === "Not Found") {
-                            try {
-                                const jsonError = JSON.parse(text);
-                                if (jsonError?.mensaje && jsonError.mensaje.includes("No se encontraron registros")) {
-                                    let nombreConsulta = "Comentarios";
-                                    if (consulta === "" || consulta === 0) {
-                                        nombreConsulta = "Comentarios";
-                                    } else {
-                                        const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
-                                        if (consultaObj && consultaObj.nombreConsulta) {
-                                            nombreConsulta = consultaObj.nombreConsulta;
-                                        }
-                                    }
-                                    toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros en la fecha especificada.`, { duration: 4000 });
-                                }
-                            } catch {/* empty */}
-                        }
-                        console.error('Error al convertir a CSV:', e);
-                        // No es JSON, dejar como está
-                    }
-                    // Descargar como CSV limpio
-                    const blob = new Blob([csvContent], { type: 'text/csv' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `comentarioso${desde}_a_${hasta}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    setFooterMsg("Libro de Excel Guardado.");
-                } else {
-                    setErrorExcel('No se pudo descargar el archivo.');
-                    setFooterMsg("Consulta terminada sin registros.");
+    }, [idCartera, idProducto, idEjecutivo]);
+
+    // Función para consumir el endpoint y descargar el Excel usando ExcelExporter
+    const handleDownloadExcel = async () => {
+        setLoadingExcel(true);
+        setErrorExcel(null);
+        try {
+            const idConsultaFinal = consulta === "" ? "0" : consulta;
+            const params = {
+                idCartera: cartera,
+                idConsulta: idConsultaFinal,
+                idProducto,
+                desde,
+                hasta,
+                jerarquia
+            };
+            const response = await getCommentsInformation(params);
+
+            const result = await exportFromAPIResponse(
+                response,
+                `busquedas_${desde}_a_${hasta}`,
+                {
+                    consultaName: "Pagos",
+                    accountFields: ['cuenta'],
+                    dateFields: ['fechapago', 'fechaPago'],
+                    currencyFields: ['montopago', 'montoPago'],
+                    showToast: true,
+                    successMessage: "Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos."
                 }
-            } catch (err) {
-                // Validar error 404 y mensaje específico del backend
-                const status = err?.response?.status;
-                const statusText = err?.response?.statusText;
-                if (status === 404 && statusText === "Not Found" && err?.response?.data instanceof Blob) {
-                    try {
-                        const text = await err.response.data.text();
-                        const jsonError = JSON.parse(text);
-                        if (jsonError?.mensaje && jsonError.mensaje.includes("No se encontraron registros")) {
-                            let nombreConsulta = "Comentarios";
-                            if (consulta === "" || consulta === 0) {
-                                nombreConsulta = "-Todas-";
-                            } else {
-                                const consultaObj = consultasOptions.find(opt => String(opt.idConsulta) === String(consulta));
-                                if (consultaObj && consultaObj.nombreConsulta) {
-                                    nombreConsulta = consultaObj.nombreConsulta;
-                                }
-                            }
-                            toast.warning(`Su consulta ${nombreConsulta} no cuenta con registros en la fecha especificada.`, { duration: 4000 });
-                        }
-                    } catch {/* empty */}
-                }
-                setFooterMsg("Consulta terminada sin registros.");
-            } finally {
-                setLoadingExcel(false);
+            );
+
+            if (result) {
+                setFooterMsg("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
+                setFooterColor("text-green-600");
+            } else {
+                setConsultaSinRegistros(true);
+                setFooterMsg("Consulta terminada sin registros");
+                setFooterColor("text-black");
             }
-        };
-    
+        } catch (err) {
+            const status = err?.response?.status;
+            const statusText = err?.response?.statusText;
+            if (status === 404 && statusText === "Not Found") {
+                setConsultaSinRegistros(true);
+                setErrorExcel(null);
+                setFooterMsg("Consulta terminada sin registros");
+                setFooterColor("text-black");
+                toast.warning("Su consulta no cuenta con registros en la fecha especificada", {
+                    duration: 4000,
+                });
+            } else {
+                setConsultaSinRegistros(false);
+                setErrorExcel('Error al obtener los pagos.');
+                setFooterMsg("No se pudo descargar el archivo de pagos.");
+                setFooterColor("text-red-600");
+            }
+        } finally {
+            setLoadingExcel(false);
+        }
+    };
 
     return (
-        <div className="w-full max-w-xs mx-auto flex flex-col items-center" style={{ minHeight: 0, height: 'auto' }}>
-            {/* Logo centrado arriba de Cartera */}
-            <div className="flex justify-center mb-4 w-full">
-                <img src={ConsorcioLogo} alt="Logo Coorin" className="h-20 w-20 object-contain mx-auto" />
+        <div className="w-full relative">
+            {/* xl y 2xl: 1 fila, 5 columnas */}
+            <div className="hidden xl:grid grid-cols-5 gap-3 w-full mb-3">
+                {/* ...igual que antes... */}
+                <div className="relative w-full">
+                    <select
+                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={cartera}
+                        onChange={e => setCartera(e.target.value)}
+                        id="cartera-select-comments-xl"
+                        disabled={loadingConsultas}
+                    >
+                        {carterasOptions.length === 0
+                            ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                            : carterasOptions.map((item) => (
+                                <option key={item.id} value={item.id}>{item.nombre}</option>
+                            ))
+                        }
+                    </select>
+                    <label
+                        htmlFor="cartera-select-comments-xl"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                    >
+                        Cartera
+                    </label>
+                </div>
+                <div className="relative w-full">
+                    <select
+                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={consulta}
+                        onChange={e => setConsulta(e.target.value)}
+                        id="consulta-select-comments-xl"
+                        disabled={loadingConsultas || errorConsultas}
+                    >
+                        <option value="">- Todas -</option>
+                        {consultasOptions.map((item) => (
+                            <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                {item.nombreConsulta}
+                            </option>
+                        ))}
+                    </select>
+                    <label
+                        htmlFor="consulta-select-comments-xl"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                    >
+                        Consulta
+                    </label>
+                    {loadingConsultas && (
+                        <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                    )}
+                    {errorConsultas && (
+                        <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                    )}
+                </div>
+                <div className="relative w-full min-w-0">
+                    <input
+                        type="date"
+                        id="fecha-desde-comments-xl"
+                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={desde}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={e => setDesde(e.target.value)}
+                        placeholder=" "
+                    />
+                    <label
+                        htmlFor="fecha-desde-comments-xl"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                    >
+                        Desde
+                    </label>
+                </div>
+                <div className="relative w-full min-w-0">
+                    <input
+                        type="date"
+                        id="fecha-hasta-comments-xl"
+                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={hasta}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={e => setHasta(e.target.value)}
+                        placeholder=" "
+                    />
+                    <label
+                        htmlFor="fecha-hasta-comments-xl"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                    >
+                        Hasta
+                    </label>
+                </div>
+                <div className="flex items-center justify-center">
+                    <button
+                        type="button"
+                        className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
+                        style={{ margin: '0 auto', display: 'block', height: '32px' }}
+                        onClick={handleDownloadExcel}
+                        disabled={loadingExcel || !consulta}
+                    >
+                        {loadingExcel ? "Exportando..." : "Guardar Excel"}
+                    </button>
+                </div>
             </div>
-            <div className="w-full relative">
-                {/* Cartera y Consulta en el mismo row */}
-                <div className="flex flex-row gap-3 w-full mb-3">
+            {/* md: 3 filas, 2 col + 2 col + 1 col */}
+            <div className="hidden md:grid xl:hidden w-full gap-3 mb-3">
+                <div className="grid grid-cols-2 gap-3">
                     {/* Cartera */}
-                    <div className="relative w-1/2">
+                    <div className="relative w-full">
                         <select
                             className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                             value={cartera}
                             onChange={e => setCartera(e.target.value)}
-                            id="cartera-select-comentarioso"
+                            id="cartera-select-comments-md"
                         >
-                                {carterasOptions.length === 0
+                            {carterasOptions.length === 0
                                 ? <option value={cartera}>{`Cartera ${cartera}`}</option>
                                 : carterasOptions.map((item) => (
-                                <option key={item.id} value={item.id}>{item.nombre}</option>
+                                    <option key={item.id} value={item.id}>{item.nombre}</option>
                                 ))
                             }
                         </select>
                         <label
-                            htmlFor="cartera-select-comentarioso"
+                            htmlFor="cartera-select-comments-md"
                             className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
                         >
                             Cartera
                         </label>
                     </div>
                     {/* Consulta */}
-                    <div className="relative w-1/2">
+                    <div className="relative w-full">
                         <select
                             className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                             value={consulta}
                             onChange={e => setConsulta(e.target.value)}
-                            id="consulta-select-comentarioso"
+                            id="consulta-select-comments-md"
                             disabled={loadingConsultas || errorConsultas}
                         >
                             <option value="">- Todas -</option>
@@ -240,7 +261,7 @@ const CommentsContent = () => {
                             ))}
                         </select>
                         <label
-                            htmlFor="consulta-select-comentarioso"
+                            htmlFor="consulta-select-comments-md"
                             className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
                         >
                             Consulta
@@ -253,55 +274,159 @@ const CommentsContent = () => {
                         )}
                     </div>
                 </div>
-                {/* Fechas */}
-                <div className="flex gap-3 mb-3">
+                <div className="grid grid-cols-2 gap-3">
                     {/* Desde */}
-                    <div className="hs-input-group w-full">
-                        <span className="hs-input-group-text min-w-[90px]">Desde</span>
+                    <div className="relative w-full min-w-0">
                         <input
                             type="date"
-                            className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                            id="fecha-desde-comments-md"
+                            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                             value={desde}
                             min={minDate}
                             max={maxDate}
                             onChange={e => setDesde(e.target.value)}
+                            placeholder=" "
                         />
+                        <label
+                            htmlFor="fecha-desde-comments-md"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                        >
+                            Desde
+                        </label>
                     </div>
                     {/* Hasta */}
-                    <div className="hs-input-group w-full">
-                        <span className="hs-input-group-text min-w-[90px]">Hasta</span>
+                    <div className="relative w-full min-w-0">
                         <input
                             type="date"
-                            className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                            id="fecha-hasta-comments-md"
+                            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                             value={hasta}
                             min={minDate}
                             max={maxDate}
                             onChange={e => setHasta(e.target.value)}
+                            placeholder=" "
                         />
+                        <label
+                            htmlFor="fecha-hasta-comments-md"
+                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                        >
+                            Hasta
+                        </label>
                     </div>
                 </div>
-                <div className="flex justify-center items-end w-full">
+                <div className="grid grid-cols-1 gap-3">
                     <button
                         type="button"
-                        className="btn-success w-full sm:w-auto min-w-[120px] max-w-full px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
-                        style={{ margin: '0 auto', display: 'block' }}
+                        className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
+                        style={{ margin: '0 auto', display: 'block', height: '32px' }}
                         onClick={handleDownloadExcel}
-                        disabled={loadingExcel}
+                        disabled={loadingExcel || !consulta}
                     >
                         {loadingExcel ? "Exportando..." : "Guardar Excel"}
                     </button>
                 </div>
-                {errorExcel && (
-                    <div className="text-red-500 text-xs text-center mt-1">{errorExcel}</div>
-                )}
             </div>
-            {/* Footer informativo */}
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginTop: 52 }}>
-                <span className="text-gray-600 text-sm pl-2">
-                    {footerMsg}
-                </span>
+            {/* sm: 5 filas, 1 columna cada una */}
+            <div className="grid md:hidden w-full grid-cols-1 gap-3 mb-3">
+                <div className="relative w-full">
+                    <select
+                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={cartera}
+                        onChange={e => setCartera(e.target.value)}
+                        id="cartera-select-comments-sm"
+                    >
+                        {carterasOptions.length === 0
+                            ? <option value={cartera}>{`Cartera ${cartera}`}</option>
+                            : carterasOptions.map((item) => (
+                                <option key={item.id} value={item.id}>{item.nombre}</option>
+                            ))
+                        }
+                    </select>
+                    <label
+                        htmlFor="cartera-select-comments-sm"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                    >
+                        Cartera
+                    </label>
+                </div>
+                <div className="relative w-full">
+                    <select
+                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={consulta}
+                        onChange={e => setConsulta(e.target.value)}
+                        id="consulta-select-comments-sm"
+                        disabled={loadingConsultas || errorConsultas}
+                    >
+                        <option value="">- Todas -</option>
+                        {consultasOptions.map((item) => (
+                            <option key={item.idConsulta || item.nombreConsulta} value={item.idConsulta}>
+                                {item.nombreConsulta}
+                            </option>
+                        ))}
+                    </select>
+                    <label
+                        htmlFor="consulta-select-comments-sm"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                    >
+                        Consulta
+                    </label>
+                    {loadingConsultas && (
+                        <span className="text-xs text-gray-500 absolute right-2 top-2">Cargando...</span>
+                    )}
+                    {errorConsultas && (
+                        <span className="text-xs text-red-500 absolute right-2 top-2">{errorConsultas}</span>
+                    )}
+                </div>
+                <div className="relative w-full min-w-0">
+                    <input
+                        type="date"
+                        id="fecha-desde-comments-sm"
+                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={desde}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={e => setDesde(e.target.value)}
+                        placeholder=" "
+                    />
+                    <label
+                        htmlFor="fecha-desde-comments-sm"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                    >
+                        Desde
+                    </label>
+                </div>
+                <div className="relative w-full min-w-0">
+                    <input
+                        type="date"
+                        id="fecha-hasta-comments-sm"
+                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={hasta}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={e => setHasta(e.target.value)}
+                        placeholder=" "
+                    />
+                    <label
+                        htmlFor="fecha-hasta-comments-sm"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
+                    >
+                        Hasta
+                    </label>
+                </div>
+                <button
+                    type="button"
+                    className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
+                    style={{ margin: '0 auto', display: 'block', height: '32px' }}
+                    onClick={handleDownloadExcel}
+                    disabled={loadingExcel || !consulta}
+                >
+                    {loadingExcel ? "Exportando..." : "Guardar Excel"}
+                </button>
             </div>
         </div>
     );
-}
+};
+
+
+
 export default CommentsContent;

@@ -9,7 +9,7 @@ import { useUserStore } from "../../contextGlobal/userStore";
 
 // Constantes para mensajes de error
 const ERROR_MESSAGES = {
-  PASSWORD_LENGTH: "La contraseña debe tener al menos 8 caracteres.",
+  // PASSWORD_LENGTH: "La contraseña debe tener al menos 8 caracteres.",
   REQUIRED_FIELDS: "Por favor, ingresa tu usuario y contraseña.",
   NO_ID_EJECUTIVO: "No se pudo obtener el idEjecutivo de la respuesta",
   PASSWORD_VALIDATION:
@@ -170,7 +170,7 @@ const handleSubmit = async (e) => {
   try {
     const response = await loginUser(userData);
     console.log("Respuesta de inicio de sesión exitosa:", response);
-    const idEjecutivo = extractIdEjecutivo(response);
+    // const idEjecutivo = extractIdEjecutivo(response);
     localStorage.setItem("username", formData.username);
     
     const userInfo = response?.ejecutivo || response;

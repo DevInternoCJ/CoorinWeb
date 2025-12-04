@@ -390,25 +390,25 @@ export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
     const idNum = Number(idEjecutivo);
     const requestData = [idNum];
     const url = `/Encargados/ejecutivos-propios/${idNum}`;
-    console.log('  Enviando a', url, 'con:', requestData);
+    console.log('Enviando a', url, 'con:', requestData);
     // El interceptor añade el token automáticamente
     const response = await api.get(url, requestData);
-    console.log('  Respuesta de', url + ':', response.data);
+    console.log('Respuesta de', url + ':', response.data);
     return response.data;
   } catch (error) {
-    console.error('  Error al obtener la ramificación de encargados:', error);
+    console.error('Error al obtener la ramificación de encargados:', error);
     if (error.response?.status === 401) {
-      console.warn('  Error 401 - Token inválido o expirado');
+      console.warn('Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
     }
     if (error.response) {
-      console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
     } else if (error.request) {
-      console.error('  No se recibió respuesta del servidor:', error.request);
+      console.error('No se recibió respuesta del servidor:', error.request);
     } else {
-      console.error('  Error al configurar la solicitud:', error.message);
+      console.error('Error al configurar la solicitud:', error.message);
     }
     throw error;
   }
@@ -2024,16 +2024,16 @@ export const getSearchesInformation = async (body) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    console.log('Enviando a /informacion/Busquedas/consultar:', body);
+    console.log('Enviando a /informacion/BusquedasInfo/consultar:', body);
     // El interceptor añade el token automáticamente
-    const response = await api.post('/informacion/Busquedas/consultar', body, {
+    const response = await api.post('/informacion/BusquedasInfo/consultar', body, {
       headers: {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
       responseType: 'blob'
     });
-    console.log(' Respuesta de /informacion/Busquedas/consultar:', response);
+    console.log(' Respuesta de /informacion/BusquedasInfo/consultar:', response);
     return response;
   } catch (error) {
     console.error('Error al obtener busquedas', error);
@@ -2098,16 +2098,16 @@ export const getCommentsInformation = async (body) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    console.log('Enviando a /informacion/Comentarios/consultar:', body);
+    console.log('Enviando a /informacion/comentarios-info/consultar:', body);
     // El interceptor añade el token automáticamente
-    const response = await api.post('/informacion/Comentarios/consultar', body, {
+    const response = await api.post('/informacion/comentarios-info/consultar', body, {
       headers: {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
       responseType: 'blob'
     });
-    console.log(' Respuesta de /informacion/Comentarios/consultar:', response);
+    console.log(' Respuesta de /informacion/comentarios-info/consultar:', response);
     return response;
   } catch (error) {
     console.error('Error al obtener Comentarios', error);
@@ -2343,6 +2343,48 @@ export const PostComments = async (data) => {
     return response.data;
   } catch (error) {
     console.error(' Error:', error);
+    throw error;
+  }
+};
+
+
+export const getAddressesCapture = async (idCartera, cuentaOrExpediente, esExpediente) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // Si es expediente, enviar como string; si es cuenta, enviar como int
+    const cuentaParam = esExpediente ? cuentaOrExpediente : parseInt(cuentaOrExpediente, 10);
+    console.log('📤 Enviando a /captura/visitas/buscar-cuenta', { idCartera, cuentaOrExpediente: cuentaParam, esExpediente });
+    // El interceptor añade el token automáticamente
+    const response = await api.get('/captura/visitas/buscar-cuenta', {
+      params: {
+        idCartera,
+        cuentaOrExpediente: cuentaParam,
+        esExpediente
+      },
+      headers: {
+        'Accept': '*/*'
+      }
+    });
+    console.log('📥 Respuesta de /captura/visitas/buscar-cuenta:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obtener domicilios captura:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
     throw error;
   }
 };

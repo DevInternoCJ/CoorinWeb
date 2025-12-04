@@ -244,6 +244,8 @@ const ModalCatalogosContent = () => {
                     width: "33%",
                     cursor: "pointer",
                     userSelect: "none",
+                    position: "sticky",
+                    top: 0,
                   }}
                   onClick={() => handleCatalogSort("catalog")}
                   title="Haz clic para ordenar"
@@ -255,6 +257,8 @@ const ModalCatalogosContent = () => {
                     width: "67%",
                     cursor: "pointer",
                     userSelect: "none",
+                    position: "sticky",
+                    top: 0,
                   }}
                   onClick={() => handleCatalogSort("description")}
                   title="Haz clic para ordenar"
@@ -354,6 +358,8 @@ const ModalCatalogosContent = () => {
                     width: "33%",
                     cursor: "pointer",
                     userSelect: "none",
+                    position: "sticky",
+                    top: 0,
                   }}
                   onClick={() => handleValuesSort("valor")}
                   title="Haz clic para ordenar"
@@ -365,6 +371,8 @@ const ModalCatalogosContent = () => {
                     width: "67%",
                     cursor: "pointer",
                     userSelect: "none",
+                    position: "sticky",
+                    top: 0,
                   }}
                   onClick={() => handleValuesSort("detalle")}
                   title="Haz clic para ordenar"

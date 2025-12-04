@@ -3,12 +3,19 @@ import React from "react";
 const CapturaVisitsF6 = () => (
   <div className="area-f5 p-2 rounded mb-2 h-full">
     <h3 className="font-bold text-sm mb-2">Teléfonos – F6</h3>
-    <div className="mb-2">
-      <label className="block text-xs mb-1">Teléfono</label>
+  <div className="mb-2 relative w-full min-w-0">
       <input
-        className="px-4 p-1 block w-full rounded-lg sm:text-sm bg-gray-50 border-transparent focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1"
+        type="text"
+        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+        id="telefono-input-f6"
+        placeholder=" "
         style={{ color: 'var(--color-jerarquia3)' }}
       />
+      <label
+        htmlFor="telefono-input-f6"
+        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"      >
+        Teléfono
+      </label>
     </div>
     <div
       style={{
@@ -16,23 +23,23 @@ const CapturaVisitsF6 = () => (
         overflowY: "auto",
         scrollbarColor: "#b0b0b0 #f5f5f5",
         scrollbarWidth: "thin",
-        maxHeight: "190px"
+        maxHeight: "170px"
       }}
       className="scrollbar-gray w-full"
     >
-      <table className="modal-table text-xs lg:text-sm" style={{ minWidth: '100%' }}>
+  <table className="modal-table text-xs lg:text-sm" style={{ minWidth: '100%', tableLayout: 'fixed' }}>
         <thead>
           <tr>
-            <th style={{ position: 'sticky', top: 0, background: 'var(--color-jerarquia3)', color: '#fff', zIndex: 2 }}>Teléfono</th>
-            <th style={{ position: 'sticky', top: 0, background: 'var(--color-jerarquia3)', color: '#fff', zIndex: 2 }}>Eliminar</th>
+            <th style={{ position: 'sticky', top: 0, background: 'var(--color-jerarquia4)', color: '#fff', zIndex: 2, width: '80%' }}>Teléfono</th>
+            <th style={{ position: 'sticky', top: 0, background: 'var(--color-jerarquia4)', color: '#fff', zIndex: 2, width: '20%', paddingLeft: 0, paddingRight: 0, textAlign: 'center' }}>X</th>
           </tr>
         </thead>
         <tbody>
-          {["5551234567","5559876543","5551112222","5553334444","5555556666","5557778888","5559990000","5552223333","5554445555","5556667777","5558889999"].map((tel, idx) => (
-            <tr key={tel+idx}>
-              <td>{tel}</td>
-              <td className="text-center align-middle">
-                <span className="flex justify-center items-center w-full h-full">
+          {["5551234567", "5559876543", "5551112222", "5553334444", "5555556666", "5557778888", "5559990000", "5552223333", "5554445555", "5556667777", "5558889999"].map((tel, idx) => (
+            <tr key={tel + idx}>
+              <td style={{ paddingRight: 0 }}>{tel}</td>
+              <td className="text-center align-middle p-0">
+                <span className="flex justify-center items-center">
                   <svg
                     role="button"
                     tabIndex={0}
