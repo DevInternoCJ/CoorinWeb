@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react";
-import ModalBase from "../../../../board/ModalBase";
-import IconCircular from "../../../../../../components/iconos/IconCircular";
-import SelectWallet from "../../../../../../hu/dashboard/board/screenFields/SelectWallet";
-import SaveButton from "../../../Administration/gespa/ButtonSave";
-import LogoCoorin from "../../../../../../assets/logo_coorin_7.svg";
-import { IconComment } from "../comments/IconsComments";
+import ModalBase from "../../../board/ModalBase";
+import IconCircular from "../../../../../components/iconos/IconCircular";
+import SelectWallet from "../../../board/screenFields/SelectWallet";
+import SaveButton from "../../Administration/gespa/ButtonSave";
+import LogoCoorin from "../../../../../assets/logo_coorin_7.svg";
+import { IconComment } from "./IconsComments";
 
 // Hook para manejar la lógica de vistas
 const useViewManager = () => {
