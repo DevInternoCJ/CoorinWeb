@@ -296,7 +296,6 @@ export default function CoorinDashboard() {
     <>
       <CoorinSidebar 
         onMenuClick={handleSidebarMenuClick}
-        // Consider any modal opened in the dashboard (cards or sidebar) as a modal open state
         isModalOpen={executiveModalOpen || consultationModalOpen || modalSidebarOpen}
         onRegisterCloseFunction={setCloseSidebarFn}
       />
@@ -304,7 +303,7 @@ export default function CoorinDashboard() {
         <div
           className="transition-transform duration-200 flex-1 overflow-y-auto overflow-x-hidden"
           style={{
-            marginLeft: sidebarMinified ? "2.5rem" : undefined,
+            marginLeft: sidebarMinified ? "2.5rem" : "2.5rem", // 16rem = w-64
             marginBottom: "0",
             marginTop: "0",
             maxHeight: "100vh"

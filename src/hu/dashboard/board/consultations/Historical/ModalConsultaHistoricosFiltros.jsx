@@ -3,6 +3,7 @@ import HistoricosTipoSelector from "./HistoricosTipoSelector";
 // import ExcelDownloader from "./ExcelDownloader";
 // import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 import { toast } from "sonner";
+import { exportDataToXLSX } from "../../../../../utils/ExcelExporter";
 
 import {
   historySingle,
@@ -266,8 +267,27 @@ const ModalConsultaHistoricosFiltros = ({
           return;
         }
 
-        setExcelBlob(result.data);
-        toast.success("Histórico consultado exitosamente. Descarga iniciada.");
+        // Si la respuesta es un Blob de tipo JSON, conviértelo a array antes de exportar
+        if (result.data instanceof Blob && result.data.type === "application/json") {
+          const text = await result.data.text();
+          try {
+            const json = JSON.parse(text);
+            console.log("[ExcelExporter] JSON parseado:", json);
+            if (json.Cuenta && Array.isArray(json.Cuenta)) {
+              exportDataToXLSX(json.Cuenta, `historico_${idCuenta}`);
+            } else {
+              toast.error("No se encontró información de cuenta para exportar.");
+            }
+          } catch (e) {
+            console.error("No se pudo parsear el blob a JSON", e);
+            toast.error("Error al procesar los datos para exportar a Excel.");
+          }
+        } else if (Array.isArray(result.data)) {
+          exportDataToXLSX(result.data, `historico_${idCuenta}`);
+        } else {
+          console.error("Formato de datos inesperado para exportar a Excel:", result.data);
+          toast.error("Formato de datos inesperado para exportar a Excel.");
+        }
       } catch (error) {
         console.error("Error al consultar histórico individual:", error);
         toast.dismiss("buscar-loading");
@@ -335,9 +355,41 @@ const ModalConsultaHistoricosFiltros = ({
           setExcelBlob(null);
           return;
         }
-        setExcelBlob(new Blob([result.data]));
-        console.log("[Archivo] Descarga iniciada");
-        toast.success("Histórico por archivo consultado exitosamente. Descarga iniciada.");
+        // Si la respuesta es un ArrayBuffer, decodifica y parsea a JSON antes de exportar
+        if (result.data instanceof ArrayBuffer) {
+          const text = new TextDecoder("utf-8").decode(result.data);
+          try {
+            const json = JSON.parse(text);
+            console.log("[ExcelExporter] JSON parseado desde ArrayBuffer:", json);
+            if (json.Cuenta && Array.isArray(json.Cuenta)) {
+              exportDataToXLSX(json.Cuenta, "HistoricoPorArchivo");
+            } else {
+              toast.error("No se encontró información de cuenta para exportar.");
+            }
+          } catch (e) {
+            console.error("No se pudo parsear el ArrayBuffer a JSON", e);
+            toast.error("Error al procesar los datos para exportar a Excel.");
+          }
+        } else if (result.data instanceof Blob && result.data.type === "application/json") {
+          const text = await result.data.text();
+          try {
+            const json = JSON.parse(text);
+            console.log("[ExcelExporter] JSON parseado:", json);
+            if (json.Cuenta && Array.isArray(json.Cuenta)) {
+              exportDataToXLSX(json.Cuenta, "HistoricoPorArchivo");
+            } else {
+              toast.error("No se encontró información de cuenta para exportar.");
+            }
+          } catch (e) {
+            console.error("No se pudo parsear el blob a JSON", e);
+            toast.error("Error al procesar los datos para exportar a Excel.");
+          }
+        } else if (Array.isArray(result.data)) {
+          exportDataToXLSX(result.data, "HistoricoPorArchivo");
+        } else {
+          console.error("Formato de datos inesperado para exportar a Excel:", result.data);
+          toast.error("Formato de datos inesperado para exportar a Excel.");
+        }
       } catch (error) {
         console.error("[Archivo] Error al consultar histórico por archivo:", error);
         toast.dismiss("buscar-loading");
@@ -351,7 +403,6 @@ const ModalConsultaHistoricosFiltros = ({
 
   const handleTipoSeleccion = (individual) => {
     setAllowSubmit(false); // Evita submit al cambiar
-    onIndividualChange(individual);
     onIndividualChange(individual);
     // Función para obtener fecha un mes atrás en formato DD/MM/YYYY
     const getFechaMesAtras = () => {
@@ -402,6 +453,7 @@ const ModalConsultaHistoricosFiltros = ({
       setFechaDesde(getFechaMesAtras());
       setFechaHasta(getFechaActual());
     }
+    setTimeout(() => setAllowSubmit(true), 100); // Reactiva submit tras cambio
     setTimeout(() => setAllowSubmit(true), 100); // Reactiva submit tras cambio
   };
 

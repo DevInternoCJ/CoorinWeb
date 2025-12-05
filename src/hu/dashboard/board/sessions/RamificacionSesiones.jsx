@@ -263,28 +263,29 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                     </div>
                     
                     {/* Columna centro - Ejecutivo de la sesión */}
-                    <div className="flex justify-center">
-                        {idEjecutivoSesion && (
+                    {idEjecutivoSesion && (
+                        <div className="flex justify-center w-full">
                             <div
-                                className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? ' selected' : ''} text-sm truncate max-w-full`}
-                                title="Ejecutivo de la sesión actual"
+                                className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? ' selected' : ''} text-xs md:text-sm lg:text-base px-2 py-2 rounded-md bg-white md:bg-gray-100 border border-gray-300 text-center max-w-full truncate shadow-sm md:shadow font-semibold text-gray-800 md:text-green-700 transition-all duration-200`}
+                                title={`Ejecutivo de la sesión actual: ${usuarioSesion} - ${nombreSesion}`}
                                 onClick={() => {
                                     setSelectedExecutiveNode(Number(idEjecutivoSesion));
                                     if (onExecutiveSelect) {
                                         onExecutiveSelect(Number(idEjecutivoSesion));
                                     }
-                                    
                                     // Hacer autoscroll hacia arriba
                                     setTimeout(() => {
                                         scrollToTop();
                                     }, 100);
                                 }}
-                                style={{ position: 'static', margin: 0 }}
+                                style={{ position: 'static', margin: 0, zIndex: 0 }}
                             >
-                                {usuarioSesion} - {nombreSesion}
+                                <span className="font-bold md:font-semibold lg:font-bold">{usuarioSesion}</span>
+                                <span className="mx-1">-</span>
+                                <span className="font-bold md:font-semibold lg:font-bold">{nombreSesion}</span>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                     
                     {/* Columna derecha - Vacía por ahora */}
                     <div></div>
@@ -312,34 +313,8 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                         </span>
                         <h3 className="text-sm xl:text-base font-semibold">Ramificación</h3>
                     </div>
-                    
                     {/* Fila 2 - Ejecutivo de la sesión */}
-                    {idEjecutivoSesion && (
-                        <div className="flex justify-center">
-                            <div
-                                className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? ' selected' : ''} text-xs px-2 py-1 rounded-md bg-gray-50 border text-center max-w-full truncate`}
-                                title={`Ejecutivo de la sesión actual: ${usuarioSesion} - ${nombreSesion}`}
-                                onClick={() => {
-                                    setSelectedExecutiveNode(Number(idEjecutivoSesion));
-                                    if (onExecutiveSelect) {
-                                        onExecutiveSelect(Number(idEjecutivoSesion));
-                                    }
-                                    
-                                    // Hacer autoscroll hacia arriba
-                                    setTimeout(() => {
-                                        scrollToTop();
-                                    }, 100);
-                                }}
-                                style={{ position: 'static', margin: 0 }}
-                            >
-                                <div className="truncate">
-                                    <span className="font-medium">{usuarioSesion}</span>
-                                    <br className="sm:hidden" />
-                                    <span className="sm:before:content-['-'] sm:before:mx-1">{nombreSesion}</span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {/* Eliminado: solo se usa una instancia global arriba */}
                 </div>
             </div>
             

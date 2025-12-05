@@ -26,8 +26,6 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
     const [errorExcel, setErrorExcel] = useState(null);
     const [consultaSinRegistros, setConsultaSinRegistros] = useState(false);
     const [showToast, setShowToast] = useState(false);
-    const [footerMsg, setFooterMsg] = useState("Elija la consulta de las cuentas que desee los pagos y el periodo de los pagos.");
-    const [footerColor, setFooterColor] = useState("text-gray-600")
 
     const minDate = "2016-01-01";
     const maxDate = new Date().toISOString().slice(0, 10);
@@ -89,12 +87,10 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
             );
 
             if (result) {
-                setFooterMsg("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
-                setFooterColor("text-green-600");
+                toast.success("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
             } else {
                 setConsultaSinRegistros(true);
-                setFooterMsg("Consulta terminada sin registros");
-                setFooterColor("text-black");
+                toast.warning("Consulta terminada sin registros");
             }
         } catch (err) {
             const status = err?.response?.status;
@@ -102,16 +98,14 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
             if (status === 404 && statusText === "Not Found") {
                 setConsultaSinRegistros(true);
                 setErrorExcel(null);
-                setFooterMsg("Consulta terminada sin registros");
-                setFooterColor("text-black");
+                toast.warning("Consulta terminada sin registros");
                 toast.warning("Su consulta no cuenta con registros en la fecha especificada", {
                     duration: 4000,
                 });
             } else {
                 setConsultaSinRegistros(false);
                 setErrorExcel('Error al obtener los pagos.');
-                setFooterMsg("No se pudo descargar el archivo de pagos.");
-                setFooterColor("text-red-600");
+                toast.error("No se pudo descargar el archivo de pagos.");
             }
         } finally {
             setLoadingExcel(false);
