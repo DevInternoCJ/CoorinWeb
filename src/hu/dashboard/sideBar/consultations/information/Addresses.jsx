@@ -66,7 +66,7 @@ const AddressesContent = ({ mostrarTabla }) => {
     const handleDownloadExcel = async () => {
         setLoadingExcel(true);
         setErrorExcel(null);
-        toast.success("Consulta terminada. Guardando libro de Excel.");
+        const toastId = toast.loading(`Exportando domicilios (${cartera}, consulta ${consulta})...`);
         try {
             const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
             const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
@@ -114,6 +114,7 @@ const AddressesContent = ({ mostrarTabla }) => {
             console.error('Error al exportar los domicilios:', err);
         } finally {
             setLoadingExcel(false);
+            toast.dismiss(toastId);
         }
     };
 

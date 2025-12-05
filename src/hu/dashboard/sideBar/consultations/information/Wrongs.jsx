@@ -35,48 +35,12 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
             setHasta(paramsGuardados.hasta);
             setDatoErroneo(paramsGuardados.idDatoErroneo);
             // Simular clic en buscar automáticamente
-            buscarConParamsGuardados();
+            // buscarConParamsGuardados(); // Eliminado, ya no se usa exportar
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mostrarTabla, paramsGuardados]);
 
-    // Función para ejecutar la búsqueda con los parámetros guardados
-    const buscarConParamsGuardados = async () => {
-        setLoadingTabla(true);
-        setErrorTabla(null);
-        setTablaData([]);
-        const params = paramsGuardados;
-        try {
-            const response = await getWrongsInformation(params);
-            let text = "";
-            if (response && response.data instanceof Blob) {
-                text = await response.data.text();
-            } else if (response && response.data) {
-                text = response.data;
-            }
-            let json = [];
-            try {
-                json = JSON.parse(text);
-            } catch {
-                setErrorTabla("Error al procesar la respuesta del servidor.");
-                setLoadingTabla(false);
-                return;
-            }
-            setTablaData(Array.isArray(json) ? json : []);
-            if (Array.isArray(json) && json.length > 0) {
-                toast.info("Búsqueda realizada exitosamente.", { duration: 5000 });
-            }
-            localStorage.removeItem('wrongsParams');
-        } catch (err) {
-            if (err?.response?.status === 404 && err?.response?.statusText === "Not Found") {
-                toast.warning("Su consulta no cuenta con registros en la fecha especificada.", { duration: 4000 });
-            } else {
-                toast.error("Error al obtener los datos erróneos.");
-            }
-        } finally {
-            setLoadingTabla(false);
-        }
-    };
+    // Función para exportar los errores con toast loading
     // Toast informativo al montar el componente
     useEffect(() => {
         const initialMostrarTabla = mostrarTabla;
@@ -156,7 +120,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
             {/* Layout extendido si mostrarTabla=true */}
             {!mostrarTabla ? (
                 <div className="flex flex-col w-full items-center" style={{ flex: 1, minHeight: 0 }}>
-                    <div className="w-full max-w-4xl mb-4">
+                    <div className="w-full max-w-4xl">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
                             {/* Desde */}
                             <div className="relative w-full min-w-0">
@@ -233,7 +197,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
             ) : (
                 <div className="flex flex-col w-full items-center" style={{ flex: 1, minHeight: 0 }}>
                     {/* Grid responsivo: lg=4cols | md=2cols x 2filas | sm=1col apilado */}
-                    <div className="w-full max-w-4xl mb-4">
+                    <div className="w-full max-w-4xl">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
                             {/* Desde */}
                             <div className="relative w-full min-w-0">

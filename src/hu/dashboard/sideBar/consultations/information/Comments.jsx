@@ -61,6 +61,7 @@ const CommentsContent = ({ headerControlsActive = false }) => {
     const handleDownloadExcel = async () => {
         setLoadingExcel(true);
         setErrorExcel(null);
+        const toastId = toast.loading(`Exportando comentarios...`);
         try {
             const idConsultaFinal = consulta === "" ? "0" : consulta;
             const params = {
@@ -87,11 +88,11 @@ const CommentsContent = ({ headerControlsActive = false }) => {
             );
 
             if (result) {
-                setFooterMsg("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
+                toast.success("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
                 setFooterColor("text-green-600");
             } else {
                 setConsultaSinRegistros(true);
-                setFooterMsg("Consulta terminada sin registros");
+                toast.warning("Consulta terminada sin registros");
                 setFooterColor("text-black");
             }
         } catch (err) {
@@ -100,7 +101,7 @@ const CommentsContent = ({ headerControlsActive = false }) => {
             if (status === 404 && statusText === "Not Found") {
                 setConsultaSinRegistros(true);
                 setErrorExcel(null);
-                setFooterMsg("Consulta terminada sin registros");
+                toast.warning("Consulta terminada sin registros");
                 setFooterColor("text-black");
                 toast.warning("Su consulta no cuenta con registros en la fecha especificada", {
                     duration: 4000,
@@ -108,11 +109,12 @@ const CommentsContent = ({ headerControlsActive = false }) => {
             } else {
                 setConsultaSinRegistros(false);
                 setErrorExcel('Error al obtener los pagos.');
-                setFooterMsg("No se pudo descargar el archivo de pagos.");
+                toast.error("No se pudo descargar el archivo de pagos.");
                 setFooterColor("text-red-600");
             }
         } finally {
             setLoadingExcel(false);
+            toast.dismiss(toastId);
         }
     };
 

@@ -62,6 +62,7 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
     const handleDownloadExcel = async () => {
         setLoadingExcel(true);
         setErrorExcel(null);
+        const toastId = toast.loading(`Exportando pagos...`);
         try {
             const idConsultaFinal = consulta === "" ? "0" : consulta;
             const params = {
@@ -114,6 +115,7 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
             }
         } finally {
             setLoadingExcel(false);
+            toast.dismiss(toastId);
         }
     };
 

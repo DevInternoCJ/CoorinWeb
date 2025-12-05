@@ -4,7 +4,7 @@ import { infoEjecutivo, getEmailsInfo } from "../../../../../services/mark/albaz
 import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
 
-const EmailsContent = ({ mostrarTabla }) => {
+const EmailsContent = () => {
 
     const [loadingExcel, setLoadingExcel] = useState(false);
     const [errorExcel, setErrorExcel] = useState(null);
@@ -63,6 +63,7 @@ useEffect(() => {
     const handleDownloadExcel = async () => {
         setLoadingExcel(true);
         setErrorExcel(null);
+        const toastId = toast.loading(`Exportando correos (${cartera}, consulta ${consulta})...`);
         try {
             const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
             const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
@@ -110,6 +111,7 @@ useEffect(() => {
             console.error('Error al exportar los correos:', err);
         } finally {
             setLoadingExcel(false);
+            toast.dismiss(toastId);
         }
     };
 

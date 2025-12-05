@@ -10,13 +10,30 @@ export const exportDataToXLSX = (data, filename = 'export', options = {}) => {
         toast.warning('No hay datos para exportar.');
         return false;
     }
-    const ws = XLSX.utils.json_to_sheet(data);
+    // Limpiar campos de fecha y horario con 'T00:00:00'
+    const cleanData = data.map(row => {
+        const newRow = {};
+        Object.entries(row).forEach(([key, value]) => {
+            if (typeof value === 'string' && /T00:00:00$/.test(value)) {
+                // Si el campo es de fecha u horario
+                if (key.toLowerCase().includes('fecha') || key.toLowerCase().includes('hora')) {
+                    newRow[key] = value.replace(/T00:00:00$/, '');
+                } else {
+                    newRow[key] = value;
+                }
+            } else {
+                newRow[key] = value;
+            }
+        });
+        return newRow;
+    });
+    const ws = XLSX.utils.json_to_sheet(cleanData);
     // Calcular el ancho máximo de cada columna
-    const keys = Object.keys(data[0]);
+    const keys = Object.keys(cleanData[0]);
     const cols = keys.map(key => {
         const maxLen = Math.max(
             key.length,
-            ...data.map(row => (row[key] ? row[key].toString().length : 0))
+            ...cleanData.map(row => (row[key] ? row[key].toString().length : 0))
         );
         return { wch: maxLen + 2 };
     });
