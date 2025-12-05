@@ -3,8 +3,8 @@
     public class ProductividadRequest
     {
         public string Indicador { get; set; }
-        public List<int> IdsEjecutivos { get; set; } = new List<int>();
-        public bool EsModoHora { get; set; } = false;
+        public List<int> IdsEjecutivos { get; set; }
         public int? IdEjecutivoPrincipal { get; set; }
+        public bool EsModoHora { get; set; }
     }
 }

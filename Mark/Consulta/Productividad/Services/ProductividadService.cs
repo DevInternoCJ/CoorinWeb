@@ -1,12 +1,14 @@
-﻿using System.Data;
-using CoorinWeb.Loki.Global;
+﻿using CoorinWeb.Loki.Global;
 using Dapper;
 using Loki.DTOs.ProductividadDTO;
+using Loki.Global;
 using Loki.Mark.Consulta.Productividad.Interfaces;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Data.SqlClient;
-using Loki.Global;
+using System.Collections;
+using System.Data;
+using System.Globalization;
 
 namespace Loki.Mark.Consulta.Productividad.Services
 {
@@ -21,19 +23,69 @@ namespace Loki.Mark.Consulta.Productividad.Services
             _logger = logger;
         }
 
-        public async Task<object> obtieneProductividad(string indicador, int idEjecutivo, string servidor, bool esModoHora = false)
-        {
-            Console.WriteLine($"=== INICIANDO obtieneProductividad ===");
-            Console.WriteLine($"Indicador: {indicador}");
-            Console.WriteLine($"idEjecutivo: {idEjecutivo}");
-            Console.WriteLine($"servidor: {servidor}");
-            Console.WriteLine($"esModoHora: {esModoHora}");
 
+        #region Métodos de Utilidad
+
+        private async Task<(DataTable tblEjecutivos, int idEjecutivoAjustado)> ObtenerEjecutivosYCrearTVP(
+    SqlConnection connection, int idEjecutivo
+)
+        {
+            // Usamos dynamic para mapear el resultado de fn_EjecutivosPropios
+            var ejecutivos = await ClasesCoorinMethods.ObtieneEjecutivosPropios(connection, idEjecutivo);
+
+            DataTable tblEjecutivos = new DataTable("PS.tbl_Ejecutivos");
+            tblEjecutivos.Columns.Add("idEjecutivo", typeof(int));
+            tblEjecutivos.Columns.Add("Usuario", typeof(string));
+            tblEjecutivos.Columns.Add("idEncargado", typeof(int));
+            tblEjecutivos.Columns.Add("Encargado", typeof(string)); // Columna que ahora llevará el ID
+            tblEjecutivos.Columns.Add("Jerarquía", typeof(byte));
+            tblEjecutivos.Columns.Add("NombreEjecutivo", typeof(string));
+
+            Console.WriteLine($"Llenando DataTable...");
+            foreach (dynamic e in ejecutivos)
+            {
+                // === CAMBIO CLAVE AQUÍ ===
+                // 1. Obtenemos el ID del encargado (e.IdEncargado).
+                // 2. Lo convertimos a cadena (.ToString()).
+                // 3. Si es nulo, usamos cadena vacía.
+                string encargadoValueForTVP = e.IdEncargado?.ToString() ?? string.Empty;
+                // =========================
+
+                tblEjecutivos.Rows.Add(
+                    e.IdEjecutivo,
+                    e.Usuario,
+                    e.IdEncargado ?? 0,
+                    encargadoValueForTVP, // <--- Ahora pasará el ID como string (ej: "5649")
+                    DBNull.Value,
+                    e.NombreEjecutivo
+                );
+            }
+
+            int idEjecutivoParaSP = idEjecutivo;
+            if (tblEjecutivos.Rows.Count > 1)
+            {
+                idEjecutivoParaSP = 0;
+            }
+
+            return (tblEjecutivos, idEjecutivoParaSP);
+        }
+        private async Task<SqlConnection> AbrirConexionAsync(string servidor, string baseDatos)
+        {
+            var dbContext = _dbContFactory.GetDbContext(servidor, baseDatos);
+            var connection = (SqlConnection)dbContext.Database.GetDbConnection();
+            await connection.OpenAsync();
+            return connection;
+        }
+
+        #endregion
+
+        public async Task<object> ObtieneProductividad(string indicador, int idEjecutivo, string servidor, bool esModoHora = false)
+        {
             var indicadoresDia = new[] { "Sesiones", "Contactos", "Negociaciones", "Porcentajes", "Tiempos", "TiempoPromedio" };
             var indicadoresHora = new[] {
-                "Cuentas", "Titulares", "Conocidos", "Desconocidos",
-                "SinContacto", "Negociaciones", "MontoNegociaciones", "SaldoSolucionado"
-            };
+            "Cuentas", "Titulares", "Conocidos", "Desconocidos",
+            "SinContacto", "Negociaciones", "MontoNegociaciones", "SaldoSolucionado"
+        };
 
             if (esModoHora && !indicadoresHora.Contains(indicador, StringComparer.OrdinalIgnoreCase))
             {
@@ -48,248 +100,137 @@ namespace Loki.Mark.Consulta.Productividad.Services
             {
                 if (esModoHora)
                 {
-                    Console.WriteLine($"MODO: HORA (PIVOT)");
-                    return await EjecutarConsultaPivot(indicador, idEjecutivo, servidor);
+                    return await EjecutarConsultaPivot(indicador, idEjecutivo, servidor, "Memory");
                 }
                 else
                 {
-                    Console.WriteLine($"MODO: DÍA (STORED PROCEDURE)");
-                    return await EjecutarStoredProcedure(indicador, idEjecutivo, servidor);
+                    return await EjecutarStoredProcedure(indicador, idEjecutivo, servidor, "Memory");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ ERROR en obtieneProductividad: {ex.Message}");
-                Console.WriteLine($"Stack: {ex.StackTrace}");
-                _logger.LogError(ex, $"Error en obtieneProductividad: {ex.Message}");
+                _logger.LogError(ex, $"Error en ObtieneProductividad: {ex.Message}");
                 throw;
             }
         }
 
-        private async Task<object> EjecutarStoredProcedure(string indicador, int idEjecutivo, string servidor)
+
+        private async Task<object> EjecutarStoredProcedure(string indicador, int idEjecutivo, string servidor, string baseDatos)
         {
-            Console.WriteLine($"=== EJECUTANDO STORED PROCEDURE ===");
-            Console.WriteLine($"Indicador: {indicador}");
-            Console.WriteLine($"idEjecutivo: {idEjecutivo}");
-            Console.WriteLine($"servidor: {servidor}");
 
-            var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
-            var connection = dbContext.Database.GetDbConnection();
-
-            Console.WriteLine($"Cadena conexión: {connection.ConnectionString}");
-
+            SqlConnection connection = null;
             try
             {
-                Console.WriteLine($"Abriendo conexión...");
-                await connection.OpenAsync();
-                Console.WriteLine($"✅ Conexión abierta");
-
-                Console.WriteLine($"Obteniendo ejecutivos propios...");
-                var ejecutivos = await ClasesCoorinMethods.ObtieneEjecutivosPropios((SqlConnection)connection, idEjecutivo);
-                Console.WriteLine($"✅ Ejecutivos obtenidos: {ejecutivos?.Count ?? 0}");
-
-                DataTable tblEjecutivos = new DataTable();
-                tblEjecutivos.Columns.Add("idEjecutivo", typeof(int));
-                tblEjecutivos.Columns.Add("Usuario", typeof(string));
-                tblEjecutivos.Columns.Add("idEncargado", typeof(int));
-                tblEjecutivos.Columns.Add("Encargado", typeof(string));
-                tblEjecutivos.Columns.Add("Jerarquía", typeof(byte));
-                tblEjecutivos.Columns.Add("NombreEjecutivo", typeof(string));
-
-                Console.WriteLine($"Llenando DataTable...");
-                foreach (var e in ejecutivos)
-                {
-                    Console.WriteLine($"  - Ejecutivo: {e.IdEjecutivo}, Usuario: {e.Usuario}");
-                    tblEjecutivos.Rows.Add(
-                        e.IdEjecutivo,
-                        e.Usuario,
-                        e.IdEncargado ?? 0,
-                        DBNull.Value,
-                        DBNull.Value,
-                        e.NombreEjecutivo
-                    );
-                }
-                Console.WriteLine($"✅ DataTable llenado: {tblEjecutivos.Rows.Count} filas");
-
-                int idEjecutivoParaSP = idEjecutivo;
-                if (tblEjecutivos.Rows.Count > 1)
-                {
-                    // Si hay más de un ejecutivo, forzamos el modo grupal en el SP
-                    idEjecutivoParaSP = 0;
-                    Console.WriteLine($"Ajustando @idEjecutivo a 0 (Modo Grupal) ya que hay {tblEjecutivos.Rows.Count} ejecutivos.");
-                }
+                connection = await AbrirConexionAsync(servidor, baseDatos);
+                var (tblEjecutivos, idEjecutivoParaSP) = await ObtenerEjecutivosYCrearTVP(connection, idEjecutivo);
 
                 var parameters = new DynamicParameters();
                 parameters.Add("@Indicador", indicador);
-                parameters.Add("@idEjecutivo", idEjecutivoParaSP); // Usar el valor ajustado
+                parameters.Add("@idEjecutivo", idEjecutivoParaSP);
                 parameters.Add("@tbl_Ejecutivos", tblEjecutivos.AsTableValuedParameter("PS.tbl_Ejecutivos"));
 
-                Console.WriteLine($"Parámetros SP:");
-                Console.WriteLine($"  - @Indicador: {indicador}");
-                Console.WriteLine($"  - @idEjecutivo: {idEjecutivoParaSP}"); // Log del nuevo valor
-                Console.WriteLine($"  - @tbl_Ejecutivos: {tblEjecutivos.Rows.Count} filas");
+                object result = null;
 
-                object result;
-
-                // CORRECCIÓN: Usar switch tradicional en lugar de switch expression
-                if (idEjecutivo == 0)
+                switch (indicador.ToLower())
                 {
-                    Console.WriteLine($"MODO: GRUPAL (idEjecutivo = 0)");
+                    case "sesiones":
+                        // 1. Mapeo RAW
+                        var rawSesiones = await connection.QueryAsync<SesionesRawDTO>(
+                            "[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
 
-                    switch (indicador.ToLower())
-                    {
-                        case "sesiones":
-                            result = await connection.QueryAsync<SesionesDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
-                        case "contactos":
-                            result = await connection.QueryAsync<ContactosDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
-                        case "porcentajes":
-                            result = await connection.QueryAsync<PorcentajesDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
-                        case "negociaciones":
-                            result = await connection.QueryAsync<NegociacionesDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
-                        case "tiempos":
-                            result = await connection.QueryAsync<TiemposDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
-                        case "tiempopromedio":
-                            result = await connection.QueryAsync<TiempoPromedioDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
-                        default:
-                            throw new ArgumentException($"Indicador '{indicador}' no soportado para modo grupal");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"MODO: INDIVIDUAL (idEjecutivo = {idEjecutivo})");
+                        // 2. Transformación y Formato
+                        result = rawSesiones.Select(r => new SesionesOutputDTO
+                        {
+                            idEncargado = r.Encargado,
+                            Ejecutivo = r.Ejecutivo,
+                            Extension = r.Extensión ?? "0",
+                            Ingreso = r.Ingreso?.ToString("hh:mm tt", new CultureInfo("es-MX")) ?? string.Empty,
+                            Salida = r.Salida?.ToString("hh:mm tt", new CultureInfo("es-MX")) ?? string.Empty,
+                            PrimerGestion = r.PrimerGestión?.ToString("hh:mm tt", new CultureInfo("es-MX")) ?? string.Empty,
+                            Modo = r.Modo,
+                            TiempoEnModo = r.TiempoEnModo?.ToString(@"hh\:mm\:ss") ?? "00:00:00"
+                        }).ToList();
+                        break;
 
-                    switch (indicador.ToLower())
-                    {
-                        case "sesiones":
-                            result = await connection.QueryAsync<SesionesIndividualDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
-                        case "contactos":
-                            result = await connection.QueryAsync<ProductividadIndividualDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
-                        case "negociaciones":
-                            result = await connection.QueryAsync<NegociacionesIndividualDTO>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
-                            break;
-                        default:
-                            throw new ArgumentException($"Indicador '{indicador}' no soportado para modo individual");
-                    }
+                    case "contactos":
+                    case "negociaciones":
+                    case "tiempos":
+                    case "tiempopromedio":
+                    case "porcentajes":
+
+                        result = await connection.QueryAsync<dynamic>("[PS].[ProductividadEnLínea]", parameters, commandType: CommandType.StoredProcedure);
+                        break;
+                    default:
+
+                        throw new ArgumentException($"Indicador '{indicador}' no soportado para modo día");
                 }
 
-                // Convertir a lista y contar resultados
-                var resultList = (result as System.Collections.IEnumerable)?.Cast<object>().ToList() ?? new List<object>();
-                Console.WriteLine($"✅ SP ejecutado. Resultados: {resultList.Count} filas");
-
-                if (resultList.Count > 0)
-                {
-                    foreach (var item in resultList)
-                    {
-                        Console.WriteLine($"  - Item: {System.Text.Json.JsonSerializer.Serialize(item)}");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"  - ⚠️  NO HAY RESULTADOS");
-                }
-
+                var resultList = (result as IEnumerable)?.Cast<object>().ToList() ?? new List<object>();
                 return resultList;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ ERROR en EjecutarStoredProcedure: {ex.Message}");
-                Console.WriteLine($"Stack: {ex.StackTrace}");
-                _logger.LogError(ex, $"Error en EjecutarStoredProcedure: {ex.Message}");
                 throw;
             }
             finally
             {
-                Console.WriteLine($"Cerrando conexión...");
-                await connection.CloseAsync();
-                Console.WriteLine($"✅ Conexión cerrada");
+                if (connection != null && connection.State == ConnectionState.Open)
+                {
+                    await connection.CloseAsync();
+                }
             }
         }
 
-        private async Task<object> EjecutarConsultaPivot(string indicador, int idEjecutivo, string servidor)
+        private async Task<object> EjecutarConsultaPivot(string indicador, int idEjecutivo, string servidor, string baseDatos)
         {
-            Console.WriteLine($"=== EJECUTANDO CONSULTA PIVOT ===");
-            Console.WriteLine($"Indicador: {indicador}");
-            Console.WriteLine($"idEjecutivo: {idEjecutivo}");
-            Console.WriteLine($"servidor: {servidor}");
-
-            var dbContext = _dbContFactory.GetDbContext(servidor, "Memory");
-            var connection = dbContext.Database.GetDbConnection();
-
+            SqlConnection connection = null;
             try
             {
-                await connection.OpenAsync();
+                connection = await AbrirConexionAsync(servidor, baseDatos);
+                var (tblEjecutivos, _) = await ObtenerEjecutivosYCrearTVP(connection, idEjecutivo);
 
-                var ejecutivos = await ClasesCoorinMethods.ObtieneEjecutivosPropios((SqlConnection)connection, idEjecutivo);
+                string queryPivot = $@"
+                SELECT 
+                    E.Encargado, E.Usuario as Ejecutivo, P.Hora, P.{indicador} as Valor 
+                FROM PS.Productividad P 
+                INNER JOIN @tblEjecutivos E ON P.idEjecutivo = E.idEjecutivo 
+            ";
 
-                DataTable tblEjecutivos = new DataTable();
-                tblEjecutivos.Columns.Add("idEjecutivo", typeof(int));
-                tblEjecutivos.Columns.Add("Usuario", typeof(string));
-                tblEjecutivos.Columns.Add("idEncargado", typeof(int));
-                tblEjecutivos.Columns.Add("Encargado", typeof(string));
-                tblEjecutivos.Columns.Add("Jerarquía", typeof(byte));
-                tblEjecutivos.Columns.Add("NombreEjecutivo", typeof(string));
+                string finalQuery = $@"
+                SELECT 
+                    Encargado, Ejecutivo, [6] as Hora6, [7] as Hora7, [8] as Hora8, [9] as Hora9, 
+                    [10] as Hora10, [11] as Hora11, [12] as Hora12, [13] as Hora13, [14] as Hora14, 
+                    [15] as Hora15, [16] as Hora16, [17] as Hora17, [18] as Hora18, [19] as Hora19, 
+                    [20] as Hora20, [21] as Hora21, [22] as Hora22
+                FROM (
+                    {queryPivot}
+                ) P 
+                PIVOT (
+                    SUM(Valor) FOR Hora IN ([6], [7], [8], [9], [10], [11], [12], [13], [14], [15], [16], [17], [18], [19], [20], [21], [22])
+                ) AS PVT";
 
-                foreach (var e in ejecutivos)
-                {
-                    tblEjecutivos.Rows.Add(
-                        e.IdEjecutivo,
-                        e.Usuario,
-                        e.IdEncargado ?? 0,
-                        DBNull.Value,
-                        DBNull.Value,
-                        e.NombreEjecutivo
-                    );
-                }
-
-                string queryPivot = @"
-                    SELECT 
-                        Encargado, Ejecutivo, [6] as Hora6, [7] as Hora7, [8] as Hora8, [9] as Hora9, 
-                        [10] as Hora10, [11] as Hora11, [12] as Hora12, [13] as Hora13, [14] as Hora14, 
-                        [15] as Hora15, [16] as Hora16, [17] as Hora17, [18] as Hora18, [19] as Hora19, 
-                        [20] as Hora20, [21] as Hora21, [22] as Hora22
-                    FROM (
-                        SELECT 
-                            E.Encargado, E.Usuario as Ejecutivo, P.Hora, P.{0} as Valor 
-                        FROM dbMemory.PS.Productividad P 
-                        INNER JOIN @tblEjecutivos E ON P.idEjecutivo = E.idEjecutivo 
-                    ) P 
-                    PIVOT (
-                        SUM(Valor) FOR Hora IN ([6], [7], [8], [9], [10], [11], [12], [13], [14], [15], [16], [17], [18], [19], [20], [21], [22])
-                    ) AS PVT";
-
-                queryPivot = string.Format(queryPivot, indicador);
 
                 var parameters = new DynamicParameters();
                 parameters.Add("@tblEjecutivos", tblEjecutivos.AsTableValuedParameter("PS.tbl_Ejecutivos"));
 
                 var result = await connection.QueryAsync<PivotedProductividadDTO>(
-                    queryPivot,
+                    finalQuery,
                     parameters,
                     commandType: CommandType.Text
                 );
 
-                var resultList = result.ToList();
-                Console.WriteLine($"✅ PIVOT ejecutado. Resultados: {resultList.Count} filas");
-
-                return resultList;
+                return result.ToList();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ ERROR en EjecutarConsultaPivot: {ex.Message}");
-                _logger.LogError(ex, $"Error en EjecutarConsultaPivot: {ex.Message}");
                 throw;
             }
             finally
             {
-                await connection.CloseAsync();
+                if (connection != null && connection.State == ConnectionState.Open)
+                {
+                    await connection.CloseAsync();
+                }
             }
         }
     }
