@@ -70,16 +70,7 @@ const dataSidebar = {
               icon: "UserGroupIcon",
               subMenus2: [
                 { id: "1CCC", title: "Comentarios", icon: "EnvelopeIcon" },
-                { id: "2CCC", title: "Definición", icon: "BookOpenIcon" },
-                { id: "3CCC", title: "Arrepentimientos", icon: "BookOpenIcon" },
-                { id: "4CCC", title: "Bloqueo cuentas", icon: "BookOpenIcon" },
-                { id: "5CCC", title: "Sucursales", icon: "BookOpenIcon" },
-                { id: "6CCC", title: "Cargos en línea", icon: "BookOpenIcon" },
-                {
-                  id: "7CCC",
-                  title: "Estados de cuenta",
-                  icon: "BookOpenIcon",
-                },
+                { id: "2CCC", title: "Procesos-Gespa", icon: "BookOpenIcon" },
               ],
             },
             {

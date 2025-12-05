@@ -23,6 +23,8 @@ import CaptureVisit from "./sideBar/processes/visits/Capture/CaptureVisit";
 import LoadVisitsContent from "./sideBar/processes/visits/LoadVisits";
 import IconCircular from "../../components/iconos/IconCircular";
 import ConsorcioLogo from "../../../src/assets//CoorinBlack.svg";
+import ProcessGespa from "../dashboard/sideBar/gespa/processgespa/ProcessGespa";
+
 
 const Comments = lazy(() =>
   import("../../hu/dashboard/sideBar/gespa/comment/Comments")
@@ -93,7 +95,7 @@ export default function CoorinDashboard() {
       "Correos",
       "Búsquedas",
       "Ofrecimientos",
-      "Comentarios",
+      "Comentarios2",
       "Consulta Visitas",
       "Captura Visitas",
       "Carga Visitas",
@@ -231,6 +233,8 @@ export default function CoorinDashboard() {
             <Comments onClose={closeModal} />
           </Suspense>
         );
+        case "Procesos-Gespa":
+        return <ProcessGespa onClose={closeModal} />;
       default:
         return null;
     }
@@ -277,7 +281,7 @@ export default function CoorinDashboard() {
       "5BBB": "Correos", // Correos
       "6BBB": "Búsquedas", // Búsquedas
       "7BBB": "Ofrecimientos", // Ofrecimientos
-      "8BBB": "Comentarios", // Comentarios
+      "8BBB": "Comentarios2", // Comentarios
       "2AAA": "Plantillas Correo", // Plantillas Correo
       "1AA": "Campañas",
       "1DD": "Campañas",
@@ -287,6 +291,7 @@ export default function CoorinDashboard() {
       "2ZZZ": "Captura Visitas", // Captura en Visitas (Procesos)
       "3ZZZ": "Carga Visitas", // Carga de Visitas (Procesos)
       "1CCC": "Comentarios", // Comentarios (Gespa)
+      "2CCC": "Procesos-Gespa", // Procesos-Gespa (Gespa)
     };
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
