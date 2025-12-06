@@ -61,23 +61,23 @@ const ProductivityModal = ({
 
     // Definir indicadores según el filtro de tiempo
     const indicadoresDia = [
-        "Sesiones",
-        "Contactos",
-        "Negociaciones",
-        "Porcentajes",
-        "Tiempos",
-        "Tiempo Promedio",
+        { label: "Sesiones", value: "Sesiones" },
+        { label: "Contactos", value: "Contactos" },
+        { label: "Negociaciones", value: "Negociaciones" },
+        { label: "Porcentajes", value: "Porcentajes" },
+        { label: "Tiempos", value: "Tiempos" },
+        { label: "Tiempo Promedio", value: "TiempoPromedio" }
     ];
 
     const indicadoresHora = [
-        "Cuentas",
-        "Titulares",
-        "Conocidos",
-        "Desconocidos",
-        "Sin Contacto",
-        "Negociaciones",
-        "Monto Negociaciones",
-        "Saldo Solucionado",
+        { label: "Cuentas", value: "Cuentas" },
+        { label: "Titulares", value: "Titulares" },
+        { label: "Conocidos", value: "Conocidos" },
+        { label: "Desconocidos", value: "Desconocidos" },
+        { label: "Sin Contacto", value: "SinContacto" },
+        { label: "Negociaciones", value: "Negociaciones" },
+        { label: "Monto Negociaciones", value: "MontoNegociaciones" },
+        { label: "Saldo Solucionado", value: "SaldoSolucionado" },
     ];
 
     // JSX para pasar como selector al header del modal (centrado junto al título)
@@ -92,11 +92,18 @@ const ProductivityModal = ({
                         className="peer pt-6 pb-2 px-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
                     >
                         <option value="" disabled hidden></option>
-                        {(timeFilter === "Dia" ? indicadoresDia : indicadoresHora).map((indicador) => (
-                            <option key={indicador} value={indicador}>
-                                {indicador}
-                            </option>
-                        ))}
+                        {(timeFilter === "Dia"
+                            ? indicadoresDia.map((indicador) => (
+                                <option key={indicador.value} value={indicador.value}>
+                                    {indicador.label}
+                                </option>
+                            ))
+                            : indicadoresHora.map((indicador) => (
+                                <option key={indicador.value} value={indicador.value}>
+                                    {indicador.label}
+                                </option>
+                            ))
+                        )}
                     </select>
                     <label
                         htmlFor="indicador-select"
@@ -142,39 +149,55 @@ const ProductivityModal = ({
 
     // Función para obtener datos de productividad
     const fetchProductivityData = async (indicador, idsEjecutivos) => {
-        if (!indicador || !idsEjecutivos || idsEjecutivos.length === 0) return;
+        if (!indicador) return;
 
         setLoadingProductivity(true);
         setErrorProductivity(null);
 
         try {
+            // Obtener el idEjecutivo de la sesión
+            const userData = JSON.parse(localStorage.getItem('userData')) || {};
+            const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || 0;
+
+            // Lógica para idsEjecutivos
+            let idsToSend = Array.isArray(idsEjecutivos) ? idsEjecutivos.filter(id => !!id) : [];
+            // Si no hay seleccionados o el seleccionado es el mismo que la sesión, enviar [0]
+            if (!idsToSend.length || (idsToSend.length === 1 && idsToSend[0] === idEjecutivoSesion)) {
+                idsToSend = [0];
+            }
+
+            // esModoHora: true si el radiobutton Hora está activo
+            const esModoHora = timeFilter === 'Hora';
+
             const requestData = {
                 indicador: indicador,
-                idsEjecutivos: idsEjecutivos,
+                idsEjecutivos: idsToSend,
+                idEjecutivoPrincipal: idEjecutivoSesion,
+                esModoHora: esModoHora
             };
 
-            console.log("📤 Enviando datos de productividad:", requestData);
+            console.log('Enviando datos de productividad:', requestData);
             const data = await getProductivity(requestData);
-            console.log("📥 Respuesta raw del endpoint de productividad:", data);
+            console.log('Respuesta raw del endpoint de productividad:', data);
 
             // Manejar diferentes tipos de respuesta del servidor
             if (Array.isArray(data)) {
                 setProductivityData(data);
             } else if (data && data.message) {
                 // Servidor devuelve mensaje (sin datos)
-                console.log("📝 Servidor responde:", data.message);
+                console.log('Servidor responde:', data.message);
                 setProductivityData([]);
-            } else if (data && typeof data === "object") {
+            } else if (data && typeof data === 'object') {
                 // Si es un objeto, intentar extraer array de datos
                 const dataArray = Object.values(data).find((val) => Array.isArray(val));
-                console.log("📥 Respuesta procesada (array encontrado):", dataArray);
+                console.log('Respuesta procesada (array encontrado):', dataArray);
                 setProductivityData(dataArray || []);
             } else {
                 setProductivityData([]);
             }
         } catch (error) {
-            console.error("❌ Error al obtener datos de productividad:", error);
-            setErrorProductivity("Error al obtener los datos de productividad");
+            console.error('Error al obtener datos de productividad:', error);
+            setErrorProductivity('Error al obtener los datos de productividad');
             setProductivityData([]);
         } finally {
             setLoadingProductivity(false);

@@ -63,7 +63,7 @@ useEffect(() => {
     const handleDownloadExcel = async () => {
         setLoadingExcel(true);
         setErrorExcel(null);
-        const toastId = toast.loading(`Exportando correos (${cartera}, consulta ${consulta})...`);
+        const toastId = toast.loading(`Exportando correos...`);
         try {
             const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
             const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
@@ -178,7 +178,7 @@ useEffect(() => {
                             type="button"
                             className="btn-success w-full min-w-[120px] px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
                             onClick={handleDownloadExcel}
-                            disabled={loadingExcel || !consulta}
+                            disabled={loadingExcel}
                         >
                             {loadingExcel ? "Exportando..." : "Guardar Excel"}
                         </button>

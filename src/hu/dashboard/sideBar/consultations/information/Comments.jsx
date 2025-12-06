@@ -215,7 +215,7 @@ const CommentsContent = ({ headerControlsActive = false }) => {
                         className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
                         style={{ margin: '0 auto', display: 'block', height: '32px' }}
                         onClick={handleDownloadExcel}
-                        disabled={loadingExcel || !consulta}
+                        disabled={loadingExcel}
                     >
                         {loadingExcel ? "Exportando..." : "Guardar Excel"}
                     </button>
@@ -322,7 +322,7 @@ const CommentsContent = ({ headerControlsActive = false }) => {
                         className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
                         style={{ margin: '0 auto', display: 'block', height: '32px' }}
                         onClick={handleDownloadExcel}
-                        disabled={loadingExcel || !consulta}
+                        disabled={loadingExcel}
                     >
                         {loadingExcel ? "Exportando..." : "Guardar Excel"}
                     </button>
@@ -420,7 +420,7 @@ const CommentsContent = ({ headerControlsActive = false }) => {
                     className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
                     style={{ margin: '0 auto', display: 'block', height: '32px' }}
                     onClick={handleDownloadExcel}
-                    disabled={loadingExcel || !consulta}
+                    disabled={loadingExcel}
                 >
                     {loadingExcel ? "Exportando..." : "Guardar Excel"}
                 </button>

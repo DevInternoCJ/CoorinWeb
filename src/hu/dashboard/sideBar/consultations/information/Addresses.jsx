@@ -66,7 +66,7 @@ const AddressesContent = ({ mostrarTabla }) => {
     const handleDownloadExcel = async () => {
         setLoadingExcel(true);
         setErrorExcel(null);
-        const toastId = toast.loading(`Exportando domicilios (${cartera}, consulta ${consulta})...`);
+        const toastId = toast.loading(`Exportando domicilios...`);
         try {
             const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
             const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
