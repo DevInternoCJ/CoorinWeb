@@ -383,14 +383,14 @@ function ModalValidadoresContent(props) {
           : `Usuario ${usuarioActual.displayName} removido como validador.`
       );
     } catch (error) {
-      toast.error("Error al actualizar validador. Intenta de nuevo.");
+      toast.error("Error al actualizar validador. Intenta de nuevo.", error);
     }
   };
 
   // El contador y el checkbox ahora se pasan al header, así que solo renderizamos el árbol y mensajes aquí
   return (
     <div
-      className="grid grid-cols-1 gap-2 w-full h-full min-w-[18.75rem] max-w-full"
+      className="grid grid-cols-1 gap-2 w-full h-auto min-w-[18.75rem] max-w-full"
       style={{ minWidth: '18.75rem' }}
     >
 

@@ -277,18 +277,20 @@ if (typeof document !== 'undefined' && !document.head.querySelector('style[data-
         .productividad-branch {
             width: 100%;
             min-width: 160px;
-            height: 100%;
+            height: auto;
             transition: width 0.2s;
             box-sizing: border-box;
         }
         @media (min-width: 1201px) {
             .productividad-branch {
                 max-width: 100%;
+                height: auto;
             }
         }
         @media (max-width: 1200px) {
             .productividad-branch {
                 max-width: 100%;
+                height: auto;
             }
         }
         @media (max-width: 900px) {

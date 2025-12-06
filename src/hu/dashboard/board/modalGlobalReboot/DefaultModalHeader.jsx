@@ -53,15 +53,18 @@ const DefaultModalHeader = ({
                             )}
                         </div>
                         {/* Dropdowns alineados a la derecha del título */}
-                        <div className="flex flex-col gap-2 w-full mt-2 lg:mt-0 lg:flex-row lg:gap-4 lg:w-auto lg:items-center">
+                        <div className={`w-full mt-2 lg:mt-0 ${props.radioButtons ? 'grid grid-cols-1 gap-2 sm:grid-cols-1 md:grid-cols-1 lg:flex lg:flex-row lg:gap-4 lg:w-auto lg:items-center' : 'flex flex-col gap-2 lg:flex-row lg:gap-4 lg:w-auto lg:items-center'}`}>
                             {props.carteraSelector && (
-                                <div className="w-full lg:w-auto">{props.carteraSelector}</div>
+                                <div className="w-full">{props.carteraSelector}</div>
                             )}
                             {props.productoSelector && (
-                                <div className="w-full lg:w-auto">{props.productoSelector}</div>
+                                <div className="w-full">{props.productoSelector}</div>
+                            )}
+                            {props.radioButtons && (
+                                <div className="w-full">{props.radioButtons}</div>
                             )}
                             {props.encargadoSelector && (
-                                <div className="w-full lg:w-auto">{props.encargadoSelector}</div>
+                                <div className="w-full">{props.encargadoSelector}</div>
                             )}
                             {/* Checkbox solo en mobile debajo de producto */}
                             {arrepentimientosCheckbox && (

@@ -11,9 +11,9 @@ const MODAL_SIZES = {
     productivity: "w-full max-w-[clamp(320px,92vw,1400px)] min-w-[clamp(220px,60vw,900px)]",
     catalogos: "w-full max-w-[clamp(280px,88vw,1100px)] min-w-[clamp(180px,50vw,700px)]",
     validadores: "w-full max-w-[clamp(270px,84vw,900px)] min-w-[clamp(180px,45vw,500px)]",
-    encargados: "w-full max-w-[clamp(320px,95vw,1200px)] min-w-[clamp(280px,90vw,700px)]",
-    historicos: "w-full max-w-[clamp(280px,65vw,725px)] min-w-[clamp(150px,42vw,425px)]",
-    "historicos-inicial": "w-[340px] min-w-[220px] h-[56px] max-h-[70px]",
+    encargados: "w-full max-w-[clamp(260px,70vw,1000px)] min-w-[clamp(160px,30vw,350px)]",
+    historicos: "w-full max-w-[clamp(280px,65vw,725px)] min-w-[clamp(150px,42vw,425px)] min-h-[120px] max-h-[80vh] lg:min-h-[120px] lg:max-h-[80vh]",
+    "historicos-inicial": "w-[420px] max-w-[520px] min-w-[220px] min-h-[56px] max-h-[260px] sm:min-h-[110px] sm:max-h-[220px] md:min-h-[120px] md:max-h-[260px] lg:min-h-[56px] lg:max-h-[260px]",
     custom: ""
 };
 
@@ -121,10 +121,11 @@ const ReusableModal = ({
                 ref={modalRef}
                 className={`bg-white rounded-lg sm:rounded-xl shadow-2xl 
                            ${sizeClass}
-                           max-h-[clamp(320px,80vh,700px)] min-h-[clamp(220px,40vh,400px)]
+                           ${size === 'historicos' ? 'grid grid-rows-[auto_1fr_auto]' : ''}
+                           ${size === 'historicos-inicial' ? 'grid grid-cols-1 sm:grid-cols-1' : ''}
+                           ${size === 'historicos' || size === 'historicos-inicial' ? '' : 'max-h-[clamp(320px,80vh,700px)] min-h-[clamp(220px,40vh,400px)]'}
                            overflow-hidden 
                            transition-all duration-300 ease-out
-                           grid grid-rows-[auto_1fr_auto]
                            modal-container
                            ${bounce ? 'animate-bounce-modal' : ''}
                            ${modalClassName}`}
@@ -147,18 +148,24 @@ const ReusableModal = ({
                 )}
 
                 {/* Contenido del modal - Responsive con scroll mejorado y grid */}
-                <div
-                    className={`pt-1 pb-3 px-3 sm:pt-2 sm:pb-4 sm:px-4 md:pt-2 md:pb-6 md:px-6
-                               overflow-y-auto overflow-x-hidden max-h-[70vh]
-                               scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100
-                               hover:scrollbar-thumb-gray-400 transition-colors
-                               flex-1 min-h-0
-                               ${contentClassName}`}
-                >
-                    <div className="modal-content-grid">
+                {size === 'historicos-inicial' ? (
+                    <div className={contentClassName}>
                         {children}
                     </div>
-                </div>
+                ) : (
+                    <div
+                        className={`pt-1 pb-3 px-3 sm:pt-2 sm:pb-4 sm:px-4 md:pt-2 md:pb-6 md:px-6
+                                   overflow-y-auto overflow-x-hidden max-h-[70vh]
+                                   scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100
+                                   hover:scrollbar-thumb-gray-400 transition-colors
+                                   flex-1 min-h-0
+                                   ${contentClassName}`}
+                    >
+                        <div className="modal-content-grid">
+                            {children}
+                        </div>
+                    </div>
+                )}
 
                 {/* Footer opcional - Responsive y flexible */}
                 {showFooter && (
