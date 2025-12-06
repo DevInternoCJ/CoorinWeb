@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
+import { useDashboardModalUrlSync } from "../../hooks/useDashboardModalUrlSync";
 import GridExecutives from "./board/executives/GridExecutives";
 import { CoorinSidebar } from "./sideBar/CoorinSidebar";
 import GridConsultations from "./board/consultations/GridConsultations";
@@ -32,13 +33,25 @@ export default function CoorinDashboard() {
   const buttonRef = useRef(null);
   const [modalSidebarOpen, setModalSidebarOpen] = useState(false);
   const [selectedSidebarOption, setSelectedSidebarOption] = useState("");
-  
   // Estados para controlar modales de las cards
   const [executiveModalOpen, setExecutiveModalOpen] = useState(false);
   const [consultationModalOpen, setConsultationModalOpen] = useState(false);
-  
+  // Estado global para el nombre del modal activo
+  const [activeModalName, setActiveModalName] = useState("");
   // Función para cerrar el sidebar (será pasada al CoorinSidebar)
   const [closeSidebarFn, setCloseSidebarFn] = useState(null);
+
+    // Sincroniza la URL cuando se abre un modal de card ejecutivos o consultas
+    useDashboardModalUrlSync(
+      "dashboardPage",
+      executiveModalOpen || consultationModalOpen ? activeModalName : ""
+    );
+
+    // Sincroniza la URL cuando se abre un modal del sidebar
+    useDashboardModalUrlSync(
+      "SideBar",
+      modalSidebarOpen && selectedSidebarOption ? selectedSidebarOption : ""
+    );
 
     const [cuentaDataCapturaVisita, setCuentaDataCapturaVisita] = useState(null);
 
@@ -262,13 +275,14 @@ export default function CoorinDashboard() {
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
     if (sidebarOptionsMap[menuId]) {
       const option = sidebarOptionsMap[menuId];
-      console.log(`Abriendo modal para: ${option} (ID: ${menuId})`);
       setSelectedSidebarOption(option);
       setModalSidebarOpen(true);
       // Reiniciar tamaño del modal de arrepentimientos al abrir
       if (option === "Arrepentimientos") setRegrestModalSize('pagos');
     } else {
-      console.log(`Click en menú: ${menuTitle} (ID: ${menuId})`);
+      // Si no está en el mapeo, igual actualiza el nombre para la URL
+      setSelectedSidebarOption(menuTitle);
+      setModalSidebarOpen(true);
     }
   };
 
@@ -334,6 +348,7 @@ export default function CoorinDashboard() {
                   <GridConsultations 
                     onModalOpen={() => setConsultationModalOpen(true)}
                     onModalClose={() => setConsultationModalOpen(false)}
+                    setActiveModalName={setActiveModalName}
                   />
                 </div>
               </div>

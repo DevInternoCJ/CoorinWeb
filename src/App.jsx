@@ -17,6 +17,8 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route element={<PrortectedRoute canActivate={true} redirectTo='/' />}>
             <Route path="/dashboardPage" element={<CoorinDashboard />} />
+            <Route path="/dashboardPage/*" element={<CoorinDashboard />} />
+            <Route path="/SideBar/*" element={<CoorinDashboard />} />
           </Route>
           {/* <Route element={<PrortectedRoute canActivate={false} redirectTo='/login'/>}/> */}
         </Routes>
