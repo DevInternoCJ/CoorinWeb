@@ -84,24 +84,23 @@ const ProcessGespa = ({ onClose }) => {
       <div className="w-1/3 right-0 flex justify-end">
         <button
           onClick={onClose}
-          className="text-jerarquia3 hover:bg-background-dashboard hover:text-red-600 text-4xl rounded-full w-8 h-8 flex items-center transition-colors"
-        >
-          &times;
+          className="text-jerarquia3 hover:bg-background-dashboard hover:text-red-600 text-4xl items-center rounded-full flex w-8 h-8 transition-colors"
+        ><span className="p-1.5">  &times;</span>   
         </button>
       </div>
     </div>
 
         {/* Tabs Container */}
-        <div className="flex items-start gap-10 max-w-4xl">
+        <div className="flex items-start gap-5 max-w-4xl">
           {/* Sidebar Tabs */}
-          <ul className="space-y-2 min-w-[230px] bg-gray-100 inline-block py-3">
+          <ul className="space-y-2 min-w-[230px] pl-4 bg-gray-100 inline-block py-3">
             {tabs.map((tab) => (
               <li
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex gap-2 items-center text-sm cursor-pointer py-4 px-6 transition-all ${
                   activeTab === tab.id
-                    ? 'text-jerarquia3 bg-white font-semibold'
+                    ? 'text-jerarquia3 bg-white rounded-l-xl font-semibold'
                     : 'text-slate-900 font-medium hover:text-jerarquia2'
                 }`}
               >

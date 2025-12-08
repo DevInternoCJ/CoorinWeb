@@ -100,13 +100,13 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
         usuario: currentUsername,
         contraActual: currentContraActual ? " PRESENTE" : " AUSENTE",
         nuevaContra: newPassword,
-        servidor: "Albaz"
+        servidor: "Orochi"
       });
 
       // Llamar al endpoint UpdatePassword
       const response = await UpdatePassword({
         usuario: currentUsername,
-        servidor: "Albaz",
+        servidor: "Orochi",
         nuevaContra: newPassword, // La nueva contraseña
         contra: currentContraActual, // La contraseña con la que intentó hacer login (de los props)
       });

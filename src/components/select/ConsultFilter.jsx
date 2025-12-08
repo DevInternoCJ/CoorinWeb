@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { getColumsProduct } from "../../services/mark/albaz/LokiServices";
-import { chargueCatalog } from "../../services/mark/albaz/LokiServices";
+import { getColumsProduct } from "../../services/mark/orochi/LokiServices";
+import { chargueCatalog } from "../../services/mark/orochi/LokiServices";
 const ConsultFilter = ({ 
   options = [], 
   label = "Seleccione", 

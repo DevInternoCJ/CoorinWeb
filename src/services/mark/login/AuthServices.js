@@ -16,7 +16,7 @@ export const loginUser = async (userData) => {
       ip: "192.168.7.116",
       aplicacion: "Coorin",
       version: "3.4.2",
-      servidor: "Albaz"
+      servidor: "Orochi"
     };
     console.log('Enviando a /Auth/login:', requestData);
     const response = await api.post('/Auth/login', requestData, {
