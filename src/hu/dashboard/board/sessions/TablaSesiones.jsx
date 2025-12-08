@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import IconCircular from "../../../../components/iconos/IconCircular";
 import CoorinGreen from '../../../../assets/CoorinGreen.svg';
-import { getSessions, patchLogoutEjecutive, patchUnlockedEjecutive, ResetPassword } from "../../../../services/mark/albaz/LokiServices";
+import { getSessions, patchLogoutEjecutive, patchUnlockedEjecutive, ResetPassword } from "../../../../services/mark/Orochi/LokiServices";
 import { toast } from 'sonner';
 
 // Tabla de sesiones 

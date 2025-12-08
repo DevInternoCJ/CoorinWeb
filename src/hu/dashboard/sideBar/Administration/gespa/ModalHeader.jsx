@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import LogoCoorin from "../../../../../assets/logo_coorin_7.svg";
 import CustomSelect from "../../../board/screenFields/SelectWallet"; // Asegúrate de que este es el SelectWallet modificado
-import { GetVerifyProduct } from "../../../../../services/mark/albaz/LokiServices";
+import { GetVerifyProduct } from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
 const PRODUCT_OPTIONS = [

@@ -8,7 +8,7 @@ import { exportDataToXLSX } from "../../../../../utils/ExcelExporter";
 import {
   historySingle,
   historyArchivoUpload,
-} from "../../../../../services/mark/albaz/LokiServices";
+} from "../../../../../services/mark/Orochi/LokiServices";
 
 async function fetchHistorySingle(params) {
   // Construir el body según los parámetros recibidos

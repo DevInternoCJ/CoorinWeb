@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { getCatalogoValueCard, getWrongsInformation } from "../../../../../services/mark/albaz/LokiServices";
+import { getCatalogoValueCard, getWrongsInformation } from "../../../../../services/mark/Orochi/LokiServices";
 
 const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
     // estado 'buscado' no usado -- eliminado para evitar warnings

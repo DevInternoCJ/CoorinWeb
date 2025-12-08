@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Toaster, toast } from "sonner";
-import { infoEjecutivo, getExportReportPayments } from "../../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo, getExportReportPayments } from "../../../../../services/mark/Orochi/LokiServices";
 import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
 

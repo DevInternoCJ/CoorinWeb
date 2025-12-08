@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { infoEjecutivo, getPaymentsInformation } from "../../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo, getPaymentsInformation } from "../../../../../services/mark/Orochi/LokiServices";
 import { Toaster, toast } from "sonner";
 import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 

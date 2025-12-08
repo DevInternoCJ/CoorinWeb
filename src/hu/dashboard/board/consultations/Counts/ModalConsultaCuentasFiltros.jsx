@@ -4,7 +4,7 @@ import ModalSeleccionCampania from "../ModalCamapañas/ModalSeleccionCampania";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import ConsultFilter from "../../../../../components/select/ConsultFilter";
 import { toast } from "sonner";
-import {getCatalogoValueCard} from "../../../../../services/mark/albaz/LokiServices";
+import {getCatalogoValueCard} from "../../../../../services/mark/Orochi/LokiServices";
 const situacionOptions = [
     { value: "Sin información", label: "Sin información" },
   

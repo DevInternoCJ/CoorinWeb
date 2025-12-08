@@ -3,7 +3,7 @@ import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import DefaultModalHeader from "../../modalGlobalReboot/DefaultModalHeader";
 import { IconEjecutivos } from "../../../board/consultations/IconesConsultations";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
-import { ReportEjecutives, obetenerJerarquiaEncargados, obetenerDropdownsEncargados } from "../../../../../services/mark/albaz/LokiServices";
+import { ReportEjecutives, obetenerJerarquiaEncargados, obetenerDropdownsEncargados } from "../../../../../services/mark/Orochi/LokiServices";
 
 // Puedes importar íconos si lo deseas, por ejemplo:
 // import { UserGroupIcon } from '@heroicons/react/24/outline';

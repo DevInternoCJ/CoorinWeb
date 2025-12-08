@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { infoEjecutivo, getSearchesInformation } from "../../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo, getSearchesInformation } from "../../../../../services/mark/Orochi/LokiServices";
 import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
 

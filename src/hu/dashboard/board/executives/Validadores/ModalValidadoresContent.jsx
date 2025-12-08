@@ -7,7 +7,7 @@ import {
   Validatorsregrets,
   InsertDeletedValidators,
   InsertDeletedValidatorsRegrets,
-} from "../../../../../services/mark/albaz/LokiServices";
+} from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
 

@@ -3,7 +3,7 @@ import { EyeOpen, ArrowSync, LockSync } from "./PasswordIcons";
 import PASSWORD_REQUIREMENTS from "./Validations";
 import ButtonLogin from "../ButtonLogin";
 import EyeClose from "../../../assets/eye-close.svg";
-import { UpdatePassword } from "../../../services/mark/albaz/LokiServices";
+import { UpdatePassword } from "../../../services/mark/Orochi/LokiServices";
 import { useUserStore } from "../../../contextGlobal/userStore";
 import { toast } from "sonner";
 
@@ -100,13 +100,13 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
         usuario: currentUsername,
         contraActual: currentContraActual ? "✅ PRESENTE" : "❌ AUSENTE",
         nuevaContra: newPassword,
-        servidor: "Albaz"
+        servidor: "Orochi"
       });
 
       // Llamar al endpoint UpdatePassword
       const response = await UpdatePassword({
         usuario: currentUsername,
-        servidor: "Albaz",
+        servidor: "Orochi",
         nuevaContra: newPassword, // ✅ La nueva contraseña
         contra: currentContraActual, // ✅ La contraseña con la que intentó hacer login (de los props)
       });

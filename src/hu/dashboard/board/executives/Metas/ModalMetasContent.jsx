@@ -4,7 +4,7 @@ import TableMetas from "./TableMetas.jsx";
 import TreeMetas from "./TreeMetas.jsx";
 import { Toaster, toast } from "sonner";
 
-import { obetenerTablaMetas, actualizarMetas } from "../../../../../services/mark/albaz/LokiServices.js";
+import { obetenerTablaMetas, actualizarMetas } from "../../../../../services/mark/Orochi/LokiServices.js";
 
 
 // Función para inyectar estilos CSS que oculten los controles de incremento

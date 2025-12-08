@@ -3,7 +3,7 @@ import ModalBase from "../../../board/ModalBase";
 import CloseButtonCampanas from "../../../components/CloseButtonReusable";
 import ModalCicle, { tabsList, COMPONENT_ICONS } from "./ModalCicle";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
-import { infoEjecutivo } from "../../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo } from "../../../../../services/mark/Orochi/LokiServices";
 
 
 // Tamaños tipo ReusableModal - Solo Visitas e Información (carrusel) - Con responsividad

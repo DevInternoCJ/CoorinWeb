@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getRegrest, infoEjecutivo } from "../../../../services/mark/albaz/LokiServices";
+import { getRegrest, infoEjecutivo } from "../../../../services/mark/Orochi/LokiServices";
 import { toast } from 'sonner';
 
 const RegrestContent = ({ growModal, isExpanded }) => {

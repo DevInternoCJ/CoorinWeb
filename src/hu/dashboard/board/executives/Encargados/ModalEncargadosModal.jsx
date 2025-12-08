@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import ModalEncargadosContent from "../Encargados/ModalEncargadosContent";
 import { IconEncargados } from "../IconesEjecutives";
-import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos, AsignaEncargados } from "../../../../../services/mark/albaz/LokiServices";
+import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos, AsignaEncargados } from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
 const EncargadosModal = ({ 

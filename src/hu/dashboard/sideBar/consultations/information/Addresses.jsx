@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { infoEjecutivo, getAddress } from "../../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo, getAddress } from "../../../../../services/mark/Orochi/LokiServices";
 import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
 const AddressesContent = ({ mostrarTabla }) => {

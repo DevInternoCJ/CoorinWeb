@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import ModalFilasCampañas from "./ModalFilasCampanias";
-import { campainghInCharge, enabledUnenabledCampaign, campaignDeleteada, campaignCleaning, AvanceCampaing } from "../../../../../services/mark/albaz/LokiServices";
+import { campainghInCharge, enabledUnenabledCampaign, campaignDeleteada, campaignCleaning, AvanceCampaing } from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 import NewCampaign from "./NewCampaign";
 import ModalToponeHundred from "./ModalToponeHundred";

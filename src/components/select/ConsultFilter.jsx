@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { getColumsProduct } from "../../services/mark/albaz/LokiServices";
-import { chargueCatalog } from "../../services/mark/albaz/LokiServices";
+import { getColumsProduct } from "../../services/mark/Orochi/LokiServices";
+import { chargueCatalog } from "../../services/mark/Orochi/LokiServices";
 const ConsultFilter = ({ 
   options = [], 
   label = "Seleccione", 
@@ -25,7 +25,7 @@ const ConsultFilter = ({
         case "Producto": { // Producto
           const productData = await getColumsProduct({
             params: {
-              servidor: "Albaz",
+              servidor: "Orochi",
               idProducto: idProducto
             }
           });
@@ -46,7 +46,7 @@ const ConsultFilter = ({
         case "Cuenta": { // Cuenta
           const catalogDataCuenta = await chargueCatalog({
             params:{
-                servidor: "Albaz",
+                servidor: "Orochi",
             }
           });
           
@@ -69,7 +69,7 @@ const ConsultFilter = ({
         case "Conteos": { // Conteos
            const catalogDataConteos = await chargueCatalog({
             params:{
-                servidor: "Albaz",
+                servidor: "Orochi",
             }
           });
           
@@ -92,7 +92,7 @@ const ConsultFilter = ({
         case "Fechas": { // Fechas
             const catalogDataFechas = await chargueCatalog({
             params:{
-                servidor: "Albaz",
+                servidor: "Orochi",
             }
           });
           if (catalogDataFechas && catalogDataFechas.catalogosConsultas && Array.isArray(catalogDataFechas.catalogosConsultas)) {

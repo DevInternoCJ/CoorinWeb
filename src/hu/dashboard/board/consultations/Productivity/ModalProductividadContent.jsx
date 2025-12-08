@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import JerarquiaConR from "../../branchs/JerarquiaConR";
-import { obetenerJerarquiaEncargados } from "../../../../../services/mark/albaz/LokiServices";
+import { obetenerJerarquiaEncargados } from "../../../../../services/mark/Orochi/LokiServices";
 
 const ModalProductividadContent = ({
   timeFilter,

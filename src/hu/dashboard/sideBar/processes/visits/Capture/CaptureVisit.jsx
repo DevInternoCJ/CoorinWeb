@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getAddressesCapture } from "../../../../../../services/mark/albaz/LokiServices";
+import { getAddressesCapture } from "../../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 import ConsorcioLogo from "../../../../../../assets/logo_coorin_7.svg";
 import CapturaVisitsF2 from "../Capture/CapturaVisitsF2";
