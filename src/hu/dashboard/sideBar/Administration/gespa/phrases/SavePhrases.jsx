@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { getPhrases, putPhrases } from "../../../../../../services/mark/albaz/LokiServices";
+import {
+  getPhrases,
+  putPhrases,
+} from "../../../../../../services/mark/orochi/LokeServices";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import { toast } from "sonner"; // si ya usas sonner en tu proyecto
-import { IconActive, IconOffActive} from "./IconPhrases";
+import { IconActive, IconOffActive } from "./IconPhrases";
 
 const SavePhrases = () => {
   const [phrases, setPhrases] = useState([]);
@@ -163,16 +166,22 @@ const SavePhrases = () => {
   );
 
   const renderTableRow = (phrase, index) => (
-    <tr key={phrase.idRegistro || index} className="hover:bg-gray-50 transition-colors">
+    <tr
+      key={phrase.idRegistro || index}
+      className="hover:bg-gray-50 transition-colors"
+    >
       <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-800">
         {phrase.idEjecutivo}
       </td>
-     
+
       <td className="px-6 py-2 text-sm text-gray-800">
-         <kbd className="min-h-7.5 inline-flex justify-center items-center py-1 px-1.5 bg-gray-200 border border-transparent font-mono text-sm text-gray-800 rounded-md">
-    {phrase.texto}
-       </kbd></td>
-      <td className="px-6 py-2 whitespace-nowrap text-sm">{renderSwitch(phrase)}</td>
+        <kbd className="min-h-7.5 inline-flex justify-center items-center py-1 px-1.5 bg-gray-200 border border-transparent font-mono text-sm text-gray-800 rounded-md">
+          {phrase.texto}
+        </kbd>
+      </td>
+      <td className="px-6 py-2 whitespace-nowrap text-sm">
+        {renderSwitch(phrase)}
+      </td>
       <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-800">
         {phrase.fechaInsert}
       </td>

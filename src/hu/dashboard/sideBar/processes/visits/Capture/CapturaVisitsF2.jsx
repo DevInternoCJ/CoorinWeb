@@ -1,7 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { getCatalogoValueCard } from "../../../../../../services/mark/albaz/LokiServices";
-
+import { getCatalogoValueCard } from "../../../../../../services/mark/orochi/LokeServices";
 
 const CapturaVisitsF2 = () => {
   const [opcionesMapeo, setOpcionesMapeo] = useState([]);
@@ -10,9 +9,9 @@ const CapturaVisitsF2 = () => {
 
   useEffect(() => {
     getCatalogoValueCard()
-      .then(data => {
+      .then((data) => {
         const mapeoOptions = Array.isArray(data)
-          ? data.filter(item => item.idCatálogo === ID_CATALOGO_MAPEO)
+          ? data.filter((item) => item.idCatálogo === ID_CATALOGO_MAPEO)
           : [];
         setOpcionesMapeo(mapeoOptions);
       })
@@ -29,11 +28,13 @@ const CapturaVisitsF2 = () => {
             className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
             id="mapeo-select"
             value={mapeoSeleccionado}
-            onChange={e => setMapeoSeleccionado(e.target.value)}
+            onChange={(e) => setMapeoSeleccionado(e.target.value)}
           >
             <option value="" hidden></option>
-            {opcionesMapeo.map(opt => (
-              <option key={opt.idValor} value={opt.idValor}>{opt.valor}</option>
+            {opcionesMapeo.map((opt) => (
+              <option key={opt.idValor} value={opt.idValor}>
+                {opt.valor}
+              </option>
             ))}
           </select>
           <label
@@ -152,7 +153,7 @@ const CapturaVisitsF2 = () => {
           id="propietario-input"
           placeholder=" "
           className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-          style={{ color: 'var(--color-jerarquia3)' }}
+          style={{ color: "var(--color-jerarquia3)" }}
         />
         <label
           htmlFor="propietario-input"
@@ -163,6 +164,6 @@ const CapturaVisitsF2 = () => {
       </div>
     </div>
   );
-}
+};
 
 export default CapturaVisitsF2;

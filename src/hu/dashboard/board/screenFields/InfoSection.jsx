@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ShowFieldScreen } from "../../../../services/mark/albaz/LokiServices";
+import { ShowFieldScreen } from "../../../../services/mark/orochi/LokeServices";
 import useSelectedRowStore from "./selectedRowStore";
 
 const InfoSection = ({
@@ -235,26 +235,20 @@ const InfoSection = ({
       );
       setInfoData(defaultData); // defaultData ahora es el array ordenado
     }
-  }, [
-    selectedRowData,
-    selectedRowIndex,
-    defaultData,
-    camposArray,
-    aliasArray,
-  ]); // Agregamos infoData a las dependencias
+  }, [selectedRowData, selectedRowIndex, defaultData, camposArray, aliasArray]); // Agregamos infoData a las dependencias
 
   // CAMBIO 3: Simplificar getInfoArray para usar el array de estado
-const getInfoArray = () => {
+  const getInfoArray = () => {
     // Si infoData es el array, lo devolvemos, mapeando para el formato final
     if (!infoData || !Array.isArray(infoData)) return [];
-    
-    return infoData.map(item => ({
-        label: item.label, // Ya contiene el alias actualizado
-        valor: item.valueObject?.valor || "",
-        fontWeight: item.valueObject?.fontWeight || "font-weight-normal",
-        color: item.valueObject?.color || "FFFFFF",
+
+    return infoData.map((item) => ({
+      label: item.label, // Ya contiene el alias actualizado
+      valor: item.valueObject?.valor || "",
+      fontWeight: item.valueObject?.fontWeight || "font-weight-normal",
+      color: item.valueObject?.color || "FFFFFF",
     }));
-};
+  };
 
   const infoArray = getInfoArray();
   // Función para dividir los datos en filas de 4 columnas

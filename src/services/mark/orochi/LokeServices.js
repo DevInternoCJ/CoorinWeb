@@ -4,7 +4,7 @@ import api from '../../../loki/apiConfig';
 //   try {
 //     const requestData = {
 //       contrasenia: userData.contrasenia,
-//       servidor: "Albaz",
+//       servidor: "Orochi",
 //       idEjecutivo
 //     };
 
@@ -2335,9 +2335,9 @@ export const PostComments = async (data) => {
       throw new Error('No hay token de autenticación disponible.');
     }
 
-    console.log('  /Scripts/guardar', data);   
+    console.log('  /Comentarios/modificar', data);   
     const response = await api.post(
-      `/Scripts/guardar`,data
+      `/Comentarios/modificar`,data
     );  
     console.log('  Respuesta:', response.data);
     return response.data;

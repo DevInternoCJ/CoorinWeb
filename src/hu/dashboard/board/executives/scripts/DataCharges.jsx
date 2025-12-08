@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PostDataCharge } from "../../../../../services/mark/albaz/LokiServices";
+import { PostDataCharge } from "../../../../../services/mark/orochi/LokeServices";
 import { useWalletProducts } from "../../../../login/WalletProduct";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
 import { IconError } from "./IconScripts";
@@ -147,11 +147,11 @@ const DataCharges = ({ onDataLoaded }) => {
   };
 
   document.addEventListener("dragstart", () => {
-  const selection = window.getSelection();
-  if (selection.rangeCount > 0) {
-    window._savedRange = selection.getRangeAt(0);
-  }
-});
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      window._savedRange = selection.getRangeAt(0);
+    }
+  });
   // Spinner de carga
   if (loading || isLoadingStore) {
     return (
@@ -179,7 +179,7 @@ const DataCharges = ({ onDataLoaded }) => {
       <div className="min-h-60 flex flex-col bg-white border border-red-200 shadow-2xs rounded-xl">
         <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
           <div className="text-red-500 text-center">
-            < IconError className="w-12 h-12 mx-auto mb-4"/>
+            <IconError className="w-12 h-12 mx-auto mb-4" />
             <p className="font-semibold">Error</p>
             <p className="text-sm mt-2">{error}</p>
           </div>
@@ -245,12 +245,13 @@ const DataCharges = ({ onDataLoaded }) => {
                     draggedLabel === item.label ? "opacity-50 scale-95" : ""
                   }`}
                   title="Arrastra el texto al campo mensaje"
-                ><div className=" flex items-center gap-1 bg-jerarquia1/50 pt-1 pr-1 rounded-sm hover:bg-jerarquia3/30 hover:shadow-jerarquia3 shadow-sm  hover:shadow-md transition-shadow duration-200">
-                   <IconDrag className=" text-jerarquia3"/>
-                  <span className="inline-flex items-center text-sm font-semibold gap-1 text-jerarquia4">
-                    {item.label}
-                  </span>
-                </div>
+                >
+                  <div className=" flex items-center gap-1 bg-jerarquia1/50 pt-1 pr-1 rounded-sm hover:bg-jerarquia3/30 hover:shadow-jerarquia3 shadow-sm  hover:shadow-md transition-shadow duration-200">
+                    <IconDrag className=" text-jerarquia3" />
+                    <span className="inline-flex items-center text-sm font-semibold gap-1 text-jerarquia4">
+                      {item.label}
+                    </span>
+                  </div>
                 </div>
                 <div
                   className={`text-sm text-${item.color}-700 font-medium break-words`}
@@ -280,10 +281,10 @@ const DataCharges = ({ onDataLoaded }) => {
                         title="Arrastra el texto al campo mensaje"
                       >
                         <div className=" flex items-center gap-1">
-                        <IconDrag className=" text-bgsuccess"/>
-                        <span className="inline-fle text-sm items-center gap-2">
-                          {key.replace(/([A-Z])/g, " $1").trim()}
-                        </span>
+                          <IconDrag className=" text-bgsuccess" />
+                          <span className="inline-fle text-sm items-center gap-2">
+                            {key.replace(/([A-Z])/g, " $1").trim()}
+                          </span>
                         </div>
                       </th>
                     ))}
@@ -294,7 +295,8 @@ const DataCharges = ({ onDataLoaded }) => {
                       ([key, value], index) => (
                         <td
                           key={index}
-                          className="py-3 px-4 border-b border-gray-200 text-sm whitespace-nowrap align-top">
+                          className="py-3 px-4 border-b border-gray-200 text-sm whitespace-nowrap align-top"
+                        >
                           {formatValue(value, key)}
                         </td>
                       )

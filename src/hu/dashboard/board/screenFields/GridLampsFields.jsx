@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { GetGridFields } from "../../../../services/mark/albaz/LokiServices";
+import { GetGridFields } from "../../../../services/mark/orochi/LokeServices";
 import useSelectedRowStore from "./selectedRowStore";
 import { useWalletProducts } from "../../../login/WalletProduct";
-import  {IconDrag}  from "../../../../components/iconos/IconDrag"
+import { IconDrag } from "../../../../components/iconos/IconDrag";
 const GridLampsFields = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [draggedHeader, setDraggedHeader] = useState(""); // Estado para el header que se arrastra
-  const servidor = "Albaz";
+  const servidor = "Orochi";
   const { setSelectedRow, selectedRowIndex } = useSelectedRowStore();
-  const { walletProducts} = useWalletProducts();
+  const { walletProducts } = useWalletProducts();
   const idProducto = walletProducts?.[0]?.idProducto;
   useEffect(() => {
     if (!idProducto || idProducto === 0) return;
@@ -29,18 +29,18 @@ const GridLampsFields = () => {
     };
     fetchGridData();
   }, [servidor, idProducto]);
-  
+
   // Cuando comienza el arrastre del header
   const handleDragStart = (e, headerName) => {
-    e.dataTransfer.effectAllowed = 'copy';
-    e.dataTransfer.setData('text/plain', `[${headerName}]`);
+    e.dataTransfer.effectAllowed = "copy";
+    e.dataTransfer.setData("text/plain", `[${headerName}]`);
     setDraggedHeader(headerName);
     console.log(`Arrastrando header: [${headerName}]`);
   };
 
   // Cuando termina el arrastre
   const handleDragEnd = () => {
-    setDraggedHeader('');
+    setDraggedHeader("");
   };
 
   // Manejar click en fila usando el store
@@ -121,15 +121,18 @@ const GridLampsFields = () => {
                     hover:bg-green-950 bg-jerarquia4
                     transition-all duration-150
                     cursor-grabbing
-                    ${draggedHeader === key ? 'opacity-50 scale-95 bg-green-950' : ''}
+                    ${
+                      draggedHeader === key
+                        ? "opacity-50 scale-95 bg-green-950"
+                        : ""
+                    }
                   `}
                   title="Arrastra este encabezado a Alias o Campos"
-                ><div className="flex text-sm items-center gap-1">
-                    <IconDrag className=" text-bgsuccess"/>
-                  <span className="inline-flex items-center">   
-                    {key}
-                  </span>
-                </div>
+                >
+                  <div className="flex text-sm items-center gap-1">
+                    <IconDrag className=" text-bgsuccess" />
+                    <span className="inline-flex items-center">{key}</span>
+                  </div>
                 </th>
               ))}
             </tr>
@@ -144,7 +147,11 @@ const GridLampsFields = () => {
                   cursor-pointer 
                   transition-colors 
                   duration-200
-                  ${selectedRowIndex === index ? 'bg-blue-100 border-blue-500 border-2' : 'hover:bg-gray-200'}
+                  ${
+                    selectedRowIndex === index
+                      ? "bg-blue-100 border-blue-500 border-2"
+                      : "hover:bg-gray-200"
+                  }
                 `}
                 onClick={() => handleRowClick(row, index)}
               >
@@ -152,7 +159,9 @@ const GridLampsFields = () => {
                   <td
                     key={i}
                     className={`py-2 px-3 text-sm border-b-jerarquia4 whitespace-nowrap ${
-                      typeof value === "number" ? "text-right font-medium" : "text-left"
+                      typeof value === "number"
+                        ? "text-right font-medium"
+                        : "text-left"
                     } ${
                       Object.keys(row)[i] === "currentbalance" ||
                       Object.keys(row)[i] === "initialbalance"
@@ -180,5 +189,3 @@ const GridLampsFields = () => {
 };
 
 export default GridLampsFields;
-
-

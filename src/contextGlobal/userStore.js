@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getWalletProduct } from '../services/mark/orochi/LokiServices';
+import { getWalletProduct } from '../services/mark/orochi/LokeServices';
 
 export const useUserStore = create((set) => ({
   user: null,

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   historySingle,
   historyArchivoUpload,
-} from "../../../../../services/mark/albaz/LokiServices";
+} from "../../../../../services/mark/orochi/LokeServices";
 
 async function fetchHistorySingle(params) {
   // Construir el body según los parámetros recibidos
@@ -38,7 +38,7 @@ const ModalConsultaHistoricosFiltros = ({
   setProducto,
   isIndividual,
   tipoSeleccionado,
-  setTipoSeleccionado
+  setTipoSeleccionado,
 }) => {
   // Estados locales solo para lógica interna
   const [producto, setProductoLocal] = useState("");
@@ -60,17 +60,21 @@ const ModalConsultaHistoricosFiltros = ({
   useEffect(() => {
     if (!isIndividual && archivo) {
       const algunoSeleccionado = Object.entries(checkedItems)
-        .filter(([key]) => [
-          "cuenta",
-          "gestiones",
-          "visitas",
-          "negociaciones",
-          "accionamientos",
-          "pagos",
-        ].includes(key))
+        .filter(([key]) =>
+          [
+            "cuenta",
+            "gestiones",
+            "visitas",
+            "negociaciones",
+            "accionamientos",
+            "pagos",
+          ].includes(key)
+        )
         .some(([, checked]) => checked);
       if (algunoSeleccionado) {
-        console.log("[Archivo] useEffect: archivo y checkbox válidos, procesando automáticamente");
+        console.log(
+          "[Archivo] useEffect: archivo y checkbox válidos, procesando automáticamente"
+        );
         (async () => {
           await handleBuscar();
           // Limpiar archivo y checkboxes después de procesar
@@ -92,9 +96,13 @@ const ModalConsultaHistoricosFiltros = ({
 
   useEffect(() => {
     if (isIndividual === true) {
-      toast.info("Introduzca la cuenta, seleccione qué concepto(s) para buscar en histórico y presione 'Buscar'.");
+      toast.info(
+        "Introduzca la cuenta, seleccione qué concepto(s) para buscar en histórico y presione 'Buscar'."
+      );
     } else if (isIndividual === false) {
-      toast.info("Seleccione qué concepto(s) y seleccione el libro de Excel (UNA pestaña, UNA columna) con las cuentas para buscarlas en histórico.");
+      toast.info(
+        "Seleccione qué concepto(s) y seleccione el libro de Excel (UNA pestaña, UNA columna) con las cuentas para buscarlas en histórico."
+      );
     }
   }, [isIndividual]);
 
@@ -303,8 +311,13 @@ const ModalConsultaHistoricosFiltros = ({
       }
       try {
         setIsLoading(true);
-        console.log("[Archivo] Iniciando consulta por archivo. Archivo:", archivo);
-        toast.loading("Consultando histórico por archivo...", { id: "buscar-loading" });
+        console.log(
+          "[Archivo] Iniciando consulta por archivo. Archivo:",
+          archivo
+        );
+        toast.loading("Consultando histórico por archivo...", {
+          id: "buscar-loading",
+        });
         const userData = JSON.parse(localStorage.getItem("userData"));
         const idCartera = userData?.idCartera || 1;
         const formatFecha = (fecha) => {
@@ -324,7 +337,7 @@ const ModalConsultaHistoricosFiltros = ({
           UsarPeriodo: periodo,
           FechaDesde: periodo ? formatFecha(fechaDesde) : null,
           FechaHasta: periodo ? formatFecha(fechaHasta) : null,
-        };  
+        };
         console.log("[Archivo] Body enviado a /Historico/archivo:", body);
         const result = await historyArchivoUpload(body);
         console.log("[Archivo] Respuesta recibida:", result);
@@ -337,9 +350,14 @@ const ModalConsultaHistoricosFiltros = ({
         }
         setExcelBlob(new Blob([result.data]));
         console.log("[Archivo] Descarga iniciada");
-        toast.success("Histórico por archivo consultado exitosamente. Descarga iniciada.");
+        toast.success(
+          "Histórico por archivo consultado exitosamente. Descarga iniciada."
+        );
       } catch (error) {
-        console.error("[Archivo] Error al consultar histórico por archivo:", error);
+        console.error(
+          "[Archivo] Error al consultar histórico por archivo:",
+          error
+        );
         toast.dismiss("buscar-loading");
         toast.error("Error al consultar histórico por archivo");
       } finally {
@@ -407,12 +425,11 @@ const ModalConsultaHistoricosFiltros = ({
 
   return (
     <>
-
       <div
         style={{
           minWidth: "0px",
           overflowY: "auto",
-          maxHeight: "70vh"
+          maxHeight: "70vh",
         }}
         className="overflow-y-auto w-full max-w-sm sm:max-w-[95vw] mx-auto"
       >
@@ -433,10 +450,8 @@ const ModalConsultaHistoricosFiltros = ({
         )}
 
         {/* Mostrar el resto solo si se seleccionó un radio button */}
-        {(isIndividual !== null && typeof isIndividual !== 'undefined') && (
-
+        {isIndividual !== null && typeof isIndividual !== "undefined" && (
           <>
-
             {/* Nueva organización en columnas */}
             <div className="mb-6 w-full flex justify-center">
               <div className="w-full flex flex-col lg:flex-row gap-4 items-start">
@@ -444,14 +459,19 @@ const ModalConsultaHistoricosFiltros = ({
                 <div className="w-full lg:w-2/3 flex flex-col gap-2">
                   <div className="grid grid-cols-2 grid-rows-3 gap-x-4 gap-y-2 w-full bg-white rounded-lg p-4 shadow-sm sm:grid-cols-2 sm:grid-rows-3 md:grid-cols-3 md:grid-rows-2">
                     {Object.entries(checkedItems).map(([key, checked]) => (
-                      <label key={key} className="flex items-center gap-x-2 text-xs font-medium text-gray-700 mb-2 w-full">
+                      <label
+                        key={key}
+                        className="flex items-center gap-x-2 text-xs font-medium text-gray-700 mb-2 w-full"
+                      >
                         <input
                           type="checkbox"
                           checked={checked}
                           onChange={() => handleCheckboxChange(key)}
                           className="form-checkbox rounded text-jerarquia1 focus:ring-jerarquia1"
                         />
-                        <span className="capitalize">{key === "accionamientos" ? "Accionamientos" : key}</span>
+                        <span className="capitalize">
+                          {key === "accionamientos" ? "Accionamientos" : key}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -475,7 +495,7 @@ const ModalConsultaHistoricosFiltros = ({
                             }}
                             placeholder="Ingresa número de cuenta"
                             className="peer pt-4 pb-2 px-2 block w-full bg-gray-50 border border-jerarquia1 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1"
-                            style={{ color: 'var(--color-jerarquia3)' }}
+                            style={{ color: "var(--color-jerarquia3)" }}
                           />
                           <label
                             htmlFor="cuentaInput"
@@ -493,7 +513,9 @@ const ModalConsultaHistoricosFiltros = ({
                             onClick={async () => {
                               if (!allowSubmit) return;
                               // 1. Validar que haya al menos un checkbox seleccionado
-                              const checkboxesValidos = Object.entries(checkedItems)
+                              const checkboxesValidos = Object.entries(
+                                checkedItems
+                              )
                                 .filter(([key]) =>
                                   [
                                     "cuenta",
@@ -514,7 +536,9 @@ const ModalConsultaHistoricosFiltros = ({
                               // 2. Si el checkbox "cuenta" está marcado, validar que haya una cuenta válida
                               if (checkedItems.cuenta) {
                                 if (!idCuenta || idCuenta.trim() === "") {
-                                  toast.warning("Debe ingresar un número de cuenta");
+                                  toast.warning(
+                                    "Debe ingresar un número de cuenta"
+                                  );
                                   return;
                                 }
                                 if (idCuenta.length < 6) {
@@ -557,11 +581,17 @@ const ModalConsultaHistoricosFiltros = ({
                             id="archivoInput"
                             accept=".xlsx,.xls"
                             style={{ display: "none" }}
-                            onChange={async e => {
+                            onChange={async (e) => {
                               if (e.target.files && e.target.files[0]) {
-                                console.log("[Archivo] Archivo seleccionado desde input:", e.target.files[0]);
+                                console.log(
+                                  "[Archivo] Archivo seleccionado desde input:",
+                                  e.target.files[0]
+                                );
                                 setArchivo(e.target.files[0]);
-                                toast.success("Archivo seleccionado: " + e.target.files[0].name);
+                                toast.success(
+                                  "Archivo seleccionado: " +
+                                    e.target.files[0].name
+                                );
                               }
                             }}
                           />
@@ -571,7 +601,9 @@ const ModalConsultaHistoricosFiltros = ({
                             disabled={isLoading}
                             onClick={async () => {
                               if (isLoading) return;
-                              const algunoSeleccionado = Object.entries(checkedItems)
+                              const algunoSeleccionado = Object.entries(
+                                checkedItems
+                              )
                                 .filter(([key]) =>
                                   [
                                     "cuenta",
@@ -593,7 +625,10 @@ const ModalConsultaHistoricosFiltros = ({
                                 document.getElementById("archivoInput").click();
                                 return;
                               }
-                              console.log("[Archivo] Botón Seleccionar ejecutado. Archivo actual:", archivo);
+                              console.log(
+                                "[Archivo] Botón Seleccionar ejecutado. Archivo actual:",
+                                archivo
+                              );
                               await handleBuscar();
                             }}
                           >
@@ -642,10 +677,16 @@ const ModalConsultaHistoricosFiltros = ({
                         min={getFechaMinima()}
                         className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         value={fechaDesde.split("/").reverse().join("-")}
-                        onChange={e => {
-                          const nuevaFecha = e.target.value.split("-").reverse().join("/");
+                        onChange={(e) => {
+                          const nuevaFecha = e.target.value
+                            .split("-")
+                            .reverse()
+                            .join("/");
                           setFechaDesde(nuevaFecha);
-                          const fechaHastaISO = fechaHasta.split("/").reverse().join("-");
+                          const fechaHastaISO = fechaHasta
+                            .split("/")
+                            .reverse()
+                            .join("-");
                           if (e.target.value > fechaHastaISO) {
                             setFechaHasta(nuevaFecha);
                           }
@@ -657,7 +698,7 @@ const ModalConsultaHistoricosFiltros = ({
                         htmlFor="fecha-desde-input"
                         className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
                       >
-                      Desde
+                        Desde
                       </label>
                     </div>
                     <div className={`relative w-full min-w-0 mt-1`}>
@@ -668,8 +709,11 @@ const ModalConsultaHistoricosFiltros = ({
                         min={getFechaMinima()}
                         className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         value={fechaHasta.split("/").reverse().join("-")}
-                        onChange={e => {
-                          const nuevaFecha = e.target.value.split("-").reverse().join("/");
+                        onChange={(e) => {
+                          const nuevaFecha = e.target.value
+                            .split("-")
+                            .reverse()
+                            .join("/");
                           setFechaHasta(nuevaFecha);
                         }}
                         disabled={!periodo}
@@ -704,10 +748,16 @@ const ModalConsultaHistoricosFiltros = ({
                         min={getFechaMinima()}
                         className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         value={fechaDesde.split("/").reverse().join("-")}
-                        onChange={e => {
-                          const nuevaFecha = e.target.value.split("-").reverse().join("/");
+                        onChange={(e) => {
+                          const nuevaFecha = e.target.value
+                            .split("-")
+                            .reverse()
+                            .join("/");
                           setFechaDesde(nuevaFecha);
-                          const fechaHastaISO = fechaHasta.split("/").reverse().join("-");
+                          const fechaHastaISO = fechaHasta
+                            .split("/")
+                            .reverse()
+                            .join("-");
                           if (e.target.value > fechaHastaISO) {
                             setFechaHasta(nuevaFecha);
                           }
@@ -719,7 +769,7 @@ const ModalConsultaHistoricosFiltros = ({
                         htmlFor="fecha-desde-input"
                         className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
                       >
-                      Desde
+                        Desde
                       </label>
                     </div>
                     <div className={`relative w-full min-w-0 mt-1`}>
@@ -730,8 +780,11 @@ const ModalConsultaHistoricosFiltros = ({
                         min={getFechaMinima()}
                         className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         value={fechaHasta.split("/").reverse().join("-")}
-                        onChange={e => {
-                          const nuevaFecha = e.target.value.split("-").reverse().join("/");
+                        onChange={(e) => {
+                          const nuevaFecha = e.target.value
+                            .split("-")
+                            .reverse()
+                            .join("/");
                           setFechaHasta(nuevaFecha);
                         }}
                         disabled={!periodo}
@@ -750,10 +803,6 @@ const ModalConsultaHistoricosFiltros = ({
             </div>
 
             {/* Input y botón debajo de las columnas */}
-
-
-
-
           </>
         )}
       </div>

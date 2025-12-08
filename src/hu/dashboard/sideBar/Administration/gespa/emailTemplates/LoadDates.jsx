@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PostLoadData } from "../../../../../../services/mark/albaz/LokiServices";
+import { PostLoadData } from "../../../../../../services/mark/orochi/LokeServices";
 import { useWalletProducts } from "../../../../../login/WalletProduct"; // Importa el hook
 import { IconDrag } from "../../../../../../components/iconos/IconDrag";
 
@@ -13,9 +13,13 @@ const LoadDates = ({
   const [datosProductoCompleto, setDatosProductoCompleto] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [draggedLabel, setDraggedLabel] = useState(""); 
+  const [draggedLabel, setDraggedLabel] = useState("");
   //  Hook corregido
-  const { walletProducts, isLoading: isLoadingStore, error: errorStore } = useWalletProducts(); 
+  const {
+    walletProducts,
+    isLoading: isLoadingStore,
+    error: errorStore,
+  } = useWalletProducts();
   // Extraer IDs con validación
   const idProducto = walletProducts?.[0]?.idProducto;
   const idCartera = walletProducts?.[0]?.idCartera;
@@ -52,7 +56,7 @@ const LoadDates = ({
       return;
     }
     setLoading(true);
-    setError(null);  
+    setError(null);
     try {
       const data = { idCartera, idProducto };
       console.log("Body enviado a PostLoadData:", data);
@@ -61,21 +65,21 @@ const LoadDates = ({
         // Procesar plantillas
         if (response.plantillas && onPlantillasChange) {
           onPlantillasChange(response.plantillas);
-        }      
+        }
         // Procesar cuenta/deudor
         if (response.cuenta) {
           const saldoFormateado = response.cuenta.Saldo
             ? `$${response.cuenta.Saldo.toLocaleString()}`
-            : "$0.00";      
+            : "$0.00";
           const nuevosDatosDeudor = {
             NombreDeudor: response.cuenta.NombreDeudor || "",
             RFC: response.cuenta.RFC || "",
             NúmeroCliente: response.cuenta.NúmeroCliente || "",
             Saldo: saldoFormateado,
-          };        
+          };
           setDatosDeudor(nuevosDatosDeudor);
           onDatosDeudorChange?.(nuevosDatosDeudor);
-        }      
+        }
         // Procesar producto
         if (response.producto) {
           setDatosProductoCompleto(response.producto);
@@ -83,7 +87,7 @@ const LoadDates = ({
         }
       } else {
         setError("No se pudieron cargar los datos del servidor");
-      }    
+      }
       setLoading(false);
     } catch (error) {
       console.error("Error al obtener los datos:", error);
@@ -167,15 +171,17 @@ const LoadDates = ({
     <div className="min-h-60 flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl ">
       <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
         <div className="flex justify-center">
-          <div 
-            className="animate-spin inline-block size-6 border-[3px] border-current border-t-transparent text-blue-600 rounded-full dark:text-blue-500" 
-            role="status" 
+          <div
+            className="animate-spin inline-block size-6 border-[3px] border-current border-t-transparent text-blue-600 rounded-full dark:text-blue-500"
+            role="status"
             aria-label="loading"
           >
             <span className="sr-only">Loading...</span>
           </div>
         </div>
-        <p className="mt-4 text-sm text-gray-600 dark:text-neutral-400">{message}</p>
+        <p className="mt-4 text-sm text-gray-600 dark:text-neutral-400">
+          {message}
+        </p>
       </div>
     </div>
   );
@@ -185,14 +191,24 @@ const LoadDates = ({
   }
   if (loading) {
     return <SpinnerLoader message="Cargando datos del producto..." />;
-  }  
+  }
   if (error) {
     return (
       <div className="min-h-60 flex flex-col bg-white border border-red-200 shadow-2xs rounded-xl">
         <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
           <div className="text-red-500 text-center">
-            <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-12 h-12 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <p className="font-semibold">Error</p>
             <p className="text-sm mt-2">{error}</p>
@@ -206,11 +222,24 @@ const LoadDates = ({
       <div className="min-h-60 flex flex-col bg-white border border-yellow-200 shadow-2xs rounded-xl">
         <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
           <div className="text-yellow-600 text-center">
-            <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <svg
+              className="w-12 h-12 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
             </svg>
             <p className="font-semibold">Sin datos disponibles</p>
-            <p className="text-sm mt-2">No se encontraron datos del producto. Por favor, verifica que haya productos disponibles.</p>
+            <p className="text-sm mt-2">
+              No se encontraron datos del producto. Por favor, verifica que haya
+              productos disponibles.
+            </p>
           </div>
         </div>
       </div>
@@ -267,9 +296,9 @@ const LoadDates = ({
                 title="Arrastra el texto al campo mensaje"
               >
                 <div className=" flex items-center gap-1 bg-jerarquia1/50 pt-1 pr-1 rounded-sm hover:bg-jerarquia3/30 hover:shadow-jerarquia3 shadow-sm  hover:shadow-md transition-shadow duration-200">
-                  <IconDrag className=" text-jerarquia3"/>
+                  <IconDrag className=" text-jerarquia3" />
                   <span className="inline-flex items-center text-sm font-semibold gap-1 rounded-lg">
-                  {item.label}
+                    {item.label}
                   </span>
                 </div>
               </div>
@@ -311,12 +340,12 @@ const LoadDates = ({
                     title="Arrastra el texto al campo mensaje"
                   >
                     <div className=" flex items-center gap-1">
-                             <IconDrag className=" text-bgsuccess"/>
-                    <span className="inline-flex items-center gap-2">
-                      {key
-                        .replace(/([A-Z])/g, " $1")
-                        .replace(/^./, (str) => str.toUpperCase())}
-                    </span>
+                      <IconDrag className=" text-bgsuccess" />
+                      <span className="inline-flex items-center gap-2">
+                        {key
+                          .replace(/([A-Z])/g, " $1")
+                          .replace(/^./, (str) => str.toUpperCase())}
+                      </span>
                     </div>
                   </th>
                 ))}

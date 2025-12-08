@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import JerarquiaConR from "../../branchs/JerarquiaConR";
-import { obetenerJerarquiaEncargados } from "../../../../../services/mark/albaz/LokiServices";
+import { obetenerJerarquiaEncargados } from "../../../../../services/mark/orochi/LokeServices";
 
 const ModalProductividadContent = ({
   timeFilter,
@@ -178,7 +178,13 @@ const ModalProductividadContent = ({
 
     switch (selectedIndicator) {
       case "Sesiones":
-        return ["Extensión", "Ingreso", "Primer Gestión", "Modo", "TiempoEnModo"];
+        return [
+          "Extensión",
+          "Ingreso",
+          "Primer Gestión",
+          "Modo",
+          "TiempoEnModo",
+        ];
       case "Contactos":
         return [
           "conocidos",
@@ -266,7 +272,6 @@ const ModalProductividadContent = ({
         return [];
     }
   };
-
 
   // Función para renderizar las columnas de la tabla según el indicador
   const renderTableHeaders = () => {
@@ -506,12 +511,12 @@ const ModalProductividadContent = ({
         const headerToKey = (h) => {
           if (!h) return null;
           const map = {
-            "Extensión": "extension",
-            "Ingreso": "ingreso",
-            "Salida": "salida",
+            Extensión: "extension",
+            Ingreso: "ingreso",
+            Salida: "salida",
             "Primera Gestión": "primerGestion",
-            "Modo": "modo",
-            "Tiempo En Modo": "tiempoEnModo"
+            Modo: "modo",
+            "Tiempo En Modo": "tiempoEnModo",
           };
           if (map[h]) return map[h];
           // fallback: normalizar
@@ -522,7 +527,10 @@ const ModalProductividadContent = ({
         if (headers && headers.length > 0) {
           values = headers.map((h) => {
             const key = headerToKey(h);
-            const v = key && Object.prototype.hasOwnProperty.call(item, key) ? item[key] : undefined;
+            const v =
+              key && Object.prototype.hasOwnProperty.call(item, key)
+                ? item[key]
+                : undefined;
             return v !== undefined ? v : "-";
           });
         } else {
@@ -542,7 +550,8 @@ const ModalProductividadContent = ({
       return (
         <tr key={index}>
           {values.slice(0, columnCount).map((value, idx) => {
-            let display = value !== null && value !== undefined ? String(value) : "-";
+            let display =
+              value !== null && value !== undefined ? String(value) : "-";
             const header = headers[idx] || "";
 
             // Si la columna es 'Ingreso', extraer la parte de hora tras la 'T' (HH:MM:SS)

@@ -4,8 +4,8 @@ import ButtonSave from "../ButtonSave";
 import {
   SaveCreateTemplate,
   UpdateTemplate,
-} from "../../../../../../services/mark/albaz/LokiServices";
-import { DeleteTemplate } from "../../../../../../services/mark/albaz/LokiServices";
+} from "../../../../../../services/mark/orochi/LokeServices";
+import { DeleteTemplate } from "../../../../../../services/mark/orochi/LokeServices";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import { useWalletProducts } from "../../../../../login/WalletProduct";
 import { toast } from "sonner";
@@ -29,8 +29,8 @@ const Template = ({
   );
   // Estados para el drag and drop
   const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const { walletProducts} = useWalletProducts();
-    const idProducto = walletProducts?.[0]?.idProducto;
+  const { walletProducts } = useWalletProducts();
+  const idProducto = walletProducts?.[0]?.idProducto;
   useEffect(() => {
     setSelectedPlantilla(plantillas[0]?.nombre ?? "");
     setIdCorreoScript(plantillas[0]?.idCorreoScript ?? null);
@@ -204,14 +204,14 @@ const Template = ({
           mensaje: mensaje,
           idEjecutivo,
         };
-        console.log("datos al guardar plantilla: ",payload)
+        console.log("datos al guardar plantilla: ", payload);
         await UpdateTemplate(payload);
         toast.success("Plantilla actualizada correctamente.");
       } else {
         // Validar que no exista una plantilla con el mismo nombre
-        const existeNombre = plantillas.some((p) =>
-  p.nombre.trim().toLowerCase() === nombre.trim().toLowerCase()
-);
+        const existeNombre = plantillas.some(
+          (p) => p.nombre.trim().toLowerCase() === nombre.trim().toLowerCase()
+        );
         if (existeNombre) {
           toast.warning(
             "Ya existe una plantilla con ese nombre. Elige otro nombre."
@@ -226,7 +226,7 @@ const Template = ({
           mensaje: mensaje,
           idEjecutivo,
         };
-        console.log("datos al guardar plantilla: ",payload)
+        console.log("datos al guardar plantilla: ", payload);
         await SaveCreateTemplate(payload);
         toast.success("Plantilla creada correctamente.");
       }
@@ -262,27 +262,27 @@ const Template = ({
 
   return (
     <div className=" rounded-lg">
-       <div className="py-2 px-4 rounded-lg bg-background-tertiary justify-between flex items-center">
-          <div className="flex justify-start items-end gap-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Plantilla
-            </label>
-            <SelectWallet
-              options={plantillas.map((p) => ({
-                label: p.nombre,
-                value: p.nombre,
-                idCorreoScript: p.idCorreoScript,
-              }))}
-              value={selectedPlantilla}
-              onChange={handleSelectChange}
-              className=" bg-gray-600"
-            />
-          </div>
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-jerarquia3 font-bold text-lg">Info</span>
-          </div>
+      <div className="py-2 px-4 rounded-lg bg-background-tertiary justify-between flex items-center">
+        <div className="flex justify-start items-end gap-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Plantilla
+          </label>
+          <SelectWallet
+            options={plantillas.map((p) => ({
+              label: p.nombre,
+              value: p.nombre,
+              idCorreoScript: p.idCorreoScript,
+            }))}
+            value={selectedPlantilla}
+            onChange={handleSelectChange}
+            className=" bg-gray-600"
+          />
         </div>
-      <div className=" bg-gray-700 rounded-lg p-4"> 
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-jerarquia3 font-bold text-lg">Info</span>
+        </div>
+      </div>
+      <div className=" bg-gray-700 rounded-lg p-4">
         <div className="border-1 p-3 border-jerarquia1 rounded-lg min-h-[200px] leading-relaxed">
           <input
             type="text"
@@ -390,7 +390,10 @@ const Template = ({
                   checked={vistaPrevia}
                   onChange={handleVistaPreviaChange}
                 />
-                <label htmlFor="vista-previa" className="ml-1 text-sm text-jerarquia1">
+                <label
+                  htmlFor="vista-previa"
+                  className="ml-1 text-sm text-jerarquia1"
+                >
                   Vista Previa
                 </label>
               </div>

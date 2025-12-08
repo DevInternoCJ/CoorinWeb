@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
 import ButtonSave from "../ButtonSave";
-import { postSavePhrases } from "../../../../../../services/mark/albaz/LokiServices";
+import { postSavePhrases } from "../../../../../../services/mark/orochi/LokeServices";
 import { useWalletProducts } from "../../../../../login/WalletProduct";
 
 export const InputPhrases = ({ onPhraseSaved }) => {
@@ -10,7 +10,7 @@ export const InputPhrases = ({ onPhraseSaved }) => {
   const { walletProducts } = useWalletProducts();
   const idProducto = walletProducts?.[0]?.idProducto;
   const idCartera = walletProducts?.[0]?.idCartera;
-  const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
   const idEjecutivo = userData?.idEjecutivo || userData?.id || null;
   const isValidPhrase = phrase.trim().length > 0;
   // Manejar cambio en el textarea
@@ -25,11 +25,15 @@ export const InputPhrases = ({ onPhraseSaved }) => {
       return;
     }
     if (!idProducto || !idCartera) {
-      toast.error("No se encontraron datos del producto. Por favor, recarga la página");
+      toast.error(
+        "No se encontraron datos del producto. Por favor, recarga la página"
+      );
       return;
     }
     if (!idEjecutivo) {
-      toast.error("No se encontró información del usuario. Por favor, inicia sesión nuevamente");
+      toast.error(
+        "No se encontró información del usuario. Por favor, inicia sesión nuevamente"
+      );
       return;
     }
     setLoading(true);
@@ -39,7 +43,7 @@ export const InputPhrases = ({ onPhraseSaved }) => {
         idEjecutivo,
         idCartera,
         idProducto,
-        textoFrase: phrase.trim()
+        textoFrase: phrase.trim(),
       };
       console.log("Guardando frase:", data);
       // Llamar al endpoint
@@ -47,13 +51,16 @@ export const InputPhrases = ({ onPhraseSaved }) => {
       console.log("Respuesta completa:", response);
 
       if (response?.exito || response?.success || response?.message) {
-        const successMessage = response?.message || response?.mensaje || "Frase guardada exitosamente";     
+        const successMessage =
+          response?.message ||
+          response?.mensaje ||
+          "Frase guardada exitosamente";
         // Mostrar toast de éxito con el mensaje del servidor
         toast.success(successMessage, {
           duration: 4000,
-          position: 'top-right',
-        });    
-       setPhrase(""); // Limpiar el textarea     
+          position: "top-right",
+        });
+        setPhrase(""); // Limpiar el textarea
         // Notificar al componente padre si existe callback
         if (onPhraseSaved) {
           onPhraseSaved(response);
@@ -62,7 +69,7 @@ export const InputPhrases = ({ onPhraseSaved }) => {
         toast.error(response?.mensaje || "Error al guardar la frase");
       }
     } catch (err) {
-      console.error("Error al guardar frase:", err);   
+      console.error("Error al guardar frase:", err);
       // Manejo de errores específicos
       if (err.response?.status === 401) {
         toast.error("Sesión expirada. Por favor, inicia sesión nuevamente", {

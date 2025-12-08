@@ -9,9 +9,12 @@ import ModalBase from "../../../board/ModalBase";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import SelectWallet from "../../../board/screenFields/SelectWallet";
 import SaveButton from "../../Administration/gespa/ButtonSave";
+import { toast } from "sonner";
+import { PostComments } from "../../../../../services/mark/orochi/LokeServices";
 import LogoCoorin from "../../../../../assets/logo_coorin_7.svg";
 import { IconComment } from "./IconsComments";
-import { getCatalogoValueCard } from "../../../../../services/mark/albaz/LokiServices";
+import { getCatalogoValueCard } from "../../../../../services/mark/orochi/LokeServices";
+import { useUserStore } from "../../../../../contextGlobal/userStore";
 
 const VIEW_TYPES = Object.freeze({ ADD: "add", LIST: "list" });
 
@@ -80,6 +83,7 @@ const useSituationCatalog = () => {
         setLoading(true);
         const data = await getCatalogoValueCard();
         // allowed ids según el original
+        console.log("Datos del catálogo de situaciones:", data);
         const allowedIds = [1001, 1002, 1003, 1012, 1030, 1042];
         const formatted = Array.isArray(data)
           ? data
@@ -170,7 +174,7 @@ const FloatingInput = ({ id, label, value, onChange, type = "text" }) => (
       value={value}
       onChange={onChange}
       placeholder={label}
-      className="peer px-5 pt-3 pb-1 block w-full bg-gray-100 border-2 border-gray-200 rounded-lg text-sm placeholder:text-transparent focus:outline-none focus:border-jerarquia2 focus:ring-jerarquia2 disabled:opacity-50"
+      className="peer px-5 pt-4 pb-1 block w-full bg-gray-100 border-2 border-gray-200 rounded-lg text-sm placeholder:text-transparent focus:outline-none focus:border-jerarquia2 focus:ring-jerarquia2 disabled:opacity-50"
     />
     <label
       htmlFor={id}
@@ -188,11 +192,11 @@ const FloatingTextarea = ({ id, label, value, onChange }) => (
       value={value}
       onChange={onChange}
       placeholder={label}
-      className="peer p-4 block w-full min-h-40 bg-gray-200 border-2 border-gray-200 focus:outline-none transition-colors duration-200 rounded-lg text-sm placeholder:text-transparent"
+      className="peer px-5 pt-5 pb-1 block w-full min-h-40 bg-gray-200 border-2 border-gray-200 transition-colors focus:pt-4 duration-200 focus:border-jerarquia3 rounded-lg text-sm placeholder:text-transparent"
     />
     <label
       htmlFor={id}
-      className="absolute top-0 left-0 p-4 h-full text-sm truncate pointer-events-none transition ease-in-out duration-100 peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500"
+      className="absolute top-0 left-0 px-5 p-2 h-full text-sm truncate pointer-events-none transition ease-in-out duration-100 peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
     >
       {label}
     </label>
@@ -244,7 +248,12 @@ const SituationSelectSection = ({
   </div>
 );
 
-const CommentForm = ({ commentText, onCommentChange, onSave }) => (
+const CommentForm = ({
+  commentText,
+  onCommentChange,
+  onSave,
+  commentError,
+}) => (
   <div className="bg-gray-50">
     <div className="m-5">
       <FloatingTextarea
@@ -253,6 +262,9 @@ const CommentForm = ({ commentText, onCommentChange, onSave }) => (
         value={commentText}
         onChange={(e) => onCommentChange(e.target.value)}
       />
+      {commentError ? (
+        <p className="mt-2 text-sm text-red-500">{commentError}</p>
+      ) : null}
     </div>
     <div className="flex justify-end px-5 pb-5">
       <SaveButton className="btn-success" onClick={onSave} />
@@ -260,18 +272,12 @@ const CommentForm = ({ commentText, onCommentChange, onSave }) => (
   </div>
 );
 
-const ListView = ({ wallet }) => (
-  <div className="transition-all duration-300 ease-in-out p-6 bg-white m-5 rounded-lg">
-    <h2 className="text-xl font-semibold mb-4">Lista de Comentarios</h2>
-    <p className="text-sm text-gray-600">
-      Cartera seleccionada:{" "}
-      <span className="font-semibold">{wallet || "Ninguna"}</span>
-    </p>
-  </div>
-);
-
 // ---------------------- Main component ----------------------
 const Comments = ({ onClose, onSaveComment }) => {
+  const user = useUserStore((state) => state.user);
+  const idEjecutivo = user?.idEjecutivo;
+  const idCartera = 1;
+  const servidor = "Orochi";
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
 
@@ -279,12 +285,49 @@ const Comments = ({ onClose, onSaveComment }) => {
   const { situationOptions, loading } = useSituationCatalog();
   const form = useCommentForm();
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
+    // Validación: mínimo 10 caracteres (sin contar espacios al inicio/final)
+    const text = String(form.commentText || "").trim();
+    if (text.length < 10) {
+      toast.error("El comentario debe tener al menos 10 caracteres.");
+      // enfocar textarea
+      const ta = document.getElementById("comment-textarea");
+      if (ta) ta.focus();
+      return;
+    }
+
     const formData = form.getFormData();
-    if (onSaveComment) onSaveComment(formData);
-    else console.log("Guardando comentario:", formData);
-    form.resetForm();
-  }, [form, onSaveComment]);
+    const selectedId = form.selectedSituation || null;
+    const selectedOpt = selectedId
+      ? situationOptions.find((o) => String(o.value) === String(selectedId))
+      : null;
+
+    const payload = {
+      situacion: selectedOpt ? selectedOpt.label : null,
+      idSituacion: selectedId
+        ? isNaN(Number(selectedId))
+          ? selectedId
+          : Number(selectedId)
+        : null,
+      idCartera: idCartera || null,
+      idCuenta: form.searchValue || null,
+      comentario: form.commentText || null,
+      idEjecutivo: idEjecutivo || null,
+      servidor: servidor || null,
+    };
+    console.log("Payload para guardar comentario:", payload);
+    try {
+      const resp = await PostComments(payload);
+      toast.success("Comentario guardado correctamente");
+      // Si el caller pasó un callback, notificarle también
+      if (onSaveComment) onSaveComment(formData, resp);
+      else console.log("Guardando comentario:", formData, resp);
+      form.resetForm();
+    } catch (err) {
+      console.error("Error guardando comentario:", err);
+      toast.error(err?.message || "Error al guardar comentario");
+    }
+  }, [form, onSaveComment, idEjecutivo, idCartera, servidor, situationOptions]);
 
   const checkboxOptions = useMemo(
     () => [
@@ -366,13 +409,11 @@ const Comments = ({ onClose, onSaveComment }) => {
 
           <CommentForm
             commentText={form.commentText}
-            onCommentChange={form.setCommentText}
+            onCommentChange={(val) => {
+              form.setCommentText(val);
+            }}
             onSave={handleSave}
           />
-
-          {activeView === VIEW_TYPES.LIST && (
-            <ListView wallet={form.selectedWallet} />
-          )}
         </div>
       </div>
     </div>

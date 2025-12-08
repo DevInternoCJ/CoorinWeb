@@ -3,32 +3,40 @@ import { EyeOpen, ArrowSync, LockSync } from "./PasswordIcons";
 import PASSWORD_REQUIREMENTS from "./Validations";
 import ButtonLogin from "../ButtonLogin";
 import EyeClose from "../../../assets/eye-close.svg";
-import { UpdatePassword } from "../../../services/mark/albaz/LokiServices";
+import { UpdatePassword } from "../../../services/mark/orochi/LokeServices";
 import { useUserStore } from "../../../contextGlobal/userStore";
 import { toast } from "sonner";
 
-const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje}) => {
+const ChangePassword = ({
+  onClose,
+  contraActual,
+  username,
+  passwordData,
+  mensaje,
+}) => {
   const user = useUserStore((state) => state.user);
-  
+
   //  MODIFICADO: Usar directamente los props que vienen de LoginCard
   const currentUsername = username;
   const currentContraActual = contraActual;
-  
+
   console.log("ChangePassword - Datos recibidos:", {
-    contraActual: currentContraActual ? ` "${currentContraActual}" (${currentContraActual.length} chars)` : "UNDEFINED",
+    contraActual: currentContraActual
+      ? ` "${currentContraActual}" (${currentContraActual.length} chars)`
+      : "UNDEFINED",
     username: currentUsername || "UNDEFINED",
     passwordData: passwordData,
-    userFromStore: user
+    userFromStore: user,
   });
 
   // Estados para los dos campos de contraseña (solo nueva y confirmar)
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
+
   // Estados de visibilidad
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   const [loading, setLoading] = useState(false);
 
   // Estado de errores
@@ -67,20 +75,24 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     //  MODIFICADO: Validar que tengamos la contraseña actual de los props
     if (!currentContraActual) {
-      toast.error("No se encontró la contraseña actual. Por favor, inicia sesión nuevamente.");
+      toast.error(
+        "No se encontró la contraseña actual. Por favor, inicia sesión nuevamente."
+      );
       console.error("Error: contraActual no disponible en props:", {
         contraActual: currentContraActual,
         username: currentUsername,
-        passwordData
+        passwordData,
       });
       return;
     }
 
     if (!currentUsername) {
-      toast.error("No se pudo identificar el usuario. Por favor, inicia sesión nuevamente.");
+      toast.error(
+        "No se pudo identificar el usuario. Por favor, inicia sesión nuevamente."
+      );
       return;
     }
 
@@ -100,7 +112,7 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
         usuario: currentUsername,
         contraActual: currentContraActual ? " PRESENTE" : " AUSENTE",
         nuevaContra: newPassword,
-        servidor: "Orochi"
+        servidor: "Orochi",
       });
 
       // Llamar al endpoint UpdatePassword
@@ -113,36 +125,35 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
 
       console.log("Respuesta de actualización exitosa:", response);
       toast.success("Contraseña actualizada exitosamente");
-      
+
       // Limpiar los campos
       setNewPassword("");
       setConfirmPassword("");
-      
+
       // Limpiar la contraseña temporal del store por seguridad
       const clearUser = useUserStore.getState().setUser;
       clearUser({
         ...user,
-        contraActual: undefined
+        contraActual: undefined,
       });
-      
+
       // Limpiar del localStorage de manera más completa
       try {
-        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        const userData = JSON.parse(localStorage.getItem("userData") || "{}");
         delete userData.contraActual;
-        localStorage.setItem('userData', JSON.stringify(userData));
-        
+        localStorage.setItem("userData", JSON.stringify(userData));
+
         // También limpiar username temporal si existe
-        localStorage.removeItem('tempUsername');
+        localStorage.removeItem("tempUsername");
       } catch (error) {
         console.error("Error limpiando localStorage:", error);
       }
-      
+
       console.log("Cambio de contraseña completado, cerrando modal...");
       onClose();
-      
     } catch (error) {
       console.error("Error al cambiar la contraseña:", error);
-      
+
       let errorMessage = "Error al cambiar la contraseña. Intenta nuevamente.";
 
       if (error.response && error.response.data && error.response.data.error) {
@@ -162,15 +173,23 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
     console.log("ChangePassword montado con los siguientes datos:", {
       props: {
         contraActual: contraActual ? `"${contraActual}"` : " NO RECIBIDA",
-        username: username || " NO RECIBIDO", 
-        passwordData: passwordData
+        username: username || " NO RECIBIDO",
+        passwordData: passwordData,
       },
       derived: {
         currentUsername,
-        currentContraActual: currentContraActual ? " DISPONIBLE" : " NO DISPONIBLE"
-      }
+        currentContraActual: currentContraActual
+          ? " DISPONIBLE"
+          : " NO DISPONIBLE",
+      },
     });
-  }, [contraActual, username, passwordData, currentUsername, currentContraActual]);
+  }, [
+    contraActual,
+    username,
+    passwordData,
+    currentUsername,
+    currentContraActual,
+  ]);
 
   return (
     <div className="flex flex-col justify-center items-center p-6 w-full">
@@ -199,32 +218,39 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
         <div className="bg-yellow-100 border border-yellow-400 p-3 rounded-lg mb-4 w-full">
           <p className="text-yellow-800 font-bold">Advertencia</p>
           <p className="text-yellow-700 text-sm">
-            No se recibió la contraseña actual. Esto puede causar errores al actualizar.
+            No se recibió la contraseña actual. Esto puede causar errores al
+            actualizar.
           </p>
           <details className="mt-2">
             <summary className="text-yellow-700 text-sm cursor-pointer">
               Ver detalles técnicos
             </summary>
             <pre className="text-xs mt-2 bg-yellow-50 p-2 rounded">
-              {JSON.stringify({
-                contraActual: currentContraActual,
-                username: currentUsername,
-                propsReceived: { contraActual, username, passwordData },
-                userFromStore: user
-              }, null, 2)}
+              {JSON.stringify(
+                {
+                  contraActual: currentContraActual,
+                  username: currentUsername,
+                  propsReceived: { contraActual, username, passwordData },
+                  userFromStore: user,
+                },
+                null,
+                2
+              )}
             </pre>
           </details>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="w-full">
-  {/* MOSTRAR MENSAJE SOLO SI dias ES 0 O NO ES NÚMERO */}
-  {passwordData?.mensaje && (passwordData?.diasRestantes === 0 || isNaN(passwordData?.diasRestantes)) && (
-    <kbd className="min-h-7.5 inline-flex mb-3 justify-center items-center py-1 px-1.5 bg-background-dashboard border border-transparent font-semibold text-sm text-red-800 rounded-md">
-      {passwordData.mensaje} {/* Usar passwordData.mensaje */}
-    </kbd>
-  )}
-  <div className="modal-body">
+        {/* MOSTRAR MENSAJE SOLO SI dias ES 0 O NO ES NÚMERO */}
+        {passwordData?.mensaje &&
+          (passwordData?.diasRestantes === 0 ||
+            isNaN(passwordData?.diasRestantes)) && (
+            <kbd className="min-h-7.5 inline-flex mb-3 justify-center items-center py-1 px-1.5 bg-background-dashboard border border-transparent font-semibold text-sm text-red-800 rounded-md">
+              {passwordData.mensaje} {/* Usar passwordData.mensaje */}
+            </kbd>
+          )}
+        <div className="modal-body">
           {/* Campo oculto para username (accesibilidad) */}
           <input
             type="text"
@@ -353,13 +379,17 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
             </ul>
           </div>
         </div>
-        
+
         <div className="modal-footer mt-6">
-          <ButtonLogin 
-            type="submit" 
-            loading={loading} 
+          <ButtonLogin
+            type="submit"
+            loading={loading}
             disabled={loading || !currentContraActual}
-            title={!currentContraActual ? "No se puede actualizar: contraseña actual no disponible" : ""}
+            title={
+              !currentContraActual
+                ? "No se puede actualizar: contraseña actual no disponible"
+                : ""
+            }
           >
             {loading ? "Actualizando..." : "Actualizar"}{" "}
             <span>
@@ -373,5 +403,3 @@ const ChangePassword = ({ onClose, contraActual, username, passwordData, mensaje
 };
 
 export default ChangePassword;
-
-
