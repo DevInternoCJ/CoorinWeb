@@ -12,9 +12,10 @@ import SaveButton from "../../Administration/gespa/ButtonSave";
 import { toast } from "sonner";
 import { PostComments } from "../../../../../services/mark/orochi/LokeServices";
 import LogoCoorin from "../../../../../assets/logo_coorin_7.svg";
-import { IconComment } from "./IconsComments";
+import { IconComment, IconFile } from "./IconsComments";
 import { getCatalogoValueCard } from "../../../../../services/mark/orochi/LokeServices";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
+import * as XLSX from "xlsx";
 
 const VIEW_TYPES = Object.freeze({ ADD: "add", LIST: "list" });
 
@@ -253,21 +254,27 @@ const CommentForm = ({
   onCommentChange,
   onSave,
   commentError,
+  showTextarea = true,
 }) => (
   <div className="bg-gray-50">
     <div className="m-5">
-      <FloatingTextarea
-        id="comment-textarea"
-        label="Comentario"
-        value={commentText}
-        onChange={(e) => onCommentChange(e.target.value)}
-      />
+      {showTextarea ? (
+        <>
+          <FloatingTextarea
+            id="comment-textarea"
+            label="Comentario"
+            value={commentText}
+            onChange={(e) => onCommentChange(e.target.value)}
+          />
+          <div className="flex justify-end mt-3">
+            <SaveButton className="btn-success" onClick={onSave} />
+          </div>
+        </>
+      ) : null}
+
       {commentError ? (
         <p className="mt-2 text-sm text-red-500">{commentError}</p>
       ) : null}
-    </div>
-    <div className="flex justify-end px-5 pb-5">
-      <SaveButton className="btn-success" onClick={onSave} />
     </div>
   </div>
 );
@@ -284,6 +291,132 @@ const Comments = ({ onClose, onSaveComment }) => {
   const { activeView, toggleView } = useViewManager();
   const { situationOptions, loading } = useSituationCatalog();
   const form = useCommentForm();
+  const [selectedFileName, setSelectedFileName] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewText, setPreviewText] = useState(null);
+  const [previewTable, setPreviewTable] = useState(null);
+  const fileInputRef = useRef(null);
+  const prevUrlRef = useRef(null);
+
+  // Generate preview when a file is selected: images -> object URL, text -> read as text
+  useEffect(() => {
+    let mounted = true;
+    if (!selectedFile) {
+      // cleanup previous
+      if (prevUrlRef.current) {
+        try {
+          URL.revokeObjectURL(prevUrlRef.current);
+        } catch {
+          /* ignore */
+        }
+        prevUrlRef.current = null;
+      }
+      setPreviewUrl(null);
+      setPreviewText(null);
+      return;
+    }
+
+    const file = selectedFile;
+    const isImage = file.type && file.type.startsWith("image/");
+
+    if (isImage) {
+      const url = URL.createObjectURL(file);
+      // revoke previous
+      if (prevUrlRef.current && prevUrlRef.current !== url) {
+        try {
+          URL.revokeObjectURL(prevUrlRef.current);
+        } catch {
+          /* ignore */
+        }
+      }
+      prevUrlRef.current = url;
+      if (mounted) {
+        setPreviewUrl(url);
+        setPreviewText(null);
+      }
+      return () => {
+        mounted = false;
+      };
+    }
+
+    // try reading text-like files
+    const isText = file.type && file.type.startsWith("text/");
+    const textExt = /\.csv$|\.txt$|\.json$/i.test(file.name || "");
+    if (isText || textExt) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (!mounted) return;
+        const txt = String(e.target.result || "").slice(0, 100000); // limit
+        setPreviewText(txt);
+        setPreviewUrl(null);
+      };
+      reader.onerror = () => {
+        if (!mounted) return;
+        setPreviewText(null);
+        setPreviewUrl(null);
+      };
+      reader.readAsText(file);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    // excel files (.xls/.xlsx)
+    const isExcel = /\.xlsx?$|\.xls$/i.test(file.name || "");
+    if (isExcel) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = e.target.result;
+          // read with cellDates so date cells become Date objects and use raw:false
+          // when converting to json so cells are formatted as displayed in Excel
+          const workbook = XLSX.read(data, { type: "array", cellDates: true });
+          const firstSheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[firstSheetName];
+          const rows = XLSX.utils.sheet_to_json(sheet, {
+            header: 1,
+            raw: false,
+          });
+          // keep only first 50 rows to avoid heavy renders
+          setPreviewTable(rows.slice(0, 50));
+          setPreviewUrl(null);
+          setPreviewText(null);
+        } catch {
+          setPreviewTable(null);
+        }
+      };
+      reader.onerror = () => {
+        setPreviewTable(null);
+      };
+      reader.readAsArrayBuffer(file);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    // other file types: no preview
+    setPreviewUrl(null);
+    setPreviewText(null);
+    setPreviewTable(null);
+    return () => {
+      mounted = false;
+    };
+  }, [selectedFile]);
+
+  // cleanup when component unmounts
+  useEffect(() => {
+    return () => {
+      if (prevUrlRef.current) {
+        try {
+          URL.revokeObjectURL(prevUrlRef.current);
+        } catch {
+          /* ignore */
+        }
+        prevUrlRef.current = null;
+      }
+    };
+  }, []);
 
   const handleSave = useCallback(async () => {
     // Validación: mínimo 10 caracteres (sin contar espacios al inicio/final)
@@ -355,7 +488,7 @@ const Comments = ({ onClose, onSaveComment }) => {
         ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-white rounded-lg shadow-2xl w-full max-w-4xl overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]`}
+        } bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader onClose={onClose} />
@@ -407,12 +540,122 @@ const Comments = ({ onClose, onSaveComment }) => {
             )}
           </section>
 
+          {/* Toolbar para la vista 'Insertar comentarios' */}
+          {activeView === VIEW_TYPES.LIST && (
+            <div className="my-3 mx-5 bg-neutral-100 flex items-center gap-5 rounded-md border-none">
+              <div className="flex-1 bg-background-tertiary border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600 truncate">
+                {selectedFileName || "Seleccione archivo"}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files && e.target.files[0];
+                  if (f) {
+                    setSelectedFileName(f.name);
+                    setSelectedFile(f);
+                    // reset previous previews
+                    setPreviewUrl(null);
+                    setPreviewText(null);
+                  } else {
+                    setSelectedFileName("");
+                    setSelectedFile(null);
+                    setPreviewUrl(null);
+                    setPreviewText(null);
+                  }
+                }}
+              />
+              <SaveButton
+                tooltip="Seleccionar archivo"
+                className="btn-info w-14"
+                onClick={() =>
+                  fileInputRef.current && fileInputRef.current.click()
+                }
+              >
+                {" "}
+                <IconFile className="size-5.5 " />
+              </SaveButton>
+
+              <SaveButton className="btn-success" onClick={handleSave}>
+                {" "}
+                Guardar
+              </SaveButton>
+            </div>
+          )}
+
+          {/* Preview area: cuando la vista es LIST mostramos la previsualización en lugar del textarea */}
+          {activeView === VIEW_TYPES.LIST && (
+            <div className="px-5 pb-5">
+              {previewUrl ? (
+                <div className="border-none rounded p-2 bg-white">
+                  <img
+                    src={previewUrl}
+                    alt={selectedFileName || "preview"}
+                    className="max-h-96 w-auto mx-auto"
+                  />
+                </div>
+              ) : previewTable ? (
+                <div className="border-none rounded-lg bg-white max-h-96 overflow-auto text-xs">
+                  <table className="min-w-full table-auto rounded-lg border-collapse text-sm">
+                    <thead>
+                      <tr className=" bg-jerarquia4">
+                        {[
+                          "Cuenta",
+                          "Fechas",
+                          "Horas",
+                          "Ejecutivo",
+                          "Comentario",
+                        ].map((label, ci) => (
+                          <th
+                            key={ci}
+                            className="border-none px-2 py-1 text-white text-left"
+                          >
+                            {label}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {previewTable.slice(1, 51).map((row, ri) => (
+                        <tr key={ri} className={ri % 2 ? "bg-gray-100" : ""}>
+                          {[0, 1, 2, 3, 4].map((ci) => (
+                            <td
+                              key={ci}
+                              className="border-none px-2 py-1 align-top"
+                            >
+                              {String((row || [])[ci] ?? "")}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : previewText ? (
+                <div className="border-none rounded p-3 bg-white max-h-96 overflow-auto text-xs">
+                  <pre className="whitespace-pre-wrap">{previewText}</pre>
+                </div>
+              ) : selectedFileName ? (
+                <div className="border-none rounded p-3 bg-white text-sm text-gray-600">
+                  Vista previa no disponible para este tipo de archivo:{" "}
+                  <strong>{selectedFileName}</strong>
+                </div>
+              ) : (
+                <div className="border-none rounded-lg p-3 bg-white text-sm text-gray-500">
+                  No hay archivo seleccionado
+                </div>
+              )}
+            </div>
+          )}
+
           <CommentForm
             commentText={form.commentText}
             onCommentChange={(val) => {
               form.setCommentText(val);
             }}
             onSave={handleSave}
+            showTextarea={activeView !== VIEW_TYPES.LIST}
           />
         </div>
       </div>
