@@ -2,14 +2,24 @@ import React, { useRef, useState } from "react";
 import ModalBase from "../../../board/ModalBase";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import { IconProcess, IconDefinition, IconAccountBlock, IconOnlineCharges, IconRepentance, IconStatement } from "./IconsProcessGespa";
+import Definition from "./process/Definition";
 
 const ProcessGespa = ({ onClose }) => {
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
-  
   // Estado para controlar qué tab está activo
   const [activeTab, setActiveTab] = useState('setting');
+  const [cartera, setCartera] = useState("");
+  const [tipo, setTipo] = useState("individual");
+  const [search, setSearch] = useState("");
 
+  const handleBuscar = () => {
+  console.log({
+    cartera,
+    tipo,
+    search,
+  });
+};
   // Configuración de tabs
   const tabs = [
     {
@@ -17,9 +27,7 @@ const ProcessGespa = ({ onClose }) => {
       label: 'Definición',
       icon: (
         <IconDefinition className="size-5" />
-      ),
-      title: 'Welcome to Your Dashboard',
-      content: 'Get a quick overview of your account and activity. Use the tabs on the left to access your settings, manage users, read messages, and view notifications. This dashboard helps you stay organized and manage everything in one place.'
+      )
     },
     {
       id: 'arrepentimientos',
@@ -117,12 +125,18 @@ const ProcessGespa = ({ onClose }) => {
                 key={tab.id}
                 className={`max-w-2xl ${activeTab === tab.id ? 'block' : 'hidden'}`}
               >
-                <h4 className="text-base font-semibold text-slate-900">
-                  {tab.title}
-                </h4>
-                <p className="text-sm text-slate-600 mt-4 leading-relaxed">
-                  {tab.content}
-                </p>
+                  {/* Mostrar SearchBar SOLO en el tab Definición */}
+    {tab.id === "definicion" && (
+      <Definition
+        cartera={cartera}
+        onCarteraChange={setCartera}
+        tipo={tipo}
+        onTipoChange={setTipo}
+        searchValue={search}
+        onSearchChange={setSearch}
+        onSearchClick={handleBuscar}
+      />
+    )}
               </div>
             ))}
           </div>
