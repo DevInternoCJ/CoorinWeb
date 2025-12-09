@@ -4,7 +4,7 @@ import OptionFields from "./OptionFields";
 import {
   GetScreenFields,
   SaveScreenFields,
-} from "../../../../services/mark/albaz/LokiServices";
+} from "../../../../services/mark/Orochi/LokiServices";
 import { useUserStore } from "../../../../contextGlobal/userStore";
 import SaveButton from "../../sideBar/Administration/gespa/ButtonSave";
 

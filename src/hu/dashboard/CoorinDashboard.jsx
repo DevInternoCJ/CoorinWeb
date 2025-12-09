@@ -34,13 +34,15 @@ export default function CoorinDashboard() {
   const buttonRef = useRef(null);
   const [modalSidebarOpen, setModalSidebarOpen] = useState(false);
   const [selectedSidebarOption, setSelectedSidebarOption] = useState("");
-  
   // Estados para controlar modales de las cards
   const [executiveModalOpen, setExecutiveModalOpen] = useState(false);
   const [consultationModalOpen, setConsultationModalOpen] = useState(false);
-  
+  // Estado global para el nombre del modal activo
+  const [activeModalName, setActiveModalName] = useState("");
   // Función para cerrar el sidebar (será pasada al CoorinSidebar)
   const [closeSidebarFn, setCloseSidebarFn] = useState(null);
+
+
 
     const [cuentaDataCapturaVisita, setCuentaDataCapturaVisita] = useState(null);
 
@@ -269,13 +271,14 @@ export default function CoorinDashboard() {
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
     if (sidebarOptionsMap[menuId]) {
       const option = sidebarOptionsMap[menuId];
-      console.log(`Abriendo modal para: ${option} (ID: ${menuId})`);
       setSelectedSidebarOption(option);
       setModalSidebarOpen(true);
       // Reiniciar tamaño del modal de arrepentimientos al abrir
       if (option === "Arrepentimientos") setRegrestModalSize('pagos');
     } else {
-      console.log(`Click en menú: ${menuTitle} (ID: ${menuId})`);
+      // Si no está en el mapeo, igual actualiza el nombre para la URL
+      setSelectedSidebarOption(menuTitle);
+      setModalSidebarOpen(true);
     }
   };
 
@@ -313,7 +316,7 @@ export default function CoorinDashboard() {
         <div
           className="transition-transform duration-200 flex-1 overflow-y-auto overflow-x-hidden"
           style={{
-            marginLeft: sidebarMinified ? "2.5rem" : undefined,
+            marginLeft: sidebarMinified ? "2.5rem" : "2.5rem", // 16rem = w-64
             marginBottom: "0",
             marginTop: "0",
             maxHeight: "100vh",
@@ -407,6 +410,7 @@ export default function CoorinDashboard() {
                   <GridConsultations
                     onModalOpen={() => setConsultationModalOpen(true)}
                     onModalClose={() => setConsultationModalOpen(false)}
+                    setActiveModalName={setActiveModalName}
                   />
                 </div>
               </div>

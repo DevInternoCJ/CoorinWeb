@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { infoEjecutivo, getEmailsInfo } from "../../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo, getEmailsInfo } from "../../../../../services/mark/Orochi/LokiServices";
 import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
 
-const EmailsContent = ({ mostrarTabla }) => {
+const EmailsContent = () => {
 
     const [loadingExcel, setLoadingExcel] = useState(false);
     const [errorExcel, setErrorExcel] = useState(null);
@@ -63,6 +63,7 @@ useEffect(() => {
     const handleDownloadExcel = async () => {
         setLoadingExcel(true);
         setErrorExcel(null);
+        const toastId = toast.loading(`Exportando correos...`);
         try {
             const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
             const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
@@ -110,6 +111,7 @@ useEffect(() => {
             console.error('Error al exportar los correos:', err);
         } finally {
             setLoadingExcel(false);
+            toast.dismiss(toastId);
         }
     };
 
@@ -176,7 +178,7 @@ useEffect(() => {
                             type="button"
                             className="btn-success w-full min-w-[120px] px-6 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
                             onClick={handleDownloadExcel}
-                            disabled={loadingExcel || !consulta}
+                            disabled={loadingExcel}
                         >
                             {loadingExcel ? "Exportando..." : "Guardar Excel"}
                         </button>

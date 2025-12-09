@@ -42,23 +42,6 @@ const ValidadoresModal = ({
     }, []);
 
 
-    // Footer personalizado con mensaje dinámico
-    const CustomFooter = () => {
-        // Función para determinar el mensaje a mostrar
-        const getMessage = () => {
-
-        };
-
-        return (
-            <div className="px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-4 
-                           bg-gray-50 border-t border-gray-200 flex-shrink-0">
-                <p className="text-sm text-justify m-0 italic"
-                    style={{ color: "var(--color-jerarquia3)" }}>
-                    {getMessage()}
-                </p>
-            </div>
-        );
-    };
 
     // Selectores para pasar al header
     const carteraSelector = (
@@ -157,14 +140,13 @@ const ValidadoresModal = ({
                 nodoEjecutivoHeader,
                 arrepentimientosCheckbox
             }}
-            footerComponent={CustomFooter}
             showFooter={true}
             enableBounce={enableBounce}
             enableShakeOnBackdropClick={enableShakeOnBackdropClick}
             enableBounceOnBackdropOrEscape={enableBounceOnBackdropOrEscape}
             closeOnBackdropClick={closeOnBackdropClick}
-            contentClassName="flex flex-col gap-4 h-full"
-            modalClassName="border-0 shadow-2xl h-[60vh] overflow-hidden"
+            contentClassName="flex flex-col gap-4 h-auto"
+            modalClassName="border-0 shadow-2xl overflow-hidden"
             {...props}
         >
             {/* Contenido principal con filtros */}

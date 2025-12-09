@@ -15,11 +15,23 @@ const TableMetas = ({
     return (
         <div className="metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full h-full overflow-hidden">
             {/* Contenedor de tabla con scroll */}
-            <div className="scrollbar-gray w-full flex-1 overflow-auto">
-                <table className="modal-table">
+            <div
+                className="scrollbar-gray w-full flex-1"
+                style={{
+                    overflowY: 'auto',
+                    maxHeight:
+                        window.innerWidth >= 1280 && window.innerWidth < 1536
+                            ? '40vh'
+                            : window.innerWidth >= 1024
+                                ? '40vh'
+                                : '50vh',
+                    minHeight: 0
+                }}
+            >
+                <table className="modal-table" style={{width: '100%', borderCollapse: 'collapse'}}>
                     <thead>
                         <tr>
-                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>
+                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 10, }}>
                                 <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                                     <input
                                         type="checkbox"
@@ -30,19 +42,19 @@ const TableMetas = ({
                                     Cambiar
                                 </span>
                             </th>
-                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Ejecutivo</th>
-                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Usuario</th>
-                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Cuentas</th>
-                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Titulares</th>
-                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Negociaciones</th>
-                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Cumplimientos</th>
-                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Monto Cumplido</th>
-                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Saldo Solucionado</th>
-                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>Segmento</th>
-                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>H.Entrada</th>
-                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 2 }}>H.Salida</th>
-                        </tr>
-                    </thead>
+                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 10,  }}>Ejecutivo</th>
+                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 10,  }}>Usuario</th>
+                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 10,  }}>Cuentas</th>
+                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 10,  }}>Titulares</th>
+                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 10,  }}>Negociaciones</th>
+                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 10,  }}>Cumplimientos</th>
+                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 10,  }}>Monto Cumplido</th>
+                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 10,  }}>Saldo Solucionado</th>
+                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 10,  }}>Segmento</th>
+                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 10,  }}>H.Entrada</th>
+                            <th style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 10,  }}>H.Salida</th>
+                        </tr >
+                    </thead >
                     <tbody>
                         {loading && (
                             <tr>
@@ -142,10 +154,9 @@ const TableMetas = ({
                                     </tr>
                                 );
                             })}
-                    </tbody>
-                </table>
+                    </tbody >
+                </table >
             </div>
-
         </div>
     );
 };

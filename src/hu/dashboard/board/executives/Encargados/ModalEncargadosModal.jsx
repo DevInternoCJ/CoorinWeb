@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import ModalEncargadosContent from "../Encargados/ModalEncargadosContent";
 import { IconEncargados } from "../IconesEjecutives";
-import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos, AsignaEncargados } from "../../../../../services/mark/albaz/LokiServices";
+import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos, AsignaEncargados } from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
 const EncargadosModal = ({ 
@@ -262,16 +262,12 @@ const EncargadosModal = ({
     );
 
 
-    // Footer personalizado con mensaje informativo
-    const CustomFooter = () => (
-        <div className="px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-4 
-                       bg-gray-50 border-t border-gray-200 flex-shrink-0">
-            <p className="text-sm text-justify m-0 italic"
-               style={{ color: "var(--color-jerarquia3)" }}>
-                Palomee los Ejecutivos que desee pasar a otro encargado y presione Cambiar.
-            </p>
-        </div>
-    );
+    // Mostrar toast informativo al montar el componente
+    useEffect(() => {
+        if (isOpen) {
+            toast.info("Palomee los Ejecutivos que desee pasar a otro encargado y presione Cambiar.");
+        }
+    }, [isOpen]);
 
     return (
         <ReusableModal
@@ -291,14 +287,14 @@ const EncargadosModal = ({
                 nodoEjecutivoHeader,
                 cambiarButton
             }}
-            footerComponent={CustomFooter}
+            // Sin footer informativo
             showFooter={true}
             enableBounce={enableBounce}
             enableShakeOnBackdropClick={enableShakeOnBackdropClick}
             enableBounceOnBackdropOrEscape={enableBounceOnBackdropOrEscape}
             closeOnBackdropClick={closeOnBackdropClick}
-            contentClassName="flex flex-col gap-4 h-full !overflow-hidden"
-            modalClassName="border-0 shadow-2xl h-[60vh] overflow-hidden"
+            contentClassName="flex flex-col gap-4 h-auto !overflow-hidden"
+            modalClassName="border-0 shadow-2xl overflow-hidden"
             {...props}
         >
             <ModalEncargadosContent 

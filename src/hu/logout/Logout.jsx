@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../../contextGlobal/userStore';
-import { putLogout } from '../../services/mark/albaz/LokiServices';
+import { putLogout } from '../../services/mark/Orochi/LokiServices';
 import CoorinGrenn from '../../assets/CoorinGreen.svg';
 
 const Logout = ({

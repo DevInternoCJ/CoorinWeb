@@ -72,23 +72,38 @@ const HistoricosModal = ({
             enableShakeOnBackdropClick={enableShakeOnBackdropClick}
             enableBounceOnBackdropOrEscape={enableBounceOnBackdropOrEscape}
             closeOnBackdropClick={closeOnBackdropClick}
-            contentClassName="flex flex-col gap-4 h-full" // Elimina !overflow-hidden
-            modalClassName="border-0 shadow-2xl h-[30vh]" // Elimina overflow-hidden
+            contentClassName={isIndividual === undefined ? 'p-0 overflow-visible min-h-0 max-h-none' : 'flex flex-col gap-4 h-full max-h-[80vh] min-h-[220px] sm:max-h-none md:max-h-none lg:max-h-none'}
+            modalClassName="border-0 shadow-2xl"
             {...props}
         >
             {/* Contenido principal con filtros */}
-            <div className="flex justify-center w-full flex-1">                 <ModalConsultaHistoricosFiltros
-                onIndividualChange={handleIndividualChange}
-                cartera={cartera}
-                setCartera={setCartera}
-                carteras={carteras}
-                carterasProductosData={carterasProductosData}
-                setProductos={setProductos}
-                setProducto={setProducto}
-                isIndividual={isIndividual}
-                setTipoSeleccionado={setTipoSeleccionado}
-            />
-            </div>
+            {isIndividual === undefined ? (
+                <HistoricosTipoSelector
+                    cartera={cartera}
+                    setCartera={setCartera}
+                    carteras={carteras}
+                    carterasProductosData={carterasProductosData}
+                    setProductos={setProductos}
+                    setProducto={setProducto}
+                    isIndividual={isIndividual}
+                    setTipoSeleccionado={setTipoSeleccionado}
+                    handleTipoSeleccion={setIsIndividual}
+                />
+            ) : (
+                <div className="flex justify-center w-full flex-1">
+                    <ModalConsultaHistoricosFiltros
+                        onIndividualChange={handleIndividualChange}
+                        cartera={cartera}
+                        setCartera={setCartera}
+                        carteras={carteras}
+                        carterasProductosData={carterasProductosData}
+                        setProductos={setProductos}
+                        setProducto={setProducto}
+                        isIndividual={isIndividual}
+                        setTipoSeleccionado={setTipoSeleccionado}
+                    />
+                </div>
+            )}
         </ReusableModal>
     );
 };

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useDashboardModalUrlSync } from "./../../../../hooks/useDashboardModalUrlSync";
 import dataDash from "../../dataDash";
 import { ExecutiveChart } from "../../DashboardIcons";
 import {
@@ -24,9 +25,12 @@ const CardExecutive = ({ onModalOpen, onModalClose }) => {
   const [showCatalogosModal, setShowCatalogosModal] = useState(false);
   const [showScriptsModal, setShowScriptsModal] = useState(false);
   const [showPantallaModal, setShowPantallaModal] = useState(false);
+  // Estado para el nombre del modal actual
+  const [activeModalName, setActiveModalName] = useState("");
 
-  const handleOpenModal = (modalSetter) => {
+  const handleOpenModal = (modalSetter, modalName) => {
     modalSetter(true);
+    setActiveModalName(modalName);
     if (onModalOpen) onModalOpen();
   };
 
@@ -37,21 +41,33 @@ const CardExecutive = ({ onModalOpen, onModalClose }) => {
 
   const handleCardClick = (title) => {
     if (title === "Metas") {
-      handleOpenModal(setShowMetasModal);
+      handleOpenModal(setShowMetasModal, "Metas");
     } else if (title === "Validadores") {
-      handleOpenModal(setShowValidadoresModal);
+      handleOpenModal(setShowValidadoresModal, "Validadores");
     } else if (title === "Encargados") {
-      handleOpenModal(setShowEncargadosModal);
+      handleOpenModal(setShowEncargadosModal, "Encargados");
     } else if (title === "Catalogos") {
-      handleOpenModal(setShowCatalogosModal);
+      handleOpenModal(setShowCatalogosModal, "Catalogos");
     } else if (title === "Scripts") {
-      handleOpenModal(setShowScriptsModal);
+      handleOpenModal(setShowScriptsModal, "Scripts");
     } else if (title === "Pantalla") {
-      handleOpenModal(setShowPantallaModal);
+      handleOpenModal(setShowPantallaModal, "Pantalla");
     } else {
+      setActiveModalName(title);
       alert(`Click en ${title}`);
     }
   };
+  // Sincroniza la URL con el nombre del modal abierto
+  useDashboardModalUrlSync(
+    "dashboardPage",
+    showMetasModal ? "Metas" :
+    showValidadoresModal ? "Validadores" :
+    showEncargadosModal ? "Encargados" :
+    showCatalogosModal ? "Catalogos" :
+    showScriptsModal ? "Scripts" :
+    showPantallaModal ? "Pantalla" :
+    activeModalName ? activeModalName : ""
+  );
 
   // Subcomponente que mide su propio ancho y decide si ocultar título
   const CardTile = ({ catalog }) => {

@@ -1,3 +1,53 @@
+/**
+ * Formatea los campos de moneda requeridos en un array de objetos.
+ * Aplica formato: $#,###.00
+ * @param {Array} data - Array de objetos
+ * @returns {Array} Nuevo array con los campos formateados
+ */
+export function formatCurrencyFields(data) {
+    if (!Array.isArray(data)) return data;
+    const currencyFields = ['MontoPago', 'MontoNegociado', 'SaldoNegociación', 'Saldo', 'MontoRequerido', 'MontoOfrecido', 'SaldoNegociación', 'MontoPagado'];
+    return data.map(row => {
+        const newRow = { ...row };
+        // Formateo de moneda
+        currencyFields.forEach(field => {
+            if (Object.prototype.hasOwnProperty.call(newRow, field)) {
+                let val = newRow[field];
+                if (val === null || val === undefined || val === '') return;
+                if (typeof val === 'string') val = val.replace(/[$,]/g, '');
+                let num = Number(val);
+                if (isNaN(num)) return;
+                let [entero, decimal] = String(num).split('.');
+                if (!decimal) {
+                    decimal = '00';
+                } else if (decimal.length === 1) {
+                    decimal = decimal + '0';
+                } else if (decimal.length > 2) {
+                    decimal = decimal.slice(0, 2);
+                }
+                const enteroFormateado = Number(entero).toLocaleString('en-US');
+                newRow[field] = `$${enteroFormateado}.${decimal}`;
+            }
+        });
+        // Formateo de fechas (incluye CreaciónNegociación)
+        Object.entries(newRow).forEach(([key, value]) => {
+            const keyLower = key.toLowerCase();
+            if (keyLower.includes('fecha') || key === 'CreaciónNegociación') {
+                if (typeof value === 'string') {
+                    // Quitar T00:00:00
+                    let fechaStr = value.replace(/T00:00:00$/, '');
+                    // Si está en formato AAAA-MM-DD, convertir a DD-MM-AAAA
+                    const match = fechaStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                    if (match) {
+                        fechaStr = `${match[3]}-${match[2]}-${match[1]}`;
+                    }
+                    newRow[key] = fechaStr;
+                }
+            }
+        });
+        return newRow;
+    });
+}
 import * as XLSX from 'xlsx';
 /**
  * Exporta datos a Excel (.xlsx) con ajuste automático de ancho de columna
@@ -10,13 +60,31 @@ export const exportDataToXLSX = (data, filename = 'export', options = {}) => {
         toast.warning('No hay datos para exportar.');
         return false;
     }
-    const ws = XLSX.utils.json_to_sheet(data);
+    // Limpiar campos de fecha y horario con 'T00:00:00'
+    let cleanData = data.map(row => {
+        const newRow = {};
+        Object.entries(row).forEach(([key, value]) => {
+            if (typeof value === 'string' && /T00:00:00$/.test(value)) {
+                if (key.toLowerCase().includes('fecha') || key.toLowerCase().includes('hora')) {
+                    newRow[key] = value.replace(/T00:00:00$/, '');
+                } else {
+                    newRow[key] = value;
+                }
+            } else {
+                newRow[key] = value;
+            }
+        });
+        return newRow;
+    });
+    // Formatear campos de moneda requeridos
+    cleanData = formatCurrencyFields(cleanData);
+    const ws = XLSX.utils.json_to_sheet(cleanData);
     // Calcular el ancho máximo de cada columna
-    const keys = Object.keys(data[0]);
+    const keys = Object.keys(cleanData[0]);
     const cols = keys.map(key => {
         const maxLen = Math.max(
             key.length,
-            ...data.map(row => (row[key] ? row[key].toString().length : 0))
+            ...cleanData.map(row => (row[key] ? row[key].toString().length : 0))
         );
         return { wch: maxLen + 2 };
     });
@@ -341,13 +409,15 @@ export const processAPIResponse = async (response, options = {}) => {
                 // Intentar convertir CSV a JSON
                 const rows = data.rawCSV.split('\n').map(row => row.split(','));
                 const headers = rows[0];
-                const jsonData = rows.slice(1).map(row => {
+                let jsonData = rows.slice(1).map(row => {
                     const obj = {};
                     headers.forEach((h, i) => {
                         obj[h] = row[i];
                     });
                     return obj;
                 });
+                // Formatear campos de moneda requeridos
+                jsonData = formatCurrencyFields(jsonData);
                 const result = exportDataToXLSX(jsonData, filename, exportOptions);
                 if (showToast) {
                     toast.dismiss(loadingToast);
@@ -358,8 +428,9 @@ export const processAPIResponse = async (response, options = {}) => {
                 return result;
             }
 
-            // Exportar a XLSX siempre
-            const result = exportDataToXLSX(data, filename, exportOptions);
+            // Exportar a XLSX siempre, formateando campos de moneda requeridos
+            const formattedData = formatCurrencyFields(Array.isArray(data) ? data : [data]);
+            const result = exportDataToXLSX(formattedData, filename, exportOptions);
 
             if (showToast) {
                 toast.dismiss(loadingToast);

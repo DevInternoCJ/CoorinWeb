@@ -1,11 +1,15 @@
 
 import React, { useState, useEffect} from "react";
-import { darkListV2 } from "../../../../services/mark/albaz/LokiServices";
+import { darkListV2 } from "../../../../services/mark/Orochi/LokiServices";
 import { toast } from 'sonner';
 
 const DarkListContent = () => {
 
     const [tipo, setTipo] = useState("cuenta");
+    useEffect(() => {
+        // Log para depuración del estado de los radio buttons
+        console.log("Tipo seleccionado:", tipo);
+    }, [tipo]);
     const [valor, setValor] = useState("");
     const [resultado, setResultado] = useState(null); // {enListaNegra: bool, msg: string}
     const [loading, setLoading] = useState(false);
@@ -110,7 +114,12 @@ const DarkListContent = () => {
         setValor("");
         setError(null);
         setResultado(null);
-
+        // Forzar actualización visual
+        setTimeout(() => {
+            document.querySelectorAll('input[type="radio"][name="tipo"]').forEach(radio => {
+                radio.checked = radio.value === nuevoTipo;
+            });
+        }, 0);
         let ayuda = '';
         if (nuevoTipo === 'telefono') {
             ayuda = 'Ingrese solo números, mínimo 10 y máximo 15 dígitos.';
@@ -124,96 +133,216 @@ const DarkListContent = () => {
 
     return (
         <div className="w-full box-border flex flex-col items-center">
-            <form onSubmit={handleBuscar} className="w-full mb-6">
-                <div className="flex flex-row justify-center items-center gap-4 w-full">
-                    {/* Columna vacía al inicio */}
-                    <div className="flex-1 min-w-0"></div>
-                    {/* Radio buttons juntos */}
-                    <div className="flex flex-row gap-1 flex-1 min-w-0 justify-end">
-                        <label className="inline-flex items-center gap-1">
+            <form onSubmit={handleBuscar} className="w-full">
+                {/* Layout para md y sm: filas separadas, para lg/xl/2xl: fila única */}
+                <div className="w-full">
+                    {/* md y sm: filas separadas */}
+                    <div className="block lg:hidden w-full">
+                        {/* Radio buttons: primer row */}
+                        <div className="w-full mb-4">
+                            {/* md: fila con radio buttons distribuidos uniformemente */}
+                            <div className="hidden md:flex w-full flex-row justify-between items-center">
+                                <label className="flex-1 flex justify-start items-center gap-1">
+                                    <input
+                                        type="radio"
+                                        name="tipo"
+                                        value="telefono"
+                                        checked={tipo === "telefono"}
+                                        onChange={() => handleTipoChange("telefono")}
+                                        className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                                    />
+                                    <span className="text-sm text-gray-700">Teléfono</span>
+                                </label>
+                                <label className="flex-1 flex justify-center items-center gap-1">
+                                    <input
+                                        type="radio"
+                                        name="tipo"
+                                        value="cuenta"
+                                        checked={tipo === "cuenta"}
+                                        onChange={() => handleTipoChange("cuenta")}
+                                        className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                                    />
+                                    <span className="text-sm text-gray-700">Cuenta</span>
+                                </label>
+                                <label className="flex-1 flex justify-end items-center gap-1">
+                                    <input
+                                        type="radio"
+                                        name="tipo"
+                                        value="correo"
+                                        checked={tipo === "correo"}
+                                        onChange={() => handleTipoChange("correo")}
+                                        className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                                    />
+                                    <span className="text-sm text-gray-700">Correo</span>
+                                </label>
+                            </div>
+                            {/* sm: fila expandida al ancho completo, siempre horizontal */}
+                            <div className="flex md:hidden w-full flex-row gap-4 justify-between items-center">
+                                <label className="flex-1 flex justify-start items-center gap-1">
+                                    <input
+                                        type="radio"
+                                        name="tipo"
+                                        value="telefono"
+                                        checked={tipo === "telefono"}
+                                        onChange={() => handleTipoChange("telefono")}
+                                        className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                                    />
+                                    <span className="text-sm text-gray-700">Teléfono</span>
+                                </label>
+                                <label className="flex-1 flex justify-center items-center gap-1">
+                                    <input
+                                        type="radio"
+                                        name="tipo"
+                                        value="cuenta"
+                                        checked={tipo === "cuenta"}
+                                        onChange={() => handleTipoChange("cuenta")}
+                                        className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                                    />
+                                    <span className="text-sm text-gray-700">Cuenta</span>
+                                </label>
+                                <label className="flex-1 flex justify-end items-center gap-1">
+                                    <input
+                                        type="radio"
+                                        name="tipo"
+                                        value="correo"
+                                        checked={tipo === "correo"}
+                                        onChange={() => handleTipoChange("correo")}
+                                        className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                                    />
+                                    <span className="text-sm text-gray-700">Correo</span>
+                                </label>
+                            </div>
+                        </div>
+                        {/* Input: segundo row */}
+                        <div className="w-full flex justify-center items-center mb-4">
                             <input
-                                type="radio"
-                                name="tipo"
-                                value="telefono"
-                                checked={tipo === "telefono"}
-                                onChange={() => handleTipoChange("telefono")}
-                                className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                                className="block w-full max-w-xl bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
+                                type="text"
+                                value={valor}
+                                onChange={e => {
+                                    if (tipo === "telefono") {
+                                        const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 15);
+                                        setValor(soloNumeros);
+                                    } else if (tipo === "cuenta") {
+                                        const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 16);
+                                        setValor(soloNumeros);
+                                    } else if (tipo === "correo") {
+                                        setValor(e.target.value.toLowerCase());
+                                    } else {
+                                        setValor(e.target.value);
+                                    }
+                                }}
+                                onPaste={e => {
+                                    if (tipo === "telefono") {
+                                        e.preventDefault();
+                                        const pasted = e.clipboardData.getData('text');
+                                        const soloNumeros = pasted.replace(/\D/g, "").slice(0, 15);
+                                        setValor(soloNumeros);
+                                    }
+                                }}
+                                placeholder={tipo === "telefono" ? "Teléfono" : tipo === "cuenta" ? "Cuenta" : "Correo"}
+                                disabled={loading}
+                                maxLength={tipo === "telefono" ? 15 : tipo === "cuenta" ? 16 : undefined}
                             />
-                            <span className="text-sm text-gray-700">Teléfono</span>
-                        </label>
-                        <label className="inline-flex items-center gap-1">
+                        </div>
+                        {/* Botón buscar: tercer row */}
+                        <div className="w-full flex justify-center items-center mb-4">
+                            <button
+                                type="submit"
+                                className="btn-success w-full max-w-xl px-4 py-2 rounded-lg text-white text-sm font-medium shadow-sm hover:brightness-95 flex justify-center"
+                                disabled={loading}
+                            >
+                                {loading ? "Buscando..." : "Buscar"}
+                            </button>
+                        </div>
+                    </div>
+                    {/* lg, xl, 2xl: fila única con todos los elementos como antes */}
+                    <div className="hidden lg:flex flex-row justify-center items-center gap-4 w-full">
+                        {/* Input */}
+                        <div className="flex-[2] min-w-0">
                             <input
-                                type="radio"
-                                name="tipo"
-                                value="cuenta"
-                                checked={tipo === "cuenta"}
-                                onChange={() => handleTipoChange("cuenta")}
-                                className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                                className="block w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
+                                type="text"
+                                value={valor}
+                                onChange={e => {
+                                    if (tipo === "telefono") {
+                                        const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 15);
+                                        setValor(soloNumeros);
+                                    } else if (tipo === "cuenta") {
+                                        const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 16);
+                                        setValor(soloNumeros);
+                                    } else if (tipo === "correo") {
+                                        setValor(e.target.value.toLowerCase());
+                                    } else {
+                                        setValor(e.target.value);
+                                    }
+                                }}
+                                onPaste={e => {
+                                    if (tipo === "telefono") {
+                                        e.preventDefault();
+                                        const pasted = e.clipboardData.getData('text');
+                                        const soloNumeros = pasted.replace(/\D/g, "").slice(0, 15);
+                                        setValor(soloNumeros);
+                                    }
+                                }}
+                                placeholder={tipo === "telefono" ? "Teléfono" : tipo === "cuenta" ? "Cuenta" : "Correo"}
+                                disabled={loading}
+                                maxLength={tipo === "telefono" ? 15 : tipo === "cuenta" ? 16 : undefined}
                             />
-                            <span className="text-sm text-gray-700">Cuenta</span>
-                        </label>
-                        <label className="inline-flex items-center gap-1">
-                            <input
-                                type="radio"
-                                name="tipo"
-                                value="correo"
-                                checked={tipo === "correo"}
-                                onChange={() => handleTipoChange("correo")}
-                                className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
-                            />
-                            <span className="text-sm text-gray-700">Correo</span>
-                        </label>
+                        </div>
+                        {/* Radio buttons */}
+                        <div className="flex flex-row gap-4 flex-1 min-w-0 justify-end">
+                            <label className="inline-flex items-center gap-1">
+                                <input
+                                    type="radio"
+                                    name="tipo"
+                                    value="telefono"
+                                    checked={tipo === "telefono"}
+                                    onChange={() => handleTipoChange("telefono")}
+                                    className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                                />
+                                <span className="text-sm text-gray-700">Teléfono</span>
+                            </label>
+                            <label className="inline-flex items-center gap-1">
+                                <input
+                                    type="radio"
+                                    name="tipo"
+                                    value="cuenta"
+                                    checked={tipo === "cuenta"}
+                                    onChange={() => handleTipoChange("cuenta")}
+                                    className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                                />
+                                <span className="text-sm text-gray-700">Cuenta</span>
+                            </label>
+                            <label className="inline-flex items-center gap-1">
+                                <input
+                                    type="radio"
+                                    name="tipo"
+                                    value="correo"
+                                    checked={tipo === "correo"}
+                                    onChange={() => handleTipoChange("correo")}
+                                    className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                                />
+                                <span className="text-sm text-gray-700">Correo</span>
+                            </label>
+                        </div>
+                        {/* Botón buscar */}
+                        <div className="flex-1 min-w-0 flex justify-center">
+                            <button
+                                type="submit"
+                                className="btn-success w-full px-4 py-2 rounded-lg text-white text-sm font-medium shadow-sm hover:brightness-95 flex justify-center"
+                                disabled={loading}
+                            >
+                                {loading ? "Buscando..." : "Buscar"}
+                            </button>
+                        </div>
                     </div>
-                    {/* Input */}
-                    <div className="flex-[2] min-w-0">
-                        <input
-                            className="block w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
-                            type="text"
-                            value={valor}
-                            onChange={e => {
-                                if (tipo === "telefono") {
-                                    const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 15);
-                                    setValor(soloNumeros);
-                                } else if (tipo === "cuenta") {
-                                    const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 16);
-                                    setValor(soloNumeros);
-                                } else if (tipo === "correo") {
-                                    setValor(e.target.value.toLowerCase());
-                                } else {
-                                    setValor(e.target.value);
-                                }
-                            }}
-                            onPaste={e => {
-                                if (tipo === "telefono") {
-                                    e.preventDefault();
-                                    const pasted = e.clipboardData.getData('text');
-                                    const soloNumeros = pasted.replace(/\D/g, "").slice(0, 15);
-                                    setValor(soloNumeros);
-                                }
-                            }}
-                            placeholder={tipo === "telefono" ? "Teléfono" : tipo === "cuenta" ? "Cuenta" : "Correo"}
-                            disabled={loading}
-                            maxLength={tipo === "telefono" ? 15 : tipo === "cuenta" ? 16 : undefined}
-                        />
-                    </div>
-                    {/* Botón */}
-                    <div className="flex-1 min-w-0 flex justify-center">
-                        <button
-                            type="submit"
-                            className="btn-success w-full px-4 py-2 rounded-lg text-white text-sm font-medium shadow-sm hover:brightness-95 flex justify-center"
-                            disabled={loading}
-                        >
-                            {loading ? "Buscando..." : "Buscar"}
-                        </button>
-                    </div>
-                    {/* Columna vacía al final */}
-                    <div className="flex-1 min-w-0"></div>
                 </div>
             </form>
-            <div className="w-full h-0.5 bg-gray-200 rounded mb-4" />
+            <div className="w-full h-0.5 bg-gray-200 rounded" />
 
             {(resultado || error) && (
-                <div className="w-full mt-2 mb-2 flex flex-col items-center">
+                <div className="w-full flex flex-col items-center">
                     {resultado ? (
                         <div className={`text-sm font-semibold ${resultado.enListaNegra ? 'text-red-600' : 'text-emerald-600'}`}>
                             {resultado.msg}

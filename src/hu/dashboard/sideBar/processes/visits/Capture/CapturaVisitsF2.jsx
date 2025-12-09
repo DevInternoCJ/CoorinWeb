@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { getCatalogoValueCard } from "../../../../../../services/mark/albaz/LokiServices";
+import { getCatalogoValueCard } from "../../../../../../services/mark/Orochi/LokiServices";
 
 
 const CapturaVisitsF2 = () => {

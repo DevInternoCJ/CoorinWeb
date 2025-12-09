@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getPhrases, putPhrases } from "../../../../../../services/mark/albaz/LokiServices";
+import { getPhrases, putPhrases } from "../../../../../../services/mark/Orochi/LokiServices";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import { toast } from "sonner"; // si ya usas sonner en tu proyecto
 import { IconActive, IconOffActive} from "./IconPhrases";

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
-import { infoEjecutivo, CargarFilasConsulta, campainghInCharge, sendArchiveCampanias } from "../../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo, CargarFilasConsulta, campainghInCharge, sendArchiveCampanias } from "../../../../../services/mark/Orochi/LokiServices";
 
 const ModalFilasCampañas = ({
   open,

@@ -5,7 +5,7 @@ import ModalConsultaCuentasColumnas from "./ModalConsultaCuentasColumnas";
 import ModalConsultaCuentasFooter from "./ModalConsultaCuentasFooter";
 import ExcelDownloader from "../Historical/ExcelDownloader";
 import { toast } from "sonner";
-import { postReportCampaign } from "../../../../../services/mark/albaz/LokiServices";
+import { postReportCampaign } from "../../../../../services/mark/Orochi/LokiServices";
 import * as XLSX from 'xlsx';
 import {useUserStore} from "../../../../../contextGlobal/userStore";
 const ModalConsultaCuentas = ({ onClose }) => {
@@ -94,7 +94,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
 
         // Construir el JSON
         const consultaJSON = {
-            servidor: "Albaz",
+            servidor: "Orochi",
             idCartera: headerData.idCartera || 1,
             idProducto: headerData.idProducto || 1,
             desdeFecha: fechaDesde || "2025-06-11",

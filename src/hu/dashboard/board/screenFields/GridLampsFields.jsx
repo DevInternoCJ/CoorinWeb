@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { GetGridFields } from "../../../../services/mark/albaz/LokiServices";
+import { GetGridFields } from "../../../../services/mark/Orochi/LokiServices";
 import useSelectedRowStore from "./selectedRowStore";
 import { useWalletProducts } from "../../../login/WalletProduct";
 import  {IconDrag}  from "../../../../components/iconos/IconDrag"
@@ -8,7 +8,7 @@ const GridLampsFields = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [draggedHeader, setDraggedHeader] = useState(""); // Estado para el header que se arrastra
-  const servidor = "Albaz";
+  const servidor = "Orochi";
   const { setSelectedRow, selectedRowIndex } = useSelectedRowStore();
   const { walletProducts} = useWalletProducts();
   const idProducto = walletProducts?.[0]?.idProducto;

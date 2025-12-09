@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useDashboardModalUrlSync } from "../../../../hooks/useDashboardModalUrlSync";
 import DataDashConsul from "../../DataDashConsul";
 import { ExecutiveChart } from "../../DashboardIcons";
 import { IconCuentas, IconProductividad, IconGenerales, IconHistoricos,IconExecutive,IconDayExecutive } from "./IconesConsultations";
@@ -15,10 +16,13 @@ const CardConsultations = ({ onModalOpen, onModalClose }) => {
     const [openGenerales, setOpenGenerales] = useState(false);
     const [openHistoricos, setOpenHistoricos] = useState(false);
     const [openEjecutivos, setOpenEjecutivos] = useState(false);
+    // Estado para el nombre del modal actual
+    const [activeModalName, setActiveModalName] = useState("");
 
     // Funciones para manejar la apertura de modales
-    const handleOpenModal = (modalSetter) => {
+    const handleOpenModal = (modalSetter, modalName) => {
         modalSetter(true);
+        setActiveModalName(modalName);
         if (onModalOpen) onModalOpen();
     };
 
@@ -81,22 +85,34 @@ const CardConsultations = ({ onModalOpen, onModalClose }) => {
         );
     };
 
+    // Sincroniza la URL con el nombre del modal abierto
+    useDashboardModalUrlSync(
+        "dashboardPage",
+        open ? "Cuentas" :
+        openProductividad ? "Productividad" :
+        openGenerales ? "Generales" :
+        openHistoricos ? "Historicos" :
+        openEjecutivos ? "Ejecutivos" :
+        activeModalName ? activeModalName : ""
+    );
+
     return (
         <>
             {DataDashConsul.map((catalog) =>
                 catalog.title === "Cuentas" ? (
-                    <CardTile key={catalog.id} catalog={catalog} onClick={() => handleOpenModal(setOpen)} />
+                    <CardTile key={catalog.id} catalog={catalog} onClick={() => handleOpenModal(setOpen, "Cuentas")} />
                 ) : (
                     <CardTile key={catalog.id} catalog={catalog} onClick={() => {
                         if (catalog.title === "Productividad") {
-                            handleOpenModal(setOpenProductividad);
+                            handleOpenModal(setOpenProductividad, "Productividad");
                         } else if (catalog.title === "Generales") {
-                            handleOpenModal(setOpenGenerales);
+                            handleOpenModal(setOpenGenerales, "Generales");
                         } else if (catalog.title === "Historicos") {
-                            handleOpenModal(setOpenHistoricos);
+                            handleOpenModal(setOpenHistoricos, "Historicos");
                         } else if (catalog.title === "Ejecutivos") {
-                            handleOpenModal(setOpenEjecutivos);
+                            handleOpenModal(setOpenEjecutivos, "Ejecutivos");
                         } else {
+                            setActiveModalName(catalog.title);
                             alert(`Click en ${catalog.title}`);
                         }
                     }} />

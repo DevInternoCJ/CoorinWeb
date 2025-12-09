@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Toaster, toast } from "sonner";
-import { infoEjecutivo, getExportReportPayments } from "../../../../../services/mark/albaz/LokiServices";
-import { exportDataToCSV } from "../../../../../utils/ExcelExporter";
+import { infoEjecutivo, getExportReportPayments } from "../../../../../services/mark/Orochi/LokiServices";
 import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
 
@@ -180,7 +179,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla, activeTab }) 
     // Exportar a Excel (CSV) usando ExcelExporter
     const handleExportar = () => {
         if (!tablaData.length) return;
-
+        const toastId = toast.loading(`Exportando pagos reportados...`);
         exportFromAPIResponse(
             tablaData,
             `pagos_reportados_${desde}_a_${hasta}`,
@@ -194,7 +193,9 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla, activeTab }) 
                 successMessage: "Archivo exportado correctamente. Ábrelo en Excel para visualizar los pagos.",
                 errorMessage: "Error al exportar los pagos reportados."
             }
-        );
+        ).finally(() => {
+            toast.dismiss(toastId);
+        });
     };
 
     return (
@@ -204,7 +205,7 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla, activeTab }) 
                 {!mostrarTabla && (
                     <>
                         {/* Contenedor horizontal tipo grid igual al expansivo */}
-                        <div className="w-full mb-4">
+                        <div className="w-full">
                             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 items-center">
                                 {/* Desde */}
                                 <div className="relative w-full min-w-0">

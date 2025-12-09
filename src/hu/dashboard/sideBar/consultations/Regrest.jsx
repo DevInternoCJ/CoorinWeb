@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getRegrest, infoEjecutivo } from "../../../../services/mark/albaz/LokiServices";
+import { getRegrest, infoEjecutivo } from "../../../../services/mark/Orochi/LokiServices";
 import { toast } from 'sonner';
 
 const RegrestContent = ({ growModal, isExpanded }) => {
@@ -92,11 +92,12 @@ const RegrestContent = ({ growModal, isExpanded }) => {
 
     // El layout horizontal solo aplica si el modal está expandido (pagos-xl)
     return (
-        <div className="w-full pt-0 px-6 pb-6 box-border flex flex-col">
-            <div className={isExpanded ? "w-full max-w-[1100px] mb-4 mx-auto" : "w-full max-w-2xl mb-4 mx-auto"}>
-                <div className="flex flex-row justify-center items-center gap-4 w-full">
-                    {/* Cartera */}
-                    <div className="relative w-full min-w-0 flex-1">
+        <div className="w-full box-border flex flex-col">
+            <div className="w-full max-w-[1100px] mb-4 mx-auto">
+                {/* sm y md: estructura vertical, lg/xl/2xl: horizontal con input expandible */}
+                <div className="block lg:flex lg:flex-row lg:items-center lg:gap-2 w-full">
+                    {/* Dropdown cartera */}
+                    <div className="relative w-full mb-4 lg:mb-0 lg:flex-shrink-0 lg:max-w-[180px]">
                         <select
                             id="cartera-select"
                             className="peer py-3 px-3 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none"
@@ -117,19 +118,26 @@ const RegrestContent = ({ growModal, isExpanded }) => {
                             Cartera
                         </label>
                     </div>
-                    {/* Cuenta */}
-                    <div className="flex-[2] min-w-0">
+                    {/* Input cuenta adaptado de DarkList.jsx */}
+                    <div className="mb-4 lg:mb-0 flex-1 lg:flex-[5] xl:flex-[5] 2xl:flex-[5] min-w-0 flex items-center justify-center">
                         <input
+                            className="block w-full lg:max-w-xl xl:max-w-xl 2xl:max-w-xl bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
                             type="text"
                             value={valor}
-                            onChange={e => setValor(e.target.value)}
+                            onChange={e => setValor(e.target.value.replace(/\D/g, "").slice(0, 16))}
+                            onPaste={e => {
+                                e.preventDefault();
+                                const pasted = e.clipboardData.getData('text');
+                                const soloNumeros = pasted.replace(/\D/g, "").slice(0, 16);
+                                setValor(soloNumeros);
+                            }}
                             placeholder="Ingrese nú. de cuenta"
-                            className="block w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
                             disabled={loading}
+                            maxLength={16}
                         />
                     </div>
-                    {/* Buscar */}
-                    <div className="flex-1 min-w-0 flex justify-center">
+                    {/* Botón buscar */}
+                    <div className="flex justify-center lg:flex-[2] xl:flex-[2] 2xl:flex-[2]">
                         <button
                             className="btn-success w-full px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
                             onClick={handleBuscar}

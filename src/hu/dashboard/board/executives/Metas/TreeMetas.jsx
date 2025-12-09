@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import JerarquiaConR from "../../branchs/JerarquiaConR.jsx";
-import { obetenerJerarquiaEncargados } from "../../../../../services/mark/albaz/LokiServices.js";
+import { obetenerJerarquiaEncargados } from "../../../../../services/mark/Orochi/LokiServices.js";
 
 const TreeMetas = ({
     setSelectedExecutives,
@@ -66,17 +66,12 @@ const TreeMetas = ({
             return ids;
         };
         if (rootNode) {
-            if (Array.isArray(rootNode.subordinados) && rootNode.subordinados.length > 0) {
-                const idsSubordinados = rootNode.subordinados.map(sub => Number(sub.idEjecutivo)).filter(id => Number.isInteger(id) && id > 0);
-                setSelectedExecutives(idsSubordinados);
-                setSelectedExecutiveNode(idEjecutivo);
-            } else if (idEjecutivo) {
-                setSelectedExecutives([Number(idEjecutivo)]);
-                setSelectedExecutiveNode(idEjecutivo);
-            }
+            // Recolecta todos los IDs del nodo raíz (incluyendo el propio y subordinados)
             const allIds = getAllHierarchyIds(rootNode)
                 .map(id => Number(id))
                 .filter(id => Number.isInteger(id) && id > 0);
+            setSelectedExecutives(allIds);
+            setSelectedExecutiveNode(idEjecutivo);
             setAllHierarchyIds(allIds);
         } else {
             setAllHierarchyIds([]);
@@ -84,21 +79,16 @@ const TreeMetas = ({
     }, [executiveTree, setSelectedExecutiveNode, setSelectedExecutives]);
 
     return (
-        <div
-            className="metas-block metas-block-1 w-full lg:w-auto bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] p-1.5"
-            style={{ fontSize: '0.92em' }}
-        >
-            <JerarquiaConR
-                executiveTree={executiveTree}
-                loadingJerarquia={loadingJerarquia}
-                errorJerarquia={errorJerarquia}
-                selectedExecutiveNode={selectedExecutiveNode}
-                allHierarchyIds={allHierarchyIds}
-                setSelectedExecutives={setSelectedExecutives}
-                setSelectedRows={setSelectedRows}
-                setSelectedExecutiveNode={setSelectedExecutiveNode}
-            />
-        </div>
+        <JerarquiaConR
+            executiveTree={executiveTree}
+            loadingJerarquia={loadingJerarquia}
+            errorJerarquia={errorJerarquia}
+            selectedExecutiveNode={selectedExecutiveNode}
+            allHierarchyIds={allHierarchyIds}
+            setSelectedExecutives={setSelectedExecutives}
+            setSelectedRows={setSelectedRows}
+            setSelectedExecutiveNode={setSelectedExecutiveNode}
+        />
     );
 };
 

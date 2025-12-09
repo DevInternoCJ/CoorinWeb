@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ShowFieldScreen } from "../../../../services/mark/albaz/LokiServices";
+import { ShowFieldScreen } from "../../../../services/mark/Orochi/LokiServices";
 import useSelectedRowStore from "./selectedRowStore";
 
 const InfoSection = ({

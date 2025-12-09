@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
-import { infoEjecutivo, getSearchesInformation } from "../../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo, getSearchesInformation } from "../../../../../services/mark/Orochi/LokiServices";
 
 
 const ConsultVisitContent = () => {

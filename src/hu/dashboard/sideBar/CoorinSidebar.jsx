@@ -452,7 +452,7 @@ export const CoorinSidebar = ({
   const asideClass = `${
     isMinified ? "hs-overlay-minified " : ""
   }hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 transition-transform duration-150 transform fixed top-0 start-0 bottom-0 ${
-    blocked ? "z-0" : "z-1"
+    blocked ? "z-50" : "z-100"
   } bg-white border-e border-gray-200 ${
     isMinified ? "w-[3.25rem]" : "w-64"
   } min-h-screen flex flex-col overflow-x-hidden ${

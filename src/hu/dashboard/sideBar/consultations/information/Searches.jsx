@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { infoEjecutivo, getSearchesInformation } from "../../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo, getSearchesInformation } from "../../../../../services/mark/Orochi/LokiServices";
 import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
 
 const SearchesContent = ({ headerControlsActive = false }) => {
-    // Mensaje de footer dinámico
-    const [footerMsg, setFooterMsg] = useState("Elija la consulta de las cuentas que desee las búsquedas y el periodo.");
-
     // Obtener datos de usuario desde localStorage
     const userData = JSON.parse(localStorage.getItem("userData"));
     const idCartera = userData?.idCartera || 0;
@@ -29,7 +26,6 @@ const SearchesContent = ({ headerControlsActive = false }) => {
     const [errorExcel, setErrorExcel] = useState(null);
     const [consultaSinRegistros, setConsultaSinRegistros] = useState(false);
     const [showToast, setShowToast] = useState(false);
-    const [footerColor, setFooterColor] = useState("text-gray-600")
 
     const minDate = "2016-01-01";
     const maxDate = new Date().toISOString().slice(0, 10);
@@ -64,6 +60,7 @@ const SearchesContent = ({ headerControlsActive = false }) => {
     const handleDownloadExcel = async () => {
         setLoadingExcel(true);
         setErrorExcel(null);
+        const toastId = toast.loading(`Exportando búsquedas...`);
         try {
             const idConsultaFinal = consulta === "" ? "0" : consulta;
             const params = {
@@ -90,12 +87,10 @@ const SearchesContent = ({ headerControlsActive = false }) => {
             );
 
             if (result) {
-                setFooterMsg("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
-                setFooterColor("text-green-600");
+                toast.success("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
             } else {
                 setConsultaSinRegistros(true);
-                setFooterMsg("Consulta terminada sin registros");
-                setFooterColor("text-black");
+                toast.warning("Consulta terminada sin registros");
             }
         } catch (err) {
             const status = err?.response?.status;
@@ -103,19 +98,18 @@ const SearchesContent = ({ headerControlsActive = false }) => {
             if (status === 404 && statusText === "Not Found") {
                 setConsultaSinRegistros(true);
                 setErrorExcel(null);
-                setFooterMsg("Consulta terminada sin registros");
-                setFooterColor("text-black");
+                toast.warning("Consulta terminada sin registros");
                 toast.warning("Su consulta no cuenta con registros en la fecha especificada", {
                     duration: 4000,
                 });
             } else {
                 setConsultaSinRegistros(false);
                 setErrorExcel('Error al obtener los pagos.');
-                setFooterMsg("No se pudo descargar el archivo de pagos.");
-                setFooterColor("text-red-600");
+                toast.error("No se pudo descargar el archivo de pagos.");
             }
         } finally {
             setLoadingExcel(false);
+            toast.dismiss(toastId);
         }
     };
 

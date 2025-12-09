@@ -4,7 +4,7 @@ import TableMetas from "./TableMetas.jsx";
 import TreeMetas from "./TreeMetas.jsx";
 import { Toaster, toast } from "sonner";
 
-import { obetenerTablaMetas, actualizarMetas } from "../../../../../services/mark/albaz/LokiServices.js";
+import { obetenerTablaMetas, actualizarMetas } from "../../../../../services/mark/Orochi/LokiServices.js";
 
 
 // Función para inyectar estilos CSS que oculten los controles de incremento
@@ -82,6 +82,13 @@ const validateCurrencyInput = (value) => {
 
 
 const ModalMetasContent = () => {
+        // Estado para el ancho de ventana y efecto resize
+        const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+        useEffect(() => {
+            const handleResize = () => setWindowWidth(window.innerWidth);
+            window.addEventListener('resize', handleResize);
+            return () => window.removeEventListener('resize', handleResize);
+        }, []);
     const lastCrossField = React.useRef(null);
     const [tablaMetas, setTablaMetas] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -881,9 +888,28 @@ const ModalMetasContent = () => {
     };
 
     return (
-        <div className="metas-responsive-blocks h-full w-full flex flex-col lg:flex-row gap-3" style={{ maxHeight: '68vh' }}>
+        <div
+            className="metas-responsive-blocks w-full flex flex-col lg:flex-row gap-3"
+            style={{
+                maxHeight: windowWidth >= 1024 ? '100vh' : 'none',
+                overflowY: windowWidth >= 1024 ? 'auto' : 'visible',
+                minHeight: 0
+            }}
+        >
             {/* Bloque 1: Jerarquía - En lg+: lateral izquierdo, en <lg: altura auto */}
-            <div className="w-full lg:w-auto lg:min-w-[200px] lg:max-w-[28vw] shrink-0">
+            <div
+                className="w-full lg:w-auto lg:min-w-[200px] lg:max-w-[28vw] shrink-0"
+                style={{
+                    maxHeight:
+                        windowWidth >= 1280
+                            ? '100vh'
+                            : windowWidth >= 1024
+                                ? '100vh'
+                                : '40vh',
+                    overflowY: 'auto',
+                    minHeight: 0
+                }}
+            >
                 <TreeMetas
                     setSelectedExecutives={setSelectedExecutives}
                     setSelectedRows={setSelectedRows}
@@ -893,7 +919,7 @@ const ModalMetasContent = () => {
             </div>
 
             {/* Bloque 2: Inputs + Tabla */}
-            <div className="flex-1 flex flex-col min-w-0 w-full gap-3">
+            <div className="flex-1 flex flex-col min-w-0 w-full gap-3" style={{minHeight: 0}}>
                 {/* Fila de inputs */}
                 <div className="w-full shrink-0">
                     <div className="bg-white rounded-lg p-2 sm:p-3 shadow border border-[var(--color-jerarquia1)] w-full">
@@ -1265,8 +1291,20 @@ const ModalMetasContent = () => {
                     </div>
                 </div>
 
-                {/* Tabla - ocupa el espacio restante con scroll */}
-                <div className="flex-1 min-h-[250px] w-full lg:overflow-hidden overflow-x-auto">
+                {/* Tabla - ocupa el espacio restante con scroll y altura máxima */}
+                <div
+                    className="flex-1 min-h-[250px] w-full lg:overflow-hidden overflow-x-auto"
+                    style={{
+                        maxHeight:
+                            windowWidth >= 1280
+                                ? '100vh'
+                                : windowWidth >= 1024
+                                    ? '100vh'
+                                    : '50vh',
+                        overflowY: 'auto',
+                        minHeight: 0
+                    }}
+                >
                     <TableMetas
                         tablaMetas={tablaMetas}
                         loading={loading}

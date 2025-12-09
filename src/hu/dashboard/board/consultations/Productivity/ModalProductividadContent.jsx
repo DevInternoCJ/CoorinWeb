@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import JerarquiaConR from "../../branchs/JerarquiaConR";
-import { obetenerJerarquiaEncargados } from "../../../../../services/mark/albaz/LokiServices";
+import { obetenerJerarquiaEncargados } from "../../../../../services/mark/Orochi/LokiServices";
 
 const ModalProductividadContent = ({
   timeFilter,
@@ -27,17 +27,9 @@ const ModalProductividadContent = ({
       setErrorJerarquia(null);
       try {
         const userData = JSON.parse(localStorage.getItem("userData"));
-        const idEjecutivo =
-          userData?.idEjecutivo ||
-          userData?.idejecutivo ||
-          userData?.id ||
-          null;
+        const idEjecutivo = userData?.idEjecutivo || null;
         const usuario = userData?.usuario || "";
-        const nombreEjecutivo =
-          userData?.nombre ||
-          userData?.nombreEjecutivo ||
-          userData?.ejecutivo ||
-          "";
+        const nombreEjecutivo = userData?.nombreEjecutivo || "";
         if (!idEjecutivo)
           throw new Error("No se encontró el idEjecutivo del usuario logueado");
         const data = await obetenerJerarquiaEncargados(idEjecutivo);
@@ -59,7 +51,7 @@ const ModalProductividadContent = ({
         }
         setExecutiveTree(tree);
       } catch (e) {
-        setErrorJerarquia("Error al obtener la jerarquía de ejecutivos");
+        setErrorJerarquia("Error al obtener la jerarquía de ejecutivos",e);
         setExecutiveTree([]);
       } finally {
         setLoadingJerarquia(false);
@@ -91,8 +83,6 @@ const ModalProductividadContent = ({
         .map((id) => Number(id))
         .filter((id) => Number.isInteger(id) && id > 0);
       setAllHierarchyIds(allIds);
-
-      // Seleccionar automáticamente el primer ejecutivo si no hay ninguno seleccionado
       if (!selectedExecutiveNode && allIds.length > 0) {
         setSelectedExecutiveNode(allIds[0]);
       }
@@ -178,7 +168,17 @@ const ModalProductividadContent = ({
 
     switch (selectedIndicator) {
       case "Sesiones":
-        return ["Extensión", "Ingreso", "Primer Gestión", "Modo", "TiempoEnModo"];
+        // Orden solicitado: ejecutivo, extension, idEncargado, ingreso, modo, primeraGestion, salida, tiempoEnModo
+        return [
+          "Ejecutivo",
+          "Extensión",
+          "Id Encargado",
+          "Ingreso",
+          "Modo",
+          "Primera Gestión",
+          "Salida",
+          "Tiempo En Modo"
+        ];
       case "Contactos":
         return [
           "conocidos",
@@ -208,19 +208,20 @@ const ModalProductividadContent = ({
           "SinContacto",
         ];
       case "Tiempos":
+        // Orden real del backend
         return [
-          "Encargado",
-          "Ejecutivo",
-          "Sesión",
-          "Cuentas",
-          "Pausas",
-          "Muerto",
-          "Consulta",
-          "Gestión",
-          "Permiso",
-          "Curso",
-          "Comida",
           "Baño",
+          "Comida",
+          "Consulta",
+          "Cuentas",
+          "Curso",
+          "Ejecutivo",
+          "Encargado",
+          "Gestión",
+          "Muerto",
+          "Pausas",
+          "Permiso",
+          "Sesión"
         ];
       case "Tiempo Promedio":
         return [
@@ -318,11 +319,14 @@ const ModalProductividadContent = ({
       case "Sesiones":
         return (
           <>
+            <th>Ejecutivo</th>
             <th>Extensión</th>
+            <th>Encargado</th>
             <th>Ingreso</th>
-            <th>Primer Gestión</th>
             <th>Modo</th>
-            <th>Tiempo En Modo</th>
+            <th>P. Gestión</th>
+            <th>Salida</th>
+            <th>T. Modo</th>
           </>
         );
       case "Contactos":
@@ -360,21 +364,21 @@ const ModalProductividadContent = ({
       case "Tiempos":
         return (
           <>
-            <th>Encargado</th>
-            <th>Ejecutivo</th>
-            <th>Sesión</th>
-            <th>Cuentas</th>
-            <th>Pausas</th>
-            <th>Muerto</th>
-            <th>Consulta</th>
-            <th>Gestión</th>
-            <th>Permiso</th>
-            <th>Curso</th>
-            <th>Comida</th>
             <th>Baño</th>
+            <th>Comida</th>
+            <th>Consulta</th>
+            <th>Cuentas</th>
+            <th>Curso</th>
+            <th>Ejecutivo</th>
+            <th>Encargado</th>
+            <th>Gestión</th>
+            <th>Muerto</th>
+            <th>Pausas</th>
+            <th>Permiso</th>
+            <th>Sesión</th>
           </>
         );
-      case "Tiempo Promedio":
+      case "TiempoPromedio":
         return (
           <>
             <th>Encargado</th>
@@ -392,9 +396,9 @@ const ModalProductividadContent = ({
       case "Titulares":
       case "Conocidos":
       case "Desconocidos":
-      case "Sin Contacto":
-      case "Monto Negociaciones":
-      case "Saldo Solucionado":
+      case "SinContacto":
+      case "MontoNegociaciones":
+      case "SaldoSolucionado":
         return (
           <>
             <th>Encargado</th>
@@ -436,7 +440,7 @@ const ModalProductividadContent = ({
     switch (selectedIndicator) {
       // Radio Button "Día"
       case "Sesiones":
-        return 5; // Extensión, Ingreso, 1erGestión, Modo, TiempoEnModo
+        return 8; // Ejecutivo, Extensión, Id Encargado, Ingreso, Modo, Primera Gestión, Salida, Tiempo En Modo
       case "Contactos":
         return 13; // campos mapeados según respuesta: conocidos, cuentas, desconocidos, entrada, gestiones, hora, montoNegociaciones, montoPromedio, negociaciones, saldoPromedio, saldoSolucionado, sinContacto, titulares
       case "Porcentajes":
@@ -450,7 +454,7 @@ const ModalProductividadContent = ({
       case "Titulares":
       case "Conocidos":
       case "Desconocidos":
-      case "Sin Contacto":
+      case "SinContacto":
       case "Monto Negociaciones":
       case "Saldo Solucionado":
         return 20; // Encargado, Ejecutivo, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, Total
@@ -501,29 +505,57 @@ const ModalProductividadContent = ({
       if (Array.isArray(item)) {
         values = item;
       } else if (typeof item === "object" && item !== null) {
-        // Mapeamos explícitamente por nombre de columna para evitar desalineamiento
         const headers = getTableHeaderTitles();
+        // Mapeos personalizados por indicador
+        const indicatorMappings = {
+          "Sesiones": {
+            "Ejecutivo": "ejecutivo",
+            "Extensión": "extension",
+            "Encargado": "idEncargado",
+            "Ingreso": "ingreso",
+            "Modo": "modo",
+            "P. Gestión": "primerGestion",
+            "Salida": "salida",
+            "T. Modo": "tiempoEnModo"
+          },
+          "Tiempos": {
+            // Las claves coinciden con los headers
+            "Baño": "Baño",
+            "Comida": "Comida",
+            "Consulta": "Consulta",
+            "Cuentas": "Cuentas",
+            "Curso": "Curso",
+            "Ejecutivo": "Ejecutivo",
+            "Encargado": "Encargado",
+            "Gestión": "Gestión",
+            "Muerto": "Muerto",
+            "Pausas": "Pausas",
+            "Permiso": "Permiso",
+            "Sesión": "Sesión"
+          }
+          // Agrega aquí más mapeos personalizados para otros indicadores si lo necesitas
+        };
+
         const headerToKey = (h) => {
           if (!h) return null;
-          const map = {
-            "Extensión": "extension",
-            "Ingreso": "ingreso",
-            "Salida": "salida",
-            "Primera Gestión": "primerGestion",
-            "Modo": "modo",
-            "Tiempo En Modo": "tiempoEnModo"
-          };
-          if (map[h]) return map[h];
-          // fallback: normalizar
-          const normalized = h.replace(/\s+/g, "").replace(/\W/g, "");
-          return normalized.charAt(0).toLowerCase() + normalized.slice(1);
+          const label = typeof h === 'object' && h.label ? h.label : h;
+          // Si existe mapeo personalizado para el indicador actual
+          if (indicatorMappings[selectedIndicator] && indicatorMappings[selectedIndicator][label]) {
+            return indicatorMappings[selectedIndicator][label];
+          }
+          // Otros indicadores: normalizar
+          if (typeof label === 'string') {
+            const normalized = label.replace(/\s+/g, "").replace(/\W/g, "");
+            return normalized.charAt(0).toLowerCase() + normalized.slice(1);
+          }
+          return '-';
         };
 
         if (headers && headers.length > 0) {
           values = headers.map((h) => {
             const key = headerToKey(h);
             const v = key && Object.prototype.hasOwnProperty.call(item, key) ? item[key] : undefined;
-            return v !== undefined ? v : "-";
+            return v !== undefined && v !== null && v !== "" ? v : "--";
           });
         } else {
           values = Object.values(item);
@@ -542,11 +574,11 @@ const ModalProductividadContent = ({
       return (
         <tr key={index}>
           {values.slice(0, columnCount).map((value, idx) => {
-            let display = value !== null && value !== undefined ? String(value) : "-";
+            let display = (value !== null && value !== undefined && value !== "") ? String(value) : "--";
             const header = headers[idx] || "";
 
             // Si la columna es 'Ingreso', extraer la parte de hora tras la 'T' (HH:MM:SS)
-            if (header === "Ingreso") {
+            if (header === "Ingreso" && display !== "--") {
               const m = display.match(/T(\d{2}:\d{2}:\d{2})/);
               if (m && m[1]) {
                 display = m[1];
@@ -590,11 +622,6 @@ const ModalProductividadContent = ({
           style={{ minWidth: 0 }}
         >
           {/* Información del ejecutivo seleccionado */}
-          {/* Aquí irá el header con los selectores; se renderiza desde el padre */}
-
-          {/* Ejecutivo info removed as per request - not showing executive above productivity table */}
-
-          {/* Fila de información */}
           <div className="flex items-center mb-2 w-full">
             <span className="modal-span-1 pl-1 mr-4">
               {loadingProductivity
@@ -609,18 +636,19 @@ const ModalProductividadContent = ({
             </span>
           </div>
 
-          {/* Tabla con scroll */}
+          {/* Tabla con scroll horizontal */}
           <div
             style={{
               overflowX: "auto",
               overflowY: "auto",
-              maxHeight: "31vh",
               height: "100%",
               flex: 1,
+              minWidth: '100%',
+              WebkitOverflowScrolling: 'touch'
             }}
             className="scrollbar-gray"
           >
-            <table className="modal-table mb-2">
+            <table className="modal-table mb-2" style={{ minWidth: '600px', width: 'max-content' }}>
               <thead>
                 <tr>{renderTableHeaders()}</tr>
               </thead>

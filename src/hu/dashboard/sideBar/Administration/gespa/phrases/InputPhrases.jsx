@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
 import ButtonSave from "../ButtonSave";
-import { postSavePhrases } from "../../../../../../services/mark/albaz/LokiServices";
+import { postSavePhrases } from "../../../../../../services/mark/Orochi/LokiServices";
 import { useWalletProducts } from "../../../../../login/WalletProduct";
 
 export const InputPhrases = ({ onPhraseSaved }) => {

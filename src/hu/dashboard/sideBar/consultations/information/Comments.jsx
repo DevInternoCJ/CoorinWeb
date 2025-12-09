@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { infoEjecutivo, getCommentsInformation } from "../../../../../services/mark/albaz/LokiServices";
+import { infoEjecutivo, getCommentsInformation } from "../../../../../services/mark/Orochi/LokiServices";
 import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 
 const CommentsContent = ({ headerControlsActive = false }) => {
@@ -61,6 +61,7 @@ const CommentsContent = ({ headerControlsActive = false }) => {
     const handleDownloadExcel = async () => {
         setLoadingExcel(true);
         setErrorExcel(null);
+        const toastId = toast.loading(`Exportando comentarios...`);
         try {
             const idConsultaFinal = consulta === "" ? "0" : consulta;
             const params = {
@@ -87,11 +88,11 @@ const CommentsContent = ({ headerControlsActive = false }) => {
             );
 
             if (result) {
-                setFooterMsg("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
+                toast.success("Archivo descargado correctamente. Abre el archivo en Excel para visualizar los pagos.");
                 setFooterColor("text-green-600");
             } else {
                 setConsultaSinRegistros(true);
-                setFooterMsg("Consulta terminada sin registros");
+                toast.warning("Consulta terminada sin registros");
                 setFooterColor("text-black");
             }
         } catch (err) {
@@ -100,7 +101,7 @@ const CommentsContent = ({ headerControlsActive = false }) => {
             if (status === 404 && statusText === "Not Found") {
                 setConsultaSinRegistros(true);
                 setErrorExcel(null);
-                setFooterMsg("Consulta terminada sin registros");
+                toast.warning("Consulta terminada sin registros");
                 setFooterColor("text-black");
                 toast.warning("Su consulta no cuenta con registros en la fecha especificada", {
                     duration: 4000,
@@ -108,11 +109,12 @@ const CommentsContent = ({ headerControlsActive = false }) => {
             } else {
                 setConsultaSinRegistros(false);
                 setErrorExcel('Error al obtener los pagos.');
-                setFooterMsg("No se pudo descargar el archivo de pagos.");
+                toast.error("No se pudo descargar el archivo de pagos.");
                 setFooterColor("text-red-600");
             }
         } finally {
             setLoadingExcel(false);
+            toast.dismiss(toastId);
         }
     };
 
@@ -213,7 +215,7 @@ const CommentsContent = ({ headerControlsActive = false }) => {
                         className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
                         style={{ margin: '0 auto', display: 'block', height: '32px' }}
                         onClick={handleDownloadExcel}
-                        disabled={loadingExcel || !consulta}
+                        disabled={loadingExcel}
                     >
                         {loadingExcel ? "Exportando..." : "Guardar Excel"}
                     </button>
@@ -320,7 +322,7 @@ const CommentsContent = ({ headerControlsActive = false }) => {
                         className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
                         style={{ margin: '0 auto', display: 'block', height: '32px' }}
                         onClick={handleDownloadExcel}
-                        disabled={loadingExcel || !consulta}
+                        disabled={loadingExcel}
                     >
                         {loadingExcel ? "Exportando..." : "Guardar Excel"}
                     </button>
@@ -418,7 +420,7 @@ const CommentsContent = ({ headerControlsActive = false }) => {
                     className="btn-success w-full min-w-[120px] max-w-full px-6 py-1 text-base font-medium rounded-lg shadow-sm flex justify-center self-center"
                     style={{ margin: '0 auto', display: 'block', height: '32px' }}
                     onClick={handleDownloadExcel}
-                    disabled={loadingExcel || !consulta}
+                    disabled={loadingExcel}
                 >
                     {loadingExcel ? "Exportando..." : "Guardar Excel"}
                 </button>
