@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import DefaultModalHeader from "../../modalGlobalReboot/DefaultModalHeader";
 import { IconEjecutivos } from "../../../board/consultations/IconesConsultations";
@@ -46,6 +47,14 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
     const [rawJerarquia, setRawJerarquia] = useState([]);
     const [dropdownsEncargados, setDropdownsEncargados] = useState([]);
     const [selectedRowKey, setSelectedRowKey] = useState(null);
+
+    // Mostrar toast.warning al montar el componente cuando el modal está abierto
+    useEffect(() => {
+        if (isOpen && resultados.length === 0) {
+            toast.info('Ingresa los parametros para buscar y se mostraran en la tabla.');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     // Funciones placeholder para los botones
     const handleBuscar = async () => {
@@ -126,8 +135,15 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
             const resp = await ReportEjecutives(body);
             console.log('ModalConsultaEjecutivos - ReportEjecutives response:', resp);
             const data = resp?.data ?? [];
-            if (Array.isArray(data)) setResultados(data);
-            else setResultados([]);
+            if (Array.isArray(data)) {
+                setResultados(data);
+                if (data.length === 0) {
+                    toast.warning('Necesitas hacer una búsqueda para ver los resultados aquí.');
+                }
+            } else {
+                setResultados([]);
+                toast.warning('Necesitas hacer una búsqueda para ver los resultados aquí.');
+            }
 
             // --- Construir opciones del dropdown "Encargados" basadas en matchesInDropdowns === 1 ---
             try {
@@ -640,8 +656,8 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                     onMouseLeave: e => e.target.style.color = '#147f5e',
                 },
             }}
-            contentClassName="h-[92vh] overflow-y-auto"
-            modalClassName="h-[98vh]"
+            contentClassName="min-h-[300px] max-h-[92vh] overflow-y-auto"
+            modalClassName="min-h-[350px] max-h-[98vh] h-auto"
             enableBounce={false}
             enableBounceOnBackdropOrEscape={true}
             closeOnBackdropClick={false}
@@ -753,29 +769,43 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 w-full min-w-0 mt-2 justify-center items-end">
                             {/* Desde - col 1 */}
                             <div className="flex justify-center">
-                                <div className="hs-input-group w-full max-w-full sm:max-w-[260px] md:max-w-[180px]">
-                                    <span className="hs-input-group-text min-w-[70px]">Desde</span>
+                                <div className="relative w-full max-w-full sm:max-w-[260px] md:max-w-[180px]">
                                     <input
                                         type="date"
+                                        id="fecha-desde-ejecutivos"
                                         max={yesterdayISO}
-                                        className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                         value={desde}
                                         onChange={(e) => setDesde(e.target.value)}
+                                        placeholder=" "
                                     />
+                                    <label
+                                        htmlFor="fecha-desde-ejecutivos"
+                                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                    >
+                                        Desde
+                                    </label>
                                 </div>
                             </div>
 
                             {/* Hasta - col 2 */}
                             <div className="flex justify-center">
-                                <div className="hs-input-group w-full max-w-full sm:max-w-[260px] md:max-w-[180px]">
-                                    <span className="hs-input-group-text min-w-[70px]">Hasta</span>
+                                <div className="relative w-full max-w-full sm:max-w-[260px] md:max-w-[180px]">
                                     <input
                                         type="date"
+                                        id="fecha-hasta-ejecutivos"
                                         max={yesterdayISO}
-                                        className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                                         value={hasta}
                                         onChange={(e) => setHasta(e.target.value)}
+                                        placeholder=" "
                                     />
+                                    <label
+                                        htmlFor="fecha-hasta-ejecutivos"
+                                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
+                                    >
+                                        Hasta
+                                    </label>
                                 </div>
                             </div>
 
@@ -807,7 +837,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                         {/* Fila de acciones eliminada: ahora todo está en el row de arriba */}
 
                 {/* Tabla de resultados */}
-                <div className="overflow-x-auto overflow-y-scroll relative" style={{ maxHeight: "600px", overflowY: 'scroll', overflowX: 'auto' }}>
+                <div className="overflow-x-auto overflow-y-auto relative" style={{ minHeight: "150px", maxHeight: "600px", overflowY: 'auto', overflowX: 'auto' }}>
                     {/* Spinner overlay centered */}
                     {loading && (
                         <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.6)', zIndex: 90 }}>
@@ -818,7 +848,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                         </div>
                     )}
 
-                    <table className="modal-table min-w-[900px] min-h-[280px] sm:min-h-[320px]">
+                    <table className="modal-table min-w-[900px]">
                         <thead>
                             <tr>
                                 {resultados && resultados.length > 0 ? (
@@ -869,26 +899,11 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {loading && (
-                                <tr>
-                                    <td colSpan={resultados && resultados.length > 0 ? (visibleColumns ? visibleColumns.length : Object.keys(resultados[0]).length) : 6} className="text-center py-4">
-                                        Cargando resultados...
-                                    </td>
-                                </tr>
-                            )}
-                            {error && (
-                                <tr>
-                                    <td colSpan={resultados && resultados.length > 0 ? (visibleColumns ? visibleColumns.length : Object.keys(resultados[0]).length) : 6} className="text-center text-red-600 py-4">
-                                        {error}
-                                    </td>
-                                </tr>
-                            )}
                             {!loading && !error && resultados && resultados.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="text-center py-4">No hay resultados</td>
+                                    <td colSpan={6} className="text-center py-4 text-gray-500">Necesitas hacer una búsqueda para ver los resultados aquí.</td>
                                 </tr>
                             )}
-
                             {!loading && resultados && resultados.length > 0 && resultados.map((row, idx) => (
                                 <tr key={idx} onClick={() => setSelectedRowKey(idx)} style={{ cursor: 'pointer' }}>
                                     {(visibleColumns || Object.keys(row)).map((k) => {

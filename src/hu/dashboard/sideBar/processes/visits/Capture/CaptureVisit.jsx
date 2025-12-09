@@ -250,7 +250,7 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                                     <label htmlFor="cartera-select-carga-visits" className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500">Cartera</label>
                                 </div>
                                 <div className="flex flex-col flex-1 items-center justify-start">
-                                    <label htmlFor="porExpediente" className="text-sm font-medium mb-1 text-center flex items-center justify-center h-full">Expediente</label>
+                                    <label htmlFor="porExpediente" className="text-sm font-medium mb-1 text-center flex items-center justify-center h-full">Expdte.</label>
                                     <input
                                         id="porExpediente"
                                         type="checkbox"

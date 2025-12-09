@@ -1,5 +1,8 @@
 import React, {lazy, Suspense} from 'react'
-import { Routes, Route} from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+
+// Componente para redirigir a home
+const RedirectToHome = () => <Navigate to="/" replace />;
 import './index.css'
 import './App.css'
 import PrortectedRoute from './utils/ProtectedRoute';
@@ -44,7 +47,16 @@ function App() {
           element={<PrortectedRoute canActivate={true} redirectTo="/" />}
         >
           <Route
-            path="/dashboardPage"
+            path="/dashboardPage/*"
+            element={
+              <Suspense fallback={<Loader />}>
+                <CoorinDashboard />
+              </Suspense>
+            }
+          />
+          {/* Ruta para SideBar con modal abierto */}
+          <Route
+            path="/SideBar/*"
             element={
               <Suspense fallback={<Loader />}>
                 <CoorinDashboard />
@@ -52,6 +64,8 @@ function App() {
             }
           />
         </Route>
+        {/* Ruta catch-all: redirige cualquier URL desconocida a / */}
+        <Route path="*" element={<RedirectToHome />} />
       </Routes>
     </div>
     </>

@@ -1074,16 +1074,21 @@ const ModalFilasCampañas = ({
                   >
                     {loadingConsultas ? (
                       <option value="">Cargando consultas...</option>
+                    ) : consultas.length === 0 ? (
+                      <option value="">No hay consultas disponibles</option>
                     ) : (
                       <>
-                        {consultas.map((consulta) => (
-                          <option 
-                            key={consulta.idConsulta} 
-                            value={consulta.idConsulta.toString()}
-                          >
-                            {consulta.NombreConsulta}
-                          </option>
-                        ))}
+                        <option value="">Seleccione una consulta</option>
+                        {consultas
+                          .filter((consulta) => consulta && consulta.idConsulta != null)
+                          .map((consulta) => (
+                            <option 
+                              key={consulta.idConsulta} 
+                              value={String(consulta.idConsulta)}
+                            >
+                              {consulta.NombreConsulta || "Sin nombre"}
+                            </option>
+                          ))}
                       </>
                     )}
                   </select>

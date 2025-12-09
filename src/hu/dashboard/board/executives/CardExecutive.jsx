@@ -36,6 +36,7 @@ const CardExecutive = ({ onModalOpen, onModalClose }) => {
 
   const handleCloseModal = (modalSetter) => {
     modalSetter(false);
+    setActiveModalName("");
     if (onModalClose) onModalClose();
   };
 

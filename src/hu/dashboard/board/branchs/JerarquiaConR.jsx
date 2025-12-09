@@ -12,7 +12,8 @@ const JerarquiaConR = ({
     usuariosValidadores = [],
     handleSeleccionarUsuario = () => {},
     producto = null,
-    omitSessionExecutive = false
+    omitSessionExecutive = false,
+    onNodeSelect = null // Callback para notificar cuando se selecciona un nodo
 }) => {
     // Logo y datos de sesión
     const userData = JSON.parse(localStorage.getItem('userData'));
@@ -102,6 +103,8 @@ const JerarquiaConR = ({
                             const allIds = collectAllIds(node).filter(id => id !== Number(idEjecutivoSesion));
                             if (allIds.length > 0) setSelectedExecutives(allIds);
                             else if (node.idEjecutivo) setSelectedExecutives([Number(node.idEjecutivo)]);
+                            // Notificar al componente padre sobre la selección del nodo
+                            if (onNodeSelect) onNodeSelect(node);
                             setTimeout(() => { if (ramificacionRef.current) ramificacionRef.current.scrollTo({ top: 0, behavior: 'smooth' }); }, 100);
                         }}
                         onDoubleClick={() => {
@@ -203,10 +206,11 @@ const JerarquiaConR = ({
     return (
         <div 
             ref={ramificacionRef}
-            className="productividad-branch"
+            className="productividad-branch scrollbar-gray"
             style={{
-                height: 'auto',
-                maxHeight: 'none',
+                height: '100%',
+                maxHeight: '55vh',
+                overflowY: 'auto',
                 width: 'auto',
                 background: '#ffffff',
                 borderRadius: 8,
@@ -226,8 +230,12 @@ const JerarquiaConR = ({
                             const allIds = collectAllIds(rootNode).filter(id => id !== Number(idEjecutivoSesion));
                             if (allIds.length > 0) setSelectedExecutives(allIds);
                             else setSelectedExecutives([Number(idEjecutivoSesion)]);
+                            // Notificar al componente padre sobre la selección del nodo de sesión
+                            if (onNodeSelect) onNodeSelect(rootNode);
                         } else {
                             setSelectedExecutives([Number(idEjecutivoSesion)]);
+                            // Crear nodo virtual para el callback
+                            if (onNodeSelect) onNodeSelect({ idEjecutivo: idEjecutivoSesion, usuario: usuarioSesion, nombreEjecutivo: nombreSesion });
                         }
                         setSelectedRows([]);
                         setSelectedExecutiveNode(Number(idEjecutivoSesion));

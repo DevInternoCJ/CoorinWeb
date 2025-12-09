@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import ModalProductividadContent from "./ModalProductividadContent";
 import { IconProductividad } from "../IconesConsultations";
@@ -58,6 +58,15 @@ const ProductivityModal = ({
     const [loadingProductivity, setLoadingProductivity] = useState(false);
     const [errorProductivity, setErrorProductivity] = useState(null);
     const [selectedExecutiveNode, setSelectedExecutiveNode] = useState(null);
+    
+    // Estado para caché de datos completos (cuando idsEjecutivos es [0])
+    const [cachedFullData, setCachedFullData] = useState({});
+    // Estado para el usuario seleccionado del árbol (para filtrado)
+    const [selectedUserFromTree, setSelectedUserFromTree] = useState(null);
+    
+    // Ref para acceder al caché actual sin recrear funciones
+    const cachedFullDataRef = useRef(cachedFullData);
+    cachedFullDataRef.current = cachedFullData;
 
     // Definir indicadores según el filtro de tiempo
     const indicadoresDia = [
@@ -148,8 +157,29 @@ const ProductivityModal = ({
     );
 
     // Función para obtener datos de productividad
-    const fetchProductivityData = async (indicador, idsEjecutivos) => {
+    const fetchProductivityData = useCallback(async (indicador, currentTimeFilter, shouldFetchAll = true, userFilter = null) => {
         if (!indicador) return;
+
+        // Crear clave única para el caché basada en indicador y timeFilter
+        const cacheKey = `${indicador}_${currentTimeFilter}`;
+
+        // Si no debemos hacer fetch (solo filtrar), usar datos del caché
+        if (!shouldFetchAll && cachedFullDataRef.current[cacheKey]) {
+            if (userFilter) {
+                // Filtrar datos del caché por usuario
+                const filteredData = cachedFullDataRef.current[cacheKey].filter(item => {
+                    // Buscar coincidencia en campo 'usuario', 'ejecutivo', 'Ejecutivo' o 'Usuario'
+                    const itemUser = item.usuario || item.ejecutivo || item.Ejecutivo || item.Usuario || '';
+                    return itemUser.toLowerCase() === userFilter.toLowerCase();
+                });
+                console.log(`Filtrando datos del caché para usuario: ${userFilter}`, filteredData);
+                setProductivityData(filteredData);
+            } else {
+                // Mostrar todos los datos del caché
+                setProductivityData(cachedFullDataRef.current[cacheKey]);
+            }
+            return;
+        }
 
         setLoadingProductivity(true);
         setErrorProductivity(null);
@@ -159,15 +189,11 @@ const ProductivityModal = ({
             const userData = JSON.parse(localStorage.getItem('userData')) || {};
             const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || 0;
 
-            // Lógica para idsEjecutivos
-            let idsToSend = Array.isArray(idsEjecutivos) ? idsEjecutivos.filter(id => !!id) : [];
-            // Si no hay seleccionados o el seleccionado es el mismo que la sesión, enviar [0]
-            if (!idsToSend.length || (idsToSend.length === 1 && idsToSend[0] === idEjecutivoSesion)) {
-                idsToSend = [0];
-            }
+            // Siempre enviar [0] para obtener todos los datos
+            const idsToSend = [0];
 
             // esModoHora: true si el radiobutton Hora está activo
-            const esModoHora = timeFilter === 'Hora';
+            const esModoHora = currentTimeFilter === 'Hora';
 
             const requestData = {
                 indicador: indicador,
@@ -176,24 +202,42 @@ const ProductivityModal = ({
                 esModoHora: esModoHora
             };
 
-            console.log('Enviando datos de productividad:', requestData);
+            console.log('Enviando datos de productividad (fetch completo con [0]):', requestData);
             const data = await getProductivity(requestData);
             console.log('Respuesta raw del endpoint de productividad:', data);
 
             // Manejar diferentes tipos de respuesta del servidor
+            let processedData = [];
             if (Array.isArray(data)) {
-                setProductivityData(data);
+                processedData = data;
             } else if (data && data.message) {
                 // Servidor devuelve mensaje (sin datos)
                 console.log('Servidor responde:', data.message);
-                setProductivityData([]);
+                processedData = [];
             } else if (data && typeof data === 'object') {
                 // Si es un objeto, intentar extraer array de datos
                 const dataArray = Object.values(data).find((val) => Array.isArray(val));
                 console.log('Respuesta procesada (array encontrado):', dataArray);
-                setProductivityData(dataArray || []);
+                processedData = dataArray || [];
+            }
+
+            // Guardar en caché los datos completos
+            setCachedFullData(prev => ({
+                ...prev,
+                [cacheKey]: processedData
+            }));
+            console.log(`Datos guardados en caché con clave: ${cacheKey}`, processedData);
+
+            // Si hay un filtro de usuario activo, aplicarlo
+            if (userFilter && processedData.length > 0) {
+                const filteredData = processedData.filter(item => {
+                    const itemUser = item.usuario || item.ejecutivo || item.Ejecutivo || item.Usuario || '';
+                    return itemUser.toLowerCase() === userFilter.toLowerCase();
+                });
+                console.log(`Aplicando filtro de usuario: ${userFilter}`, filteredData);
+                setProductivityData(filteredData);
             } else {
-                setProductivityData([]);
+                setProductivityData(processedData);
             }
         } catch (error) {
             console.error('Error al obtener datos de productividad:', error);
@@ -202,15 +246,42 @@ const ProductivityModal = ({
         } finally {
             setLoadingProductivity(false);
         }
-    };
+    }, []);
 
-    // Efecto para cargar datos cuando cambian el indicador o ejecutivo seleccionado
+    // Efecto para cargar datos cuando cambia el indicador o timeFilter (siempre hace fetch con [0])
     useEffect(() => {
-        if (selectedIndicator && selectedExecutiveNode) {
-            const idsToSend = [selectedExecutiveNode];
-            fetchProductivityData(selectedIndicator, idsToSend);
+        if (selectedIndicator) {
+            // Al cambiar indicador o timeFilter, hacer fetch completo
+            // El filtro se aplicará en el segundo useEffect si hay usuario seleccionado
+            fetchProductivityData(selectedIndicator, timeFilter, true, selectedUserFromTree);
         }
-    }, [selectedIndicator, selectedExecutiveNode]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedIndicator, timeFilter, fetchProductivityData]);
+
+    // Efecto para filtrar datos cuando cambia el usuario seleccionado del árbol
+    useEffect(() => {
+        if (!selectedIndicator) return;
+        
+        const cacheKey = `${selectedIndicator}_${timeFilter}`;
+        
+        // Solo filtrar si tenemos datos en caché (es decir, ya se hizo el fetch inicial)
+        if (cachedFullDataRef.current[cacheKey]) {
+            if (selectedUserFromTree) {
+                // Filtrar por el usuario seleccionado
+                const filteredData = cachedFullDataRef.current[cacheKey].filter(item => {
+                    const itemUser = item.usuario || item.ejecutivo || item.Ejecutivo || item.Usuario || '';
+                    return itemUser.toLowerCase() === selectedUserFromTree.toLowerCase();
+                });
+                console.log(`Filtrando datos del caché para usuario: ${selectedUserFromTree}`, filteredData);
+                setProductivityData(filteredData);
+            } else {
+                // Mostrar todos los datos del caché (usuario de sesión seleccionado)
+                console.log('Mostrando todos los datos del caché');
+                setProductivityData(cachedFullDataRef.current[cacheKey]);
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedUserFromTree]);
 
     return (
         <ReusableModal
@@ -234,11 +305,11 @@ const ProductivityModal = ({
             contentClassName="p-0"
             {...props}
         >
-            <div className="space-y-4">
+            <div className="h-full flex flex-col">
                 {/* Controles movidos al contenido de la derecha. Header simplificado. */}
 
-                {/* Contenido principal */}
-                <div className="min-h-[400px] max-h-[60vh] overflow-y-auto">
+                {/* Contenido principal - sin scroll, los componentes internos manejan su propio scroll */}
+                <div className="flex-1 h-full overflow-hidden">
                     <ModalProductividadContent
                         timeFilter={timeFilter}
                         selectedIndicator={selectedIndicator}
@@ -251,6 +322,7 @@ const ProductivityModal = ({
                         setSelectedIndicator={setSelectedIndicator}
                         indicadoresDia={indicadoresDia}
                         indicadoresHora={indicadoresHora}
+                        setSelectedUserFromTree={setSelectedUserFromTree}
                     />
                 </div>
             </div>
