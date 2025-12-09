@@ -369,20 +369,109 @@ const Comments = ({ onClose, onSaveComment }) => {
       reader.onload = (e) => {
         try {
           const data = e.target.result;
-          // read with cellDates so date cells become Date objects and use raw:false
-          // when converting to json so cells are formatted as displayed in Excel
+          // read with cellDates so date cells may become Date objects
           const workbook = XLSX.read(data, { type: "array", cellDates: true });
           const firstSheetName = workbook.SheetNames[0];
           const sheet = workbook.Sheets[firstSheetName];
+          // read raw values (no automatic formatting) and process dates/times ourselves
           const rows = XLSX.utils.sheet_to_json(sheet, {
             header: 1,
-            raw: false,
+            raw: true,
           });
+
+          // helpers to format date and time according to requirement
+          const pad = (n) => String(n).padStart(2, "0");
+          const excelSerialToDate = (v) => {
+            // Excel stores days since 1899-12-31; convert serial to JS Date (UTC)
+            try {
+              const ms = Math.round((v - 25569) * 86400 * 1000);
+              return new Date(ms);
+            } catch {
+              return null;
+            }
+          };
+
+          const formatDate = (val) => {
+            if (val == null || val === "") return "";
+            if (val instanceof Date && !isNaN(val)) {
+              return `${pad(val.getDate())}/${pad(
+                val.getMonth() + 1
+              )}/${val.getFullYear()}`;
+            }
+            if (typeof val === "number") {
+              const d = excelSerialToDate(val);
+              if (d && !isNaN(d))
+                return `${pad(d.getDate())}/${pad(
+                  d.getMonth() + 1
+                )}/${d.getFullYear()}`;
+            }
+            // try parsing strings
+            const parsed = new Date(String(val));
+            if (!isNaN(parsed))
+              return `${pad(parsed.getDate())}/${pad(
+                parsed.getMonth() + 1
+              )}/${parsed.getFullYear()}`;
+            return String(val);
+          };
+
+          const formatTime = (val) => {
+            if (val == null || val === "") return "";
+            let dateObj = null;
+
+            if (val instanceof Date && !isNaN(val)) {
+              dateObj = val;
+            } else if (typeof val === "number") {
+              // fractional day (e.g., 0.5 -> 12:00:00) or full serial
+              if (val > 1) {
+                dateObj = excelSerialToDate(val);
+              } else {
+                const ms = Math.round(val * 24 * 3600 * 1000);
+                dateObj = new Date(ms);
+              }
+            } else {
+              const s = String(val).trim();
+              // try match hh:mm[:ss] [am|pm]
+              const m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)?$/i);
+              if (m) {
+                let hh = parseInt(m[1], 10);
+                const mm = parseInt(m[2], 10);
+                const ss = m[3] ? parseInt(m[3], 10) : 0;
+                const ampm = m[4] ? m[4].toLowerCase() : null;
+                if (ampm === "pm" && hh < 12) hh += 12;
+                if (ampm === "am" && hh === 12) hh = 0;
+                dateObj = new Date();
+                dateObj.setHours(hh, mm, ss, 0);
+              } else {
+                const parsed = new Date(s);
+                if (!isNaN(parsed)) dateObj = parsed;
+              }
+            }
+
+            if (!dateObj || isNaN(dateObj)) return String(val);
+
+            const hh24 = dateObj.getHours();
+            const minutes = dateObj.getMinutes();
+            const seconds = dateObj.getSeconds();
+            let hh12 = hh24 % 12;
+            if (hh12 === 0) hh12 = 12;
+            const ampm = hh24 >= 12 ? "pm" : "am"; // lowercase per requirement
+            return `${pad(hh12)}:${pad(minutes)}:${pad(seconds)} ${ampm}`;
+          };
+
+          // apply formatting to expected columns: index 1 -> Fecha, index 2 -> Hora
+          const formatted = rows.map((row) => {
+            const r = Array.isArray(row) ? row.slice() : [];
+            r[1] = formatDate(r[1]);
+            r[2] = formatTime(r[2]);
+            return r;
+          });
+
           // keep only first 50 rows to avoid heavy renders
-          setPreviewTable(rows.slice(0, 50));
+          setPreviewTable(formatted.slice(0, 50));
           setPreviewUrl(null);
           setPreviewText(null);
-        } catch {
+        } catch (err) {
+          console.error("Error parsing excel for preview:", err);
           setPreviewTable(null);
         }
       };
@@ -577,8 +666,22 @@ const Comments = ({ onClose, onSaveComment }) => {
                 <IconFile className="size-5.5 " />
               </SaveButton>
 
-              <SaveButton className="btn-success" onClick={handleSave}>
-                {" "}
+              <SaveButton
+                className={`btn-success ${
+                  !selectedFile ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                onClick={() => {
+                  if (!selectedFile) return;
+                  handleSave();
+                }}
+                disabled={!selectedFile}
+                aria-disabled={!selectedFile}
+                title={
+                  !selectedFile
+                    ? "Seleccione un archivo antes de guardar"
+                    : "Guardar"
+                }
+              >
                 Guardar
               </SaveButton>
             </div>
