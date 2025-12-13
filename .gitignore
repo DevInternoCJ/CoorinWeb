@@ -20,7 +20,7 @@ obj/
 .vscode/
 .history/
 *.code-workspace
-
+.vs/*
 # JetBrains Rider
 .idea/
 

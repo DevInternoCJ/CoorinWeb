@@ -24,103 +24,69 @@ namespace Loki.Mark.Consulta.Productividad.Controllers
 
         [HttpPost("get-productividad")]
         [SwaggerOperation(
-            Summary = "Consulta Productividad - Irene",
+            Summary = "productividad - Irene",
             Description = "Obtiene la productividad de uno o más ejecutivos."
         )]
         public async Task<IActionResult> ObtieneProductividad([FromBody] ProductividadRequest request)
         {
-            Console.WriteLine($"=== CONTROLLER: obtieneProductividad INICIADO ===");
-            Console.WriteLine($"Request recibido:");
-            Console.WriteLine($"  - Indicador: {request.Indicador}");
-            Console.WriteLine($"  - IdsEjecutivos: [{string.Join(", ", request.IdsEjecutivos)}]");
-            Console.WriteLine($"  - IdEjecutivoPrincipal: {request.IdEjecutivoPrincipal}");
-            Console.WriteLine($"  - EsModoHora: {request.EsModoHora}");
+            Console.WriteLine($"=== CONTROLLER: ObtieneProductividad INICIADO ===");
 
+            // --- 1. Validaciones Iniciales ---
             if (string.IsNullOrWhiteSpace(request.Indicador))
             {
-                Console.WriteLine($"❌ ERROR: Indicador requerido");
                 return BadRequest(new { error = "El indicador es requerido" });
+            }
+
+            // Validación y conversión de int? a int
+            if (request.IdEjecutivoPrincipal == null || request.IdEjecutivoPrincipal <= 0)
+            {
+                return BadRequest(new { error = "El IdEjecutivoPrincipal es requerido y debe ser positivo." });
             }
 
             if (request.IdsEjecutivos == null || request.IdsEjecutivos.Count == 0)
             {
-                Console.WriteLine($"❌ ERROR: Se requiere al menos un ID de ejecutivo");
                 return BadRequest(new { error = "Se requiere al menos un ID de ejecutivo" });
             }
+
+            int idEjecutivoPrincipal = request.IdEjecutivoPrincipal.Value;
 
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
             if (string.IsNullOrWhiteSpace(servidorClaim))
             {
-                Console.WriteLine($"❌ ERROR: No se encontró el claim 'Servidor'");
                 return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
             }
 
-            Console.WriteLine($"Servidor claim: {servidorClaim}");
-
             try
             {
-                var resultados = new List<object>();
+                // --- 2. Llamada única al Service ---
+                var productividad = await _productividadService.ObtieneProductividad(
+                    request.Indicador,
+                    idEjecutivoPrincipal,
+                    servidorClaim,
+                    request.EsModoHora
+                );
 
-                Console.WriteLine($"Procesando {request.IdsEjecutivos.Count} ejecutivo(s)...");
+                // Consolida el resultado (ya formateado si es Sesiones)
+                var resultadosList = (productividad as System.Collections.IEnumerable)?.Cast<object>().ToList() ?? new List<object>();
 
-                foreach (var idEjecutivo in request.IdsEjecutivos)
-                {
-                    Console.WriteLine($"📞 Llamando Service para ejecutivo: {idEjecutivo}");
-
-                    var productividad = await _productividadService.obtieneProductividad(
-                        request.Indicador,
-                        idEjecutivo,
-                        servidorClaim,
-                        request.EsModoHora
-                    );
-
-                    Console.WriteLine($"✅ Service retornó para ejecutivo {idEjecutivo}");
-
-                    if (productividad is System.Collections.IEnumerable enumerable && productividad is not string)
-                    {
-                        int count = 0;
-                        foreach (var item in enumerable)
-                        {
-                            resultados.Add(item);
-                            count++;
-                        }
-                        Console.WriteLine($"  - Agregados {count} items del enumerable");
-                    }
-                    else
-                    {
-                        resultados.Add(productividad);
-                        Console.WriteLine($"  - Agregado 1 item directo");
-                    }
-                }
-
-                Console.WriteLine($"📊 Total resultados acumulados: {resultados.Count}");
-
+                // --- 3. Construcción de la Respuesta ---
                 var response = new ProductividadResponse
                 {
-                    Datos = resultados,
+                    Datos = resultadosList,
                     Modo = request.EsModoHora ? "Hora" : "Dia",
                     Indicador = request.Indicador,
-                    TotalRegistros = resultados.Count
+                    TotalRegistros = resultadosList.Count
                 };
-
-                Console.WriteLine($"✅ RESPONSE ENVIADO:");
-                Console.WriteLine($"  - Indicador: {response.Indicador}");
-                Console.WriteLine($"  - Modo: {response.Modo}");
-                Console.WriteLine($"  - TotalRegistros: {response.TotalRegistros}");
 
                 return Ok(response);
             }
             catch (ArgumentException ex)
             {
-                Console.WriteLine($"❌ ArgumentException: {ex.Message}");
                 return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ EXCEPCIÓN NO MANEJADA: {ex.Message}");
-                Console.WriteLine($"Stack: {ex.StackTrace}");
-                _logger.LogError(ex, "Error obteniendo productividad");
-                return StatusCode(500, new { error = "Error interno del servidor" });
+                return StatusCode(500, new { error = "Error interno del servidor al obtener la productividad" });
             }
         }
     }
