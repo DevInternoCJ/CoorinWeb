@@ -10,7 +10,9 @@ namespace Loki.DTOs.Captura.VisitasDTOs
 	/// </summary>
 	public class CapturaVisitaRequestDto
 	{
-		[Required]
+        [Required]
+        public int IdEjecutivo { get; set; }
+        [Required]
 		public int IdCartera { get; set; }
 		[Required]
 		public string IdCuenta { get; set; }

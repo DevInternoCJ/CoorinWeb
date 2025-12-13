@@ -15,6 +15,6 @@ namespace Loki.Mark.Captura.Visitas.Services
 		/// <summary>
 		/// Valida y guarda la información de una visita domiciliaria y sus teléfonos asociados.
 		/// </summary>
-		Task<(bool Exitoso, string Mensaje)> GuardarVisitaAsync(string servidor, CapturaVisitaRequestDto request, ClaimsPrincipal user);
+		Task<(bool Exitoso, string Mensaje)> GuardarVisitaAsync(string servidor, CapturaVisitaRequestDto request);
 	}
 }

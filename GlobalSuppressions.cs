@@ -1,4 +1,3 @@
-
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Minor Code Smell", "S2325:Methods and properties that don't access instance data should be static", Justification = "<pendiente>", Scope = "member", Target = "~M:CoorinWeb.Loki.Mark.Auth.DAOs.DaoBase.ExecuteStoredProcedure(Microsoft.Data.SqlClient.SqlConnection,System.String,Microsoft.Data.SqlClient.SqlParameter[])~System.Threading.Tasks.Task{System.Object}")]
@@ -9,6 +8,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Style", "IDE0290:Usar constructor principal", Justification = "<pendiente>", Scope = "module")]
 [assembly: SuppressMessage("Style", "IDE0130:El espacio de nombres no coincide con la estructura de carpetas", Justification = "<pendiente>", Scope = "module")]
 [assembly: SuppressMessage("Style", "IDE0305:Simplificar la inicialización de la recopilación", Justification = "<pendiente>", Scope = "module")]
-
-
-
+[assembly: SuppressMessage("Performance", "CA1822:Marcar miembros como static", Justification = "<pendiente>", Scope = "member", Target = "~M:Loki.Mark.Procesos.Accionamientos.Services.InformeService.ConstruirQueryAgrupado(System.Text.StringBuilder,Loki.DTOs.Procesos.Accionamientos.Procesos.InformeRequestDto,System.String,Loki.Global.SubQueryResult,System.String)")]

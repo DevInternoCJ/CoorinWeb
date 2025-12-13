@@ -67,7 +67,7 @@ namespace Loki.Mark.Captura.Visitas.Controllers
 			if (string.IsNullOrWhiteSpace(servidorClaim))
 				return Unauthorized(new { error = "Claim 'Servidor' no encontrado." });
 
-			var (exitoso, mensaje) = await _service.GuardarVisitaAsync(servidorClaim, request, User);
+			var (exitoso, mensaje) = await _service.GuardarVisitaAsync(servidorClaim, request);
 
 			if (!exitoso)
 			{

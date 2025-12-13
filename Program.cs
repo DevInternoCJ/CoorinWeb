@@ -13,12 +13,6 @@ using HadesLibrary.ModelsDbAllocation;
 using HadesLibrary.ModelsDbCollection;
 using HadesLibrary.ModelsDbHistory;
 using HadesLibrary.ModelsDbMemory;
-// This file is NOT part of Orochi (it actually is, but we're poking fun at non-english-speaking fellas xd).
-using Loki.OrochiLibrary.Allocation;
-using Loki.OrochiLibrary.Collection;
-using Loki.OrochiLibrary.History;
-using Loki.OrochiLibrary.Memory;
-
 using Loki.AlbazLibrary;
 using Loki.AsuraLibrary.ModelsAllocation;
 // This file is part of Asura
@@ -102,6 +96,12 @@ using Loki.Mark.Consulta.PlantillasCorreo.Interfaces;
 using Loki.Mark.Consulta.PlantillasCorreo.Services;
 using Loki.Mark.Consulta.Productividad.Interfaces;
 using Loki.Mark.Consulta.Productividad.Services;
+using Loki.Mark.Procesos.Accionamientos.Carteo.DAOs;
+using Loki.Mark.Procesos.Accionamientos.Carteo.Interfaces;
+using Loki.Mark.Procesos.Accionamientos.Carteo.Services;
+using Loki.Mark.Procesos.Accionamientos.Informe.DAOs;
+using Loki.Mark.Procesos.Accionamientos.Informe.Interfaces;
+using Loki.Mark.Procesos.Accionamientos.Informe.Services;
 using Loki.Mark.Procesos.Gespa.Arrepentimientos.DAOs;
 using Loki.Mark.Procesos.Gespa.Arrepentimientos.Interfaces;
 using Loki.Mark.Procesos.Gespa.Bloqueo_cuentas.DAOs;
@@ -117,12 +117,12 @@ using Loki.Mark.Procesos.Gespa.Estados_de_cuenta.Interfaces;
 using Loki.Mark.Procesos.Gestiones.DAOs;
 using Loki.Mark.Procesos.Gestiones.Interfaces;
 using Loki.Mark.Procesos.Gestiones.Services;
+using Loki.Mark.Procesos.Metas.DAOs;
+using Loki.Mark.Procesos.Metas.Interfaces;
+using Loki.Mark.Procesos.Metas.Services;
 using Loki.Mark.Procesos.Procesos.DAOs;
 using Loki.Mark.Procesos.Procesos.Interfaces;
 using Loki.Mark.Procesos.Procesos.Services;
-using Loki.Mark.Procesos.Metas.Services;
-using Loki.Mark.Procesos.Metas.Interfaces;
-using Loki.Mark.Procesos.Metas.DAOs;
 using Loki.Mark.Reportes.Cliente.DAOs;
 using Loki.Mark.Reportes.Cliente.Services;
 using Loki.Mark.Reportes.DiaDelEjecutivo.DAOs;
@@ -135,6 +135,11 @@ using Loki.Middleware;
 using Loki.ModelsDbAllocationMictlan;
 using Loki.ModelsDbHistoryMictlan;
 using Loki.ModelsDbMemoryMictlan;
+// This file is NOT part of Orochi (it actually is, but we're poking fun at non-english-speaking fellas xd).
+using Loki.OrochiLibrary.Allocation;
+using Loki.OrochiLibrary.Collection;
+using Loki.OrochiLibrary.History;
+using Loki.OrochiLibrary.Memory;
 // This file is part of Thor
 using Loki.ThorLibrary.ModelsAllocation;
 using Loki.ThorLibrary.ModelsCollection;
@@ -156,39 +161,39 @@ using System.Text;
 using System.Text.Json;
 using BusquedasService = Loki.Mark.Consulta.Cuenta.Services.BusquedasService;
 using CatalogosService = Loki.Mark.Administracion.Gespa.Catalogos.Services.CatalogosService;
-using MetasService = Loki.Mark.Administracion.Ejecutivos.Metas.Services.MetasService;
 using MetasDao = Loki.Mark.Administracion.Ejecutivos.Metas.DAOs.MetasDao;
+using MetasService = Loki.Mark.Administracion.Ejecutivos.Metas.Services.MetasService;
 
 
 
 
 Log.Logger = new LoggerConfiguration()
-	.WriteTo.Console() // Log to the console
-	.WriteTo.File("Logs/Lokita.txt", rollingInterval: RollingInterval.Hour) // Log to a file
-	.Enrich.FromLogContext() // Adds contextual information to logs
-	.Enrich.WithMachineName()
-	.Enrich.WithEnvironmentUserName()
-	.MinimumLevel.Information() // Set the minimum logging level
-	.CreateLogger();
+    .WriteTo.Console() // Log to the console
+    .WriteTo.File("Logs/Lokita.txt", rollingInterval: RollingInterval.Hour) // Log to a file
+    .Enrich.FromLogContext() // Adds contextual information to logs
+    .Enrich.WithMachineName()
+    .Enrich.WithEnvironmentUserName()
+    .MinimumLevel.Information() // Set the minimum logging level
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ===== Configuraciones adicionales de JWT =====
 var additionalIssuers = builder.Configuration.GetSection("JwtSettings:AdditionalIssuers").Exists()
-	? builder.Configuration.GetSection("JwtSettings:AdditionalIssuers").Get<string[]>() ?? []
-	: [];
+    ? builder.Configuration.GetSection("JwtSettings:AdditionalIssuers").Get<string[]>() ?? []
+    : [];
 
 var additionalAudiences = builder.Configuration.GetSection("JwtSettings:AdditionalAudiences").Exists()
-	? builder.Configuration.GetSection("JwtSettings:AdditionalAudiences").Get<string[]>() ?? []
-	: [];
+    ? builder.Configuration.GetSection("JwtSettings:AdditionalAudiences").Get<string[]>() ?? []
+    : [];
 
 // ===== Configurar CORS =====
 builder.Services.AddCors(options =>
 {
-	options.AddPolicy("PermitirTodo",
-		policy => policy.AllowAnyOrigin()
-						.AllowAnyMethod()
-						.AllowAnyHeader());
+    options.AddPolicy("PermitirTodo",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
 });
 
 // ===== Agregar Controllers =====
@@ -197,52 +202,52 @@ builder.Services.AddControllers();
 // ===== Configurar Autenticación JWT =====
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
-	options.TokenValidationParameters = new TokenValidationParameters
-	{
-		ValidateIssuer = false,
-		ValidateAudience = false,
-		ValidateLifetime = true,
-		ValidateIssuerSigningKey = true,
-		ValidIssuers = new[] { builder.Configuration["JwtSettings:Issuer"] }.Concat(additionalIssuers),
-		ValidAudiences = new[] { builder.Configuration["JwtSettings:Audience"] }.Concat(additionalAudiences),
-		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
-	};
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuers = new[] { builder.Configuration["JwtSettings:Issuer"] }.Concat(additionalIssuers),
+        ValidAudiences = new[] { builder.Configuration["JwtSettings:Audience"] }.Concat(additionalAudiences),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
+    };
 });
 
 // ===== Configurar Swagger con JWT Bearer =====
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-	options.SwaggerDoc("v1", new OpenApiInfo { Title = "Loki(ta) API", Version = "v1" });
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Loki(ta) API", Version = "v1" });
 
-	options.EnableAnnotations(); // <-- Perú es clave.🏳️‍🌈
+    options.EnableAnnotations(); // <-- Perú es clave.🏳️‍🌈
 
-	options.ExampleFilters();
+    options.ExampleFilters();
 
-	options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-	{
-		Name = "Authorization",
-		Type = SecuritySchemeType.Http,
-		Scheme = "Bearer",
-		BearerFormat = "JWT",
-		In = ParameterLocation.Header,
-		Description = "Ingrese el token en el formato: Bearer {su_token}"
-	});
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Ingrese el token en el formato: Bearer {su_token}"
+    });
 
-	options.AddSecurityRequirement(new OpenApiSecurityRequirement
-	{
-		{
-			new OpenApiSecurityScheme
-			{
-				Reference = new OpenApiReference
-				{
-					Type = ReferenceType.SecurityScheme,
-					Id = "Bearer"
-				}
-			},
-			Array.Empty<string>()
-		}
-	});
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 
     //filtros para ordenar la API
     options.DocumentFilter<TagOrderDocumentFilter>(new List<string>
@@ -414,11 +419,11 @@ builder.Services.AddScoped<IBusqueda, BusquedasService>();
 builder.Services.AddScoped<ICatalogosService, CatalogosService>();
 builder.Services.AddScoped<ICatalogosServiceRe, Loki.Mark.Consulta.Cuenta.Services.CatalogosService>();
 builder.Services.AddScoped<Loki.Mark.Consulta.Cuenta.Interfaces.ICatalogosServiceRe,
-				   Loki.Mark.Consulta.Cuenta.Services.CatalogosService>();
+                   Loki.Mark.Consulta.Cuenta.Services.CatalogosService>();
 builder.Services.AddScoped<ICatalogosService, CatalogosService>();
 //generales
-builder.Services.AddScoped<IGeneralesService,GeneralesServices>();
-builder.Services.AddScoped<IGeneralesDao,GeneralesDao>();
+builder.Services.AddScoped<IGeneralesService, GeneralesServices>();
+builder.Services.AddScoped<IGeneralesDao, GeneralesDao>();
 #region Información
 
 builder.Services.AddScoped<IPagosService, PagosService>();
@@ -498,6 +503,16 @@ builder.Services.AddScoped<Loki.Mark.Procesos.Metas.Interfaces.IMetasService, Lo
 builder.Services.AddScoped<Loki.Mark.Procesos.Metas.Interfaces.IMetasDao, Loki.Mark.Procesos.Metas.DAOs.MetasDao>();
 #endregion
 
+#region Accionamientos
+//Procesos -> Accionamientos -> Informe
+builder.Services.AddScoped<IInformeService, InformeService>();
+builder.Services.AddScoped<IInformeDAO, InformeDAO>();
+
+builder.Services.AddScoped<ICarteoService, CarteoService>();
+builder.Services.AddScoped<ICarteoDAO, CarteoDAO>();
+#endregion
+
+
 #region Reportes
 
 builder.Services.AddScoped<IReportesClienteService, ReportesClienteService>();
@@ -524,23 +539,23 @@ builder.Services.AddScoped<AccionamientosQueryHelper>();
 
 // Configuración de JSON para que distinga entre mayúsculas y minúsculas
 builder.Services.AddControllers()
-	.AddJsonOptions(options =>
-	{
-		options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
-		options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-	});
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 
 
 
 // ===== Registro de servicio para compresión de archivos =====
 builder.Services.AddResponseCompression(options =>
 {
-	options.EnableForHttps = true;
-	options.Providers.Add<GzipCompressionProvider>();
+    options.EnableForHttps = true;
+    options.Providers.Add<GzipCompressionProvider>();
 });
 builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 {
-	options.Level = System.IO.Compression.CompressionLevel.Fastest; // O Optimal
+    options.Level = System.IO.Compression.CompressionLevel.Fastest; // O Optimal
 });
 
 
@@ -553,19 +568,19 @@ var app = builder.Build();
 // Middleware
 app.UseSwagger(options =>
 {
-	options.RouteTemplate = "/openapi/{documentName}.json";
+    options.RouteTemplate = "/openapi/{documentName}.json";
 });
 
 app.MapScalarApiReference(options =>
 {
-	options
-		.WithPreferredScheme("Bearer")
-		.WithTitle("Loki(ta)API")
-		//.WithTheme(ScalarTheme.Mars)
-		.WithTheme(ScalarTheme.BluePlanet)
-		//.WithTheme(ScalarTheme.DeepSpace)
-		.WithDarkMode(true)
-		.WithSidebar(true);
+    options
+        .WithPreferredScheme("Bearer")
+        .WithTitle("Loki(ta)API")
+        //.WithTheme(ScalarTheme.Mars)
+        .WithTheme(ScalarTheme.BluePlanet)
+        //.WithTheme(ScalarTheme.DeepSpace)
+        .WithDarkMode(true)
+        .WithSidebar(true);
 });
 
 app.UseHttpsRedirection();
