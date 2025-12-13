@@ -1,4 +1,4 @@
-﻿using Loki.DTOs.Procesos.AccionamientosDTOs.Informe;
+﻿using Loki.DTOs.Procesos.Accionamientos.InformeDTOs;
 using Loki.Mark.Procesos.Accionamientos.Informe.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

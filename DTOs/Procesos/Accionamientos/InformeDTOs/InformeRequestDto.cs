@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Loki.DTOs.Procesos.Accionamientos.CargaDTOs
+namespace Loki.DTOs.Procesos.Accionamientos.InformeDTOs
 {
     public enum TipoConteoAccionamiento
     {

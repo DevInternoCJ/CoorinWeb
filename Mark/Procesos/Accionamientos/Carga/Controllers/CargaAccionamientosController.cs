@@ -1,8 +1,6 @@
 ﻿// Ubicación: /Mark/Procesos/Accionamientos/Controllers/CargaAccionamientosController.cs
-using Loki.DTOs.Procesos.Accionamientos;
-using Loki.DTOs.Procesos.AccionamientosDTOs.Carga;
-using Loki.Mark.Procesos.Accionamientos.Interfaces;
-using Loki.Mark.Procesos.Accionamientos.Services;
+using Loki.DTOs.Procesos.Accionamientos.CargaDTOs;
+using Loki.Mark.Procesos.Accionamientos.Carga.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;

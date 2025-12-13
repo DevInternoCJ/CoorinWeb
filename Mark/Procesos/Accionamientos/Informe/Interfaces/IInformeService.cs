@@ -1,5 +1,5 @@
 ﻿using Loki.DTOs.Procesos.Accionamientos;
-using Loki.DTOs.Procesos.AccionamientosDTOs.Informe;
+using Loki.DTOs.Procesos.Accionamientos.InformeDTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

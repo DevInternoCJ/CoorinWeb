@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Loki.DTOs.Global;
-using Loki.DTOs.Procesos.AccionamientosDTOs.Informe;
+using Loki.DTOs.Procesos.Accionamientos.InformeDTOs;
 using Loki.Global;
 using Loki.Mark.Procesos.Accionamientos.Informe.Interfaces;
 using System.Text;
