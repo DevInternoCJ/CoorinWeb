@@ -64,6 +64,8 @@ export const useSituationCatalog = () => {
       try {
         setLoading(true);
         const data = await getCatalogoValueCard();
+        console.log("Datos del catálogo de situaciones:", data);
+        
         const allowedIds = [1001, 1002, 1003, 1012, 1030, 1042];
         const formatted = Array.isArray(data)
           ? data
@@ -100,21 +102,37 @@ export const useSituationCatalog = () => {
 };
 
 /**
+ * ✅ SOLUCIÓN 1: Recibe el objeto form directamente en lugar de formRef
  * handleSaveComment: ejecuta el PostComments con la información del formulario.
  * Retorna una función memoizada.
  */
-export const useSaveComment = ({ formRef, situationOptions, onSaveComment, idCartera = 1, servidor = "Orochi" } = {}) => {
+export const useSaveComment = ({ 
+  form,  // ✅ CAMBIO: Recibir form directamente
+  situationOptions, 
+  onSaveComment, 
+  idCartera = 1, 
+  servidor = "Orochi" 
+} = {}) => {
   const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;
 
-  const handleSave = useCallback(async () => {
-    const form = formRef.current;
+  const handleSave = useCallback(async (opts = {}) => {
+    // CAMBIO: Acceso directo a form en lugar de formRef.current
     const text = String(form.commentText || "").trim();
-    if (text.length < 10) {
-      toast.error("El comentario debe tener al menos 10 caracteres.");
+
+    console.log("handleSave invoked - commentText (trimmed):", text, {
+      raw: form.commentText,
+      length: text.length,
+      selectedSituation: form.selectedSituation,
+      searchValue: form.searchValue,
+    });
+
+    // si opts.allowEmpty es true, saltamos la validación de longitud (ej: guardado desde toolbar con archivo)
+    if (!opts.allowEmpty && text.length < 10) {
+      toast.error(`El comentario debe tener al menos 10 caracteres (actual: ${text.length}).`);
       const ta = document.getElementById("comment-textarea");
       if (ta) ta.focus();
-      return;
+      return false;
     }
 
     const selectedId = form.selectedSituation || null;
@@ -126,22 +144,60 @@ export const useSaveComment = ({ formRef, situationOptions, onSaveComment, idCar
       situacion: selectedOpt ? selectedOpt.label : null,
       idSituacion: selectedId ? (isNaN(Number(selectedId)) ? selectedId : Number(selectedId)) : null,
       idCartera: idCartera || null,
-      idCuenta: form.searchValue || null,
+      // normalizar idCuenta: si es un número en string, enviarlo como Number
+      idCuenta: form.searchValue ? (isNaN(Number(form.searchValue)) ? form.searchValue : Number(form.searchValue)) : null,
       comentario: form.commentText || null,
       idEjecutivo: idEjecutivo || null,
       servidor: servidor || null,
     };
-
+    
+    console.log("Payload completo para guardar:", payload);
+    
     try {
       const resp = await PostComments(payload);
       toast.success("Comentario guardado correctamente");
       if (onSaveComment) onSaveComment(form, resp);
       form.resetForm();
+      return resp ?? true;
     } catch (err) {
-      console.error("Error guardando comentario:", err);
-      toast.error(err?.message || "Error al guardar comentario");
+      console.error(" Error guardando comentario:", err, err?.response?.data);
+        // Mejor logging para diagnóstico: incluir respuesta del servidor si está disponible
+        let serverMsg = "Error al guardar comentario";
+        const body = err?.response?.data;
+        if (body) {
+          if (typeof body === "string") {
+            serverMsg = body;
+          } else if (body?.message) {
+            serverMsg = String(body.message);
+          } else if (body?.errors && typeof body.errors === "object") {
+            // body.errors suele ser un objeto { campo: ["msg1","msg2"] }
+            const parts = Object.entries(body.errors).map(([k, v]) => {
+              if (Array.isArray(v)) return `${k}: ${v.join(", ")}`;
+              return `${k}: ${String(v)}`;
+            });
+            serverMsg = parts.join(" | ");
+          } else {
+            try {
+              serverMsg = JSON.stringify(body);
+            } catch {
+              serverMsg = String(body);
+            }
+          }
+        } else if (err?.message) {
+          serverMsg = String(err.message);
+        }
+        
+      toast.error(serverMsg || "Error al guardar comentario");
+      return false;
     }
-  }, [formRef, situationOptions, onSaveComment, idCartera, idEjecutivo, servidor]);
+  }, [
+    form,  // ✅ CAMBIO: Cambiar formRef a form en las dependencias
+    situationOptions, 
+    onSaveComment, 
+    idCartera, 
+    idEjecutivo, 
+    servidor
+  ]);
 
   return { handleSave };
 };

@@ -20,7 +20,7 @@ const WALLET_OPTIONS = [
   { value: "expediente", label: "Expediente" },
 ];
 
-// Componentes  pequeños 
+// Componentes pequeños
 const ModalHeader = ({ onClose }) => (
   <header className="bg-neutral-100 p-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-gray-200">
     <div className="block md:flex items-start justify-between w-2/4 gap-3">
@@ -162,22 +162,9 @@ const Comments = ({ onClose, onSaveComment }) => {
   const { situationOptions, loading } = useSituationCatalog();
   const form = useCommentForm();
 
-  // crear un objeto ref para pasar al hook de guardado (para que el hook lea los valores más recientes del formulario)
-  const formRef = useRef({
-    get commentText() {
-      return form.commentText;
-    },
-    get selectedSituation() {
-      return form.selectedSituation;
-    },
-    get searchValue() {
-      return form.searchValue;
-    },
-    resetForm: form.resetForm,
-  });
-
+  // ✅ SOLUCIÓN 1: Pasar form directamente al hook
   const { handleSave } = useSaveComment({
-    formRef,
+    form: form,
     situationOptions,
     onSaveComment,
   });
@@ -195,9 +182,8 @@ const Comments = ({ onClose, onSaveComment }) => {
 
   const onSaveFileAction = () => {
     if (!fileStateRef.current.file) return;
-    // En el código original `handleSave` se usaba tanto para guardar el comentario como para guardar con archivo.
-    // Conservamos ese comportamiento: llamar a `handleSave` (envía el comentario).
-    handleSave();
+    // pasamos allowEmpty=true porque en la vista LIST el textarea está oculto y el comentario puede venir del archivo
+    handleSave({ allowEmpty: true });
   };
 
   const checkboxOptions = [
