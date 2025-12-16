@@ -90,10 +90,10 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
     const [datosValidados, setDatosValidados] = useState(null); // Almacena los datos validados para confirmar
     
     // Handler para cuando cambia el mapeo en F2
-    const handleMapeoChange = (mapeoTexto, mapeoId) => {
+    const handleMapeoChange = useCallback((mapeoTexto, mapeoId) => {
         setMapeoVivienda(mapeoTexto);
         setMapeoViviendaId(mapeoId);
-    };
+    }, []);
 
     // Efecto para controlar visibilidad de F6 (Teléfonos) según cartera
     useEffect(() => {
@@ -113,11 +113,12 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
         }, [porExpediente, mostrarTabla]);
 
         // Efecto para actualizar _busquedaPorExpediente en cuentaData cuando cambia porExpediente
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         useEffect(() => {
             if (cuentaData) {
                 setCuentaData(prev => ({ ...prev, _busquedaPorExpediente: porExpediente }));
             }
-        }, [porExpediente, cuentaData, setCuentaData]);
+        }, [porExpediente]);
 
     // Efecto para limpiar campos cuando cambia la cartera y volver a buscar
     useEffect(() => {
@@ -558,10 +559,10 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
             return false;
         }
         
-        // 8. Validar Visitador (mínimo 4 caracteres)
+        // 8. Validar Visitador (máximo 4 caracteres)
         const visitador = dataF4.usuarioVisitador || "";
-        if (visitador.trim().length < 4) {
-            toast.error("Escriba la clave de visitador, consta de 4 letras mayúsculas.");
+        if (visitador.trim().length > 4) {
+            toast.error("El visitador debe tener máximo 4 caracteres.");
             return false;
         }
         
@@ -575,19 +576,19 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
         // 10-12. Validaciones solo para carteras CFE (14 y 24)
         if (carteraNumero === 14 || carteraNumero === 24) {
             // 10. Validar Energía Eléctrica
-            if (!dataF7.energiaElectrica && dataF7.energiaElectrica !== false) {
+            if (dataF7.energiaElectrica == null || dataF7.energiaElectrica === "") {
                 toast.error("Seleccione si el deudor cuenta con energía eléctrica.");
                 return false;
             }
             
             // 11. Validar Acuse de requerimiento
-            if (!dataF7.acuseRequerimiento && dataF7.acuseRequerimiento !== false) {
+            if (dataF7.acuseRequerimiento == null || dataF7.acuseRequerimiento === "") {
                 toast.error("Seleccione si el deudor cuenta con acuse de requerimiento de cobro.");
                 return false;
             }
             
             // 12. Validar Fotografía del predio
-            if (!dataF7.fotografiaPredio && dataF7.fotografiaPredio !== false) {
+            if (dataF7.fotografiaPredio == null || dataF7.fotografiaPredio === "") {
                 toast.error("Seleccione si cuenta con fotografía del predio.");
                 return false;
             }
@@ -685,38 +686,15 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                 }
             }
             
-            // Construir payload según el esquema del endpoint
-            // Mapeo exacto de parámetros del backend
+            // Construir payload según el esquema exacto del endpoint
             const payload = {
-                // Datos principales
                 idCartera: carteraNumero,
                 idCuenta: cuentaData?.cuenta?.idCuenta || idCuenta,
                 idDomicilio: domicilioData.idDomicilio || 0,
-                
-                // Fecha y hora de visita
                 fechaVisita: dataF4.fechaVisita,
                 horaVisita: dataF4.horaVisita,
-                suarioVisitador: (dataF4.usuarioVisitador || "").toUpperCase().trim(),
-                //usuarioVisitador: userData?.idEjecutivo !! 0,
-                
-                // F2 - Vivienda
+                usuarioVisitador: (dataF4.usuarioVisitador || "").toUpperCase().trim(),
                 idHabitacion: dataF2.idHabitacion || null,
-                colorFachada: dataF2.colorFachada || null,
-                colorPuerta: dataF2.colorPuerta || null,
-                colorHerreria: dataF2.colorHerreria || null,
-                pisos: dataF2.pisos ? parseInt(dataF2.pisos, 10) : null,
-                idVivienda: dataF2.idVivienda || null,
-                idEconomico: dataF2.idEconomico || null,
-                nombrePropietario: dataF2.nombrePropietario || null,
-                
-                // F3 - Auto
-                autoMapeo: dataF3.autoMapeo || null,
-                autoMarca: dataF3.autoMarca || null,
-                autoModelo: dataF3.autoModelo || null,
-                autoAño: dataF3.autoAño ? parseInt(dataF3.autoAño, 10) : null, // Con ñ como espera el backend
-                autoPlacas: dataF3.autoPlacas || null,
-                
-                // F4 - Visita
                 idContacto: dataF4.idContacto,
                 idParentesco: dataF4.idParentesco || null,
                 idSituacion: dataF4.idSituacion || null,
@@ -724,31 +702,35 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                 idSucursal: dataF4.idSucursal || null,
                 atendio: dataF4.atendio || null,
                 comentario: dataF4.comentario || null,
+                colorFachada: dataF2.colorFachada || null,
+                colorPuerta: dataF2.colorPuerta || null,
+                colorHerreria: dataF2.colorHerreria || null,
+                pisos: dataF2.pisos ? parseInt(dataF2.pisos, 10) : null,
+                idVivienda: dataF2.idVivienda || null,
+                idEconomico: dataF2.idEconomico || null,
+                nombrePropietario: dataF2.nombrePropietario || null,
+                autoMapeo: dataF3.autoMapeo || null,
+                autoMarca: dataF3.autoMarca || null,
+                autoModelo: dataF3.autoModelo || null,
+                autoAño: dataF3.autoAño ? parseInt(dataF3.autoAño, 10) : null,
+                autoPlacas: dataF3.autoPlacas || null,
                 paquete: dataF4.paquete ? parseInt(dataF4.paquete, 10) : null,
-                montoNegociacion: dataF4.montoNegociacion || null,
-                fechaPagoNegociacion: dataF4.montoNegociacion ? dataF4.fechaPagoNegociacion : null,
-                
-                // F5 - Entre Calles
                 calleHorizontalNorte: dataF5.calleHorizontalNorte || null,
                 calleHorizontalSur: dataF5.calleHorizontalSur || null,
                 calleVerticalEste: dataF5.calleVerticalEste || null,
                 calleVerticalOeste: dataF5.calleVerticalOeste || null,
-                
-                // F6 - Teléfonos
+                montoNegociacion: dataF4.montoNegociacion || null,
+                fechaPagoNegociacion: dataF4.montoNegociacion ? dataF4.fechaPagoNegociacion : null,
                 telefonosCapturados: dataF6.telefonosCapturados || [],
-                
-                // F7 - Energía Eléctrica (CFE)
                 numeroMedidor: dataF7.numeroMedidor || null,
                 energiaElectrica: dataF7.energiaElectrica != null ? (dataF7.energiaElectrica === "Si" || dataF7.energiaElectrica === true) : null,
                 acuseRequerimiento: dataF7.acuseRequerimiento != null ? (dataF7.acuseRequerimiento === "Si" || dataF7.acuseRequerimiento === true) : null,
                 fotografiaPredio: dataF7.fotografiaPredio != null ? (dataF7.fotografiaPredio === "Si" || dataF7.fotografiaPredio === true) : null,
-                
-                // Geocodificación
                 latitud: latitud || null,
                 longitud: longitud || null
             };
             
-            console.log("Payload de captura (InsertaGestiónDomiciliaria):", payload);
+            console.log("Payload enviado al endpoint:", payload);
             
             // Enviar al servidor
             const response = await guardarVisitaCapturada(payload);

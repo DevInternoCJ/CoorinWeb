@@ -64,9 +64,9 @@ const CapturaVisitsF6 = forwardRef((props, ref) => {
             value={telefono}
             onChange={(e) => setTelefono(e.target.value.replace(/\D/g, "").slice(0, 10))}
             onKeyDown={handleKeyDown}
-            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500"
             id="telefono-input-f6"
-            placeholder=" "
+            placeholder="Ingrese teléfono"
             style={{ color: 'var(--color-jerarquia3)' }}
           />
           <label

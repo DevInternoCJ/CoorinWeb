@@ -60,9 +60,9 @@ const CapturaVisitsF5 = forwardRef(({ disabled = false }, ref) => {
   <div className="relative w-full min-w-0">
         <input
           type="text"
-          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2`}
+          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500`}
           id="calle-norte-input-f5"
-          placeholder=" "
+          placeholder="Ingrese calle horizontal norte"
           value={calleNorte}
           maxLength={100}
           onChange={(e) => setCalleNorte(sanitizeStreet(e.target.value, 100))}
@@ -84,9 +84,9 @@ const CapturaVisitsF5 = forwardRef(({ disabled = false }, ref) => {
   <div className="relative w-full min-w-0">
         <input
           type="text"
-          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2`}
+          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500`}
           id="calle-sur-input-f5"
-          placeholder=" "
+          placeholder="Ingrese calle horizontal sur"
           value={calleSur}
           maxLength={100}
           onChange={(e) => setCalleSur(sanitizeStreet(e.target.value, 100))}
@@ -108,9 +108,9 @@ const CapturaVisitsF5 = forwardRef(({ disabled = false }, ref) => {
   <div className="relative w-full min-w-0">
         <input
           type="text"
-          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2`}
+          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500`}
           id="calle-este-input-f5"
-          placeholder=" "
+          placeholder="Ingrese calle vertical este"
           value={calleEste}
           maxLength={100}
           onChange={(e) => setCalleEste(sanitizeStreet(e.target.value, 100))}
@@ -132,9 +132,9 @@ const CapturaVisitsF5 = forwardRef(({ disabled = false }, ref) => {
   <div className="relative w-full min-w-0">
         <input
           type="text"
-          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2`}
+          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500`}
           id="calle-ost-input-f5"
-          placeholder=" "
+          placeholder="Ingrese calle vertical oeste"
           value={calleOeste}
           maxLength={100}
           onChange={(e) => setCalleOeste(sanitizeStreet(e.target.value, 100))}

@@ -62,9 +62,12 @@ const CapturaVisitsF2 = forwardRef(({ onMapeoChange, filtroExcluirId }, ref) => 
   }), [mapeoSeleccionado, fachada, puerta, herreria, nivelesPisos, nEconomico, vivienda, propietario]);
 
   // Filtrar opciones de mapeo excluyendo el ID si está definido (ej: 2805 = Ilocalizable cuando domicilio es "Localizable")
-  const opcionesMapeofiltradas = useMemo(() => {
-    if (!filtroExcluirId) return opcionesMapeo;
-    return opcionesMapeo.filter(opt => opt.idValor !== filtroExcluirId);
+  // En lugar de filtrar, mantenemos todas pero deshabilitamos las excluidas para evitar que el select se resetee
+  const opcionesMapeoConFiltro = useMemo(() => {
+    return opcionesMapeo.map(opt => ({
+      ...opt,
+      disabled: filtroExcluirId ? opt.idValor === filtroExcluirId : false
+    }));
   }, [opcionesMapeo, filtroExcluirId]);
 
   // Cargar catálogos al montar el componente (del C# LlenaComboBox)
@@ -134,11 +137,20 @@ const CapturaVisitsF2 = forwardRef(({ onMapeoChange, filtroExcluirId }, ref) => 
   // Handler para cambio de mapeo
   const handleMapeoChange = (e) => {
     const selectedId = e.target.value;
+    
+    // Verificar si la opción seleccionada está deshabilitada
+    const opcionSeleccionada = opcionesMapeoConFiltro.find(opt => String(opt.idValor) === String(selectedId));
+    if (opcionSeleccionada && opcionSeleccionada.disabled) {
+      // Si está deshabilitada, no cambiar la selección
+      return;
+    }
+    
+    console.log("Seleccionando mapeo:", selectedId, opcionSeleccionada?.valor);
     setMapeoSeleccionado(selectedId);
     
     // Obtener el texto del mapeo seleccionado
-    const opcionSeleccionada = opcionesMapeo.find(opt => String(opt.idValor) === String(selectedId));
-    setMapeoTexto(opcionSeleccionada ? opcionSeleccionada.valor : "");
+    const opcion = opcionesMapeo.find(opt => String(opt.idValor) === String(selectedId));
+    setMapeoTexto(opcion ? opcion.valor : "");
   };
 
   // Validaciones y manejadores para Propietario (txtPropietario)
@@ -215,7 +227,7 @@ const CapturaVisitsF2 = forwardRef(({ onMapeoChange, filtroExcluirId }, ref) => 
     enabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
   }`;
 
-  const getInputClass = (enabled) => `peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 ${
+  const getInputClass = (enabled) => `peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500 ${
     enabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
   }`;
 
@@ -231,9 +243,9 @@ const CapturaVisitsF2 = forwardRef(({ onMapeoChange, filtroExcluirId }, ref) => 
             value={mapeoSeleccionado}
             onChange={handleMapeoChange}
           >
-            <option value="" hidden></option>
-            {opcionesMapeofiltradas.map(opt => (
-              <option key={opt.idValor} value={opt.idValor}>{opt.valor}</option>
+            <option value="" disabled>Seleccione mapeo</option>
+            {opcionesMapeoConFiltro.map(opt => (
+              <option key={opt.idValor} value={opt.idValor} disabled={opt.disabled}>{opt.valor}</option>
             ))}
           </select>
           <label
@@ -252,6 +264,7 @@ const CapturaVisitsF2 = forwardRef(({ onMapeoChange, filtroExcluirId }, ref) => 
             onChange={(e) => setFachada(e.target.value)}
             disabled={!camposHabilitados}
           >
+            <option value="" disabled>Seleccione color fachada</option>
             {fachadaOptions.map((opt) => (
               <option key={opt.value} value={opt.value} hidden={opt.value === ""}>
                 {opt.label}
@@ -274,6 +287,7 @@ const CapturaVisitsF2 = forwardRef(({ onMapeoChange, filtroExcluirId }, ref) => 
             onChange={(e) => setPuerta(e.target.value)}
             disabled={!camposHabilitados}
           >
+            <option value="" disabled>Seleccione color puerta</option>
             {puertaOptions.map((opt) => (
               <option key={opt.value} value={opt.value} hidden={opt.value === ""}>
                 {opt.label}
@@ -296,6 +310,7 @@ const CapturaVisitsF2 = forwardRef(({ onMapeoChange, filtroExcluirId }, ref) => 
             onChange={(e) => setHerreria(e.target.value)}
             disabled={!camposHabilitados}
           >
+            <option value="" disabled>Seleccione color herrería</option>
             {herreriaOptions.map((opt) => (
               <option key={opt.value} value={opt.value} hidden={opt.value === ""}>
                 {opt.label}
@@ -318,6 +333,7 @@ const CapturaVisitsF2 = forwardRef(({ onMapeoChange, filtroExcluirId }, ref) => 
             onChange={(e) => setNivelesPisos(e.target.value)}
             disabled={!camposHabilitados}
           >
+            <option value="" disabled>Seleccione niveles</option>
             {nivelesPisosOptions.map((opt) => (
               <option key={opt.value} value={opt.value} hidden={opt.value === ""}>
                 {opt.label}
@@ -340,7 +356,7 @@ const CapturaVisitsF2 = forwardRef(({ onMapeoChange, filtroExcluirId }, ref) => 
             onChange={(e) => setNEconomico(e.target.value)}
             disabled={!camposHabilitados}
           >
-            <option value="" hidden></option>
+            <option value="" disabled>Seleccione económico</option>
             {opcionesEconomico.map((opt) => (
               <option key={opt.idValor} value={opt.idValor}>
                 {opt.valor}
@@ -363,7 +379,7 @@ const CapturaVisitsF2 = forwardRef(({ onMapeoChange, filtroExcluirId }, ref) => 
             onChange={(e) => setVivienda(e.target.value)}
             disabled={!camposHabilitados}
           >
-            <option value="" hidden></option>
+            <option value="" disabled>Seleccione vivienda</option>
             {opcionesVivienda.map((opt) => (
               <option key={opt.idValor} value={opt.idValor}>
                 {opt.valor}
@@ -383,7 +399,7 @@ const CapturaVisitsF2 = forwardRef(({ onMapeoChange, filtroExcluirId }, ref) => 
         <input
             type="text"
             id="propietario-input"
-            placeholder=" "
+            placeholder="Ingrese propietario"
             value={propietario}
             onChange={handlePropietarioChange}
             onBlur={handlePropietarioBlur}

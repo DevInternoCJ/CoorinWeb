@@ -425,7 +425,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
           value={contacto}
           onChange={(e) => setContacto(e.target.value)}
         >
-          <option value="" hidden></option>
+          <option value="" disabled>Seleccione contacto</option>
           {contactoOptions.map((opt) => (
             <option key={opt.idValor} value={opt.idValor}>
               {opt.valor}
@@ -442,9 +442,9 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
   <div className="relative w-full min-w-0 sm:col-span-2">
         <input
           type="text"
-          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500"
           id="atendio-input-f4"
-          placeholder=" "
+          placeholder="Ingrese atendió"
           value={atendio}
           onChange={handleAtendioChange}
           onBlur={handleAtendioBlur}
@@ -470,7 +470,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
           onChange={(e) => setParentesco(e.target.value)}
           disabled={!parentescoEnabled}
         >
-          <option value="" hidden></option>
+          <option value="" disabled>Seleccione parentesco</option>
           {opcionesParentesco.map((opt) => (
             <option key={opt.idValor} value={opt.idValor}>
               {opt.valor}
@@ -494,7 +494,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
           onChange={(e) => setSituacion(e.target.value)}
           disabled={!situacionEnabled}
         >
-          <option value="" hidden></option>
+          <option value="" disabled>Seleccione situación</option>
           {situacionOptions.map((opt) => (
             <option key={opt.idValor} value={opt.idValor}>
               {opt.valor}
@@ -518,7 +518,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
           onChange={(e) => setNoPago(e.target.value)}
           disabled={!noPagoEnabled}
         >
-          <option value="" hidden></option>
+          <option value="" disabled>Seleccione causa no pago</option>
           {opcionesCausaNoPago.map((opt) => (
             <option key={opt.idValor} value={opt.idValor}>
               {opt.valor}
@@ -539,12 +539,12 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
         <input
           type="date"
           id="visita-date-f4"
-          placeholder=" "
+          placeholder="Seleccione fecha visita"
           value={visita}
           onChange={(e) => setVisita(e.target.value)}
           min={fechaLimites.visita.min}
           max={fechaLimites.visita.max}
-          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500"
           style={{ color: 'var(--color-jerarquia3)' }}
         />
         <label
@@ -559,10 +559,10 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
         <input
           type="time"
           id="hora-time-f4"
-          placeholder=" "
+          placeholder="Seleccione hora"
           value={hora}
           onChange={(e) => setHora(e.target.value)}
-          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500"
           style={{ color: 'var(--color-jerarquia3)' }}
         />
         <label
@@ -575,9 +575,9 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
   <div className="relative w-full min-w-0">
         <input
           type="text"
-          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500"
           id="visitador-input-f4"
-          placeholder=" "
+          placeholder="ABCD"
           value={visitador}
           onChange={handleVisitadorChange}
           onBlur={handleVisitadorBlur}
@@ -600,7 +600,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
           value={sucursal}
           onChange={(e) => setSucursal(e.target.value)}
         >
-          <option value="" hidden></option>
+          <option value="" disabled>Seleccione sucursal</option>
           {opcionesSucursal.map((opt) => (
             <option key={opt.idValor} value={opt.idValor}>
               {opt.valor}
@@ -617,9 +617,9 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
   <div className="relative w-full min-w-0">
         <input
           type="text"
-          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500"
           id="paquete-input-f4"
-          placeholder=" "
+          placeholder="Ingrese paquete"
           value={paquete}
           onChange={handlePaqueteChange}
           onBlur={handlePaqueteBlur}
@@ -640,13 +640,13 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
         <input
           type="date"
           id="fechapago-date-f4"
-          placeholder=" "
+          placeholder="Seleccione fecha pago"
           value={fechaPago}
           onChange={(e) => setFechaPago(e.target.value)}
           disabled={!fechaPagoEnabled}
           min={fechaLimites.negociacion.min}
           max={fechaLimites.negociacion.max}
-          className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 ${
+          className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500 ${
             fechaPagoEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
           }`}
           style={{ color: 'var(--color-jerarquia3)' }}
@@ -664,11 +664,11 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
         <div className="relative w-full min-w-0">
           <input
             type="text"
-            className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 ${
+            className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500 ${
               montoEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
             }`}
               id="monto-input-f4"
-              placeholder=" "
+              placeholder="Ingrese monto"
               value={monto}
               onChange={handleMontoChange}
               onBlur={handleMontoBlur}
@@ -695,6 +695,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
           className="px-4 p-1 block w-full min-w-0 rounded-lg sm:text-sm bg-gray-50 border-transparent focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1"
           style={{ color: 'var(--color-jerarquia3)', minHeight: '8.2rem', height: '8.2rem' }}
           rows={4}
+          placeholder="Ingrese observación"
           value={observacion}
           onChange={handleObservacionChange}
           onBlur={handleObservacionBlur}

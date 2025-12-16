@@ -225,6 +225,7 @@ const CapturaVisitsF3 = forwardRef((props, ref) => {
           value={mapeo}
           onChange={(e) => setMapeo(e.target.value)}
         >
+          <option value="" disabled>Seleccione mapeo auto</option>
           {mapeoOptions.map((opt) => (
             <option key={opt.value} value={opt.value} hidden={opt.value === ""}>
               {opt.label}
@@ -249,6 +250,7 @@ const CapturaVisitsF3 = forwardRef((props, ref) => {
             onChange={(e) => setMarca(e.target.value)}
             disabled={!camposEnabled}
           >
+            <option value="" disabled>Seleccione marca</option>
             {marcaOptions.map((opt) => (
               <option key={opt.value} value={opt.value} hidden={opt.value === ""}>
                 {opt.label}
@@ -272,6 +274,7 @@ const CapturaVisitsF3 = forwardRef((props, ref) => {
             onChange={(e) => setAnio(e.target.value)}
             disabled={!camposEnabled}
           >
+            <option value="" disabled>Seleccione año</option>
             {anioOptions.map((opt) => (
               <option key={opt.value} value={opt.value} hidden={opt.value === ""}>
                 {opt.label}
@@ -291,14 +294,14 @@ const CapturaVisitsF3 = forwardRef((props, ref) => {
         <input
           type="text"
           id="modelo-input-f3"
-          placeholder=" "
+          placeholder="Ingrese modelo"
           value={modelo}
           onChange={handleModeloChange}
           onBlur={handleModeloBlur}
           onPaste={handleModeloPaste}
           maxLength={50}
           disabled={!camposEnabled}
-          className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 ${
+          className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500 ${
             camposEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
           }`}
           style={{ color: 'var(--color-jerarquia3)' }}
@@ -315,14 +318,14 @@ const CapturaVisitsF3 = forwardRef((props, ref) => {
         <input
           type="text"
           id="placas-input-f3"
-          placeholder=" "
+          placeholder="Ingrese placas"
           value={placas}
           onChange={handlePlacasChange}
           onBlur={handlePlacasBlur}
           onPaste={handlePlacasPaste}
           maxLength={10}
           disabled={!camposEnabled}
-          className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 ${
+          className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500 ${
             camposEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
           }`}
           style={{ color: 'var(--color-jerarquia3)' }}
