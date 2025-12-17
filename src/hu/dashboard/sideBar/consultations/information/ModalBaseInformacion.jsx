@@ -293,27 +293,49 @@ const ModalBaseInformacion = ({
                         </div>
                         </>
                     ) : (
-                        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-                            <div className="flex items-center gap-3">
-                                {headerIcon}
-                                <h2 className="text-lg font-semibold truncate" style={{ color: 'var(--color-jerarquia3)' }}>{titulo}</h2>
+                        <div className="border-b border-gray-200 px-4 py-3">
+                            {/* Layout para lg, xl, 2xl: horizontal en una fila */}
+                            <div className="hidden lg:flex lg:items-center lg:justify-between">
+                                <div className="flex items-center gap-3">
+                                    {headerIcon}
+                                    <h2 className="text-lg font-semibold truncate" style={{ color: 'var(--color-jerarquia3)' }}>{titulo}</h2>
+                                    {infoCuenta && infoCuenta.cuenta && (
+                                        <>
+                                            <span className="font-semibold text-base text-jerarquia3">
+                                                {infoCuenta._busquedaPorExpediente ? `-- ${infoCuenta.cuenta.idCuenta} --`: `-- ${infoCuenta.cuenta.expediente} --`}
+                                            </span>
+                                            <span className="font-semibold text-base text-jerarquia3">{infoCuenta.cuenta.nombreDeudor}</span>
+                                        </>
+                                    )}
+                                </div>
+                                <CloseButtonCampanas onClose={handleSafeClose} />
+                            </div>
+                            
+                            {/* Layout para sm y md: vertical en filas */}
+                            <div className="lg:hidden flex flex-col">
+                                {/* Row 1: icono, título, botón close */}
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-3">
+                                        {headerIcon}
+                                        <h2 className="text-lg font-semibold truncate" style={{ color: 'var(--color-jerarquia3)' }}>{titulo}</h2>
+                                    </div>
+                                    <CloseButtonCampanas onClose={handleSafeClose} />
+                                </div>
+                                {/* Row 2: Cuenta/Expediente centrado */}
                                 {infoCuenta && infoCuenta.cuenta && (
-                                    <div className="flex flex-row ml-4" style={{ gap: '8.25rem' }}>
-                                        {infoCuenta._busquedaPorExpediente ? (
-                                            <>
-                                                <span className="font-semibold text-base text-jerarquia3" style={{ marginRight: '3.125rem' }}>{infoCuenta.cuenta.idCuenta}</span>
-                                                <span className="font-semibold text-base text-jerarquia3">{infoCuenta.cuenta.nombreDeudor}</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <span className="font-semibold text-base text-jerarquia3" style={{ marginRight: '3.125rem' }}>{infoCuenta.cuenta.expediente}</span>
-                                                <span className="font-semibold text-base text-jerarquia3">{infoCuenta.cuenta.nombreDeudor}</span>
-                                            </>
-                                        )}
+                                    <div className="text-center mb-1">
+                                        <span className="font-semibold text-base text-jerarquia3">
+                                            {infoCuenta._busquedaPorExpediente ? `-- ${infoCuenta.cuenta.idCuenta} --` : `-- ${infoCuenta.cuenta.expediente} --`}
+                                        </span>
+                                    </div>
+                                )}
+                                {/* Row 3: Nombre Deudor centrado */}
+                                {infoCuenta && infoCuenta.cuenta && (
+                                    <div className="text-center">
+                                        <span className="font-semibold text-base text-jerarquia3">{infoCuenta.cuenta.nombreDeudor}</span>
                                     </div>
                                 )}
                             </div>
-                            <CloseButtonCampanas onClose={handleSafeClose} />
                         </div>
                     )
                 )}

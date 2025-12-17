@@ -10,15 +10,18 @@ const ModalProductividadContent = ({
   productivityData,
   loadingProductivity,
   errorProductivity,
+  setSelectedUserFromTree,
 }) => {
   // Estados mínimos para la jerarquía
   const [executiveTree, setExecutiveTree] = useState([]);
   const [loadingJerarquia, setLoadingJerarquia] = useState(false);
   const [errorJerarquia, setErrorJerarquia] = useState(null);
-  const [selectedExecutives, setSelectedExecutives] = useState([]);
   const [allHierarchyIds, setAllHierarchyIds] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [editValues, setEditValues] = useState({});
+  
+  // Estados requeridos por JerarquiaConR (aunque no se usen directamente aquí)
+  const [_selectedExecutives, setSelectedExecutives] = useState([]);
+  const [_selectedRows, setSelectedRows] = useState([]);
+  const [_editValues, setEditValues] = useState({});
 
   // Obtener la jerarquía de ejecutivos (idéntico a otros modales)
   useEffect(() => {
@@ -29,7 +32,9 @@ const ModalProductividadContent = ({
         const userData = JSON.parse(localStorage.getItem("userData"));
         const idEjecutivo = userData?.idEjecutivo || null;
         const usuario = userData?.usuario || "";
-        const nombreEjecutivo = userData?.nombreEjecutivo || "";
+        // El campo del nombre puede estar en diferentes propiedades según el login
+        const nombreEjecutivo = userData?.nombre;
+        console.log("Usuario sesión:", { idEjecutivo, usuario, nombreEjecutivo });
         if (!idEjecutivo)
           throw new Error("No se encontró el idEjecutivo del usuario logueado");
         const data = await obetenerJerarquiaEncargados(idEjecutivo);
@@ -91,11 +96,29 @@ const ModalProductividadContent = ({
     }
   }, [executiveTree, selectedExecutiveNode, setSelectedExecutiveNode]);
 
-  // Renderizado recursivo para la jerarquía
+  // Callback para manejar la selección de un nodo del árbol
+  const handleNodeSelect = (node) => {
+    const userData = JSON.parse(localStorage.getItem("userData")) || {};
+    const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+    const isSessionUser = node.idEjecutivo === idEjecutivoSesion;
+    
+    // Si es el usuario de sesión, mostrar todos los datos (null = sin filtro)
+    // Si es otro usuario, filtrar por su nombre de usuario
+    if (isSessionUser) {
+      console.log('Usuario de sesión seleccionado - mostrando todos los datos');
+      setSelectedUserFromTree(null);
+    } else {
+      console.log(`Usuario seleccionado del árbol: ${node.usuario}`);
+      setSelectedUserFromTree(node.usuario);
+    }
+  };
+
+  // Renderizado recursivo para la jerarquía (usado internamente si es necesario)
   const renderExecutiveTree = (tree, level = 0) => {
     if (!Array.isArray(tree)) return null;
     return tree.map((node, idx) => {
       const isSelected = node.idEjecutivo === selectedExecutiveNode;
+      
       return (
         <React.Fragment key={node.usuario || node.id || idx}>
           <div
@@ -110,7 +133,10 @@ const ModalProductividadContent = ({
               color: isSelected ? "#2b463c" : undefined,
               userSelect: "none",
             }}
-            onClick={() => setSelectedExecutiveNode(node.idEjecutivo)}
+            onClick={() => {
+              setSelectedExecutiveNode(node.idEjecutivo);
+              handleNodeSelect(node);
+            }}
             title={
               Array.isArray(node.subordinados) && node.subordinados.length > 0
                 ? "Mostrar solo subordinados"
@@ -131,14 +157,15 @@ const ModalProductividadContent = ({
   const getTableHeaderTitles = () => {
     if (selectedIndicator === "Negociaciones") {
       if (timeFilter === "Dia") {
-        // Backend returns fields for negociaciones as: hora, montoNegociaciones, montoPromedio, negociaciones, saldoPromedio, saldoSolucionado
+        // Backend returns fields for negociaciones as: Ejecutivo, Encargado, Negociaciones, MontoNegociaciones, SaldoSolucionado, MontoPromedio, SaldoPromedio
         return [
-          "hora",
-          "montoNegociaciones",
-          "montoPromedio",
-          "negociaciones",
-          "saldoPromedio",
-          "saldoSolucionado",
+          "Ejecutivo",
+          "Encargado",
+          "Negociaciones",
+          "MontoNegociaciones",
+          "SaldoSolucionado",
+          "MontoPromedio",
+          "SaldoPromedio",
         ];
       } else {
         return [
@@ -181,26 +208,22 @@ const ModalProductividadContent = ({
         ];
       case "Contactos":
         return [
-          "conocidos",
-          "cuentas",
-          "desconocidos",
-          "entrada",
-          "gestiones",
-          "hora",
-          "montoNegociaciones",
-          "montoPromedio",
-          "negociaciones",
-          "saldoPromedio",
-          "saldoSolucionado",
-          "sinContacto",
-          "titulares",
+          "Ejecutivo",
+          "Entrada",
+          "Encargado",
+          "Cuentas",
+          "Gestiones",
+          "Titulares",
+          "Conocidos",
+          "Desconocidos",
+          "SinContacto",
         ];
       case "Porcentajes":
         return [
-          "Encargado",
           "Ejecutivo",
+          "Encargado",
           "Negociación",
-          "Gestiones x Cuenta",
+          "Gestión",
           "Entrada",
           "Titulares",
           "Conocidos",
@@ -225,8 +248,8 @@ const ModalProductividadContent = ({
         ];
       case "Tiempo Promedio":
         return [
-          "Encargado",
           "Ejecutivo",
+          "Encargado",
           "Negociaciones",
           "Cuentas",
           "Titulares",
@@ -277,12 +300,13 @@ const ModalProductividadContent = ({
         // Mostrar columnas que envía el backend para "Negociaciones" en modo Día
         return (
           <>
-            <th>hora</th>
-            <th>montoNegociaciones</th>
-            <th>montoPromedio</th>
-            <th>negociaciones</th>
-            <th>saldoPromedio</th>
-            <th>saldoSolucionado</th>
+            <th>Ejecutivo</th>
+            <th>Encargado</th>
+            <th>Negociaciones</th>
+            <th>MontoNegociaciones</th>
+            <th>SaldoSolucionado</th>
+            <th>MontoPromedio</th>
+            <th>SaldoPromedio</th>
           </>
         );
       } else {
@@ -332,28 +356,24 @@ const ModalProductividadContent = ({
       case "Contactos":
         return (
           <>
-            <th>conocidos</th>
-            <th>cuentas</th>
-            <th>desconocidos</th>
-            <th>entrada</th>
-            <th>gestiones</th>
-            <th>hora</th>
-            <th>montoNegociaciones</th>
-            <th>montoPromedio</th>
-            <th>negociaciones</th>
-            <th>saldoPromedio</th>
-            <th>saldoSolucionado</th>
-            <th>sinContacto</th>
-            <th>titulares</th>
+            <th>Ejecutivo</th>
+            <th>Entrada</th>
+            <th>Encargado</th>
+            <th>Cuentas</th>
+            <th>Gestiones</th>
+            <th>Titulares</th>
+            <th>Conocidos</th>
+            <th>Desconocidos</th>
+            <th>SinContacto</th>
           </>
         );
       case "Porcentajes":
         return (
           <>
-            <th>Encargado</th>
             <th>Ejecutivo</th>
+            <th>Encargado</th>
             <th>Negociación</th>
-            <th>Gestiones x Cuenta</th>
+            <th>Gestión</th>
             <th>Entrada</th>
             <th>Titulares</th>
             <th>Conocidos</th>
@@ -381,8 +401,8 @@ const ModalProductividadContent = ({
       case "TiempoPromedio":
         return (
           <>
-            <th>Encargado</th>
             <th>Ejecutivo</th>
+            <th>Encargado</th>
             <th>Negociaciones</th>
             <th>Cuentas</th>
             <th>Titulares</th>
@@ -431,7 +451,7 @@ const ModalProductividadContent = ({
     // Distinguir entre "Negociaciones" de Día vs Hora
     if (selectedIndicator === "Negociaciones") {
       if (timeFilter === "Dia") {
-        return 6; // hora, montoNegociaciones, montoPromedio, negociaciones, saldoPromedio, saldoSolucionado
+        return 7; // Ejecutivo, Encargado, Negociaciones, MontoNegociaciones, SaldoSolucionado, MontoPromedio, SaldoPromedio
       } else {
         return 20; // Encargado, Ejecutivo, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, Total
       }
@@ -442,7 +462,7 @@ const ModalProductividadContent = ({
       case "Sesiones":
         return 8; // Ejecutivo, Extensión, Id Encargado, Ingreso, Modo, Primera Gestión, Salida, Tiempo En Modo
       case "Contactos":
-        return 13; // campos mapeados según respuesta: conocidos, cuentas, desconocidos, entrada, gestiones, hora, montoNegociaciones, montoPromedio, negociaciones, saldoPromedio, saldoSolucionado, sinContacto, titulares
+        return 9; // Ejecutivo, Entrada, Encargado, Cuentas, Gestiones, Titulares, Conocidos, Desconocidos, SinContacto
       case "Porcentajes":
         return 9; // Encargado, Ejecutivo, Negociación, Gestiones x Cuenta, Entrada, Titulares, Conocidos, Desconocidos, SinContacto
       case "Tiempos":
@@ -518,6 +538,37 @@ const ModalProductividadContent = ({
             "Salida": "salida",
             "T. Modo": "tiempoEnModo"
           },
+          "Contactos": {
+            "Ejecutivo": "Ejecutivo",
+            "Entrada": "Entrada",
+            "Encargado": "Encargado",
+            "Cuentas": "Cuentas",
+            "Gestiones": "Gestiones",
+            "Titulares": "Titulares",
+            "Conocidos": "Conocidos",
+            "Desconocidos": "Desconocidos",
+            "SinContacto": "SinContacto"
+          },
+          "Negociaciones": {
+            "Ejecutivo": "Ejecutivo",
+            "Encargado": "Encargado",
+            "Negociaciones": "Negociaciones",
+            "MontoNegociaciones": "MontoNegociaciones",
+            "SaldoSolucionado": "SaldoSolucionado",
+            "MontoPromedio": "MontoPromedio",
+            "SaldoPromedio": "SaldoPromedio"
+          },
+          "Porcentajes": {
+            "Ejecutivo": "Ejecutivo",
+            "Encargado": "Encargado",
+            "Negociación": "Negociación",
+            "Gestión": "Gestión",
+            "Entrada": "Entrada",
+            "Titulares": "Titulares",
+            "Conocidos": "Conocidos",
+            "Desconocidos": "Desconocidos",
+            "SinContacto": "SinContacto"
+          },
           "Tiempos": {
             // Las claves coinciden con los headers
             "Baño": "Baño",
@@ -532,6 +583,16 @@ const ModalProductividadContent = ({
             "Pausas": "Pausas",
             "Permiso": "Permiso",
             "Sesión": "Sesión"
+          },
+          "Tiempo Promedio": {
+            "Ejecutivo": "Ejecutivo",
+            "Encargado": "Encargado",
+            "Negociaciones": "Negociaciones",
+            "Cuentas": "Cuentas",
+            "Titulares": "Titulares",
+            "Conocidos": "Conocidos",
+            "Desconocidos": "Desconocidos",
+            "SinContacto": "SinContacto"
           }
           // Agrega aquí más mapeos personalizados para otros indicadores si lo necesitas
         };
@@ -601,7 +662,7 @@ const ModalProductividadContent = ({
 
   return (
     <>
-      <div className="flex gap-4 h-full">
+      <div className="flex gap-4 h-full" style={{ maxHeight: '60vh' }}>
         {/* Columna izquierda - Jerarquía de Ejecutivos */}
         <JerarquiaConR
           executiveTree={executiveTree}
@@ -614,15 +675,16 @@ const ModalProductividadContent = ({
           setEditValues={setEditValues}
           setSelectedExecutiveNode={setSelectedExecutiveNode}
           renderExecutiveTree={renderExecutiveTree}
+          onNodeSelect={handleNodeSelect}
         />
 
-        {/* Columna derecha - Tabla de datos */}
+        {/* Columna derecha - Tabla de datos con scroll interno */}
         <div
-          className="flex-1 bg-white rounded-lg pt-[1.5vh] pb-3 px-[1vw] shadow border border-[var(--color-jerarquia1)] flex flex-col"
-          style={{ minWidth: 0 }}
+          className="flex-1 bg-white rounded-lg pt-[1.5vh] pb-3 px-[1vw] shadow border border-[var(--color-jerarquia1)] flex flex-col overflow-hidden"
+          style={{ minWidth: 0, maxHeight: '100%', maxWidth: '70%' }}
         >
           {/* Información del ejecutivo seleccionado */}
-          <div className="flex items-center mb-2 w-full">
+          <div className="flex items-center mb-2 w-full flex-shrink-0">
             <span className="modal-span-1 pl-1 mr-4">
               {loadingProductivity
                 ? "Cargando datos..."
@@ -636,19 +698,15 @@ const ModalProductividadContent = ({
             </span>
           </div>
 
-          {/* Tabla con scroll horizontal */}
+          {/* Tabla con scroll horizontal y vertical interno */}
           <div
+            className="scrollbar-gray flex-1 overflow-auto"
             style={{
-              overflowX: "auto",
-              overflowY: "auto",
-              height: "100%",
-              flex: 1,
               minWidth: '100%',
               WebkitOverflowScrolling: 'touch'
             }}
-            className="scrollbar-gray"
           >
-            <table className="modal-table mb-2" style={{ minWidth: '600px', width: 'max-content' }}>
+            <table className="modal-table mb-2" style={{ minWidth: '400px', width: 'max-content' }}>
               <thead>
                 <tr>{renderTableHeaders()}</tr>
               </thead>

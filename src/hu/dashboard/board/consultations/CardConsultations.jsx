@@ -29,6 +29,7 @@ const CardConsultations = ({ onModalOpen, onModalClose }) => {
     // Función para manejar el cierre de modales
     const handleCloseModal = (modalSetter) => {
         modalSetter(false);
+        setActiveModalName("");
         if (onModalClose) onModalClose();
     };
 

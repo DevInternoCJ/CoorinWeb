@@ -2369,3 +2369,90 @@ export const getAddressesCapture = async (idCartera, cuentaOrExpediente, esExped
     throw error;
   }
 };
+
+/**
+ * Obtiene latitud y longitud de una dirección usando Nominatim (OpenStreetMap) - API gratuita
+ * Alternativa a Google Maps Geocoding API
+ * @param {string} direccion - Dirección completa a geocodificar
+ * @returns {Promise<{latitud: string, longitud: string}>} Coordenadas o vacías si no se encuentra
+ */
+export const obtenerLatitudLongitud = async (direccion) => {
+  try {
+    if (!direccion || direccion.trim() === "") {
+      return { latitud: "", longitud: "" };
+    }
+
+    // Usar Nominatim (OpenStreetMap) - API gratuita, sin API key
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}&limit=1`;
+    
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'CoorinWeb/1.0 (Captura de Visitas)' // Requerido por Nominatim
+      }
+    });
+
+    if (!response.ok) {
+      console.warn('⚠️ Error al geocodificar dirección:', response.status);
+      return { latitud: "", longitud: "" };
+    }
+
+    const data = await response.json();
+
+    if (data && data.length > 0) {
+      const resultado = data[0];
+      console.log('📍 Coordenadas obtenidas:', { lat: resultado.lat, lon: resultado.lon });
+      return {
+        latitud: resultado.lat || "",
+        longitud: resultado.lon || ""
+      };
+    }
+
+    console.warn('⚠️ No se encontraron coordenadas para la dirección:', direccion);
+    return { latitud: "", longitud: "" };
+  } catch (error) {
+    console.error('❌ Error al obtener coordenadas:', error);
+    return { latitud: "", longitud: "" };
+  }
+};
+
+/**
+ * Guarda una visita capturada en el sistema
+ * @param {Object} visitaData - Datos de la visita según el esquema del endpoint
+ * @returns {Promise<Object>} Respuesta del servidor
+ */
+export const guardarVisitaCapturada = async (visitaData) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+
+    console.log('📤 Enviando a /captura/visitas/guardar:', visitaData);
+
+    const response = await api.post('/captura/visitas/guardar', visitaData, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log('📥 Respuesta de /captura/visitas/guardar:', response);
+    return response;
+  } catch (error) {
+    console.error('❌ Error al guardar visita:', error);
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('❌ Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
