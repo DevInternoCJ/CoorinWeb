@@ -12,6 +12,7 @@ import CapturaVisitsF7 from "../Capture/CapturaVisitsF7";
 const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaData, setCuentaData }) => {
     // Obtener idCartera y jerarquía dinámicos desde localStorage
     const userData = JSON.parse(localStorage.getItem("userData"));
+    const idEjecutivo = userData?.idEjecutivo || 0;
     const idCartera = userData?.idCartera || "";
     const jerarquia = userData?.Jerarquía ?? 0;
     
@@ -547,7 +548,13 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
             return false;
         }
         
-        // 7. Validar Hora de visita (7:00 - 22:00)
+        // 7. Validar Sucursal
+        if (!dataF4.idSucursal) {
+            toast.error("Seleccione la sucursal.");
+            return false;
+        }
+        
+        // 8. Validar Hora de visita (7:00 - 22:00)
         if (dataF4.horaVisita) {
             const [hora] = dataF4.horaVisita.split(':').map(Number);
             if (hora < 7 || hora > 21) {
@@ -559,42 +566,42 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
             return false;
         }
         
-        // 8. Validar Visitador (máximo 4 caracteres)
+        // 9. Validar Visitador (máximo 4 caracteres)
         const visitador = dataF4.usuarioVisitador || "";
         if (visitador.trim().length > 4) {
             toast.error("El visitador debe tener máximo 4 caracteres.");
             return false;
         }
         
-        // 9. Validar Observación (mínimo 5 caracteres)
+        // 10. Validar Observación (mínimo 5 caracteres)
         const observacion = dataF4.comentario || "";
         if (observacion.trim().length < 5) {
             toast.error("Escriba una observación de la visita más extensa.");
             return false;
         }
         
-        // 10-12. Validaciones solo para carteras CFE (14 y 24)
+        // 11-13. Validaciones solo para carteras CFE (14 y 24)
         if (carteraNumero === 14 || carteraNumero === 24) {
-            // 10. Validar Energía Eléctrica
+            // 11. Validar Energía Eléctrica
             if (dataF7.energiaElectrica == null || dataF7.energiaElectrica === "") {
                 toast.error("Seleccione si el deudor cuenta con energía eléctrica.");
                 return false;
             }
             
-            // 11. Validar Acuse de requerimiento
+            // 12. Validar Acuse de requerimiento
             if (dataF7.acuseRequerimiento == null || dataF7.acuseRequerimiento === "") {
                 toast.error("Seleccione si el deudor cuenta con acuse de requerimiento de cobro.");
                 return false;
             }
             
-            // 12. Validar Fotografía del predio
+            // 13. Validar Fotografía del predio
             if (dataF7.fotografiaPredio == null || dataF7.fotografiaPredio === "") {
                 toast.error("Seleccione si cuenta con fotografía del predio.");
                 return false;
             }
         }
         
-        // 13. Verificar calles vacías (mostrar confirmación)
+        // 14. Verificar calles vacías (mostrar confirmación)
         let callesVacias = [];
         if (!dataF5.calleHorizontalNorte?.trim()) callesVacias.push("Horizontal norte");
         if (!dataF5.calleHorizontalSur?.trim()) callesVacias.push("Horizontal sur");
@@ -609,7 +616,7 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
             return false; // Detener aquí, se continuará desde el modal
         }
         
-        // 14. Si pasa todas las validaciones, mostrar confirmación de fecha
+        // 15. Si pasa todas las validaciones, mostrar confirmación de fecha
         setDatosValidados({ dataF2, dataF4, dataF5, dataF7 });
         setModalConfirmacionFecha(true);
         return false; // Detener aquí, se continuará desde el modal
@@ -688,10 +695,11 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
             
             // Construir payload según el esquema exacto del endpoint
             const payload = {
+                idEjecutivo: idEjecutivo,
                 idCartera: carteraNumero,
-                idCuenta: cuentaData?.cuenta?.idCuenta || idCuenta,
+                idCuenta: (cuentaData?.cuenta?.idCuenta || idCuenta).trim(),
                 idDomicilio: domicilioData.idDomicilio || 0,
-                fechaVisita: dataF4.fechaVisita,
+                fechaVisita: dataF4.fechaVisita + 'T00:00:00',
                 horaVisita: dataF4.horaVisita,
                 usuarioVisitador: (dataF4.usuarioVisitador || "").toUpperCase().trim(),
                 idHabitacion: dataF2.idHabitacion || null,
@@ -720,14 +728,14 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                 calleVerticalEste: dataF5.calleVerticalEste || null,
                 calleVerticalOeste: dataF5.calleVerticalOeste || null,
                 montoNegociacion: dataF4.montoNegociacion || null,
-                fechaPagoNegociacion: dataF4.montoNegociacion ? dataF4.fechaPagoNegociacion : null,
+                fechaPagoNegociacion: dataF4.montoNegociacion ? dataF4.fechaPagoNegociacion + 'T00:00:00' : null,
                 telefonosCapturados: dataF6.telefonosCapturados || [],
                 numeroMedidor: dataF7.numeroMedidor || null,
                 energiaElectrica: dataF7.energiaElectrica != null ? (dataF7.energiaElectrica === "Si" || dataF7.energiaElectrica === true) : null,
                 acuseRequerimiento: dataF7.acuseRequerimiento != null ? (dataF7.acuseRequerimiento === "Si" || dataF7.acuseRequerimiento === true) : null,
                 fotografiaPredio: dataF7.fotografiaPredio != null ? (dataF7.fotografiaPredio === "Si" || dataF7.fotografiaPredio === true) : null,
-                latitud: latitud || null,
-                longitud: longitud || null
+                latitud: latitud ? latitud.toString() : null,
+                longitud: longitud ? longitud.toString() : null
             };
             
             console.log("Payload enviado al endpoint:", payload);
@@ -866,7 +874,7 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                                 value={idCuenta}
                                 maxLength={porExpediente ? 12 : 16}
                                 onChange={e => {
-                                    let valor = e.target.value;
+                                    let valor = e.target.value.trim();
                                     if (porExpediente) {
                                         // Permitir solo hasta 12 caracteres alfanuméricos
                                         valor = valor.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12);
@@ -1028,7 +1036,7 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                                     value={idCuenta}
                                     maxLength={porExpediente ? 12 : 16}
                                     onChange={e => {
-                                        let valor = e.target.value;
+                                        let valor = e.target.value.trim();
                                         if (porExpediente) {
                                             // Permitir solo hasta 12 caracteres alfanuméricos
                                             valor = valor.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12);
