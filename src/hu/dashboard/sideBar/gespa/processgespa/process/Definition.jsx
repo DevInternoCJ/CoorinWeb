@@ -1,5 +1,6 @@
 import React from "react";
 import SaveButton from "../../../Administration/gespa/ButtonSave";
+import SelectWallet from "../../../../board/screenFields/SelectWallet"; // ajusta el path
 
 const Definition = ({
   cartera,
@@ -10,25 +11,31 @@ const Definition = ({
   onSearchChange,
   onSearchClick,
 }) => {
+
+  const carteraOptions = [
+    { value: "", label: "Seleccione" },
+    { value: "amex", label: "American Express" },
+    { value: "banamex", label: "Banamex" },
+    { value: "santander", label: "Santander" },
+  ];
+
   return (
     <div className="flex flex-col gap-3 w-full">
 
       {/* Cartera y Tipo */}
       <div className="flex items-center justify-start gap-10 text-sm">
-        <div>
-          <p className="text-gray-700">Cartera</p>
-          <select
-            className="border rounded px-2 py-1"
+
+        {/* 🔥 Select reutilizable */}
+        <div className="w-64">
+          <SelectWallet
+            label="Cartera"
+            options={carteraOptions}
             value={cartera}
-            onChange={(e) => onCarteraChange(e.target.value)}
-          >
-            <option value="">Seleccione</option>
-            <option value="amex">American Express</option>
-            <option value="banamex">Banamex</option>
-            <option value="santander">Santander</option>
-          </select>
+            onChange={onCarteraChange}
+          />
         </div>
 
+        {/* Tipo */}
         <div className="flex gap-6">
           <label className="flex items-center gap-1">
             <input
