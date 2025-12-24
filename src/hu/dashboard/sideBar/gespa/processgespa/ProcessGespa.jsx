@@ -3,6 +3,7 @@ import ModalBase from "../../../board/ModalBase";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import { IconProcess, IconDefinition, IconAccountBlock, IconOnlineCharges, IconRepentance, IconStatement } from "./IconsProcessGespa";
 import Definition from "./process/Definition";
+import Repentance from "./process/Repentance";
 
 const ProcessGespa = ({ onClose }) => {
   const modalRef = useRef(null);

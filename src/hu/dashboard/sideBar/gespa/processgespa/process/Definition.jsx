@@ -21,11 +21,10 @@ const Definition = ({
 
   return (
     <div className="flex flex-col gap-3 w-full">
-
       {/* Cartera y Tipo */}
       <div className="flex items-center justify-start gap-10 text-sm">
 
-        {/* 🔥 Select reutilizable */}
+        {/* Select reutilizable */}
         <div className="w-64">
           <SelectWallet
             label="Cartera"
@@ -34,7 +33,6 @@ const Definition = ({
             onChange={onCarteraChange}
           />
         </div>
-
         {/* Tipo */}
         <div className="flex gap-6">
           <label className="flex items-center gap-1">
@@ -45,7 +43,6 @@ const Definition = ({
             />
             Individual
           </label>
-
           <label className="flex items-center gap-1">
             <input
               type="radio"
@@ -56,7 +53,6 @@ const Definition = ({
           </label>
         </div>
       </div>
-
       {/* Input + Botón */}
       <div className="flex items-center">
         <input
@@ -65,7 +61,6 @@ const Definition = ({
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-full bg-gray-200 h-8 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mr-4"
         />
-
         <SaveButton
           onClick={onSearchClick}
           className="btn-success"
