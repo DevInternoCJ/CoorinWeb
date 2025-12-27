@@ -22,22 +22,6 @@ const OnlineCharges = () => {
 
   return (
     <div className="py-4 w-full">
-      {/* Logos */}
-      <div className="mb-6 flex justify-center">
-        <div className="flex items-center gap-3">
-          <img
-            src="/path/to/consorcio-logo.png"
-            alt="Consorcio Jurídico"
-            className="h-15"
-          />
-          <img
-            src="/path/to/proyecto-logo.png"
-            alt="Proyecto"
-            className="h-15"
-          />
-        </div>
-      </div>
-
       {/* Contenido principal */}
       <div className="flex justify-center">
         <div className="w-full max-w-2xl flex flex-col gap-4">
