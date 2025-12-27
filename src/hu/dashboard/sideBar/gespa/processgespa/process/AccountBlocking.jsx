@@ -1,7 +1,7 @@
 import React from "react";
 import SearchForm from "./SearchForm"; // ajusta el path
 
-const Definition = ({
+const AccountBloking = ({
   cartera,
   onCarteraChange,
   tipo,
@@ -48,4 +48,4 @@ const Definition = ({
   );
 };
 
-export default Definition;
+export default AccountBloking;

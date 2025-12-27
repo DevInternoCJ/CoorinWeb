@@ -4,6 +4,8 @@ import IconCircular from "../../../../../components/iconos/IconCircular";
 import { IconProcess, IconDefinition, IconAccountBlock, IconOnlineCharges, IconRepentance, IconStatement } from "./IconsProcessGespa";
 import Definition from "./process/Definition";
 import Repentance from "./process/Repentance";
+import AccountBloking from "./process/AccountBlocking";
+import OnlineCharges from "./process/OnlineCharges";
 
 const ProcessGespa = ({ onClose }) => {
   const modalRef = useRef(null);
@@ -120,7 +122,7 @@ const ProcessGespa = ({ onClose }) => {
           </ul>
 
           {/* Content Area */}
-          <div className="flex-1 mt-4 pr-4">
+          <div className="flex-1 mt-6 pr-4">
             {tabs.map((tab) => (
               <div
                 key={tab.id}
@@ -137,6 +139,21 @@ const ProcessGespa = ({ onClose }) => {
         onSearchChange={setSearch}
         onSearchClick={handleBuscar}
       />
+    )}
+    {tab.id === "arrepentimientos" && (
+      <Repentance />
+    )}
+    {tab.id === "bloqueo-cuentas" && (
+      <AccountBloking />
+    )}
+    {tab.id === "cargos-en-linea" && (
+      <OnlineCharges />
+    )}
+    {tab.id === "estados-cuenta" && (
+      <div className="p-4">
+        <h3 className="text-lg font-semibold">{tab.title}</h3>
+        <p>{tab.content}</p>
+      </div>
     )}
               </div>
             ))}

@@ -1,93 +1,72 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Form, Button, Image } from "react-bootstrap";
+import SaveButton from "../../../Administration/gespa/ButtonSave";
+import SelectWallet from "../../../../board/screenFields/SelectWallet"; // ajusta el path
 
-const Repentance = () => {
+const Repentance = ({ searchValue, onSearchClick, onSearchChange }) => {
   const [cartera, setCartera] = useState("");
   const [cuenta, setCuenta] = useState("");
-  const [busqueda, setBusqueda] = useState("");
+
+  // Opciones para los selects
+  const carteraOptions = [
+    { value: "", label: "Selecciona una cartera" },
+    { value: "amex", label: "American Express" },
+    { value: "banamex", label: "Banamex" },
+    { value: "santander", label: "Santander" },
+    { value: "hsbc", label: "HSBC" },
+  ];
+
+  const cuentaOptions = [
+    { value: "", label: "Selecciona un tipo" },
+    { value: "individual", label: "Individual" },
+    { value: "archivo", label: "Archivo" },
+    { value: "lote", label: "Lote" },
+  ];
 
   const handleBuscar = () => {
     console.log("Buscar:", {
       cartera,
       cuenta,
-      busqueda,
+      busqueda: searchValue,
     });
+    onSearchClick();
   };
 
   return (
-    <Container fluid className="py-4">
-      {/* Logos */}
-      <Row className="mb-4 justify-content-center">
-        <Col xs="auto">
-          <div className="d-flex align-items-center gap-3">
-            <Image
-              src="/path/to/consorcio-logo.png"
-              alt="Consorcio Jurídico"
-              height={60}
-            />
-            <Image
-              src="/path/to/proyecto-logo.png"
-              alt="Proyecto"
-              height={60}
-            />
-          </div>
-        </Col>
-      </Row>
-
+    <div className=" w-full">
       {/* Formulario */}
-      <Row className="justify-content-center">
-        <Col md={8} lg={6}>
-          <div className="d-flex flex-column gap-3">
-            {/* Select Cartera */}
-            <Form.Group controlId="cartera">
-              <Form.Select
-                value={cartera}
-                onChange={(e) => setCartera(e.target.value)}
-                className="bg-light"
-              >
-                <option value="">Cartera</option>
-                <option value="amex">American Express</option>
-                <option value="banamex">Banamex</option>
-                <option value="santander">Santander</option>
-                <option value="hsbc">HSBC</option>
-              </Form.Select>
-            </Form.Group>
+      <div className="flex justify-center">
+        <div className="w-full max-w-2xl flex flex-col gap-4">
+          {/* Select Cartera */}
+          <SelectWallet
+            label="Cartera"
+            options={carteraOptions}
+            value={cartera}
+            onChange={setCartera}
+          />
 
-            {/* Select Cuenta */}
-            <Form.Group controlId="cuenta">
-              <Form.Select
-                value={cuenta}
-                onChange={(e) => setCuenta(e.target.value)}
-                className="bg-light"
-              >
-                <option value="">Cuenta</option>
-                <option value="individual">Individual</option>
-                <option value="archivo">Archivo</option>
-                <option value="lote">Lote</option>
-              </Form.Select>
-            </Form.Group>
+          {/* Select Cuenta */}
+          <SelectWallet
+            label="Cuenta"
+            options={cuentaOptions}
+            value={cuenta}
+            onChange={setCuenta}
+          />
 
-            {/* Input + Botón */}
-            <div className="d-flex gap-2">
-              <Form.Control
-                type="text"
-                placeholder="Buscar..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                className="flex-grow-1"
-              />
-              <Button 
-                variant="success" 
-                onClick={handleBuscar}
-                className="px-4"
-              >
-                Buscar
-              </Button>
-            </div>
+          {/* Input + Botón */}
+          <div className="flex items-center">
+            <input
+              type="text"
+              value={searchValue}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="w-full bg-gray-200 h-8 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mr-4"
+            />
+            <SaveButton onClick={onSearchClick} className="btn-success">
+              Buscar
+            </SaveButton>
           </div>
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 };
 
