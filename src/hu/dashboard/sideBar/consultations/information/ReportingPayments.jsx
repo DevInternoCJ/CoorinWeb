@@ -17,7 +17,10 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla, activeTab }) 
     // Bandera para controlar el toast de error
     const [errorToastShown, setErrorToastShown] = useState(false);
     // Bandera para saber si la búsqueda fue manual
-    const [cartera, setCartera] = useState(idCartera);
+    const [cartera, setCartera] = useState(() => {
+        const saved = localStorage.getItem('selectedCartera');
+        return saved ? parseInt(saved, 10) : idCartera;
+    });
     const [consulta, setConsulta] = useState("0");
     const [desde, setDesde] = useState(new Date().toISOString().slice(0, 10));
     const [hasta, setHasta] = useState(new Date().toISOString().slice(0, 10));
@@ -29,6 +32,12 @@ const ReportingPaymentsContent = ({ mostrarTabla, setMostrarTabla, activeTab }) 
     const [loadingTabla, setLoadingTabla] = useState(false);
     const [errorTabla, setErrorTabla] = useState(null);
     const [tablaData, setTablaData] = useState([]);
+    const [abortController, setAbortController] = useState(null);
+
+    // Persistir la cartera seleccionada
+    useEffect(() => {
+        localStorage.setItem('selectedCartera', cartera);
+    }, [cartera]);
 
     // Efecto para reiniciar estados al cambiar de tab
     useEffect(() => {

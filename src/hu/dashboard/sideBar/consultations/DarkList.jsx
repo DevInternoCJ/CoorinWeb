@@ -14,6 +14,7 @@ const DarkListContent = () => {
     const [resultado, setResultado] = useState(null); // {enListaNegra: bool, msg: string}
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [abortController, setAbortController] = useState(null);
 
     // Obtener idCartera desde localStorage
     const getIdCartera = () => {
@@ -90,8 +91,10 @@ const DarkListContent = () => {
             }
         }
         setLoading(true);
+        const controller = new AbortController();
+        setAbortController(controller);
         try {
-            const res = await darkListV2({ idCartera: getIdCartera(), selector: tipo, dato: valor });
+            const res = await darkListV2({ idCartera: getIdCartera(), selector: tipo, dato: valor }, { signal: controller.signal });
             if (typeof res?.enListaNegra === "boolean") {
                 setResultado({
                     enListaNegra: res.enListaNegra,
@@ -102,12 +105,27 @@ const DarkListContent = () => {
             } else {
                 toast.error("Respuesta inesperada del servidor.");
             }
-        } catch {
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                console.log('Petición cancelada');
+                return;
+            }
             toast.error("Error al consultar la lista negra.");
         } finally {
             setLoading(false);
+            setAbortController(null);
         }
     }
+
+    // Cancelar petición al desmontar el componente
+    useEffect(() => {
+        return () => {
+            if (abortController) {
+                toast.warning("Petición cancelada al cerrar el modal.");
+                abortController.abort();
+            }
+        };
+    }, [abortController]);
 
     const handleTipoChange = (nuevoTipo) => {
         setTipo(nuevoTipo);

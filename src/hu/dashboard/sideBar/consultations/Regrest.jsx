@@ -8,6 +8,7 @@ const RegrestContent = ({ growModal, isExpanded }) => {
     const [resultados, setResultados] = useState(null); // array de arrepentimientos
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [abortController, setAbortController] = useState(null);
 
     const [cartera, setCartera] = useState(() => {
         const ud = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -55,8 +56,10 @@ const RegrestContent = ({ growModal, isExpanded }) => {
         console.log('🔍 Usando idCartera:', idCartera);
 
         setLoading(true);
+        const controller = new AbortController();
+        setAbortController(controller);
         try {
-            const data = await getRegrest({ idCartera, cuenta: valor });
+            const data = await getRegrest({ idCartera, cuenta: valor }, { signal: controller.signal });
             if (Array.isArray(data) && data.length > 0) {
                 // Ordenar por fecha y hora descendente
                 const ordenados = [...data].sort((a, b) => {
@@ -73,13 +76,28 @@ const RegrestContent = ({ growModal, isExpanded }) => {
                 setResultados([]);
             }
         } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Petición cancelada');
+                return;
+            }
             console.error('Error al buscar arrepentimientos:', error);
             toast.warning('Verifica que la cuenta sea correcta');
             setError("Verifica que la cuenta sea correcta.");
         } finally {
             setLoading(false);
+            setAbortController(null);
         }
     };
+
+    // Cancelar petición al desmontar el componente
+    useEffect(() => {
+        return () => {
+            if (abortController) {
+                toast.warning("Petición cancelada al cerrar el modal.");
+                abortController.abort();
+            }
+        };
+    }, [abortController]);
 
     useEffect(() => {
         if (error === "Verifica que la cuenta sea correcta.") {

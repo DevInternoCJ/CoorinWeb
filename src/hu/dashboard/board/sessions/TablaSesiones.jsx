@@ -162,16 +162,16 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                     scrollbarColor: "#b0b0b0 #f5f5f5",
                     scrollbarWidth: "thin"
                 }}
-                className="scrollbar-gray w-full max-h-[30vh] lg:max-h-[22vh]"
+                className="scrollbar-gray w-full max-h-[35vh] lg:max-h-[27vh]"
             >
                 <table className="modal-table text-xs lg:text-sm" style={{ minWidth: '100%' }}>
                     <thead style={{ position: 'sticky', top: 0, background: 'var(--color-jerarquia1)', zIndex: 0 }}>
                         <tr>
-                            <th style={{ top: 0, background: 'bg-jerarquia4', color: '#fff' }}>Ejecutivo</th>
+                            <th style={{ top: 0, background: 'bg-jerarquia4', color: '#fff', whiteSpace: 'nowrap' }}>Ejecutivo</th>
                             <th style={{ textAlign: 'center', top: 0, background: 'bg-jerarquia4¿', color: '#fff' }}>Usuario</th>
                             <th style={{ textAlign: 'center', top: 0, background: 'bg-jerarquia4', color: '#fff' }}>Bloqueado</th>
                             <th style={{ textAlign: 'center', top: 0, background: 'bg-jerarquia4', color: '#fff' }}>Contraseña</th>
-                            <th style={{ textAlign: 'center', top: 0, background: 'bg-jerarquia4', color: '#fff' }}>Sesión Abierta</th>
+                            <th style={{ textAlign: 'center', top: 0, background: 'bg-jerarquia4', color: '#fff', whiteSpace: 'nowrap' }}>Sesión Abierta</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -215,7 +215,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                         )}
                         {!loading && !error && sessions.length > 0 && sessions.map((session, i) => (
                             <tr key={session.id || i} style={{ height: '20px' }}>
-                                <td>
+                                <td style={{ whiteSpace: 'nowrap' }}>
                                     {session.nombreEjecutivo || session.ejecutivo || session.nombre || '---'}
                                 </td>
                                 <td style={{ letterSpacing: '0.05em', fontVariantNumeric: 'tabular-nums', fontFamily: 'monospace', textAlign: 'center' }}>
@@ -287,7 +287,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                                         </button>
                                     </div>
                                 </td>
-                                <td style={{ textAlign: 'center' }}>
+                                <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                                     {session.sesionAbierta !== undefined ? (
                                         <input 
                                             type="checkbox" 

@@ -26,8 +26,8 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
             try {
                 const userData = JSON.parse(localStorage.getItem('userData'));
                 const idEjecutivo = userData?.idEjecutivo;
-                const usuario = userData?.usuario || '';
-                const nombreEjecutivo = userData?.nombreEjecutivo;
+                const usuario = userData?.usuario || userData?.Usuario || '';
+                const nombreEjecutivo = userData?.NombreEjecutivo || userData?.nombreEjecutivo || userData?.nombre;
                 if (!idEjecutivo) throw new Error('No se encontró el idEjecutivo del usuario logueado');
                 
                 const data = await obetenerJerarquiaEncargados(idEjecutivo);
@@ -45,7 +45,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                         tree = [{
                             idEjecutivo,
                             usuario,
-                            nombreEjecutivo,
+                            NombreEjecutivo: nombreEjecutivo,
                             subordinados: data
                         }];
                     }
@@ -165,7 +165,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                     aria-expanded={hasSub ? !isCollapsed : undefined}
                     id={headingId}
                     data-hs-tree-view-item={JSON.stringify({
-                        value: node.usuario || node.nombreEjecutivo || node.idEjecutivo,
+                        value: node.usuario || node.NombreEjecutivo || node.nombreEjecutivo || node.ejecutivo || node.nombre || node.idEjecutivo,
                         isDir: hasSub
                     })}
                 >
@@ -204,10 +204,10 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                             onDoubleClick={() => {
                                 if (hasSub) toggleCollapse(node.idEjecutivo);
                             }}
-                            title={node.usuario + ' - ' + node.nombreEjecutivo}
+                            title={node.usuario + ' - ' + (node.NombreEjecutivo || node.nombreEjecutivo || node.ejecutivo || node.nombre || 'SIN NOMBRE')}
                         >
                             <span className="text-sm font-medium w-full" style={{color: isSelected ? '#2b463c' : '#147f5e', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block'}}>
-                                {node.usuario} - {node.nombreEjecutivo}
+                                {node.usuario} - {node.NombreEjecutivo || node.nombreEjecutivo || node.ejecutivo || node.nombre || 'SIN NOMBRE'}
                             </span>
                         </div>
                     </div>
@@ -232,22 +232,21 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     // Obtener datos de la sesión
     const userData = JSON.parse(localStorage.getItem('userData'));
     const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
-    const nombreSesion = userData?.nombre || userData?.nombreEjecutivo || userData?.ejecutivo || '';
-    const usuarioSesion = userData?.usuario || '';
+    const nombreSesion = userData?.NombreEjecutivo || userData?.nombreEjecutivo || userData?.nombre || '';
+    const usuarioSesion = userData?.usuario || userData?.Usuario || '';
 
     return (
         <div className="ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64 bg-white/80">
-            {/* Header responsive */}
+            {/* Header unificado y responsive */}
             <div className="mb-1">
-                {/* Layout para pantallas grandes (md y superiores) */}
-                <div className="hidden lg:grid grid-cols-3 items-center">
-                    {/* Columna izquierda - Título */}
+                <div className="flex items-center justify-between">
+                    {/* Título a la izquierda */}
                     <div className="flex items-center text-gray-800">
                         <span className="mr-2">
                             {/* Icono de ramificación */}
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="inline-block w-6 h-6 text-gray-700"
+                                className="inline-block w-5 h-5 lg:w-6 lg:h-6 text-gray-700"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor">
@@ -262,66 +261,33 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                         <h3 className="text-base lg:text-lg font-semibold">Ramificación</h3>
                     </div>
                     
-                    {/* Columna centro - Ejecutivo de la sesión */}
+                    {/* Ejecutivo de la sesión a la derecha */}
                     {idEjecutivoSesion && (
-                        <div className="flex justify-center w-full">
-                            <div
-                                className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? ' selected' : ''} text-xs md:text-sm lg:text-base px-2 py-2 rounded-md bg-white md:bg-gray-100 border border-gray-300 text-center max-w-full truncate shadow-sm md:shadow font-semibold text-gray-800 md:text-green-700 transition-all duration-200`}
-                                title={`Ejecutivo de la sesión actual: ${usuarioSesion} - ${nombreSesion}`}
-                                onClick={() => {
-                                    setSelectedExecutiveNode(Number(idEjecutivoSesion));
-                                    if (onExecutiveSelect) {
-                                        onExecutiveSelect(Number(idEjecutivoSesion));
-                                    }
-                                    // Hacer autoscroll hacia arriba
-                                    setTimeout(() => {
-                                        scrollToTop();
-                                    }, 100);
-                                }}
-                                style={{ position: 'static', margin: 0, zIndex: 0 }}
-                            >
-                                <span className="font-bold md:font-semibold lg:font-bold">{usuarioSesion}</span>
-                                <span className="mx-1">-</span>
-                                <span className="font-bold md:font-semibold lg:font-bold">{nombreSesion}</span>
-                            </div>
+                        <div
+                            className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? ' selected' : ''} text-xs md:text-sm lg:text-base px-2 py-2 rounded-md bg-white md:bg-gray-100 border border-gray-300 text-center max-w-full truncate shadow-sm md:shadow font-semibold text-gray-800 md:text-green-700 transition-all duration-200`}
+                            title={`Ejecutivo de la sesión actual: ${usuarioSesion} - ${nombreSesion}`}
+                            onClick={() => {
+                                setSelectedExecutiveNode(Number(idEjecutivoSesion));
+                                if (onExecutiveSelect) {
+                                    onExecutiveSelect(Number(idEjecutivoSesion));
+                                }
+                                // Hacer autoscroll hacia arriba
+                                setTimeout(() => {
+                                    scrollToTop();
+                                }, 100);
+                            }}
+                            style={{ position: 'static', margin: 0, zIndex: 0 }}
+                        >
+                            <span className="font-bold md:font-semibold lg:font-bold">{usuarioSesion}</span>
+                            <span className="mx-1">-</span>
+                            <span className="font-bold md:font-semibold lg:font-bold">{nombreSesion}</span>
                         </div>
                     )}
-                    
-                    {/* Columna derecha - Vacía por ahora */}
-                    <div></div>
                 </div>
-
-                {/* Layout para pantallas pequeñas (móviles y tablets) */}
-                <div className="xl:hidden">
-                    {/* Fila 1 - Título */}
-                    <div className="flex items-center text-gray-800 mb-2">
-                        <span className="mr-2">
-                            {/* Icono de ramificación */}
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="inline-block w-5 h-5 text-gray-700"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M7 7a3 3 0 11-6 0 3 3 0 016 0zm0 0v10a3 3 0 006 0V7m0 10a3 3 0 006 0V7a3 3 0 10-6 0"
-                                />
-                            </svg>
-                        </span>
-                        <h3 className="text-sm xl:text-base font-semibold">Ramificación</h3>
-                    </div>
-                    {/* Fila 2 - Ejecutivo de la sesión */}
-                    {/* Eliminado: solo se usa una instancia global arriba */}
-                </div>
-            </div>
-            
             {/* Contenedor de la ramificación con estilos de JerarquiaConR */}
             <div
                 ref={ramificacionRef}
-                className="productividad-branch flex-1 h-[40vh] xl:h-[56vh] p-2"
+                className="productividad-branch flex-1 max-h-[35vh] lg:max-h-[26vh] xl:h-[56vh] "
                 style={{
                     overflowX: 'auto',
                     overflowY: 'auto',
@@ -384,6 +350,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                 )}
             </div>
         </div>
+    </div>
     );
 };
 

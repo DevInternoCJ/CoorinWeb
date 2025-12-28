@@ -11,6 +11,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
     const [loadingTabla, setLoadingTabla] = useState(false);
     const [errorTabla, setErrorTabla] = useState(null);
     const [tablaData, setTablaData] = useState([]);
+    const [abortController, setAbortController] = useState(null);
     // Guardar y restaurar parámetros
     const [paramsGuardados, setParamsGuardados] = useState(() => {
         const saved = localStorage.getItem('wrongsParams');
@@ -20,12 +21,22 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
     const userData = JSON.parse(localStorage.getItem("userData"));
     const idCartera = userData?.idCartera || 0;
     // Memorizar los parámetros actuales
+    const [cartera, setCartera] = useState(() => {
+        const saved = localStorage.getItem('selectedCartera');
+        return saved ? parseInt(saved, 10) : idCartera;
+    });
+    // Memorizar los parámetros actuales
     const searchParams = {
         idCartera,
         idDatoErroneo: datoErroneo === "" ? 0 : parseInt(datoErroneo, 10),
         desde,
         hasta
     };
+
+    // Persistir la cartera seleccionada
+    useEffect(() => {
+        localStorage.setItem('selectedCartera', cartera);
+    }, [cartera]);
     // ...existing code...
     // Ejecutar búsqueda automática al abrir el modal extendido si hay parámetros guardados
     useEffect(() => {
@@ -74,6 +85,8 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
         setLoadingTabla(true);
         setErrorTabla(null);
         setTablaData([]);
+        const controller = new AbortController();
+        setAbortController(controller);
         // SIEMPRE usar los parámetros actuales al buscar manualmente
         let params = {
             idCartera,
@@ -82,7 +95,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
             hasta
         };
         try {
-            const response = await getWrongsInformation(params);
+            const response = await getWrongsInformation(params, { signal: controller.signal });
             // La respuesta es un blob, leer como texto y parsear JSON
             let text = "";
             if (response && response.data instanceof Blob) {
@@ -104,6 +117,10 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
             }
             localStorage.removeItem('wrongsParams');
         } catch (err) {
+            if (err.name === 'AbortError') {
+                console.log('Petición cancelada');
+                return;
+            }
             if (err?.response?.status === 404 && err?.response?.statusText === "Not Found") {
                 setErrorTabla("No se encontraron resultados.");
                 toast.warning("Su consulta no cuenta con registros en la fecha especificada.", { duration: 4000 });
@@ -112,8 +129,19 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
             }
         } finally {
             setLoadingTabla(false);
+            setAbortController(null);
         }
     };
+
+    // Cancelar petición al desmontar el componente
+    useEffect(() => {
+        return () => {
+            if (abortController) {
+                toast.warning("Petición cancelada al cerrar el modal.");
+                abortController.abort();
+            }
+        };
+    }, [abortController]);
 
     return (
         <div style={{ width: '100%', height: '100%' }} className="flex flex-col items-center min-h-0 h-full">

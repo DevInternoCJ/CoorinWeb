@@ -14,7 +14,10 @@ const SearchesContent = ({ headerControlsActive = false }) => {
 
 
     // El valor mostrado en el dropdown es idCartera
-    const [cartera, setCartera] = useState(idCartera);
+    const [cartera, setCartera] = useState(() => {
+        const saved = localStorage.getItem('selectedCartera');
+        return saved ? parseInt(saved, 10) : idCartera;
+    });
     const [carterasOptions, setCarterasOptions] = useState([]);
     const [consulta, setConsulta] = useState("");
     const [desde, setDesde] = useState(new Date().toISOString().slice(0, 10));
@@ -26,9 +29,14 @@ const SearchesContent = ({ headerControlsActive = false }) => {
     const [errorExcel, setErrorExcel] = useState(null);
     const [consultaSinRegistros, setConsultaSinRegistros] = useState(false);
     const [showToast, setShowToast] = useState(false);
+    const [abortController, setAbortController] = useState(null);
 
     const minDate = "2016-01-01";
     const maxDate = new Date().toISOString().slice(0, 10);
+
+    useEffect(() => {
+        localStorage.setItem('selectedCartera', cartera);
+    }, [cartera]);
 
     useEffect(() => {
         if (!idEjecutivo) return;
@@ -61,6 +69,8 @@ const SearchesContent = ({ headerControlsActive = false }) => {
         setLoadingExcel(true);
         setErrorExcel(null);
         const toastId = toast.loading(`Exportando búsquedas...`);
+        const controller = new AbortController();
+        setAbortController(controller);
         try {
             const idConsultaFinal = consulta === "" ? "0" : consulta;
             const params = {
@@ -71,7 +81,7 @@ const SearchesContent = ({ headerControlsActive = false }) => {
                 hasta,
                 jerarquia
             };
-            const response = await getSearchesInformation(params);
+            const response = await getSearchesInformation(params, { signal: controller.signal });
 
             const result = await exportFromAPIResponse(
                 response,
@@ -93,6 +103,10 @@ const SearchesContent = ({ headerControlsActive = false }) => {
                 toast.warning("Consulta terminada sin registros");
             }
         } catch (err) {
+            if (err.name === 'AbortError') {
+                console.log('Petición cancelada');
+                return;
+            }
             const status = err?.response?.status;
             const statusText = err?.response?.statusText;
             if (status === 404 && statusText === "Not Found") {
@@ -109,9 +123,20 @@ const SearchesContent = ({ headerControlsActive = false }) => {
             }
         } finally {
             setLoadingExcel(false);
+            setAbortController(null);
             toast.dismiss(toastId);
         }
     };
+
+    // Cancelar petición al desmontar el componente
+    useEffect(() => {
+        return () => {
+            if (abortController) {
+                toast.warning("Petición cancelada al cerrar el modal.");
+                abortController.abort();
+            }
+        };
+    }, [abortController]);
 
     return (
         <div className="w-full flex flex-col items-center" style={{ minHeight: 0, height: 'auto' }}>

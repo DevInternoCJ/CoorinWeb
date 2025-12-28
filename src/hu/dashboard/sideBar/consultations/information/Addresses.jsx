@@ -13,13 +13,17 @@ const AddressesContent = ({ mostrarTabla }) => {
     const idEjecutivo = userData?.idEjecutivo ?? null;
     const idProducto = userData?.idProducto ?? 0;
 
-    const [cartera, setCartera] = useState(idCartera);
+    const [cartera, setCartera] = useState(() => {
+        const saved = localStorage.getItem('selectedCartera');
+        return saved ? parseInt(saved, 10) : idCartera;
+    });
     // Opciones de cartera dinámicas
     const [carterasOptions, setCarterasOptions] = useState([]);
     const [consulta, setConsulta] = useState("");
     const [consultasOptions, setConsultasOptions] = useState([]);
     const [loadingConsultas, setLoadingConsultas] = useState(false);
     const [errorConsultas, setErrorConsultas] = useState(null);
+    const [abortController, setAbortController] = useState(null);
 
     // Al abrir el modal (cuando se monta el componente o cambia mostrarTabla a true), mostrar mensaje inicial
     useEffect(() => {
@@ -27,6 +31,11 @@ const AddressesContent = ({ mostrarTabla }) => {
         toast.info("Elija la consulta de las cuentas que desee los domicilios.");
 
     }, [mostrarTabla]);
+
+    // Persistir la cartera seleccionada
+    useEffect(() => {
+        localStorage.setItem('selectedCartera', cartera);
+    }, [cartera]);
 
 
     // Cargar opciones de consulta
@@ -67,10 +76,12 @@ const AddressesContent = ({ mostrarTabla }) => {
         setLoadingExcel(true);
         setErrorExcel(null);
         const toastId = toast.loading(`Exportando domicilios...`);
+        const controller = new AbortController();
+        setAbortController(controller);
         try {
             const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
             const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
-            const response = await getAddress(idCarteraInt, idConsultaInt);
+            const response = await getAddress(idCarteraInt, idConsultaInt, { signal: controller.signal });
 
             let nombreConsulta = "Domicilios";
             if (consulta !== "" && consulta !== 0) {
@@ -96,6 +107,10 @@ const AddressesContent = ({ mostrarTabla }) => {
                 toast.warning("Consulta terminada sin registros.");
             }
         } catch (err) {
+            if (err.name === 'AbortError') {
+                console.log('Petición cancelada');
+                return;
+            }
             const status = err?.response?.status;
             const mensajeBackend = err?.response?.data?.mensaje;
             if (status === 404 && mensajeBackend === "No se encontraron registros para los Domicilios.") {
@@ -114,9 +129,20 @@ const AddressesContent = ({ mostrarTabla }) => {
             console.error('Error al exportar los domicilios:', err);
         } finally {
             setLoadingExcel(false);
+            setAbortController(null);
             toast.dismiss(toastId);
         }
     };
+
+    // Cancelar petición al desmontar el componente
+    useEffect(() => {
+        return () => {
+            if (abortController) {
+                toast.warning("Petición cancelada al cerrar el modal.");
+                abortController.abort();
+            }
+        };
+    }, [abortController]);
 
     return (
         <div style={{ width: '100%' }} className="flex flex-col items-center">

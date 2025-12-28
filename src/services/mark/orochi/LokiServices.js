@@ -224,7 +224,7 @@ export const SaveScreenFields = async (data) => {
 };
 
 // Nuevo endpoint para Lista Negra con parámetros
-export const darkListV2 = async ({ idCartera, selector, dato }) => {
+export const darkListV2 = async ({ idCartera, selector, dato }, options = {}) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -233,7 +233,7 @@ export const darkListV2 = async ({ idCartera, selector, dato }) => {
     const params = { idCartera, selector, dato };
     console.log('Enviando a /ListaNegra/lista-negra con:', params);
     // El interceptor añade el token automáticamente
-    const response = await api.get('/ListaNegra/lista-negra', { params });
+    const response = await api.get('/ListaNegra/lista-negra', { params, ...options });
     console.log('Respuesta de /ListaNegra/lista-negra:', response.data);
     return response.data;
   } catch (error) {
@@ -255,7 +255,7 @@ export const darkListV2 = async ({ idCartera, selector, dato }) => {
   }
 };
 
-export const getRegrest = async ({ idCartera, cuenta }) => {
+export const getRegrest = async ({ idCartera, cuenta }, options = {}) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -264,7 +264,7 @@ export const getRegrest = async ({ idCartera, cuenta }) => {
     const params = { idCartera, cuenta};
     console.log('Enviando a /arrepentimientos/get-arrepentimientos a con:', params);
     // El interceptor añade el token automáticamente
-    const response = await api.get('/arrepentimientos/get-arrepentimientos', { params });
+    const response = await api.get('/arrepentimientos/get-arrepentimientos', { params, ...options });
     console.log('Respuesta de /arrepentimientos/get-arrepentimientos:', response.data);
     return response.data;
   } catch (error) {
@@ -1662,7 +1662,7 @@ export const CargarFilasConsulta = async (payload) => {
   }
 };
 
-export const getPaymentsInformation = async (body) => {
+export const getPaymentsInformation = async (body, options = {}) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -1675,7 +1675,8 @@ export const getPaymentsInformation = async (body) => {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
-      responseType: 'blob'
+      responseType: 'blob',
+      ...options
     });
     console.log(' Respuesta de /informacion/Pagos/consultar:', response);
     return response;
@@ -1912,7 +1913,7 @@ export const sendArchiveCampanias = async (body) => {
 };
 
 
-export const getExportReportPayments = async (body) => {
+export const getExportReportPayments = async (body, options = {}) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -1923,7 +1924,8 @@ export const getExportReportPayments = async (body) => {
       headers: {
         'Accept': '*/*',
         'Content-Type': 'application/json'
-      }
+      },
+      ...options
     });
     console.log('Respuesta de /informacion/PagosReportados/consultar:', response);
     return response;
@@ -1948,7 +1950,7 @@ export const getExportReportPayments = async (body) => {
 
 
 
-export const getAddress = async (idCartera, idConsulta) => {
+export const getAddress = async (idCartera, idConsulta, options = {}) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -1959,7 +1961,8 @@ export const getAddress = async (idCartera, idConsulta) => {
     const response = await api.get(url, {
       headers: {
         'Accept': '*/*'
-      }
+      },
+      ...options
     });
     console.log('Respuesta de', url + ':', response.data);
     return response.data;
@@ -1983,7 +1986,7 @@ export const getAddress = async (idCartera, idConsulta) => {
 };
 
 
-export const getEmailsInfo = async (idCartera, idConsulta) => {
+export const getEmailsInfo = async (idCartera, idConsulta, options = {}) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -1994,7 +1997,8 @@ export const getEmailsInfo = async (idCartera, idConsulta) => {
     const response = await api.get(url, {
       headers: {
         'Accept': '*/*'
-      }
+      },
+      ...options
     });
     console.log('Respuesta de', url + ':', response.data);
     return response.data;
@@ -2018,7 +2022,7 @@ export const getEmailsInfo = async (idCartera, idConsulta) => {
 };
 
 
-export const getSearchesInformation = async (body) => {
+export const getSearchesInformation = async (body, options = {}) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -2031,7 +2035,8 @@ export const getSearchesInformation = async (body) => {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
-      responseType: 'blob'
+      responseType: 'blob',
+      ...options
     });
     console.log(' Respuesta de /informacion/BusquedasInfo/consultar:', response);
     return response;
@@ -2055,7 +2060,7 @@ export const getSearchesInformation = async (body) => {
 };
 
 
-export const getOffersInformation = async (body) => {
+export const getOffersInformation = async (body, options = {}) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -2068,7 +2073,8 @@ export const getOffersInformation = async (body) => {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
-      responseType: 'blob'
+      responseType: 'blob',
+      ...options
     });
     console.log(' Respuesta de /informacion/Ofrecimientos/consultar:', response);
     return response;
@@ -2092,7 +2098,7 @@ export const getOffersInformation = async (body) => {
 };
 
 
-export const getCommentsInformation = async (body) => {
+export const getCommentsInformation = async (body, options = {}) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -2105,7 +2111,8 @@ export const getCommentsInformation = async (body) => {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
-      responseType: 'blob'
+      responseType: 'blob',
+      ...options
     });
     console.log(' Respuesta de /informacion/comentarios-info/consultar:', response);
     return response;
@@ -2128,7 +2135,7 @@ export const getCommentsInformation = async (body) => {
   }
 };
 
-export const getWrongsInformation = async (body) => {
+export const getWrongsInformation = async (body, options = {}) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -2141,7 +2148,8 @@ export const getWrongsInformation = async (body) => {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
-      responseType: 'blob'
+      responseType: 'blob',
+      ...options
     });
     console.log(' Respuesta de /informacion/DatosErroneos/consultar:', response);
     return response;

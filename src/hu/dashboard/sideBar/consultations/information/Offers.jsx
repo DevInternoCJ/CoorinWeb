@@ -15,7 +15,10 @@ const OffersContent = () => {
 
 
     // El valor mostrado en el dropdown es idCartera
-    const [cartera, setCartera] = useState(idCartera);
+    const [cartera, setCartera] = useState(() => {
+        const saved = localStorage.getItem('selectedCartera');
+        return saved ? parseInt(saved, 10) : idCartera;
+    });
     const [carterasOptions, setCarterasOptions] = useState([]);
     const [consulta, setConsulta] = useState("");
     const [desde, setDesde] = useState(new Date().toISOString().slice(0, 10));
@@ -27,10 +30,16 @@ const OffersContent = () => {
     const [errorExcel, setErrorExcel] = useState(null);
     const [consultaSinRegistros, setConsultaSinRegistros] = useState(false);
     const [showToast, setShowToast] = useState(false);
+    const [abortController, setAbortController] = useState(null);
     // Eliminado: processAPIResponse ya no es necesario
 
     const minDate = "2016-01-01";
     const maxDate = new Date().toISOString().slice(0, 10);
+
+    // Persistir la cartera seleccionada
+    useEffect(() => {
+        localStorage.setItem('selectedCartera', cartera);
+    }, [cartera]);
 
     useEffect(() => {
         if (!idEjecutivo) return;
@@ -63,6 +72,8 @@ const OffersContent = () => {
         setLoadingExcel(true);
         setErrorExcel(null);
         const toastId = toast.loading(`Exportando ofrecimientos...`);
+        const controller = new AbortController();
+        setAbortController(controller);
         try {
             const idConsultaFinal = consulta === "" ? "0" : consulta;
             const params = {
@@ -73,7 +84,7 @@ const OffersContent = () => {
                 hasta,
                 jerarquia
             };
-            const response = await getOffersInformation(params);
+            const response = await getOffersInformation(params, { signal: controller.signal });
 
             // Usar la función centralizada para exportar y mostrar toasts
             const result = await exportFromAPIResponse(
@@ -96,6 +107,10 @@ const OffersContent = () => {
                 toast.warning("Consulta terminada sin registros");
             }
         } catch (err) {
+            if (err.name === 'AbortError') {
+                console.log('Petición cancelada');
+                return;
+            }
             const status = err?.response?.status;
             const statusText = err?.response?.statusText;
             if (status === 404 && statusText === "Not Found") {
@@ -112,9 +127,20 @@ const OffersContent = () => {
             }
         } finally {
             setLoadingExcel(false);
+            setAbortController(null);
             toast.dismiss(toastId);
         }
     };
+
+    // Cancelar petición al desmontar el componente
+    useEffect(() => {
+        return () => {
+            if (abortController) {
+                toast.warning("Petición cancelada al cerrar el modal.");
+                abortController.abort();
+            }
+        };
+    }, [abortController]);
 
     return (
         <div className="w-full relative">

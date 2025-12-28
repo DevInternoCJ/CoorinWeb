@@ -14,18 +14,27 @@ const EmailsContent = () => {
     const idEjecutivo = userData?.idEjecutivo ?? null;
     const idProducto = userData?.idProducto ?? 0;
 
-    const [cartera, setCartera] = useState(idCartera);
+    const [cartera, setCartera] = useState(() => {
+        const saved = localStorage.getItem('selectedCartera');
+        return saved ? parseInt(saved, 10) : idCartera;
+    });
     // Opciones de cartera dinámicas
     const [carterasOptions, setCarterasOptions] = useState([]);
     const [consulta, setConsulta] = useState("");
     const [consultasOptions, setConsultasOptions] = useState([]);
     const [loadingConsultas, setLoadingConsultas] = useState(false);
     const [errorConsultas, setErrorConsultas] = useState(null);
+    const [abortController, setAbortController] = useState(null);
 
     // Al abrir el modal (cuando se monta el componente o cambia mostrarTabla a true), mostrar mensaje inicial
 useEffect(() => {
     toast.info("Elija la consulta de las cuentas que desee los correos.");
 }, []);
+
+    // Persistir la cartera seleccionada
+    useEffect(() => {
+        localStorage.setItem('selectedCartera', cartera);
+    }, [cartera]);
 
     // Cargar opciones de consulta
     useEffect(() => {
@@ -64,10 +73,12 @@ useEffect(() => {
         setLoadingExcel(true);
         setErrorExcel(null);
         const toastId = toast.loading(`Exportando correos...`);
+        const controller = new AbortController();
+        setAbortController(controller);
         try {
             const idCarteraInt = cartera ? parseInt(cartera, 10) : undefined;
             const idConsultaInt = consulta === "" ? 0 : parseInt(consulta, 10);
-            const response = await getEmailsInfo(idCarteraInt, idConsultaInt);
+            const response = await getEmailsInfo(idCarteraInt, idConsultaInt, { signal: controller.signal });
 
             let nombreConsulta = "Correos";
             if (consulta !== "" && consulta !== 0) {
@@ -93,6 +104,10 @@ useEffect(() => {
                 toast.warning("Consulta terminada sin registros.");
             }
         } catch (err) {
+            if (err.name === 'AbortError') {
+                console.log('Petición cancelada');
+                return;
+            }
             const status = err?.response?.status;
             const mensajeBackend = err?.response?.data?.mensaje;
             if (status === 404 && mensajeBackend?.includes("No se encontraron registros para los Correos")) {
@@ -111,9 +126,20 @@ useEffect(() => {
             console.error('Error al exportar los correos:', err);
         } finally {
             setLoadingExcel(false);
+            setAbortController(null);
             toast.dismiss(toastId);
         }
     };
+
+    // Cancelar petición al desmontar el componente
+    useEffect(() => {
+        return () => {
+            if (abortController) {
+                toast.warning("Petición cancelada al cerrar el modal.");
+                abortController.abort();
+            }
+        };
+    }, [abortController]);
 
     return (
         <div style={{ width: '100%' }} className="flex flex-col items-center">

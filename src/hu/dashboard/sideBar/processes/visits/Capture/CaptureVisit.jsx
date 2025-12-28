@@ -81,6 +81,9 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
     const f6Ref = useRef(null); // Teléfonos
     const f7Ref = useRef(null); // Energía Eléctrica
     
+    // Ref para controlar el toast de carga actual
+    const currentToastId = useRef(null);
+    
     // Estado para indicar que se está guardando la captura
     const [guardando, setGuardando] = useState(false);
     
@@ -396,6 +399,10 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
         setLoading(true);
         setError(null);
         let expandir = false;
+        if (currentToastId.current) {
+            toast.dismiss(currentToastId.current);
+        }
+        currentToastId.current = toast.loading("Buscando cuenta...");
         try {
             const cuentaOrExpedienteStr = String(porExpediente ? idCuenta : parseInt(idCuenta, 10));
             let res;
@@ -411,7 +418,6 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                 localStorage.removeItem("cuentaDataCapturaVisita");
                 expandir = false;
                 toast.error("La cuenta a la que desean acceder no existe, verifíquela por favor");
-                
                 // Deshabilitar grupos y limpiar información
                 setGruposHabilitados(false);
                 setExpedienteLabel("");
@@ -420,6 +426,8 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                 setMostrarBtnCaptura(false);
                 
                 setLoading(false);
+                toast.dismiss(currentToastId.current);
+                currentToastId.current = null;
                 if (typeof setMostrarTabla === "function") setMostrarTabla(false);
                 return;
             }
@@ -454,6 +462,8 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                     setMostrarF7(mostrarEnergia);
                 }
                 
+                toast.dismiss(currentToastId.current);
+                currentToastId.current = null;
                  
             } else {
                 setCuentaData(null);
@@ -467,6 +477,9 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                 setNombreDeudor("");
                 setMostrarF7(false);
                 setMostrarBtnCaptura(false);
+                
+                toast.dismiss(currentToastId.current);
+                currentToastId.current = null;
             }
         } finally {
             setLoading(false);
