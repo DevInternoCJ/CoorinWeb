@@ -25,7 +25,6 @@ export default {
   },
   plugins: [
     preline,
-    tailwindcssForms,
     iconify,
     tailwindcssAnimated,
   ],

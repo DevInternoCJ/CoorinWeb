@@ -22,6 +22,8 @@ import Phrases from "./sideBar/Administration/gespa/phrases/Phrases";
 import ConsultVisitContent from "./sideBar/processes/visits/ConsultaVisits";
 import CaptureVisit from "./sideBar/processes/visits/Capture/CaptureVisit";
 import LoadVisitsContent from "./sideBar/processes/visits/LoadVisits";
+import ModalAccionamientos from "./sideBar/processes/accionamientos/ModalAccionamientos";
+import ModalBaseAccionamientos from "./sideBar/processes/accionamientos/ModalBaseAccionamientos";
 import IconCircular from "../../components/iconos/IconCircular";
 import ConsorcioLogo from "../../../src/assets//CoorinBlack.svg";
 import { useDashboardModalUrlSync } from "../../hooks/useDashboardModalUrlSync";
@@ -38,6 +40,7 @@ export default function CoorinDashboard() {
   // Estados para controlar modales de las cards
   const [executiveModalOpen, setExecutiveModalOpen] = useState(false);
   const [consultationModalOpen, setConsultationModalOpen] = useState(false);
+  const [accionamientosModalOpen, setAccionamientosModalOpen] = useState(false);
   // Estado para el path del sidebar modal (usado para la URL)
   const [sidebarModalPath, setSidebarModalPath] = useState("");
   // Función para cerrar el sidebar (será pasada al CoorinSidebar)
@@ -213,6 +216,8 @@ export default function CoorinDashboard() {
         return <EmailTemplates onClose={closeModal} />;
       case "Frases":
         return <Phrases onClose={closeModal} />;
+      case "Accionamientos":
+        return <ModalBaseInformacion tipoInformacion="Accionamientos" onClose={closeModal} />;
       case "Comentarios":
         return   <Suspense fallback={<div className="text-center p-10">Cargando comentarios...</div>}>
       <Comments onClose={closeModal} />
@@ -293,6 +298,7 @@ export default function CoorinDashboard() {
       "4CC_2CCC": "Carga Accionamientos",
       "4CC_3CCC_1CCCC": "Captura Carteo",
       "4CC_3CCC_2CCCC": "Consulta Carteo",
+      "4CC": "Accionamientos", // Agregar para abrir modal con tabs
       
       // === Procesos sin submenú (IDs únicos) ===
       "5CC": "Gestiones",
@@ -314,7 +320,7 @@ export default function CoorinDashboard() {
       "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios", 
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
       "Consulta Visitas", "Captura Visitas", "Carga Visitas",
-      "Campañas", "Plantillas Correo", "Frases"
+      "Campañas", "Plantillas Correo", "Frases", "Accionamientos"
     ];
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
@@ -328,7 +334,7 @@ export default function CoorinDashboard() {
         return;
       }
       
-      console.log("✅ Abriendo modal con opción:", option);
+      console.log("✅ Abriendo modal con opción:", option, "menuId:", menuId);
       setSidebarModalPath(option); // Usar el nombre del modal para la URL
       setSelectedSidebarOption(option);
       setModalSidebarOpen(true);

@@ -116,28 +116,12 @@ const dataSidebar = {
               id: "4CC",
               title: "Accionamientos",
               icon: "UserIcon",
-              subMenus2: [
-                { id: "1CCC", title: "Informe", icon: "EnvelopeIcon" },
-                {
-                  id: "2CCC",
-                  title: "Carga",
-                  icon: "BookOpenIcon",
-                },
-                {
-                  id: "3CCC",
-                  title: "Carteo Devuelto",
-                  icon: "BookOpenIcon",
-                  subMenus3: [
-                    { id: "1CCCC", title: "Captura", icon: "EnvelopeIcon" },
-                    { id: "2CCCC", title: "Consulta", icon: "BookOpenIcon" },
-                  ],
-                },
-              ],
+              // Sin subMenus2 - abre el modal directamente
             },
             { id: "5CC", title: "Gestiones", icon: "UserIcon" },
             { id: "6CC", title: "Supervisor", icon: "UserIcon" },
-     
-         
+
+
 
             // { id: "7CC", title: "Domicilios", icon: "UserIcon" },
             // { id: "8CC", title: "Amex", icon: "UserIcon" },//comentado por que no se usa Menu Procesos Carteras proceso nuevo

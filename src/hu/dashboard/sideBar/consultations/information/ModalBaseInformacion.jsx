@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
 import ModalBase from "../../../board/ModalBase";
 import CloseButtonCampanas from "../../../components/CloseButtonReusable";
-import ModalCicle, { tabsList, COMPONENT_ICONS } from "./ModalCicle";
+import ModalCicle, { tabsListInformacion, COMPONENT_ICONS_INFORMACION } from "./ModalCicle";
+import { tabsListAccionamientos, COMPONENT_ICONS_ACCIONAMIENTOS } from "../../processes/accionamientos/ModalAccionamientosTabs";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { infoEjecutivo } from "../../../../../services/mark/Orochi/LokiServices";
 
@@ -15,6 +16,7 @@ const MODAL_SIZES = {
     consultaVisits: { maxWidth: "min(644px, 95vw)", minWidth: "320px", width: "min(483px, 95vw)", height: "506px", maxHeight: "90vh" },
     capturaVisit: { maxWidth: "min(805px, 95vw)", minWidth: "320px", width: "min(370px, 95vw)", height: "380px", maxHeight: "90vh" },
     cargaVisitas: { maxWidth: "min(1104px, 95vw)", minWidth: "320px", width: "min(900px, 95vw)", height: "220px", maxHeight: "85vh" },
+    "accionamientos-xl": { maxWidth: "min(1135px, 98vw)", minWidth: "320px", width: "min(1335px, 98vw)", height: "auto", maxHeight: "auto" },
     custom: {},
 };
 
@@ -47,6 +49,7 @@ const ModalBaseInformacion = ({
     
     // Estado para el tamaño dinámico del modal (carrusel información)
     const [dynamicSize, setDynamicSize] = useState("informacion");
+    const [activeTab, setActiveTab] = useState(0);
 
     // Helper para activar animación bounce
     const triggerBounce = () => {
@@ -61,6 +64,7 @@ const ModalBaseInformacion = ({
     const isCargaVisitas = tipoInformacion === "Carga Visitas";
     const isVisitas = isConsultaVisitas || isCapturaVisitas || isCargaVisitas;
     const isInformacion = tipoInformacion === "información";
+    const isAccionamientos = tipoInformacion === "Accionamientos";
 
     // Estados para controles de Ofrecimientos en el header
     const userData = JSON.parse(localStorage.getItem("userData"));
@@ -125,6 +129,7 @@ const ModalBaseInformacion = ({
     // Títulos según tipo
     const titulos = {
         "información": "Información",
+        "Accionamientos": "Accionamientos",
         "Consulta Visitas": "Consulta Visitas - Coorin",
         "Captura Visitas": "Captura Visitas - Coorin",
         "Carga Visitas": "Carga de Visitas - Coorin"
@@ -132,16 +137,17 @@ const ModalBaseInformacion = ({
     const titulo = titulos[tipoInformacion] || "Información";
     
     // Verificar si la pestaña actual es Ofrecimientos
-    const isOffersTab = isInformacion && carouselNav && tabsList[carouselNav.currentIndex]?.key === "Ofrecimientos";
+    const isOffersTab = isInformacion && carouselNav && tabsListInformacion[carouselNav.currentIndex]?.key === "Ofrecimientos";
 
     // Determinar tamaño del modal
     let normalizedSize = size;
     if (isConsultaVisitas) normalizedSize = "consultaVisits";
     else if (isCapturaVisitas) normalizedSize = size === "pagos-xl" ? "informacion-xl" : "capturaVisit";
     else if (isCargaVisitas) normalizedSize = "cargaVisitas";
+    else if (isAccionamientos) normalizedSize = "accionamientos-xl";
     else if (isInformacion) {
         // Si el tab activo es Pagos Reportados y mostrarTabla=true, expandir modal
-        const isPagosReportadosTab = carouselNav && tabsList[carouselNav.currentIndex]?.key === "Pagos Reportados";
+        const isPagosReportadosTab = carouselNav && tabsListInformacion[carouselNav.currentIndex]?.key === "Pagos Reportados";
         if (isPagosReportadosTab && mostrarTabla) {
             normalizedSize = "informacion-xl";
         } else {
@@ -151,7 +157,7 @@ const ModalBaseInformacion = ({
 
     // Log para verificar el tab activo y el tamaño del modal
     if (carouselNav) {
-        console.log('[ModalBaseInformacion] Tab activo:', tabsList[carouselNav.currentIndex]?.key);
+        console.log('[ModalBaseInformacion] Tab activo:', tabsListInformacion[carouselNav.currentIndex]?.key);
         console.log('[ModalBaseInformacion] mostrarTabla:', mostrarTabla);
     }
 
@@ -244,7 +250,7 @@ const ModalBaseInformacion = ({
                                 role="tablist"
                                 aria-orientation="horizontal"
                             >
-                                {tabsList.map((tab, index) => {
+                                {tabsListInformacion.map((tab, index) => {
                                     const shortText = {
                                         "Ofrecimientos": "Ofrecimientos",
                                         "Pagos": "Pagos", 
@@ -281,7 +287,7 @@ const ModalBaseInformacion = ({
                                             <span
                                                 className={`${carouselNav?.currentIndex === index ? 'text-jerarquia3' : 'text-gray-500'} inline lg:hidden`}
                                             >
-                                                {COMPONENT_ICONS[tab.key]}
+                                                {COMPONENT_ICONS_INFORMACION[tab.key]}
                                             </span>
                                             <span
                                                 className="hidden lg:inline xl:inline 2xl:inline"
@@ -292,62 +298,17 @@ const ModalBaseInformacion = ({
                             </nav>
                         </div>
                         </>
-                    ) : (
-                        <div className="border-b border-gray-200 px-4 py-3">
-                            {/* Layout para lg, xl, 2xl: horizontal en una fila */}
-                            <div className="hidden lg:flex lg:items-center lg:justify-between">
-                                <div className="flex items-center gap-3">
-                                    {headerIcon}
-                                    <h2 className="text-lg font-semibold truncate" style={{ color: 'var(--color-jerarquia3)' }}>{titulo}</h2>
-                                    {infoCuenta && infoCuenta.cuenta && (
-                                        <>
-                                            <span className="font-semibold text-base text-jerarquia3">
-                                                {infoCuenta._busquedaPorExpediente ? `-- ${infoCuenta.cuenta.idCuenta} --`: `-- ${infoCuenta.cuenta.expediente} --`}
-                                            </span>
-                                            <span className="font-semibold text-base text-jerarquia3">{infoCuenta.cuenta.nombreDeudor}</span>
-                                        </>
-                                    )}
-                                </div>
-                                <CloseButtonCampanas onClose={handleSafeClose} />
-                            </div>
-                            
-                            {/* Layout para sm y md: vertical en filas */}
-                            <div className="lg:hidden flex flex-col">
-                                {/* Row 1: icono, título, botón close */}
-                                <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-3">
-                                        {headerIcon}
-                                        <h2 className="text-lg font-semibold truncate" style={{ color: 'var(--color-jerarquia3)' }}>{titulo}</h2>
-                                    </div>
-                                    <CloseButtonCampanas onClose={handleSafeClose} />
-                                </div>
-                                {/* Row 2: Cuenta/Expediente centrado */}
-                                {infoCuenta && infoCuenta.cuenta && (
-                                    <div className="text-center mb-1">
-                                        <span className="font-semibold text-base text-jerarquia3">
-                                            {infoCuenta._busquedaPorExpediente ? `-- ${infoCuenta.cuenta.idCuenta} --` : `-- ${infoCuenta.cuenta.expediente} --`}
-                                        </span>
-                                    </div>
-                                )}
-                                {/* Row 3: Nombre Deudor centrado */}
-                                {infoCuenta && infoCuenta.cuenta && (
-                                    <div className="text-center">
-                                        <span className="font-semibold text-base text-jerarquia3">{infoCuenta.cuenta.nombreDeudor}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )
+                    ) : null
                 )}
 
-                {/* Contenido: Carrusel para información, children para Visitas */}
+                {/* Contenido: Carrusel para información, layout de dos columnas para Accionamientos, children para otros */}
                 <div className={`flex-1 w-full overflow-auto ${contentClassName}`}>
                     {isInformacion ? (
                         <>
                             {/* Contenido de los tabs */}
                             <div className="mt-3 px-4 flex-1 overflow-auto">
-                                <ModalCicle 
-                                    renderNavInHeader={false} 
+                                <ModalCicle
+                                    renderNavInHeader={false}
                                     onNavigationReady={setCarouselNav}
                                     onSizeChange={setDynamicSize}
                                     headerControlsActive={isOffersTab}
@@ -364,6 +325,90 @@ const ModalBaseInformacion = ({
                                 />
                             </div>
                         </>
+                    ) : isAccionamientos ? (
+                        <>
+                            {/* Layout de dos columnas para Accionamientos */}
+                            <div className="flex h-full">
+                                {/* Columna izquierda: tabs verticales */}
+                                <div className="w-20 md:w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-auto">
+                                    <div className="p-2 md:p-4">
+                                        <h3 className="text-sm font-semibold text-jerarquia3 mb-3 uppercase tracking-wide flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" className="mr-2">
+                                                <path fill="currentColor" d="M4.01 8.54C5.2 9.23 6 10.52 6 12s-.81 2.77-2 3.46V18h16v-2.54c-1.19-.69-2-1.99-2-3.46s.81-2.77 2-3.46V6H4zm6.72 1.68L12 7l1.26 3.23l3.47.2l-2.69 2.2l.89 3.37L12 14.12L9.07 16l.88-3.37l-2.69-2.2z" opacity="0.3"/>
+                                                <path fill="currentColor" d="M20 4H4c-1.1 0-1.99.9-1.99 2v4c1.1 0 1.99.9 1.99 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2V6c0-1.1-.9-2-2-2m0 4.54c-1.19.69-2 1.99-2 3.46s.81 2.77 2 3.46V18H4v-2.54c1.19-.69 2-1.99 2-3.46c0-1.48-.8-2.77-1.99-3.46L4 6h16zM9.07 16L12 14.12L14.93 16l-.89-3.36l2.69-2.2l-3.47-.21L12 7l-1.27 3.22l-3.47.21l2.69 2.2z"/>
+                                            </svg>
+                                            <span className="hidden md:inline">Accionamientos</span>
+                                        </h3>
+                                        <nav
+                                            className="flex flex-col gap-y-2"
+                                            aria-label="Tabs Accionamientos Verticales"
+                                            role="tablist"
+                                            aria-orientation="vertical"
+                                        >
+                                            {tabsListAccionamientos.map((tab, index) => (
+                                                <button
+                                                    key={tab.key}
+                                                    type="button"
+                                                    className={`
+                                                        w-full py-2 px-2 md:py-3 md:px-4 inline-flex items-center gap-x-3 text-sm font-medium text-left
+                                                        border border-gray-200 rounded-lg transition-colors duration-200
+                                                        hover:bg-jerarquia1 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none
+                                                        ${activeTab === index
+                                                            ? 'bg-white border-jerarquia2 text-jerarquia3 shadow-sm'
+                                                            : 'bg-gray-50 text-gray-600 hover:text-jerarquia3 hover:border-gray-300'
+                                                        }
+                                                    `}
+                                                    id={`tab-accionamientos-vertical-item-${index}`}
+                                                    aria-selected={activeTab === index}
+                                                    data-hs-tab={`#tab-accionamientos-vertical-content-${index}`}
+                                                    aria-controls={`tab-accionamientos-vertical-content-${index}`}
+                                                    role="tab"
+                                                    title={tab.key}
+                                                    onClick={() => setActiveTab(index)}
+                                                >
+                                                    <span className={`${activeTab === index ? 'text-jerarquia3' : 'text-gray-500'} flex-shrink-0`}>
+                                                        {COMPONENT_ICONS_ACCIONAMIENTOS[tab.key]}
+                                                    </span>
+                                                    <span className="hidden md:inline flex-1">{tab.key}</span>
+                                                    {activeTab === index && (
+                                                        <span className="flex-shrink-0 w-2 h-2 bg-jerarquia3 rounded-full"></span>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </nav>
+                                    </div>
+                                </div>
+
+                                {/* Columna derecha: contenido del tab activo */}
+                                <div className="flex-1 h-full relative">
+                                    {/* Contenido del tab */}
+                                    <div className="overflow-visible h-full">
+                                        <div className="px-4 py-4">
+                                            <ModalCicle
+                                                tabsList={tabsListAccionamientos}
+                                                componentIcons={COMPONENT_ICONS_ACCIONAMIENTOS}
+                                                activeTab={activeTab}
+                                                setActiveTab={setActiveTab}
+                                                renderNavInHeader={false}
+                                                mostrarTabla={mostrarTabla}
+                                                setMostrarTabla={setMostrarTabla}
+                                                onNavigationReady={setCarouselNav}
+                                                onSizeChange={setDynamicSize}
+                                                headerControlsActive={false}
+                                                headerStates={{}}
+                                            />
+                                        </div>
+                                    </div>
+                                    {/* Botón cerrar posicionado absolutamente en la esquina */}
+                                    <CloseButtonCampanas onClose={handleSafeClose} className="absolute top-2 right-4" />
+                                </div>
+                            </div>
+                        </>
+                    ) : isCapturaVisitas ? (
+                        <div className="relative">
+                            <CloseButtonCampanas onClose={handleSafeClose} className="absolute top-1 right-2" />
+                            {children}
+                        </div>
                     ) : children}
                 </div>
 
