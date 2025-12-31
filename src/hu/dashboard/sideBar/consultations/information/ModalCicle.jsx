@@ -220,7 +220,7 @@ const ModalCicle = ({ tabsList = tabsListInformacion, componentIcons = COMPONENT
         } else {
             // Para otros tabs (como Accionamientos), usar el componente directamente
             const Component = tab.component;
-            return <Component />;
+            return <Component setMostrarTabla={setMostrarTabla} />;
         }
     };
 

@@ -3,6 +3,7 @@ import ModalBase from "../../../board/ModalBase";
 import CloseButtonCampanas from "../../../components/CloseButtonReusable";
 import ModalCicle, { tabsListInformacion, COMPONENT_ICONS_INFORMACION } from "./ModalCicle";
 import { tabsListAccionamientos, COMPONENT_ICONS_ACCIONAMIENTOS } from "../../processes/accionamientos/ModalAccionamientosTabs";
+import TableCargaAccionamientos from "../../processes/accionamientos/TwoTablesAccionamientos";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { infoEjecutivo } from "../../../../../services/mark/Orochi/LokiServices";
 
@@ -82,7 +83,13 @@ const ModalBaseInformacion = ({
     const [loadingExcel, setLoadingExcel] = useState(false);
     // Estado para mostrar el modal de confirmación de cierre
     const [showCloseConfirm, setShowCloseConfirm] = useState(false);
-    const [mostrarTabla, setMostrarTabla] = useState(false);
+    const [mostrarTabla, setMostrarTabla] = useState('');
+
+    useEffect(() => {
+        if (activeTab !== 1) { // Solo mostrar tabla en el tab Carga (índice 1)
+            setMostrarTabla('');
+        }
+    }, [activeTab, setMostrarTabla]);
 
     // Handler para cierre seguro del modal
     const handleSafeClose = () => {
@@ -326,11 +333,11 @@ const ModalBaseInformacion = ({
                             </div>
                         </>
                     ) : isAccionamientos ? (
-                        <>
-                            {/* Layout de dos columnas para Accionamientos */}
-                            <div className="flex h-full">
+                        <div className="flex flex-col">
+                            {/* Row 1: tabs izquierda + contenido derecha */}
+                            <div className="flex">
                                 {/* Columna izquierda: tabs verticales */}
-                                <div className="w-20 md:w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-auto">
+                                <div className="w-20 md:w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-auto h-fit">
                                     <div className="p-2 md:p-4">
                                         <h3 className="text-sm font-semibold text-jerarquia3 mb-3 uppercase tracking-wide flex items-center justify-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" className="mr-2">
@@ -380,7 +387,7 @@ const ModalBaseInformacion = ({
                                 </div>
 
                                 {/* Columna derecha: contenido del tab activo */}
-                                <div className="flex-1 h-full relative">
+                                <div className="flex-1 h-full relative overflow-hidden">
                                     {/* Contenido del tab */}
                                     <div className="overflow-visible h-full">
                                         <div className="px-4 py-4">
@@ -403,7 +410,7 @@ const ModalBaseInformacion = ({
                                     <CloseButtonCampanas onClose={handleSafeClose} className="absolute top-2 right-4" />
                                 </div>
                             </div>
-                        </>
+                        </div>
                     ) : isCapturaVisitas ? (
                         <div className="relative">
                             <CloseButtonCampanas onClose={handleSafeClose} className="absolute top-1 right-2" />
@@ -411,6 +418,9 @@ const ModalBaseInformacion = ({
                         </div>
                     ) : children}
                 </div>
+
+                {/* Tabla en row aparte si mostrarTabla para Accionamientos */}
+                {isAccionamientos && mostrarTabla && <TableCargaAccionamientos tipo={mostrarTabla} />}
 
                 {/* Footer */}
                 {showFooter && (
