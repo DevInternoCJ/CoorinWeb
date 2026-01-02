@@ -94,6 +94,9 @@ const ModalBaseAccionamientos = ({
                                 ))}
                             </div>
                         </div>
+                        <div className="flex-1 text-center px-4">
+                            <label className={`text-sm font-medium text-gray-700 ${activeTab === 2 ? '' : 'invisible'}`}>Nombre: Federico Uriel Maradonio Pascual Montes Gomez</label>
+                        </div>
                         <button
                             onClick={onClose}
                             className="text-gray-400 hover:text-gray-600 focus:outline-none"
