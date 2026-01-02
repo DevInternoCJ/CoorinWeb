@@ -56,9 +56,11 @@ const InformeContent = () => {
     };
 
     return (
-        <div className="p-6 flex flex-col h-full space-y-4">
+        <div className="p-6 flex flex-col h-full space-y-6">
             {/* Versión móvil */}
             <div className="lg:hidden space-y-4 mt-2">
+                {/* Radio buttons móviles */}
+                <TipoInformeRadios tipoInforme={tipoInforme} setTipoInforme={setTipoInforme} layout="vertical" key={forceRender} />
                 <div className="relative w-full">
                     <select
                         value={cartera}
@@ -121,9 +123,10 @@ const InformeContent = () => {
             </div>
 
             {/* Versión desktop */}
-            <div className="hidden lg:flex lg:gap-4 lg:items-start">
-                <div className="flex-1 space-y-4">
-                    <div className={`grid ${tipoInforme === 'Detalles' ? 'grid-cols-3' : 'grid-cols-2'} gap-4 mt-2`}>
+            <div className="hidden lg:block space-y-6">
+                <TipoInformeRadios tipoInforme={tipoInforme} setTipoInforme={setTipoInforme} layout="horizontal" key={forceRender} />
+                <div className="space-y-2 mt-8">
+                    <div className={`grid ${tipoInforme === 'Detalles' ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
                         <div className="relative w-full">
                             <select
                                 value={cartera}
@@ -185,8 +188,8 @@ const InformeContent = () => {
                         )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="relative w-full">
+                    <div className="flex gap-4 items-end">
+                        <div className="relative flex-1">
                             <input
                                 type="date"
                                 value={fechaDesde}
@@ -202,7 +205,7 @@ const InformeContent = () => {
                                 Desde
                             </label>
                         </div>
-                        <div className="relative w-full">
+                        <div className="relative flex-1">
                             <input
                                 type="date"
                                 value={fechaHasta}
@@ -218,18 +221,22 @@ const InformeContent = () => {
                                 Hasta
                             </label>
                         </div>
+                        <div className="flex items-center">
+                            <button
+                                onClick={handleConsultar}
+                                className="btn-success w-full lg:w-auto lg:min-w-[120px] px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                            >
+                                Consultar
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                <div className="flex flex-col justify-start pt-2">
-                    <TipoInformeRadios tipoInforme={tipoInforme} setTipoInforme={setTipoInforme} layout="vertical" key={forceRender} />
                 </div>
             </div>
 
             {/* Fechas móviles */}
             <div className="lg:hidden">
-                <div className="md:flex md:flex-col md:space-y-4 lg:flex lg:justify-center lg:space-x-4 w-full">
-                    <div className="relative w-full">
+                <div className="w-full mb-4">
+                    <div className="relative">
                         <input
                             type="date"
                             value={fechaDesde}
@@ -245,7 +252,9 @@ const InformeContent = () => {
                             Desde
                         </label>
                     </div>
-                    <div className="relative w-full">
+                </div>
+                <div className="w-full mb-4">
+                    <div className="relative">
                         <input
                             type="date"
                             value={fechaHasta}
@@ -262,22 +271,17 @@ const InformeContent = () => {
                         </label>
                     </div>
                 </div>
+                <div className="w-full">
+                    <button
+                        onClick={handleConsultar}
+                        className="btn-success w-full px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+                    >
+                        Consultar
+                    </button>
+                </div>
             </div>
 
-            {/* Radio buttons móviles */}
-            <div className="lg:hidden">
-                <TipoInformeRadios tipoInforme={tipoInforme} setTipoInforme={setTipoInforme} layout="vertical" key={forceRender} />
-            </div>
 
-            {/* Botón Consultar */}
-            <div className="flex justify-center mt-4">
-                <button
-                    onClick={handleConsultar}
-                    className="btn-success w-full md:w-full lg:w-auto lg:min-w-[120px] px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
-                >
-                    Consultar
-                </button>
-            </div>
         </div>
     );
 };

@@ -41,6 +41,21 @@ const CargaContent = ({ setMostrarTabla } = {}) => {
     const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
 
+    // Función para truncar el path del archivo si es demasiado largo, asegurando que el nombre del archivo se vea completo al final
+    const truncatePath = (fullPath, maxLength = 100) => {
+        const fileName = fullPath.split('\\').pop() || fullPath.split('/').pop();
+        const pathWithoutName = fullPath.slice(0, -fileName.length);
+        if (fullPath.length <= maxLength) {
+            return fullPath;
+        }
+        const availableLength = maxLength - fileName.length - 3; // 3 for "..."
+        if (availableLength <= 0) {
+            return "..." + fileName.slice(- (maxLength - 3));
+        }
+        const truncatedPath = pathWithoutName.slice(-availableLength);
+        return "..." + truncatedPath + fileName;
+    };
+
     useEffect(() => {
         if (setMostrarTabla) {
             setMostrarTabla(tipoCarga.toLowerCase());
@@ -150,12 +165,13 @@ const CargaContent = ({ setMostrarTabla } = {}) => {
                         className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 disabled:bg-gray-200 disabled:text-gray-500"
                         id="archivo-seleccionado-input"
                         placeholder=" "
+                        style={{ direction: 'rtl', textAlign: 'left' }}
                     />
                     <label
                         htmlFor="archivo-seleccionado-input"
                         className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
                     >
-                        Archivo Seleccionado
+                        Ubicación del Archivo
                     </label>
                 </div>
 
@@ -167,7 +183,8 @@ const CargaContent = ({ setMostrarTabla } = {}) => {
                     onChange={(e) => {
                         const file = e.target.files[0];
                         if (file) {
-                            setArchivoNombre(file.name);
+                            const simulatedPath = "C:\\Users\\Alan De La O\\Downloads\\CARÉTA1\\CARPETA2\\CARPETA3\\CARPETA4\\CARETA5\\CARPETA6\\" + file.name;
+                            setArchivoNombre(truncatePath(simulatedPath));
                         }
                     }}
                 />
