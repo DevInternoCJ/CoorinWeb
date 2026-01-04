@@ -24,6 +24,7 @@ import CaptureVisit from "./sideBar/processes/visits/Capture/CaptureVisit";
 import LoadVisitsContent from "./sideBar/processes/visits/LoadVisits";
 import ModalAccionamientos from "./sideBar/processes/accionamientos/ModalAccionamientos";
 import ModalBaseAccionamientos from "./sideBar/processes/accionamientos/ModalBaseAccionamientos";
+import ModalSupervisor from "./sideBar/processes/supervisor/ModalSupervisor";
 import IconCircular from "../../components/iconos/IconCircular";
 import ConsorcioLogo from "../../../src/assets//CoorinBlack.svg";
 import { useDashboardModalUrlSync } from "../../hooks/useDashboardModalUrlSync";
@@ -218,6 +219,8 @@ export default function CoorinDashboard() {
         return <Phrases onClose={closeModal} />;
       case "Accionamientos":
         return <ModalBaseInformacion tipoInformacion="Accionamientos" onClose={closeModal} />;
+      case "Supervisor":
+        return <ModalSupervisor onClose={closeModal} />;
       case "Comentarios":
         return   <Suspense fallback={<div className="text-center p-10">Cargando comentarios...</div>}>
       <Comments onClose={closeModal} />
@@ -320,7 +323,7 @@ export default function CoorinDashboard() {
       "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios", 
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
       "Consulta Visitas", "Captura Visitas", "Carga Visitas",
-      "Campañas", "Plantillas Correo", "Frases", "Accionamientos"
+      "Campañas", "Plantillas Correo", "Frases", "Accionamientos", "Supervisor"
     ];
 
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente

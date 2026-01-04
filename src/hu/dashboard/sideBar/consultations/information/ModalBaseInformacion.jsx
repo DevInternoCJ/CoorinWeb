@@ -66,6 +66,7 @@ const ModalBaseInformacion = ({
     const isVisitas = isConsultaVisitas || isCapturaVisitas || isCargaVisitas;
     const isInformacion = tipoInformacion === "información";
     const isAccionamientos = tipoInformacion === "Accionamientos";
+    const isSupervisor = tipoInformacion === "supervisor";
 
     // Estados para controles de Ofrecimientos en el header
     const userData = JSON.parse(localStorage.getItem("userData"));
@@ -152,6 +153,7 @@ const ModalBaseInformacion = ({
     else if (isCapturaVisitas) normalizedSize = size === "pagos-xl" ? "informacion-xl" : "capturaVisit";
     else if (isCargaVisitas) normalizedSize = "cargaVisitas";
     else if (isAccionamientos) normalizedSize = "accionamientos-xl";
+    else if (isSupervisor) normalizedSize = "informacion-xl";
     else if (isInformacion) {
         // Si el tab activo es Pagos Reportados y mostrarTabla=true, expandir modal
         const isPagosReportadosTab = carouselNav && tabsListInformacion[carouselNav.currentIndex]?.key === "Pagos Reportados";
@@ -412,6 +414,11 @@ const ModalBaseInformacion = ({
                             </div>
                         </div>
                     ) : isCapturaVisitas ? (
+                        <div className="relative">
+                            <CloseButtonCampanas onClose={handleSafeClose} className="absolute top-1 right-2" />
+                            {children}
+                        </div>
+                    ) : isSupervisor ? (
                         <div className="relative">
                             <CloseButtonCampanas onClose={handleSafeClose} className="absolute top-1 right-2" />
                             {children}
