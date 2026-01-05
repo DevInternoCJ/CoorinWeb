@@ -21,21 +21,13 @@ const OnlineCharges = () => {
   ];
 
   return (
-    <div className="py-4 w-full">
+    <div className=" w-full">
       {/* Contenido principal */}
-      <div className="flex justify-center">
-        <div className="w-full max-w-2xl flex flex-col gap-4">
-          
-          {/* Texto descriptivo */}
-          <div className="text-center mb-2">
-            <p className="text-sm text-gray-600">
-              Cartera <span className="font-semibold">American Express</span>
-            </p>
-          </div>
-
+      <div className="flex justify-between">
+        <div className="w-full max-w-2xl flex flex-col ">
           {/* Radio buttons con el estilo de SearchForm */}
           <div className="flex flex-col gap-1">
-            <div className="flex gap-6 justify-center">
+            <div className="flex justify-between gap-3">
               {actionOptions.map((option) => (
                 <label 
                   key={option.value} 
@@ -78,7 +70,7 @@ const OnlineCharges = () => {
 
           {/* Botón de acción */}
           {!loading && (
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-end ml-auto mt-4">
               <SaveButton
                 onClick={handleSubmit}
               className="btn-success"
