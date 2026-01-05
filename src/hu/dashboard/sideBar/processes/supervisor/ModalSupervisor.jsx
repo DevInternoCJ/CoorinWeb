@@ -46,8 +46,8 @@ const ModalSupervisor = ({ onClose }) => {
     const renderContent = () => {
         if (modo === 'Asignar') {
             return (
-                <div className="p-4">
-                    <div className="metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full h-full overflow-hidden mb-4">
+                <div className="p-2 sm:p-4">
+                    <div className="metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full h-full overflow-hidden mb-2">
                         {/* Contenedor de tabla con scroll */}
                         <div
                             className="scrollbar-gray w-full flex-1"
@@ -85,12 +85,12 @@ const ModalSupervisor = ({ onClose }) => {
                             </table>
                         </div>
                     </div>
-                    <div className="flex items-center justify-between gap-4 mb-4">
-                        <div className="relative">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 mb-4">
+                        <div className="relative w-full sm:w-48">
                             <select
                                 value={consulta}
                                 onChange={(e) => setConsulta(e.target.value)}
-                                className="peer p-4 pe-9 block w-48 bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 disabled:bg-gray-200 disabled:text-gray-500"
+                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 disabled:bg-gray-200 disabled:text-gray-500"
                                 id="consulta-select"
                             >
                                 <option value="" disabled hidden></option>
@@ -105,19 +105,19 @@ const ModalSupervisor = ({ onClose }) => {
                                 Consulta
                             </label>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-between w-full sm:w-auto sm:justify-center sm:gap-2">
                             <button
                                 onClick={() => setCuentas(Math.max(0, cuentas - 1))}
-                                className="w-8 h-8 bg-gray-200 rounded hover:bg-gray-300 flex items-center justify-center text-sm font-medium"
+                                className="w-8 h-8 bg-jerarquia1 text-white rounded hover:bg-jerarquia2 flex items-center justify-center text-sm font-medium"
                             >
                                 -
                             </button>
-                            <div className="relative">
+                            <div className="relative flex-1">
                                 <input
                                     type="number"
                                     value={cuentas}
                                     onChange={(e) => setCuentas(Math.max(0, parseInt(e.target.value) || 0))}
-                                    className="peer p-4 block w-20 bg-gray-50 border-transparent rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 disabled:bg-gray-200 disabled:text-gray-500"
+                                    className="peer p-4 block w-full sm:w-20 bg-gray-50 border-transparent rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 disabled:bg-gray-200 disabled:text-gray-500"
                                     id="cuentas-input"
                                     min="0"
                                 />
@@ -130,14 +130,14 @@ const ModalSupervisor = ({ onClose }) => {
                             </div>
                             <button
                                 onClick={() => setCuentas(cuentas + 1)}
-                                className="w-8 h-8 bg-gray-200 rounded hover:bg-gray-300 flex items-center justify-center text-sm font-medium"
+                                className="w-8 h-8 bg-jerarquia1 text-white rounded hover:bg-jerarquia2 flex items-center justify-center text-sm font-medium"
                             >
                                 +
                             </button>
                         </div>
                         <button
                             onClick={handleAsignar}
-                            className="px-3 py-2 text-sm font-medium rounded-lg transition-colors bg-jerarquia1 text-white cursor-pointer hover:bg-jerarquia2"
+                            className="px-3 py-2 text-sm font-medium rounded-lg transition-colors bg-jerarquia1 text-white cursor-pointer hover:bg-jerarquia2 w-full sm:w-auto"
                         >
                             Asignar
                         </button>
@@ -146,8 +146,8 @@ const ModalSupervisor = ({ onClose }) => {
             );
         } else {
             return (
-                <div className="p-4">
-                    <div className="flex items-center gap-4">
+                <div className="p-2 sm:p-4">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:gap-4 mb-4">
                         <div className="relative flex-1">
                             <input
                                 type="date"
@@ -177,7 +177,7 @@ const ModalSupervisor = ({ onClose }) => {
                             </label>
                         </div>
                         <button
-                            className="px-3 py-2 text-sm font-medium rounded-lg transition-colors bg-jerarquia1 text-white cursor-pointer hover:bg-jerarquia2"
+                            className="px-3 py-2 text-sm font-medium rounded-lg transition-colors bg-jerarquia1 text-white cursor-pointer hover:bg-jerarquia2 w-full sm:w-auto"
                         >
                             Buscar
                         </button>

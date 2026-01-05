@@ -109,7 +109,7 @@ const CargaContent = ({ setMostrarTabla } = {}) => {
                         </label>
                     </div>
                 ) : (
-                    <div className="flex gap-4 flex-1 items-end">
+                    <div className="flex gap-4 flex-1 items-center">
                         <div className="relative flex-1">
                             <input
                                 type="date"
@@ -145,7 +145,7 @@ const CargaContent = ({ setMostrarTabla } = {}) => {
                         {tipoCarga === 'Consulta' && (
                             <button
                                 onClick={() => console.log('Consultar accionamientos')}
-                                className="px-3 py-2 text-sm font-medium rounded-lg transition-colors bg-jerarquia1 text-white cursor-pointer hover:bg-jerarquia2"
+                                className="btn-success px-4 py-2.5 text-base font-medium rounded-lg shadow-sm flex justify-center items-center whitespace-nowrap"
                             >
                                 Consultar
                             </button>
@@ -155,8 +155,8 @@ const CargaContent = ({ setMostrarTabla } = {}) => {
             </div>
 
             {/* Segundo row: Input readonly para archivo seleccionado y botón Archivo */}
-            <div className="flex gap-4 items-end">
-                <div className="relative flex-1">
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+                <div className="relative w-full sm:flex-1">
                     <input
                         type="text"
                         value={archivoNombre}
@@ -171,7 +171,7 @@ const CargaContent = ({ setMostrarTabla } = {}) => {
                         htmlFor="archivo-seleccionado-input"
                         className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
                     >
-                        Ubicación del Archivo
+                        U. Archivo
                     </label>
                 </div>
 
@@ -191,15 +191,15 @@ const CargaContent = ({ setMostrarTabla } = {}) => {
 
                 <label
                     htmlFor="archivo-file-input"
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${tipoCarga === 'Consulta' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-jerarquia1 text-white cursor-pointer hover:bg-jerarquia2'}`}
+                    className={`btn-success w-full sm:w-auto px-4 py-2.5 text-base font-medium rounded-lg shadow-sm flex justify-center items-center whitespace-nowrap ${tipoCarga === 'Consulta' ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}
                 >
                     Archivo
                 </label>
             </div>
 
             {/* Tercer row: Inputs Nombre y Descripción */}
-            <div className="flex gap-4">
-                <div className="relative flex-[1]">
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative w-full sm:flex-[1]">
                     <input
                         type="text"
                         value={nombre}
@@ -217,7 +217,7 @@ const CargaContent = ({ setMostrarTabla } = {}) => {
                     </label>
                 </div>
 
-                <div className="relative flex-[2]">
+                <div className="relative w-full sm:flex-[2]">
                     <input
                         type="text"
                         value={descripcion}
