@@ -13,8 +13,6 @@ const Definition = ({
   const carteraOptions = [
     { value: "", label: "Seleccione" },
     { value: "amex", label: "American Express" },
-    { value: "banamex", label: "Banamex" },
-    { value: "santander", label: "Santander" },
   ];
 
   return (
