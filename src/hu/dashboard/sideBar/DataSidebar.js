@@ -118,14 +118,19 @@ const dataSidebar = {
               icon: "UserIcon",
               // Sin subMenus2 - abre el modal directamente
             },
-            { id: "5CC", title: "Gestiones", icon: "UserIcon" },
+            {
+              id: "5CC",
+              title: "Gestiones",
+              icon: "UserIcon",
+              // Sin subMenus2 - abre el modal directamente
+            },
             { id: "6CC", title: "Supervisor", icon: "UserIcon" },
 
 
 
             // { id: "7CC", title: "Domicilios", icon: "UserIcon" },
             // { id: "8CC", title: "Amex", icon: "UserIcon" },//comentado por que no se usa Menu Procesos Carteras proceso nuevo
-            { id: "13CC", title: "Metas", icon: "UserIcon" },
+            //{ id: "13CC", title: "Metas", icon: "UserIcon" },
           ],
         },
       ],

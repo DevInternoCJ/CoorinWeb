@@ -3,6 +3,7 @@ import ModalBase from "../../../board/ModalBase";
 import CloseButtonCampanas from "../../../components/CloseButtonReusable";
 import ModalCicle, { tabsListInformacion, COMPONENT_ICONS_INFORMACION } from "./ModalCicle";
 import { tabsListAccionamientos, COMPONENT_ICONS_ACCIONAMIENTOS } from "../../processes/accionamientos/ModalAccionamientosTabs";
+import { tabsListGestiones, COMPONENT_ICONS_GESTIONES } from "../../processes/managements/ModalGestionesTabs";
 import TableCargaAccionamientos from "../../processes/accionamientos/TwoTablesAccionamientos";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import { infoEjecutivo } from "../../../../../services/mark/Orochi/LokiServices";
@@ -18,6 +19,7 @@ const MODAL_SIZES = {
     capturaVisit: { maxWidth: "min(805px, 95vw)", minWidth: "320px", width: "min(370px, 95vw)", height: "380px", maxHeight: "90vh" },
     cargaVisitas: { maxWidth: "min(1104px, 95vw)", minWidth: "320px", width: "min(900px, 95vw)", height: "220px", maxHeight: "85vh" },
     "accionamientos-xl": { maxWidth: "min(1135px, 98vw)", minWidth: "320px", width: "min(1335px, 98vw)", height: "auto", maxHeight: "auto" },
+    "gestiones-xl": { maxWidth: "min(1135px, 98vw)", minWidth: "320px", width: "min(1335px, 98vw)", height: "auto", maxHeight: "auto" },
     custom: {},
 };
 
@@ -66,6 +68,7 @@ const ModalBaseInformacion = ({
     const isVisitas = isConsultaVisitas || isCapturaVisitas || isCargaVisitas;
     const isInformacion = tipoInformacion === "información";
     const isAccionamientos = tipoInformacion === "Accionamientos";
+    const isGestiones = tipoInformacion === "Gestiones";
     const isSupervisor = tipoInformacion === "supervisor";
 
     // Estados para controles de Ofrecimientos en el header
@@ -138,6 +141,7 @@ const ModalBaseInformacion = ({
     const titulos = {
         "información": "Información",
         "Accionamientos": "Accionamientos",
+        "Gestiones": "Gestiones",
         "Consulta Visitas": "Consulta Visitas - Coorin",
         "Captura Visitas": "Captura Visitas - Coorin",
         "Carga Visitas": "Carga de Visitas - Coorin"
@@ -153,6 +157,7 @@ const ModalBaseInformacion = ({
     else if (isCapturaVisitas) normalizedSize = size === "pagos-xl" ? "informacion-xl" : "capturaVisit";
     else if (isCargaVisitas) normalizedSize = "cargaVisitas";
     else if (isAccionamientos) normalizedSize = "accionamientos-xl";
+    else if (isGestiones) normalizedSize = "gestiones-xl";
     else if (isSupervisor) normalizedSize = "informacion-xl";
     else if (isInformacion) {
         // Si el tab activo es Pagos Reportados y mostrarTabla=true, expandir modal
@@ -396,6 +401,84 @@ const ModalBaseInformacion = ({
                                             <ModalCicle
                                                 tabsList={tabsListAccionamientos}
                                                 componentIcons={COMPONENT_ICONS_ACCIONAMIENTOS}
+                                                activeTab={activeTab}
+                                                setActiveTab={setActiveTab}
+                                                renderNavInHeader={false}
+                                                mostrarTabla={mostrarTabla}
+                                                setMostrarTabla={setMostrarTabla}
+                                                onNavigationReady={setCarouselNav}
+                                                onSizeChange={setDynamicSize}
+                                                headerControlsActive={false}
+                                                headerStates={{}}
+                                            />
+                                        </div>
+                                    </div>
+                                    {/* Botón cerrar posicionado absolutamente en la esquina */}
+                                    <CloseButtonCampanas onClose={handleSafeClose} className="absolute top-2 right-4" />
+                                </div>
+                            </div>
+                        </div>
+                    ) : isGestiones ? (
+                        <div className="flex flex-col">
+                            {/* Row 1: tabs izquierda + contenido derecha */}
+                            <div className="flex">
+                                {/* Columna izquierda: tabs verticales */}
+                                <div className={`w-20 md:w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-auto h-fit ${activeTab === 2 || activeTab === 3 || activeTab === 4 ? 'pt-12' : ''}`}>
+                                    <div className="p-2 md:p-4">
+                                        <h3 className="text-sm font-semibold text-jerarquia3 mb-3 uppercase tracking-wide flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" className="mr-2">
+                                                <path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2m-2.06 11L15 15.28L12.06 17l.78-3.33l-2.59-2.24l3.41-.29L15 8l1.34 3.14l3.41.29l-2.59 2.24z"/>
+                                            </svg>
+                                            <span className="hidden md:inline">Gestiones</span>
+                                        </h3>
+                                        <nav
+                                            className="flex flex-col gap-y-2"
+                                            aria-label="Tabs Gestiones Verticales"
+                                            role="tablist"
+                                            aria-orientation="vertical"
+                                        >
+                                            {tabsListGestiones.map((tab, index) => (
+                                                <button
+                                                    key={tab.key}
+                                                    type="button"
+                                                    className={`
+                                                        w-full py-2 px-2 md:py-3 md:px-4 inline-flex items-center gap-x-3 text-sm font-medium text-left
+                                                        border border-gray-200 rounded-lg transition-colors duration-200
+                                                        hover:bg-jerarquia1 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none
+                                                        ${activeTab === index
+                                                            ? 'bg-white border-jerarquia2 text-jerarquia3 shadow-sm'
+                                                            : 'bg-gray-50 text-gray-600 hover:text-jerarquia3 hover:border-gray-300'
+                                                        }
+                                                    `}
+                                                    id={`tab-gestiones-vertical-item-${index}`}
+                                                    aria-selected={activeTab === index}
+                                                    data-hs-tab={`#tab-gestiones-vertical-content-${index}`}
+                                                    aria-controls={`tab-gestiones-vertical-content-${index}`}
+                                                    role="tab"
+                                                    title={tab.key}
+                                                    onClick={() => setActiveTab(index)}
+                                                >
+                                                    <span className={`${activeTab === index ? 'text-jerarquia3' : 'text-gray-500'} flex-shrink-0`}>
+                                                        {COMPONENT_ICONS_GESTIONES[tab.key]}
+                                                    </span>
+                                                    <span className="hidden md:inline flex-1">{tab.key}</span>
+                                                    {activeTab === index && (
+                                                        <span className="flex-shrink-0 w-2 h-2 bg-jerarquia3 rounded-full"></span>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </nav>
+                                    </div>
+                                </div>
+
+                                {/* Columna derecha: contenido del tab activo */}
+                                <div className="flex-1 h-full relative overflow-hidden">
+                                    {/* Contenido del tab */}
+                                    <div className="overflow-visible h-full">
+                                        <div className="px-4 py-4">
+                                            <ModalCicle
+                                                tabsList={tabsListGestiones}
+                                                componentIcons={COMPONENT_ICONS_GESTIONES}
                                                 activeTab={activeTab}
                                                 setActiveTab={setActiveTab}
                                                 renderNavInHeader={false}
