@@ -4,7 +4,7 @@ import OptionFields from "./OptionFields";
 import {
   GetScreenFields,
   SaveScreenFields,
-} from "../../../../services/mark/Orochi/LokiServices";
+} from "../../../../services/mark/orochi/LokeServices";
 import { useUserStore } from "../../../../contextGlobal/userStore";
 import SaveButton from "../../sideBar/Administration/gespa/ButtonSave";
 
@@ -103,7 +103,9 @@ const TableEditFields = ({
       .map((item) => item.campos)
       .filter(Boolean);
 
-    const currentAliasNames = editData.map((item) => item.alias).filter(Boolean);
+    const currentAliasNames = editData
+      .map((item) => item.alias)
+      .filter(Boolean);
 
     if (currentFieldNames.length > 0) {
       console.log(
@@ -173,51 +175,52 @@ const TableEditFields = ({
   };
   const handleSaveClick = () => {
     setConfirming(true);
-    
-    toast.custom((t) => (
-      <div className="bg-amber-50 text-amber-700 px-4 py-3 rounded-lg shadow-lg flex flex-col gap-3 w-80">
-        <span className="font-medium text-sm">
-          ¿Está seguro de guardar los cambios?
-        </span>
-        <div className="flex justify-end gap-2">
-          <SaveButton
-            onClick={() => {
-              toast.dismiss(t);
-              setConfirming(false);
-              toast.info("Guardado cancelado");
-            }}
-            className="btn-danger hover:bg-red-600"
-          >
-            Cancelar
-          </SaveButton>
-          <SaveButton
-            onClick={() => {
-              toast.dismiss(t);
-              toast.promise(
-                new Promise((resolve, reject) => {
-                  handleSaveAll()
-                    .then(resolve)
-                    .catch(reject);
-                }),
-                {
-                  loading: "Guardando cambios...",
-                  success: "Cambios guardados correctamente",
-                  error: "Error al guardar los cambios",
-                }
-              );
-            }}
-            className="btn-success hover:bg-green-600"
-          >
-            Confirmar
-          </SaveButton>
+
+    toast.custom(
+      (t) => (
+        <div className="bg-amber-50 text-amber-700 px-4 py-3 rounded-lg shadow-lg flex flex-col gap-3 w-80">
+          <span className="font-medium text-sm">
+            ¿Está seguro de guardar los cambios?
+          </span>
+          <div className="flex justify-end gap-2">
+            <SaveButton
+              onClick={() => {
+                toast.dismiss(t);
+                setConfirming(false);
+                toast.info("Guardado cancelado");
+              }}
+              className="btn-danger hover:bg-red-600"
+            >
+              Cancelar
+            </SaveButton>
+            <SaveButton
+              onClick={() => {
+                toast.dismiss(t);
+                toast.promise(
+                  new Promise((resolve, reject) => {
+                    handleSaveAll().then(resolve).catch(reject);
+                  }),
+                  {
+                    loading: "Guardando cambios...",
+                    success: "Cambios guardados correctamente",
+                    error: "Error al guardar los cambios",
+                  }
+                );
+              }}
+              className="btn-success hover:bg-green-600"
+            >
+              Confirmar
+            </SaveButton>
+          </div>
         </div>
-      </div>
-    ), {
-      duration: Infinity,
-      position: "top-center",
-      onDismiss: () => setConfirming(false),
-      onAutoClose: () => setConfirming(false),
-    });
+      ),
+      {
+        duration: Infinity,
+        position: "top-center",
+        onDismiss: () => setConfirming(false),
+        onAutoClose: () => setConfirming(false),
+      }
+    );
   };
 
   if (loading) {

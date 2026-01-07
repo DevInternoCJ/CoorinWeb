@@ -3,7 +3,7 @@ import {
   obetenerJerarquiaEncargados,
   asignaEjecutivoCampanas,
   UsuarioRestante,
-} from "../../../../../services/mark/Orochi/LokiServices";
+} from "../../../../../services/mark/orochi/LokeServices";
 import { toast } from "sonner";
 
 const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
@@ -14,8 +14,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
     const fetchExecutives = async () => {
       try {
         const userData = JSON.parse(localStorage.getItem("userData"));
-        const idEjecutivo =
-          userData?.idEjecutivo;
+        const idEjecutivo = userData?.idEjecutivo;
         if (!idEjecutivo) return;
         const data = await obetenerJerarquiaEncargados(idEjecutivo);
         // Mapeo: estructura completa según el endpoint
@@ -234,7 +233,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
             tableLayout: "fixed",
             minWidth: "260px",
             width: "100%",
-            maxWidth: "260px"
+            maxWidth: "260px",
           }}
         >
           <thead>
@@ -250,7 +249,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
                   minWidth: "22px",
                   position: "sticky",
                   top: 0,
-                  zIndex: 2
+                  zIndex: 2,
                 }}
               >
                 Asignado
@@ -266,7 +265,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
                   minWidth: "40px",
                   position: "sticky",
                   top: 0,
-                  zIndex: 2
+                  zIndex: 2,
                 }}
               >
                 Usuario
@@ -282,7 +281,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
                   minWidth: "22px",
                   position: "sticky",
                   top: 0,
-                  zIndex: 2
+                  zIndex: 2,
                 }}
               >
                 Restantes
@@ -291,7 +290,14 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
           </thead>
           <tbody>
             {ejecutivosOrdenados.map((row, i) => (
-              <tr key={i} style={{ background: row.asignado ? 'var(--color-jerarquia1)' : undefined }}>
+              <tr
+                key={i}
+                style={{
+                  background: row.asignado
+                    ? "var(--color-jerarquia1)"
+                    : undefined,
+                }}
+              >
                 <td
                   className="modal-table-td"
                   style={{
@@ -312,15 +318,37 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
                         className="peer sr-only"
                         checked={row.asignado || false}
                         disabled={loadingRow === i}
-                        onChange={(e) => handleAsignar(e.target.checked, row, i)}
+                        onChange={(e) =>
+                          handleAsignar(e.target.checked, row, i)
+                        }
                       />
                       <span className="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-jerarquia3"></span>
                       <span className="absolute top-1/2 start-0.5 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
                       <span className="absolute top-1/2 start-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-white transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" width={13} height={13} viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"></path></svg>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width={13}
+                          height={13}
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            fill="currentColor"
+                            d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"
+                          ></path>
+                        </svg>
                       </span>
                       <span className="absolute top-1/2 end-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-jerarquia3 transition-colors duration-200 ">
-                        <svg xmlns="http://www.w3.org/2000/svg" width={13} height={13} viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"></path></svg>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width={13}
+                          height={13}
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            fill="currentColor"
+                            d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"
+                          ></path>
+                        </svg>
                       </span>
                     </label>
                   </div>

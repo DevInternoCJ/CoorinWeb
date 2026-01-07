@@ -291,7 +291,6 @@ const ModalProductividadContent = ({
     }
   };
 
-
   // Función para renderizar las columnas de la tabla según el indicador
   const renderTableHeaders = () => {
     // Distinguir entre "Negociaciones" de Día vs Hora

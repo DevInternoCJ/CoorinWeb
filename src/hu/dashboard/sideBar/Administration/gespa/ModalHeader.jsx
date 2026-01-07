@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import LogoCoorin from "../../../../../assets/logo_coorin_7.svg";
 import CustomSelect from "../../../board/screenFields/SelectWallet"; // Asegúrate de que este es el SelectWallet modificado
-import { GetVerifyProduct } from "../../../../../services/mark/Orochi/LokiServices";
+import { GetVerifyProduct } from "../../../../../services/mark/orochi/LokeServices";
 import { toast } from "sonner";
 
 const PRODUCT_OPTIONS = [
@@ -22,7 +22,6 @@ const ModalHeader = ({
   setLoading,
   setShowDataTables,
 }) => {
-
   const servidor = "Thor"; // Efecto para la verificación del producto (MOVIDO DESDE WalletSection)
   useEffect(() => {
     console.log("selectedProduct for verification:", selectedProduct);
@@ -68,8 +67,7 @@ const ModalHeader = ({
         </div>
         <div className="flex flex-col items-end">
           <div className="flex items-center gap-4 mb-3">
-            <div>
-            </div>
+            <div></div>
             <div className="block md:grid grid-cols-2 gap-4">
               <div>
                 <CustomSelect

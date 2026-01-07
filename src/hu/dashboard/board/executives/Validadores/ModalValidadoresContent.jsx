@@ -7,12 +7,10 @@ import {
   Validatorsregrets,
   InsertDeletedValidators,
   InsertDeletedValidatorsRegrets,
-} from "../../../../../services/mark/Orochi/LokiServices";
+} from "../../../../../services/mark/orochi/LokeServices";
 import { toast } from "sonner";
 
-
 function ModalValidadoresContent(props) {
-
   // Limpiar estados al cerrar el modal (cuando isOpen pasa a false)
   useEffect(() => {
     if (props.isOpen === false) {
@@ -27,7 +25,7 @@ function ModalValidadoresContent(props) {
   }, [props.isOpen]);
   // Resetear estados al cerrar el modal
   useEffect(() => {
-    if (typeof props.onClose === 'function') {
+    if (typeof props.onClose === "function") {
       // Suscribirse al evento de cierre del modal
       const handleClose = () => {
         setExecutiveTree([]);
@@ -47,7 +45,9 @@ function ModalValidadoresContent(props) {
   }, [props.onClose]);
   useEffect(() => {
     if (!props.producto) {
-      toast.info("Primero debe seleccionar un producto para activar los validadores.");
+      toast.info(
+        "Primero debe seleccionar un producto para activar los validadores."
+      );
     }
   }, []);
   // Todos los hooks y lógica van dentro de la función principal
@@ -92,21 +92,23 @@ function ModalValidadoresContent(props) {
     const fetchExecutives = async () => {
       try {
         const userData = JSON.parse(localStorage.getItem("userData"));
-        const idEjecutivo =
-          userData?.idEjecutivo;
+        const idEjecutivo = userData?.idEjecutivo;
         const usuarioSesion = userData?.usuario || userData?.Usuario || "";
-        const nombreSesion = userData?.nombreEjecutivo || userData?.nombre || "";
+        const nombreSesion =
+          userData?.nombreEjecutivo || userData?.nombre || "";
         if (!idEjecutivo) return;
         const data = await obetenerJerarquiaEncargados(idEjecutivo);
         // Filtrar solo ejecutivos propios de nivel 1 (simula tvDependientes.CargaEjecutivosPropios(1))
         const hijos = Array.isArray(data)
           ? data
-              .filter(e => (e.jerarquia === undefined || e.jerarquia > 0)) // Solo excluye jerarquía <= 0
+              .filter((e) => e.jerarquia === undefined || e.jerarquia > 0) // Solo excluye jerarquía <= 0
               .map((e) => ({
                 usuario: e.usuario,
                 nombreEjecutivo: e.nombreEjecutivo || "",
                 subordinados: Array.isArray(e.subordinados)
-                  ? e.subordinados.filter(s => (s.jerarquia === undefined || s.jerarquia > 0)) // Solo excluye jerarquía <= 0 en subordinados
+                  ? e.subordinados.filter(
+                      (s) => s.jerarquia === undefined || s.jerarquia > 0
+                    ) // Solo excluye jerarquía <= 0 en subordinados
                   : [],
                 idEjecutivo: e.idEjecutivo,
                 idEncargado: e.idEncargado || null,
@@ -140,14 +142,27 @@ function ModalValidadoresContent(props) {
     if (!executiveTree.length) return [];
 
     // Función recursiva para recorrer toda la jerarquía y agregar ejecutivos válidos
-    const recolectarEjecutivos = (ejecutivo, nivel = 1, encargadoPadre = null) => {
+    const recolectarEjecutivos = (
+      ejecutivo,
+      nivel = 1,
+      encargadoPadre = null
+    ) => {
       const lista = [];
-      if (ejecutivo && (ejecutivo.jerarquia === undefined || ejecutivo.jerarquia > 0)) {
+      if (
+        ejecutivo &&
+        (ejecutivo.jerarquia === undefined || ejecutivo.jerarquia > 0)
+      ) {
         lista.push({
           usuario: ejecutivo.usuario || ejecutivo.Usuario || "",
           nombreEjecutivo: ejecutivo.nombreEjecutivo || "",
-          displayName: `${ejecutivo.usuario || ejecutivo.Usuario || ""} - ${ejecutivo.nombreEjecutivo || ""}`,
-          idEjecutivo: ejecutivo.idEjecutivo || ejecutivo.idejecutivo || ejecutivo.id || "",
+          displayName: `${ejecutivo.usuario || ejecutivo.Usuario || ""} - ${
+            ejecutivo.nombreEjecutivo || ""
+          }`,
+          idEjecutivo:
+            ejecutivo.idEjecutivo ||
+            ejecutivo.idejecutivo ||
+            ejecutivo.id ||
+            "",
           idEncargado: ejecutivo.idEncargado || null,
           nivelJerarquia: nivel,
           esSubordinado: nivel > 1,
@@ -156,9 +171,14 @@ function ModalValidadoresContent(props) {
           jerarquia: ejecutivo.jerarquia || 1,
         });
       }
-      if (Array.isArray(ejecutivo.subordinados) && ejecutivo.subordinados.length > 0) {
-        ejecutivo.subordinados.forEach(sub => {
-          lista.push(...recolectarEjecutivos(sub, nivel + 1, ejecutivo.usuario));
+      if (
+        Array.isArray(ejecutivo.subordinados) &&
+        ejecutivo.subordinados.length > 0
+      ) {
+        ejecutivo.subordinados.forEach((sub) => {
+          lista.push(
+            ...recolectarEjecutivos(sub, nivel + 1, ejecutivo.usuario)
+          );
         });
       }
       return lista;
@@ -166,7 +186,7 @@ function ModalValidadoresContent(props) {
 
     // Recorrer todos los nodos raíz
     let usuariosValidadores = [];
-    executiveTree.forEach(ejecutivo => {
+    executiveTree.forEach((ejecutivo) => {
       usuariosValidadores.push(...recolectarEjecutivos(ejecutivo, 1, null));
     });
 
@@ -199,7 +219,7 @@ function ModalValidadoresContent(props) {
         cartera,
         contadorValidadores,
         isLoadingValidadores,
-        nodoSesion: executiveTree.length > 0 ? executiveTree[0] : null
+        nodoSesion: executiveTree.length > 0 ? executiveTree[0] : null,
       });
     }
   }, [
@@ -212,7 +232,7 @@ function ModalValidadoresContent(props) {
     cartera,
     contadorValidadores,
     isLoadingValidadores,
-    executiveTree
+    executiveTree,
   ]);
 
   // Función para obtener idProducto basado en la selección
@@ -390,22 +410,20 @@ function ModalValidadoresContent(props) {
   // El contador y el checkbox ahora se pasan al header, así que solo renderizamos el árbol y mensajes aquí
   return (
     <div
-      className="grid grid-cols-1 gap-2 w-full h-auto min-w-[18.75rem] max-w-full"
-      style={{ minWidth: '18.75rem' }}
+      className="grid grid-cols-1 gap-2 w-full h-full min-w-[18.75rem] max-w-full"
+      style={{ minWidth: "18.75rem" }}
     >
-
-          <JerarquiaConR
-            executiveTree={executiveTree}
-            useCheckbox={true}
-            usuariosValidadores={usuariosValidadores}
-            handleSeleccionarUsuario={handleSeleccionarUsuario}
-            producto={producto}
-            style={{ height: '100%', width: '100%' }}
-            omitSessionExecutive={true}
-          />
-      
+      <JerarquiaConR
+        executiveTree={executiveTree}
+        useCheckbox={true}
+        usuariosValidadores={usuariosValidadores}
+        handleSeleccionarUsuario={handleSeleccionarUsuario}
+        producto={producto}
+        style={{ height: "100%", width: "100%" }}
+        omitSessionExecutive={true}
+      />
     </div>
   );
-};
+}
 
 export default ModalValidadoresContent;

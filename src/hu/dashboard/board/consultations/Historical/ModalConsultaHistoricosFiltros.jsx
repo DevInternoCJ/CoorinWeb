@@ -205,8 +205,13 @@ const ModalConsultaHistoricosFiltros = ({
       }
       try {
         setIsLoading(true);
-        console.log("[Archivo] Iniciando consulta por archivo. Archivo:", archivo);
-        toast.loading("Consultando histórico por archivo...", { id: "buscar-loading" });
+        console.log(
+          "[Archivo] Iniciando consulta por archivo. Archivo:",
+          archivo
+        );
+        toast.loading("Consultando histórico por archivo...", {
+          id: "buscar-loading",
+        });
         const userData = JSON.parse(localStorage.getItem("userData"));
         const idCartera = userData?.idCartera || 1;
         const formatFecha = (fecha) => {
@@ -226,7 +231,7 @@ const ModalConsultaHistoricosFiltros = ({
           UsarPeriodo: periodo,
           FechaDesde: periodo ? formatFecha(fechaDesde) : null,
           FechaHasta: periodo ? formatFecha(fechaHasta) : null,
-        };  
+        };
         console.log("[Archivo] Body enviado a /Historico/archivo:", body);
         const result = await historyArchivoUpload(body);
         console.log("[Archivo] Respuesta recibida:", result);
@@ -273,7 +278,10 @@ const ModalConsultaHistoricosFiltros = ({
           toast.error("Formato de datos inesperado para exportar a Excel.");
         }
       } catch (error) {
-        console.error("[Archivo] Error al consultar histórico por archivo:", error);
+        console.error(
+          "[Archivo] Error al consultar histórico por archivo:",
+          error
+        );
         toast.dismiss("buscar-loading");
         toast.error("Error al consultar histórico por archivo");
       } finally {

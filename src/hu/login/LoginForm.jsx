@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-//import { ValidatePassword } from "../../services/mark/albaz/LokiServices";
+//import { ValidatePassword } from "../../services/mark/orochi/LokiServices";
 import { loginUser } from "../../services/mark/login/AuthServices";
 import ButtonLogin from "./ButtonLogin";
 import { LoginUser, LoginKey } from "./LoginIcons";
@@ -24,7 +24,7 @@ const InputField = ({
   placeholder,
   value,
   onChange,
-  id="hs-floating-input-email",
+  id = "hs-floating-input-email",
   label,
   minLength,
   maxLength,
@@ -53,7 +53,9 @@ const InputField = ({
         id={id}
         disabled={disabled}
       />
-      <label htmlFor="hs-floating-input-email-value" className="absolute top-0 start-0 p-2 h-full sm:text-sm truncate pointer-events-none transition ease-in-out duration-100  origin-[0_0] peer-disabled:opacity-50 peer-disabled:pointer-events-none
+      <label
+        htmlFor="hs-floating-input-email-value"
+        className="absolute top-0 start-0 p-2 h-full sm:text-sm truncate pointer-events-none transition ease-in-out duration-100  origin-[0_0] peer-disabled:opacity-50 peer-disabled:pointer-events-none
       peer-focus:scale-90
       peer-focus:translate-x-0.5
       peer-focus:-translate-y-3
@@ -61,7 +63,10 @@ const InputField = ({
       peer-not-placeholder-shown:scale-90
       peer-not-placeholder-shown:translate-x-0.5
       peer-not-placeholder-shown:-translate-y-3
-      peer-not-placeholder-shown:text-gray-500  ">{label}</label>
+      peer-not-placeholder-shown:text-gray-500  "
+      >
+        {label}
+      </label>
     </div>
   </div>
 );
@@ -141,252 +146,254 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
       } else {
         toast.success("¡Inicio de sesión exitoso!");
         saveUserData(response);
-        onLoginSuccess?.(); 
+        onLoginSuccess?.();
         navigate("/dashboardPage");
       }
     },
     [saveUserData]
   );
 
-// Handler principal de submit
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (passwordError) {
-    toast.error(passwordError);
-    return;
-  }
-  if (!formData.username || !formData.password) {
-    toast.error(ERROR_MESSAGES.REQUIRED_FIELDS);
-    return;
-  }
-  setLoading(true);
-  setApiError("");
-  const userData = {
-    usuario: formData.username,
-    contrasenia: formData.password,
-    usuarioWindows: formData.username,
-  };
-  
-  try {
-    const response = await loginUser(userData);
-    console.log("Respuesta de inicio de sesión exitosa:", response);
-    // const idEjecutivo = extractIdEjecutivo(response);
-    localStorage.setItem("username", formData.username);
-    
-    const userInfo = response?.ejecutivo || response;
-
-    // GUARDAR DATOS COMPLETOS EN STORE Y LOCALSTORAGE
-    const userStoreData = {
-      idEjecutivo: userInfo.idEjecutivo,
+  // Handler principal de submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (passwordError) {
+      toast.error(passwordError);
+      return;
+    }
+    if (!formData.username || !formData.password) {
+      toast.error(ERROR_MESSAGES.REQUIRED_FIELDS);
+      return;
+    }
+    setLoading(true);
+    setApiError("");
+    const userData = {
       usuario: formData.username,
-      nombre: userInfo.NombreEjecutivo,
-      dias: userInfo.Días,
-      Jerarquía: userInfo.Jerarquía,
-      token: userInfo.Token,
-      idCartera: userInfo.idCartera,
-      idSucursal: userInfo.idSucursal,
-      idArea: userInfo.idÁrea,
-      Extensión: userInfo.Extensión,
-      Encargado: userInfo.Encargado,
-      idEncargado: userInfo.idEncargado,
-      idLogIngreso: userInfo.idLogIngreso,
-      idProducto: userInfo.idProducto,
-      Segmento: userInfo.Segmento,
-      // NUEVO: Guardar también la contraseña actual temporalmente
-      contraActual: formData.password
+      contrasenia: formData.password,
+      usuarioWindows: formData.username,
     };
 
-    setUser(userStoreData);
-    
-    // GUARDAR EN LOCALSTORAGE CON CONTRASEÑA ACTUAL
-    const localStorageData = {
-      ...userStoreData,
-      contraActual: formData.password // Guardar para ChangePassword
-    };
-    localStorage.setItem("userData", JSON.stringify(localStorageData));
-    
-    console.log("Datos guardados en store y localStorage:", userStoreData);
+    try {
+      const response = await loginUser(userData);
+      console.log("Respuesta de inicio de sesión exitosa:", response);
+      // const idEjecutivo = extractIdEjecutivo(response);
+      localStorage.setItem("username", formData.username);
 
-    // try {
-    //   const passwordValidation = await ValidatePassword(
-    //     { contrasenia: formData.password, servidor: "Thor" },
-    //     idEjecutivo
-    //   );
-    //   console.log("Respuesta de validación de contraseña:", passwordValidation);
+      const userInfo = response?.ejecutivo || response;
 
-    //   // DETECTAR SI LA CONTRASEÑA ESTÁ PRÓXIMA A EXPIRAR (pero aún es válida)
-    //   const diasRestantes = userInfo.Días;
-    //   console.log("🔍 Días restantes para expirar:", diasRestantes);
+      // GUARDAR DATOS COMPLETOS EN STORE Y LOCALSTORAGE
+      const userStoreData = {
+        idEjecutivo: userInfo.idEjecutivo,
+        usuario: formData.username,
+        nombre: userInfo.NombreEjecutivo,
+        dias: userInfo.Días,
+        Jerarquía: userInfo.Jerarquía,
+        token: userInfo.Token,
+        idCartera: userInfo.idCartera,
+        idSucursal: userInfo.idSucursal,
+        idArea: userInfo.idÁrea,
+        Extensión: userInfo.Extensión,
+        Encargado: userInfo.Encargado,
+        idEncargado: userInfo.idEncargado,
+        idLogIngreso: userInfo.idLogIngreso,
+        idProducto: userInfo.idProducto,
+        Segmento: userInfo.Segmento,
+        // NUEVO: Guardar también la contraseña actual temporalmente
+        contraActual: formData.password,
+      };
 
-    //   // CONDICIÓN MODIFICADA: Mostrar PasswordChangeContent si:
-    //   // 1. La contraseña expiró (días <= 0) O 
-    //   // 2. La contraseña está próxima a expirar (días < 30) Y es cambio opcional
-    //   if (diasRestantes <= 0) {
-    //     console.log("CONTRASEÑA EXPIRADA - Cambio obligatorio");
-    //     // Para contraseña expirada, usar onPasswordExpired para flujo directo a ChangePassword
-    //     if (onPasswordExpired && typeof onPasswordExpired === 'function') {
-    //       const expiredData = {
-    //         diasRestantes: diasRestantes,
-    //         username: formData.username,
-    //         contraActual: formData.password,
-    //         esExpirada: true
-    //       };
-    //       console.log("Ejecutando onPasswordExpired (contraseña expirada):", expiredData);
-    //       onPasswordExpired(expiredData);
-    //     }
-    //   } else if (diasRestantes < 30) {
-    //     console.log("CONTRASEÑA PRÓXIMA A EXPIRAR - Cambio recomendado");
-    //     // Para contraseña próxima a expirar, usar onLoginSuccess para mostrar opción
-    //     if (onLoginSuccess && typeof onLoginSuccess === 'function') {
-    //       const successData = {
-    //         diasRestantes: diasRestantes,
-    //         username: formData.username,
-    //         contraActual: formData.password,
-    //         esExpirada: false
-    //       };
-    //       console.log("Ejecutando onLoginSuccess (cambio opcional):", successData);
-    //       onLoginSuccess(successData);
-    //     }
-    //   } else {
-    //     console.log("CONTRASEÑA VÁLIDA - Login normal");
-    //     // Contraseña válida con muchos días restantes - login normal
-    //     processSuccessfulLogin(
-    //       response,
-    //       passwordValidation,
-    //       () => {
-    //         // Callback vacío para no mostrar PasswordChangeContent
-    //         console.log("Login exitoso, redirigiendo al dashboard");
-    //         navigate("/dashboardPage");
-    //       },
-    //       navigate
-    //     );
-    //   }
+      setUser(userStoreData);
 
-    // } catch (validationError) {
-    //   console.error("Error en validación de contraseña:", validationError);
-    //   handlePasswordValidationError(validationError, onLoginSuccess);
-    // }
-    console.log("Login exitoso sin validación de contraseña");
+      // GUARDAR EN LOCALSTORAGE CON CONTRASEÑA ACTUAL
+      const localStorageData = {
+        ...userStoreData,
+        contraActual: formData.password, // Guardar para ChangePassword
+      };
+      localStorage.setItem("userData", JSON.stringify(localStorageData));
+
+      console.log("Datos guardados en store y localStorage:", userStoreData);
+
+      // try {
+      //   const passwordValidation = await ValidatePassword(
+      //     { contrasenia: formData.password, servidor: "Thor" },
+      //     idEjecutivo
+      //   );
+      //   console.log("Respuesta de validación de contraseña:", passwordValidation);
+
+      //   // DETECTAR SI LA CONTRASEÑA ESTÁ PRÓXIMA A EXPIRAR (pero aún es válida)
+      //   const diasRestantes = userInfo.Días;
+      //   console.log("🔍 Días restantes para expirar:", diasRestantes);
+
+      //   // CONDICIÓN MODIFICADA: Mostrar PasswordChangeContent si:
+      //   // 1. La contraseña expiró (días <= 0) O
+      //   // 2. La contraseña está próxima a expirar (días < 30) Y es cambio opcional
+      //   if (diasRestantes <= 0) {
+      //     console.log("CONTRASEÑA EXPIRADA - Cambio obligatorio");
+      //     // Para contraseña expirada, usar onPasswordExpired para flujo directo a ChangePassword
+      //     if (onPasswordExpired && typeof onPasswordExpired === 'function') {
+      //       const expiredData = {
+      //         diasRestantes: diasRestantes,
+      //         username: formData.username,
+      //         contraActual: formData.password,
+      //         esExpirada: true
+      //       };
+      //       console.log("Ejecutando onPasswordExpired (contraseña expirada):", expiredData);
+      //       onPasswordExpired(expiredData);
+      //     }
+      //   } else if (diasRestantes < 30) {
+      //     console.log("CONTRASEÑA PRÓXIMA A EXPIRAR - Cambio recomendado");
+      //     // Para contraseña próxima a expirar, usar onLoginSuccess para mostrar opción
+      //     if (onLoginSuccess && typeof onLoginSuccess === 'function') {
+      //       const successData = {
+      //         diasRestantes: diasRestantes,
+      //         username: formData.username,
+      //         contraActual: formData.password,
+      //         esExpirada: false
+      //       };
+      //       console.log("Ejecutando onLoginSuccess (cambio opcional):", successData);
+      //       onLoginSuccess(successData);
+      //     }
+      //   } else {
+      //     console.log("CONTRASEÑA VÁLIDA - Login normal");
+      //     // Contraseña válida con muchos días restantes - login normal
+      //     processSuccessfulLogin(
+      //       response,
+      //       passwordValidation,
+      //       () => {
+      //         // Callback vacío para no mostrar PasswordChangeContent
+      //         console.log("Login exitoso, redirigiendo al dashboard");
+      //         navigate("/dashboardPage");
+      //       },
+      //       navigate
+      //     );
+      //   }
+
+      // } catch (validationError) {
+      //   console.error("Error en validación de contraseña:", validationError);
+      //   handlePasswordValidationError(validationError, onLoginSuccess);
+      // }
+      console.log("Login exitoso sin validación de contraseña");
       toast.success("¡Inicio de sesión exitoso!");
       saveUserData(response);
       navigate("/dashboardPage");
     } catch (error) {
-    console.error("Error en el inicio de sesión:", error);
+      console.error("Error en el inicio de sesión:", error);
 
-    // 🔍 Extraer código de error de Axios
-    const status = error.response?.status;
-    const axiosCode = error.code;
+      // 🔍 Extraer código de error de Axios
+      const status = error.response?.status;
+      const axiosCode = error.code;
 
-    // Error 503 (Servidor no disponible)
-    if (status === 503) {
-      const detail =
-        error.response?.data?.detail ||
-        "El servicio no está disponible en este momento. Intenta más tarde.";
-      toast.error("Servidor no disponible: " + detail);
-      console.error("Detalle del error 503:", detail);
-      setApiError(detail);
-      setLoading(false);
-      return;
-    }
-
-    // Error de red (sin conexión al servidor)
-    if (axiosCode === "ERR_NETWORK") {
-      toast.error("No se pudo conectar con el servidor. Verifica tu red o VPN.");
-      console.error("Error de red:", error.message);
-      setApiError("No se pudo establecer conexión con el servidor.");
-      setLoading(false);
-      return;
-    }
-
-    // Error de respuesta inválida del backend (por ejemplo SQL inaccesible)
-    if (axiosCode === "ERR_BAD_RESPONSE") {
-      const sqlError =
-        error.response?.data?.detail ||
-        "Error interno del servidor o base de datos no accesible.";
-      toast.error("Error en el servidor: " + sqlError);
-      console.error("🧩 Detalle SQL:", sqlError);
-      setApiError(sqlError);
-      setLoading(false);
-      return;
-    }
-
-    // Detectar contraseña expirada (400 con Expiró = 1)
-    if (status === 400 && error.response?.data?.loginResult?.Expiró === 1) {
-      const diasRestantes = error.response?.data?.loginResult?.Días || 0;
-      const mensaje =
-        error.response?.data?.loginResult?.Mensaje ||
-        "Su contraseña expiró y debe renovarla.";
-      console.log("CONTRASEÑA EXPIRADA DETECTADA:", {
-        expiró: error.response.data.loginResult.Expiró,
-        mensaje,
-        días: diasRestantes,
-      });
-
-      localStorage.removeItem("userData");
-      const tempUserData = {
-        dias: diasRestantes,
-        usuario: formData.username,
-        contraActual: formData.password,
-        mensaje,
-        esExpirada: true,
-      };
-      localStorage.setItem("userData", JSON.stringify(tempUserData));
-
-      setUser({
-        usuario: formData.username,
-        contraActual: formData.password,
-        dias: diasRestantes,
-        esExpirada: true,
-      });
-
-      toast.warning(mensaje, { duration: 5000 });
-
-      if (onPasswordExpired && typeof onPasswordExpired === "function") {
-        onPasswordExpired({
-          diasRestantes,
-          username: formData.username,
-          contraActual: formData.password,
-          esExpirada: true,
-        });
+      // Error 503 (Servidor no disponible)
+      if (status === 503) {
+        const detail =
+          error.response?.data?.detail ||
+          "El servicio no está disponible en este momento. Intenta más tarde.";
+        toast.error("Servidor no disponible: " + detail);
+        console.error("Detalle del error 503:", detail);
+        setApiError(detail);
+        setLoading(false);
+        return;
       }
 
-      setLoading(false);
-      return;
-    }
+      // Error de red (sin conexión al servidor)
+      if (axiosCode === "ERR_NETWORK") {
+        toast.error(
+          "No se pudo conectar con el servidor. Verifica tu red o VPN."
+        );
+        console.error("Error de red:", error.message);
+        setApiError("No se pudo establecer conexión con el servidor.");
+        setLoading(false);
+        return;
+      }
 
-    // Otros errores 400 (credenciales inválidas, etc.)
-    if (status === 400) {
-      const errorMessage =
-        error.response?.data?.loginResult?.Mensaje ||
+      // Error de respuesta inválida del backend (por ejemplo SQL inaccesible)
+      if (axiosCode === "ERR_BAD_RESPONSE") {
+        const sqlError =
+          error.response?.data?.detail ||
+          "Error interno del servidor o base de datos no accesible.";
+        toast.error("Error en el servidor: " + sqlError);
+        console.error("🧩 Detalle SQL:", sqlError);
+        setApiError(sqlError);
+        setLoading(false);
+        return;
+      }
+
+      // Detectar contraseña expirada (400 con Expiró = 1)
+      if (status === 400 && error.response?.data?.loginResult?.Expiró === 1) {
+        const diasRestantes = error.response?.data?.loginResult?.Días || 0;
+        const mensaje =
+          error.response?.data?.loginResult?.Mensaje ||
+          "Su contraseña expiró y debe renovarla.";
+        console.log("CONTRASEÑA EXPIRADA DETECTADA:", {
+          expiró: error.response.data.loginResult.Expiró,
+          mensaje,
+          días: diasRestantes,
+        });
+
+        localStorage.removeItem("userData");
+        const tempUserData = {
+          dias: diasRestantes,
+          usuario: formData.username,
+          contraActual: formData.password,
+          mensaje,
+          esExpirada: true,
+        };
+        localStorage.setItem("userData", JSON.stringify(tempUserData));
+
+        setUser({
+          usuario: formData.username,
+          contraActual: formData.password,
+          dias: diasRestantes,
+          esExpirada: true,
+        });
+
+        toast.warning(mensaje, { duration: 5000 });
+
+        if (onPasswordExpired && typeof onPasswordExpired === "function") {
+          onPasswordExpired({
+            diasRestantes,
+            username: formData.username,
+            contraActual: formData.password,
+            esExpirada: true,
+          });
+        }
+
+        setLoading(false);
+        return;
+      }
+
+      // Otros errores 400 (credenciales inválidas, etc.)
+      if (status === 400) {
+        const errorMessage =
+          error.response?.data?.loginResult?.Mensaje ||
+          error.response?.data?.message ||
+          ERROR_MESSAGES.LOGIN_ERROR;
+        toast.error(errorMessage);
+        setApiError(errorMessage);
+        setLoading(false);
+        return;
+      }
+
+      // otros errores 500
+      if (status === 500) {
+        toast.error("Error interno del servidor. Inténtalo más tarde.");
+        console.error(" Error 500:", error.response?.data);
+        setApiError("Error interno del servidor.");
+        setLoading(false);
+        return;
+      }
+
+      // Manejo genérico
+      const fallbackMessage =
         error.response?.data?.message ||
+        error.message ||
         ERROR_MESSAGES.LOGIN_ERROR;
-      toast.error(errorMessage);
-      setApiError(errorMessage);
+      toast.error(fallbackMessage);
+      setApiError(fallbackMessage);
       setLoading(false);
-      return;
-    }
-
-    // otros errores 500
-    if (status === 500) {
-      toast.error("Error interno del servidor. Inténtalo más tarde.");
-      console.error(" Error 500:", error.response?.data);
-      setApiError("Error interno del servidor.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Manejo genérico
-    const fallbackMessage =
-      error.response?.data?.message ||
-      error.message ||
-      ERROR_MESSAGES.LOGIN_ERROR;
-    toast.error(fallbackMessage);
-    setApiError(fallbackMessage);
-    setLoading(false);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <form onSubmit={handleSubmit} className="lg:w-full px-6 text-neutral-900 ">

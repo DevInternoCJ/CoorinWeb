@@ -1,5 +1,4 @@
-
-import React, { useState, useRef, useEffect, Suspense, lazy} from "react";
+import React, { useState, useRef, useEffect, Suspense, lazy } from "react";
 import GridExecutives from "./board/executives/GridExecutives";
 import { CoorinSidebar } from "./sideBar/CoorinSidebar";
 import GridConsultations from "./board/consultations/GridConsultations";
@@ -24,9 +23,12 @@ import CaptureVisit from "./sideBar/processes/visits/Capture/CaptureVisit";
 import LoadVisitsContent from "./sideBar/processes/visits/LoadVisits";
 import IconCircular from "../../components/iconos/IconCircular";
 import ConsorcioLogo from "../../../src/assets//CoorinBlack.svg";
-import { useDashboardModalUrlSync } from "../../hooks/useDashboardModalUrlSync";
+import ProcessGespa from "../dashboard/sideBar/gespa/processgespa/ProcessGespa";
 
-const Comments = lazy(() => import("./sideBar/processes/gespa/comments/Comments"));
+
+const Comments = lazy(() =>
+  import("../../hu/dashboard/sideBar/gespa/comment/Comments")
+);
 
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -35,44 +37,38 @@ export default function CoorinDashboard() {
   const buttonRef = useRef(null);
   const [modalSidebarOpen, setModalSidebarOpen] = useState(false);
   const [selectedSidebarOption, setSelectedSidebarOption] = useState("");
+
   // Estados para controlar modales de las cards
   const [executiveModalOpen, setExecutiveModalOpen] = useState(false);
   const [consultationModalOpen, setConsultationModalOpen] = useState(false);
-  // Estado para el path del sidebar modal (usado para la URL)
-  const [sidebarModalPath, setSidebarModalPath] = useState("");
+
   // Función para cerrar el sidebar (será pasada al CoorinSidebar)
   const [closeSidebarFn, setCloseSidebarFn] = useState(null);
 
-  // Sincronizar URL con el modal del sidebar abierto
-  useDashboardModalUrlSync(
-    "SideBar",
-    modalSidebarOpen ? sidebarModalPath : ""
-  );
-
-
-
-    const [cuentaDataCapturaVisita, setCuentaDataCapturaVisita] = useState(null);
+  const [cuentaDataCapturaVisita, setCuentaDataCapturaVisita] = useState(null);
 
   // Mapeo directo para renderizar cada componente con su propio modal
 
   // Estado para controlar si la tabla de Pagos reportados está visible
-  const [mostrarTablaPagosReportados, setMostrarTablaPagosReportados] = useState(false);
+  const [mostrarTablaPagosReportados, setMostrarTablaPagosReportados] =
+    useState(false);
   // Estado para controlar si la tabla de Domicilios está visible
   const [mostrarTablaDomicilios, setMostrarTablaDomicilios] = useState(false);
 
-    // Estado para controlar el tamaño del modal de arrepentimientos
-  const [regrestModalSize, setRegrestModalSize] = useState('pagos');
+  // Estado para controlar el tamaño del modal de arrepentimientos
+  const [regrestModalSize, setRegrestModalSize] = useState("pagos");
 
-        // Estado para controlar el tamaño del modal de Captura Visitas
-      const [captureVisitModalSize, setCaptureVisitModalSize] = useState("capturaVisit");
-      const handleGrowCaptureVisitModal = (grow) => {
-        // Solo expandir, no volver atrás si ya está expandido
-        if (grow && captureVisitModalSize !== "pagos-xl") {
-          setCaptureVisitModalSize("pagos-xl");
-        }
-      };
+  // Estado para controlar el tamaño del modal de Captura Visitas
+  const [captureVisitModalSize, setCaptureVisitModalSize] =
+    useState("capturaVisit");
+  const handleGrowCaptureVisitModal = (grow) => {
+    // Solo expandir, no volver atrás si ya está expandido
+    if (grow && captureVisitModalSize !== "pagos-xl") {
+      setCaptureVisitModalSize("pagos-xl");
+    }
+  };
 
-      // Efecto para cerrar el sidebar cuando se abran modales de las cards
+  // Efecto para cerrar el sidebar cuando se abran modales de las cards
   useEffect(() => {
     if ((executiveModalOpen || consultationModalOpen) && closeSidebarFn) {
       closeSidebarFn();
@@ -91,10 +87,19 @@ export default function CoorinDashboard() {
     // Componentes de información que usan el ModalBaseInformacion
     const informationComponents = [
       "información", // Carrusel circular con todos los componentes
-      "Lista Negra", "Arrepentimientos",
-      "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios", 
-      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
-      "Consulta Visitas", "Captura Visitas", "Carga Visitas"
+      "Lista Negra",
+      "Arrepentimientos",
+      "Pagos",
+      "Pagos Reportados",
+      "Datos Erroneos",
+      "Domicilios",
+      "Correos",
+      "Búsquedas",
+      "Ofrecimientos",
+      "Comentarios2",
+      "Consulta Visitas",
+      "Captura Visitas",
+      "Carga Visitas",
     ];
 
     if (informationComponents.includes(selectedSidebarOption)) {
@@ -111,8 +116,8 @@ export default function CoorinDashboard() {
         case "Arrepentimientos":
           ContentComponent = RegrestContent;
           contentProps = {
-            growModal: () => setRegrestModalSize('pagos-xl'),
-            isExpanded: regrestModalSize === 'pagos-xl'
+            growModal: () => setRegrestModalSize("pagos-xl"),
+            isExpanded: regrestModalSize === "pagos-xl",
           };
           break;
         case "Pagos":
@@ -122,21 +127,21 @@ export default function CoorinDashboard() {
           ContentComponent = ReportingPaymentsContent;
           contentProps = {
             mostrarTabla: mostrarTablaPagosReportados,
-            setMostrarTabla: setMostrarTablaPagosReportados
+            setMostrarTabla: setMostrarTablaPagosReportados,
           };
           break;
         case "Datos Erroneos":
           ContentComponent = WrongsContent;
           contentProps = {
             mostrarTabla: mostrarTablaPagosReportados,
-            setMostrarTabla: setMostrarTablaPagosReportados
+            setMostrarTabla: setMostrarTablaPagosReportados,
           };
           break;
         case "Domicilios":
           ContentComponent = AddressesContent;
           contentProps = {
             mostrarTabla: mostrarTablaDomicilios,
-            setMostrarTabla: setMostrarTablaDomicilios
+            setMostrarTabla: setMostrarTablaDomicilios,
           };
           break;
         case "Correos":
@@ -158,9 +163,9 @@ export default function CoorinDashboard() {
           ContentComponent = CaptureVisit;
           contentProps = {
             mostrarTabla: captureVisitModalSize === "pagos-xl",
-            setMostrarTabla: grow => handleGrowCaptureVisitModal(grow),
+            setMostrarTabla: (grow) => handleGrowCaptureVisitModal(grow),
             cuentaData: cuentaDataCapturaVisita,
-            setCuentaData: setCuentaDataCapturaVisita
+            setCuentaData: setCuentaDataCapturaVisita,
           };
           break;
         case "Carga Visitas":
@@ -168,7 +173,7 @@ export default function CoorinDashboard() {
           contentProps = {
             mostrarTabla: false,
             setMostrarTabla: () => {},
-            onClose: closeModal
+            onClose: closeModal,
           };
           break;
         default:
@@ -198,30 +203,43 @@ export default function CoorinDashboard() {
           mostrarTabla={mostrarTablaPagosReportados}
           setMostrarTabla={setMostrarTablaPagosReportados}
           size={size}
-          infoCuenta={selectedSidebarOption === "Captura Visitas" ? cuentaDataCapturaVisita : undefined}
+          infoCuenta={
+            selectedSidebarOption === "Captura Visitas"
+              ? cuentaDataCapturaVisita
+              : undefined
+          }
         >
           {ContentComponent && <ContentComponent {...contentProps} />}
         </ModalBaseInformacion>
       );
     }
-    
+
     // Otros componentes que mantienen su lógica original
     switch (selectedSidebarOption) {
       case "Campañas":
-        return <ModalBaseCampanas open={modalSidebarOpen} onClose={closeModal} />;
+        return (
+          <ModalBaseCampanas open={modalSidebarOpen} onClose={closeModal} />
+        );
       case "Plantillas Correo":
         return <EmailTemplates onClose={closeModal} />;
       case "Frases":
         return <Phrases onClose={closeModal} />;
       case "Comentarios":
-        return   <Suspense fallback={<div className="text-center p-10">Cargando comentarios...</div>}>
-      <Comments onClose={closeModal} />
-    </Suspense>;
+        return (
+          <Suspense
+            fallback={
+              <div className="text-center p-10">Cargando comentarios...</div>
+            }
+          >
+            <Comments onClose={closeModal} />
+          </Suspense>
+        );
+        case "Procesos-Gespa":
+        return <ProcessGespa onClose={closeModal} />;
       default:
         return null;
     }
   };
-
 
   // Efecto para detectar clics fuera del sidebar
   useEffect(() => {
@@ -261,8 +279,17 @@ export default function CoorinDashboard() {
     const sidebarOptionsMap = {
       // === Consulta (IDs únicos, sin padre) ===
       "1BB": "información", // Información - abre carrusel circular
-      
-      // === Administración ===
+      "2BB": "Lista Negra", // Lista Negra
+      "3BB": "Arrepentimientos", // Arrepentimientos
+      "1BBB": "Pagos", // Pagos
+      "2BBB": "Pagos Rportados", // Pagos reportados
+      "3BBB": "Datos Erroneos", // Datos Erróneos
+      "4BBB": "Domicilios", // Domicilios
+      "5BBB": "Correos", // Correos
+      "6BBB": "Búsquedas", // Búsquedas
+      "7BBB": "Ofrecimientos", // Ofrecimientos
+      "8BBB": "Comentarios2", // Comentarios
+      "2AAA": "Plantillas Correo", // Plantillas Correo
       "1AA": "Campañas",
       "2AA_2AAA": "Plantillas Correo",
       "2AA_3AAA": "Frases",
@@ -301,8 +328,13 @@ export default function CoorinDashboard() {
       
       // === Reportes ===
       "1DD": "Campañas",
-      "2DD_1DDD": "Plantillas Correo",
-      "2DD_2DDD": "Catalogos",
+      "1EE": "Campañas",
+      "3AAA": "Frases",
+      "1ZZZ": "Consulta Visitas", // Consulta en Visitas (Procesos)
+      "2ZZZ": "Captura Visitas", // Captura en Visitas (Procesos)
+      "3ZZZ": "Carga Visitas", // Carga de Visitas (Procesos)
+      "1CCC": "Comentarios", // Comentarios (Gespa)
+      "2CCC": "Procesos-Gespa", // Procesos-Gespa (Gespa)
     };
 
     console.log("Buscando en mapa:", menuId);
@@ -333,7 +365,7 @@ export default function CoorinDashboard() {
       setSelectedSidebarOption(option);
       setModalSidebarOpen(true);
       // Reiniciar tamaño del modal de arrepentimientos al abrir
-      if (option === "Arrepentimientos") setRegrestModalSize('pagos');
+      if (option === "Arrepentimientos") setRegrestModalSize("pagos");
     } else {
       // Si no está en el mapeo, verificar si el título está implementado
       if (!implementedOptions.includes(menuTitle)) {
@@ -415,14 +447,15 @@ export default function CoorinDashboard() {
                 </span>
                 {/* Logo y texto con efecto de gota */}
                 <div className="flex items-center relative">
-                  <span 
+                  <span
                     className="text-4xl font-medium text-black tracking-[-0.02em] flex items-center gap-3 relative"
                     style={{
-                      background: 'linear-gradient(90deg, rgba(249, 250, 251, 0) 0%, rgba(249, 250, 251, 0.4) 20%, rgba(249, 250, 251, 0.8) 40%, #f9fafb 60%, #ffffff 100%)',
-                      padding: '6px 12px 6px 16px',
-                      borderRadius: '24px',
-                     
-                      zIndex: 1
+                      background:
+                        "linear-gradient(90deg, rgba(249, 250, 251, 0) 0%, rgba(249, 250, 251, 0.4) 20%, rgba(249, 250, 251, 0.8) 40%, #f9fafb 60%, #ffffff 100%)",
+                      padding: "6px 12px 6px 16px",
+                      borderRadius: "24px",
+
+                      zIndex: 1,
                     }}
                   >
                     Coorin
@@ -432,7 +465,7 @@ export default function CoorinDashboard() {
                       style={{
                         height: "48px",
                         width: "48px",
-                        objectFit: "contain"
+                        objectFit: "contain",
                       }}
                     />
                   </span>
