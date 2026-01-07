@@ -26,6 +26,7 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
         { id: "3", nombre: "Cartera 3" },
         { id: "4", nombre: "Cartera 4" },
         { id: "22", nombre: "Cartera 22" },
+        { id: "31", nombre: "Cartera 31" },
     ]);
     const [porExpediente, setPorExpediente] = useState(false);
     const [idCuenta, setIdCuenta] = useState("");

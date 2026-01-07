@@ -11,7 +11,7 @@ import { infoEjecutivo } from "../../../../../services/mark/Orochi/LokiServices"
 
 // Tamaños tipo ReusableModal - Solo Visitas e Información (carrusel) - Con responsividad
 const MODAL_SIZES = {
-    informacion: { maxWidth: "min(1100px, 98vw)", minWidth: "320px", width: "min(1300px, 98vw)", height: "240px", maxHeight: "85vh" },
+    informacion: { maxWidth: "min(1100px, 98vw)", minWidth: "320px", width: "min(1300px, 98vw)", height: "auto", maxHeight: "85vh" },
     "informacion-xl": { maxWidth: "min(1100px, 98vw)", minWidth: "320px", width: "min(1300px, 98vw)", height: "auto", minHeight: "300px", maxHeight: "90vh" },
     "pagos-xl": { maxWidth: "min(1800px, 95vw)", minWidth: "320px", width: "min(1700px, 95vw)", height: "85vh", maxHeight: "90vh" },
     pagos: { maxWidth: "min(420px, 95vw)", minWidth: "280px", width: "min(380px, 95vw)", height: "340px", maxHeight: "85vh" },
@@ -344,9 +344,9 @@ const ModalBaseInformacion = ({
                             {/* Row 1: tabs izquierda + contenido derecha */}
                             <div className="flex">
                                 {/* Columna izquierda: tabs verticales */}
-                                <div className="w-20 md:w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-auto h-fit">
-                                    <div className="p-2 md:p-4">
-                                        <h3 className="text-sm font-semibold text-jerarquia3 mb-3 uppercase tracking-wide flex items-center justify-center">
+                                <div className="w-16 md:w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-auto h-fit">
+                                    <div className="p-1 md:p-4">
+                                        <h3 className="text-sm font-semibold text-jerarquia3 mb-1.5 md:mb-3 uppercase tracking-wide flex items-center justify-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" className="mr-2">
                                                 <path fill="currentColor" d="M4.01 8.54C5.2 9.23 6 10.52 6 12s-.81 2.77-2 3.46V18h16v-2.54c-1.19-.69-2-1.99-2-3.46s.81-2.77 2-3.46V6H4zm6.72 1.68L12 7l1.26 3.23l3.47.2l-2.69 2.2l.89 3.37L12 14.12L9.07 16l.88-3.37l-2.69-2.2z" opacity="0.3"/>
                                                 <path fill="currentColor" d="M20 4H4c-1.1 0-1.99.9-1.99 2v4c1.1 0 1.99.9 1.99 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2V6c0-1.1-.9-2-2-2m0 4.54c-1.19.69-2 1.99-2 3.46s.81 2.77 2 3.46V18H4v-2.54c1.19-.69 2-1.99 2-3.46c0-1.48-.8-2.77-1.99-3.46L4 6h16zM9.07 16L12 14.12L14.93 16l-.89-3.36l2.69-2.2l-3.47-.21L12 7l-1.27 3.22l-3.47.21l2.69 2.2z"/>
@@ -354,7 +354,7 @@ const ModalBaseInformacion = ({
                                             <span className="hidden md:inline">Accionamientos</span>
                                         </h3>
                                         <nav
-                                            className="flex flex-col gap-y-2"
+                                            className="flex flex-col gap-y-0.5 md:gap-y-2"
                                             aria-label="Tabs Accionamientos Verticales"
                                             role="tablist"
                                             aria-orientation="vertical"
@@ -364,7 +364,7 @@ const ModalBaseInformacion = ({
                                                     key={tab.key}
                                                     type="button"
                                                     className={`
-                                                        w-full py-2 px-2 md:py-3 md:px-4 inline-flex items-center gap-x-3 text-sm font-medium text-left
+                                                        w-full py-1 px-1 md:py-3 md:px-4 inline-flex items-center justify-center md:justify-start gap-x-1 md:gap-x-3 text-sm font-medium text-left
                                                         border border-gray-200 rounded-lg transition-colors duration-200
                                                         hover:bg-jerarquia1 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none
                                                         ${activeTab === index
@@ -380,12 +380,12 @@ const ModalBaseInformacion = ({
                                                     title={tab.key}
                                                     onClick={() => setActiveTab(index)}
                                                 >
-                                                    <span className={`${activeTab === index ? 'text-jerarquia3' : 'text-gray-500'} flex-shrink-0`}>
+                                                    <span className={`${activeTab === index ? 'text-jerarquia3' : 'text-gray-500'} flex-shrink-0 scale-75 md:scale-100`}>
                                                         {COMPONENT_ICONS_ACCIONAMIENTOS[tab.key]}
                                                     </span>
                                                     <span className="hidden md:inline flex-1">{tab.key}</span>
                                                     {activeTab === index && (
-                                                        <span className="flex-shrink-0 w-2 h-2 bg-jerarquia3 rounded-full"></span>
+                                                        <span className="flex-shrink-0 w-1.5 h-1.5 md:w-2 md:h-2 bg-jerarquia3 rounded-full"></span>
                                                     )}
                                                 </button>
                                             ))}
@@ -414,7 +414,7 @@ const ModalBaseInformacion = ({
                                         </div>
                                     </div>
                                     {/* Botón cerrar posicionado absolutamente en la esquina */}
-                                    <CloseButtonCampanas onClose={handleSafeClose} className="absolute top-2 right-4" />
+                                    <CloseButtonCampanas onClose={handleSafeClose} className="absolute -top-3 right-0" />
                                 </div>
                             </div>
                         </div>
@@ -423,16 +423,16 @@ const ModalBaseInformacion = ({
                             {/* Row 1: tabs izquierda + contenido derecha */}
                             <div className="flex">
                                 {/* Columna izquierda: tabs verticales */}
-                                <div className={`w-20 md:w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-auto h-fit ${activeTab === 2 || activeTab === 3 || activeTab === 4 ? 'pt-12' : ''}`}>
-                                    <div className="p-2 md:p-4">
-                                        <h3 className="text-sm font-semibold text-jerarquia3 mb-3 uppercase tracking-wide flex items-center justify-center">
+                                <div className={`w-16 md:w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-auto h-fit ${activeTab === 2 || activeTab === 3 || activeTab === 4 ? 'pt-12' : ''}`}>
+                                    <div className="p-1 md:p-4">
+                                        <h3 className="text-sm font-semibold text-jerarquia3 mb-1.5 md:mb-3 uppercase tracking-wide flex items-center justify-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" className="mr-2">
                                                 <path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2m-2.06 11L15 15.28L12.06 17l.78-3.33l-2.59-2.24l3.41-.29L15 8l1.34 3.14l3.41.29l-2.59 2.24z"/>
                                             </svg>
                                             <span className="hidden md:inline">Gestiones</span>
                                         </h3>
                                         <nav
-                                            className="flex flex-col gap-y-2"
+                                            className="flex flex-col gap-y-0.5 md:gap-y-2"
                                             aria-label="Tabs Gestiones Verticales"
                                             role="tablist"
                                             aria-orientation="vertical"
@@ -442,7 +442,7 @@ const ModalBaseInformacion = ({
                                                     key={tab.key}
                                                     type="button"
                                                     className={`
-                                                        w-full py-2 px-2 md:py-3 md:px-4 inline-flex items-center gap-x-3 text-sm font-medium text-left
+                                                        w-full py-1 px-1 md:py-3 md:px-4 inline-flex items-center justify-center md:justify-start gap-x-1 md:gap-x-3 text-sm font-medium text-left
                                                         border border-gray-200 rounded-lg transition-colors duration-200
                                                         hover:bg-jerarquia1 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none
                                                         ${activeTab === index
@@ -458,12 +458,12 @@ const ModalBaseInformacion = ({
                                                     title={tab.key}
                                                     onClick={() => setActiveTab(index)}
                                                 >
-                                                    <span className={`${activeTab === index ? 'text-jerarquia3' : 'text-gray-500'} flex-shrink-0`}>
+                                                    <span className={`${activeTab === index ? 'text-jerarquia3' : 'text-gray-500'} flex-shrink-0 scale-75 md:scale-100`}>
                                                         {COMPONENT_ICONS_GESTIONES[tab.key]}
                                                     </span>
                                                     <span className="hidden md:inline flex-1">{tab.key}</span>
                                                     {activeTab === index && (
-                                                        <span className="flex-shrink-0 w-2 h-2 bg-jerarquia3 rounded-full"></span>
+                                                        <span className="flex-shrink-0 w-1.5 h-1.5 md:w-2 md:h-2 bg-jerarquia3 rounded-full"></span>
                                                     )}
                                                 </button>
                                             ))}
@@ -492,7 +492,7 @@ const ModalBaseInformacion = ({
                                         </div>
                                     </div>
                                     {/* Botón cerrar posicionado absolutamente en la esquina */}
-                                    <CloseButtonCampanas onClose={handleSafeClose} className="absolute top-2 right-4" />
+                                    <CloseButtonCampanas onClose={handleSafeClose} className="absolute -top-3 right-0" />
                                 </div>
                             </div>
                         </div>

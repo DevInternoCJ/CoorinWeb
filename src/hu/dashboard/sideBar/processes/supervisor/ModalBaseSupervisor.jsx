@@ -135,7 +135,7 @@ const ModalBaseSupervisor = ({
                                 </label>
                             </div>
                         </div>
-                        <CloseButtonCampanas onClose={onClose} className="absolute top-2 right-2 sm:relative sm:top-auto sm:right-auto" />
+                        <CloseButtonCampanas onClose={onClose} className="absolute -top-2 -right-2" />
                     </div>
                 )}
 
