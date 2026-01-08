@@ -631,72 +631,93 @@ export const CoorinSidebar = ({
                       section.Menu.map((menu, menuIdx) => {
                         const menuId = `menu-app-${indiceIdx}-${sectionIdx}-${menuIdx}`;
                         return (
-                          <li className="hs-accordion" id={menuId} key={menuId}>
-                            <button
-                              type="button"
-                              className="hs-accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
-                              aria-expanded="false"
-                              aria-controls={`${menuId}-collapse`}
-                              onClick={expandSidebar}>
-                              {section.collapsetoggle &&
-                                iconMap[section.collapsetoggle] && (
-                                  <span className="inline-flex w-6 flex-shrink-0 text-jerarquia3">
-                                    {React.createElement(
-                                      iconMap[section.collapsetoggle],
-                                      { className: "w-5 h-5" }
+                          <li id={menuId} key={menuId}>
+                            {menu.id === "4CC" ? (
+                              // Renderizar como botón simple para Accionamientos
+                              <a
+                                className="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 cursor-pointer"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  onMenuClick("4CC", menu.title);
+                                }}>
+                                {section.collapsetoggle &&
+                                  iconMap[section.collapsetoggle] && (
+                                    <span className="inline-flex w-6 flex-shrink-0 text-jerarquia3">
+                                      {React.createElement(
+                                        iconMap[section.collapsetoggle],
+                                        { className: "w-5 h-5" }
+                                      )}
+                                    </span>
+                                  )}
+                                <span className="inline-block font-semibold text-sm text-gray-700">
+                                  {section.divider || menu.title || "Abrir"}
+                                </span>
+                              </a>
+                            ) : (
+                              // Renderizar como accordion para otros menús
+                              <div className="hs-accordion" id={menuId}>
+                                <button
+                                  type="button"
+                                  className="hs-accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
+                                  aria-expanded="false"
+                                  aria-controls={`${menuId}-collapse`}
+                                  onClick={expandSidebar}>
+                                  {section.collapsetoggle &&
+                                    iconMap[section.collapsetoggle] && (
+                                      <span className="inline-flex w-6 flex-shrink-0 text-jerarquia3">
+                                        {React.createElement(
+                                          iconMap[section.collapsetoggle],
+                                          { className: "w-5 h-5" }
+                                        )}
+                                      </span>
                                     )}
+                                  <span className="inline-block font-semibold text-sm text-gray-700">
+                                    {section.divider || menu.title || "Abrir"}
                                   </span>
-                                )}
-
-                              {/* Usar el divider del índice (section.divider) como encabezado de los submenús */}
-                              <span className="inline-block font-semibold text-sm text-gray-700">
-                                {section.divider || menu.title || "Abrir"}
-                              </span>
-
-                              <svg
-                                className="hs-accordion-active:block ms-auto hidden size-4 text-gray-600 group-hover:text-gray-500"
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round">
-                                <path d="m18 15-6-6-6 6" />
-                              </svg>
-                              <svg
-                                className="hs-accordion-active:hidden ms-auto block size-4 text-gray-600 group-hover:text-gray-500"
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round">
-                                <path d="m6 9 6 6 6-6" />
-                              </svg>
-                            </button>
-
-                            <div
-                              id={`${menuId}-collapse`}
-                              className="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 hidden"
-                              role="region"
-                              aria-labelledby={menuId}>
-                              {/* Renderizamos los subMenus del menu usando la estructura anidada */}
-                              {menu.subMenus && (
-                                <RenderSubMenus
-                                  subMenus={menu.subMenus}
-                                  parentId={`${menuId}-group`}
-                                  onMenuClick={onMenuClick}
-                                  level={0}
-                                  onItemClick={expandSidebar}
-                                />
-                              )}
-                            </div>
+                                  <svg
+                                    className="hs-accordion-active:block ms-auto hidden size-4 text-gray-600 group-hover:text-gray-500"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round">
+                                    <path d="m18 15-6-6-6 6" />
+                                  </svg>
+                                  <svg
+                                    className="hs-accordion-active:hidden ms-auto block size-4 text-gray-600 group-hover:text-gray-500"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round">
+                                    <path d="m6 9 6 6 6-6" />
+                                  </svg>
+                                </button>
+                                <div
+                                  id={`${menuId}-collapse`}
+                                  className="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 hidden"
+                                  role="region"
+                                  aria-labelledby={menuId}>
+                                  {menu.subMenus && (
+                                    <RenderSubMenus
+                                      subMenus={menu.subMenus}
+                                      parentId={`${menuId}-group`}
+                                      onMenuClick={onMenuClick}
+                                      level={0}
+                                      onItemClick={expandSidebar}
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           </li>
                         );
                       })}
