@@ -1,15 +1,96 @@
 // editar gestiones
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { GetInfoEditManagments, PutEditManagments } from '../../../../../services/mark/Orochi/LokiServices';
 
 const TabEditManagement = () => {
     const [cartera, setCartera] = useState('');
     const [cuenta, setCuenta] = useState('');
     const [comentario, setComentario] = useState('');
     const [hasBuscado, setHasBuscado] = useState(false);
+    const [gestiones, setGestiones] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [selectedRow, setSelectedRow] = useState(null);
+    const rowRefs = useRef([]);
 
-    const handleBuscar = () => {
-        console.log('Buscar cuenta:', cuenta);
-        setHasBuscado(true);
+    const handleBuscar = async () => {
+        if (!cartera || !cuenta) {
+            console.warn('Cartera y Cuenta son requeridos');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const data = await GetInfoEditManagments({ 
+                idCartera: parseInt(cartera), 
+                idCuenta: cuenta 
+            });
+            setGestiones(data || []);
+            setHasBuscado(true);
+            setSelectedRow(null);
+            setComentario('');
+        } catch (error) {
+            console.error('Error al buscar gestiones:', error);
+            setGestiones([]);
+            setHasBuscado(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRowClick = (gestion, index) => {
+        setSelectedRow(index);
+        setComentario(gestion.Comentario || '');
+    };
+
+    const handleEditar = async () => {
+        if (selectedRow === null) {
+            console.warn('Debe seleccionar una gestión para editar');
+            return;
+        }
+
+        const gestionSeleccionada = gestiones[selectedRow];
+        const currentSelectedIndex = selectedRow;
+        
+        const params = {
+            idCartera: parseInt(cartera),
+            idCuenta: cuenta,
+            fecha: gestionSeleccionada.Fecha ? gestionSeleccionada.Fecha.split('T')[0] : '',
+            hora: gestionSeleccionada.Hora || '',
+            comentario: comentario
+        };
+
+        console.log('Parámetros a enviar al endpoint PutEditManagments:', params);
+
+        setLoading(true);
+        try {
+            const response = await PutEditManagments(params);
+            console.log('Respuesta exitosa de PutEditManagments:', response);
+            
+            // Recargar las gestiones después de editar
+            const data = await GetInfoEditManagments({ 
+                idCartera: parseInt(cartera), 
+                idCuenta: cuenta 
+            });
+            setGestiones(data || []);
+            
+            // Mantener la selección del mismo row y actualizar el comentario
+            setSelectedRow(currentSelectedIndex);
+            setComentario(comentario);
+            
+            // Hacer scroll al row editado después de que se actualice el DOM
+            setTimeout(() => {
+                if (rowRefs.current[currentSelectedIndex]) {
+                    rowRefs.current[currentSelectedIndex].scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }
+            }, 100);
+        } catch (error) {
+            console.error('Error al editar gestión:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -25,9 +106,10 @@ const TabEditManagement = () => {
                         id="cartera-select-edit"
                     >
                         <option value="" disabled hidden></option>
-                        <option value="cartera1">Cartera 1</option>
-                        <option value="cartera2">Cartera 2</option>
-                        <option value="cartera3">Cartera 3</option>
+                        <option value="1">Cartera 1</option>
+                        <option value="2">Cartera 2</option>
+                        <option value="3">Cartera 3</option>
+                        <option value="31">Cartera 31</option>
                     </select>
                     <label
                         htmlFor="cartera-select-edit"
@@ -97,97 +179,53 @@ const TabEditManagement = () => {
                                 {!hasBuscado ? (
                                     <tr>
                                         <td colSpan="5" style={{ textAlign: 'center', verticalAlign: 'middle', padding: '8px', height: '150px' }}>
-                                            <span>Aún no se carga Archivo</span>
+                                            <span>Aún no se realiza una Busqueda</span>
+                                        </td>
+                                    </tr>
+                                ) : loading ? (
+                                    <tr>
+                                        <td colSpan="5" style={{ textAlign: 'center', verticalAlign: 'middle', padding: '8px', height: '150px' }}>
+                                            <span>Cargando...</span>
+                                        </td>
+                                    </tr>
+                                ) : gestiones.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="5" style={{ textAlign: 'center', verticalAlign: 'middle', padding: '8px', height: '150px' }}>
+                                            <span>No se encontraron gestiones</span>
                                         </td>
                                     </tr>
                                 ) : (
-                                    <>
-                                        {/* Filas de ejemplo */}
-                                        <tr>
-                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>05/01/2026</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>09:37:25</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Titular</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Confirmar negociación</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Cesar Enrique Rodr</td>
-                                </tr>
-                                <tr style={{ background: '#f9f9f9' }}>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>30/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>14:09:36</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Titular</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Reporte de pago</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Alan De La O Flores</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>29/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>14:32:40</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Titular</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Confirmar negociación</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Uriel Martinez Pasc</td>
-                                </tr>
-                                <tr style={{ background: '#f9f9f9' }}>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>29/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>13:30:36</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Referencia</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Promesa de pago</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Maria Lopez Garcia</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>28/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>16:45:12</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Titular</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Sin contacto</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Roberto Sanchez Ruiz</td>
-                                </tr>
-                                <tr style={{ background: '#f9f9f9' }}>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>27/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>10:22:18</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Titular</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Acuerdo de pago</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Juan Carlos Mendez</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>26/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>15:18:45</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Referencia</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Número equivocado</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Ana Patricia Torres</td>
-                                </tr>
-                                <tr style={{ background: '#f9f9f9' }}>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>24/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>11:55:30</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Titular</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Liquidación total</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Luis Fernando Gomez</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>23/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>09:12:50</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Titular</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Solicitud de prórroga</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Sofia Ramirez Castro</td>
-                                </tr>
-                                <tr style={{ background: '#f9f9f9' }}>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>22/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>14:40:25</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Referencia</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Información proporcionada</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Diego Hernandez Paz</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>21/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>16:28:15</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Titular</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Reclamo de deuda</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Carmen Gutierrez Vega</td>
-                                </tr>
-                                <tr style={{ background: '#f9f9f9' }}>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>20/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>12:15:42</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Titular</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Confirmar negociación</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Pedro Morales Silva</td>
-                                </tr>                                    </>
-                                )}                            </tbody>
+                                    gestiones.map((gestion, index) => (
+                                        <tr 
+                                            key={index}
+                                            ref={(el) => (rowRefs.current[index] = el)}
+                                            style={{ 
+                                                background: index % 2 === 1 ? '#f9f9f9' : 'transparent',
+                                                cursor: 'pointer',
+                                                backgroundColor: selectedRow === index ? 'var(--color-jerarquia1)' : (index % 2 === 1 ? '#f9f9f9' : 'transparent')
+                                            }}
+                                            onClick={() => handleRowClick(gestion, index)}
+                                        >
+                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {gestion.Fecha ? gestion.Fecha.split('T')[0] : '-'}
+                                                {/* {gestion.Fecha || '-'} */}
+                                            </td>
+                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {gestion.Hora || '-'}
+                                            </td>
+                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {gestion.Contacto || '-'}
+                                            </td>
+                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {gestion.Situación || '-'}
+                                            </td>
+                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {gestion.Ejecutivo || '-'}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -198,7 +236,7 @@ const TabEditManagement = () => {
                         value={comentario}
                         onChange={(e) => setComentario(e.target.value)}
                         className="w-full h-full p-4 pr-28 pb-4 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 resize-y"
-                        placeholder="prueba de sistemas"
+                        placeholder="Comentario de la Gestion. "
                         style={{ 
                             minHeight: '100px',
                             backgroundImage: 'linear-gradient(135deg, transparent 50%, #000 50%), linear-gradient(45deg, transparent 50%, #000 50%)',
@@ -209,9 +247,11 @@ const TabEditManagement = () => {
                     />
                     <button
                         type="button"
-                        className="btn-success absolute right-5 bottom-3 px-6 py-2 text-sm font-medium rounded-lg shadow-sm"
+                        onClick={handleEditar}
+                        disabled={selectedRow === null || loading}
+                        className="btn-success absolute right-5 bottom-3 px-6 py-2 text-sm font-medium rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Editar
+                        {loading ? 'Guardando...' : 'Editar'}
                     </button>
                 </div>
             </div>

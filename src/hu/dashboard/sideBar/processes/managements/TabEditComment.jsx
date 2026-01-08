@@ -1,5 +1,6 @@
 // editar comentario
-import React, { useState } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
+import { GetInfoEditComments, PutEditComments } from '../../../../../services/mark/Orochi/LokiServices';
 
 const TabEditComment = () => {
     const [cartera, setCartera] = useState('');
@@ -7,11 +8,112 @@ const TabEditComment = () => {
     const [fecha, setFecha] = useState('');
     const [comentario, setComentario] = useState('');
     const [hasBuscado, setHasBuscado] = useState(false);
+    const [gestiones, setGestiones] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [selectedRow, setSelectedRow] = useState(null);
+    const rowRefs = useRef([]);
 
-    const handleBuscar = () => {
-        console.log('Buscar cuenta:', cuenta);
-        setHasBuscado(true);
+    // Obtener fecha actual local para max del input date
+    const hoy = new Date();
+    const fechaHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+
+    const handleBuscar = async () => {
+        if (!cartera || !cuenta) {
+            console.warn('Cartera y Cuenta son requeridos');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const data = await GetInfoEditComments({ 
+                idCartera: parseInt(cartera), 
+                cuenta: cuenta 
+            });
+            console.log('Datos recibidos:', data);
+            setGestiones(data || []);
+            setHasBuscado(true);
+            setSelectedRow(null);
+            setComentario('');
+        } catch (error) {
+            console.error('Error al buscar comentarios:', error);
+            setGestiones([]);
+            setHasBuscado(true);
+        } finally {
+            setLoading(false);
+        }
     };
+
+    const handleRowClick = (gestion, index) => {
+        setSelectedRow(index);
+        setComentario(gestion.Comentario || '');
+    };
+
+    const handleEditar = async () => {
+        if (selectedRow === null) {
+            console.warn('Debe seleccionar un comentario para editar');
+            return;
+        }
+
+        const gestionSeleccionada = gestiones[selectedRow];
+        const currentSelectedIndex = selectedRow;
+        
+        // Obtener fecha actual del sistema local en formato YYYY-MM-DD
+        const hoy = new Date();
+        const fechaSistema = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+        
+        const params = {
+            comentario: comentario,
+            idCuenta: cuenta,
+            idCartera: parseInt(cartera),
+            fechaOriginal: gestionSeleccionada.Fecha ? gestionSeleccionada.Fecha.split('T')[0] : '',
+            segundoInsert: gestionSeleccionada.Hora || '',
+            fechaNueva: fechaSistema
+        };
+
+        console.log('Parámetros a enviar al endpoint PutEditComments:', params);
+
+        setLoading(true);
+        try {
+            const response = await PutEditComments(params);
+            console.log('Respuesta exitosa de PutEditComments:', response);
+            
+            // Recargar los comentarios después de editar
+            const data = await GetInfoEditComments({ 
+                idCartera: parseInt(cartera), 
+                cuenta: cuenta 
+            });
+            setGestiones(data || []);
+            
+            // Mantener la selección del mismo row y actualizar el comentario
+            setSelectedRow(currentSelectedIndex);
+            setComentario(comentario);
+            
+            // Hacer scroll al row editado después de que se actualice el DOM
+            setTimeout(() => {
+                if (rowRefs.current[currentSelectedIndex]) {
+                    rowRefs.current[currentSelectedIndex].scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }
+            }, 100);
+        } catch (error) {
+            console.error('Error al editar comentario:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Filtrar gestiones por fecha (filtro local)
+    const gestionesFiltradas = useMemo(() => {
+        if (!fecha) {
+            return gestiones;
+        }
+        return gestiones.filter(gestion => {
+            const fechaGestion = gestion.Fecha ? gestion.Fecha.split('T')[0] : '';
+            return fechaGestion === fecha;
+        });
+    }, [gestiones, fecha]);
 
     return (
         <div className="p-6 flex flex-col h-full space-y-4">
@@ -29,6 +131,7 @@ const TabEditComment = () => {
                         <option value="cartera1">Cartera 1</option>
                         <option value="cartera2">Cartera 2</option>
                         <option value="cartera3">Cartera 3</option>
+                        <option value="31">Cartera 31</option>
                     </select>
                     <label
                         htmlFor="cartera-select-comment"
@@ -62,6 +165,8 @@ const TabEditComment = () => {
                         type="date"
                         value={fecha}
                         onChange={(e) => setFecha(e.target.value)}
+                        min="2016-01-01"
+                        max={fechaHoy}
                         className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="fecha-input-comment"
                         placeholder=" "
@@ -117,109 +222,56 @@ const TabEditComment = () => {
                                 {!hasBuscado ? (
                                     <tr>
                                         <td colSpan="6" style={{ textAlign: 'center', verticalAlign: 'middle', padding: '8px', height: '150px' }}>
-                                            <span>Aún no se carga Archivo</span>
+                                            <span>Aún no se realiza una Busqueda</span>
+                                        </td>
+                                    </tr>
+                                ) : loading ? (
+                                    <tr>
+                                        <td colSpan="6" style={{ textAlign: 'center', verticalAlign: 'middle', padding: '8px', height: '150px' }}>
+                                            <span>Cargando...</span>
+                                        </td>
+                                    </tr>
+                                ) : gestionesFiltradas.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" style={{ textAlign: 'center', verticalAlign: 'middle', padding: '8px', height: '150px' }}>
+                                            <span>No se encontraron comentarios{fecha ? ' para la fecha seleccionada' : ''}</span>
                                         </td>
                                     </tr>
                                 ) : (
-                                    <>
-                                        {/* Filas de ejemplo */}
-                                        <tr>
-                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>00000017288</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Soriana</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>05/01/2026</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>09:37:25</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Cesar Enrique Rodriguez</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>CER001</td>
-                                </tr>
-                                <tr style={{ background: '#f9f9f9' }}>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>00000017289</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Bancomer</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>30/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>14:09:36</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Alan De La O Flores</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>ADF002</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>00000017290</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Soriana</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>29/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>14:32:40</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Uriel Martinez Pascual</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>UMP003</td>
-                                </tr>
-                                <tr style={{ background: '#f9f9f9' }}>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>00000017291</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Liverpool</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>29/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>13:30:36</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Maria Lopez Garcia</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>MLG004</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>00000017292</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Bancomer</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>28/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>16:45:12</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Roberto Sanchez Ruiz</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>RSR005</td>
-                                </tr>
-                                <tr style={{ background: '#f9f9f9' }}>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>00000017293</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Soriana</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>27/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>10:22:18</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Juan Carlos Mendez</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>JCM006</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>00000017294</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Liverpool</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>26/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>15:18:45</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Ana Patricia Torres</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>APT007</td>
-                                </tr>
-                                <tr style={{ background: '#f9f9f9' }}>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>00000017295</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Bancomer</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>24/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>11:55:30</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Luis Fernando Gomez</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>LFG008</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>00000017296</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Soriana</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>23/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>09:12:50</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Sofia Ramirez Castro</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>SRC009</td>
-                                </tr>
-                                <tr style={{ background: '#f9f9f9' }}>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>00000017297</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Liverpool</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>22/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>14:40:25</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Diego Hernandez Paz</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>DHP010</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>00000017298</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Bancomer</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>21/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>16:28:15</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Carmen Gutierrez Vega</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>CGV011</td>
-                                </tr>
-                                <tr style={{ background: '#f9f9f9' }}>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>00000017299</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Soriana</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>20/12/2025</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>12:15:42</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Pedro Morales Silva</td>
-                                    <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>PMS012</td>
-                                </tr>
-                                    </>
+                                    gestionesFiltradas.map((gestion, index) => {
+                                        const originalIndex = gestiones.findIndex(g => g === gestion);
+                                        return (
+                                        <tr 
+                                            key={originalIndex}
+                                            ref={(el) => (rowRefs.current[originalIndex] = el)}
+                                            style={{ 
+                                                background: index % 2 === 1 ? '#f9f9f9' : 'transparent',
+                                                cursor: 'pointer',
+                                                backgroundColor: selectedRow === originalIndex ? 'var(--color-jerarquia1)' : (index % 2 === 1 ? '#f9f9f9' : 'transparent')
+                                            }}
+                                            onClick={() => handleRowClick(gestion, originalIndex)}
+                                        >
+                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {gestion.Cuenta || '-'}
+                                            </td>
+                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {gestion.Cartera || '-'}
+                                            </td>
+                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {gestion.Fecha ? gestion.Fecha.split('T')[0] : '-'}
+                                            </td>
+                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {gestion.Hora || '-'}
+                                            </td>
+                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {gestion.NombreEjecutivo || '-'}
+                                            </td>
+                                            <td style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {gestion.ClaveEjecutivo || '-'}
+                                            </td>
+                                        </tr>
+                                        );
+                                    })
                                 )}
                             </tbody>
                         </table>
@@ -232,7 +284,7 @@ const TabEditComment = () => {
                         value={comentario}
                         onChange={(e) => setComentario(e.target.value)}
                         className="w-full h-full p-4 pr-28 pb-4 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 resize-y"
-                        placeholder="prueba de sistemas"
+                        placeholder="Comentarios."
                         style={{ 
                             minHeight: '100px',
                             backgroundImage: 'linear-gradient(135deg, transparent 50%, #000 50%), linear-gradient(45deg, transparent 50%, #000 50%)',
@@ -243,9 +295,11 @@ const TabEditComment = () => {
                     />
                     <button
                         type="button"
-                        className="btn-success absolute right-5 bottom-3 px-6 py-2 text-sm font-medium rounded-lg shadow-sm"
+                        onClick={handleEditar}
+                        disabled={selectedRow === null || loading}
+                        className="btn-success absolute right-5 bottom-3 px-6 py-2 text-sm font-medium rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Editar
+                        {loading ? 'Guardando...' : 'Editar'}
                     </button>
                 </div>
             </div>

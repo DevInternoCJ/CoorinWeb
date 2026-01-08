@@ -1,14 +1,102 @@
 // consulta complemento
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getQueryComplement } from '../../../../../services/mark/Orochi/LokiServices';
+import { exportFromAPIResponse } from '../../../../../utils/ExcelExporter';
+import { toast } from 'sonner';
 
 const TabQueryComplement = () => {
-    const [desde, setDesde] = useState('');
-    const [hasta, setHasta] = useState('');
-    const [cartera, setCartera] = useState('');
+    // Obtener datos de usuario desde localStorage
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    const idCartera = userData?.idCartera || 0;
+    const idProducto = userData?.idProducto ?? 0;
+    const jerarquia = userData?.Jerarquía ?? 0;
 
-    const handleGuardarExcel = () => {
-        console.log('Guardar Excel');
+    // Obtener fecha actual local para valores por defecto y max
+    const hoy = new Date();
+    const fechaHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+
+    const [desde, setDesde] = useState(fechaHoy);
+    const [hasta, setHasta] = useState(fechaHoy);
+    const [cartera, setCartera] = useState(() => {
+        const saved = localStorage.getItem('selectedCartera');
+        return saved ? parseInt(saved, 10) : idCartera;
+    });
+    const [loadingExcel, setLoadingExcel] = useState(false);
+    const [abortController, setAbortController] = useState(null);
+
+    const minDate = "2016-01-01";
+    const maxDate = fechaHoy;
+
+    // Guardar cartera seleccionada
+    useEffect(() => {
+        localStorage.setItem('selectedCartera', cartera);
+    }, [cartera]);
+
+    const handleGuardarExcel = async () => {
+        if (!cartera || !desde || !hasta) {
+            toast.warning('Por favor complete todos los campos requeridos');
+            return;
+        }
+
+        setLoadingExcel(true);
+        const toastId = toast.loading(`Exportando consulta complemento...`);
+        const controller = new AbortController();
+        setAbortController(controller);
+
+        try {
+            // Convertir nombres de parámetros y agregar formato de fecha
+            const params = {
+                idCartera: parseInt(cartera),
+                fechaInicial: desde ? `${desde}T00:00:00Z` : null,
+                fechaFinal: hasta ? `${hasta}T00:00:00Z` : null,
+                jerarquia,
+                idProducto: idProducto || null
+            };
+
+            console.log('Parámetros enviados:', params);
+
+            const response = await getQueryComplement(params, { signal: controller.signal });
+
+            const filename = `ConsultaComplemento_${desde}_${hasta}`;
+
+            const success = await exportFromAPIResponse(
+                response,
+                filename,
+                {
+                    consultaName: 'Consulta Complemento',
+                    showToast: false
+                }
+            );
+
+            toast.dismiss(toastId);
+
+            if (success) {
+                toast.success('Archivo Excel exportado correctamente.');
+            } else {
+                toast.error('No se pudo exportar el archivo.');
+            }
+        } catch (err) {
+            toast.dismiss(toastId);
+            if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
+                toast.info('Exportación cancelada');
+            } else {
+                console.error('Error al exportar:', err);
+                toast.error('Error al exportar los datos, verifique la conexión a internet.');
+            }
+        } finally {
+            setLoadingExcel(false);
+            setAbortController(null);
+        }
     };
+
+    // Cancelar petición al desmontar el componente
+    useEffect(() => {
+        return () => {
+            if (abortController) {
+                abortController.abort();
+            }
+        };
+    }, [abortController]);
 
     return (
         <div className="p-6 md:pt-20 flex flex-col h-full space-y-4 sm:space-y-8">
@@ -28,6 +116,8 @@ const TabQueryComplement = () => {
                         type="date"
                         value={desde}
                         onChange={(e) => setDesde(e.target.value)}
+                        min={minDate}
+                        max={maxDate}
                         className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="desde-date"
                         placeholder=" "
@@ -48,9 +138,10 @@ const TabQueryComplement = () => {
                         id="cartera-select"
                     >
                         <option value="" disabled hidden></option>
-                        <option value="cartera1">Cartera 1</option>
-                        <option value="cartera2">Cartera 2</option>
-                        <option value="cartera3">Cartera 3</option>
+                        <option value="1">Cartera 1</option>
+                        <option value="2">Cartera 2</option>
+                        <option value="3">Cartera 3</option>
+                        <option value="31">Cartera 31</option>
                     </select>
                     <label
                         htmlFor="cartera-select"
@@ -68,6 +159,8 @@ const TabQueryComplement = () => {
                         type="date"
                         value={hasta}
                         onChange={(e) => setHasta(e.target.value)}
+                        min={minDate}
+                        max={maxDate}
                         className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="hasta-date"
                         placeholder=" "
@@ -82,9 +175,10 @@ const TabQueryComplement = () => {
 
                 <button
                     onClick={handleGuardarExcel}
-                    className="btn-success w-full sm:flex-1 px-4 py-4 text-base font-medium rounded-lg shadow-sm flex justify-center items-center sm:h-full"
+                    disabled={loadingExcel}
+                    className="btn-success w-full sm:flex-1 px-4 py-4 text-base font-medium rounded-lg shadow-sm flex justify-center items-center sm:h-full disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Guardar Excel
+                    {loadingExcel ? 'Exportando...' : 'Guardar Excel'}
                 </button>
             </div>
         </div>
