@@ -3,6 +3,7 @@ import { GetGridFields } from "../../../../services/mark/orochi/LokeServices";
 import useSelectedRowStore from "./selectedRowStore";
 import { useWalletProducts } from "../../../login/WalletProduct";
 import { IconDrag } from "../../../../components/iconos/IconDrag";
+
 const GridLampsFields = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,6 +13,7 @@ const GridLampsFields = () => {
   const { setSelectedRow, selectedRowIndex } = useSelectedRowStore();
   const { walletProducts } = useWalletProducts();
   const idProducto = walletProducts?.[0]?.idProducto;
+  
   useEffect(() => {
     if (!idProducto || idProducto === 0) return;
     const fetchGridData = async () => {

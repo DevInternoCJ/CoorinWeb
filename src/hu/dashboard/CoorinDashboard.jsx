@@ -78,7 +78,6 @@ export default function CoorinDashboard() {
   const renderSelectedComponent = () => {
     const closeModal = () => {
       setModalSidebarOpen(false);
-      setSidebarModalPath(""); // Limpiar el path para actualizar la URL
       setMostrarTablaPagosReportados(false); // Reiniciar al cerrar
       setCaptureVisitModalSize("capturaVisit"); // Reiniciar tamaño al cerrar
       setCuentaDataCapturaVisita(null); // Limpiar datos de cuenta al cerrar
@@ -199,7 +198,7 @@ export default function CoorinDashboard() {
       return (
         <ModalBaseInformacion
           onClose={closeModal}
-          tipoInformacion= {selectedSidebarOption}
+          tipoInformacion="información"
           mostrarTabla={mostrarTablaPagosReportados}
           setMostrarTabla={setMostrarTablaPagosReportados}
           size={size}
@@ -267,17 +266,11 @@ export default function CoorinDashboard() {
 
   // Función para manejar clicks del sidebar
   const handleSidebarMenuClick = (menuId, menuTitle) => {
-    console.log("=== DASHBOARD RECIBE ===");
-    console.log("menuId recibido:", menuId);
-    console.log("menuTitle recibido:", menuTitle);
-    
     // Cerrar sidebar en móviles después del click
     setSidebarOpen(false);
 
     // Mapeo de IDs del sidebar a opciones del modal
-    // IDs compuestos: parentId_childId para diferenciar elementos duplicados
     const sidebarOptionsMap = {
-      // === Consulta (IDs únicos, sin padre) ===
       "1BB": "información", // Información - abre carrusel circular
       "2BB": "Lista Negra", // Lista Negra
       "3BB": "Arrepentimientos", // Arrepentimientos
@@ -291,42 +284,6 @@ export default function CoorinDashboard() {
       "8BBB": "Comentarios2", // Comentarios
       "2AAA": "Plantillas Correo", // Plantillas Correo
       "1AA": "Campañas",
-      "2AA_2AAA": "Plantillas Correo",
-      "2AA_3AAA": "Frases",
-      
-      // === Procesos > Gespa (padre: 1CC) ===
-      "1CC_1CCC": "Comentarios",
-      "1CC_2CCC": "Definición",
-      "1CC_3CCC": "Arrepentimientos",
-      "1CC_4CCC": "Bloqueo cuentas",
-      "1CC_5CCC": "Sucursales",
-      "1CC_6CCC": "Cargos en línea",
-      "1CC_7CCC": "Estados de cuenta",
-      
-      // === Procesos > Visitas (padre: 2CC) ===
-      "2CC_1CCC": "Consulta Visitas",
-      "2CC_2CCC": "Captura Visitas",
-      "2CC_3CCC": "Carga Visitas",
-      "2CC_4CCC": "Corregir Visitas",
-      "2CC_5CCC": "Eliminar Visitas",
-      
-      // === Procesos > Correos (padre: 3CC) ===
-      "3CC_1CCC": "Configuración Correos",
-      "3CC_2CCC": "Envios Ejecutivos",
-      "3CC_3CCC": "Carga Conversación",
-      
-      // === Procesos > Accionamientos (padre: 4CC) ===
-      "4CC_1CCC": "Informe",
-      "4CC_2CCC": "Carga Accionamientos",
-      "4CC_3CCC_1CCCC": "Captura Carteo",
-      "4CC_3CCC_2CCCC": "Consulta Carteo",
-      
-      // === Procesos sin submenú (IDs únicos) ===
-      "5CC": "Gestiones",
-      "6CC": "Supervisor",
-      "13CC": "Metas",
-      
-      // === Reportes ===
       "1DD": "Campañas",
       "1EE": "Campañas",
       "3AAA": "Frases",
@@ -337,46 +294,16 @@ export default function CoorinDashboard() {
       "2CCC": "Procesos-Gespa", // Procesos-Gespa (Gespa)
     };
 
-    console.log("Buscando en mapa:", menuId);
-    console.log("Encontrado:", sidebarOptionsMap[menuId]);
-
-    // Lista de opciones que tienen componente implementado
-    const implementedOptions = [
-      "información", "Lista Negra", "Arrepentimientos",
-      "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios", 
-      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
-      "Consulta Visitas", "Captura Visitas", "Carga Visitas",
-      "Campañas", "Plantillas Correo", "Frases"
-    ];
-
     // Si el menuId está en el mapeo, abrir el modal con la opción correspondiente
     if (sidebarOptionsMap[menuId]) {
       const option = sidebarOptionsMap[menuId];
-      
-      // Verificar si la opción tiene componente implementado
-      if (!implementedOptions.includes(option)) {
-        console.log("⚠️ Opción sin implementar:", option);
-        // No abrir modal, solo mostrar mensaje en consola (o podrías mostrar un toast)
-        return;
-      }
-      
-      console.log("✅ Abriendo modal con opción:", option);
-      setSidebarModalPath(option); // Usar el nombre del modal para la URL
+      console.log(`Abriendo modal para: ${option} (ID: ${menuId})`);
       setSelectedSidebarOption(option);
       setModalSidebarOpen(true);
       // Reiniciar tamaño del modal de arrepentimientos al abrir
       if (option === "Arrepentimientos") setRegrestModalSize("pagos");
     } else {
-      // Si no está en el mapeo, verificar si el título está implementado
-      if (!implementedOptions.includes(menuTitle)) {
-        console.log("⚠️ Opción sin implementar:", menuTitle);
-        return;
-      }
-      
-      console.log("❌ No encontrado en mapa, usando título:", menuTitle);
-      setSidebarModalPath(menuTitle); // Usar el título para la URL
-      setSelectedSidebarOption(menuTitle);
-      setModalSidebarOpen(true);
+      console.log(`Click en menú: ${menuTitle} (ID: ${menuId})`);
     }
   };
 
@@ -414,7 +341,7 @@ export default function CoorinDashboard() {
         <div
           className="transition-transform duration-200 flex-1 overflow-y-auto overflow-x-hidden"
           style={{
-            marginLeft: sidebarMinified ? "2.5rem" : "2.5rem", // 16rem = w-64
+            marginLeft: sidebarMinified ? "2.5rem" : undefined,
             marginBottom: "0",
             marginTop: "0",
             maxHeight: "100vh",
