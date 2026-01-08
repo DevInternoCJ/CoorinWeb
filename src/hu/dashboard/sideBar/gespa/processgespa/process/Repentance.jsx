@@ -36,6 +36,7 @@ const Repentance = ({ searchValue, onSearchClick, onSearchChange }) => {
       {/* Formulario */}
       <div className="flex justify-center">
         <div className="w-full max-w-2xl flex flex-col gap-4">
+          div
           {/* Select Cartera */}
           <SelectWallet
             label="Cartera"

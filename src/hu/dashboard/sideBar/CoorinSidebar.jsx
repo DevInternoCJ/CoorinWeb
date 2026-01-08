@@ -32,7 +32,6 @@ const iconMap = {
   ShieldCheckIcon,
   // ...otros iconos si los necesitas
 };
-import LogoCoorin7 from "../../../assets/logo_coorin_7.svg";
 
 // Renderiza submenús anidados usando la estructura de acordeón de Preline
 const RenderSubMenus = ({
