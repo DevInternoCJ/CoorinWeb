@@ -211,6 +211,7 @@ export default function CoorinDashboard() {
     }
     
     // Otros componentes que mantienen su lógica original
+    
     switch (selectedSidebarOption) {
       case "Campañas":
         return <ModalBaseCampanas open={modalSidebarOpen} onClose={closeModal} />;
