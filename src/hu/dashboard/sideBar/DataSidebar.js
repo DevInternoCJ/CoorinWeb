@@ -148,7 +148,7 @@ const dataSidebar = {
               subMenus2: [
                 {
                   id: "1DDD",
-                  title: "Plantillas Correo",
+                  title: "Plantillas-Correo",
                   icon: "EnvelopeIcon",
                 },
                 { id: "2DDD", title: "Catalogos", icon: "BookOpenIcon" },

@@ -21,15 +21,14 @@ import Phrases from "./sideBar/Administration/gespa/phrases/Phrases";
 import ConsultVisitContent from "./sideBar/processes/visits/ConsultaVisits";
 import CaptureVisit from "./sideBar/processes/visits/Capture/CaptureVisit";
 import LoadVisitsContent from "./sideBar/processes/visits/LoadVisits";
+import ModalSupervisor from "./sideBar/processes/supervisor/ModalSupervisor";
 import IconCircular from "../../components/iconos/IconCircular";
 import ConsorcioLogo from "../../../src/assets//CoorinBlack.svg";
 import ProcessGespa from "../dashboard/sideBar/gespa/processgespa/ProcessGespa";
 import { useDashboardModalUrlSync } from "../../hooks/useDashboardModalUrlSync";
 
 
-const Comments = lazy(() =>
-  import("../../hu/dashboard/sideBar/gespa/comment/Comments")
-);
+const Comments = lazy(() => import("../../hu/dashboard/sideBar/gespa/comment/Comments"));
 
 export default function CoorinDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -51,24 +50,22 @@ export default function CoorinDashboard() {
   // Mapeo directo para renderizar cada componente con su propio modal
 
   // Estado para controlar si la tabla de Pagos reportados está visible
-  const [mostrarTablaPagosReportados, setMostrarTablaPagosReportados] =
-    useState(false);
+  const [mostrarTablaPagosReportados, setMostrarTablaPagosReportados] = useState(false);
   // Estado para controlar si la tabla de Domicilios está visible
   const [mostrarTablaDomicilios, setMostrarTablaDomicilios] = useState(false);
 
   // Estado para controlar el tamaño del modal de arrepentimientos
   const [regrestModalSize, setRegrestModalSize] = useState("pagos");
-    const [sidebarModalPath, setSidebarModalPath] = useState("");
+  const [sidebarModalPath, setSidebarModalPath] = useState("");
   // Función para cerrar el sidebar (será pasada al CoorinSidebar)
-    useDashboardModalUrlSync(
+  useDashboardModalUrlSync(
     "SideBar",
     modalSidebarOpen ? sidebarModalPath : ""
   );
 
 
   // Estado para controlar el tamaño del modal de Captura Visitas
-  const [captureVisitModalSize, setCaptureVisitModalSize] =
-    useState("capturaVisit");
+  const [captureVisitModalSize, setCaptureVisitModalSize] = useState("capturaVisit");
   const handleGrowCaptureVisitModal = (grow) => {
     // Solo expandir, no volver atrás si ya está expandido
     if (grow && captureVisitModalSize !== "pagos-xl") {
@@ -86,6 +83,7 @@ export default function CoorinDashboard() {
   const renderSelectedComponent = () => {
     const closeModal = () => {
       setModalSidebarOpen(false);
+      setSidebarModalPath(""); // Limpiar el path para actualizar la URL
       setMostrarTablaPagosReportados(false); // Reiniciar al cerrar
       setCaptureVisitModalSize("capturaVisit"); // Reiniciar tamaño al cerrar
       setCuentaDataCapturaVisita(null); // Limpiar datos de cuenta al cerrar
@@ -94,19 +92,10 @@ export default function CoorinDashboard() {
     // Componentes de información que usan el ModalBaseInformacion
     const informationComponents = [
       "información", // Carrusel circular con todos los componentes
-      "Lista Negra",
-      "Arrepentimientos",
-      "Pagos",
-      "Pagos Reportados",
-      "Datos Erroneos",
-      "Domicilios",
-      "Correos",
-      "Búsquedas",
-      "Ofrecimientos",
-      "Comentarios2",
-      "Consulta Visitas",
-      "Captura Visitas",
-      "Carga Visitas",
+      "Lista Negra", "Arrepentimientos",
+      "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios", 
+      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios2",
+      "Consulta Visitas", "Captura Visitas", "Carga Visitas"
     ];
 
     if (informationComponents.includes(selectedSidebarOption)) {
@@ -179,7 +168,7 @@ export default function CoorinDashboard() {
           ContentComponent = LoadVisitsContent;
           contentProps = {
             mostrarTabla: false,
-            setMostrarTabla: () => {},
+            setMostrarTabla: () => { },
             onClose: closeModal,
           };
           break;
@@ -206,15 +195,11 @@ export default function CoorinDashboard() {
       return (
         <ModalBaseInformacion
           onClose={closeModal}
-          tipoInformacion="información"
+          tipoInformacion= {selectedSidebarOption}
           mostrarTabla={mostrarTablaPagosReportados}
           setMostrarTabla={setMostrarTablaPagosReportados}
           size={size}
-          infoCuenta={
-            selectedSidebarOption === "Captura Visitas"
-              ? cuentaDataCapturaVisita
-              : undefined
-          }
+          infoCuenta={selectedSidebarOption === "Captura Visitas" ? cuentaDataCapturaVisita : undefined}
         >
           {ContentComponent && <ContentComponent {...contentProps} />}
         </ModalBaseInformacion>
@@ -227,7 +212,7 @@ export default function CoorinDashboard() {
         return (
           <ModalBaseCampanas open={modalSidebarOpen} onClose={closeModal} />
         );
-      case "Plantillas Correo":
+      case "Plantillas-Correo":
         return <EmailTemplates onClose={closeModal} />;
       case "Frases":
         return <Phrases onClose={closeModal} />;
@@ -241,9 +226,13 @@ export default function CoorinDashboard() {
             <Comments onClose={closeModal} />
           </Suspense>
         );
-        case "Procesos-Gespa":
+          case "Accionamientos":
+        return <ModalBaseInformacion tipoInformacion="Accionamientos" onClose={closeModal} />;
+      case "Supervisor":
+        return <ModalSupervisor onClose={closeModal} />;
+      case "Procesos-Gespa":
         return <ProcessGespa onClose={closeModal} />;
-         case "Gestiones":
+      case "Gestiones":
         return <ModalBaseInformacion tipoInformacion="Gestiones" onClose={closeModal} />;
       default:
         return null;
@@ -281,72 +270,67 @@ export default function CoorinDashboard() {
 
     // Mapeo de IDs del sidebar a opciones del modal
     const sidebarOptionsMap = {
-        "1BB": "información", // Información - abre carrusel circular
-      
+      "1BB": "información", // Información - abre carrusel circular
+
       // === Administración ===
       "1AA": "Campañas",
-      "2AA_2AAA": "Plantillas Correo",
+      "2AA_2AAA": "Plantillas-Correo",
       "2AA_3AAA": "Frases",
-      
+
       // === Procesos > Gespa (padre: 1CC) ===
       "1CC_1CCC": "Comentarios",
-      "1CC_2CCC": "Definición",
-      "1CC_3CCC": "Arrepentimientos",
-      "1CC_4CCC": "Bloqueo cuentas",
-      "1CC_5CCC": "Sucursales",
-      "1CC_6CCC": "Cargos en línea",
-      "1CC_7CCC": "Estados de cuenta",
-      
+      "1CC_2CCC": "Procesos-Gespa",
+
       // === Procesos > Visitas (padre: 2CC) ===
       "2CC_1CCC": "Consulta Visitas",
       "2CC_2CCC": "Captura Visitas",
       "2CC_3CCC": "Carga Visitas",
       "2CC_4CCC": "Corregir Visitas",
       "2CC_5CCC": "Eliminar Visitas",
-      
+
       // === Procesos > Correos (padre: 3CC) ===
       "3CC_1CCC": "Configuración Correos",
       "3CC_2CCC": "Envios Ejecutivos",
       "3CC_3CCC": "Carga Conversación",
-      
+
       // === Procesos > Accionamientos (padre: 4CC) ===
       "4CC_1CCC": "Informe",
       "4CC_2CCC": "Carga Accionamientos",
       "4CC_3CCC_1CCCC": "Captura Carteo",
       "4CC_3CCC_2CCCC": "Consulta Carteo",
       "4CC": "Accionamientos", // Agregar para abrir modal con tabs
-      
+
       // === Procesos sin submenú (IDs únicos) ===
       "5CC": "Gestiones",
       "6CC": "Supervisor",
       "13CC": "Metas",
-      
+
       // === Reportes ===
       "1DD": "Campañas",
-      "2DD_1DDD": "Plantillas Correo",
+      "2DD_1DDD": "Plantillas-Correo",
       "2DD_2DDD": "Catalogos",
     };
 
-      const implementedOptions = [
+    const implementedOptions = [
       "información", "Lista Negra", "Arrepentimientos",
-      "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios", 
+      "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios",
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
       "Consulta Visitas", "Captura Visitas", "Carga Visitas",
-      "Campañas", "Plantillas Correo", "Frases", "Accionamientos", "Gestiones", "Supervisor", "Procesos-Gespa", // Procesos-Gespa (Gespa)
+      "Campañas", "Plantillas-Correo", "Frases", "Accionamientos", "Gestiones", "Supervisor", "Procesos-Gespa", // Procesos-Gespa (Gespa)
     ];
 
 
     if (sidebarOptionsMap[menuId]) {
       const option = sidebarOptionsMap[menuId];
-      
-           // Verificar si la opción tiene componente implementado
+
+      // Verificar si la opción tiene componente implementado
       if (!implementedOptions.includes(option)) {
-        console.log("⚠️ Opción sin implementar:", option);
+        console.log(" Opción sin implementar:", option);
         // No abrir modal, solo mostrar mensaje en consola (o podrías mostrar un toast)
         return;
       }
-      
-      console.log("✅ Abriendo modal con opción:", option, "menuId:", menuId);
+
+      console.log(" Abriendo modal con opción:", option, "menuId:", menuId);
       setSidebarModalPath(option); // Usar el nombre del modal para la URL
       setSelectedSidebarOption(option);
       setModalSidebarOpen(true);
@@ -355,11 +339,11 @@ export default function CoorinDashboard() {
     } else {
       // Si no está en el mapeo, verificar si el título está implementado
       if (!implementedOptions.includes(menuTitle)) {
-        console.log("⚠️ Opción sin implementar:", menuTitle);
+        console.log(" Opción sin implementar:", menuTitle);
         return;
       }
-      
-      console.log("❌ No encontrado en mapa, usando título:", menuTitle);
+
+      console.log(" No encontrado en mapa, usando título:", menuTitle);
       setSidebarModalPath(menuTitle); // Usar el título para la URL
       setSelectedSidebarOption(menuTitle);
       setModalSidebarOpen(true);
@@ -370,7 +354,7 @@ export default function CoorinDashboard() {
   // Estado que refleja si la sidebar está en modo minificado (body tiene la clase hs-overlay-minified)
   const [sidebarMinified, setSidebarMinified] = useState(
     typeof document !== "undefined" &&
-      document.body.classList.contains("hs-overlay-minified")
+    document.body.classList.contains("hs-overlay-minified")
   );
 
   // Observador de cambios en el atributo 'class' del body para detectar cuando la sidebar entra/sale de modo minificado
@@ -401,7 +385,7 @@ export default function CoorinDashboard() {
         <div
           className="transition-transform duration-200 flex-1 overflow-y-auto overflow-x-hidden"
           style={{
-            marginLeft: sidebarMinified ? "2.5rem" : undefined,
+            marginLeft: sidebarMinified ? "2.5rem" : "2.5rem",
             marginBottom: "0",
             marginTop: "0",
             maxHeight: "100vh",
