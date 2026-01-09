@@ -32,6 +32,7 @@ const iconMap = {
   ShieldCheckIcon,
   // ...otros iconos si los necesitas
 };
+import LogoCoorin7 from "../../../assets/logo_coorin_7.svg";
 
 // Renderiza submenús anidados usando la estructura de acordeón de Preline
 const RenderSubMenus = ({
@@ -40,6 +41,7 @@ const RenderSubMenus = ({
   level = 0,
   onItemClick,
   onMenuClick,
+  parentItemId = "", // ID del item padre para crear IDs compuestos (ej: "1CC", "2CC")
 }) => {
   // level controla el padding/indent para grupos anidados
   const groupClass =
@@ -64,9 +66,16 @@ const RenderSubMenus = ({
                 href={item.href || "#"}
                 onClick={(e) => {
                   e.preventDefault();
-                  // Usar onMenuClick para todos los elementos
+                  // Crear ID compuesto: parentItemId_itemId (ej: "1CC_2CCC" o "2CC_2CCC")
                   if (onMenuClick) {
-                    onMenuClick(item.id, item.title);
+                    const compositeId = parentItemId ? `${parentItemId}_${item.id}` : item.id;
+                    console.log("=== SIDEBAR CLICK DEBUG ===");
+                    console.log("parentItemId:", parentItemId);
+                    console.log("item.id:", item.id);
+                    console.log("item.title:", item.title);
+                    console.log("compositeId:", compositeId);
+                    console.log("===========================");
+                    onMenuClick(compositeId, item.title);
                   }
                 }}>
                 {item.icon && iconMap[item.icon] && (
@@ -150,6 +159,7 @@ const RenderSubMenus = ({
                     level={level + 1}
                     onItemClick={onItemClick}
                     onMenuClick={onMenuClick}
+                    parentItemId={item.id}
                   />
                 );
               })()}
@@ -411,47 +421,56 @@ export const CoorinSidebar = ({
   // In SPA the library may have registered auto-init on window.load which already fired,
   // so call the components' autoInit() here to initialize elements rendered by React.
   useEffect(() => {
-    try {
-      if (typeof window !== "undefined") {
-        // small defer to ensure DOM is present
-        setTimeout(() => {
-          if (
-            window.HSAccordion &&
-            typeof window.HSAccordion.autoInit === "function"
-          ) {
-            window.HSAccordion.autoInit();
+    if (typeof window === "undefined") return;
+    
+    // small defer to ensure DOM is present
+    const timeoutId = setTimeout(() => {
+      try {
+        // Solo inicializar si el sidebar está montado
+        if (sidebarRef.current) {
+          if (window.HSAccordion && typeof window.HSAccordion.autoInit === "function") {
+            try {
+              window.HSAccordion.autoInit();
+            } catch (e) {
+              console.warn("HSAccordion.autoInit failed:", e);
+            }
           }
-          if (
-            window.HSOverlay &&
-            typeof window.HSOverlay.autoInit === "function"
-          ) {
-            window.HSOverlay.autoInit();
+          if (window.HSOverlay && typeof window.HSOverlay.autoInit === "function") {
+            try {
+              window.HSOverlay.autoInit();
+            } catch (e) {
+              console.warn("HSOverlay.autoInit failed:", e);
+            }
           }
-          if (
-            window.HSCollapse &&
-            typeof window.HSCollapse.autoInit === "function"
-          ) {
-            window.HSCollapse.autoInit();
+          if (window.HSCollapse && typeof window.HSCollapse.autoInit === "function") {
+            try {
+              window.HSCollapse.autoInit();
+            } catch (e) {
+              console.warn("HSCollapse.autoInit failed:", e);
+            }
           }
           // Inicializa el dropdown del footer
-          if (
-            window.HSDropdown &&
-            typeof window.HSDropdown.autoInit === "function"
-          ) {
-            window.HSDropdown.autoInit();
+          if (window.HSDropdown && typeof window.HSDropdown.autoInit === "function") {
+            try {
+              window.HSDropdown.autoInit();
+            } catch (e) {
+              console.warn("HSDropdown.autoInit failed:", e);
+            }
           }
-        }, 50);
+        }
+      } catch {
+        // non-fatal: log so we can debug if needed
+        console.warn("Preline re-init failed");
       }
-    } catch {
-      // non-fatal: log so we can debug if needed
-      console.warn("Preline re-init failed");
-    }
+    }, 50);
+    
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const asideClass = `${
     isMinified ? "hs-overlay-minified " : ""
   }hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 transition-transform duration-150 transform fixed top-0 start-0 bottom-0 ${
-    blocked ? "z-0" : "z-1"
+    blocked ? "z-50" : "z-100"
   } bg-white border-e border-gray-200 ${
     isMinified ? "w-[3.25rem]" : "w-64"
   } min-h-screen flex flex-col overflow-x-hidden ${
@@ -468,8 +487,16 @@ export const CoorinSidebar = ({
           setIsOpen(true);
           // re-inicializar Preline si es necesario
           setTimeout(() => {
-            window.HSOverlay?.autoInit?.();
-            window.HSAccordion?.autoInit?.();
+            try {
+              window.HSOverlay?.autoInit?.();
+            } catch (e) {
+              console.warn("HSOverlay.autoInit failed:", e);
+            }
+            try {
+              window.HSAccordion?.autoInit?.();
+            } catch (e) {
+              console.warn("HSAccordion.autoInit failed:", e);
+            }
           }, 50);
           // Restaurar acordeones después de re-init
           setTimeout(restoreAccordions, 120);
