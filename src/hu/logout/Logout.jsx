@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../../contextGlobal/userStore";
-import { putLogout } from "../../services/mark/orochi/LokeServices";
+import { putLogout } from "../../services/mark/orochi/LokiServices";
 import CoorinGrenn from "../../assets/CoorinGreen.svg";
 
 const Logout = ({ onLogout, expandSidebar }) => {

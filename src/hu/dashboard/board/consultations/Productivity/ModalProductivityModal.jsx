@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import ModalProductividadContent from "./ModalProductividadContent";
 import { IconProductividad } from "../IconesConsultations";
-import { getProductivity } from "../../../../../services/mark/orochi/LokeServices";
+import { getProductivity } from "../../../../../services/mark/orochi/LokiServices";
 // Logo eliminado: controles movidos al contenido del modal
 
 // Nota: el dropdown usará el estilo tipo 'peer' con label flotante (ver abajo)

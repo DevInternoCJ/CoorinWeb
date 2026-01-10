@@ -6,7 +6,7 @@ import {
   CargarFilasConsulta,
   campainghInCharge,
   sendArchiveCampanias,
-} from "../../../../../services/mark/orochi/LokeServices";
+} from "../../../../../services/mark/orochi/LokiServices";
 
 const ModalFilasCampañas = ({
   open,

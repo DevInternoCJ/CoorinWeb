@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   getPhrases,
   putPhrases,
-} from "../../../../../../services/mark/orochi/LokeServices";
+} from "../../../../../../services/mark/orochi/LokiServices";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import { toast } from "sonner"; // si ya usas sonner en tu proyecto
 import { IconActive, IconOffActive } from "./IconPhrases";

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { newCampaign } from "../../../../../services/mark/orochi/LokeServices";
+import { newCampaign } from "../../../../../services/mark/orochi/LokiServices";
 import { toast } from "sonner";
 
 const NewCampaign = ({ onCreated, buttonClassName }) => {

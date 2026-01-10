@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { GetGridFields } from "../../../../services/mark/orochi/LokeServices";
+import { GetGridFields } from "../../../../services/mark/orochi/LokiServices";
 import useSelectedRowStore from "./selectedRowStore";
 import { useWalletProducts } from "../../../login/WalletProduct";
 import { IconDrag } from "../../../../components/iconos/IconDrag";
@@ -13,7 +13,7 @@ const GridLampsFields = () => {
   const { setSelectedRow, selectedRowIndex } = useSelectedRowStore();
   const { walletProducts } = useWalletProducts();
   const idProducto = walletProducts?.[0]?.idProducto;
-  
+
   useEffect(() => {
     if (!idProducto || idProducto === 0) return;
     const fetchGridData = async () => {

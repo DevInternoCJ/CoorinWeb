@@ -8,7 +8,7 @@ import {
   ReportEjecutives,
   obetenerJerarquiaEncargados,
   obetenerDropdownsEncargados,
-} from "../../../../../services/mark/orochi/LokeServices";
+} from "../../../../../services/mark/orochi/LokiServices";
 
 // Puedes importar íconos si lo deseas, por ejemplo:
 // import { UserGroupIcon } from '@heroicons/react/24/outline';
@@ -812,13 +812,11 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
 
     console.log(
       "encargadosOptions -> normalized sample:",
-      normalized
-        .slice(0, 20)
-        .map((x) => ({
-          Usuario: x.Usuario,
-          NombreEjecutivo: x.NombreEjecutivo,
-          idEjecutivo: x.idEjecutivo,
-        }))
+      normalized.slice(0, 20).map((x) => ({
+        Usuario: x.Usuario,
+        NombreEjecutivo: x.NombreEjecutivo,
+        idEjecutivo: x.idEjecutivo,
+      }))
     );
     setEncargadosOptions(normalized);
   }, [rawJerarquia, dropdownsEncargados, producto, isOpen]);

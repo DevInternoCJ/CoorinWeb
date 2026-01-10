@@ -4,8 +4,8 @@ import ButtonSave from "../ButtonSave";
 import {
   SaveCreateTemplate,
   UpdateTemplate,
-} from "../../../../../../services/mark/orochi/LokeServices";
-import { DeleteTemplate } from "../../../../../../services/mark/orochi/LokeServices";
+} from "../../../../../../services/mark/orochi/LokiServices";
+import { DeleteTemplate } from "../../../../../../services/mark/orochi/LokiServices";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import { useWalletProducts } from "../../../../../login/WalletProduct";
 import { toast } from "sonner";

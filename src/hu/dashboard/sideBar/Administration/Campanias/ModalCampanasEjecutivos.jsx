@@ -3,7 +3,7 @@ import {
   obetenerJerarquiaEncargados,
   asignaEjecutivoCampanas,
   UsuarioRestante,
-} from "../../../../../services/mark/orochi/LokeServices";
+} from "../../../../../services/mark/orochi/LokiServices";
 import { toast } from "sonner";
 
 const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {

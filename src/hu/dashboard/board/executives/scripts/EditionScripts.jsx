@@ -6,7 +6,7 @@ import {
   PostSaveScripts,
   deleteScripts,
   putUpdateScripts,
-} from "../../../../../services/mark/orochi/LokeServices";
+} from "../../../../../services/mark/orochi/LokiServices";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
 import { useWalletProducts } from "../../../../login/WalletProduct";
 import { toast } from "sonner";

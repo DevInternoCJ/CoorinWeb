@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PostLoadData } from "../../../../../../services/mark/orochi/LokeServices";
+import { PostLoadData } from "../../../../../../services/mark/orochi/LokiServices";
 import { useWalletProducts } from "../../../../../login/WalletProduct"; // Importa el hook
 import { IconDrag } from "../../../../../../components/iconos/IconDrag";
 

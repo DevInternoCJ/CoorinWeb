@@ -2199,7 +2199,7 @@ export const ReportEjecutives = async (body) => {
   }
 };
 
-// En LokiServices.js
+// EnLokiServices.js
 export const PostDataCharge = async (data) => {
   try {
     const token = localStorage.getItem('token');
