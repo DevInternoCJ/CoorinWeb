@@ -7,7 +7,7 @@ import {
   campaignDeleteada,
   campaignCleaning,
   AvanceCampaing,
-} from "../../../../../services/mark/orochi/LokeServices";
+} from "../../../../../services/mark/orochi/LokiServices";
 import { toast } from "sonner";
 import NewCampaign from "./NewCampaign";
 import ModalToponeHundred from "./ModalToponeHundred";

@@ -7,7 +7,7 @@ import { Toaster, toast } from "sonner";
 import {
   obetenerTablaMetas,
   actualizarMetas,
-} from "../../../../../services/mark/orochi/LokeServices.js";
+} from "../../../../../services/mark/orochi/LokiServices.js";
 
 // Función para inyectar estilos CSS que oculten los controles de incremento
 const injectHideNumberArrowsStyles = () => {

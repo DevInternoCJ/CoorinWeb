@@ -6,7 +6,7 @@ import {
   CargarFilasConsulta,
   campainghInCharge,
   sendArchiveCampanias,
-} from "../../../../../services/mark/orochi/LokeServices";
+} from "../../../../../services/mark/orochi/LokiServices";
 
 const ModalFilasCampañas = ({
   open,
@@ -274,7 +274,7 @@ const ModalFilasCampañas = ({
     }
 
     if (hasValidFormat) {
-      console.log("✅ Headers válidos - formato correcto");
+      console.log("  Headers válidos - formato correcto");
       return { valid: true };
     } else {
       const mensajeError = `El formato del documento es incorrecto. ${errores.join(
@@ -370,7 +370,7 @@ const ModalFilasCampañas = ({
         setFileRows(rows);
         setOriginalRows(rows);
 
-        console.log("✅ Estados actualizados:");
+        console.log("  Estados actualizados:");
         console.log("- fileHeaders:", headers);
         console.log("- fileCols:", headers.length);
         console.log("- fileRows length:", rows.length);
@@ -416,7 +416,7 @@ const ModalFilasCampañas = ({
         setFileRows(rows);
         setOriginalRows(rows);
 
-        console.log("✅ Estados XLSX actualizados:");
+        console.log("  Estados XLSX actualizados:");
         console.log("- fileHeaders:", headers);
         console.log("- fileCols:", headers.length);
         console.log("- fileRows length:", rows.length);
@@ -691,7 +691,7 @@ const ModalFilasCampañas = ({
         }
       }
     } catch (err) {
-      console.error("❌ Error al cargar la consulta:", err);
+      console.error("  Error al cargar la consulta:", err);
 
       // Mensaje de error específico y claro para el usuario
       let errorMessage = "No se pudo realizar la carga de filas";
@@ -965,9 +965,7 @@ const ModalFilasCampañas = ({
                                   fontSize: 12,
                                 }}
                                 title="Se esperaba 'Cuenta'"
-                              >
-                                ❌
-                              </span>
+                              ></span>
                             )}
                           {typeof fileHeaders[0] === "string" &&
                             !fileHeaders[0].includes("Expr") && (

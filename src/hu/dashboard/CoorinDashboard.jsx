@@ -26,7 +26,6 @@ import ConsorcioLogo from "../../../src/assets//CoorinBlack.svg";
 import ProcessGespa from "../dashboard/sideBar/gespa/processgespa/ProcessGespa";
 import { useDashboardModalUrlSync } from "../../hooks/useDashboardModalUrlSync";
 
-
 const Comments = lazy(() =>
   import("../../hu/dashboard/sideBar/gespa/comment/Comments")
 );
@@ -58,13 +57,9 @@ export default function CoorinDashboard() {
 
   // Estado para controlar el tamaño del modal de arrepentimientos
   const [regrestModalSize, setRegrestModalSize] = useState("pagos");
-    const [sidebarModalPath, setSidebarModalPath] = useState("");
+  const [sidebarModalPath, setSidebarModalPath] = useState("");
   // Función para cerrar el sidebar (será pasada al CoorinSidebar)
-    useDashboardModalUrlSync(
-    "SideBar",
-    modalSidebarOpen ? sidebarModalPath : ""
-  );
-
+  useDashboardModalUrlSync("SideBar", modalSidebarOpen ? sidebarModalPath : "");
 
   // Estado para controlar el tamaño del modal de Captura Visitas
   const [captureVisitModalSize, setCaptureVisitModalSize] =
@@ -241,10 +236,15 @@ export default function CoorinDashboard() {
             <Comments onClose={closeModal} />
           </Suspense>
         );
-        case "Procesos-Gespa":
+      case "Procesos-Gespa":
         return <ProcessGespa onClose={closeModal} />;
-         case "Gestiones":
-        return <ModalBaseInformacion tipoInformacion="Gestiones" onClose={closeModal} />;
+      case "Gestiones":
+        return (
+          <ModalBaseInformacion
+            tipoInformacion="Gestiones"
+            onClose={closeModal}
+          />
+        );
       default:
         return null;
     }
@@ -281,13 +281,13 @@ export default function CoorinDashboard() {
 
     // Mapeo de IDs del sidebar a opciones del modal
     const sidebarOptionsMap = {
-        "1BB": "información", // Información - abre carrusel circular
-      
+      "1BB": "información", // Información - abre carrusel circular
+
       // === Administración ===
       "1AA": "Campañas",
       "2AA_2AAA": "Plantillas Correo",
       "2AA_3AAA": "Frases",
-      
+
       // === Procesos > Gespa (padre: 1CC) ===
       "1CC_1CCC": "Comentarios",
       "1CC_2CCC": "Definición",
@@ -296,76 +296,90 @@ export default function CoorinDashboard() {
       "1CC_5CCC": "Sucursales",
       "1CC_6CCC": "Cargos en línea",
       "1CC_7CCC": "Estados de cuenta",
-      
+
       // === Procesos > Visitas (padre: 2CC) ===
       "2CC_1CCC": "Consulta Visitas",
       "2CC_2CCC": "Captura Visitas",
       "2CC_3CCC": "Carga Visitas",
       "2CC_4CCC": "Corregir Visitas",
       "2CC_5CCC": "Eliminar Visitas",
-      
+
       // === Procesos > Correos (padre: 3CC) ===
       "3CC_1CCC": "Configuración Correos",
       "3CC_2CCC": "Envios Ejecutivos",
       "3CC_3CCC": "Carga Conversación",
-      
+
       // === Procesos > Accionamientos (padre: 4CC) ===
       "4CC_1CCC": "Informe",
       "4CC_2CCC": "Carga Accionamientos",
       "4CC_3CCC_1CCCC": "Captura Carteo",
       "4CC_3CCC_2CCCC": "Consulta Carteo",
       "4CC": "Accionamientos", // Agregar para abrir modal con tabs
-      
+
       // === Procesos sin submenú (IDs únicos) ===
       "5CC": "Gestiones",
       "6CC": "Supervisor",
       "13CC": "Metas",
-      
+
       // === Reportes ===
       "1DD": "Campañas",
       "2DD_1DDD": "Plantillas Correo",
       "2DD_2DDD": "Catalogos",
     };
 
-      const implementedOptions = [
-      "información", "Lista Negra", "Arrepentimientos",
-      "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios", 
-      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
-      "Consulta Visitas", "Captura Visitas", "Carga Visitas",
-      "Campañas", "Plantillas Correo", "Frases", "Accionamientos", "Gestiones", "Supervisor", "Procesos-Gespa", // Procesos-Gespa (Gespa)
+    const implementedOptions = [
+      "información",
+      "Lista Negra",
+      "Arrepentimientos",
+      "Pagos",
+      "Pagos Reportados",
+      "Datos Erroneos",
+      "Domicilios",
+      "Correos",
+      "Búsquedas",
+      "Ofrecimientos",
+      "Comentarios",
+      "Consulta Visitas",
+      "Captura Visitas",
+      "Carga Visitas",
+      "Campañas",
+      "Plantillas Correo",
+      "Frases",
+      "Accionamientos",
+      "Gestiones",
+      "Supervisor",
+      "Procesos-Gespa", // Procesos-Gespa (Gespa)
     ];
-
 
     if (sidebarOptionsMap[menuId]) {
       const option = sidebarOptionsMap[menuId];
-      
-           // Verificar si la opción tiene componente implementado
+
+      // Verificar si la opción tiene componente implementado
       if (!implementedOptions.includes(option)) {
-        console.log("⚠️ Opción sin implementar:", option);
+        console.log("  Opción sin implementar:", option);
         // No abrir modal, solo mostrar mensaje en consola (o podrías mostrar un toast)
         return;
       }
-      
-      console.log("✅ Abriendo modal con opción:", option, "menuId:", menuId);
+
+      console.log("  Abriendo modal con opción:", option, "menuId:", menuId);
       setSidebarModalPath(option); // Usar el nombre del modal para la URL
       setSelectedSidebarOption(option);
       setModalSidebarOpen(true);
       // Reiniciar tamaño del modal de arrepentimientos al abrir
-      if (option === "Arrepentimientos") setRegrestModalSize('pagos');
+      if (option === "Arrepentimientos") setRegrestModalSize("pagos");
     } else {
       // Si no está en el mapeo, verificar si el título está implementado
       if (!implementedOptions.includes(menuTitle)) {
-        console.log("⚠️ Opción sin implementar:", menuTitle);
+        console.log("  Opción sin implementar:", menuTitle);
         return;
       }
-      
-      console.log("❌ No encontrado en mapa, usando título:", menuTitle);
+
+      console.log("  No encontrado en mapa, usando título:", menuTitle);
       setSidebarModalPath(menuTitle); // Usar el título para la URL
       setSelectedSidebarOption(menuTitle);
       setModalSidebarOpen(true);
     }
   };
-
 
   // Estado que refleja si la sidebar está en modo minificado (body tiene la clase hs-overlay-minified)
   const [sidebarMinified, setSidebarMinified] = useState(

@@ -6,8 +6,8 @@ import ModalConsultaCuentasFooter from "./ModalConsultaCuentasFooter";
 import ExcelDownloader from "../Historical/ExcelDownloader";
 import { toast } from "sonner";
 import { postReportCampaign } from "../../../../../services/mark/Orochi/LokiServices";
-import * as XLSX from 'xlsx';
-import {useUserStore} from "../../../../../contextGlobal/userStore";
+import * as XLSX from "xlsx";
+import { useUserStore } from "../../../../../contextGlobal/userStore";
 const ModalConsultaCuentas = ({ onClose }) => {
   const user = useUserStore((state) => state.user);
   const jerarquia = user?.Jerarquía;
@@ -113,7 +113,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
       jerarquiaEjecutivo: jerarquia ? jerarquia : 0,
     };
 
-    console.log("📤 JSON de consulta:", JSON.stringify(consultaJSON, null, 2));
+    console.log("  JSON de consulta:", JSON.stringify(consultaJSON, null, 2));
 
     try {
       setIsLoading(true);
@@ -121,7 +121,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
 
       const response = await postReportCampaign(consultaJSON);
 
-      console.log("📥 Respuesta de la consulta:", response);
+      console.log("  Respuesta de la consulta:", response);
 
       if (response && !response.esError) {
         setResultData({
@@ -150,7 +150,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
         throw new Error(response.mensaje || "Error al realizar la consulta");
       }
     } catch (resultError) {
-      console.error("❌ Error al realizar la consulta:", resultError);
+      console.error("  Error al realizar la consulta:", resultError);
       toast.error("Error al realizar la consulta");
     } finally {
       setIsLoading(false);

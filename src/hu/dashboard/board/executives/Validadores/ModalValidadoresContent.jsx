@@ -7,7 +7,7 @@ import {
   Validatorsregrets,
   InsertDeletedValidators,
   InsertDeletedValidatorsRegrets,
-} from "../../../../../services/mark/orochi/LokeServices";
+} from "../../../../../services/mark/orochi/LokiServices";
 import { toast } from "sonner";
 
 function ModalValidadoresContent(props) {

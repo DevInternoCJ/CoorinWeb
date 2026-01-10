@@ -1,7 +1,7 @@
 // useCommentsLogic.js
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { PostComments, getCatalogoValueCard } from "../../../../../services/mark/orochi/LokeServices";
+import { PostComments, getCatalogoValueCard } from "../../../../../services/mark/orochi/LokiServices";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
 
 const VIEW_TYPES = Object.freeze({ ADD: "add", LIST: "list" });
@@ -102,12 +102,12 @@ export const useSituationCatalog = () => {
 };
 
 /**
- * ✅ SOLUCIÓN 1: Recibe el objeto form directamente en lugar de formRef
+ *   SOLUCIÓN 1: Recibe el objeto form directamente en lugar de formRef
  * handleSaveComment: ejecuta el PostComments con la información del formulario.
  * Retorna una función memoizada.
  */
 export const useSaveComment = ({ 
-  form,  // ✅ CAMBIO: Recibir form directamente
+  form,  //   CAMBIO: Recibir form directamente
   situationOptions, 
   onSaveComment, 
   idCartera = 1, 
@@ -191,7 +191,7 @@ export const useSaveComment = ({
       return false;
     }
   }, [
-    form,  // ✅ CAMBIO: Cambiar formRef a form en las dependencias
+    form,  //   CAMBIO: Cambiar formRef a form en las dependencias
     situationOptions, 
     onSaveComment, 
     idCartera, 

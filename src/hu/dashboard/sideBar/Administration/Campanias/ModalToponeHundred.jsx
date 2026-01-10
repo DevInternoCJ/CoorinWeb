@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { topCampaign } from "../../../../../services/mark/orochi/LokeServices";
+import { topCampaign } from "../../../../../services/mark/orochi/LokiServices";
 import { toast } from "sonner";
 
 const ModalToponeHundred = ({ open, onClose, idCampaña }) => {
@@ -114,28 +114,40 @@ const ModalToponeHundred = ({ open, onClose, idCampaña }) => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: "center", padding: "24px 0" }}>
+                    <td
+                      colSpan={3}
+                      style={{ textAlign: "center", padding: "24px 0" }}
+                    >
                       <div className="flex flex-col items-center justify-center">
                         <div
                           className="animate-spin inline-block w-6 h-6 border-3 border-current border-t-transparent text-blue-600 rounded-full"
                           role="status"
                           aria-label="loading"
                         />
-                        <span className="mt-2 text-sm text-gray-500">Cargando datos...</span>
+                        <span className="mt-2 text-sm text-gray-500">
+                          Cargando datos...
+                        </span>
                       </div>
                     </td>
                   </tr>
                 ) : rows.length === 0 ? (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: "center", padding: "24px 0" }}>
-                      <span className="text-gray-500 text-sm">Aún no se cuenta con registros</span>
+                    <td
+                      colSpan={3}
+                      style={{ textAlign: "center", padding: "24px 0" }}
+                    >
+                      <span className="text-gray-500 text-sm">
+                        Aún no se cuenta con registros
+                      </span>
                     </td>
                   </tr>
                 ) : (
                   rows.map((row, idx) => (
                     <tr key={idx}>
                       <td style={{ textAlign: "center" }}>{row.Cuenta}</td>
-                      <td style={{ textAlign: "center" }}>{row.Personalizada}</td>
+                      <td style={{ textAlign: "center" }}>
+                        {row.Personalizada}
+                      </td>
                       <td style={{ textAlign: "center" }}>{row.Teléfono}</td>
                     </tr>
                   ))

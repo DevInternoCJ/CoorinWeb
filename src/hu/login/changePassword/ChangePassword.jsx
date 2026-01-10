@@ -3,7 +3,7 @@ import { EyeOpen, ArrowSync, LockSync } from "./PasswordIcons";
 import PASSWORD_REQUIREMENTS from "./Validations";
 import ButtonLogin from "../ButtonLogin";
 import EyeClose from "../../../assets/eye-close.svg";
-import { UpdatePassword } from "../../../services/mark/orochi/LokeServices";
+import { UpdatePassword } from "../../../services/mark/orochi/LokiServices";
 import { useUserStore } from "../../../contextGlobal/userStore";
 import { toast } from "sonner";
 

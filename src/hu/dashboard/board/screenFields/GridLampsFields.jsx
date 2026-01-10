@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { GetGridFields } from "../../../../services/mark/orochi/LokeServices";
+import { GetGridFields } from "../../../../services/mark/orochi/LokiServices";
 import useSelectedRowStore from "./selectedRowStore";
 import { useWalletProducts } from "../../../login/WalletProduct";
 import { IconDrag } from "../../../../components/iconos/IconDrag";

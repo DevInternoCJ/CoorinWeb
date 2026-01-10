@@ -8,7 +8,7 @@ import {
   ReportEjecutives,
   obetenerJerarquiaEncargados,
   obetenerDropdownsEncargados,
-} from "../../../../../services/mark/orochi/LokeServices";
+} from "../../../../../services/mark/orochi/LokiServices";
 
 // Puedes importar íconos si lo deseas, por ejemplo:
 // import { UserGroupIcon } from '@heroicons/react/24/outline';

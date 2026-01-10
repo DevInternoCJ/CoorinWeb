@@ -101,7 +101,7 @@ export const GetScreenFields = async (idProducto) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -139,7 +139,7 @@ export const GetGridFields = async (idProducto) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -177,7 +177,7 @@ export const GetVerifyProduct = async (idProducto) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -213,7 +213,7 @@ export const SaveScreenFields = async (data) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -306,7 +306,7 @@ export const actualizarMetas = async (payload) => {
     }
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -435,7 +435,7 @@ export const obetenerTablaMetas = async (idEjecutivo) => {
     }
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -562,7 +562,7 @@ export const PostLoadData = async (data) => {
     }
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1431,7 +1431,7 @@ export const SaveCreateTemplate = async (payload) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1469,7 +1469,7 @@ export const ShowFieldScreen = async (idProducto) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1507,7 +1507,7 @@ export const DeleteTemplate = async (data) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1545,7 +1545,7 @@ export const UpdateTemplate = async (data) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1726,7 +1726,7 @@ export const putLogout = async (data) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1763,7 +1763,7 @@ export const getWalletProduct = async () => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1804,7 +1804,7 @@ export const postSavePhrases = async (data) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -2356,7 +2356,7 @@ export const getAddressesCapture = async (idCartera, cuentaOrExpediente, esExped
     }
     // Si es expediente, enviar como string; si es cuenta, enviar como int
     const cuentaParam = esExpediente ? cuentaOrExpediente : parseInt(cuentaOrExpediente, 10);
-    console.log('📤 Enviando a /captura/visitas/buscar-cuenta', { idCartera, cuentaOrExpediente: cuentaParam, esExpediente });
+    console.log('  Enviando a /captura/visitas/buscar-cuenta', { idCartera, cuentaOrExpediente: cuentaParam, esExpediente });
     // El interceptor añade el token automáticamente
     const response = await api.get('/captura/visitas/buscar-cuenta', {
       params: {
@@ -2368,7 +2368,7 @@ export const getAddressesCapture = async (idCartera, cuentaOrExpediente, esExped
         'Accept': '*/*'
       }
     });
-    console.log('📥 Respuesta de /captura/visitas/buscar-cuenta:', response);
+    console.log('  Respuesta de /captura/visitas/buscar-cuenta:', response);
     return response;
   } catch (error) {
     console.error('Error al obtener domicilios captura:', error);

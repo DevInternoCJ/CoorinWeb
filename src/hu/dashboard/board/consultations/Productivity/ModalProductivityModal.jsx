@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import ModalProductividadContent from "./ModalProductividadContent";
 import { IconProductividad } from "../IconesConsultations";
-import { getProductivity } from "../../../../../services/mark/orochi/LokeServices";
+import { getProductivity } from "../../../../../services/mark/orochi/LokiServices";
 // Logo eliminado: controles movidos al contenido del modal
 
 // Nota: el dropdown usará el estilo tipo 'peer' con label flotante (ver abajo)
@@ -170,9 +170,9 @@ const ProductivityModal = ({
         idsEjecutivos: idsEjecutivos,
       };
 
-      console.log("📤 Enviando datos de productividad:", requestData);
+      console.log("  Enviando datos de productividad:", requestData);
       const data = await getProductivity(requestData);
-      console.log("📥 Respuesta raw del endpoint de productividad:", data);
+      console.log("  Respuesta raw del endpoint de productividad:", data);
 
       // Manejar diferentes tipos de respuesta del servidor
       if (Array.isArray(data)) {
@@ -184,13 +184,13 @@ const ProductivityModal = ({
       } else if (data && typeof data === "object") {
         // Si es un objeto, intentar extraer array de datos
         const dataArray = Object.values(data).find((val) => Array.isArray(val));
-        console.log("📥 Respuesta procesada (array encontrado):", dataArray);
+        console.log("  Respuesta procesada (array encontrado):", dataArray);
         setProductivityData(dataArray || []);
       } else {
         setProductivityData([]);
       }
     } catch (error) {
-      console.error("❌ Error al obtener datos de productividad:", error);
+      console.error("  Error al obtener datos de productividad:", error);
       setErrorProductivity("Error al obtener los datos de productividad");
       setProductivityData([]);
     } finally {
