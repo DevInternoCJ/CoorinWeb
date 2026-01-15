@@ -2655,3 +2655,107 @@ export const getQueryComplement = async (params, options = {}) => {
     throw error;
   }
 };
+
+// Cargar Archivo de Gestiones Complemento 
+export const ManagmentLoadFile = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // Construir FormData
+    const formData = new FormData();
+    // Asume que body es un objeto con las claves necesarias y el archivo
+    Object.entries(body).forEach(([key, value]) => {
+      // Solo agregar si el valor no es null o undefined
+      if (value !== null && value !== undefined) {
+        // Si el valor es un array, agregar cada elemento por separado
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v));
+        } else {
+          formData.append(key, value);
+        }
+      }
+    });
+    console.log('Enviando a /Gestiones/carga-llamadas:', formData);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/Gestiones/carga-llamadas', formData, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'multipart/form-data'
+        // No establecer Content-Type manualmente, el navegador lo gestiona automáticamente con FormData
+      },
+      responseType: 'arraybuffer' // Para recibir datos binarios correctamente
+    });
+    console.log('Respuesta de /Gestiones/carga-llamadas:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obtener historico Archivo:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+// Cargar Archivo de Carga Complemento  
+export const VisitsLoadFile = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // Construir FormData
+    const formData = new FormData();
+    // Asume que body es un objeto con las claves necesarias y el archivo
+    Object.entries(body).forEach(([key, value]) => {
+      // Solo agregar si el valor no es null o undefined
+      if (value !== null && value !== undefined) {
+        // Si el valor es un array, agregar cada elemento por separado
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v));
+        } else {
+          formData.append(key, value);
+        }
+      }
+    });
+    console.log('Enviando a /Gestiones/cargar-intentos-vicidial:', formData);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/Gestiones/cargar-intentos-vicidial', formData, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'multipart/form-data'
+        // No establecer Content-Type manualmente, el navegador lo gestiona automáticamente con FormData
+      },
+      responseType: 'arraybuffer' // Para recibir datos binarios correctamente
+    });
+    console.log('Respuesta de /Gestiones/cargar-intentos-vicidial:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obtener historico Archivo:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
