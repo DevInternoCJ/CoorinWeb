@@ -36,7 +36,7 @@ import api from '../../../loki/apiConfig';
 
 //     throw error;
 //   }
-// };
+// };/CamposPantalla/mostrar/{idProducto}
 
 // Actualizar contraseña (versión optimizada)
 export const UpdatePassword = async (passwordData) => {
@@ -62,7 +62,7 @@ export const UpdatePassword = async (passwordData) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error(' Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -101,7 +101,7 @@ export const GetScreenFields = async (idProducto) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -139,7 +139,7 @@ export const GetGridFields = async (idProducto) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -177,7 +177,7 @@ export const GetVerifyProduct = async (idProducto) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -213,7 +213,7 @@ export const SaveScreenFields = async (data) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -224,7 +224,7 @@ export const SaveScreenFields = async (data) => {
 };
 
 // Nuevo endpoint para Lista Negra con parámetros
-export const darkListV2 = async ({ idCartera, selector, dato }, options = {}) => {
+export const darkListV2 = async ({ idCartera, selector, dato }) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -233,7 +233,7 @@ export const darkListV2 = async ({ idCartera, selector, dato }, options = {}) =>
     const params = { idCartera, selector, dato };
     console.log('Enviando a /ListaNegra/lista-negra con:', params);
     // El interceptor añade el token automáticamente
-    const response = await api.get('/ListaNegra/lista-negra', { params, ...options });
+    const response = await api.get('/ListaNegra/lista-negra', { params });
     console.log('Respuesta de /ListaNegra/lista-negra:', response.data);
     return response.data;
   } catch (error) {
@@ -255,7 +255,7 @@ export const darkListV2 = async ({ idCartera, selector, dato }, options = {}) =>
   }
 };
 
-export const getRegrest = async ({ idCartera, cuenta }, options = {}) => {
+export const getRegrest = async ({ idCartera, cuenta }) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -264,7 +264,7 @@ export const getRegrest = async ({ idCartera, cuenta }, options = {}) => {
     const params = { idCartera, cuenta};
     console.log('Enviando a /arrepentimientos/get-arrepentimientos a con:', params);
     // El interceptor añade el token automáticamente
-    const response = await api.get('/arrepentimientos/get-arrepentimientos', { params, ...options });
+    const response = await api.get('/arrepentimientos/get-arrepentimientos', { params });
     console.log('Respuesta de /arrepentimientos/get-arrepentimientos:', response.data);
     return response.data;
   } catch (error) {
@@ -306,7 +306,7 @@ export const actualizarMetas = async (payload) => {
     }
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -435,7 +435,7 @@ export const obetenerTablaMetas = async (idEjecutivo) => {
     }
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -562,7 +562,7 @@ export const PostLoadData = async (data) => {
     }
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1431,7 +1431,7 @@ export const SaveCreateTemplate = async (payload) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1469,7 +1469,7 @@ export const ShowFieldScreen = async (idProducto) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1507,7 +1507,7 @@ export const DeleteTemplate = async (data) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1545,7 +1545,7 @@ export const UpdateTemplate = async (data) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1662,7 +1662,7 @@ export const CargarFilasConsulta = async (payload) => {
   }
 };
 
-export const getPaymentsInformation = async (body, options = {}) => {
+export const getPaymentsInformation = async (body) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -1675,8 +1675,7 @@ export const getPaymentsInformation = async (body, options = {}) => {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
-      responseType: 'blob',
-      ...options
+      responseType: 'blob'
     });
     console.log(' Respuesta de /informacion/Pagos/consultar:', response);
     return response;
@@ -1707,11 +1706,11 @@ export const putLogout = async (data) => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
     
-    console.log('  Enviando a /Auth/cerrar-sesión', data);
+    console.log('  Enviando a /Auth/cerrar-sesion', data);
     console.log('  Parámetros:', { data });
     
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
-      const response = await api.put(`/Auth/cerrar-sesión `, data);
+      const response = await api.put(`/Auth/cerrar-sesion`, data);
     
     console.log('  Respuesta de /Auth/cerrar-sesión ', response.data);
     
@@ -1727,7 +1726,7 @@ export const putLogout = async (data) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1764,7 +1763,7 @@ export const getWalletProduct = async () => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1805,7 +1804,7 @@ export const postSavePhrases = async (data) => {
     // Mostrar más detalles del error
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
@@ -1913,7 +1912,7 @@ export const sendArchiveCampanias = async (body) => {
 };
 
 
-export const getExportReportPayments = async (body, options = {}) => {
+export const getExportReportPayments = async (body) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -1924,8 +1923,7 @@ export const getExportReportPayments = async (body, options = {}) => {
       headers: {
         'Accept': '*/*',
         'Content-Type': 'application/json'
-      },
-      ...options
+      }
     });
     console.log('Respuesta de /informacion/PagosReportados/consultar:', response);
     return response;
@@ -1950,7 +1948,7 @@ export const getExportReportPayments = async (body, options = {}) => {
 
 
 
-export const getAddress = async (idCartera, idConsulta, options = {}) => {
+export const getAddress = async (idCartera, idConsulta) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -1961,8 +1959,7 @@ export const getAddress = async (idCartera, idConsulta, options = {}) => {
     const response = await api.get(url, {
       headers: {
         'Accept': '*/*'
-      },
-      ...options
+      }
     });
     console.log('Respuesta de', url + ':', response.data);
     return response.data;
@@ -1986,7 +1983,7 @@ export const getAddress = async (idCartera, idConsulta, options = {}) => {
 };
 
 
-export const getEmailsInfo = async (idCartera, idConsulta, options = {}) => {
+export const getEmailsInfo = async (idCartera, idConsulta) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -1997,8 +1994,7 @@ export const getEmailsInfo = async (idCartera, idConsulta, options = {}) => {
     const response = await api.get(url, {
       headers: {
         'Accept': '*/*'
-      },
-      ...options
+      }
     });
     console.log('Respuesta de', url + ':', response.data);
     return response.data;
@@ -2022,7 +2018,7 @@ export const getEmailsInfo = async (idCartera, idConsulta, options = {}) => {
 };
 
 
-export const getSearchesInformation = async (body, options = {}) => {
+export const getSearchesInformation = async (body) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -2035,8 +2031,7 @@ export const getSearchesInformation = async (body, options = {}) => {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
-      responseType: 'blob',
-      ...options
+      responseType: 'blob'
     });
     console.log(' Respuesta de /informacion/BusquedasInfo/consultar:', response);
     return response;
@@ -2060,7 +2055,7 @@ export const getSearchesInformation = async (body, options = {}) => {
 };
 
 
-export const getOffersInformation = async (body, options = {}) => {
+export const getOffersInformation = async (body) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -2073,8 +2068,7 @@ export const getOffersInformation = async (body, options = {}) => {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
-      responseType: 'blob',
-      ...options
+      responseType: 'blob'
     });
     console.log(' Respuesta de /informacion/Ofrecimientos/consultar:', response);
     return response;
@@ -2098,7 +2092,7 @@ export const getOffersInformation = async (body, options = {}) => {
 };
 
 
-export const getCommentsInformation = async (body, options = {}) => {
+export const getCommentsInformation = async (body) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -2111,8 +2105,7 @@ export const getCommentsInformation = async (body, options = {}) => {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
-      responseType: 'blob',
-      ...options
+      responseType: 'blob'
     });
     console.log(' Respuesta de /informacion/comentarios-info/consultar:', response);
     return response;
@@ -2135,7 +2128,7 @@ export const getCommentsInformation = async (body, options = {}) => {
   }
 };
 
-export const getWrongsInformation = async (body, options = {}) => {
+export const getWrongsInformation = async (body) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -2148,8 +2141,7 @@ export const getWrongsInformation = async (body, options = {}) => {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       },
-      responseType: 'blob',
-      ...options
+      responseType: 'blob'
     });
     console.log(' Respuesta de /informacion/DatosErroneos/consultar:', response);
     return response;
@@ -2336,6 +2328,24 @@ export const putPhrases = async (idRegistro, activo) => {
   }
 };
 
+export const PostComments = async (data) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+
+    console.log('  /Scripts/guardar', data);   
+    const response = await api.post(
+      `/Scripts/guardar`,data
+    );  
+    console.log('  Respuesta:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error(' Error:', error);
+    throw error;
+  }
+};
 
 export const getAddressesCapture = async (idCartera, cuentaOrExpediente, esExpediente) => {
   try {
@@ -2345,7 +2355,7 @@ export const getAddressesCapture = async (idCartera, cuentaOrExpediente, esExped
     }
     // Si es expediente, enviar como string; si es cuenta, enviar como int
     const cuentaParam = esExpediente ? cuentaOrExpediente : parseInt(cuentaOrExpediente, 10);
-    console.log('  Enviando a /captura/visitas/buscar-cuenta', { idCartera, cuentaOrExpediente: cuentaParam, esExpediente });
+    console.log('📤 Enviando a /captura/visitas/buscar-cuenta', { idCartera, cuentaOrExpediente: cuentaParam, esExpediente });
     // El interceptor añade el token automáticamente
     const response = await api.get('/captura/visitas/buscar-cuenta', {
       params: {
@@ -2357,7 +2367,7 @@ export const getAddressesCapture = async (idCartera, cuentaOrExpediente, esExped
         'Accept': '*/*'
       }
     });
-    console.log('  Respuesta de /captura/visitas/buscar-cuenta:', response);
+    console.log('📥 Respuesta de /captura/visitas/buscar-cuenta:', response);
     return response;
   } catch (error) {
     console.error('Error al obtener domicilios captura:', error);
@@ -2400,7 +2410,7 @@ export const obtenerLatitudLongitud = async (direccion) => {
     });
 
     if (!response.ok) {
-      console.warn('  Error al geocodificar dirección:', response.status);
+      console.warn('⚠️ Error al geocodificar dirección:', response.status);
       return { latitud: "", longitud: "" };
     }
 
@@ -2415,10 +2425,10 @@ export const obtenerLatitudLongitud = async (direccion) => {
       };
     }
 
-    console.warn('  No se encontraron coordenadas para la dirección:', direccion);
+    console.warn('⚠️ No se encontraron coordenadas para la dirección:', direccion);
     return { latitud: "", longitud: "" };
   } catch (error) {
-    console.error('  Error al obtener coordenadas:', error);
+    console.error('❌ Error al obtener coordenadas:', error);
     return { latitud: "", longitud: "" };
   }
 };
@@ -2435,7 +2445,7 @@ export const guardarVisitaCapturada = async (visitaData) => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
 
-    console.log('  Enviando a /captura/visitas/guardar:', visitaData);
+    console.log('📤 Enviando a /captura/visitas/guardar:', visitaData);
 
     const response = await api.post('/captura/visitas/guardar', visitaData, {
       headers: {
@@ -2444,22 +2454,22 @@ export const guardarVisitaCapturada = async (visitaData) => {
       }
     });
 
-    console.log('  Respuesta de /captura/visitas/guardar:', response);
+    console.log('📥 Respuesta de /captura/visitas/guardar:', response);
     return response;
   } catch (error) {
-    console.error('  Error al guardar visita:', error);
+    console.error('❌ Error al guardar visita:', error);
     if (error.response?.status === 401) {
-      console.warn('  Error 401 - Token inválido o expirado');
+      console.warn('⚠️ Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
     }
     if (error.response) {
-      console.error('  Datos de respuesta del error:', error.response.data);
-      console.error('  Status del error:', error.response.status);
+      console.error('📊 Datos de respuesta del error:', error.response.data);
+      console.error('🔢 Status del error:', error.response.status);
     } else if (error.request) {
-      console.error('  No se recibió respuesta del servidor:', error.request);
+      console.error('❌ No se recibió respuesta del servidor:', error.request);
     } else {
-      console.error('  Error al configurar la solicitud:', error.message);
+      console.error('❌ Error al configurar la solicitud:', error.message);
     }
     throw error;
   }
@@ -2656,23 +2666,105 @@ export const getQueryComplement = async (params, options = {}) => {
   }
 };
 
-// EnLokiServices.js
-export const PostComments = async (data) => {
+// Cargar Archivo de Gestiones Complemento 
+export const ManagmentLoadFile = async (body) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
-      throw new Error('No hay token de autenticación disponible.');
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-
-    console.log('  /Comentarios/modificar', data);   
-    const response = await api.post(
-      `/Comentarios/modificar`,data
-    );  
-    console.log('  Respuesta:', response.data);
-    return response.data;
+    // Construir FormData
+    const formData = new FormData();
+    // Asume que body es un objeto con las claves necesarias y el archivo
+    Object.entries(body).forEach(([key, value]) => {
+      // Solo agregar si el valor no es null o undefined
+      if (value !== null && value !== undefined) {
+        // Si el valor es un array, agregar cada elemento por separado
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v));
+        } else {
+          formData.append(key, value);
+        }
+      }
+    });
+    console.log('Enviando a /Gestiones/carga-llamadas:', formData);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/Gestiones/carga-llamadas', formData, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'multipart/form-data'
+        // No establecer Content-Type manualmente, el navegador lo gestiona automáticamente con FormData
+      },
+      responseType: 'arraybuffer' // Para recibir datos binarios correctamente
+    });
+    console.log('Respuesta de /Gestiones/carga-llamadas:', response);
+    return response;
   } catch (error) {
-    console.error(' Error:', error);
+    console.error('Error al obtener historico Archivo:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
     throw error;
   }
 };
 
+// Cargar Archivo de Carga Complemento  
+export const VisitsLoadFile = async (body) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+    // Construir FormData
+    const formData = new FormData();
+    // Asume que body es un objeto con las claves necesarias y el archivo
+    Object.entries(body).forEach(([key, value]) => {
+      // Solo agregar si el valor no es null o undefined
+      if (value !== null && value !== undefined) {
+        // Si el valor es un array, agregar cada elemento por separado
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v));
+        } else {
+          formData.append(key, value);
+        }
+      }
+    });
+    console.log('Enviando a /Gestiones/cargar-intentos-vicidial:', formData);
+    // El interceptor añade el token automáticamente
+    const response = await api.post('/Gestiones/cargar-intentos-vicidial', formData, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'multipart/form-data'
+        // No establecer Content-Type manualmente, el navegador lo gestiona automáticamente con FormData
+      },
+      responseType: 'arraybuffer' // Para recibir datos binarios correctamente
+    });
+    console.log('Respuesta de /Gestiones/cargar-intentos-vicidial:', response);
+    return response;
+  } catch (error) {
+    console.error('Error al obtener historico Archivo:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }}

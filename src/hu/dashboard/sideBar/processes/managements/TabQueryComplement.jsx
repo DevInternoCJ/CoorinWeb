@@ -57,23 +57,88 @@ const TabQueryComplement = () => {
 
             const response = await getQueryComplement(params, { signal: controller.signal });
 
+            // Procesar respuesta Blob y ordenar por Fecha, Hora, NombreEjecutivo y Contacto
+            let dataToExport = null;
+            
+            try {
+                // Convertir Blob a JSON
+                let jsonData;
+                if (response.data instanceof Blob) {
+                    const text = await response.data.text();
+                    jsonData = JSON.parse(text);
+                } else {
+                    jsonData = response.data;
+                }
+                
+                if (Array.isArray(jsonData) && jsonData.length > 0) {
+                    // Ordenar por Usuario, Fecha, Contacto y Hora
+                    dataToExport = [...jsonData].sort((a, b) => {
+                        // 1. Comparar Usuario
+                        const usuarioA = (a.Usuario || '').toString().toUpperCase();
+                        const usuarioB = (b.Usuario || '').toString().toUpperCase();
+                        const compareUsuario = usuarioA.localeCompare(usuarioB);
+                        
+                        if (compareUsuario !== 0) return compareUsuario;
+                        
+                        // 2. Si Usuario es igual, comparar Fecha
+                        const fechaA = a.Fecha ? new Date(a.Fecha.split('T')[0]) : new Date(0);
+                        const fechaB = b.Fecha ? new Date(b.Fecha.split('T')[0]) : new Date(0);
+                        const compareFecha = fechaA - fechaB;
+                        
+                        if (compareFecha !== 0) return compareFecha;
+                        
+                        // 3. Si Fecha es igual, comparar Contacto
+                        const contactoA = (a.Contacto || '').toString().toUpperCase();
+                        const contactoB = (b.Contacto || '').toString().toUpperCase();
+                        const compareContacto = contactoA.localeCompare(contactoB);
+                        
+                        if (compareContacto !== 0) return compareContacto;
+                        
+                        // 4. Si Contacto es igual, comparar Hora
+                        const horaA = a.Hora || '00:00:00';
+                        const horaB = b.Hora || '00:00:00';
+                        return horaA.localeCompare(horaB);
+                    });
+                    
+                    console.log(`Registros ordenados: ${dataToExport.length}`);
+                } else {
+                    dataToExport = jsonData;
+                }
+            } catch (parseError) {
+                console.warn('⚠️ No se pudo ordenar, exportando datos originales:', parseError);
+                dataToExport = null;
+            }
+
             const filename = `ConsultaComplemento_${desde}_${hasta}`;
 
-            const success = await exportFromAPIResponse(
-                response,
-                filename,
-                {
-                    consultaName: 'Consulta Complemento',
-                    showToast: false
+            // Si se ordenó correctamente, exportar datos procesados
+            if (dataToExport) {
+                const { exportDataToXLSX } = await import('../../../../../utils/ExcelExporter');
+                const success = exportDataToXLSX(dataToExport, filename);
+                
+                toast.dismiss(toastId);
+                if (success) {
+                    toast.success('Archivo Excel exportado correctamente.');
+                } else {
+                    toast.error('No se pudo exportar el archivo.');
                 }
-            );
-
-            toast.dismiss(toastId);
-
-            if (success) {
-                toast.success('Archivo Excel exportado correctamente.');
             } else {
-                toast.error('No se pudo exportar el archivo.');
+                // Fallback: usar exportFromAPIResponse original
+                const success = await exportFromAPIResponse(
+                    response,
+                    filename,
+                    {
+                        consultaName: 'Consulta Complemento',
+                        showToast: false
+                    }
+                );
+
+                toast.dismiss(toastId);
+                if (success) {
+                    toast.success('Archivo Excel exportado correctamente.');
+                } else {
+                    toast.error('No se pudo exportar el archivo.');
+                }
             }
         } catch (err) {
             toast.dismiss(toastId);
@@ -96,7 +161,7 @@ const TabQueryComplement = () => {
                 abortController.abort();
             }
         };
-    }, [abortController]);
+    }, [abortController]); 
 
     return (
         <div className="p-6 md:pt-20 flex flex-col h-full space-y-4 sm:space-y-8">

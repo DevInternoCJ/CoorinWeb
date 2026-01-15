@@ -7,6 +7,8 @@ const ModalProductividadContent = ({
   selectedIndicator,
   selectedExecutiveNode,
   setSelectedExecutiveNode,
+  selectedExecutiveInfo,
+  setSelectedExecutiveInfo,
   productivityData,
   loadingProductivity,
   errorProductivity,
@@ -98,6 +100,20 @@ const ModalProductividadContent = ({
 
   // Callback para manejar la selección de un nodo del árbol
   const handleNodeSelect = (node) => {
+    console.log('🎯 Nodo seleccionado del árbol:', node);
+    
+    // Guardar información completa del nodo seleccionado
+    if (setSelectedExecutiveInfo) {
+      setSelectedExecutiveInfo({
+        idEjecutivo: node.idEjecutivo,
+        usuario: node.usuario,
+        nombreEjecutivo: node.nombreEjecutivo
+      });
+    }
+    
+    // Actualizar el ID seleccionado
+    setSelectedExecutiveNode(node.idEjecutivo);
+    
     const userData = JSON.parse(localStorage.getItem("userData")) || {};
     const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
     const isSessionUser = node.idEjecutivo === idEjecutivoSesion;
@@ -106,10 +122,10 @@ const ModalProductividadContent = ({
     // Si es otro usuario, filtrar por su nombre de usuario
     if (isSessionUser) {
       console.log('Usuario de sesión seleccionado - mostrando todos los datos');
-      setSelectedUserFromTree(null);
+      if (setSelectedUserFromTree) setSelectedUserFromTree(null);
     } else {
       console.log(`Usuario seleccionado del árbol: ${node.usuario}`);
-      setSelectedUserFromTree(node.usuario);
+      if (setSelectedUserFromTree) setSelectedUserFromTree(node.usuario);
     }
   };
 
@@ -231,22 +247,22 @@ const ModalProductividadContent = ({
           "SinContacto",
         ];
       case "Tiempos":
-        // Orden real del backend
+        // Orden correcto: Ejecutivo y Encargado primero, luego los tiempos
         return [
+          "Ejecutivo",
+          "Encargado",
           "Baño",
           "Comida",
           "Consulta",
           "Cuentas",
           "Curso",
-          "Ejecutivo",
-          "Encargado",
           "Gestión",
           "Muerto",
           "Pausas",
           "Permiso",
           "Sesión"
         ];
-      case "Tiempo Promedio":
+      case "TiempoPromedio":
         return [
           "Ejecutivo",
           "Encargado",
@@ -261,9 +277,9 @@ const ModalProductividadContent = ({
       case "Titulares":
       case "Conocidos":
       case "Desconocidos":
-      case "Sin Contacto":
-      case "Monto Negociaciones":
-      case "Saldo Solucionado":
+      case "SinContacto":
+      case "MontoNegociaciones":
+      case "SaldoSolucionado":
         return [
           "Encargado",
           "Ejecutivo",
@@ -517,6 +533,9 @@ const ModalProductividadContent = ({
 
     // Mapear los datos según el indicador seleccionado
     return productivityData.map((item, index) => {
+      // Log para debug
+      console.log(`📊 Item #${index} para renderizar:`, item);
+      
       // Convertir el objeto a array de valores, manejando diferentes estructuras
       let values = [];
       const columnCount = getColumnCount();

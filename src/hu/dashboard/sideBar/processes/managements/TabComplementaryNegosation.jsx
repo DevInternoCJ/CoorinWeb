@@ -15,10 +15,6 @@ const TabComplementaryNegosation = () => {
     const [descuento, setDescuento] = useState('');
     const [tieneRegistros, setTieneRegistros] = useState(false);
 
-    const handleCancelar = () => {
-        console.log('Cancelar negociación');
-    };
-
     const handleAgregar = () => {
         console.log('Agregar negociación');
         setTieneRegistros(true);
@@ -26,7 +22,7 @@ const TabComplementaryNegosation = () => {
 
     return (
         <div className="p-6 flex flex-col h-full space-y-4">
-            {/* Row 1: Select Cartera, Select Producto, Input Cuenta y Botón Cancelar */}
+            {/* Row 1: Select Cartera, Select Producto, Input Cuenta */}
             <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
                 {/* Select Cartera */}
                 <div className="relative flex-1">
@@ -86,16 +82,6 @@ const TabComplementaryNegosation = () => {
                     >
                         Cuenta
                     </label>
-                </div>
-
-                {/* Botón Cancelar */}
-                <div className="flex items-center">
-                    <button
-                        onClick={handleCancelar}
-                        className="btn-danger w-full px-6 py-2 text-sm font-medium rounded-lg shadow-sm flex justify-center items-center"
-                    >
-                        Cancelar
-                    </button>
                 </div>
             </div>
 

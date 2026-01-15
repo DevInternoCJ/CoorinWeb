@@ -154,6 +154,9 @@ export default function CoorinDashboard() {
           break;
         case "Consulta Visitas":
           ContentComponent = ConsultVisitContent;
+          contentProps = {
+            onClose: closeModal
+          };
           break;
         case "Captura Visitas":
           ContentComponent = CaptureVisit;
@@ -199,6 +202,8 @@ export default function CoorinDashboard() {
           mostrarTabla={mostrarTablaPagosReportados}
           setMostrarTabla={setMostrarTablaPagosReportados}
           size={size}
+          overlayClassName={selectedSidebarOption === "Carga Visitas" ? "bg-black/20" : ""}
+          showHeader={selectedSidebarOption === "Carga Visitas"}
           infoCuenta={selectedSidebarOption === "Captura Visitas" ? cuentaDataCapturaVisita : undefined}
         >
           {ContentComponent && <ContentComponent {...contentProps} />}
@@ -280,6 +285,12 @@ export default function CoorinDashboard() {
       // === Procesos > Gespa (padre: 1CC) ===
       "1CC_1CCC": "Comentarios",
       "1CC_2CCC": "Procesos-Gespa",
+      "1CC_2CC2": "Definición",
+      "1CC_3CCC": "Arrepentimientos",
+      "1CC_4CCC": "Bloqueo cuentas",
+      "1CC_5CCC": "Sucursales",
+      "1CC_6CCC": "Cargos en línea",
+      "1CC_7CCC": "Estados de cuenta",
 
       // === Procesos > Visitas (padre: 2CC) ===
       "2CC_1CCC": "Consulta Visitas",

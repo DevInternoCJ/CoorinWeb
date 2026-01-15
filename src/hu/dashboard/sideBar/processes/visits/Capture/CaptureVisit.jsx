@@ -35,7 +35,6 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
 
 
     const [showDropdown, setShowDropdown] = useState(false);
-    const [footerMsg] = useState("Elija la consulta de las cuentas que desee las consultas y el periodo.");
     // Estado para datos de cuenta obtenidos
     // cuentaData y setCuentaData ahora vienen del padre (CoorinDashboard)
     const [loading, setLoading] = useState(false);
@@ -1077,12 +1076,6 @@ const CaptureVisit = ({ mostrarTabla, setMostrarTabla, tipoInformacion, cuentaDa
                     </div>
                 </>
             )}
-            {/* Footer informativo */}
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginTop: 12 }}>
-                <span className="text-gray-600 text-sm pl-2">
-                    {footerMsg}
-                </span>
-            </div>
             
             {/* Modal de confirmación: Calles vacías */}
             {modalCallesVacias && (
