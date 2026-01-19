@@ -203,7 +203,7 @@ export default function CoorinDashboard() {
           setMostrarTabla={setMostrarTablaPagosReportados}
           size={size}
           overlayClassName={selectedSidebarOption === "Carga Visitas" ? "bg-black/20" : ""}
-          showHeader={selectedSidebarOption === "Carga Visitas"}
+          showHeader={selectedSidebarOption !== "Carga Visitas"}
           infoCuenta={selectedSidebarOption === "Captura Visitas" ? cuentaDataCapturaVisita : undefined}
         >
           {ContentComponent && <ContentComponent {...contentProps} />}

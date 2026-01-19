@@ -2739,20 +2739,19 @@ export const VisitsLoadFile = async (body) => {
         }
       }
     });
-    console.log('Enviando a /Gestiones/cargar-intentos-vicidial:', formData);
+    console.log('Enviando a /Gestiones/carga-llamadas:', formData);
     // El interceptor añade el token automáticamente
-    const response = await api.post('/Gestiones/cargar-intentos-vicidial', formData, {
+    const response = await api.post('/Gestiones/carga-llamadas', formData, {
       headers: {
         'Accept': '*/*',
         'Content-Type': 'multipart/form-data'
         // No establecer Content-Type manualmente, el navegador lo gestiona automáticamente con FormData
-      },
-      responseType: 'arraybuffer' // Para recibir datos binarios correctamente
+      }
     });
-    console.log('Respuesta de /Gestiones/cargar-intentos-vicidial:', response);
+    console.log('Respuesta de /Gestiones/carga-llamadas:', response);
     return response;
   } catch (error) {
-    console.error('Error al obtener historico Archivo:', error);
+    console.error('Error al obtener cargar archivo:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');
@@ -2768,3 +2767,113 @@ export const VisitsLoadFile = async (body) => {
     }
     throw error;
   }}
+
+  export const getSuperInfo = async (idCartera) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+  const url = `/Supervisores/supervisores?idCartera=${idCartera}`;
+    // El interceptor añade el token automáticamente
+    const response = await api.get(url, {
+      headers: {
+        'Accept': '*/*'
+      }
+    });
+    console.log('Respuesta de', url + ':', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener Supervisores:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+export const InsertSuper = async (payload) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+
+    console.log('Enviando a /Supervisores/inserta-cuentas:', payload);
+
+    const response = await api.post('/Supervisores/inserta-cuentas', payload, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log('Respuesta de /Supervisores/inserta-cuentas:', response);
+    return response.data;
+  } catch (error) {
+    console.error('Error al insertar supervisor:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
+
+
+export const getSuperInfoExcel = async (idCartera, fechaDesde, fechaHasta) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+    }
+
+    const url = `/Supervisores/cuentas?idCartera=${idCartera}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`;
+    
+    console.log('Consultando:', url);
+    
+    const response = await api.get(url, {
+      headers: {
+        'Accept': '*/*'
+      }
+    });
+    
+    console.log('Respuesta de /Supervisores/cuentas:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener cuentas de Supervisores:', error);
+    if (error.response?.status === 401) {
+      console.warn('Error 401 - Token inválido o expirado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    if (error.response) {
+      console.error('Datos de respuesta del error:', error.response.data);
+      console.error('Status del error:', error.response.status);
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+    } else {
+      console.error('Error al configurar la solicitud:', error.message);
+    }
+    throw error;
+  }
+};
