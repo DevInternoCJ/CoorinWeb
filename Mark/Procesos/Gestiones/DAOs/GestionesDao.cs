@@ -178,7 +178,7 @@ namespace Loki.Mark.Procesos.Gestiones.DAOs
                     {
                         // Identificamos las filas que estaban en el Excel pero no llegaron a la tabla intermedia
                         erroresTelefonos = (await conn.QueryAsync<dynamic>($@"
-                    SELECT A.Cuenta, A.Telefono, 'Teléfono no asociado a la cuenta en Tabla Maestra' as Resultado
+                    SELECT A.Cuenta, A.Telefono, 'Teléfono no asociado a la cuenta' as Resultado
                     FROM {tableQuoted} A
                     LEFT JOIN {interQuoted} T ON A.idLlamada = T.idLlamada
                     WHERE T.idLlamada IS NULL", transaction: trx)).ToList();
