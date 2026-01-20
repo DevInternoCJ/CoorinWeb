@@ -44,8 +44,14 @@
 
   <ItemGroup>
     <Folder Include="Mark\Consulta\Arrepentimientos\DAOs\" />
-    <Folder Include="Mark\Procesos\CapturaVisitas\DAOs\" />
-    <Folder Include="Mark\Procesos\Visitas\Consulta\" />
+    <Folder Include="Mark\Procesos\Visitas\Corregir\Controllers\" />
+    <Folder Include="Mark\Procesos\Visitas\Corregir\DAOs\" />
+    <Folder Include="Mark\Procesos\Visitas\Corregir\Interfaces\" />
+    <Folder Include="Mark\Procesos\Visitas\Corregir\Services\" />
+    <Folder Include="Mark\Procesos\Visitas\Eliminar\Controllers\" />
+    <Folder Include="Mark\Procesos\Visitas\Eliminar\DAOs\" />
+    <Folder Include="Mark\Procesos\Visitas\Eliminar\Interfaces\" />
+    <Folder Include="Mark\Procesos\Visitas\Eliminar\Services\" />
   </ItemGroup>
 
   

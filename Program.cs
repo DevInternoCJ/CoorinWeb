@@ -123,6 +123,10 @@ using Loki.Mark.Procesos.Metas.Services;
 using Loki.Mark.Procesos.Procesos.DAOs;
 using Loki.Mark.Procesos.Procesos.Interfaces;
 using Loki.Mark.Procesos.Procesos.Services;
+using Loki.Mark.Procesos.Visitas.Carga.DAOs;
+using Loki.Mark.Procesos.Visitas.Carga.Services;
+using Loki.Mark.Procesos.Visitas.Consulta.DAOs;
+using Loki.Mark.Procesos.Visitas.Consulta.Services;
 using Loki.Mark.Reportes.Cliente.DAOs;
 using Loki.Mark.Reportes.Cliente.Services;
 using Loki.Mark.Reportes.DiaDelEjecutivo.DAOs;
@@ -487,9 +491,14 @@ builder.Services.AddScoped<IDiaDelEjecutivoDAOs, DiaDelEjecutivoDAOs>();//padrin
 #endregion
 
 #region Visitas
+builder.Services.AddScoped<IConsultaVisitasService, ConsultaVisitasService>();
+builder.Services.AddScoped<IConsultaVisitasDAO, ConsultaVisitasDAO>();
 
 builder.Services.AddScoped<ICapturaVisitasService, CapturaVisitasService>();
 builder.Services.AddScoped<ICapturaVisitasDAO, CapturaVisitasDAO>();
+
+builder.Services.AddScoped<ICargaVisitasService, CargaVisitasService>();
+builder.Services.AddScoped<ICargaVisitasDAO, CargaVisitasDAO>();
 
 #endregion
 //supervidor
