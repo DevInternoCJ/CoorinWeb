@@ -330,7 +330,6 @@ export default function CoorinDashboard() {
       "Campañas", "Plantillas-Correo", "Frases", "Accionamientos", "Gestiones", "Supervisor", "Procesos-Gespa", // Procesos-Gespa (Gespa)
     ];
 
-
     if (sidebarOptionsMap[menuId]) {
       const option = sidebarOptionsMap[menuId];
 
@@ -346,7 +345,7 @@ export default function CoorinDashboard() {
       setSelectedSidebarOption(option);
       setModalSidebarOpen(true);
       // Reiniciar tamaño del modal de arrepentimientos al abrir
-      if (option === "Arrepentimientos") setRegrestModalSize('pagos');
+      if (option === "Arrepentimientos") setRegrestModalSize("pagos");
     } else {
       // Si no está en el mapeo, verificar si el título está implementado
       if (!implementedOptions.includes(menuTitle)) {
@@ -360,7 +359,6 @@ export default function CoorinDashboard() {
       setModalSidebarOpen(true);
     }
   };
-
 
   // Estado que refleja si la sidebar está en modo minificado (body tiene la clase hs-overlay-minified)
   const [sidebarMinified, setSidebarMinified] = useState(

@@ -2355,7 +2355,7 @@ export const getAddressesCapture = async (idCartera, cuentaOrExpediente, esExped
     }
     // Si es expediente, enviar como string; si es cuenta, enviar como int
     const cuentaParam = esExpediente ? cuentaOrExpediente : parseInt(cuentaOrExpediente, 10);
-    console.log('📤 Enviando a /captura/visitas/buscar-cuenta', { idCartera, cuentaOrExpediente: cuentaParam, esExpediente });
+    console.log('  Enviando a /captura/visitas/buscar-cuenta', { idCartera, cuentaOrExpediente: cuentaParam, esExpediente });
     // El interceptor añade el token automáticamente
     const response = await api.get('/captura/visitas/buscar-cuenta', {
       params: {
@@ -2367,7 +2367,7 @@ export const getAddressesCapture = async (idCartera, cuentaOrExpediente, esExped
         'Accept': '*/*'
       }
     });
-    console.log('📥 Respuesta de /captura/visitas/buscar-cuenta:', response);
+    console.log('  Respuesta de /captura/visitas/buscar-cuenta:', response);
     return response;
   } catch (error) {
     console.error('Error al obtener domicilios captura:', error);
@@ -2410,7 +2410,7 @@ export const obtenerLatitudLongitud = async (direccion) => {
     });
 
     if (!response.ok) {
-      console.warn('⚠️ Error al geocodificar dirección:', response.status);
+      console.warn('  Error al geocodificar dirección:', response.status);
       return { latitud: "", longitud: "" };
     }
 
@@ -2425,10 +2425,10 @@ export const obtenerLatitudLongitud = async (direccion) => {
       };
     }
 
-    console.warn('⚠️ No se encontraron coordenadas para la dirección:', direccion);
+    console.warn('  No se encontraron coordenadas para la dirección:', direccion);
     return { latitud: "", longitud: "" };
   } catch (error) {
-    console.error('❌ Error al obtener coordenadas:', error);
+    console.error('  Error al obtener coordenadas:', error);
     return { latitud: "", longitud: "" };
   }
 };
@@ -2445,7 +2445,7 @@ export const guardarVisitaCapturada = async (visitaData) => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
 
-    console.log('📤 Enviando a /captura/visitas/guardar:', visitaData);
+    console.log('  Enviando a /captura/visitas/guardar:', visitaData);
 
     const response = await api.post('/captura/visitas/guardar', visitaData, {
       headers: {
@@ -2454,22 +2454,22 @@ export const guardarVisitaCapturada = async (visitaData) => {
       }
     });
 
-    console.log('📥 Respuesta de /captura/visitas/guardar:', response);
+    console.log('  Respuesta de /captura/visitas/guardar:', response);
     return response;
   } catch (error) {
-    console.error('❌ Error al guardar visita:', error);
+    console.error('  Error al guardar visita:', error);
     if (error.response?.status === 401) {
-      console.warn('⚠️ Error 401 - Token inválido o expirado');
+      console.warn('  Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
     }
     if (error.response) {
-      console.error('📊 Datos de respuesta del error:', error.response.data);
-      console.error('🔢 Status del error:', error.response.status);
+      console.error('  Datos de respuesta del error:', error.response.data);
+      console.error('  Status del error:', error.response.status);
     } else if (error.request) {
-      console.error('❌ No se recibió respuesta del servidor:', error.request);
+      console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
-      console.error('❌ Error al configurar la solicitud:', error.message);
+      console.error('  Error al configurar la solicitud:', error.message);
     }
     throw error;
   }

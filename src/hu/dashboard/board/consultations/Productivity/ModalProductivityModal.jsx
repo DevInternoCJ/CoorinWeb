@@ -245,7 +245,7 @@ const ProductivityModal = ({
       console.log("========================================");
       
       const data = await getProductivity(requestData);
-      console.log("📥 Respuesta raw del endpoint de productividad:", data);
+      console.log("  Respuesta raw del endpoint de productividad:", data);
 
       // Manejar diferentes tipos de respuesta del servidor
       let processedData = [];
@@ -317,7 +317,7 @@ const ProductivityModal = ({
       
       setAllProductivityData(processedData);
     } catch (error) {
-      console.error("❌ Error al obtener datos de productividad:", error);
+      console.error("  Error al obtener datos de productividad:", error);
       setErrorProductivity("Error al obtener los datos de productividad");
       setAllProductivityData([]);
     } finally {

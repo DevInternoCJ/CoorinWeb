@@ -23,10 +23,10 @@ const ModalCatalogosContent = () => {
       try {
         setLoading(true);
         setError(null);
-        console.log("📤 Cargando catálogos...");
+        console.log("  Cargando catálogos...");
 
         const response = await getCatalogoCard();
-        console.log("📥 Respuesta de getCatalogoCard:", response);
+        console.log("  Respuesta de getCatalogoCard:", response);
 
         if (response && Array.isArray(response)) {
           // Mapear la respuesta del API al formato esperado
@@ -63,10 +63,10 @@ const ModalCatalogosContent = () => {
     const loadCatalogValues = async () => {
       try {
         setLoadingValues(true);
-        console.log("📤 Cargando valores de catálogos...");
+        console.log("  Cargando valores de catálogos...");
 
         const response = await getCatalogoValueCard();
-        console.log("📥 Respuesta de getCatalogoValueCard:", response);
+        console.log("  Respuesta de getCatalogoValueCard:", response);
 
         if (response && Array.isArray(response)) {
           setCatalogsValuesData(response);
@@ -78,7 +78,7 @@ const ModalCatalogosContent = () => {
           setCatalogsValuesData([]);
         }
       } catch (err) {
-        console.error("❌ Error al cargar valores de catálogos:", err);
+        console.error("  Error al cargar valores de catálogos:", err);
         setCatalogsValuesData([]);
       } finally {
         setLoadingValues(false);

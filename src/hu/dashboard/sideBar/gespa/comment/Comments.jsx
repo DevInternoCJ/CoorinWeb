@@ -162,7 +162,7 @@ const Comments = ({ onClose, onSaveComment }) => {
   const { situationOptions, loading } = useSituationCatalog();
   const form = useCommentForm();
 
-  // ✅ SOLUCIÓN 1: Pasar form directamente al hook
+  //   SOLUCIÓN 1: Pasar form directamente al hook
   const { handleSave } = useSaveComment({
     form: form,
     situationOptions,
