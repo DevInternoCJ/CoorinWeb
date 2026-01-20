@@ -340,10 +340,10 @@ const TabComplementLoad = () => {
 
                     if (json.success) {
                         // Mostrar mensaje de éxito con estadísticas
-                        const mensaje = `✅ ${json.message || 'Carga completada'}\n` +
-                                       `📊 Total: ${json.total || 0} | ` +
-                                       `✔️ Insertados: ${json.insertados || 0} | ` +
-                                       `❌ Incorrectos: ${json.incorrectos || 0}`;
+                        const mensaje = ` ${json.message || 'Carga completada'}\n` +
+                                       ` Total: ${json.total || 0} | ` +
+                                       ` Insertados: ${json.insertados || 0} | ` +
+                                       ` Incorrectos: ${json.incorrectos || 0}`;
                         
                         toast.success(mensaje, { duration: 5000 });
 

@@ -88,9 +88,9 @@ const ModalBaseSupervisor = ({
                                     id="cartera-supervisor-select"
                                 >
                                     <option value="" disabled hidden></option>
-                                    <option value="cartera1">Cartera 1</option>
-                                    <option value="cartera2">Cartera 2</option>
-                                    <option value="cartera3">Cartera 3</option>
+                                    <option value="1">Cartera 1</option>
+                                    <option value="2">Cartera 2</option>
+                                    <option value="31">Cartera 31</option>
                                 </select>
                                 <label
                                     htmlFor="cartera-supervisor-select"

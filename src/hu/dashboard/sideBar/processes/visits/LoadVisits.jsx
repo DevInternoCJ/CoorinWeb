@@ -384,35 +384,33 @@ const LoadVisitsContent = ({ mostrarTabla, setMostrarTabla, onClose }) => {
             
             console.log('📥 Respuesta recibida:', response);
             
-            // Procesar respuesta arraybuffer
+            // Procesar respuesta JSON
             if (response.status === 200) {
-                // Si la respuesta es un archivo (Excel con errores o confirmación)
-                const blob = new Blob([response.data], { 
-                    type: response.headers['content-type'] || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-                });
+                console.log('📄 Respuesta JSON del servidor:', response.data);
                 
-                // Obtener el nombre del archivo desde el header Content-Disposition
-                const contentDisposition = response.headers['content-disposition'];
-                let fileName = 'resultado_carga_visitas.xlsx';
-                
-                if (contentDisposition) {
-                    const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-                    if (fileNameMatch && fileNameMatch[1]) {
-                        fileName = fileNameMatch[1].replace(/['"]|utf-8/g, '').trim();
+                // Si el servidor retorna un archivo Excel binario codificado
+                if (response.data && typeof response.data === 'string') {
+                    // Convertir de base64 a Blob si es necesario
+                    const binaryString = atob(response.data);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
                     }
+                    const blob = new Blob([bytes], { 
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                    });
+                    
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'resultado_carga_visitas.xlsx';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
                 }
                 
-                // Descargar el archivo
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = fileName;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-                
-                toast.success(`Carga completada. Se descargó el archivo de resultados: ${fileName}`);
+                toast.success('Archivo cargado exitosamente');
                 
                 // Limpiar el formulario
                 setSelectedFile(null);
