@@ -116,108 +116,124 @@ namespace Loki.Mark.Procesos.Gestiones.DAOs
 
         //carga gestiones
         #region carga gestiones tel
-        public async Task<CargaLlamadasResponse> CargarLlamadasAsync( DataTable tabla, int idCartera, int idEjecutivo, string servidor)
+        public async Task<CargaLlamadasResponse> CargarLlamadasAsync(DataTable tabla, int idCartera, int idEjecutivo, string servidor)
         {
             string baseName = "dbComplemento";
             string schema = "Temp";
             string tempTable = $"LLAM_{idEjecutivo}";
+            string intermediateTable = $"TEMP_{idEjecutivo}_LLAM";
 
-            string tableFull = $"{baseName}.{schema}.{tempTable}";
             string tableQuoted = $"[{baseName}].[{schema}].[{tempTable}]";
+            string interQuoted = $"[{baseName}].[{schema}].[{intermediateTable}]";
 
             using var conn = _dbContFactory.GetSqlConnection(servidor, "Collection");
             await conn.OpenAsync();
 
             try
             {
-                // Crear tabla solo una vez, si no existe
-                var sqlCreate = $@"
-                IF NOT EXISTS (
-                    SELECT 1 FROM sys.tables t
-                    JOIN sys.schemas s ON t.schema_id = s.schema_id
-                    WHERE t.name = '{tempTable}' AND s.name = '{schema}'
-                )
-                BEGIN
-                    CREATE TABLE {tableQuoted} (
-                ";
+                // 1. Borrar tablas si quedaron de una ejecución fallida previa
+                await conn.ExecuteAsync($@"
+                IF OBJECT_ID('{tableQuoted}', 'U') IS NOT NULL DROP TABLE {tableQuoted};
+                IF OBJECT_ID('{interQuoted}', 'U') IS NOT NULL DROP TABLE {interQuoted};");
 
+                // 2. CREAR TABLA TEMPORAL: 
+                string sqlCreate = $"CREATE TABLE {tableQuoted} ( ";
                 foreach (DataColumn col in tabla.Columns)
                 {
-                    string tipo =
-                        (col.ColumnName == "FechaGestion" ||
-                         col.ColumnName == "HoraGestion" ||
-                         col.ColumnName == "Duracion")
-                        ? "DATETIME NULL"
-                        : "VARCHAR(8000) NULL";
-
-                    sqlCreate += $" [{col.ColumnName}] {tipo},";
+                    string tipo = (col.ColumnName.Contains("Fecha") || col.ColumnName.Contains("Hora"))
+                        ? "DATETIME NULL" : "VARCHAR(8000) NULL";
+                    sqlCreate += $"\r\n [{col.ColumnName}] {tipo},";
                 }
-
-                sqlCreate += @"
-                        idLlamada INT NOT NULL IDENTITY(1,1) PRIMARY KEY
-                    );
-                END
-                ";
-
+                sqlCreate += " idLlamada INT NOT NULL IDENTITY(1,1) PRIMARY KEY );";
                 await conn.ExecuteAsync(sqlCreate);
 
-                // Borrar registros ANTES del bulk
-                await conn.ExecuteAsync($"DELETE FROM {tableQuoted};");
-
                 using var trx = conn.BeginTransaction();
-
                 try
                 {
-                    // === BULKCOPY ===
-                    using (var bulk = new SqlBulkCopy((SqlConnection)conn, SqlBulkCopyOptions.Default, trx))
+                    // 3. BULK COPY: Subir los datos del DataTable a la tabla física en SQL
+                    using (var bulk = new SqlBulkCopy((SqlConnection)conn, SqlBulkCopyOptions.Default, (SqlTransaction)trx))
                     {
                         bulk.DestinationTableName = tableQuoted;
-                        bulk.BulkCopyTimeout = 1800;
-
+                        bulk.BulkCopyTimeout = 600;
                         foreach (DataColumn col in tabla.Columns)
                             bulk.ColumnMappings.Add(col.ColumnName, col.ColumnName);
 
                         await bulk.WriteToServerAsync(tabla);
                     }
 
-                    // === Ejecutar el SP con tabla llena ===
-                    var errores = await conn.QueryAsync(
-                        $@"EXEC {baseName}.dbo.[1.0.InsertaLlamadas]
-                   @idCartera, @idEjecutivo, @Base",
-                        new
-                        {
-                            idCartera,
-                            idEjecutivo,
-                            Base = baseName
-                        },
+                    // 4. EJECUTAR STORED PROCEDURE: Procesa la inserción y valida Contactos, Sucursales, etc.
+                    var erroresSp = (await conn.QueryAsync<dynamic>(
+                        $@"EXEC {baseName}.dbo.[1.0.InsertaLlamadas] @idCartera, @idEjecutivo, @Base",
+                        new { idCartera, idEjecutivo = idEjecutivo.ToString(), Base = baseName },
                         transaction: trx
-                    );
+                    )).ToList();
 
+                    // 5. VALIDACIÓN DE TELÉFONOS
+                    int totalRecords = tabla.Rows.Count;
+                    int sobrevivientes = await conn.ExecuteScalarAsync<int>(
+                        $"SELECT COUNT(*) FROM {interQuoted}", transaction: trx);
+
+                    var erroresTelefonos = new List<dynamic>();
+                    if (totalRecords > sobrevivientes)
+                    {
+                        // Identificamos las filas que estaban en el Excel pero no llegaron a la tabla intermedia
+                        erroresTelefonos = (await conn.QueryAsync<dynamic>($@"
+                    SELECT A.Cuenta, A.Telefono, 'Teléfono no asociado a la cuenta en Tabla Maestra' as Resultado
+                    FROM {tableQuoted} A
+                    LEFT JOIN {interQuoted} T ON A.idLlamada = T.idLlamada
+                    WHERE T.idLlamada IS NULL", transaction: trx)).ToList();
+                    }
+
+                    // 6. CONSOLIDAR TODOS LOS ERRORES
+                    var todosLosErrores = erroresSp.Concat(erroresTelefonos).ToList();
+                    int totalErrores = todosLosErrores.Count;
+                    int insertadosRealmente = totalRecords - totalErrores;
+
+                    // 7. LIMPIEZA FINAL: Borrar tablas después de procesar 
+                    await conn.ExecuteAsync($@"
+                IF OBJECT_ID('{tableQuoted}', 'U') IS NOT NULL DROP TABLE {tableQuoted};
+                IF OBJECT_ID('{interQuoted}', 'U') IS NOT NULL DROP TABLE {interQuoted};",
+                        transaction: trx);
+
+                    // 8. ENVIAR RESPUESTA
                     trx.Commit();
 
-                    int total = tabla.Rows.Count;
-                    int incorrectos = errores.Count();
-                    int insertados = total - incorrectos;
-
-                    return new CargaLlamadasResponse
+                    if (totalErrores == 0)
                     {
-                        Success = true,
-                        Total = total,
-                        Insertados = insertados,
-                        Incorrectos = incorrectos,
-                        Errores = errores,
-                        Message = "Carga de llamadas finalizada correctamente."
-                    };
+                        return new CargaLlamadasResponse
+                        {
+                            Success = true,
+                            Total = totalRecords,
+                            Insertados = totalRecords,
+                            Message = "Carga procesada exitosamente."
+                        };
+                    }
+                    else
+                    {
+                        return new CargaLlamadasResponse
+                        {
+                            Success = false,
+                            Total = totalRecords,
+                            Insertados = insertadosRealmente,
+                            Incorrectos = totalErrores,
+                            Errores = todosLosErrores,
+                            Message = $"Proceso terminado. Se insertaron {insertadosRealmente} registros y {totalErrores} fueron rechazados por validación."
+                        };
+                    }
                 }
-                catch (Exception exBulk)
+                catch (SqlException ex) when (ex.Number == 2627) 
                 {
-                    try { trx.Rollback(); } catch { }
-
+                    if (trx.Connection != null) trx.Rollback();
                     return new CargaLlamadasResponse
                     {
                         Success = false,
-                        Message = $"Error durante Bulk/SP: {exBulk.Message}"
+                        Message = "Error de Duplicados: Ya existen llamadas para esta cuenta con la misma fecha y hora exacta."
                     };
+                }
+                catch (Exception)
+                {
+                    if (trx.Connection != null) trx.Rollback();
+                    throw;
                 }
             }
             catch (Exception ex)
@@ -225,11 +241,10 @@ namespace Loki.Mark.Procesos.Gestiones.DAOs
                 return new CargaLlamadasResponse
                 {
                     Success = false,
-                    Message = $"Error creando tabla temporal: {ex.Message}"
+                    Message = $"Error Crítico en el Servidor: {ex.Message}"
                 };
             }
         }
-
         public DataTable LeerArchivo(IFormFile archivo)
         {
             var extension = Path.GetExtension(archivo.FileName).ToLower();
