@@ -31,13 +31,17 @@ const FileUploader = ({ onFileChange, onSave, saveDisabled,
       onFileChange && onFileChange(null, "");
     }
   };
+  const carteraOptions = [
+    { value: "", label: "Seleccione" },
+    { value: "amex", label: "American Express" },
+  ];
 
   return (
     <div className=" d-flex items-center justify-center">
                 <div className={selectWidth}>
           <SelectWallet
             label={selectConfig.label}
-            options={selectConfig.options}
+            options={carteraOptions}
             value={selectConfig.value}
             onChange={selectConfig.onChange}
           />
