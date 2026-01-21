@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import LogoCoorin from "../../../../../assets/logo_coorin_7.svg";
 import CustomSelect from "../../../board/screenFields/SelectWallet";
-import { GetVerifyProduct, getCarteras, getCarterasProductos} from "../../../../../services/mark/orochi/LokiServices";
+import {
+  GetVerifyProduct,
+  getCarteras,
+  getCarterasProductos,
+} from "../../../../../services/mark/orochi/LokiServices";
 import { toast } from "sonner";
-
 
 const ModalHeader = ({
   onClose,
@@ -13,28 +16,28 @@ const ModalHeader = ({
   setSelectedProduct,
   setVerifyResult,
   setLoading,
-  setShowDataTables,
 }) => {
   const servidor = "Orochi";
   const [carteraOptions, setCarteraOptions] = useState([
-    { label: "Cargando...", value: 0 }
+    { label: "Cargando...", value: 0 },
   ]);
-  
+
   const [productOptions, setProductOptions] = useState([
-    { label: "Cargando...", value: 0 }
+    { label: "Selecciona una cartera primero", value: 0 },
   ]);
+  const [selectedCartera, setSelectedCartera] = useState(null);
+
   // Efecto para cargar las carteras
   useEffect(() => {
     const fetchCarteras = async () => {
       try {
         const carteras = await getCarteras();
-        
-        // Mapear la respuesta al formato necesario para el select
-        const options = carteras.map(cartera => ({
+
+        const options = carteras.map((cartera) => ({
           label: cartera.cartera,
-          value: cartera.idCartera
+          value: cartera.idCartera,
         }));
-        
+
         setCarteraOptions(options);
       } catch (error) {
         console.error("Error fetching carteras:", error);
@@ -46,38 +49,56 @@ const ModalHeader = ({
     fetchCarteras();
   }, []);
 
-    // Efecto para cargar las carteras
+  // Efecto para cargar y filtrar productos cuando cambia la cartera seleccionada
   useEffect(() => {
-    const fetchProductos = async () => {
+    if (!selectedCartera || selectedCartera === 0 || selectedCartera === "0") {
+      setProductOptions([{ label: "Selecciona una cartera primero", value: 0 }]);
+      return;
+    }
+
+    const fetchAndFilterProducts = async () => {
+      setProductOptions([{ label: "Cargando productos...", value: 0 }]);
+      
       try {
         const productos = await getCarterasProductos();
-        
-        // Mapear la respuesta al formato necesario para el select
-        const options = productos.map(producto => ({
-          label: producto.producto,
-          value: producto.idProducto
-        }));
 
-        setProductOptions(options);
+        // Convertir selectedCartera a número para la comparación
+        const carteraId = Number(selectedCartera);
+
+        // Filtrar productos por idCartera (comparando números)
+        const filteredProducts = productos.filter((producto) => {
+          return Number(producto.idCartera) === carteraId;
+        });
+
+        console.log(`✅ Encontrados ${filteredProducts.length} productos para la cartera ${carteraId}`);
+
+        if (filteredProducts.length > 0) {
+          const options = filteredProducts.map((producto) => ({
+            label: producto.producto,
+            value: producto.idProducto,
+          }));
+          setProductOptions(options);
+        } else {
+          setProductOptions([{ label: "Sin productos disponibles", value: 0 }]);
+        }
       } catch (error) {
-        console.error("Error fetching productos:", error);
+        console.error("Error al cargar productos:", error);
         toast.error("Error al cargar los productos");
-        setProductOptions([{ label: "Error al cargar", value: 0 }]);
+        setProductOptions([{ label: "Error al cargar productos", value: 0 }]);
       }
     };
 
-    fetchProductos();
-  }, []);
+    fetchAndFilterProducts();
+  }, [selectedCartera]);
 
   // Efecto para la verificación del producto
   useEffect(() => {
-    console.log("selectedProduct for verification:", selectedProduct);
-    if (!selectedProduct || selectedProduct.value === 0) {
+    if (!selectedProduct || selectedProduct.value === 0 || !selectedProduct.value) {
       setVerifyResult(null);
       toast.dismiss("product-verify");
       return;
     }
-    
+
     const toastId = "product-verify";
     const fetchVerifyProduct = async () => {
       setLoading(true);
@@ -93,7 +114,7 @@ const ModalHeader = ({
         setVerifyResult(result);
       } catch (error) {
         const errorMessage = error.message || "Error al verificar el producto.";
-        toast.error(` ${errorMessage}`, {
+        toast.error(`${errorMessage}`, {
           id: toastId,
           duration: 5000,
         });
@@ -105,6 +126,21 @@ const ModalHeader = ({
 
     fetchVerifyProduct();
   }, [selectedProduct, servidor, setLoading, setVerifyResult]);
+
+ const handleCarteraChange = (value) => {
+    setSelectedCartera(value);
+    // Resetear el producto seleccionado cuando cambia la cartera
+    if (setSelectedProduct) {
+      setSelectedProduct(null);
+    }
+  };
+
+  const handleProductChange = (value) => {
+    console.log("Producto seleccionado:", value);
+    if (setSelectedProduct) {
+      setSelectedProduct({ value: Number(value) });
+    }
+  };
 
   return (
     <div className="bg-neutral-100 px-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-gray-200">
@@ -122,6 +158,7 @@ const ModalHeader = ({
                   options={carteraOptions}
                   defaultValue={carteraOptions[0]?.value}
                   label="Cartera"
+                  onChange={handleCarteraChange}
                 />
               </div>
               <div>
@@ -129,6 +166,7 @@ const ModalHeader = ({
                   options={productOptions}
                   defaultValue={productOptions[0]?.value}
                   label="Producto"
+                  onChange={handleProductChange}
                 />
               </div>
             </div>
@@ -139,6 +177,7 @@ const ModalHeader = ({
         <button
           onClick={onClose}
           className="text-jerarquia3 hover:bg-background-dashboard hover:text-red-600 text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+          aria-label="Cerrar"
         >
           &times;
         </button>

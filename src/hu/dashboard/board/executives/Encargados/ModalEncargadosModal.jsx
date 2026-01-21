@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import ModalEncargadosContent from "../Encargados/ModalEncargadosContent";
 import { IconEncargados } from "../IconesEjecutives";
@@ -26,8 +26,13 @@ const EncargadosModal = ({
   const [error, setError] = useState(null);
   const [isChangingAssignment, setIsChangingAssignment] = useState(false);
 
+  // Ref para controlar si ya se mostró el toast
+  const toastShownRef = useRef(false);
+
   // Carga real de datos desde servicios
   useEffect(() => {
+    if (!isOpen) return; // Solo cargar cuando el modal esté abierto
+    
     setLoading(true);
     Promise.all([
       getCarteras(),
@@ -56,7 +61,7 @@ const EncargadosModal = ({
         toast.error("Error al cargar los datos. Inténtalo de nuevo.");
         setLoading(false);
       });
-  }, []);
+  }, [isOpen]); // Solo ejecutar cuando cambia isOpen
 
   // Filtrar encargados según cartera y producto, usando los datos originales
   const filtrarEncargados = useCallback(
@@ -191,6 +196,7 @@ const EncargadosModal = ({
       </label>
     </div>
   );
+  
   const productoSelector = (
     <div className="relative mb-0 w-full md:w-auto">
       <select
@@ -217,6 +223,7 @@ const EncargadosModal = ({
       </label>
     </div>
   );
+  
   const encargadoSelector = (
     <div className="relative mb-0 w-full md:w-auto">
       {loading ? (
@@ -280,17 +287,19 @@ const EncargadosModal = ({
     useState(null);
 
   // Callback para recibir el contador filtrado desde el content
-  const handleContadorChange = (contador) => {
+  const handleContadorChange = useCallback((contador) => {
     setContadorEncargados(contador);
-  };
+  }, []);
+  
   // Callback para recibir el nombre del nodo raíz desde el content
-  const handleNodoEjecutivoHeaderChange = (nombre) => {
+  const handleNodoEjecutivoHeaderChange = useCallback((nombre) => {
     setNodoEjecutivoHeader(nombre);
-  };
+  }, []);
+  
   // Callback para recibir la función de cambiar asignación desde el content
-  const handleCambiarAsignacionCallback = (callback) => {
+  const handleCambiarAsignacionCallback = useCallback((callback) => {
     setHandleCambiarAsignacionContent(() => callback);
-  };
+  }, []);
 
   const cambiarButton = (
     <button
@@ -305,64 +314,53 @@ const EncargadosModal = ({
     </button>
   );
 
-  // Footer personalizado con mensaje informativo
-  const CustomFooter = () => (
-    <div
-      className="px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-4 
-                       bg-gray-50 border-t border-gray-200 flex-shrink-0"
+  // Mostrar toast informativo SOLO una vez cuando el modal se abre
+  useEffect(() => {
+    if (isOpen && !toastShownRef.current) {
+      toast.info("Palomee los Ejecutivos que desee pasar a otro encargado y presione Cambiar.");
+      toastShownRef.current = true;
+    }
+    
+    // Resetear el ref cuando el modal se cierra
+    if (!isOpen) {
+      toastShownRef.current = false;
+    }
+  }, [isOpen]);
+
+  return (
+    <ReusableModal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="encargados"
+      showHeader={true}
+      title="Encargado - Coorin"
+      icon={IconEncargados}
+      iconClassName="text-jerarquia3"
+      headerProps={{
+        titleClassName: "text-jerarquia3",
+        carteraSelector,
+        productoSelector,
+        encargadoSelector,
+        contadorEncargados,
+        nodoEjecutivoHeader,
+        cambiarButton
+      }}
+      showFooter={true}
+      enableBounce={enableBounce}
+      enableShakeOnBackdropClick={enableShakeOnBackdropClick}
+      enableBounceOnBackdropOrEscape={enableBounceOnBackdropOrEscape}
+      closeOnBackdropClick={closeOnBackdropClick}
+      contentClassName="flex flex-col gap-4 h-auto !overflow-hidden"
+      modalClassName="border-0 shadow-2xl overflow-hidden"
+      {...props}
     >
-      <p
-        className="text-sm text-justify m-0 italic"
-        style={{ color: "var(--color-jerarquia3)" }}
-      >
-        Palomee los Ejecutivos que desee pasar a otro encargado y presione
-        Cambiar.
-      </p>
-    </div>
+      <ModalEncargadosContent 
+        onContadorChange={handleContadorChange} 
+        onNodoEjecutivoHeaderChange={handleNodoEjecutivoHeaderChange}
+        onCambiarAsignacionCallback={handleCambiarAsignacionCallback}
+      />
+    </ReusableModal>
   );
-
-    // Mostrar toast informativo al montar el componente
-    useEffect(() => {
-        if (isOpen) {
-            toast.info("Palomee los Ejecutivos que desee pasar a otro encargado y presione Cambiar.");
-        }
-    }, [isOpen]);
-
-    return (
-        <ReusableModal
-            isOpen={isOpen}
-            onClose={onClose}
-            size="encargados"
-            showHeader={true}
-            title="Encargado - Coorin"
-            icon={IconEncargados}
-            iconClassName="text-jerarquia3"
-            headerProps={{
-                titleClassName: "text-jerarquia3",
-                carteraSelector,
-                productoSelector,
-                encargadoSelector,
-                contadorEncargados,
-                nodoEjecutivoHeader,
-                cambiarButton
-            }}
-            // Sin footer informativo
-            showFooter={true}
-            enableBounce={enableBounce}
-            enableShakeOnBackdropClick={enableShakeOnBackdropClick}
-            enableBounceOnBackdropOrEscape={enableBounceOnBackdropOrEscape}
-            closeOnBackdropClick={closeOnBackdropClick}
-            contentClassName="flex flex-col gap-4 h-auto !overflow-hidden"
-            modalClassName="border-0 shadow-2xl overflow-hidden"
-            {...props}
-        >
-            <ModalEncargadosContent 
-                onContadorChange={handleContadorChange} 
-                onNodoEjecutivoHeaderChange={handleNodoEjecutivoHeaderChange}
-                onCambiarAsignacionCallback={handleCambiarAsignacionCallback}
-            />
-        </ReusableModal>
-    );
 };
 
 export default EncargadosModal;
