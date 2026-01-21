@@ -8,12 +8,14 @@ import {
   IconOnlineCharges,
   IconRepentance,
   IconStatement,
+  IconBranchOffice
 } from "./IconsProcessGespa";
 import Definition from "./process/Definition";
 import Repentance from "./process/Repentance";
 import AccountBloking from "./process/AccountBlocking";
 import OnlineCharges from "./process/OnlineCharges";
 import AccountStatements from "./process/AccountStatements";
+import BranchOffice from "./process/BranchOffice";
 import { IconWarning } from "../../../board/executives/scripts/IconScripts";
 
 const ProcessGespa = ({ onClose }) => {
@@ -67,6 +69,11 @@ const ProcessGespa = ({ onClose }) => {
       id: "estados-cuenta",
       label: "Estados de cuenta",
       icon: <IconStatement className="size-5" />,
+    },
+    {
+      id: "sucursales",
+      label: "Sucursales",
+      icon: <IconBranchOffice className="size-5" />,
     },
   ];
 
@@ -154,6 +161,7 @@ const ProcessGespa = ({ onClose }) => {
                 {tab.id === "bloqueo-cuentas" && <AccountBloking />}
                 {tab.id === "cargos-en-linea" && <OnlineCharges />}
                 {tab.id === "estados-cuenta" && <AccountStatements />}
+                {tab.id === "sucursales" && (<BranchOffice />)}
               </div>
             ))}
 
