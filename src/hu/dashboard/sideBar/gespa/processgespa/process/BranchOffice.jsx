@@ -1,23 +1,17 @@
 // FileUploader.jsx
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect} from "react";
 import SaveButton from "../../../Administration/gespa/ButtonSave";
 import { IconFile } from "../../comment/IconsComments";
 import SelectWallet from "../../../../board/screenFields/SelectWallet";
+import { getCarteras } from "../../../../../../services/mark/orochi/LokiServices";
+import { toast } from "sonner";
 
-/**
- * FileUploader
- * - maneja selección de archivo y expone: selectedFile, selectedFileName, onSelect
- * - renderiza botones: seleccionar y acción (guardar) - la acción de guardar se delega al prop onSave
- */
-const FileUploader = ({ onFileChange, onSave, saveDisabled, 
-     selectConfig = {
-    label: "Cartera",
-    value: "",
-    onChange: () => {},
-    options: [],
-  },
+const FileUploader = ({ onFileChange, onSave, saveDisabled, cartera, onCarteraChange,
   selectWidth = "w-64",
 }) => {
+  const [carteraOptions, setCarteraOptions] = useState([
+        { value: "", label: "Seleccione una cartera" },
+      ]);
   const fileInputRef = useRef(null);
   const [selectedFileName, setSelectedFileName] = useState("");
 
@@ -31,19 +25,38 @@ const FileUploader = ({ onFileChange, onSave, saveDisabled,
       onFileChange && onFileChange(null, "");
     }
   };
-  const carteraOptions = [
-    { value: "", label: "Seleccione" },
-    { value: "amex", label: "American Express" },
-  ];
+      useEffect(() => {
+        const fetchCarteras = async () => {
+          try {
+            const carteras = await getCarteras();
+    
+            const options = [
+              { value: "", label: "Seleccione una cartera" },
+              ...carteras.map((cartera) => ({
+                label: cartera.cartera,
+                value: cartera.idCartera,
+              }))
+            ];
+    
+            setCarteraOptions(options);
+          } catch (error) {
+            console.error("Error fetching carteras:", error);
+            toast.error("Error al cargar las carteras");
+            setCarteraOptions([{ value: "", label: "Error al cargar" }]);
+          }
+        };
+    
+        fetchCarteras();
+      }, []);
 
   return (
     <div className=" d-flex items-center justify-center">
-                <div className={selectWidth}>
+        <div className={selectWidth}>
           <SelectWallet
-            label={selectConfig.label}
-            options={carteraOptions}
-            value={selectConfig.value}
-            onChange={selectConfig.onChange}
+          label="Cartera"
+          value={cartera}
+          onChange={onCarteraChange}
+          options={carteraOptions}
           />
         </div>
     <div className="my-3 bg-neutral-100 flex items-center gap-5 rounded-md border-none">

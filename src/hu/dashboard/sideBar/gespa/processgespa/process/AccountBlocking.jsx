@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect, useState}from "react";
 import SearchForm from "./SearchForm"; // ajusta el path
+import { getCarteras } from "../../../../../../services/mark/orochi/LokiServices";
+import { toast } from "sonner";
 
 const AccountBloking = ({
   cartera,
@@ -10,20 +12,41 @@ const AccountBloking = ({
   onSearchChange,
   onSearchClick,
 }) => {
-  const carteraOptions = [
-    { value: "", label: "Seleccione" },
-    { value: "amex", label: "American Express" },
-    { value: "banamex", label: "Banamex" },
-    { value: "santander", label: "Santander" },
-  ];
+    const [carteraOptions, setCarteraOptions] = useState([
+      { value: "", label: "Seleccione una cartera" },
+    ]);
+    // Efecto para cargar las carteras desde el servicio
+    useEffect(() => {
+      const fetchCarteras = async () => {
+        try {
+          const carteras = await getCarteras();
+  
+          const options = [
+            { value: "", label: "Seleccione una cartera" },
+            ...carteras.map((cartera) => ({
+              label: cartera.cartera,
+              value: cartera.idCartera,
+            }))
+          ];
+  
+          setCarteraOptions(options);
+        } catch (error) {
+          console.error("Error fetching carteras:", error);
+          toast.error("Error al cargar las carteras");
+          setCarteraOptions([{ value: "", label: "Error al cargar" }]);
+        }
+      };
+  
+      fetchCarteras();
+    }, []);
 
   return (
     <SearchForm
       selectConfig={{
-        label: "Cartera",
-        value: cartera,
-        onChange: onCarteraChange,
-        options: carteraOptions,
+          label: "Cartera",
+          value: cartera,
+          onChange: onCarteraChange,
+          options: carteraOptions,
       }}
       radioConfig={{
         label: "Tipo",

@@ -19,13 +19,13 @@ const ModalHeader = ({
 }) => {
   const servidor = "Orochi";
   const [carteraOptions, setCarteraOptions] = useState([
-    { label: "Seleccione una cartera", value: "" }, // ⭐ Opción por defecto
+    { label: "Seleccione una cartera", value: "" }, //  Opción por defecto
   ]);
 
   const [productOptions, setProductOptions] = useState([
     { label: "Selecciona una cartera primero", value: "" },
   ]);
-  const [selectedCartera, setSelectedCartera] = useState(""); // ⭐ Inicializado como string vacío
+  const [selectedCartera, setSelectedCartera] = useState(""); //Inicializado como string vacío
 
   // Efecto para cargar las carteras
   useEffect(() => {
@@ -34,7 +34,7 @@ const ModalHeader = ({
         const carteras = await getCarteras();
 
         const options = [
-          { label: "Seleccione una cartera", value: "" }, // ⭐ Primera opción
+          { label: "Seleccione una cartera", value: "" }, // Primera opción
           ...carteras.map((cartera) => ({
             label: cartera.cartera,
             value: cartera.idCartera,
@@ -54,7 +54,7 @@ const ModalHeader = ({
 
   // Efecto para cargar y filtrar productos cuando cambia la cartera seleccionada
   useEffect(() => {
-    // ⭐ Validación mejorada
+    // Validación mejorada
     if (!selectedCartera || selectedCartera === "" || selectedCartera === "0" || selectedCartera === 0) {
       setProductOptions([{ label: "Selecciona una cartera primero", value: "" }]);
       return;
@@ -78,7 +78,7 @@ const ModalHeader = ({
 
         if (filteredProducts.length > 0) {
           const options = [
-            { label: "Seleccione un producto", value: "" }, // ⭐ Primera opción para productos
+            { label: "Seleccione un producto", value: "" }, // Primera opción para productos
             ...filteredProducts.map((producto) => ({
               label: producto.producto,
               value: producto.idProducto,
@@ -144,7 +144,7 @@ const ModalHeader = ({
 
   const handleProductChange = (value) => {
     console.log("Producto seleccionado:", value);
-    // ⭐ Solo actualizar si se seleccionó un producto válido
+    // Solo actualizar si se seleccionó un producto válido
     if (value && value !== "" && setSelectedProduct) {
       setSelectedProduct({ value: Number(value) });
     } else if (setSelectedProduct) {
@@ -166,7 +166,7 @@ const ModalHeader = ({
               <div>
                 <CustomSelect
                   options={carteraOptions}
-                  defaultValue="" // ⭐ Valor por defecto vacío
+                  defaultValue="" //  Valor por defecto vacío
                   label="Cartera"
                   onChange={handleCarteraChange}
                 />
@@ -174,7 +174,7 @@ const ModalHeader = ({
               <div>
                 <CustomSelect
                   options={productOptions}
-                  defaultValue="" // ⭐ Valor por defecto vacío
+                  defaultValue="" // Valor por defecto vacío
                   label="Producto"
                   onChange={handleProductChange}
                 />

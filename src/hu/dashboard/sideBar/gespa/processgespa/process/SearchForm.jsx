@@ -13,18 +13,7 @@ const SearchForm = ({
   
   // Configuración de los radio buttons (opcional)
   radioConfig = null,
-  // Ejemplo de radioConfig:
-  // {
-  //   label: "Tipo",
-  //   value: "individual",
-  //   onChange: () => {},
-  //   options: [
-  //     { value: "individual", label: "Individual" },
-  //     { value: "archivo", label: "Archivo" }
-  //   ]
-  // }
-  
-  // Configuración del input de búsqueda
+
   searchConfig = {
     value: "",
     onChange: () => {},

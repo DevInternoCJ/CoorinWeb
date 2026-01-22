@@ -1,19 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import SaveButton from "../../../Administration/gespa/ButtonSave";
 import SelectWallet from "../../../../board/screenFields/SelectWallet"; // ajusta el path
+import { getCarteras } from "../../../../../../services/mark/orochi/LokiServices";
+import { toast } from "sonner";
 
-const Repentance = ({ searchValue, onSearchClick, onSearchChange }) => {
-  const [cartera, setCartera] = useState("");
+const Repentance = ({ searchValue, onSearchClick, onSearchChange, cartera,
+  onCarteraChange,}) => {
+  const [carteraOptions, setCarteraOptions] = useState([
+    { value: "", label: "Seleccione una cartera" },
+  ]);
   const [cuenta, setCuenta] = useState("");
 
-  // Opciones para los selects
-  const carteraOptions = [
-    { value: "", label: "Selecciona una cartera" },
-    { value: "amex", label: "American Express" },
-    { value: "banamex", label: "Banamex" },
-    { value: "santander", label: "Santander" },
-    { value: "hsbc", label: "HSBC" },
-  ];
+    useEffect(() => {
+      const fetchCarteras = async () => {
+        try {
+          const carteras = await getCarteras();
+  
+          const options = [
+            { value: "", label: "Seleccione una cartera" },
+            ...carteras.map((cartera) => ({
+              label: cartera.cartera,
+              value: cartera.idCartera,
+            }))
+          ];
+  
+          setCarteraOptions(options);
+        } catch (error) {
+          console.error("Error fetching carteras:", error);
+          toast.error("Error al cargar las carteras");
+          setCarteraOptions([{ value: "", label: "Error al cargar" }]);
+        }
+      };
+  
+      fetchCarteras();
+    }, []);
 
   const cuentaOptions = [
     { value: "", label: "Selecciona un tipo" },
@@ -38,10 +58,10 @@ const Repentance = ({ searchValue, onSearchClick, onSearchChange }) => {
         <div className="w-full max-w-2xl flex flex-col gap-4">
           {/* Select Cartera */}
           <SelectWallet
-            label="Cartera"
-            options={carteraOptions}
-            value={cartera}
-            onChange={setCartera}
+          label="Cartera"
+          value={cartera}
+          onChange={onCarteraChange}
+          options={carteraOptions}
           />
 
           {/* Select Cuenta */}
