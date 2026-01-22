@@ -19,13 +19,13 @@ const ModalHeader = ({
 }) => {
   const servidor = "Orochi";
   const [carteraOptions, setCarteraOptions] = useState([
-    { label: "Cargando...", value: 0 },
+    { label: "Seleccione una cartera", value: "" }, // ⭐ Opción por defecto
   ]);
 
   const [productOptions, setProductOptions] = useState([
-    { label: "Selecciona una cartera primero", value: 0 },
+    { label: "Selecciona una cartera primero", value: "" },
   ]);
-  const [selectedCartera, setSelectedCartera] = useState(null);
+  const [selectedCartera, setSelectedCartera] = useState(""); // ⭐ Inicializado como string vacío
 
   // Efecto para cargar las carteras
   useEffect(() => {
@@ -33,16 +33,19 @@ const ModalHeader = ({
       try {
         const carteras = await getCarteras();
 
-        const options = carteras.map((cartera) => ({
-          label: cartera.cartera,
-          value: cartera.idCartera,
-        }));
+        const options = [
+          { label: "Seleccione una cartera", value: "" }, // ⭐ Primera opción
+          ...carteras.map((cartera) => ({
+            label: cartera.cartera,
+            value: cartera.idCartera,
+          }))
+        ];
 
         setCarteraOptions(options);
       } catch (error) {
         console.error("Error fetching carteras:", error);
         toast.error("Error al cargar las carteras");
-        setCarteraOptions([{ label: "Error al cargar", value: 0 }]);
+        setCarteraOptions([{ label: "Error al cargar", value: "" }]);
       }
     };
 
@@ -51,13 +54,14 @@ const ModalHeader = ({
 
   // Efecto para cargar y filtrar productos cuando cambia la cartera seleccionada
   useEffect(() => {
-    if (!selectedCartera || selectedCartera === 0 || selectedCartera === "0") {
-      setProductOptions([{ label: "Selecciona una cartera primero", value: 0 }]);
+    // ⭐ Validación mejorada
+    if (!selectedCartera || selectedCartera === "" || selectedCartera === "0" || selectedCartera === 0) {
+      setProductOptions([{ label: "Selecciona una cartera primero", value: "" }]);
       return;
     }
 
     const fetchAndFilterProducts = async () => {
-      setProductOptions([{ label: "Cargando productos...", value: 0 }]);
+      setProductOptions([{ label: "Cargando productos...", value: "" }]);
       
       try {
         const productos = await getCarterasProductos();
@@ -70,21 +74,24 @@ const ModalHeader = ({
           return Number(producto.idCartera) === carteraId;
         });
 
-        console.log(`✅ Encontrados ${filteredProducts.length} productos para la cartera ${carteraId}`);
+        console.log(`Encontrados ${filteredProducts.length} productos para la cartera ${carteraId}`);
 
         if (filteredProducts.length > 0) {
-          const options = filteredProducts.map((producto) => ({
-            label: producto.producto,
-            value: producto.idProducto,
-          }));
+          const options = [
+            { label: "Seleccione un producto", value: "" }, // ⭐ Primera opción para productos
+            ...filteredProducts.map((producto) => ({
+              label: producto.producto,
+              value: producto.idProducto,
+            }))
+          ];
           setProductOptions(options);
         } else {
-          setProductOptions([{ label: "Sin productos disponibles", value: 0 }]);
+          setProductOptions([{ label: "Sin productos disponibles", value: "" }]);
         }
       } catch (error) {
         console.error("Error al cargar productos:", error);
         toast.error("Error al cargar los productos");
-        setProductOptions([{ label: "Error al cargar productos", value: 0 }]);
+        setProductOptions([{ label: "Error al cargar productos", value: "" }]);
       }
     };
 
@@ -93,7 +100,7 @@ const ModalHeader = ({
 
   // Efecto para la verificación del producto
   useEffect(() => {
-    if (!selectedProduct || selectedProduct.value === 0 || !selectedProduct.value) {
+    if (!selectedProduct || !selectedProduct.value || selectedProduct.value === "" || selectedProduct.value === 0) {
       setVerifyResult(null);
       toast.dismiss("product-verify");
       return;
@@ -127,7 +134,7 @@ const ModalHeader = ({
     fetchVerifyProduct();
   }, [selectedProduct, servidor, setLoading, setVerifyResult]);
 
- const handleCarteraChange = (value) => {
+  const handleCarteraChange = (value) => {
     setSelectedCartera(value);
     // Resetear el producto seleccionado cuando cambia la cartera
     if (setSelectedProduct) {
@@ -137,8 +144,11 @@ const ModalHeader = ({
 
   const handleProductChange = (value) => {
     console.log("Producto seleccionado:", value);
-    if (setSelectedProduct) {
+    // ⭐ Solo actualizar si se seleccionó un producto válido
+    if (value && value !== "" && setSelectedProduct) {
       setSelectedProduct({ value: Number(value) });
+    } else if (setSelectedProduct) {
+      setSelectedProduct(null);
     }
   };
 
@@ -156,7 +166,7 @@ const ModalHeader = ({
               <div>
                 <CustomSelect
                   options={carteraOptions}
-                  defaultValue={carteraOptions[0]?.value}
+                  defaultValue="" // ⭐ Valor por defecto vacío
                   label="Cartera"
                   onChange={handleCarteraChange}
                 />
@@ -164,7 +174,7 @@ const ModalHeader = ({
               <div>
                 <CustomSelect
                   options={productOptions}
-                  defaultValue={productOptions[0]?.value}
+                  defaultValue="" // ⭐ Valor por defecto vacío
                   label="Producto"
                   onChange={handleProductChange}
                 />
