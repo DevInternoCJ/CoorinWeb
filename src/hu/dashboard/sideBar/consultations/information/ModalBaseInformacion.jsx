@@ -6,10 +6,8 @@ import { tabsListAccionamientos, COMPONENT_ICONS_ACCIONAMIENTOS } from "../../pr
 import { tabsListGestiones, COMPONENT_ICONS_GESTIONES } from "../../processes/managements/ModalGestionesTabs";
 import TableCargaAccionamientos from "../../processes/accionamientos/TwoTablesAccionamientos";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
-import { infoEjecutivo } from "../../../../../services/mark/Orochi/LokiServices";
+import { infoEjecutivo } from "../../../../../services/mark/orochi/LokiServices"
 
-
-// Tamaños tipo ReusableModal - Solo Visitas e Información (carrusel) - Con responsividad
 const MODAL_SIZES = {
     informacion: { maxWidth: "min(1100px, 98vw)", minWidth: "320px", width: "min(1300px, 98vw)", height: "auto", maxHeight: "85vh" },
     "informacion-xl": { maxWidth: "min(1100px, 98vw)", minWidth: "320px", width: "min(1300px, 98vw)", height: "auto", minHeight: "300px", maxHeight: "90vh" },
