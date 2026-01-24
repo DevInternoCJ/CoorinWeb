@@ -143,7 +143,8 @@ const ModalBaseInformacion = ({
         "Gestiones": "Gestiones",
         "Consulta Visitas": "Consulta Visitas - Coorin",
         "Captura Visitas": "Captura Visitas - Coorin",
-        "Carga Visitas": "Carga de Visitas - Coorin"
+        "Carga Visitas": "Carga de Visitas - Coorin",
+        "VGP": "VGP - Coorin"
     };
     const titulo = titulos[tipoInformacion] || "Información";
     
@@ -274,7 +275,8 @@ const ModalBaseInformacion = ({
                                         "Arrepentimientos": "Arrep.",
                                         "Domicilios": "Domic.",
                                         "Correos": "Emails",
-                                        "Comentarios": "Coment."
+                                        "Comentarios": "Coment.",
+                                        "VGP": "VGP"
                                     }[tab.key] || tab.key;
                                     return (
                                         <button
