@@ -5,7 +5,7 @@ import {
   GetVerifyProduct,
   getCarteras,
   getCarterasProductos,
-} from "../../../../../services/mark/orochi/LokiServices";
+} from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
 const ModalHeader = ({
@@ -14,18 +14,22 @@ const ModalHeader = ({
   icon,
   selectedProduct,
   setSelectedProduct,
+  selectedCartera, // ⭐ Nueva prop del padre
+  setSelectedCartera, // ⭐ Nueva prop del padre
   setVerifyResult,
   setLoading,
 }) => {
   const servidor = "Orochi";
   const [carteraOptions, setCarteraOptions] = useState([
-    { label: "Seleccione una cartera", value: "" }, //  Opción por defecto
+    { label: "Seleccione una cartera", value: "" },
   ]);
 
   const [productOptions, setProductOptions] = useState([
     { label: "Selecciona una cartera primero", value: "" },
   ]);
-  const [selectedCartera, setSelectedCartera] = useState(""); //Inicializado como string vacío
+  
+  // ⭐ Estado interno para manejar la cartera localmente
+  const [internalSelectedCartera, setInternalSelectedCartera] = useState("");
 
   // Efecto para cargar las carteras
   useEffect(() => {
@@ -34,7 +38,7 @@ const ModalHeader = ({
         const carteras = await getCarteras();
 
         const options = [
-          { label: "Seleccione una cartera", value: "" }, // Primera opción
+          { label: "Seleccione una cartera", value: "" },
           ...carteras.map((cartera) => ({
             label: cartera.cartera,
             value: cartera.idCartera,
@@ -52,10 +56,9 @@ const ModalHeader = ({
     fetchCarteras();
   }, []);
 
-  // Efecto para cargar y filtrar productos cuando cambia la cartera seleccionada
+  // ⭐ Efecto para cargar y filtrar productos cuando cambia la cartera seleccionada
   useEffect(() => {
-    // Validación mejorada
-    if (!selectedCartera || selectedCartera === "" || selectedCartera === "0" || selectedCartera === 0) {
+    if (!internalSelectedCartera || internalSelectedCartera === "" || internalSelectedCartera === "0" || internalSelectedCartera === 0) {
       setProductOptions([{ label: "Selecciona una cartera primero", value: "" }]);
       return;
     }
@@ -67,7 +70,7 @@ const ModalHeader = ({
         const productos = await getCarterasProductos();
 
         // Convertir selectedCartera a número para la comparación
-        const carteraId = Number(selectedCartera);
+        const carteraId = Number(internalSelectedCartera);
 
         // Filtrar productos por idCartera (comparando números)
         const filteredProducts = productos.filter((producto) => {
@@ -78,7 +81,7 @@ const ModalHeader = ({
 
         if (filteredProducts.length > 0) {
           const options = [
-            { label: "Seleccione un producto", value: "" }, // Primera opción para productos
+            { label: "Seleccione un producto", value: "" },
             ...filteredProducts.map((producto) => ({
               label: producto.producto,
               value: producto.idProducto,
@@ -96,7 +99,7 @@ const ModalHeader = ({
     };
 
     fetchAndFilterProducts();
-  }, [selectedCartera]);
+  }, [internalSelectedCartera]); // ⭐ Usar estado interno
 
   // Efecto para la verificación del producto
   useEffect(() => {
@@ -134,8 +137,15 @@ const ModalHeader = ({
     fetchVerifyProduct();
   }, [selectedProduct, servidor, setLoading, setVerifyResult]);
 
+  // ⭐ Handler actualizado para notificar al componente padre
   const handleCarteraChange = (value) => {
-    setSelectedCartera(value);
+    setInternalSelectedCartera(value);
+    
+    // ⭐ Notificar al componente padre (ModalCampanas)
+    if (setSelectedCartera) {
+      setSelectedCartera(value ? Number(value) : null);
+    }
+    
     // Resetear el producto seleccionado cuando cambia la cartera
     if (setSelectedProduct) {
       setSelectedProduct(null);
@@ -153,7 +163,7 @@ const ModalHeader = ({
   };
 
   return (
-    <div className="bg-neutral-100 px-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-gray-200">
+    <div className="bg-neutral-100 rounded-xl px-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-gray-200 mb-2">
       <div className="block md:flex items-start justify-between w-3/4 gap-3">
         <div className="flex items-center gap-2 text-jerarquia3">
           {icon}
@@ -166,7 +176,7 @@ const ModalHeader = ({
               <div>
                 <CustomSelect
                   options={carteraOptions}
-                  defaultValue="" //  Valor por defecto vacío
+                  defaultValue=""
                   label="Cartera"
                   onChange={handleCarteraChange}
                 />
@@ -174,7 +184,7 @@ const ModalHeader = ({
               <div>
                 <CustomSelect
                   options={productOptions}
-                  defaultValue="" // Valor por defecto vacío
+                  defaultValue=""
                   label="Producto"
                   onChange={handleProductChange}
                 />

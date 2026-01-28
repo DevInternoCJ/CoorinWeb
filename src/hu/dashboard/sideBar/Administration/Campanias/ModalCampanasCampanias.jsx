@@ -7,12 +7,17 @@ import {
   campaignDeleteada,
   campaignCleaning,
   AvanceCampaing,
-} from "../../../../../services/mark/orochi/LokiServices";
+} from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 import NewCampaign from "./NewCampaign";
 import ModalToponeHundred from "./ModalToponeHundred";
+import { useUserStore } from "../../../../../contextGlobal/userStore";
 
-const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
+const ModalCampanasCampanias = ({ 
+  onSeleccionCampaña,
+  selectedCartera, // 
+  selectedProduct  //
+}) => {
   const [selectedId, setSelectedId] = useState(null);
   const [campanas, setCampanas] = useState([]);
   const [updatingId, setUpdatingId] = useState(null);
@@ -38,13 +43,21 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
   });
   const [setTipoFilas] = useState("archivo");
 
+  const user = useUserStore((state) => state.user);
+  const idEjecutivo = user?.idEjecutivo;
+
   // Función para cargar campañas
   const cargarCampanas = async () => {
     const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-    const idEncargado = userData?.idEjecutivo ?? 0;
-    const idCartera = userData?.idCartera ?? 0;
-    const idProducto = userData?.idProducto ?? 0;
+    const idEncargado = idEjecutivo || 0;
+    
+    //  Usar los valores seleccionados o los valores por defecto
+    const idCartera = selectedCartera ?? userData?.idCartera ?? 0;
+    const idProducto = selectedProduct?.value ?? userData?.idProducto ?? 0;
+
     const params = { idEncargado, idCartera, idProducto };
+
+    console.log("📊 Parámetros enviados a campainghInCharge:", params);
 
     try {
       // Obtener las campañas
@@ -57,27 +70,27 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
       const avanceResponse = await AvanceCampaing(
         idEncargado,
         idCartera,
-        idProducto
+        idProducto,
       );
       const avanceData = Array.isArray(avanceResponse.data)
         ? avanceResponse.data
         : [avanceResponse.data];
 
-      // Combinar los datos: actualizar el campo Avance basado en idCampaña
+      // Combinar los datos
       const campanasConAvance = campanasList.map((campana) => {
         const avanceInfo = avanceData.find(
-          (avance) => avance.idCampaña === campana.idCampaña
+          (avance) => avance.idCampaña === campana.idCampaña,
         );
         return {
           ...campana,
-          Avance: avanceInfo ? avanceInfo.avance : campana.Avance, // Usar el nuevo avance si existe, sino mantener el original
+          Avance: avanceInfo ? avanceInfo.avance : campana.Avance,
         };
       });
 
       setCampanas(campanasConAvance);
     } catch (error) {
       console.error("Error al cargar campañas o avances:", error);
-      // Fallback: cargar solo las campañas sin avance actualizado
+      // Fallback
       try {
         const data = await campainghInCharge(params);
         setCampanas(Array.isArray(data) ? data : [data]);
@@ -88,9 +101,10 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
     }
   };
 
+  // Recargar campañas cuando cambie la cartera o el producto
   useEffect(() => {
     cargarCampanas();
-  }, []);
+  }, [selectedCartera, selectedProduct]);
 
   // Ordenar campañas por nombre alfabéticamente (ignorando mayúsculas y tildes)
   const sortedCampanas = [...campanas].sort((a, b) => {
@@ -388,7 +402,7 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                             if (!row.idCampaña) return;
                             setUpdatingId(row.idCampaña);
                             const userData = JSON.parse(
-                              localStorage.getItem("userData") || "{}"
+                              localStorage.getItem("userData") || "{}",
                             );
                             const idEncargado =
                               userData?.idEjecutivo ??
@@ -405,7 +419,7 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                               toast.success(
                                 `Campaña "${row.Campaña}" ${
                                   encender ? "encendida" : "apagada"
-                                }`
+                                }`,
                               );
                               await cargarCampanas();
                             } catch (e) {
@@ -714,7 +728,7 @@ const ModalCampanasCampanias = ({ onSeleccionCampaña }) => {
                       idCampaña: modalEliminar.idCampaña,
                     });
                     toast.success(
-                      `Campaña "${modalEliminar.nombre}" eliminada`
+                      `Campaña "${modalEliminar.nombre}" eliminada`,
                     );
                     await cargarCampanas();
                   } catch (e) {

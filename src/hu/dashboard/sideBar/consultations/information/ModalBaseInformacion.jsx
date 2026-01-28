@@ -259,7 +259,7 @@ const ModalBaseInformacion = ({
                         {/* Segunda fila: solo tabs */}
                         <div className="w-full border-b border-gray-200 px-4 py-2 bg-gray-50 flex justify-center">
                             <nav
-                                className="grid grid-cols-5 sm:grid-cols-10 md:grid-cols-10 lg:grid-cols-10 xl:grid-cols-10 2xl:grid-cols-10 gap-x-0.5 gap-y-0.5 justify-center"
+                                className=" w-full grid grid-cols-5 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-6 gap-x-0.5 gap-y-0.5 justify-center"
                                 aria-label="Tabs"
                                 role="tablist"
                                 aria-orientation="horizontal"
@@ -268,14 +268,14 @@ const ModalBaseInformacion = ({
                                     const shortText = {
                                         "Ofrecimientos": "Ofrecimientos",
                                         "Pagos": "Pagos", 
-                                        "Pagos Reportados": "P. Rep.",
-                                        "Búsquedas": "Búsq.",
+                                        "Pagos Reportados": "Pagos Reportados",
+                                        "Búsquedas": "Búsquedas",
                                         "Datos Erróneos": "Errores",
-                                        "Lista Negra": "L. Negra",
-                                        "Arrepentimientos": "Arrep.",
-                                        "Domicilios": "Domic.",
-                                        "Correos": "Emails",
-                                        "Comentarios": "Coment.",
+                                        "Lista Negra": "Lista Negra",
+                                        "Arrepentimientos": "Arrepentimientos",
+                                        "Domicilios": "Domicilios",
+                                        "Correos": "Correos",
+                                        "Comentarios": "Comentarios",
                                         "VGP": "VGP"
                                     }[tab.key] || tab.key;
                                     return (
@@ -283,6 +283,7 @@ const ModalBaseInformacion = ({
                                             key={tab.key}
                                             type="button"
                                             className={`
+                                                w-full
                                                 py-2 px-2 lg:px-3 xl:px-4 inline-flex items-center gap-x-1 text-xs font-medium text-center 
                                                 border border-gray-200 rounded-t-lg transition-colors duration-200
                                                 hover:bg-jerarquia1 focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none
