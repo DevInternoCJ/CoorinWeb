@@ -1,23 +1,48 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { getWalletProduct } from '../services/mark/Orochi/LokiServices';
 
-export const useUserStore = create((set) => ({
-  user: null,
-  isAuthenticated: false,
-  setUser: (user) => set({ user, isAuthenticated: !!user }),
-  logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userData');
-    set({ user: null, isAuthenticated: false });
-  },
-  
-  clearUserData: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userData');
+export const useUserStore = create(
+  persist(
+    (set) => ({
+      // Inicializar desde localStorage si existe
+      user: JSON.parse(localStorage.getItem('userData') || 'null'),
+      isAuthenticated: !!JSON.parse(localStorage.getItem('userData') || 'null'),
+      setUser: (user) => {
+        try {
+          localStorage.setItem('userData', JSON.stringify(user));
+        } catch (e) {
+          console.warn('No se pudo guardar userData en localStorage', e);
+        }
+        set({ user, isAuthenticated: !!user });
+      },
+      logout: () => {
+        try {
+          localStorage.removeItem('token');
+          localStorage.removeItem('userData');
+        } catch (e) {
+          console.warn('No se pudo limpiar localStorage en logout', e);
+        }
+        set({ user: null, isAuthenticated: false });
+      },
+      
+      clearUserData: () => {
+        try {
+          localStorage.removeItem('token');
+          localStorage.removeItem('userData');
+        } catch (e) {
+          console.warn('No se pudo limpiar localStorage', e);
+        }
 
-    set({ user: null, isAuthenticated: false });
-  }
-}));
+        set({ user: null, isAuthenticated: false });
+      }
+    }),
+    {
+      name: 'coorin-user', // clave en localStorage
+      getStorage: () => localStorage,
+    },
+  ),
+);
 
 export const useWalletProductStore = create((set) => ({
   walletProducts: null,

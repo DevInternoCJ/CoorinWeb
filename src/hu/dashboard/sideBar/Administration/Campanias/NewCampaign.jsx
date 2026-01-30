@@ -1,11 +1,15 @@
 import React, { useState } from "react";
-import { newCampaign } from "../../../../../services/mark/orochi/LokiServices";
+import { newCampaign } from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
+import { useUserStore } from "../../../../../contextGlobal/userStore";
 
-const NewCampaign = ({ onCreated, buttonClassName }) => {
+const NewCampaign = ({ onCreated, buttonClassName, selectedProduct}) => {
   const [nuevaCampania, setNuevaCampania] = useState("");
   const [loadingNueva, setLoadingNueva] = useState(false);
   const [errorNueva, setErrorNueva] = useState("");
+
+  const userData = useUserStore((state) => state.userData);
+  const idEjecutivo = userData?.idEjecutivo;
 
   const handleNuevaCampania = async () => {
     setErrorNueva("");
@@ -24,11 +28,8 @@ const NewCampaign = ({ onCreated, buttonClassName }) => {
     }
     setLoadingNueva(true);
     try {
-      const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-      const idEjecutivoInsert =
-        userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
-      const idProducto =
-        userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
+      const idEjecutivoInsert = idEjecutivo;
+      const idProducto = selectedProduct?.value;
       const body = {
         campania: nombre,
         numeroCuentas: 0,

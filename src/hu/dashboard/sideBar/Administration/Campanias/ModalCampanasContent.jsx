@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import ModalCampanasCampanias from "./ModalCampanasCampanias";
 import ModalCampanasEjecutivos from "./ModalCampanasEjecutivos";
-import ModalCampanasFooter from "./ModalCampanasFooter";
 import ModalHeader from "../gespa/ModalHeader";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import { IconCampaign } from "./IconCampaign";
 
 const ModalCampanas = ({ onClose }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedCartera, setSelectedCartera] = useState(null); // ⭐ Nuevo estado
+  const [selectedCartera, setSelectedCartera] = useState(null); //  Nuevo estado
   const [verifyResult, setVerifyResult] = useState(null);
   const [loading, setLoading] = useState(false);
   
@@ -21,7 +20,7 @@ const ModalCampanas = ({ onClose }) => {
     setSelectedProduct(product);
   };
 
-  const handleCarteraChange = (cartera) => { // ⭐ Nueva función
+  const handleCarteraChange = (cartera) => { //  Nueva función
     setSelectedCartera(cartera);
   };
 
@@ -41,8 +40,8 @@ const ModalCampanas = ({ onClose }) => {
         onClose={onClose}
         selectedProduct={selectedProduct}
         setSelectedProduct={handleProductChange}
-        selectedCartera={selectedCartera} // ⭐ Pasar cartera seleccionada
-        setSelectedCartera={handleCarteraChange} // ⭐ Pasar función para actualizar cartera
+        selectedCartera={selectedCartera} //  Pasar cartera seleccionada
+        setSelectedCartera={handleCarteraChange} //  Pasar función para actualizar cartera
         verifyResult={verifyResult}
         setVerifyResult={setVerifyResult}
         loading={loading}
@@ -60,8 +59,8 @@ const ModalCampanas = ({ onClose }) => {
         <div className="min-w-0 flex flex-col">
           <ModalCampanasCampanias 
             onSeleccionCampaña={handleSeleccionCampaña}
-            selectedCartera={selectedCartera} // ⭐ Pasar cartera
-            selectedProduct={selectedProduct} // ⭐ Pasar producto
+            selectedCartera={selectedCartera} //  Pasar cartera
+            selectedProduct={selectedProduct} //  Pasar producto
           />
         </div>
         <div className="min-w-0 flex flex-col">
@@ -70,9 +69,6 @@ const ModalCampanas = ({ onClose }) => {
             nombreCampaña={campañaSeleccionada.nombre}
           />
         </div>
-      </div>
-      <div style={{ width: "100%", overflowX: "auto" }}>
-        <ModalCampanasFooter />
       </div>
     </div>
   );

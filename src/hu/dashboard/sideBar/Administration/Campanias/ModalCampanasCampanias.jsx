@@ -13,10 +13,10 @@ import NewCampaign from "./NewCampaign";
 import ModalToponeHundred from "./ModalToponeHundred";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
 
-const ModalCampanasCampanias = ({ 
+const ModalCampanasCampanias = ({
   onSeleccionCampaña,
-  selectedCartera, // 
-  selectedProduct  //
+  selectedCartera, //
+  selectedProduct, //
 }) => {
   const [selectedId, setSelectedId] = useState(null);
   const [campanas, setCampanas] = useState([]);
@@ -41,23 +41,25 @@ const ModalCampanasCampanias = ({
     idCampaña: null,
     nombreCampaña: "",
   });
-  const [setTipoFilas] = useState("archivo");
+  const [tipoFilas, setTipoFilas] = useState("archivo");
 
   const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;
-
   // Función para cargar campañas
   const cargarCampanas = async () => {
-    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-    const idEncargado = idEjecutivo || 0;
-    
-    //  Usar los valores seleccionados o los valores por defecto
-    const idCartera = selectedCartera ?? userData?.idCartera ?? 0;
-    const idProducto = selectedProduct?.value ?? userData?.idProducto ?? 0;
-
+    const idEncargado = idEjecutivo;
+    // Resolver idCartera: preferir la seleccion en UI, si no existe usar localStorage como fallback
+    const idCartera =
+      selectedCartera?.value;
+    const idProducto = selectedProduct?.value;
     const params = { idEncargado, idCartera, idProducto };
 
-    console.log("📊 Parámetros enviados a campainghInCharge:", params);
+    console.log(" Parámetros enviados a campainghInCharge:", params);
+    if (typeof idCartera === "undefined" || idCartera === null) {
+      console.warn(
+        "Warning: idCartera no definido al llamar a campainghInCharge. Revisa la selección de cartera o el localStorage.",
+      );
+    }
 
     try {
       // Obtener las campañas
@@ -102,7 +104,15 @@ const ModalCampanasCampanias = ({
   };
 
   // Recargar campañas cuando cambie la cartera o el producto
+  // Solo realizar la petición cuando ambas selecciones (cartera y producto) sean válidas
   useEffect(() => {
+    if (!selectedCartera || !selectedProduct) {
+      console.log(
+        "Esperando selección de cartera y producto antes de cargar campañas",
+        { selectedCartera, selectedProduct },
+      );
+      return;
+    }
     cargarCampanas();
   }, [selectedCartera, selectedProduct]);
 
@@ -294,9 +304,9 @@ const ModalCampanasCampanias = ({
                         }}
                       >
                         <IconCircular
-                          bgColor="bg-green-200"
-                          textColor="text-green-700"
-                          borderColor="border-green-800"
+                          bgColor="bg-green-100"
+                          textColor="text-green-800"
+                          borderColor="border-green-400"
                           size="size-5"
                           borderWidth="border-2"
                           tooltip="Filas"
@@ -309,7 +319,7 @@ const ModalCampanasCampanias = ({
                             viewBox="0 0 24 24"
                           >
                             <path
-                              fill="#111"
+                              fill="#02B567"
                               d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"
                             />
                           </svg>
@@ -352,9 +362,9 @@ const ModalCampanasCampanias = ({
                         }
                       >
                         <IconCircular
-                          bgColor="bg-yellow-300"
-                          textColor="text-yellow-900"
-                          borderColor="border-orange-custom"
+                          bgColor="bg-yellow-100"
+                          textColor="text-yellow-700"
+                          borderColor="border-yellow-800"
                           size="size-5"
                           borderWidth="border-2"
                           tooltip="Limpiar"
@@ -366,7 +376,7 @@ const ModalCampanasCampanias = ({
                             viewBox="0 0 24 24"
                           >
                             <path
-                              fill="#111"
+                              fill="#B57002"
                               d="M16 11h-1V3c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v8H8c-2.76 0-5 2.24-5 5v7h18v-7c0-2.76-2.24-5-5-5m-5-8h2v8h-2zm8 18h-2v-3c0-.55-.45-1-1-1s-1 .45-1 1v3h-2v-3c0-.55-.45-1-1-1s-1 .45-1 1v3H9v-3c0-.55-.45-1-1-1s-1 .45-1 1v3H5v-5c0-1.65 1.35-3 3-3h8c1.65 0 3 1.35 3 3z"
                             />
                           </svg>
@@ -530,8 +540,8 @@ const ModalCampanasCampanias = ({
                       }
                     >
                       <IconCircular
-                        bgColor="bg-red-200"
-                        textColor="text-red-700"
+                        bgColor="bg-white"
+                        textColor="text-white"
                         borderColor="border-red-800"
                         size="size-5"
                         borderWidth="border-2"

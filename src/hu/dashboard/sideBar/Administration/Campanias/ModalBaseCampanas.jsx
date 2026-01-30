@@ -11,23 +11,13 @@ const ModalBaseCampanas = ({ open, onClose }) => {
     if (!open) return null;
 
     return (
-        <div className="modal-blur-bg">
-            <div className="modal-overlay" onClick={handleBackdropClick} />
+        <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div
-                ref={modalRef}
-                className={`modal-content modal-xl-container${bounce ? " animate-bounce-modal" : ""}`}
-                onClick={e => e.stopPropagation()}
-                style={{
-                    maxWidth: "min(1200px, 95vw)",
-                    minWidth: "min(1200px, 95vw)",
-                    width: "min(1200px, 95vw)",
-                    height: "min(660px, 90vh)",
-                    display: "flex",
-                    flexDirection: "column",
-                    position: "relative",
-                    overflowX: "hidden",
-                    overflowY: "auto"
-                }}
+                  ref={modalRef}
+        className={`${
+          bounce ? "animate-bounce-modal" : ""
+        } bg-white rounded-lg shadow-2xl w-full max-w-6xl p-4 overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]`}
+        onClick={(e) => e.stopPropagation()}
             >
                 {/* Header y contenido principal */}
                 <ModalCampanasContent onClose={onClose} />

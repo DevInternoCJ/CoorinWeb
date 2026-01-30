@@ -1858,31 +1858,80 @@ export const sendArchiveCampanias = async (body) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    // Construir FormData
-    const formData = new FormData();
-    // Asume que body es un objeto con las claves necesarias y el archivo
-    Object.entries(body).forEach(([key, value]) => {
-      // Solo agregar si el valor no es null o undefined
-      if (value !== null && value !== undefined) {
-        // Si el valor es un array, agregar cada elemento por separado
-        if (Array.isArray(value)) {
-          value.forEach((v) => formData.append(key, v));
-        } else {
-          formData.append(key, value);
+    let formDataToSend;
+    // Si el caller ya pasó un FormData, usarlo tal cual
+    if (body instanceof FormData) {
+      formDataToSend = body;
+    } else {
+      // Construir FormData desde el objeto
+      formDataToSend = new FormData();
+      Object.entries(body).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          if (Array.isArray(value)) {
+            value.forEach((v) => formDataToSend.append(key, v));
+          } else {
+            formDataToSend.append(key, value);
+          }
         }
-      }
-    });
+      });
+    }
+
     // El interceptor añade el token automáticamente
-    const response = await api.post('/carteras/cargar-archivo', formData, {
+    // Preparar configuración sin Content-Type para que el navegador
+    // agregue el multipart boundary automáticamente.
+    const config = {
       headers: {
-        'Accept': '*/*',
-        'Content-Type': 'multipart/form-data'
-        // No establecer Content-Type manualmente, el navegador lo gestiona automáticamente con FormData
+        'Accept': '*/*'
       },
       responseType: 'arraybuffer' // Para recibir datos binarios correctamente
-    });
+    };
+
+    // Asegurarnos de no enviar un Content-Type por defecto (axios instance puede tener uno)
+    // Dejarlo como undefined para que el navegador lo establezca con el boundary.
+    try {
+      if (config.headers && Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) {
+        delete config.headers['Content-Type'];
+      }
+      // También forzar undefined para evitar que axios lo añada desde defaults
+      config.headers['Content-Type'] = undefined;
+    } catch (e) {
+      console.warn('No se pudo ajustar Content-Type en config.headers:', e);
+    }
+
+    console.log('DEBUG - Enviando /carteras/cargar-archivo con headers:', config.headers);
+    const response = await api.post('/carteras/cargar-archivo', formDataToSend, config);
     return response;
   } catch (error) {
+    // Intentar decodificar y mostrar el body de error si viene como ArrayBuffer
+    try {
+      const errData = error.response?.data;
+      if (errData && (errData instanceof ArrayBuffer || errData.buffer)) {
+        const buffer = errData instanceof ArrayBuffer ? errData : errData.buffer;
+        const text = new TextDecoder('utf-8').decode(new Uint8Array(buffer));
+        try {
+          const parsed = JSON.parse(text);
+          console.error('Error al subir campanña Archivo - response parsed:', parsed);
+          // Mostrar errores de validación más detallados si existen
+          if (parsed.errors) {
+            console.error('Validation errors object:', parsed.errors);
+            try {
+              const human = Object.entries(parsed.errors)
+                .map(([k, arr]) => `${k}: ${Array.isArray(arr) ? arr.join(', ') : arr}`)
+                .join(' | ');
+              console.error('Validation message:', human);
+            } catch (e) {
+              console.error('Error formatting validation messages:', e);
+            }
+          }
+        } catch (parseErr) {
+          console.error('Error al subir campanña Archivo - response text:', text);
+        }
+      } else if (error.response?.data) {
+        console.error('Error al subir campanña Archivo - response data:', error.response.data);
+      }
+    } catch (e) {
+      console.error('Error procesando el body del error:', e);
+    }
     console.error('Error al subir campanña Archivo:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');

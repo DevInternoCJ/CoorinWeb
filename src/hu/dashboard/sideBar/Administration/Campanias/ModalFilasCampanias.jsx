@@ -6,7 +6,7 @@ import {
   CargarFilasConsulta,
   campainghInCharge,
   sendArchiveCampanias,
-} from "../../../../../services/mark/orochi/LokiServices";
+} from "../../../../../services/mark/Orochi/LokiServices";
 
 const ModalFilasCampañas = ({
   open,
@@ -97,7 +97,7 @@ const ModalFilasCampañas = ({
             setSelectedConsulta(consultasArray[0].idConsulta.toString());
             console.log(
               "Consulta seleccionada por defecto:",
-              consultasArray[0].NombreConsulta
+              consultasArray[0].NombreConsulta,
             );
           }
         } catch (error) {
@@ -124,7 +124,7 @@ const ModalFilasCampañas = ({
             .toString()
             .trim()
             .replace(/[\r\n]/g, "")
-        : ""
+        : "",
     );
 
     // Función local para normalizar
@@ -173,7 +173,7 @@ const ModalFilasCampañas = ({
             .toString()
             .trim()
             .replace(/[\r\n]/g, "")
-        : ""
+        : "",
     );
 
     // Debug: mostrar los headers recibidos
@@ -182,8 +182,8 @@ const ModalFilasCampañas = ({
     console.log(
       "Headers detallados:",
       cleanHeaders.map(
-        (h, i) => `[${i}]: "${h}" ${h === "" ? "(VACÍO)" : "(OK)"}`
-      )
+        (h, i) => `[${i}]: "${h}" ${h === "" ? "(VACÍO)" : "(OK)"}`,
+      ),
     );
 
     // Función para normalizar texto (quitar tildes y convertir a minúsculas para comparación)
@@ -224,13 +224,13 @@ const ModalFilasCampañas = ({
         errores.push(
           `Faltan ${
             3 - headers.length
-          } columna(s). Se requieren 3 columnas: Cuenta, Usuario, Teléfono`
+          } columna(s). Se requieren 3 columnas: Cuenta, Usuario, Teléfono`,
         );
       } else {
         errores.push(
           `Hay ${
             headers.length - 3
-          } columna(s) de más. Se requieren exactamente 3 columnas: Cuenta, Usuario, Teléfono`
+          } columna(s) de más. Se requieren exactamente 3 columnas: Cuenta, Usuario, Teléfono`,
         );
       }
     }
@@ -248,14 +248,14 @@ const ModalFilasCampañas = ({
           .map((option) => `"${option}"`)
           .join(" o ");
         errores.push(
-          `Posición ${i + 1}: Header vacío. Se esperaba ${expectedOptions}`
+          `Posición ${i + 1}: Header vacío. Se esperaba ${expectedOptions}`,
         );
         continue;
       }
 
       // Verificar si el header actual coincide con alguna opción válida
       const isValid = validOptions.some(
-        (option) => normalizeText(option) === headerNormalizado
+        (option) => normalizeText(option) === headerNormalizado,
       );
 
       if (!isValid) {
@@ -268,7 +268,7 @@ const ModalFilasCampañas = ({
             i + 1
           }: Se esperaba ${expectedOptions}, pero se recibió "${
             cleanHeaders[i]
-          }"`
+          }"`,
         );
       }
     }
@@ -278,7 +278,7 @@ const ModalFilasCampañas = ({
       return { valid: true };
     } else {
       const mensajeError = `El formato del documento es incorrecto. ${errores.join(
-        ". "
+        ". ",
       )}`;
       console.log("Headers inválidos:", errores);
       return {
@@ -303,7 +303,7 @@ const ModalFilasCampañas = ({
           sorted.sort(
             (a, b) =>
               (b[colIdx] || "").toString().length -
-              (a[colIdx] || "").toString().length
+              (a[colIdx] || "").toString().length,
           );
         } else {
           sorted.sort((a, b) => {
@@ -435,7 +435,7 @@ const ModalFilasCampañas = ({
     // Validar formato antes de cargar
     if (!formatoValido) {
       toast.error(
-        "El formato del documento es incorrecto. No se puede procesar la carga."
+        "El formato del documento es incorrecto. No se puede procesar la carga.",
       );
       return;
     }
@@ -443,7 +443,7 @@ const ModalFilasCampañas = ({
     // Validar que haya datos cargados
     if (fileRows.length === 0) {
       toast.error(
-        "No hay datos para cargar. Por favor seleccione un archivo válido."
+        "No hay datos para cargar. Por favor seleccione un archivo válido.",
       );
       return;
     }
@@ -455,13 +455,13 @@ const ModalFilasCampañas = ({
         !row[0] ||
         row[0].toString().trim() === "" || // Cuenta vacía
         !row[2] ||
-        row[2].toString().trim() === "" // Teléfono vacío
+        row[2].toString().trim() === "", // Teléfono vacío
       // row[1] (Usuario) puede estar vacío - no se valida
     );
 
     if (filasConErrores.length > 0) {
       toast.error(
-        `Hay ${filasConErrores.length} fila(s) con datos requeridos vacíos. Los campos Cuenta y Teléfono son obligatorios.`
+        `Hay ${filasConErrores.length} fila(s) con datos requeridos vacíos. Los campos Cuenta y Teléfono son obligatorios.`,
       );
       return;
     }
@@ -471,7 +471,7 @@ const ModalFilasCampañas = ({
 
     // Obtener el archivo original del input
     const fileInput = document.querySelector(
-      'input[type="file"][accept=".csv,.xlsx"]'
+      'input[type="file"][accept=".csv,.xlsx"]',
     );
     const archivo =
       fileInput && fileInput.files && fileInput.files[0]
@@ -484,13 +484,28 @@ const ModalFilasCampañas = ({
 
     setLoading(true);
     try {
-      // Construir el body para el endpoint
-      const body = {
-        Archivo: archivo,
-        IdCampania: idCampaña,
-        IdCartera: idCartera,
-      };
-      const response = await sendArchiveCampanias(body);
+      // Construir FormData explícitamente en el componente
+      const formData = new FormData();
+      // Adjuntar el archivo incluyendo explícitamente el nombre (algunos backends esperan filename)
+      formData.append("Archivo", archivo, archivo.name || "archivo");
+      // Añadir claves fallback comunes por si el backend espera otro nombre de campo
+      // (esto es temporal para diagnóstico; podemos quitarlo después si funciona)
+      formData.append("archivo", archivo, archivo.name || "archivo");
+      formData.append("file", archivo, archivo.name || "archivo");
+      formData.append("IdCampania", idCampaña);
+      formData.append("IdCartera", idCartera);
+
+      // Debug: confirmar que el archivo y FormData contienen lo que esperamos
+      console.log("DEBUG - Archivo a enviar:", archivo);
+      try {
+        for (const entry of formData.entries()) {
+          console.log("DEBUG - FormData entry:", entry[0], entry[1]);
+        }
+      } catch (e) {
+        console.warn("No se pudo iterar FormData de depuración:", e);
+      }
+
+      const response = await sendArchiveCampanias(formData);
       // Esperamos respuesta tipo { mensaje, totalRegistros }
       if (response && response.data) {
         // Si la respuesta es un arraybuffer, intentar parsear a JSON
@@ -526,7 +541,7 @@ const ModalFilasCampañas = ({
             } catch (refreshError) {
               console.error(
                 "Error al actualizar campañas tras carga de archivo:",
-                refreshError
+                refreshError,
               );
             }
           }, 0); // pequeño delay para UX
@@ -546,9 +561,9 @@ const ModalFilasCampañas = ({
           const data = JSON.parse(text);
           errorMsg = data.mensaje || errorMsg;
         } catch (e) {
-          (errorMsg =
+          ((errorMsg =
             "No se pudo procesar la respuesta de error del servidor."),
-            e;
+            e);
         }
       } else if (err.message) {
         errorMsg = err.message;
@@ -627,7 +642,7 @@ const ModalFilasCampañas = ({
       // Mostrar toast de éxito con información específica
       if (totalFilas > 0) {
         toast.success(
-          `${mensaje || "Se cargaron correctamente"} - ${totalFilas} filas`
+          `${mensaje || "Se cargaron correctamente"} - ${totalFilas} filas`,
         );
       } else {
         toast.warning(`${mensaje || "Consulta procesada"} - 0 filas cargadas`);
@@ -684,7 +699,7 @@ const ModalFilasCampañas = ({
             } catch (refreshError) {
               console.error(
                 "Error al actualizar tabla (fallback):",
-                refreshError
+                refreshError,
               );
             }
           }, 1000);
@@ -938,12 +953,12 @@ const ModalFilasCampañas = ({
                                   fileHeaders[0] === "Cuenta" ||
                                     fileHeaders[0] === "Teléfono"
                                     ? "number"
-                                    : "string"
+                                    : "string",
                                 );
                               }
                             } else {
                               toast.error(
-                                "El encabezado de la columna 1 no es válido."
+                                "El encabezado de la columna 1 no es válido.",
                               );
                             }
                           }}
@@ -998,12 +1013,12 @@ const ModalFilasCampañas = ({
                                   fileHeaders[1] === "Cuenta" ||
                                     fileHeaders[1] === "Teléfono"
                                     ? "number"
-                                    : "string"
+                                    : "string",
                                 );
                               }
                             } else {
                               toast.error(
-                                "El encabezado de la columna 2 no es válido."
+                                "El encabezado de la columna 2 no es válido.",
                               );
                             }
                           }}
@@ -1043,12 +1058,12 @@ const ModalFilasCampañas = ({
                                   fileHeaders[2] === "Cuenta" ||
                                     fileHeaders[2] === "Teléfono"
                                     ? "number"
-                                    : "string"
+                                    : "string",
                                 );
                               }
                             } else {
                               toast.error(
-                                "El encabezado de la columna 3 no es válido."
+                                "El encabezado de la columna 3 no es válido.",
                               );
                             }
                           }}
@@ -1276,13 +1291,13 @@ const ModalFilasCampañas = ({
           (fileRows.length > 0 && filasCargadas > 0 && mensajeCarga)
             ? mensajeCarga
             : fileRows.length > 0
-            ? !formatoValido
-              ? `${
-                  mensajeValidacion ||
-                  "El formato del documento es incorrecto. Los headers deben ser: Cuenta, Usuario, Teléfono"
-                }`
-              : "Verifique la equivalencia de columnas, si es correcta presione Cargar."
-            : "Resultado"}
+              ? !formatoValido
+                ? `${
+                    mensajeValidacion ||
+                    "El formato del documento es incorrecto. Los headers deben ser: Cuenta, Usuario, Teléfono"
+                  }`
+                : "Verifique la equivalencia de columnas, si es correcta presione Cargar."
+              : "Resultado"}
         </div>
       </div>
     </div>

@@ -5,9 +5,9 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // No establecer 'Content-Type' global aquí: dejar que axios
+  // determine el Content-Type por petición (JSON vs FormData).
+  headers: {},
 });
 
 // Interceptores
