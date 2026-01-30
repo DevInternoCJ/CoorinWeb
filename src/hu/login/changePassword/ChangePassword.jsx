@@ -3,7 +3,7 @@ import { EyeOpen, ArrowSync, LockSync } from "./PasswordIcons";
 import PASSWORD_REQUIREMENTS from "./Validations";
 import ButtonLogin from "../ButtonLogin";
 import EyeClose from "../../../assets/eye-close.svg";
-import { UpdatePassword } from "../../../services/mark/orochi/LokiServices";
+import { UpdatePassword } from "../../../services/mark/Orochi/LokiServices";
 import { useUserStore } from "../../../contextGlobal/userStore";
 import { toast } from "sonner";
 
@@ -79,7 +79,7 @@ const ChangePassword = ({
     //  MODIFICADO: Validar que tengamos la contraseña actual de los props
     if (!currentContraActual) {
       toast.error(
-        "No se encontró la contraseña actual. Por favor, inicia sesión nuevamente."
+        "No se encontró la contraseña actual. Por favor, inicia sesión nuevamente.",
       );
       console.error("Error: contraActual no disponible en props:", {
         contraActual: currentContraActual,
@@ -91,7 +91,7 @@ const ChangePassword = ({
 
     if (!currentUsername) {
       toast.error(
-        "No se pudo identificar el usuario. Por favor, inicia sesión nuevamente."
+        "No se pudo identificar el usuario. Por favor, inicia sesión nuevamente.",
       );
       return;
     }
@@ -234,7 +234,7 @@ const ChangePassword = ({
                   userFromStore: user,
                 },
                 null,
-                2
+                2,
               )}
             </pre>
           </details>

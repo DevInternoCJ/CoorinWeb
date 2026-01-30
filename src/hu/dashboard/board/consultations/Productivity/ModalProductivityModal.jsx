@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import ModalProductividadContent from "./ModalProductividadContent";
 import { IconProductividad } from "../IconesConsultations";
-import { getProductivity } from "../../../../../services/mark/orochi/LokiServices";
+import { getProductivity } from "../../../../../services/mark/Orochi/LokiServices";
 // Logo eliminado: controles movidos al contenido del modal
 
 // Nota: el dropdown usará el estilo tipo 'peer' con label flotante (ver abajo)
@@ -82,27 +82,40 @@ const ProductivityModal = ({
       try {
         const userData = JSON.parse(localStorage.getItem("userData"));
         console.log("📋 userData completo:", userData);
-        
-        let idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
-        
+
+        let idEjecutivo =
+          userData?.idEjecutivo ||
+          userData?.idejecutivo ||
+          userData?.id ||
+          null;
+
         // Convertir a número si es string
-        if (idEjecutivo && typeof idEjecutivo === 'string') {
+        if (idEjecutivo && typeof idEjecutivo === "string") {
           idEjecutivo = parseInt(idEjecutivo, 10);
         }
-        
-        console.log("🔍 idEjecutivo extraído:", idEjecutivo, "tipo:", typeof idEjecutivo);
-        
+
+        console.log(
+          "🔍 idEjecutivo extraído:",
+          idEjecutivo,
+          "tipo:",
+          typeof idEjecutivo,
+        );
+
         if (idEjecutivo && Number.isInteger(idEjecutivo) && idEjecutivo > 0) {
           setIdEjecutivoPrincipal(idEjecutivo);
           setSelectedExecutiveNode(idEjecutivo);
           setSelectedExecutiveInfo({
             idEjecutivo: idEjecutivo,
             usuario: userData?.usuario || "--",
-            nombreEjecutivo: userData?.nombre || userData?.nombreEjecutivo || "--"
+            nombreEjecutivo:
+              userData?.nombre || userData?.nombreEjecutivo || "--",
           });
           console.log("✅ ID Ejecutivo Principal establecido:", idEjecutivo);
         } else {
-          console.warn("⚠️ No se encontró idEjecutivo válido en userData. Valor recibido:", idEjecutivo);
+          console.warn(
+            "⚠️ No se encontró idEjecutivo válido en userData. Valor recibido:",
+            idEjecutivo,
+          );
         }
       } catch (error) {
         console.error("❌ Error al obtener idEjecutivo:", error);
@@ -134,27 +147,42 @@ const ProductivityModal = ({
   // Filtrar datos en frontend usando useMemo (sin llamar al backend)
   const productivityData = React.useMemo(() => {
     if (!allProductivityData || allProductivityData.length === 0) return [];
-    
+
     // Si no hay ejecutivo seleccionado o es el principal, mostrar todos
-    if (!selectedExecutiveNode || !selectedExecutiveInfo || selectedExecutiveNode === idEjecutivoPrincipal) {
+    if (
+      !selectedExecutiveNode ||
+      !selectedExecutiveInfo ||
+      selectedExecutiveNode === idEjecutivoPrincipal
+    ) {
       return allProductivityData;
     }
-    
+
     // Filtrar por ejecutivo seleccionado (funciona para Día y Hora)
-    const filtered = allProductivityData.filter(item => {
+    const filtered = allProductivityData.filter((item) => {
       // Modo Hora: comparar con "encargado" o "idEncargado"
-      const matchEncargado = item.encargado === String(selectedExecutiveInfo.idEjecutivo) ||
-                            item.idEncargado === String(selectedExecutiveInfo.idEjecutivo);
-      
+      const matchEncargado =
+        item.encargado === String(selectedExecutiveInfo.idEjecutivo) ||
+        item.idEncargado === String(selectedExecutiveInfo.idEjecutivo);
+
       // Modo Día: comparar con "ejecutivo" (usuario)
       const matchEjecutivo = item.ejecutivo === selectedExecutiveInfo.usuario;
-      
+
       return matchEncargado || matchEjecutivo;
     });
-    
-    console.log(`🔍 Filtrando para "${selectedExecutiveInfo.usuario}":`, filtered.length, "de", allProductivityData.length);
+
+    console.log(
+      `🔍 Filtrando para "${selectedExecutiveInfo.usuario}":`,
+      filtered.length,
+      "de",
+      allProductivityData.length,
+    );
     return filtered;
-  }, [allProductivityData, selectedExecutiveNode, selectedExecutiveInfo, idEjecutivoPrincipal]);
+  }, [
+    allProductivityData,
+    selectedExecutiveNode,
+    selectedExecutiveInfo,
+    idEjecutivoPrincipal,
+  ]);
 
   // JSX para pasar como selector al header del modal (centrado junto al título)
   const indicadoresSelector = (
@@ -173,7 +201,7 @@ const ProductivityModal = ({
                 <option key={indicador} value={indicador}>
                   {indicador}
                 </option>
-              )
+              ),
             )}
           </select>
           <label
@@ -226,12 +254,14 @@ const ProductivityModal = ({
     setErrorProductivity(null);
 
     try {
-      const idEjecutivoPrincipal = Array.isArray(idsEjecutivos) ? idsEjecutivos[0] : idsEjecutivos;
+      const idEjecutivoPrincipal = Array.isArray(idsEjecutivos)
+        ? idsEjecutivos[0]
+        : idsEjecutivos;
       const esModoHora = timeFilter === "Hora";
-      
+
       // Si no hay ID específico, usar 0 para mostrar todos
       const idsToSend = !idEjecutivoPrincipal ? [0] : [idEjecutivoPrincipal];
-      
+
       const requestData = {
         indicador: indicador,
         idsEjecutivos: idsToSend,
@@ -243,65 +273,92 @@ const ProductivityModal = ({
       console.log("📤 REQUEST COMPLETO QUE SE ENVÍA:");
       console.log(JSON.stringify(requestData, null, 2));
       console.log("========================================");
-      
+
       const data = await getProductivity(requestData);
       console.log("  Respuesta raw del endpoint de productividad:", data);
 
       // Manejar diferentes tipos de respuesta del servidor
       let processedData = [];
-      
+
       if (data && data.datos && Array.isArray(data.datos)) {
         // Si la respuesta tiene estructura con "datos", usar ese array
-        processedData = data.datos.map(item => {
+        processedData = data.datos.map((item) => {
           // Normalizar campos según el modo
           const normalizedItem = { ...item };
-          
+
           // Si viene "encargado" pero no "idEncargado", mapear
           if (item.encargado !== undefined && !item.idEncargado) {
             normalizedItem.idEncargado = item.encargado;
           }
-          
+
           // Si es modo Hora, mapear hora6-hora22 a campos numéricos
           if (esModoHora && item.hora6 !== undefined) {
-            normalizedItem['6'] = item.hora6 ?? 0;
-            normalizedItem['7'] = item.hora7 ?? 0;
-            normalizedItem['8'] = item.hora8 ?? 0;
-            normalizedItem['9'] = item.hora9 ?? 0;
-            normalizedItem['10'] = item.hora10 ?? 0;
-            normalizedItem['11'] = item.hora11 ?? 0;
-            normalizedItem['12'] = item.hora12 ?? 0;
-            normalizedItem['13'] = item.hora13 ?? 0;
-            normalizedItem['14'] = item.hora14 ?? 0;
-            normalizedItem['15'] = item.hora15 ?? 0;
-            normalizedItem['16'] = item.hora16 ?? 0;
-            normalizedItem['17'] = item.hora17 ?? 0;
-            normalizedItem['18'] = item.hora18 ?? 0;
-            normalizedItem['19'] = item.hora19 ?? 0;
-            normalizedItem['20'] = item.hora20 ?? 0;
-            normalizedItem['21'] = item.hora21 ?? 0;
-            normalizedItem['22'] = item.hora22 ?? 0;
-            
+            normalizedItem["6"] = item.hora6 ?? 0;
+            normalizedItem["7"] = item.hora7 ?? 0;
+            normalizedItem["8"] = item.hora8 ?? 0;
+            normalizedItem["9"] = item.hora9 ?? 0;
+            normalizedItem["10"] = item.hora10 ?? 0;
+            normalizedItem["11"] = item.hora11 ?? 0;
+            normalizedItem["12"] = item.hora12 ?? 0;
+            normalizedItem["13"] = item.hora13 ?? 0;
+            normalizedItem["14"] = item.hora14 ?? 0;
+            normalizedItem["15"] = item.hora15 ?? 0;
+            normalizedItem["16"] = item.hora16 ?? 0;
+            normalizedItem["17"] = item.hora17 ?? 0;
+            normalizedItem["18"] = item.hora18 ?? 0;
+            normalizedItem["19"] = item.hora19 ?? 0;
+            normalizedItem["20"] = item.hora20 ?? 0;
+            normalizedItem["21"] = item.hora21 ?? 0;
+            normalizedItem["22"] = item.hora22 ?? 0;
+
             // Calcular total si no viene
-            if (normalizedItem.total === undefined || normalizedItem.total === null) {
+            if (
+              normalizedItem.total === undefined ||
+              normalizedItem.total === null
+            ) {
               const sum = [
-                item.hora6, item.hora7, item.hora8, item.hora9, item.hora10,
-                item.hora11, item.hora12, item.hora13, item.hora14, item.hora15,
-                item.hora16, item.hora17, item.hora18, item.hora19, item.hora20,
-                item.hora21, item.hora22
+                item.hora6,
+                item.hora7,
+                item.hora8,
+                item.hora9,
+                item.hora10,
+                item.hora11,
+                item.hora12,
+                item.hora13,
+                item.hora14,
+                item.hora15,
+                item.hora16,
+                item.hora17,
+                item.hora18,
+                item.hora19,
+                item.hora20,
+                item.hora21,
+                item.hora22,
               ].reduce((acc, val) => acc + (Number(val) || 0), 0);
               normalizedItem.total = sum;
             }
           }
-          
+
           // Si el backend devuelve null en ejecutivo o idEncargado, rellenar con info del nodo seleccionado
-          if (selectedExecutiveInfo && (normalizedItem.ejecutivo === null || normalizedItem.idEncargado === null)) {
-            normalizedItem.ejecutivo = normalizedItem.ejecutivo || selectedExecutiveInfo.usuario || "--";
-            normalizedItem.idEncargado = normalizedItem.idEncargado || selectedExecutiveInfo.idEjecutivo || "--";
+          if (
+            selectedExecutiveInfo &&
+            (normalizedItem.ejecutivo === null ||
+              normalizedItem.idEncargado === null)
+          ) {
+            normalizedItem.ejecutivo =
+              normalizedItem.ejecutivo || selectedExecutiveInfo.usuario || "--";
+            normalizedItem.idEncargado =
+              normalizedItem.idEncargado ||
+              selectedExecutiveInfo.idEjecutivo ||
+              "--";
           }
-          
+
           return normalizedItem;
         });
-        console.log("📥 Respuesta procesada (datos encontrado):", processedData);
+        console.log(
+          "📥 Respuesta procesada (datos encontrado):",
+          processedData,
+        );
       } else if (Array.isArray(data)) {
         // Si es un array directo
         processedData = data;
@@ -310,11 +367,14 @@ const ProductivityModal = ({
         // Buscar un array en las propiedades del objeto
         const dataArray = Object.values(data).find((val) => Array.isArray(val));
         processedData = dataArray || [];
-        console.log("📥 Respuesta procesada (array encontrado en objeto):", processedData);
+        console.log(
+          "📥 Respuesta procesada (array encontrado en objeto):",
+          processedData,
+        );
       } else {
         processedData = [];
       }
-      
+
       setAllProductivityData(processedData);
     } catch (error) {
       console.error("  Error al obtener datos de productividad:", error);

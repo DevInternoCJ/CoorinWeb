@@ -3,7 +3,7 @@ import { newCampaign } from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
 
-const NewCampaign = ({ onCreated, buttonClassName, selectedProduct}) => {
+const NewCampaign = ({ onCreated, buttonClassName, selectedProduct }) => {
   const [nuevaCampania, setNuevaCampania] = useState("");
   const [loadingNueva, setLoadingNueva] = useState(false);
   const [errorNueva, setErrorNueva] = useState("");

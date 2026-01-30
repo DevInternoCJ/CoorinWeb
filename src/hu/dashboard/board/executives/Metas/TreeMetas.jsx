@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import JerarquiaConR from "../../branchs/JerarquiaConR.jsx";
-import { obetenerJerarquiaEncargados } from "../../../../../services/mark/orochi/LokiServices.js";
+import { obetenerJerarquiaEncargados } from "../../../../../services/mark/Orochi/LokiServices.js";
 
 const TreeMetas = ({
   setSelectedExecutives,

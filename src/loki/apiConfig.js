@@ -15,10 +15,10 @@ api.interceptors.request.use(
   config => {
     // Si la URL es la de login, no añadas el token
     if (config.url !== '/Auth/login') {
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+        const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
     }
     return config;
   },

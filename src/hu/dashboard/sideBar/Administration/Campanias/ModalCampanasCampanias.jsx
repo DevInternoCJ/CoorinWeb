@@ -50,7 +50,20 @@ const ModalCampanasCampanias = ({
     const idEncargado = idEjecutivo;
     // Resolver idCartera: preferir la seleccion en UI, si no existe usar localStorage como fallback
     const idCartera =
-      selectedCartera?.value;
+      selectedCartera?.value ||
+      (function () {
+        try {
+          const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+          return (
+            userData?.idCartera ||
+            userData?.idcartera ||
+            userData?.cartera ||
+            undefined
+          );
+        } catch (e) {
+          return undefined;
+        }
+      })();
     const idProducto = selectedProduct?.value;
     const params = { idEncargado, idCartera, idProducto };
 

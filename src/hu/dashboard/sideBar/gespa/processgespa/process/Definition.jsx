@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import SearchForm from "./SearchForm";
-import { getCarteras } from "../../../../../../services/mark/orochi/LokiServices";
+import { getCarteras } from "../../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
 const Definition = ({
@@ -27,7 +27,7 @@ const Definition = ({
           ...carteras.map((cartera) => ({
             label: cartera.cartera,
             value: cartera.idCartera,
-          }))
+          })),
         ];
 
         setCarteraOptions(options);

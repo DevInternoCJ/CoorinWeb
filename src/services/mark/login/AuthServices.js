@@ -16,7 +16,7 @@ export const loginUser = async (userData) => {
       ip: "192.168.7.116",
       aplicacion: "Coorin",
       version: "3.4.2",
-      servidor: "Orochi"
+      servidor: "Albaz"
     };
     console.log('Enviando a /Auth/login:', requestData);
     const response = await api.post('/Auth/login', requestData, {
@@ -35,19 +35,23 @@ export const loginUser = async (userData) => {
     });  
  
     if (response.data && response.data.ejecutivo && response.data.ejecutivo.Token) {
-      localStorage.setItem('token', response.data.ejecutivo.Token);
-      console.log(' Token guardado en localStorage:', response.data.ejecutivo.Token);   
+      // Guardar en sessionStorage para que persista en recargas pero se borre al cerrar la pestaña
+      sessionStorage.setItem('token', response.data.ejecutivo.Token);
+      console.log(' Token guardado en sessionStorage:', response.data.ejecutivo.Token);
       // Verificar que realmente se guardó
-      const savedToken = localStorage.getItem('token');
-      console.log('Token recuperado de localStorage:', savedToken);
-      // Guardar datos del usuario
-      localStorage.setItem('userData', JSON.stringify({
-        idEjecutivo: response.data.ejecutivo.idEjecutivo,
-        usuario: response.data.ejecutivo.Usuario,
-        nombre: response.data.ejecutivo.NombreEjecutivo,
-        dias: response.data.ejecutivo.Días,
-        Jerarquía: response.data.ejecutivo.Jerarquía
-      }));
+      const savedToken = sessionStorage.getItem('token');
+      console.log('Token recuperado de sessionStorage:', savedToken);
+      // Guardar datos del usuario en sessionStorage
+      sessionStorage.setItem(
+        'userData',
+        JSON.stringify({
+          idEjecutivo: response.data.ejecutivo.idEjecutivo,
+          usuario: response.data.ejecutivo.Usuario,
+          nombre: response.data.ejecutivo.NombreEjecutivo,
+          dias: response.data.ejecutivo.Días,
+          Jerarquía: response.data.ejecutivo.Jerarquía,
+        }),
+      );
     } else {
       console.warn('No se recibió token en la respuesta');
       console.warn('Estructura completa de la respuesta:', response.data);

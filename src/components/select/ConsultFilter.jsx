@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { getColumsProduct } from "../../services/mark/orochi/LokiServices";
-import { chargueCatalog } from "../../services/mark/orochi/LokiServices";
+import { getColumsProduct } from "../../services/mark/Orochi/LokiServices";
+import { chargueCatalog } from "../../services/mark/Orochi/LokiServices";
 const ConsultFilter = ({
   options = [],
   label = "Seleccione",
@@ -139,7 +139,7 @@ const ConsultFilter = ({
         setIsLoading(false);
       }
     },
-    [options, idProducto]
+    [options, idProducto],
   );
 
   // Efecto para cargar opciones cuando cambia el filterType
@@ -188,7 +188,7 @@ const ConsultFilter = ({
     // Enviar el objeto completo de la opción seleccionada
     if (onSelectionChange) {
       const selectedOption = dynamicOptions.find(
-        (option) => option.value === value
+        (option) => option.value === value,
       );
       onSelectionChange(selectedOption);
     }

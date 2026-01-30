@@ -174,11 +174,11 @@ const GridLampsFields = () => {
                     {value === null || value === "NULL"
                       ? "N/A"
                       : typeof value === "number"
-                      ? value.toLocaleString("es-MX", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })
-                      : value.toString().trim()}
+                        ? value.toLocaleString("es-MX", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : value.toString().trim()}
                   </td>
                 ))}
               </tr>

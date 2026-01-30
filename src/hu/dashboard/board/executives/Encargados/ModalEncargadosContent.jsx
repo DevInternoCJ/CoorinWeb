@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos, AsignaEncargados } from "../../../../../services/mark/Orochi/LokiServices";
+import {
+  obetenerJerarquiaEncargados,
+  obetenerDropdownsEncargados,
+  getCarteras,
+  getCarterasProductos,
+  AsignaEncargados,
+} from "../../../../../services/mark/Orochi/LokiServices";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 import { toast } from "sonner";
 import JerarquiaConR from "../../branchs/JerarquiaConR";
@@ -114,7 +120,7 @@ const ModalEncargadosContent = (props) => {
 
         encargadosFiltrados = encargados.filter((item) => {
           const matchProducto = idsProductoRelacionados.includes(
-            item.idProducto
+            item.idProducto,
           );
           return matchProducto;
         });
@@ -133,11 +139,11 @@ const ModalEncargadosContent = (props) => {
         // Si no hay encargados disponibles, establecer como VACIO
         setSelectedEncargado("VACIO");
         console.log(
-          "No hay encargados disponibles para los filtros actuales - establecido como VACIO"
+          "No hay encargados disponibles para los filtros actuales - establecido como VACIO",
         );
       }
     },
-    [encargados, carterasProductosData]
+    [encargados, carterasProductosData],
   );
 
   // Efectuar el filtrado cuando cambien cartera o producto
@@ -164,7 +170,7 @@ const ModalEncargadosContent = (props) => {
                 nombreEjecutivo: e.nombreEjecutivo || "",
                 subordinados: Array.isArray(e.subordinados)
                   ? e.subordinados.filter(
-                      (s) => s.jerarquia === undefined || s.jerarquia > 0
+                      (s) => s.jerarquia === undefined || s.jerarquia > 0,
                     )
                   : [],
                 idEjecutivo: e.idEjecutivo,
@@ -298,7 +304,7 @@ const ModalEncargadosContent = (props) => {
   const contadorEncargados = useMemo(() => {
     const totalEncargados = usuariosEncargados.length;
     const encargadosAsignados = usuariosEncargados.filter(
-      (u) => u.seleccionado
+      (u) => u.seleccionado,
     ).length;
     return { asignados: encargadosAsignados, total: totalEncargados };
   }, [usuariosEncargados]);
@@ -325,7 +331,7 @@ const ModalEncargadosContent = (props) => {
     // Actualizar el estado local inmediatamente para mejor UX
     setUsuariosEncargados((prev) => {
       const updated = prev.map((u, i) =>
-        i === index ? { ...u, seleccionado: nuevoEstado } : u
+        i === index ? { ...u, seleccionado: nuevoEstado } : u,
       );
 
       // Log para debug
@@ -343,7 +349,7 @@ const ModalEncargadosContent = (props) => {
     try {
       // Validar que hay usuarios seleccionados
       const usuariosSeleccionados = usuariosEncargados.filter(
-        (u) => u.seleccionado
+        (u) => u.seleccionado,
       );
       if (usuariosSeleccionados.length === 0) {
         toast.warning("Selecciona al menos un ejecutivo para asignar.");
@@ -355,7 +361,7 @@ const ModalEncargadosContent = (props) => {
 
       // Obtener IDs de cartera y producto
       const idCartera = carterasProductosData.find(
-        (item) => item.cartera === cartera
+        (item) => item.cartera === cartera,
       )?.idCartera;
       const idProducto =
         producto === "-Sin Producto-"
@@ -391,11 +397,11 @@ const ModalEncargadosContent = (props) => {
       console.log("Enviando asignación de encargados:", requestBody);
       console.log(
         "👥 Usuarios seleccionados:",
-        usuariosSeleccionados.map((u) => u.displayName)
+        usuariosSeleccionados.map((u) => u.displayName),
       );
       console.log(
         "Array de asignaciones:",
-        `${requestBody.length} asignación(es) a procesar`
+        `${requestBody.length} asignación(es) a procesar`,
       );
 
       try {
@@ -410,7 +416,8 @@ const ModalEncargadosContent = (props) => {
           selectedEncargado === " "
             ? "Sin Encargado"
             : encargadosFiltrados.find(
-                (e) => e.idEjecutivo.toString() === selectedEncargado.toString()
+                (e) =>
+                  e.idEjecutivo.toString() === selectedEncargado.toString(),
               )?.nombreEjecutivo || "Encargado";
 
         // Formato ordenado del mensaje del toast
@@ -438,7 +445,7 @@ const ModalEncargadosContent = (props) => {
 
         // Limpiar selecciones
         setUsuariosEncargados((prev) =>
-          prev.map((u) => ({ ...u, seleccionado: false }))
+          prev.map((u) => ({ ...u, seleccionado: false })),
         );
       } catch (error) {
         console.error("Error al asignar ejecutivos:", error);
@@ -449,27 +456,27 @@ const ModalEncargadosContent = (props) => {
           const errors = error.response.data.errors;
           if (errors.listaEjecutivo) {
             errorMessage += ` Problema con la lista de ejecutivos: ${errors.listaEjecutivo.join(
-              ", "
+              ", ",
             )}`;
           }
           if (errors.idEjecutivo) {
             errorMessage += ` Problema con los ejecutivos: ${errors.idEjecutivo.join(
-              ", "
+              ", ",
             )}`;
           }
           if (errors.idEncargado) {
             errorMessage += ` Problema con el encargado: ${errors.idEncargado.join(
-              ", "
+              ", ",
             )}`;
           }
           if (errors.idCartera) {
             errorMessage += ` Problema con la cartera: ${errors.idCartera.join(
-              ", "
+              ", ",
             )}`;
           }
           if (errors.idProducto) {
             errorMessage += ` Problema con el producto: ${errors.idProducto.join(
-              ", "
+              ", ",
             )}`;
           }
           if (errors.$) {

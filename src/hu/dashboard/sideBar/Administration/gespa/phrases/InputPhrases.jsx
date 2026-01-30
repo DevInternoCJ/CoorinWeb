@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
 import ButtonSave from "../ButtonSave";
-import { postSavePhrases } from "../../../../../../services/mark/orochi/LokiServices";
+import { postSavePhrases } from "../../../../../../services/mark/Orochi/LokiServices";
 import { useWalletProducts } from "../../../../../login/WalletProduct";
 
 export const InputPhrases = ({ onPhraseSaved }) => {
@@ -26,13 +26,13 @@ export const InputPhrases = ({ onPhraseSaved }) => {
     }
     if (!idProducto || !idCartera) {
       toast.error(
-        "No se encontraron datos del producto. Por favor, recarga la página"
+        "No se encontraron datos del producto. Por favor, recarga la página",
       );
       return;
     }
     if (!idEjecutivo) {
       toast.error(
-        "No se encontró información del usuario. Por favor, inicia sesión nuevamente"
+        "No se encontró información del usuario. Por favor, inicia sesión nuevamente",
       );
       return;
     }

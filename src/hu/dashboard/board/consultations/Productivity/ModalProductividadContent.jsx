@@ -19,7 +19,7 @@ const ModalProductividadContent = ({
   const [loadingJerarquia, setLoadingJerarquia] = useState(false);
   const [errorJerarquia, setErrorJerarquia] = useState(null);
   const [allHierarchyIds, setAllHierarchyIds] = useState([]);
-  
+
   // Estados requeridos por JerarquiaConR (aunque no se usen directamente aquí)
   const [_selectedExecutives, setSelectedExecutives] = useState([]);
   const [_selectedRows, setSelectedRows] = useState([]);
@@ -36,7 +36,11 @@ const ModalProductividadContent = ({
         const usuario = userData?.usuario || "";
         // El campo del nombre puede estar en diferentes propiedades según el login
         const nombreEjecutivo = userData?.nombre;
-        console.log("Usuario sesión:", { idEjecutivo, usuario, nombreEjecutivo });
+        console.log("Usuario sesión:", {
+          idEjecutivo,
+          usuario,
+          nombreEjecutivo,
+        });
         if (!idEjecutivo)
           throw new Error("No se encontró el idEjecutivo del usuario logueado");
         const data = await obetenerJerarquiaEncargados(idEjecutivo);
@@ -58,7 +62,7 @@ const ModalProductividadContent = ({
         }
         setExecutiveTree(tree);
       } catch (e) {
-        setErrorJerarquia("Error al obtener la jerarquía de ejecutivos",e);
+        setErrorJerarquia("Error al obtener la jerarquía de ejecutivos", e);
         setExecutiveTree([]);
       } finally {
         setLoadingJerarquia(false);
@@ -100,28 +104,29 @@ const ModalProductividadContent = ({
 
   // Callback para manejar la selección de un nodo del árbol
   const handleNodeSelect = (node) => {
-    console.log('🎯 Nodo seleccionado del árbol:', node);
-    
+    console.log("🎯 Nodo seleccionado del árbol:", node);
+
     // Guardar información completa del nodo seleccionado
     if (setSelectedExecutiveInfo) {
       setSelectedExecutiveInfo({
         idEjecutivo: node.idEjecutivo,
         usuario: node.usuario,
-        nombreEjecutivo: node.nombreEjecutivo
+        nombreEjecutivo: node.nombreEjecutivo,
       });
     }
-    
+
     // Actualizar el ID seleccionado
     setSelectedExecutiveNode(node.idEjecutivo);
-    
+
     const userData = JSON.parse(localStorage.getItem("userData")) || {};
-    const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+    const idEjecutivoSesion =
+      userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
     const isSessionUser = node.idEjecutivo === idEjecutivoSesion;
-    
+
     // Si es el usuario de sesión, mostrar todos los datos (null = sin filtro)
     // Si es otro usuario, filtrar por su nombre de usuario
     if (isSessionUser) {
-      console.log('Usuario de sesión seleccionado - mostrando todos los datos');
+      console.log("Usuario de sesión seleccionado - mostrando todos los datos");
       if (setSelectedUserFromTree) setSelectedUserFromTree(null);
     } else {
       console.log(`Usuario seleccionado del árbol: ${node.usuario}`);
@@ -134,7 +139,7 @@ const ModalProductividadContent = ({
     if (!Array.isArray(tree)) return null;
     return tree.map((node, idx) => {
       const isSelected = node.idEjecutivo === selectedExecutiveNode;
-      
+
       return (
         <React.Fragment key={node.usuario || node.id || idx}>
           <div
@@ -220,7 +225,7 @@ const ModalProductividadContent = ({
           "Modo",
           "Primera Gestión",
           "Salida",
-          "Tiempo En Modo"
+          "Tiempo En Modo",
         ];
       case "Contactos":
         return [
@@ -260,7 +265,7 @@ const ModalProductividadContent = ({
           "Muerto",
           "Pausas",
           "Permiso",
-          "Sesión"
+          "Sesión",
         ];
       case "TiempoPromedio":
         return [
@@ -535,7 +540,7 @@ const ModalProductividadContent = ({
     return productivityData.map((item, index) => {
       // Log para debug
       console.log(`📊 Item #${index} para renderizar:`, item);
-      
+
       // Convertir el objeto a array de valores, manejando diferentes estructuras
       let values = [];
       const columnCount = getColumnCount();
@@ -546,94 +551,100 @@ const ModalProductividadContent = ({
         const headers = getTableHeaderTitles();
         // Mapeos personalizados por indicador
         const indicatorMappings = {
-          "Sesiones": {
-            "Ejecutivo": "ejecutivo",
-            "Extensión": "extension",
-            "Encargado": "idEncargado",
-            "Ingreso": "ingreso",
-            "Modo": "modo",
+          Sesiones: {
+            Ejecutivo: "ejecutivo",
+            Extensión: "extension",
+            Encargado: "idEncargado",
+            Ingreso: "ingreso",
+            Modo: "modo",
             "P. Gestión": "primerGestion",
-            "Salida": "salida",
-            "T. Modo": "tiempoEnModo"
+            Salida: "salida",
+            "T. Modo": "tiempoEnModo",
           },
-          "Contactos": {
-            "Ejecutivo": "Ejecutivo",
-            "Entrada": "Entrada",
-            "Encargado": "Encargado",
-            "Cuentas": "Cuentas",
-            "Gestiones": "Gestiones",
-            "Titulares": "Titulares",
-            "Conocidos": "Conocidos",
-            "Desconocidos": "Desconocidos",
-            "SinContacto": "SinContacto"
+          Contactos: {
+            Ejecutivo: "Ejecutivo",
+            Entrada: "Entrada",
+            Encargado: "Encargado",
+            Cuentas: "Cuentas",
+            Gestiones: "Gestiones",
+            Titulares: "Titulares",
+            Conocidos: "Conocidos",
+            Desconocidos: "Desconocidos",
+            SinContacto: "SinContacto",
           },
-          "Negociaciones": {
-            "Ejecutivo": "Ejecutivo",
-            "Encargado": "Encargado",
-            "Negociaciones": "Negociaciones",
-            "MontoNegociaciones": "MontoNegociaciones",
-            "SaldoSolucionado": "SaldoSolucionado",
-            "MontoPromedio": "MontoPromedio",
-            "SaldoPromedio": "SaldoPromedio"
+          Negociaciones: {
+            Ejecutivo: "Ejecutivo",
+            Encargado: "Encargado",
+            Negociaciones: "Negociaciones",
+            MontoNegociaciones: "MontoNegociaciones",
+            SaldoSolucionado: "SaldoSolucionado",
+            MontoPromedio: "MontoPromedio",
+            SaldoPromedio: "SaldoPromedio",
           },
-          "Porcentajes": {
-            "Ejecutivo": "Ejecutivo",
-            "Encargado": "Encargado",
-            "Negociación": "Negociación",
-            "Gestión": "Gestión",
-            "Entrada": "Entrada",
-            "Titulares": "Titulares",
-            "Conocidos": "Conocidos",
-            "Desconocidos": "Desconocidos",
-            "SinContacto": "SinContacto"
+          Porcentajes: {
+            Ejecutivo: "Ejecutivo",
+            Encargado: "Encargado",
+            Negociación: "Negociación",
+            Gestión: "Gestión",
+            Entrada: "Entrada",
+            Titulares: "Titulares",
+            Conocidos: "Conocidos",
+            Desconocidos: "Desconocidos",
+            SinContacto: "SinContacto",
           },
-          "Tiempos": {
+          Tiempos: {
             // Las claves coinciden con los headers
-            "Baño": "Baño",
-            "Comida": "Comida",
-            "Consulta": "Consulta",
-            "Cuentas": "Cuentas",
-            "Curso": "Curso",
-            "Ejecutivo": "Ejecutivo",
-            "Encargado": "Encargado",
-            "Gestión": "Gestión",
-            "Muerto": "Muerto",
-            "Pausas": "Pausas",
-            "Permiso": "Permiso",
-            "Sesión": "Sesión"
+            Baño: "Baño",
+            Comida: "Comida",
+            Consulta: "Consulta",
+            Cuentas: "Cuentas",
+            Curso: "Curso",
+            Ejecutivo: "Ejecutivo",
+            Encargado: "Encargado",
+            Gestión: "Gestión",
+            Muerto: "Muerto",
+            Pausas: "Pausas",
+            Permiso: "Permiso",
+            Sesión: "Sesión",
           },
           "Tiempo Promedio": {
-            "Ejecutivo": "Ejecutivo",
-            "Encargado": "Encargado",
-            "Negociaciones": "Negociaciones",
-            "Cuentas": "Cuentas",
-            "Titulares": "Titulares",
-            "Conocidos": "Conocidos",
-            "Desconocidos": "Desconocidos",
-            "SinContacto": "SinContacto"
-          }
+            Ejecutivo: "Ejecutivo",
+            Encargado: "Encargado",
+            Negociaciones: "Negociaciones",
+            Cuentas: "Cuentas",
+            Titulares: "Titulares",
+            Conocidos: "Conocidos",
+            Desconocidos: "Desconocidos",
+            SinContacto: "SinContacto",
+          },
           // Agrega aquí más mapeos personalizados para otros indicadores si lo necesitas
         };
 
         const headerToKey = (h) => {
           if (!h) return null;
-          const label = typeof h === 'object' && h.label ? h.label : h;
+          const label = typeof h === "object" && h.label ? h.label : h;
           // Si existe mapeo personalizado para el indicador actual
-          if (indicatorMappings[selectedIndicator] && indicatorMappings[selectedIndicator][label]) {
+          if (
+            indicatorMappings[selectedIndicator] &&
+            indicatorMappings[selectedIndicator][label]
+          ) {
             return indicatorMappings[selectedIndicator][label];
           }
           // Otros indicadores: normalizar
-          if (typeof label === 'string') {
+          if (typeof label === "string") {
             const normalized = label.replace(/\s+/g, "").replace(/\W/g, "");
             return normalized.charAt(0).toLowerCase() + normalized.slice(1);
           }
-          return '-';
+          return "-";
         };
 
         if (headers && headers.length > 0) {
           values = headers.map((h) => {
             const key = headerToKey(h);
-            const v = key && Object.prototype.hasOwnProperty.call(item, key) ? item[key] : undefined;
+            const v =
+              key && Object.prototype.hasOwnProperty.call(item, key)
+                ? item[key]
+                : undefined;
             return v !== undefined && v !== null && v !== "" ? v : "--";
           });
         } else {
@@ -653,7 +664,10 @@ const ModalProductividadContent = ({
       return (
         <tr key={index}>
           {values.slice(0, columnCount).map((value, idx) => {
-            let display = (value !== null && value !== undefined && value !== "") ? String(value) : "--";
+            let display =
+              value !== null && value !== undefined && value !== ""
+                ? String(value)
+                : "--";
             const header = headers[idx] || "";
 
             // Si la columna es 'Ingreso', extraer la parte de hora tras la 'T' (HH:MM:SS)
@@ -680,7 +694,7 @@ const ModalProductividadContent = ({
 
   return (
     <>
-      <div className="flex gap-4 h-full" style={{ maxHeight: '60vh' }}>
+      <div className="flex gap-4 h-full" style={{ maxHeight: "60vh" }}>
         {/* Columna izquierda - Jerarquía de Ejecutivos */}
         <JerarquiaConR
           executiveTree={executiveTree}
@@ -699,7 +713,7 @@ const ModalProductividadContent = ({
         {/* Columna derecha - Tabla de datos con scroll interno */}
         <div
           className="flex-1 bg-white rounded-lg pt-[1.5vh] pb-3 px-[1vw] shadow border border-[var(--color-jerarquia1)] flex flex-col overflow-hidden"
-          style={{ minWidth: 0, maxHeight: '100%', maxWidth: '70%' }}
+          style={{ minWidth: 0, maxHeight: "100%", maxWidth: "70%" }}
         >
           {/* Información del ejecutivo seleccionado */}
           <div className="flex items-center mb-2 w-full flex-shrink-0">
@@ -707,12 +721,12 @@ const ModalProductividadContent = ({
               {loadingProductivity
                 ? "Cargando datos..."
                 : errorProductivity
-                ? "Error al cargar datos"
-                : !selectedExecutiveNode
-                ? "Seleccione un indicador y ejecutivo"
-                : productivityData.length > 0
-                ? `Datos de productividad - ${productivityData.length} registros`
-                : "Sin datos disponibles para el ejecutivo seleccionado"}
+                  ? "Error al cargar datos"
+                  : !selectedExecutiveNode
+                    ? "Seleccione un indicador y ejecutivo"
+                    : productivityData.length > 0
+                      ? `Datos de productividad - ${productivityData.length} registros`
+                      : "Sin datos disponibles para el ejecutivo seleccionado"}
             </span>
           </div>
 
@@ -720,11 +734,14 @@ const ModalProductividadContent = ({
           <div
             className="scrollbar-gray flex-1 overflow-auto"
             style={{
-              minWidth: '100%',
-              WebkitOverflowScrolling: 'touch'
+              minWidth: "100%",
+              WebkitOverflowScrolling: "touch",
             }}
           >
-            <table className="modal-table mb-2" style={{ minWidth: '400px', width: 'max-content' }}>
+            <table
+              className="modal-table mb-2"
+              style={{ minWidth: "400px", width: "max-content" }}
+            >
               <thead>
                 <tr>{renderTableHeaders()}</tr>
               </thead>

@@ -1,7 +1,7 @@
 // useCommentsLogic.js
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { PostComments, getCatalogoValueCard } from "../../../../../services/mark/orochi/LokiServices";
+import { PostComments, getCatalogoValueCard } from "../../../../../services/mark/Orochi/LokiServices";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
 
 const VIEW_TYPES = Object.freeze({ ADD: "add", LIST: "list" });

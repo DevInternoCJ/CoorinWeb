@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PostDataCharge } from "../../../../../services/mark/orochi/LokiServices";
+import { PostDataCharge } from "../../../../../services/mark/Orochi/LokiServices";
 import { useWalletProducts } from "../../../../login/WalletProduct";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
 import { IconError } from "./IconScripts";
@@ -89,7 +89,7 @@ const DataCharges = ({ onDataLoaded }) => {
           }
         } else {
           setError(
-            response?.mensaje || "No se pudieron cargar los datos del servidor"
+            response?.mensaje || "No se pudieron cargar los datos del servidor",
           );
         }
       } catch (err) {
@@ -299,7 +299,7 @@ const DataCharges = ({ onDataLoaded }) => {
                         >
                           {formatValue(value, key)}
                         </td>
-                      )
+                      ),
                     )}
                   </tr>
                 </tbody>

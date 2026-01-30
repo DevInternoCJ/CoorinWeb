@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-//import { ValidatePassword } from "../../services/mark/orochi/LokiServices";
+//import { ValidatePassword } from "../../services/mark/Orochi/LokiServices";
 import { loginUser } from "../../services/mark/login/AuthServices";
 import ButtonLogin from "./ButtonLogin";
 import { LoginUser, LoginKey } from "./LoginIcons";
@@ -95,7 +95,7 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
       setPasswordError(
         value.length > 0 && value.length < 8
           ? ERROR_MESSAGES.PASSWORD_LENGTH
-          : ""
+          : "",
       );
     }
   }, []);
@@ -150,7 +150,7 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
         navigate("/dashboardPage");
       }
     },
-    [saveUserData]
+    [saveUserData],
   );
 
   // Handler principal de submit
@@ -297,7 +297,7 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
       // Error de red (sin conexión al servidor)
       if (axiosCode === "ERR_NETWORK") {
         toast.error(
-          "No se pudo conectar con el servidor. Verifica tu red o VPN."
+          "No se pudo conectar con el servidor. Verifica tu red o VPN.",
         );
         console.error("Error de red:", error.message);
         setApiError("No se pudo establecer conexión con el servidor.");

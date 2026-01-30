@@ -55,12 +55,12 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
           setExecutiveTree((prev) =>
             prev.map((ej) => {
               const encontrado = respuesta.data.find(
-                (r) => r.idEjecutivo === ej.idEjecutivo
+                (r) => r.idEjecutivo === ej.idEjecutivo,
               );
               return encontrado
                 ? { ...ej, restantes: encontrado.Restantes, asignado: true }
                 : { ...ej, restantes: 0, asignado: false };
-            })
+            }),
           );
 
           // Mostrar mensaje de éxito cuando se cargan datos para la campaña
@@ -85,7 +85,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
               ...ej,
               restantes: 0,
               asignado: false,
-            }))
+            })),
           );
         }
       }
@@ -148,20 +148,22 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
     // Combinar: primero ejecutivos principales, luego subordinados al final
     ejecutivosFiltrados.push(
       ...listaEjecutivosPrincipales,
-      ...listaSubordinados
+      ...listaSubordinados,
     );
 
     console.log(
       "Ejecutivos mostrados (TODOS los principales + subordinados al final):",
-      ejecutivosFiltrados.length
+      ejecutivosFiltrados.length,
     );
     console.log(
       "Ejecutivos principales:",
-      listaEjecutivosPrincipales.map((e) => e.usuario)
+      listaEjecutivosPrincipales.map((e) => e.usuario),
     );
     console.log(
       "Subordinados al final (orden inverso):",
-      listaSubordinados.map((e) => `${e.usuario} (hijo de ${e.encargadoPadre})`)
+      listaSubordinados.map(
+        (e) => `${e.usuario} (hijo de ${e.encargadoPadre})`,
+      ),
     );
 
     return ejecutivosFiltrados;
@@ -171,7 +173,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
   const contadorEjecutivos = useMemo(() => {
     const totalEjecutivos = ejecutivosOrdenados.length;
     const ejecutivosAsignados = ejecutivosOrdenados.filter(
-      (e) => e.asignado
+      (e) => e.asignado,
     ).length;
     return { asignados: ejecutivosAsignados, total: totalEjecutivos };
   }, [ejecutivosOrdenados]);
@@ -185,12 +187,12 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
       const response = await asignaEjecutivoCampanas(
         checked,
         idCampaña,
-        row.idEjecutivo
+        row.idEjecutivo,
       );
       // Si la respuesta fue exitosa, actualiza el estado asignado
       if (response?.data?.success || response?.status === 200) {
         setExecutiveTree((prev) =>
-          prev.map((r, i) => (i === idx ? { ...r, asignado: checked } : r))
+          prev.map((r, i) => (i === idx ? { ...r, asignado: checked } : r)),
         );
       }
     } catch (error) {

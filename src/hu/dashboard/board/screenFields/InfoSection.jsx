@@ -23,7 +23,7 @@ const InfoSection = ({
         const response = await ShowFieldScreen(idProducto);
         console.log(
           "InfoSection - Datos por defecto (Objeto original):",
-          response
+          response,
         );
 
         // CAMBIO 1: Convertir la respuesta inicial (objeto) a un Array de objetos
@@ -49,7 +49,7 @@ const InfoSection = ({
     if (!fieldName || !rowData) {
       console.log(
         `processFieldValue - Datos faltantes: fieldName=${fieldName}, rowData=`,
-        rowData
+        rowData,
       );
       return "N/A";
     }
@@ -70,12 +70,12 @@ const InfoSection = ({
           formattedValue,
           "(valor crudo:",
           actualValue,
-          ")"
+          ")",
         );
         // CORRECCIÓN: Reemplazar SIEMPRE, incluso si es "N/A" o vacío
         processedValue = processedValue.replace(
           `[${fieldInBrackets}]`,
-          formattedValue
+          formattedValue,
         );
 
         if (formattedValue !== "N/A" && formattedValue !== "") {
@@ -103,7 +103,7 @@ const InfoSection = ({
         `FieldName directo "${fieldName}" -> valor:`,
         value,
         "formateado:",
-        formattedValue
+        formattedValue,
       );
       return formattedValue;
     }
@@ -122,13 +122,13 @@ const InfoSection = ({
     }
     // Buscar coincidencia case insensitive
     const key = Object.keys(rowData).find(
-      (k) => k.toLowerCase() === fieldName.toLowerCase()
+      (k) => k.toLowerCase() === fieldName.toLowerCase(),
     );
     if (key) {
       const value = rowData[key];
       console.log(
         `Coincidencia case-insensitive encontrada: "${fieldName}" -> "${key}":`,
-        value
+        value,
       );
       return value;
     }
@@ -191,7 +191,7 @@ const InfoSection = ({
     if (shouldProcessRowData) {
       console.log(
         "InfoSection - Procesando fila seleccionada con fieldNames:",
-        camposArray
+        camposArray,
       );
 
       // CAMBIO 2: Trabajamos sobre una copia del array infoData (que ya está ordenado)
@@ -202,7 +202,7 @@ const InfoSection = ({
         // Procesar el valor usando el campo (camposArray)
         const processedValue = processFieldValue(
           correspondingFieldName,
-          selectedRowData
+          selectedRowData,
         );
 
         // Crear el nuevo objeto de valor para el campo 'valor'
@@ -220,7 +220,7 @@ const InfoSection = ({
 
       console.log(
         "InfoSection - Datos actualizados (Array ordenado):",
-        updatedArrayData
+        updatedArrayData,
       );
       setInfoData(updatedArrayData);
     } else {
@@ -231,7 +231,7 @@ const InfoSection = ({
       if (camposArray.length === 0) reason += "sin fieldNames";
       console.log(
         "InfoSection - Restaurando datos por defecto (Array ordenado). " +
-          reason
+          reason,
       );
       setInfoData(defaultData); // defaultData ahora es el array ordenado
     }
@@ -323,7 +323,7 @@ const InfoSection = ({
                       <td className="py-2 px-2 font-semibold"></td>
                       <td className="py-2 px-2"></td>
                     </React.Fragment>
-                  )
+                  ),
                 )}
               </tr>
             ))}

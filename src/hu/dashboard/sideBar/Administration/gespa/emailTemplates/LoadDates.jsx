@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PostLoadData } from "../../../../../../services/mark/orochi/LokiServices";
+import { PostLoadData } from "../../../../../../services/mark/Orochi/LokiServices";
 import { useWalletProducts } from "../../../../../login/WalletProduct"; // Importa el hook
 import { IconDrag } from "../../../../../../components/iconos/IconDrag";
 
@@ -358,12 +358,12 @@ const LoadDates = ({
                       key={index}
                       className={`py-3 px-4 border-b-jerarquia4 text-sm w-auto ${getValueClass(
                         value,
-                        key
+                        key,
                       )} whitespace-nowrap align-top`}
                     >
                       {formatValue(value, key)}
                     </td>
-                  )
+                  ),
                 )}
               </tr>
             </tbody>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import ModalHeader from "../ModalHeader";
 import Template from "./Template";
 import LoadDates from "./LoadDates";
-import { PostLoadData } from "../../../../../../services/mark/orochi/LokiServices";
+import { PostLoadData } from "../../../../../../services/mark/Orochi/LokiServices";
 import ModalBase from "../../../../board/ModalBase";
 import { IconTemplate } from "../IconsTemplates";
 import { useWalletProducts } from "../../../../../login/WalletProduct";
@@ -29,7 +29,7 @@ const EmailTemplates = ({ onClose }) => {
       "Body enviado a PostLoadData:",
       data,
       typeof data,
-      Array.isArray(data)
+      Array.isArray(data),
     );
 
     const response = await PostLoadData(data);

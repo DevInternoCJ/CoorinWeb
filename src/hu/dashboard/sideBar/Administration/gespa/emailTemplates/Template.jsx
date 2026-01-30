@@ -4,8 +4,8 @@ import ButtonSave from "../ButtonSave";
 import {
   SaveCreateTemplate,
   UpdateTemplate,
-} from "../../../../../../services/mark/orochi/LokiServices";
-import { DeleteTemplate } from "../../../../../../services/mark/orochi/LokiServices";
+} from "../../../../../../services/mark/Orochi/LokiServices";
+import { DeleteTemplate } from "../../../../../../services/mark/Orochi/LokiServices";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import { useWalletProducts } from "../../../../../login/WalletProduct";
 import { toast } from "sonner";
@@ -188,7 +188,7 @@ const Template = ({
 
   const user = useUserStore((state) => state.user);
   console.log("Datos de usuario en el store:", user);
-  const idEjecutivo = 38764;
+  const idEjecutivo = user?.idEjecutivo;
   console.log("idEjecutivo del usuario:", idEjecutivo);
 
   const handleSave = async () => {

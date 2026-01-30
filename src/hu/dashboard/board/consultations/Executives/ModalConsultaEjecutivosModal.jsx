@@ -8,7 +8,7 @@ import {
   ReportEjecutives,
   obetenerJerarquiaEncargados,
   obetenerDropdownsEncargados,
-} from "../../../../../services/mark/orochi/LokiServices";
+} from "../../../../../services/mark/Orochi/LokiServices";
 
 // Puedes importar íconos si lo deseas, por ejemplo:
 // import { UserGroupIcon } from '@heroicons/react/24/outline';
@@ -75,7 +75,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
       const userData = JSON.parse(localStorage.getItem("userData")) || {};
       console.log(
         "ModalConsultaEjecutivos - userData from localStorage:",
-        userData
+        userData,
       );
       const idCartera = userData?.idCartera || 1;
       const idProducto = userData?.idProducto || 1;
@@ -91,19 +91,20 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
         // Buscar por Usuario primero
         let match = (encargadosOptions || []).find(
           (e) =>
-            e.Usuario && String(e.Usuario).toUpperCase() === val.toUpperCase()
+            e.Usuario && String(e.Usuario).toUpperCase() === val.toUpperCase(),
         );
         if (!match) {
           // Buscar por NombreEjecutivo
           match = (encargadosOptions || []).find(
             (e) =>
-              String(e.NombreEjecutivo ?? e.nombreEjecutivo ?? e.nombre) === val
+              String(e.NombreEjecutivo ?? e.nombreEjecutivo ?? e.nombre) ===
+              val,
           );
         }
         if (!match) {
           // Buscar por idEjecutivo
           match = (encargadosOptions || []).find(
-            (e) => String(e.idEjecutivo ?? "") === val
+            (e) => String(e.idEjecutivo ?? "") === val,
           );
         }
         if (match && match.Usuario) {
@@ -113,8 +114,8 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
           encargadoToSend = match.Usuario
             ? String(match.Usuario).toUpperCase()
             : match.idEjecutivo
-            ? Number(match.idEjecutivo)
-            : String(match.NombreEjecutivo ?? val);
+              ? Number(match.idEjecutivo)
+              : String(match.NombreEjecutivo ?? val);
         } else {
           // fallback: enviar el valor seleccionado tal cual
           encargadoToSend = val;
@@ -129,7 +130,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
       }
       console.log(
         "ModalConsultaEjecutivos - encargado resolved value (to send):",
-        encargadoToSend
+        encargadoToSend,
       );
 
       const body = {
@@ -141,18 +142,18 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
       };
       console.log(
         "ModalConsultaEjecutivos - request body for ReportEjecutives:",
-        body
+        body,
       );
       // Log JSON stringified payload so we can see exactly what is sent over the wire
       try {
         console.log(
           "ModalConsultaEjecutivos - Enviando ReportEjecutives payload (JSON):",
-          JSON.stringify(body, (k, v) => (v === undefined ? null : v), 2)
+          JSON.stringify(body, (k, v) => (v === undefined ? null : v), 2),
         );
       } catch (jsonErr) {
         console.warn(
           "No se pudo serializar el body a JSON para logging:",
-          jsonErr
+          jsonErr,
         );
       }
 
@@ -179,7 +180,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
             "idEjecutivo",
             "idEj",
             "idEje",
-            "id_ejecutivo"
+            "id_ejecutivo",
           );
           const did =
             didRaw === undefined || didRaw === null ? null : Number(didRaw);
@@ -194,7 +195,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
           .map((item) => {
             const idEje =
               Number(
-                getVal(item, "idEjecutivo", "idejecutivo", "idEj", "id") ?? 0
+                getVal(item, "idEjecutivo", "idejecutivo", "idEj", "id") ?? 0,
               ) || 0;
             const nombre =
               getVal(item, "NombreEjecutivo", "nombreEjecutivo", "nombre") ??
@@ -230,10 +231,10 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
           (data || [])
             .map((r) =>
               normalize(
-                getVal(r, "NombreEjecutivo", "nombreEjecutivo", "nombre") ?? ""
-              )
+                getVal(r, "NombreEjecutivo", "nombreEjecutivo", "nombre") ?? "",
+              ),
             )
-            .filter(Boolean)
+            .filter(Boolean),
         );
 
         const candidatesWithNorm = candidates.map((c) => ({
@@ -255,11 +256,11 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
           "reportNames=",
           reportNames.size,
           "finalOptions=",
-          finalOptions.length
+          finalOptions.length,
         );
         console.log(
           "Encargados finalOptions from ReportEjecutives cross-check:",
-          finalOptions.slice(0, 20)
+          finalOptions.slice(0, 20),
         );
 
         // Construir entrada del ejecutivo de sesión (mostrar NombreEjecutivo pero cuando se envíe, se usará Usuario)
@@ -353,7 +354,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
       } catch (crossErr) {
         console.warn(
           "Error construyendo opciones de encargados desde ReportEjecutives:",
-          crossErr
+          crossErr,
         );
       }
     } catch (err) {
@@ -534,7 +535,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
       // cols es un subconjunto; asegurar orden y eliminar duplicados
       const colsList = Array.isArray(cols) ? cols : [];
       const restFiltered = colsList.filter(
-        (c) => !primariesPresent.includes(c)
+        (c) => !primariesPresent.includes(c),
       );
       setVisibleColumns([...primariesPresent, ...restFiltered]);
     }
@@ -551,18 +552,18 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
         // Obtener jerarquía
         const resp = await obetenerJerarquiaEncargados(idEj);
         console.log("obetenerJerarquiaEncargados response:", resp);
-        const lista = Array.isArray(resp) ? resp : resp?.data ?? [];
+        const lista = Array.isArray(resp) ? resp : (resp?.data ?? []);
 
         // Obtener dropdowns (productos por ejecutivo)
         let dd = [];
         try {
           const respDd = await obetenerDropdownsEncargados();
           console.log("obetenerDropdownsEncargados response:", respDd);
-          dd = Array.isArray(respDd) ? respDd : respDd?.data ?? [];
+          dd = Array.isArray(respDd) ? respDd : (respDd?.data ?? []);
         } catch (e) {
           console.warn(
             "No se pudo obtener obetenerDropdownsEncargados, proceder sin product-filter:",
-            e
+            e,
           );
           dd = [];
         }
@@ -572,7 +573,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
           "rawJerarquia length:",
           lista.length,
           "dropdownsEncargados length:",
-          (dd || []).length
+          (dd || []).length,
         );
         if (lista && lista.length > 0)
           console.log("rawJerarquia sample keys:", Object.keys(lista[0]));
@@ -597,7 +598,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
       } catch (err) {
         console.error(
           "Error cargando jerarquía de encargados o dropdowns:",
-          err
+          err,
         );
       }
     };
@@ -618,8 +619,8 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
       sessionProduct && sessionProduct > 0
         ? sessionProduct
         : producto && !isNaN(Number(producto))
-        ? Number(producto)
-        : 0;
+          ? Number(producto)
+          : 0;
 
     // función auxiliar para normalizar claves
     const getVal = (obj, ...keys) => {
@@ -633,7 +634,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
       "sessionProduct:",
       sessionProduct,
       "productoSelected:",
-      productoSelected
+      productoSelected,
     );
 
     const filtered = (rawJerarquia || []).filter((item) => {
@@ -646,7 +647,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
           : Number(idAreaRaw) || 0;
       const idEnc =
         Number(
-          getVal(item, "idEncargado", "idencargado", "idEnc", "id_encargado")
+          getVal(item, "idEncargado", "idencargado", "idEnc", "id_encargado"),
         ) || 0;
       const idEjeRaw = getVal(item, "idEjecutivo", "idejecutivo", "idEj", "id");
       const idEje = Number(idEjeRaw ?? 0) || 0;
@@ -709,7 +710,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
       "from rawJerarquia:",
       rawJerarquia.length,
       "with dropdowns:",
-      dropdownsEncargados.length
+      dropdownsEncargados.length,
     );
     // Si el filtrado devuelve vacío, hacer un diagnóstico adicional para mostrar qué ejecutivos no coincidieron y por qué
     if (filtered.length === 0) {
@@ -720,7 +721,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
             "idEjecutivo",
             "idejecutivo",
             "idEj",
-            "id"
+            "id",
           );
           const idEjeVal = Number(idEjeRaw ?? 0) || 0;
           const idAreaRawLocal = getVal(item, "idÁrea", "idArea", "idarea");
@@ -730,7 +731,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
               "idEjecutivo",
               "idEj",
               "idEje",
-              "id_ejecutivo"
+              "id_ejecutivo",
             );
             return (
               did !== undefined &&
@@ -741,9 +742,9 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
           const prods = Array.from(
             new Set(
               matches.map((m) =>
-                getVal(m, "idProducto", "idProd", "id_producto")
-              )
-            )
+                getVal(m, "idProducto", "idProd", "id_producto"),
+              ),
+            ),
           ).slice(0, 10);
           return {
             idEjecutivo: idEjeVal,
@@ -751,7 +752,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
               item,
               "NombreEjecutivo",
               "nombreEjecutivo",
-              "nombre"
+              "nombre",
             ),
             matchesInDropdowns: matches.length,
             sampleProducts: prods,
@@ -761,12 +762,12 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
         try {
           console.log(
             "Diagnóstico filtrado encargados (primeras 20 filas):",
-            JSON.stringify(diag, null, 2)
+            JSON.stringify(diag, null, 2),
           );
         } catch {
           console.log(
             "Diagnóstico filtrado encargados (primeras 20 filas):",
-            diag
+            diag,
           );
         }
       } catch (dErr) {
@@ -816,7 +817,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
         Usuario: x.Usuario,
         NombreEjecutivo: x.NombreEjecutivo,
         idEjecutivo: x.idEjecutivo,
-      }))
+      })),
     );
     setEncargadosOptions(normalized);
   }, [rawJerarquia, dropdownsEncargados, producto, isOpen]);
@@ -1023,7 +1024,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                             item.NombreEjecutivo ??
                             item.nombre ??
                             item.idEjecutivo ??
-                            ""
+                            "",
                         )}
                       >
                         {item.NombreEjecutivo ??

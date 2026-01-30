@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   getPhrases,
   putPhrases,
-} from "../../../../../../services/mark/orochi/LokiServices";
+} from "../../../../../../services/mark/Orochi/LokiServices";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
 import { toast } from "sonner"; // si ya usas sonner en tu proyecto
 import { IconActive, IconOffActive } from "./IconPhrases";
@@ -54,15 +54,15 @@ const SavePhrases = () => {
       prev.map((p) =>
         p.idRegistro === phrase.idRegistro
           ? { ...p, fraseActiva: newStatus }
-          : p
-      )
+          : p,
+      ),
     );
 
     try {
       toast.loading("Actualizando frase...");
       await putPhrases(phrase.idRegistro, newStatus);
       toast.success(
-        `Frase ${newStatus ? "activada" : "desactivada"} correctamente`
+        `Frase ${newStatus ? "activada" : "desactivada"} correctamente`,
       );
     } catch (error) {
       console.error("Error al actualizar la frase:", error);
@@ -73,8 +73,8 @@ const SavePhrases = () => {
         prev.map((p) =>
           p.idRegistro === phrase.idRegistro
             ? { ...p, fraseActiva: !newStatus }
-            : p
-        )
+            : p,
+        ),
       );
     } finally {
       toast.dismiss(); // cierra el loading

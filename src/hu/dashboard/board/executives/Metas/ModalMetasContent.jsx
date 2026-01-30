@@ -7,7 +7,7 @@ import { Toaster, toast } from "sonner";
 import {
   obetenerTablaMetas,
   actualizarMetas,
-} from "../../../../../services/mark/orochi/LokiServices.js";
+} from "../../../../../services/mark/Orochi/LokiServices.js";
 
 // Función para inyectar estilos CSS que oculten los controles de incremento
 const injectHideNumberArrowsStyles = () => {
@@ -215,7 +215,7 @@ const ModalMetasContent = () => {
     value,
     allValues = inputValues,
     showToast = true,
-    eventType = "change"
+    eventType = "change",
   ) => {
     // Validación cruzada Negociaciones < Titulares SOLO en onChange
     if (
@@ -370,7 +370,7 @@ const ModalMetasContent = () => {
         }));
         if (showToast)
           toast.warning(
-            "Los cumplimientos deben ser menor o igual a las negociaciones"
+            "Los cumplimientos deben ser menor o igual a las negociaciones",
           );
         return false;
       } else {
@@ -430,7 +430,7 @@ const ModalMetasContent = () => {
               "titulares",
               allValues.titulares,
               { ...allValues, cuentas: value },
-              false
+              false,
             );
             lastCrossField.current = null;
           }, 0);
@@ -471,7 +471,7 @@ const ModalMetasContent = () => {
               "cuentas",
               allValues.cuentas,
               { ...allValues, titulares: value },
-              false
+              false,
             );
             lastCrossField.current = null;
           }, 0);
@@ -537,7 +537,7 @@ const ModalMetasContent = () => {
               allValues.cumplimientos,
               { ...allValues, negociaciones: value },
               false,
-              eventType
+              eventType,
             );
             lastCrossField.current = null;
           }, 0);
@@ -582,7 +582,7 @@ const ModalMetasContent = () => {
               "negociaciones",
               allValues.negociaciones,
               { ...allValues, cumplimientos: value },
-              false
+              false,
             );
             lastCrossField.current = null;
           }, 0);
@@ -636,7 +636,7 @@ const ModalMetasContent = () => {
               "saldoSolucionado",
               allValues.saldoSolucionado,
               { ...allValues, montoCumplido: value },
-              false
+              false,
             );
             lastCrossField.current = null;
           }, 0);
@@ -694,7 +694,7 @@ const ModalMetasContent = () => {
               "montoCumplido",
               allValues.montoCumplido,
               { ...allValues, saldoSolucionado: value },
-              false
+              false,
             );
             lastCrossField.current = null;
           }, 0);
@@ -763,7 +763,7 @@ const ModalMetasContent = () => {
             } else if (
               allValues.horaEntrada &&
               /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/.test(
-                allValues.horaEntrada
+                allValues.horaEntrada,
               )
             ) {
               // Validar diferencia máxima de 10 horas entre entrada y salida
@@ -901,13 +901,13 @@ const ModalMetasContent = () => {
     }
     if (validIds.some((id) => isNaN(id))) {
       validIds = validIds.filter(
-        (id) => Number.isInteger(id) && id > 0 && !isNaN(id)
+        (id) => Number.isInteger(id) && id > 0 && !isNaN(id),
       );
     }
     if (invalidIndexes.length > 0 && Array.isArray(selectedExecutives)) {
       const idInvalidos = invalidIndexes.map((idx) => selectedExecutives[idx]);
       const mensaje = `Se omitieron los siguientes usuarios por tener id inválido: ${idInvalidos.join(
-        ", "
+        ", ",
       )}`;
       toast.warning(mensaje);
     }
@@ -956,7 +956,7 @@ const ModalMetasContent = () => {
     setSelectedRows((prev) =>
       prev.includes(rowKey)
         ? prev.filter((k) => k !== rowKey)
-        : [...prev, rowKey]
+        : [...prev, rowKey],
     );
     // Validar campos requeridos al seleccionar (sin segmento ni saldoSolucionado)
     const requiredFields = [
@@ -969,7 +969,7 @@ const ModalMetasContent = () => {
       "horaSalida",
     ];
     const missingFields = requiredFields.filter(
-      (f) => !inputValues[f] || inputValues[f] === ""
+      (f) => !inputValues[f] || inputValues[f] === "",
     );
     if (missingFields.length > 0) {
       toast.warning("Faltan campos requeridos por llenar.");
@@ -1072,10 +1072,10 @@ const ModalMetasContent = () => {
         // Refrescar la tabla manteniendo el orden original
         try {
           const prevOrder = tablaMetas.map(
-            (row) => row.idEjecutivo || row.id || row.usuario
+            (row) => row.idEjecutivo || row.id || row.usuario,
           );
           const dataArr = await Promise.all(
-            selectedExecutives.map((id) => obetenerTablaMetas(id))
+            selectedExecutives.map((id) => obetenerTablaMetas(id)),
           );
           let newMetas = dataArr.flat().filter(Boolean);
           // Reordenar según el orden anterior
@@ -1083,8 +1083,8 @@ const ModalMetasContent = () => {
             newMetas = prevOrder
               .map((key) =>
                 newMetas.find(
-                  (row) => (row.idEjecutivo || row.id || row.usuario) === key
-                )
+                  (row) => (row.idEjecutivo || row.id || row.usuario) === key,
+                ),
               )
               .filter(Boolean);
           }
@@ -1105,7 +1105,7 @@ const ModalMetasContent = () => {
     if (negociaciones < 0 || negociaciones > 255) {
       showValidationWarningSVG(
         "negociaciones",
-        "Las negociaciones deben estar entre 0 y 255"
+        "Las negociaciones deben estar entre 0 y 255",
       );
       toast.warning("Las negociaciones deben estar entre 0 y 255");
       return;
@@ -1145,7 +1145,7 @@ const ModalMetasContent = () => {
     try {
       for (const rowKey of selectedRows) {
         const row = tablaMetas.find(
-          (r, i) => (r.id || r.usuario || i) === rowKey
+          (r, i) => (r.id || r.usuario || i) === rowKey,
         );
         if (!row) continue;
         let nuevoValor = 0;
@@ -1192,7 +1192,7 @@ const ModalMetasContent = () => {
       try {
         // Refrescar la tabla usando los ids seleccionados y toda la jerarquía si corresponde
         const prevOrder = tablaMetas.map(
-          (row) => row.idEjecutivo || row.id || row.usuario
+          (row) => row.idEjecutivo || row.id || row.usuario,
         );
         let idsToRefresh = [];
         if (
@@ -1205,7 +1205,7 @@ const ModalMetasContent = () => {
           idsToRefresh = selectedExecutives;
         }
         const dataArr = await Promise.all(
-          idsToRefresh.map((id) => obetenerTablaMetas(id))
+          idsToRefresh.map((id) => obetenerTablaMetas(id)),
         );
         let newMetas = dataArr.flat().filter(Boolean);
         // Reordenar según el orden anterior
@@ -1213,14 +1213,14 @@ const ModalMetasContent = () => {
           newMetas = prevOrder
             .map((key) =>
               newMetas.find(
-                (row) => (row.idEjecutivo || row.id || row.usuario) === key
-              )
+                (row) => (row.idEjecutivo || row.id || row.usuario) === key,
+              ),
             )
             .filter(Boolean);
           // Agregar los que no estaban antes (nuevos subordinados)
           const nuevos = newMetas.filter(
             (row) =>
-              !prevOrder.includes(row.idEjecutivo || row.id || row.usuario)
+              !prevOrder.includes(row.idEjecutivo || row.id || row.usuario),
           );
           newMetas = newMetas.concat(nuevos);
         }
@@ -1286,7 +1286,7 @@ const ModalMetasContent = () => {
                         v,
                         inputValues,
                         true,
-                        "blur"
+                        "blur",
                       );
                     }}
                   />
@@ -1297,7 +1297,7 @@ const ModalMetasContent = () => {
                     {typeof validationState.cuentas.error === "string" &&
                       validationState.cuentas.showIcon &&
                       WarningIcon(validationState.cuentas.error, () =>
-                        toast.warning(validationState.cuentas.error)
+                        toast.warning(validationState.cuentas.error),
                       )}
                     Cuentas
                   </label>
@@ -1333,7 +1333,7 @@ const ModalMetasContent = () => {
                         v,
                         inputValues,
                         true,
-                        "blur"
+                        "blur",
                       );
                     }}
                   />
@@ -1344,7 +1344,7 @@ const ModalMetasContent = () => {
                     {typeof validationState.titulares.error === "string" &&
                       validationState.titulares.showIcon &&
                       WarningIcon(validationState.titulares.error, () =>
-                        toast.warning(validationState.titulares.error)
+                        toast.warning(validationState.titulares.error),
                       )}
                     Titulares
                   </label>
@@ -1379,7 +1379,7 @@ const ModalMetasContent = () => {
                         inputValues.negociaciones,
                         inputValues,
                         true,
-                        "blur"
+                        "blur",
                       );
                     }}
                   />
@@ -1425,7 +1425,7 @@ const ModalMetasContent = () => {
                         inputValues.cumplimientos,
                         inputValues,
                         true,
-                        "blur"
+                        "blur",
                       );
                     }}
                   />
@@ -1436,7 +1436,7 @@ const ModalMetasContent = () => {
                     {typeof validationState.cumplimientos.error === "string" &&
                       validationState.cumplimientos.showIcon &&
                       WarningIcon(validationState.cumplimientos.error, () =>
-                        toast.warning(validationState.cumplimientos.error)
+                        toast.warning(validationState.cumplimientos.error),
                       )}
                     Cumplimientos
                   </label>
@@ -1474,7 +1474,7 @@ const ModalMetasContent = () => {
                         inputValues.montoCumplido,
                         inputValues,
                         true,
-                        "blur"
+                        "blur",
                       );
                     }}
                   />
@@ -1493,7 +1493,7 @@ const ModalMetasContent = () => {
                         onClick={() =>
                           toast.warning(
                             "Error en Monto Cumplido: " +
-                              validationState.montoCumplido.error
+                              validationState.montoCumplido.error,
                           )
                         }
                       >
@@ -1542,7 +1542,7 @@ const ModalMetasContent = () => {
                         inputValues.saldoSolucionado,
                         inputValues,
                         true,
-                        "blur"
+                        "blur",
                       );
                     }}
                   />
@@ -1561,7 +1561,7 @@ const ModalMetasContent = () => {
                         onClick={() =>
                           toast.warning(
                             "Error en Saldo Solucionado: " +
-                              validationState.saldoSolucionado.error
+                              validationState.saldoSolucionado.error,
                           )
                         }
                       >
@@ -1635,7 +1635,7 @@ const ModalMetasContent = () => {
                         inputValues.horaEntrada,
                         inputValues,
                         true,
-                        "blur"
+                        "blur",
                       );
                     }}
                   />
@@ -1654,7 +1654,7 @@ const ModalMetasContent = () => {
                         onClick={() =>
                           toast.warning(
                             "Error en Hora Entrada: " +
-                              validationState.horaEntrada.error
+                              validationState.horaEntrada.error,
                           )
                         }
                       >
@@ -1699,7 +1699,7 @@ const ModalMetasContent = () => {
                         inputValues.horaSalida,
                         inputValues,
                         true,
-                        "blur"
+                        "blur",
                       );
                     }}
                   />
@@ -1718,7 +1718,7 @@ const ModalMetasContent = () => {
                         onClick={() =>
                           toast.warning(
                             "Error en Hora Salida: " +
-                              validationState.horaSalida.error
+                              validationState.horaSalida.error,
                           )
                         }
                       >
@@ -1740,7 +1740,7 @@ const ModalMetasContent = () => {
                     0;
                   const saldoSolucionado =
                     Number(
-                      parseCurrencyToNumber(inputValues.saldoSolucionado)
+                      parseCurrencyToNumber(inputValues.saldoSolucionado),
                     ) || 0;
                   const negociaciones = Number(inputValues.negociaciones) || 0;
                   const cumplimientos = Number(inputValues.cumplimientos) || 0;

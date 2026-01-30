@@ -27,7 +27,7 @@ const ModalHeader = ({
   const [productOptions, setProductOptions] = useState([
     { label: "Selecciona una cartera primero", value: "" },
   ]);
-  
+
   // ⭐ Estado interno para manejar la cartera localmente
   const [internalSelectedCartera, setInternalSelectedCartera] = useState("");
 
@@ -42,7 +42,7 @@ const ModalHeader = ({
           ...carteras.map((cartera) => ({
             label: cartera.cartera,
             value: cartera.idCartera,
-          }))
+          })),
         ];
 
         setCarteraOptions(options);
@@ -58,14 +58,21 @@ const ModalHeader = ({
 
   // ⭐ Efecto para cargar y filtrar productos cuando cambia la cartera seleccionada
   useEffect(() => {
-    if (!internalSelectedCartera || internalSelectedCartera === "" || internalSelectedCartera === "0" || internalSelectedCartera === 0) {
-      setProductOptions([{ label: "Selecciona una cartera primero", value: "" }]);
+    if (
+      !internalSelectedCartera ||
+      internalSelectedCartera === "" ||
+      internalSelectedCartera === "0" ||
+      internalSelectedCartera === 0
+    ) {
+      setProductOptions([
+        { label: "Selecciona una cartera primero", value: "" },
+      ]);
       return;
     }
 
     const fetchAndFilterProducts = async () => {
       setProductOptions([{ label: "Cargando productos...", value: "" }]);
-      
+
       try {
         const productos = await getCarterasProductos();
 
@@ -77,7 +84,9 @@ const ModalHeader = ({
           return Number(producto.idCartera) === carteraId;
         });
 
-        console.log(`Encontrados ${filteredProducts.length} productos para la cartera ${carteraId}`);
+        console.log(
+          `Encontrados ${filteredProducts.length} productos para la cartera ${carteraId}`,
+        );
 
         if (filteredProducts.length > 0) {
           const options = [
@@ -85,11 +94,13 @@ const ModalHeader = ({
             ...filteredProducts.map((producto) => ({
               label: producto.producto,
               value: producto.idProducto,
-            }))
+            })),
           ];
           setProductOptions(options);
         } else {
-          setProductOptions([{ label: "Sin productos disponibles", value: "" }]);
+          setProductOptions([
+            { label: "Sin productos disponibles", value: "" },
+          ]);
         }
       } catch (error) {
         console.error("Error al cargar productos:", error);
@@ -103,7 +114,12 @@ const ModalHeader = ({
 
   // Efecto para la verificación del producto
   useEffect(() => {
-    if (!selectedProduct || !selectedProduct.value || selectedProduct.value === "" || selectedProduct.value === 0) {
+    if (
+      !selectedProduct ||
+      !selectedProduct.value ||
+      selectedProduct.value === "" ||
+      selectedProduct.value === 0
+    ) {
       setVerifyResult(null);
       toast.dismiss("product-verify");
       return;
@@ -140,12 +156,12 @@ const ModalHeader = ({
   // ⭐ Handler actualizado para notificar al componente padre
   const handleCarteraChange = (value) => {
     setInternalSelectedCartera(value);
-    
+
     // ⭐ Notificar al componente padre (ModalCampanas)
     if (setSelectedCartera) {
       setSelectedCartera(value ? Number(value) : null);
     }
-    
+
     // Resetear el producto seleccionado cuando cambia la cartera
     if (setSelectedProduct) {
       setSelectedProduct(null);

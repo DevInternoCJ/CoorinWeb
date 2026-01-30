@@ -39,11 +39,11 @@ const TableEditFields = ({
     (fieldName) => {
       if (!selectedRowData || !fieldName) return "";
       const key = Object.keys(selectedRowData).find(
-        (k) => k.toLowerCase() === fieldName.toLowerCase()
+        (k) => k.toLowerCase() === fieldName.toLowerCase(),
       );
       return key ? selectedRowData[key] : "";
     },
-    [selectedRowData]
+    [selectedRowData],
   );
 
   useEffect(() => {
@@ -110,7 +110,7 @@ const TableEditFields = ({
     if (currentFieldNames.length > 0) {
       console.log(
         "TableEditFields - Enviando data estructurada (alias/campos):",
-        currentAliasNames.length
+        currentAliasNames.length,
       );
       onFieldNamesChange({
         fieldNames: currentFieldNames,
@@ -121,7 +121,7 @@ const TableEditFields = ({
 
   const handleEditField = (index, field, value) => {
     const newEditData = editData.map((item, i) =>
-      i === index ? { ...item, [field]: value } : item
+      i === index ? { ...item, [field]: value } : item,
     );
 
     if (field === "alias") {
@@ -204,7 +204,7 @@ const TableEditFields = ({
                     loading: "Guardando cambios...",
                     success: "Cambios guardados correctamente",
                     error: "Error al guardar los cambios",
-                  }
+                  },
                 );
               }}
               className="btn-success hover:bg-green-600"
@@ -219,7 +219,7 @@ const TableEditFields = ({
         position: "top-center",
         onDismiss: () => setConfirming(false),
         onAutoClose: () => setConfirming(false),
-      }
+      },
     );
   };
 

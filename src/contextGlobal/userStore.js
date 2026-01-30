@@ -5,41 +5,41 @@ import { getWalletProduct } from '../services/mark/Orochi/LokiServices';
 export const useUserStore = create(
   persist(
     (set) => ({
-      // Inicializar desde localStorage si existe
-      user: JSON.parse(localStorage.getItem('userData') || 'null'),
-      isAuthenticated: !!JSON.parse(localStorage.getItem('userData') || 'null'),
+      // Inicializar desde sessionStorage si existe
+      user: JSON.parse(sessionStorage.getItem('userData') || 'null'),
+      isAuthenticated: !!JSON.parse(sessionStorage.getItem('userData') || 'null'),
       setUser: (user) => {
         try {
-          localStorage.setItem('userData', JSON.stringify(user));
+          sessionStorage.setItem('userData', JSON.stringify(user));
         } catch (e) {
-          console.warn('No se pudo guardar userData en localStorage', e);
+          console.warn('No se pudo guardar userData en sessionStorage', e);
         }
         set({ user, isAuthenticated: !!user });
       },
       logout: () => {
         try {
-          localStorage.removeItem('token');
-          localStorage.removeItem('userData');
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('userData');
         } catch (e) {
-          console.warn('No se pudo limpiar localStorage en logout', e);
+          console.warn('No se pudo limpiar sessionStorage en logout', e);
         }
         set({ user: null, isAuthenticated: false });
       },
       
       clearUserData: () => {
         try {
-          localStorage.removeItem('token');
-          localStorage.removeItem('userData');
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('userData');
         } catch (e) {
-          console.warn('No se pudo limpiar localStorage', e);
+          console.warn('No se pudo limpiar sessionStorage', e);
         }
 
         set({ user: null, isAuthenticated: false });
       }
     }),
     {
-      name: 'coorin-user', // clave en localStorage
-      getStorage: () => localStorage,
+      name: 'coorin-user', // clave en sessionStorage
+      getStorage: () => sessionStorage,
     },
   ),
 );

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { infoEjecutivo, getSearchesInformation } from "../../../../../services/mark/Orochi/LokiServices";
+import {
+  infoEjecutivo,
+  getSearchesInformation,
+} from "../../../../../services/mark/Orochi/LokiServices";
 import CloseButtonReusable from "../../../components/CloseButtonReusable";
-
 
 const ConsultVisitContent = ({ onClose }) => {
   // Obtener datos de usuario desde localStorage
@@ -44,8 +46,8 @@ const ConsultVisitContent = ({ onClose }) => {
                     id: item.idCartera,
                     nombre: item.NombreCartera || `Cartera ${item.idCartera}`,
                   },
-                ])
-              ).values()
+                ]),
+              ).values(),
             )
           : [];
         setCarterasOptions(carterasUnicas);
@@ -54,7 +56,7 @@ const ConsultVisitContent = ({ onClose }) => {
           ? data.filter(
               (item) =>
                 String(item.idCartera) === String(cartera) &&
-                String(item.idProducto) === String(idProducto)
+                String(item.idProducto) === String(idProducto),
             )
           : [];
         setConsultasOptions(filtered);
@@ -105,7 +107,7 @@ const ConsultVisitContent = ({ onClose }) => {
                     value = value.replace(/,/g, "");
                   return value;
                 })
-                .join(",")
+                .join(","),
             );
             csvContent = headers.join(",") + "\n" + rows.join("\n");
           }
@@ -140,14 +142,19 @@ const ConsultVisitContent = ({ onClose }) => {
         <CloseButtonReusable onClose={onClose} />
       </div>
 
-      <div className="flex flex-col items-center mx-auto px-2 sm:px-4" style={{ width: '100%', height: '100%' }}>
+      <div
+        className="flex flex-col items-center mx-auto px-2 sm:px-4"
+        style={{ width: "100%", height: "100%" }}
+      >
         {/* Row 1: Título, Select Cartera, Select Consulta */}
         <div className="w-full grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4 items-center mt-2">
           {/* Título */}
           <div className="col-span-1 sm:col-span-4 text-center sm:text-left">
-            <span className="text-lg font-semibold text-jerarquia3">Consulta Visitas</span>
+            <span className="text-lg font-semibold text-jerarquia3">
+              Consulta Visitas
+            </span>
           </div>
-          
+
           {/* Select Cartera */}
           <div className="relative col-span-1 sm:col-span-4">
             <select
@@ -269,9 +276,7 @@ const ConsultVisitContent = ({ onClose }) => {
               {loadingExcel ? "Exportando..." : "Guardar Excel"}
             </button>
             {errorExcel && (
-              <div className="text-red-500 text-xs mt-1">
-                {errorExcel}
-              </div>
+              <div className="text-red-500 text-xs mt-1">{errorExcel}</div>
             )}
           </div>
         </div>

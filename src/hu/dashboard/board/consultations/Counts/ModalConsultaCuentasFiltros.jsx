@@ -4,7 +4,7 @@ import ModalSeleccionCampania from "../ModalCamapañas/ModalSeleccionCampania";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import ConsultFilter from "../../../../../components/select/ConsultFilter";
 import { toast } from "sonner";
-import {getCatalogoValueCard} from "../../../../../services/mark/Orochi/LokiServices";
+import { getCatalogoValueCard } from "../../../../../services/mark/Orochi/LokiServices";
 const situacionOptions = [
   { value: "Sin información", label: "Sin información" },
 ];
@@ -40,7 +40,7 @@ const ModalConsultaCuentasFiltros = ({
     let valorMostrar = niegan;
     if (cuenta === "Cuenta" && niegan) {
       const opcionSeleccionada = nieganOptions.find(
-        (option) => option.idValor === parseInt(niegan)
+        (option) => option.idValor === parseInt(niegan),
       );
       if (opcionSeleccionada) {
         valorMostrar = opcionSeleccionada.valor;
@@ -50,7 +50,7 @@ const ModalConsultaCuentasFiltros = ({
     // Verificar si ya existe un filtro con el mismo concepto y campo
     const filtroExistente = filtros.find(
       (filtro) =>
-        filtro.concepto === cuenta && filtro.campo === campoSeleccionado
+        filtro.concepto === cuenta && filtro.campo === campoSeleccionado,
     );
 
     if (filtroExistente) {
@@ -83,15 +83,15 @@ const ModalConsultaCuentasFiltros = ({
                     ...filtro,
                     valores: filtro.valores + ", " + valorMostrar,
                   }
-                : filtro
-            )
+                : filtro,
+            ),
           );
           return;
         }
         // Si no existe "=" pero existe "≠", no permitir concatenar
         if (operadoresUsados.includes("≠")) {
           toast.error(
-            'No se puede concatenar el operador "=" cuando ya existe "≠". Elimine el filtro o use el mismo operador.'
+            'No se puede concatenar el operador "=" cuando ya existe "≠". Elimine el filtro o use el mismo operador.',
           );
           return;
         }
@@ -117,15 +117,15 @@ const ModalConsultaCuentasFiltros = ({
                     ...filtro,
                     valores: filtro.valores + ", " + valorMostrar,
                   }
-                : filtro
-            )
+                : filtro,
+            ),
           );
           return;
         }
         // Si ya existe el operador "=", no permitir concatenar "≠"
         if (operadoresUsados.includes("=")) {
           toast.error(
-            'No se puede concatenar el operador "≠" cuando ya existe "=". Elimine el filtro o cree uno nuevo.'
+            'No se puede concatenar el operador "≠" cuando ya existe "=". Elimine el filtro o cree uno nuevo.',
           );
           return;
         }
@@ -152,15 +152,15 @@ const ModalConsultaCuentasFiltros = ({
                     valores:
                       filtro.valores + ", " + operador + " " + valorMostrar,
                   }
-                : filtro
-            )
+                : filtro,
+            ),
           );
           return;
         }
         // Si existe cualquier otro operador, no permitir concatenar "="
         if (operadoresUsados.length > 0 && !operadoresUsados.includes("=")) {
           toast.error(
-            'No se puede concatenar el operador "=" con otros operadores. Elimine el filtro o cree uno nuevo.'
+            'No se puede concatenar el operador "=" con otros operadores. Elimine el filtro o cree uno nuevo.',
           );
           return;
         }
@@ -171,7 +171,7 @@ const ModalConsultaCuentasFiltros = ({
         // Si ya existe el operador "=", no permitir concatenar "≠"
         if (operadoresUsados.includes("=")) {
           toast.error(
-            'No se puede concatenar el operador "≠" con "=". Solo se permite concatenar múltiples valores con el operador "=".'
+            'No se puede concatenar el operador "≠" con "=". Solo se permite concatenar múltiples valores con el operador "=".',
           );
           return;
         }
@@ -194,8 +194,8 @@ const ModalConsultaCuentasFiltros = ({
                     valores:
                       filtro.valores + ", " + operador + " " + valorMostrar,
                   }
-                : filtro
-            )
+                : filtro,
+            ),
           );
           return;
         }
@@ -215,7 +215,7 @@ const ModalConsultaCuentasFiltros = ({
             toast.error(
               'No se puede concatenar el operador "' +
                 operador +
-                '" cuando el primer operador fue "≠". Solo se permite concatenar múltiples "≠".'
+                '" cuando el primer operador fue "≠". Solo se permite concatenar múltiples "≠".',
             );
             return;
           }
@@ -228,7 +228,7 @@ const ModalConsultaCuentasFiltros = ({
         !(cuenta !== "Cuenta" && (operador === "=" || operador === "≠"))
       ) {
         toast.error(
-          `No se puede concatenar el mismo operador "${operador}" dos veces. Seleccione un operador diferente.`
+          `No se puede concatenar el mismo operador "${operador}" dos veces. Seleccione un operador diferente.`,
         );
         return;
       }
@@ -249,8 +249,8 @@ const ModalConsultaCuentasFiltros = ({
         if (permitidos && !permitidos.includes(operador)) {
           toast.error(
             `No se puede usar el operador "${operador}" con "${opUsado}". Solo se permite: ${permitidos.join(
-              ", "
-            )}`
+              ", ",
+            )}`,
           );
           return;
         }
@@ -277,7 +277,7 @@ const ModalConsultaCuentasFiltros = ({
 
       if (valorDuplicado) {
         toast.warning(
-          "Este valor con el mismo operador ya fue agregado al filtro"
+          "Este valor con el mismo operador ya fue agregado al filtro",
         );
         return;
       }
@@ -291,8 +291,8 @@ const ModalConsultaCuentasFiltros = ({
                 valores: filtro.valores + ", " + operador + valorMostrar,
                 operador: filtro.operador + "," + operador, // Guardar múltiples operadores
               }
-            : filtro
-        )
+            : filtro,
+        ),
       );
     } else {
       // Crear un nuevo filtro
@@ -340,7 +340,7 @@ const ModalConsultaCuentasFiltros = ({
           if (catalogData && Array.isArray(catalogData)) {
             // Filtrar solo los que tienen idCatálogo === 2
             const filteredOptions = catalogData.filter(
-              (item) => item.idCatálogo === 2
+              (item) => item.idCatálogo === 2,
             );
             setNieganOptions(filteredOptions);
             // Seleccionar automáticamente el primer valor
@@ -351,7 +351,7 @@ const ModalConsultaCuentasFiltros = ({
         } catch (error) {
           console.error(
             "Error al cargar opciones de Niegan acreditado:",
-            error
+            error,
           );
           setNieganOptions([]);
         }

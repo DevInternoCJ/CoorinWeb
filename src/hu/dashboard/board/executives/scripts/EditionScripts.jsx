@@ -6,7 +6,7 @@ import {
   PostSaveScripts,
   deleteScripts,
   putUpdateScripts,
-} from "../../../../../services/mark/orochi/LokiServices";
+} from "../../../../../services/mark/Orochi/LokiServices";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
 import { useWalletProducts } from "../../../../login/WalletProduct";
 import { toast } from "sonner";
@@ -92,7 +92,7 @@ const EditionScripts = ({
               default:
                 replacement = Object.prototype.hasOwnProperty.call(
                   placeholderValues,
-                  placeholder
+                  placeholder,
                 )
                   ? placeholderValues[placeholder] !== ""
                     ? formatValue(placeholderValues[placeholder], placeholder)
@@ -101,7 +101,7 @@ const EditionScripts = ({
             }
 
             return replacement; // si no hay valor, retorna vacío (no muestra nada)
-          }
+          },
         );
 
         return resultado;
@@ -110,7 +110,7 @@ const EditionScripts = ({
         return text;
       }
     },
-    [placeholderValues, user]
+    [placeholderValues, user],
   );
 
   // Renderizado de script a HTML
@@ -163,7 +163,7 @@ const EditionScripts = ({
       }
       return html;
     },
-    [showPreview, replacePlaceholders]
+    [showPreview, replacePlaceholders],
   );
 
   // Hook de editor
@@ -172,7 +172,7 @@ const EditionScripts = ({
     showPreview,
     renderFormattedScriptToHTML,
     editableRef,
-    cursorPosition
+    cursorPosition,
   );
   // Efectos
   useEffect(() => {
@@ -191,7 +191,7 @@ const EditionScripts = ({
   const handleWalletChange = (selectedValue) => {
     if (hasChanges) {
       const selected = scripts.find(
-        (s) => s.idScript.toString() === selectedValue
+        (s) => s.idScript.toString() === selectedValue,
       );
       toast.custom((t) => (
         <div className=" bg-amber-50 text-amber-700 px-4 py-3 rounded-lg shadow-lg flex flex-col gap-3 w-80">
@@ -222,7 +222,7 @@ const EditionScripts = ({
                     loading: "Cambiando script...",
                     success: "Script cambiado correctamente",
                     error: "Error al cambiar script",
-                  }
+                  },
                 );
               }}
               className="btn-success"
@@ -332,7 +332,7 @@ const EditionScripts = ({
           setShowPreview(false);
           if (editableRef.current)
             editableRef.current.innerHTML = renderFormattedScriptToHTML(
-              selectedScript.script || ""
+              selectedScript.script || "",
             );
           resolve();
         }, 400);
@@ -341,7 +341,7 @@ const EditionScripts = ({
         loading: "Restaurando script original...",
         success: "Script restaurado correctamente",
         error: "No se pudo restaurar el script",
-      }
+      },
     );
   };
 
@@ -361,7 +361,7 @@ const EditionScripts = ({
       (async () => {
         await deleteScripts({ idScript: selectedScript.idScript });
         const filtered = scripts.filter(
-          (s) => s.idScript !== selectedScript.idScript
+          (s) => s.idScript !== selectedScript.idScript,
         );
         if (!filtered.find((s) => s.idScript === 0)) {
           filtered.unshift(createNewScript());
@@ -377,7 +377,7 @@ const EditionScripts = ({
         loading: "Eliminando script...",
         success: "Script eliminado. Ahora puedes editar el script Nuevo",
         error: "Error al eliminar el script",
-      }
+      },
     );
   };
 
@@ -402,7 +402,9 @@ const EditionScripts = ({
         if (selectedScript.idScript) {
           response = await putUpdateScripts(scriptData);
           const updatedScripts = scripts.map((s) =>
-            s.idScript === selectedScript.idScript ? { ...s, ...editedData } : s
+            s.idScript === selectedScript.idScript
+              ? { ...s, ...editedData }
+              : s,
           );
           onScriptsUpdate?.(updatedScripts);
           toast.success("Script actualizado exitosamente");
@@ -425,7 +427,7 @@ const EditionScripts = ({
           console.error("Error al guardar script:", error);
           return error.message || "Error desconocido";
         },
-      }
+      },
     );
   };
 

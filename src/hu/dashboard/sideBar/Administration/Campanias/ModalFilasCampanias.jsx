@@ -66,8 +66,12 @@ const ModalFilasCampañas = ({
         try {
           setLoadingConsultas(true);
 
-          // Obtener el idEjecutivo del localStorage
-          const userData = JSON.parse(localStorage.getItem("userData"));
+          // Obtener el idEjecutivo desde sessionStorage (fallback a localStorage)
+          const userData = JSON.parse(
+            sessionStorage.getItem("userData") ||
+              localStorage.getItem("userData") ||
+              "null",
+          );
           const idEjecutivo =
             userData?.idEjecutivo ||
             userData?.idejecutivo ||
@@ -578,19 +582,31 @@ const ModalFilasCampañas = ({
 
   // Función para obtener idCartera desde localStorage
   const getIdCartera = () => {
-    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+    const userData = JSON.parse(
+      sessionStorage.getItem("userData") ||
+        localStorage.getItem("userData") ||
+        "{}",
+    );
     return userData?.idCartera || userData?.idcartera || userData?.cartera || 1; // fallback a 1 si no existe
   };
 
   // Función para obtener idEncargado (idEjecutivo) desde localStorage
   const getIdEncargado = () => {
-    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+    const userData = JSON.parse(
+      sessionStorage.getItem("userData") ||
+        localStorage.getItem("userData") ||
+        "{}",
+    );
     return userData?.idEjecutivo || userData?.idejecutivo || userData?.id || 1; // fallback a 1 si no existe
   };
 
   // Función para obtener idProducto desde localStorage
   const getIdProducto = () => {
-    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+    const userData = JSON.parse(
+      sessionStorage.getItem("userData") ||
+        localStorage.getItem("userData") ||
+        "{}",
+    );
     return (
       userData?.idProducto || userData?.idproducto || userData?.producto || 1
     ); // fallback a 1 si no existe
@@ -778,7 +794,7 @@ const ModalFilasCampañas = ({
               fontSize: 22,
             }}
           >
-            Filas de trabajo (Promesa Midprimes) - Coorin
+            Filas de trabajo
           </span>
           <button
             className="modal-btn modal-btn-close"

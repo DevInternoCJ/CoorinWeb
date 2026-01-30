@@ -7,7 +7,7 @@ import {
   Validatorsregrets,
   InsertDeletedValidators,
   InsertDeletedValidatorsRegrets,
-} from "../../../../../services/mark/orochi/LokiServices";
+} from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
 function ModalValidadoresContent(props) {
@@ -46,7 +46,7 @@ function ModalValidadoresContent(props) {
   useEffect(() => {
     if (!props.producto) {
       toast.info(
-        "Primero debe seleccionar un producto para activar los validadores."
+        "Primero debe seleccionar un producto para activar los validadores.",
       );
     }
   }, []);
@@ -84,7 +84,7 @@ function ModalValidadoresContent(props) {
         setIsLoadingValidadores(false);
       }
     },
-    []
+    [],
   );
 
   // Cargar ejecutivos (idéntico a ModalCampanasEjecutivos)
@@ -107,7 +107,7 @@ function ModalValidadoresContent(props) {
                 nombreEjecutivo: e.nombreEjecutivo || "",
                 subordinados: Array.isArray(e.subordinados)
                   ? e.subordinados.filter(
-                      (s) => s.jerarquia === undefined || s.jerarquia > 0
+                      (s) => s.jerarquia === undefined || s.jerarquia > 0,
                     ) // Solo excluye jerarquía <= 0 en subordinados
                   : [],
                 idEjecutivo: e.idEjecutivo,
@@ -145,7 +145,7 @@ function ModalValidadoresContent(props) {
     const recolectarEjecutivos = (
       ejecutivo,
       nivel = 1,
-      encargadoPadre = null
+      encargadoPadre = null,
     ) => {
       const lista = [];
       if (
@@ -177,7 +177,7 @@ function ModalValidadoresContent(props) {
       ) {
         ejecutivo.subordinados.forEach((sub) => {
           lista.push(
-            ...recolectarEjecutivos(sub, nivel + 1, ejecutivo.usuario)
+            ...recolectarEjecutivos(sub, nivel + 1, ejecutivo.usuario),
           );
         });
       }
@@ -202,7 +202,7 @@ function ModalValidadoresContent(props) {
   const contadorValidadores = useMemo(() => {
     const totalValidadores = usuariosValidadores.length;
     const validadoresAsignados = usuariosValidadores.filter(
-      (u) => u.seleccionado
+      (u) => u.seleccionado,
     ).length;
     return { asignados: validadoresAsignados, total: totalValidadores };
   }, [usuariosValidadores]);
@@ -269,7 +269,7 @@ function ModalValidadoresContent(props) {
     if (validadoresFromAPI.length > 0 && usuariosValidadores.length > 0) {
       // Crear un Set con los idEjecutivo de los validadores para búsqueda rápida
       const validadoresIds = new Set(
-        validadoresFromAPI.map((v) => v.idEjecutivo)
+        validadoresFromAPI.map((v) => v.idEjecutivo),
       );
 
       setUsuariosValidadores((prev) => {
@@ -321,12 +321,12 @@ function ModalValidadoresContent(props) {
           } correctamente (${
             arrepentimientos ? "ARREPENTIMIENTOS" : "NORMAL"
           }):`,
-          response
+          response,
         );
 
         // Encontrar el nombre del usuario para el mensaje del footer
         const usuarioData = usuariosValidadores.find(
-          (u) => u.idEjecutivo === idEjecutivo
+          (u) => u.idEjecutivo === idEjecutivo,
         );
         const nombreUsuario =
           usuarioData?.displayName ||
@@ -344,7 +344,7 @@ function ModalValidadoresContent(props) {
           `Error al ${inserta ? "insertar" : "eliminar"} validador (${
             arrepentimientos ? "ARREPENTIMIENTOS" : "NORMAL"
           }):`,
-          error
+          error,
         );
         // Solo mostrar toast de error, evitando duplicados
         toast.error(`Error al ${inserta ? "agregar" : "remover"} validador`);
@@ -362,7 +362,7 @@ function ModalValidadoresContent(props) {
       usuariosValidadores,
       setLastAction,
       setLastUser,
-    ]
+    ],
   );
 
   // Handler para seleccionar/deseleccionar usuarios
@@ -382,7 +382,7 @@ function ModalValidadoresContent(props) {
     // Actualizar el estado local inmediatamente para mejor UX
     setUsuariosValidadores((prev) => {
       const updated = prev.map((u, i) =>
-        i === index ? { ...u, seleccionado: nuevoEstado } : u
+        i === index ? { ...u, seleccionado: nuevoEstado } : u,
       );
 
       // Log para debug
@@ -400,7 +400,7 @@ function ModalValidadoresContent(props) {
       toast.success(
         nuevoEstado
           ? `Usuario ${usuarioActual.displayName} agregado como validador.`
-          : `Usuario ${usuarioActual.displayName} removido como validador.`
+          : `Usuario ${usuarioActual.displayName} removido como validador.`,
       );
     } catch (error) {
       toast.error("Error al actualizar validador. Intenta de nuevo.", error);

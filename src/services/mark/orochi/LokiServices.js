@@ -1,5 +1,8 @@
 import api from '../../../loki/apiConfig';
 
+// Helper para obtener token: preferir sessionStorage (se borra al cerrar pestaña)
+const getToken = () => sessionStorage.getItem('token') || localStorage.getItem('token');
+
 // export const ValidatePassword = async (userData, idEjecutivo) => {
 //   try {
 //     const requestData = {
@@ -42,7 +45,7 @@ import api from '../../../loki/apiConfig';
 export const UpdatePassword = async (passwordData) => {
   try {
     // Verificar que el token existe antes de proceder
-    const token = localStorage.getItem('token');
+    const token = getToken();
     
     console.log('  Enviando a /Auth/restablecer-contrasenia:', passwordData);
     console.log('  Token disponible:', token);
@@ -56,8 +59,15 @@ export const UpdatePassword = async (passwordData) => {
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      // Limpiar tanto sessionStorage como localStorage por compatibilidad
+      try {
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('userData');
+      } catch (e) {}
+      try {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userData');
+      } catch (e) {}
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -75,7 +85,7 @@ export const UpdatePassword = async (passwordData) => {
 // services/LokiServices.js
 export const GetScreenFields = async (idProducto) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
@@ -95,8 +105,14 @@ export const GetScreenFields = async (idProducto) => {
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      try {
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('userData');
+      } catch (e) {}
+      try {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userData');
+      } catch (e) {}
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -113,7 +129,7 @@ export const GetScreenFields = async (idProducto) => {
 
 export const GetGridFields = async (idProducto) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
@@ -133,8 +149,14 @@ export const GetGridFields = async (idProducto) => {
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      try {
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('userData');
+      } catch (e) {}
+      try {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userData');
+      } catch (e) {}
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -151,7 +173,7 @@ export const GetGridFields = async (idProducto) => {
 
 export const GetVerifyProduct = async (idProducto) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
@@ -171,8 +193,14 @@ export const GetVerifyProduct = async (idProducto) => {
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      try {
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('userData');
+      } catch (e) {}
+      try {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userData');
+      } catch (e) {}
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -190,7 +218,7 @@ export const GetVerifyProduct = async (idProducto) => {
 export const SaveScreenFields = async (data) => {
   try {
     // Verificar que el token existe antes de proceder
-    const token = localStorage.getItem('token');
+    const token = getToken();
     
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
@@ -226,7 +254,7 @@ export const SaveScreenFields = async (data) => {
 // Nuevo endpoint para Lista Negra con parámetros
 export const darkListV2 = async ({ idCartera, selector, dato }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -257,7 +285,7 @@ export const darkListV2 = async ({ idCartera, selector, dato }) => {
 
 export const getRegrest = async ({ idCartera, cuenta }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -288,7 +316,7 @@ export const getRegrest = async ({ idCartera, cuenta }) => {
 
 export const actualizarMetas = async (payload) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -319,7 +347,7 @@ export const actualizarMetas = async (payload) => {
 
 export const getSessions = async ({ idEjecutivo }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -351,7 +379,7 @@ export const getSessions = async ({ idEjecutivo }) => {
 
 export const getValidators = async ({ idProducto }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -383,7 +411,7 @@ export const getValidators = async ({ idProducto }) => {
 // Obtener ramificación de encargados (sin parámetros)
 export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -416,7 +444,7 @@ export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
 
 export const obetenerTablaMetas = async (idEjecutivo) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -448,7 +476,7 @@ export const obetenerTablaMetas = async (idEjecutivo) => {
 // Obtener ramificación de encargados (sin parámetros)
 export const obetenerDropdownsEncargados = async () => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -500,7 +528,7 @@ export const getCarteras = async () => {
 // Obtener carteras de encargados 
 export const getCarterasProductos = async () => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -531,7 +559,7 @@ export const getCarterasProductos = async () => {
 export const PostLoadData = async (data) => {
   try {
     // Verificar que el token existe antes de proceder
-    const token = localStorage.getItem('token');  
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }  
@@ -564,7 +592,7 @@ export const PostLoadData = async (data) => {
 
 export const getCatalogoCard = async () => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -595,7 +623,7 @@ export const getCatalogoCard = async () => {
 //Valores Catalogo
 export const getCatalogoValueCard = async () => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -626,7 +654,7 @@ export const getCatalogoValueCard = async () => {
 
 export const getProductivity = async (requestData = null) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -662,7 +690,7 @@ export const getProductivity = async (requestData = null) => {
 
 export const PostInsertScreen = async (data) => {
   try {
-    const token = localStorage.getItem('token');  
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible');
     }
@@ -691,7 +719,7 @@ export const PostInsertScreen = async (data) => {
 // Obtener Historico invidual
 export const historySingle = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -728,7 +756,7 @@ export const historySingle = async (body) => {
 // Obtener Historico Archivo
 export const historyArchivoUpload = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }

@@ -73,7 +73,7 @@ const ModalCatalogosContent = () => {
         } else {
           console.warn(
             "Respuesta vacía o en formato incorrecto para valores:",
-            response
+            response,
           );
           setCatalogsValuesData([]);
         }
@@ -153,20 +153,20 @@ const ModalCatalogosContent = () => {
     if (selectedCatalog) {
       // Encontrar el catálogo seleccionado para obtener su idCatalogo
       const selectedCatalogData = catalogsData.find(
-        (cat) => cat.catalog === selectedCatalog
+        (cat) => cat.catalog === selectedCatalog,
       );
 
       if (selectedCatalogData) {
         // Filtrar los valores que corresponden al idCatalogo seleccionado
         valuesData = catalogsValuesData.filter(
-          (value) => value.idCatálogo === selectedCatalogData.idCatalogo
+          (value) => value.idCatálogo === selectedCatalogData.idCatalogo,
         );
 
         console.log(
           "Valores filtrados para idCatalogo",
           selectedCatalogData.idCatalogo,
           ":",
-          valuesData.length
+          valuesData.length,
         );
       }
     }

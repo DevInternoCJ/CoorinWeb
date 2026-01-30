@@ -2,7 +2,13 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import ReusableModal from "../../modalGlobalReboot/ReusableModal";
 import ModalEncargadosContent from "../Encargados/ModalEncargadosContent";
 import { IconEncargados } from "../IconesEjecutives";
-import { obetenerJerarquiaEncargados, obetenerDropdownsEncargados, getCarteras, getCarterasProductos, AsignaEncargados } from "../../../../../services/mark/Orochi/LokiServices";
+import {
+  obetenerJerarquiaEncargados,
+  obetenerDropdownsEncargados,
+  getCarteras,
+  getCarterasProductos,
+  AsignaEncargados,
+} from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
 const EncargadosModal = ({
@@ -32,7 +38,7 @@ const EncargadosModal = ({
   // Carga real de datos desde servicios
   useEffect(() => {
     if (!isOpen) return; // Solo cargar cuando el modal esté abierto
-    
+
     setLoading(true);
     Promise.all([
       getCarteras(),
@@ -43,7 +49,7 @@ const EncargadosModal = ({
         setCarteras(
           carterasData
             .map((item) => item.cartera)
-            .sort((a, b) => a.localeCompare(b))
+            .sort((a, b) => a.localeCompare(b)),
         );
         setCartera(carterasData[0]?.cartera || "");
         setCarterasProductosData(carterasProductosData);
@@ -89,7 +95,7 @@ const EncargadosModal = ({
           .filter((id, index, self) => self.indexOf(id) === index);
         filtrados = encargadosOriginales.filter((item) => {
           const matchProducto = idsProductoRelacionados.includes(
-            item.idProducto
+            item.idProducto,
           );
           return matchProducto;
         });
@@ -98,7 +104,7 @@ const EncargadosModal = ({
       }
       return filtrados;
     },
-    [carterasProductosData]
+    [carterasProductosData],
   );
 
   // Actualizar productos al cambiar cartera
@@ -129,7 +135,7 @@ const EncargadosModal = ({
     const filtrados = filtrarEncargados(
       cartera,
       producto,
-      encargadosOriginales
+      encargadosOriginales,
     );
     setEncargadosFiltrados(filtrados);
     if (filtrados.length > 0) {
@@ -196,7 +202,7 @@ const EncargadosModal = ({
       </label>
     </div>
   );
-  
+
   const productoSelector = (
     <div className="relative mb-0 w-full md:w-auto">
       <select
@@ -223,7 +229,7 @@ const EncargadosModal = ({
       </label>
     </div>
   );
-  
+
   const encargadoSelector = (
     <div className="relative mb-0 w-full md:w-auto">
       {loading ? (
@@ -253,8 +259,8 @@ const EncargadosModal = ({
                   .slice()
                   .sort((a, b) =>
                     (a.nombreEjecutivo || "").localeCompare(
-                      b.nombreEjecutivo || ""
-                    )
+                      b.nombreEjecutivo || "",
+                    ),
                   )
                   .map((item) => (
                     <option key={item.idEjecutivo} value={item.idEjecutivo}>
@@ -290,12 +296,12 @@ const EncargadosModal = ({
   const handleContadorChange = useCallback((contador) => {
     setContadorEncargados(contador);
   }, []);
-  
+
   // Callback para recibir el nombre del nodo raíz desde el content
   const handleNodoEjecutivoHeaderChange = useCallback((nombre) => {
     setNodoEjecutivoHeader(nombre);
   }, []);
-  
+
   // Callback para recibir la función de cambiar asignación desde el content
   const handleCambiarAsignacionCallback = useCallback((callback) => {
     setHandleCambiarAsignacionContent(() => callback);
@@ -317,10 +323,12 @@ const EncargadosModal = ({
   // Mostrar toast informativo SOLO una vez cuando el modal se abre
   useEffect(() => {
     if (isOpen && !toastShownRef.current) {
-      toast.info("Palomee los Ejecutivos que desee pasar a otro encargado y presione Cambiar.");
+      toast.info(
+        "Palomee los Ejecutivos que desee pasar a otro encargado y presione Cambiar.",
+      );
       toastShownRef.current = true;
     }
-    
+
     // Resetear el ref cuando el modal se cierra
     if (!isOpen) {
       toastShownRef.current = false;
@@ -343,7 +351,7 @@ const EncargadosModal = ({
         encargadoSelector,
         contadorEncargados,
         nodoEjecutivoHeader,
-        cambiarButton
+        cambiarButton,
       }}
       showFooter={true}
       enableBounce={enableBounce}
@@ -354,8 +362,8 @@ const EncargadosModal = ({
       modalClassName="border-0 shadow-2xl overflow-hidden"
       {...props}
     >
-      <ModalEncargadosContent 
-        onContadorChange={handleContadorChange} 
+      <ModalEncargadosContent
+        onContadorChange={handleContadorChange}
         onNodoEjecutivoHeaderChange={handleNodoEjecutivoHeaderChange}
         onCambiarAsignacionCallback={handleCambiarAsignacionCallback}
       />
