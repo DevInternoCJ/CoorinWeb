@@ -3,6 +3,18 @@ import api from '../../../loki/apiConfig';
 // Helper para obtener token: preferir sessionStorage (se borra al cerrar pestaña)
 const getToken = () => sessionStorage.getItem('token') || localStorage.getItem('token');
 
+// Helper para limpiar autentificación de ambos storages
+const clearAuth = () => {
+  try {
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('userData');
+  } catch (e) {}
+  try {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+  } catch (e) {}
+};
+
 // export const ValidatePassword = async (userData, idEjecutivo) => {
 //   try {
 //     const requestData = {

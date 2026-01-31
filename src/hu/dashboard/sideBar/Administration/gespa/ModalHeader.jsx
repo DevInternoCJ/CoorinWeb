@@ -18,6 +18,7 @@ const ModalHeader = ({
   setSelectedCartera, // ⭐ Nueva prop del padre
   setVerifyResult,
   setLoading,
+  setShowDataTables, // opcional: notificar al padre para mostrar LoadDates
 }) => {
   const servidor = "Orochi";
   const [carteraOptions, setCarteraOptions] = useState([
@@ -173,8 +174,10 @@ const ModalHeader = ({
     // Solo actualizar si se seleccionó un producto válido
     if (value && value !== "" && setSelectedProduct) {
       setSelectedProduct({ value: Number(value) });
+      if (typeof setShowDataTables === "function") setShowDataTables(true);
     } else if (setSelectedProduct) {
       setSelectedProduct(null);
+      if (typeof setShowDataTables === "function") setShowDataTables(false);
     }
   };
 
