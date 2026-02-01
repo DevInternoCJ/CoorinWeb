@@ -6,6 +6,7 @@ using Loki.DTOs.CampaniasDTOs;
 
 using Loki.Mark.Administracion.Carteras.Interfaces;
 using Microsoft.AspNetCore.Connections;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -29,9 +30,12 @@ namespace Loki.Mark.Administracion.Carteras.DAOs
         }
         public async Task<bool> NuevaCampaña(CampañaDTO request, string servidor)
         {
+
             const string tipoBase = "Memory";
             if (servidor?.Contains('_') == true) throw new ArgumentException($"Servidor '{servidor}' inválido.");
             using var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
+            if (request.IdEjecutivoInsert <= 0)
+                throw new ArgumentException("El id del ejecutivo debe ser mayor a 0 para crear una nueva campaña.");
             try
             {
                 await sqlConnection.OpenAsync();
