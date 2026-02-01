@@ -265,7 +265,7 @@ builder.Services.AddSwaggerGen(options =>
 
     // Grupo: Administración
      "Administración - campanias",
-    "Administración - Campañas",
+    //"Administración - Campañas",
     "Administración - Carteras",
     "Administración - InfoEjecutivo",
     "Administración - Encargados",

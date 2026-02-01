@@ -40,11 +40,11 @@ namespace Loki.Mark.Administracion.Carteras.DAOs
             {
                 await sqlConnection.OpenAsync();
                 string sqlInsert = "INSERT INTO dbMemory.AMS.Campañas (Campaña, NúmeroCuentas, Encendida, idEjecutivo_Insert, idProducto) " +
-                                     "VALUES (@Campania, @NumeroCuentas, @Encendido, @IdEjecutivoInsert, @IdProducto);";
+                                     "VALUES (@Campania, 0, 0, @IdEjecutivoInsert, @IdProducto);";
                 using var cmdInsert = new SqlCommand(sqlInsert, sqlConnection);
                 cmdInsert.Parameters.Add("@Campania", SqlDbType.NVarChar).Value = request.Campania ?? (object)DBNull.Value;
-                cmdInsert.Parameters.Add("@NumeroCuentas", SqlDbType.Int).Value = request.NumeroCuentas;
-                cmdInsert.Parameters.Add("@Encendido", SqlDbType.Bit).Value = request.Encendido;
+                //cmdInsert.Parameters.Add("@NumeroCuentas", SqlDbType.Int).Value = request.NumeroCuentas;
+                //cmdInsert.Parameters.Add("@Encendido", SqlDbType.Bit).Value = request.Encendido;
                 cmdInsert.Parameters.Add("@IdEjecutivoInsert", SqlDbType.Int).Value = request.IdEjecutivoInsert;
                 cmdInsert.Parameters.Add("@IdProducto", SqlDbType.SmallInt).Value = request.IdProducto;
 
