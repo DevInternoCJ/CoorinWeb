@@ -1,19 +1,60 @@
 import api from '../../../loki/apiConfig';
 
-// Helper para obtener token: preferir sessionStorage (se borra al cerrar pestaña)
-const getToken = () => sessionStorage.getItem('token') || localStorage.getItem('token');
+// Helper para obtener token: preferir sessionStorage (sesión por pestaña), fallback a localStorage
+export const getToken = () => {
+  try {
+    return sessionStorage.getItem('token') || localStorage.getItem('token') || null;
+  } catch (e) {
+    return localStorage.getItem('token') || null;
+  }
+};
 
-// Helper para limpiar autentificación de ambos storages
-const clearAuth = () => {
+// Helper para limpiar credenciales en ambos storages
+export const clearAuth = () => {
   try {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('userData');
-  } catch (e) {}
+  } catch (e) {
+    // ignore
+  }
   try {
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
-  } catch (e) {}
+  } catch (e) {
+    // ignore
+  }
 };
+
+// Shim de compatibilidad: hacer que lecturas/eliminiaciones legadas en localStorage
+// respeten la nueva lógica de sesión por pestaña (sessionStorage primero).
+try {
+  const _origGetItem = localStorage.getItem.bind(localStorage);
+  localStorage.getItem = function (key) {
+    if (key === 'token') {
+      try {
+        return sessionStorage.getItem('token') || _origGetItem(key);
+      } catch (e) {
+        return _origGetItem(key);
+      }
+    }
+    return _origGetItem(key);
+  };
+
+  const _origRemoveItem = localStorage.removeItem.bind(localStorage);
+  localStorage.removeItem = function (key) {
+    if (key === 'token' || key === 'userData') {
+      try {
+        clearAuth();
+        return;
+      } catch (e) {
+        // fall back to original
+      }
+    }
+    return _origRemoveItem(key);
+  };
+} catch (e) {
+  // Si por alguna razón no podemos reconfigurar localStorage, no fallar.
+}
 
 // export const ValidatePassword = async (userData, idEjecutivo) => {
 //   try {
@@ -71,15 +112,7 @@ export const UpdatePassword = async (passwordData) => {
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      // Limpiar tanto sessionStorage como localStorage por compatibilidad
-      try {
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('userData');
-      } catch (e) {}
-      try {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userData');
-      } catch (e) {}
+      clearAuth();
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -97,7 +130,7 @@ export const UpdatePassword = async (passwordData) => {
 // services/LokiServices.js
 export const GetScreenFields = async (idProducto) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
@@ -117,14 +150,8 @@ export const GetScreenFields = async (idProducto) => {
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      try {
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('userData');
-      } catch (e) {}
-      try {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userData');
-      } catch (e) {}
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -141,7 +168,7 @@ export const GetScreenFields = async (idProducto) => {
 
 export const GetGridFields = async (idProducto) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
@@ -161,14 +188,8 @@ export const GetGridFields = async (idProducto) => {
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      try {
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('userData');
-      } catch (e) {}
-      try {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userData');
-      } catch (e) {}
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -185,7 +206,7 @@ export const GetGridFields = async (idProducto) => {
 
 export const GetVerifyProduct = async (idProducto) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
@@ -205,14 +226,8 @@ export const GetVerifyProduct = async (idProducto) => {
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      try {
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('userData');
-      } catch (e) {}
-      try {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userData');
-      } catch (e) {}
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -230,7 +245,7 @@ export const GetVerifyProduct = async (idProducto) => {
 export const SaveScreenFields = async (data) => {
   try {
     // Verificar que el token existe antes de proceder
-    const token = getToken();
+    const token = localStorage.getItem('token');
     
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
@@ -266,7 +281,7 @@ export const SaveScreenFields = async (data) => {
 // Nuevo endpoint para Lista Negra con parámetros
 export const darkListV2 = async ({ idCartera, selector, dato }) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -297,7 +312,7 @@ export const darkListV2 = async ({ idCartera, selector, dato }) => {
 
 export const getRegrest = async ({ idCartera, cuenta }) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -328,7 +343,7 @@ export const getRegrest = async ({ idCartera, cuenta }) => {
 
 export const actualizarMetas = async (payload) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -359,7 +374,7 @@ export const actualizarMetas = async (payload) => {
 
 export const getSessions = async ({ idEjecutivo }) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -391,7 +406,7 @@ export const getSessions = async ({ idEjecutivo }) => {
 
 export const getValidators = async ({ idProducto }) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -423,7 +438,7 @@ export const getValidators = async ({ idProducto }) => {
 // Obtener ramificación de encargados (sin parámetros)
 export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -456,7 +471,7 @@ export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
 
 export const obetenerTablaMetas = async (idEjecutivo) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -488,7 +503,7 @@ export const obetenerTablaMetas = async (idEjecutivo) => {
 // Obtener ramificación de encargados (sin parámetros)
 export const obetenerDropdownsEncargados = async () => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -553,8 +568,7 @@ export const getCarterasProductos = async () => {
     console.error('Error al obtener carteras productos:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -571,7 +585,7 @@ export const getCarterasProductos = async () => {
 export const PostLoadData = async (data) => {
   try {
     // Verificar que el token existe antes de proceder
-    const token = getToken();
+    const token = localStorage.getItem('token');  
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }  
@@ -604,7 +618,7 @@ export const PostLoadData = async (data) => {
 
 export const getCatalogoCard = async () => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -635,7 +649,7 @@ export const getCatalogoCard = async () => {
 //Valores Catalogo
 export const getCatalogoValueCard = async () => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -666,7 +680,7 @@ export const getCatalogoValueCard = async () => {
 
 export const getProductivity = async (requestData = null) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -702,7 +716,7 @@ export const getProductivity = async (requestData = null) => {
 
 export const PostInsertScreen = async (data) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');  
     if (!token) {
       throw new Error('No hay token de autenticación disponible');
     }
@@ -731,7 +745,7 @@ export const PostInsertScreen = async (data) => {
 // Obtener Historico invidual
 export const historySingle = async (body) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -768,7 +782,7 @@ export const historySingle = async (body) => {
 // Obtener Historico Archivo
 export const historyArchivoUpload = async (body) => {
   try {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1898,80 +1912,31 @@ export const sendArchiveCampanias = async (body) => {
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    let formDataToSend;
-    // Si el caller ya pasó un FormData, usarlo tal cual
-    if (body instanceof FormData) {
-      formDataToSend = body;
-    } else {
-      // Construir FormData desde el objeto
-      formDataToSend = new FormData();
-      Object.entries(body).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          if (Array.isArray(value)) {
-            value.forEach((v) => formDataToSend.append(key, v));
-          } else {
-            formDataToSend.append(key, value);
-          }
+    // Construir FormData
+    const formData = new FormData();
+    // Asume que body es un objeto con las claves necesarias y el archivo
+    Object.entries(body).forEach(([key, value]) => {
+      // Solo agregar si el valor no es null o undefined
+      if (value !== null && value !== undefined) {
+        // Si el valor es un array, agregar cada elemento por separado
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v));
+        } else {
+          formData.append(key, value);
         }
-      });
-    }
-
+      }
+    });
     // El interceptor añade el token automáticamente
-    // Preparar configuración sin Content-Type para que el navegador
-    // agregue el multipart boundary automáticamente.
-    const config = {
+    const response = await api.post('/carteras/cargar-archivo', formData, {
       headers: {
-        'Accept': '*/*'
+        'Accept': '*/*',
+        'Content-Type': 'multipart/form-data'
+        // No establecer Content-Type manualmente, el navegador lo gestiona automáticamente con FormData
       },
       responseType: 'arraybuffer' // Para recibir datos binarios correctamente
-    };
-
-    // Asegurarnos de no enviar un Content-Type por defecto (axios instance puede tener uno)
-    // Dejarlo como undefined para que el navegador lo establezca con el boundary.
-    try {
-      if (config.headers && Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) {
-        delete config.headers['Content-Type'];
-      }
-      // También forzar undefined para evitar que axios lo añada desde defaults
-      config.headers['Content-Type'] = undefined;
-    } catch (e) {
-      console.warn('No se pudo ajustar Content-Type en config.headers:', e);
-    }
-
-    console.log('DEBUG - Enviando /carteras/cargar-archivo con headers:', config.headers);
-    const response = await api.post('/carteras/cargar-archivo', formDataToSend, config);
+    });
     return response;
   } catch (error) {
-    // Intentar decodificar y mostrar el body de error si viene como ArrayBuffer
-    try {
-      const errData = error.response?.data;
-      if (errData && (errData instanceof ArrayBuffer || errData.buffer)) {
-        const buffer = errData instanceof ArrayBuffer ? errData : errData.buffer;
-        const text = new TextDecoder('utf-8').decode(new Uint8Array(buffer));
-        try {
-          const parsed = JSON.parse(text);
-          console.error('Error al subir campanña Archivo - response parsed:', parsed);
-          // Mostrar errores de validación más detallados si existen
-          if (parsed.errors) {
-            console.error('Validation errors object:', parsed.errors);
-            try {
-              const human = Object.entries(parsed.errors)
-                .map(([k, arr]) => `${k}: ${Array.isArray(arr) ? arr.join(', ') : arr}`)
-                .join(' | ');
-              console.error('Validation message:', human);
-            } catch (e) {
-              console.error('Error formatting validation messages:', e);
-            }
-          }
-        } catch (parseErr) {
-          console.error('Error al subir campanña Archivo - response text:', text);
-        }
-      } else if (error.response?.data) {
-        console.error('Error al subir campanña Archivo - response data:', error.response.data);
-      }
-    } catch (e) {
-      console.error('Error procesando el body del error:', e);
-    }
     console.error('Error al subir campanña Archivo:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');

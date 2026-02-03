@@ -28,6 +28,8 @@ const Loader = () => (
 );
 
 function App() {
+  // Suscribirse al estado de autenticación para forzar re-render cuando cambie
+  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
   return (
     <>
       <div className="container-fluid min-h-screen">
@@ -46,27 +48,23 @@ function App() {
           <Route
             element={
               <ProtectedRoute
-                canActivate={
-                  // Permitir acceso solo si existe token y usuario autenticado (store o localStorage)
-                  (() => {
-                    try {
-                      // Usar sessionStorage: persiste en recargas pero se borra al cerrar la pestaña
-                      const token =
-                        sessionStorage.getItem("token") ||
-                        localStorage.getItem("token");
-                      const isAuthenticated =
-                        useUserStore.getState()?.isAuthenticated;
-                      const storedUser = JSON.parse(
-                        sessionStorage.getItem("userData") ||
-                          localStorage.getItem("userData") ||
-                          "null",
-                      );
-                      return !!token && (isAuthenticated || !!storedUser);
-                    } catch (e) {
-                      return false;
-                    }
-                  })()
-                }
+                // Permitir acceso solo si existe token y usuario autenticado (store o sessionStorage)
+                canActivate={(() => {
+                  try {
+                    const token =
+                      sessionStorage.getItem("token") ||
+                      localStorage.getItem("token");
+                    // `isAuthenticated` viene del store y es reactivo — provoca re-render
+                    const storedUser = JSON.parse(
+                      sessionStorage.getItem("userData") ||
+                        localStorage.getItem("userData") ||
+                        "null",
+                    );
+                    return !!token && (isAuthenticated || !!storedUser);
+                  } catch (e) {
+                    return false;
+                  }
+                })()}
                 redirectTo="/"
               />
             }

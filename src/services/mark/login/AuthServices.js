@@ -52,6 +52,24 @@ export const loginUser = async (userData) => {
           Jerarquía: response.data.ejecutivo.Jerarquía,
         }),
       );
+      // Emitir una señal breve en localStorage para sincronizar otras pestañas
+      try {
+        const syncPayload = {
+          token: response.data.ejecutivo.Token,
+          userData: {
+            idEjecutivo: response.data.ejecutivo.idEjecutivo,
+            usuario: response.data.ejecutivo.Usuario,
+            nombre: response.data.ejecutivo.NombreEjecutivo,
+            dias: response.data.ejecutivo.Días,
+            Jerarquía: response.data.ejecutivo.Jerarquía,
+          },
+        };
+        localStorage.setItem('coorin-session-sync', JSON.stringify(syncPayload));
+        // remove immediately to trigger storage event on other tabs
+        localStorage.removeItem('coorin-session-sync');
+      } catch (e) {
+        console.warn('No se pudo emitir sincronización de sesión:', e);
+      }
     } else {
       console.warn('No se recibió token en la respuesta');
       console.warn('Estructura completa de la respuesta:', response.data);

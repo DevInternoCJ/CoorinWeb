@@ -591,6 +591,7 @@ const ModalCampanasCampanias = ({
         <NewCampaign
           onCreated={cargarCampanas}
           buttonClassName="btn-success w-full sm:w-auto sm:min-w-[120px] px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center"
+          selectedProduct={selectedProduct}
         />
       </div>
       {/* Modal visual de Filas de trabajo (Promesa Midprimes) */}

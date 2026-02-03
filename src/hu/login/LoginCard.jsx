@@ -1,23 +1,21 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import LogoCoorin7 from "../../assets/logo_coorin_7.svg";
 import LogicCard from "./LogicCard";
 import LoginForm from "./LoginForm";
 import PasswordChangeContent from "./changePassword/PasswordChangeContent";
 import ChangePassword from "./changePassword/ChangePassword";
 
-const LoginCard = ({
-  logo = LogoCoorin7,
-  formComponent = null,
-  children
-}) => {
+const LoginCard = ({ logo = LogoCoorin7, formComponent = null, children }) => {
   const [showPasswordContent, setShowPasswordContent] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [diasRestantes, setDiasRestantes] = useState(null);
   const [passwordExpiredData, setPasswordExpiredData] = useState(null);
 
   useEffect(() => {
-    // Obtener los días del localStorage
-    const userData = localStorage.getItem('userData');
+    // Obtener los días desde sessionStorage (preferido) o localStorage como fallback
+    const raw =
+      sessionStorage.getItem("userData") || localStorage.getItem("userData");
+    const userData = raw;
     if (userData) {
       const parsedData = JSON.parse(userData);
       setDiasRestantes(parsedData.dias);
@@ -25,52 +23,54 @@ const LoginCard = ({
   }, []);
 
   // Función mejorada con más debug y manejo de estado
-  //  Recibir datos de contraseña expirada  
-const handlePasswordExpired = (data) => {
-  console.log(" Contraseña expirada con datos:", data);
-  setPasswordExpiredData(data);
-  setDiasRestantes(data.diasRestantes);
-  setShowPasswordContent(false);
-  setShowChangePassword(true); //  Mostrar directamente ChangePassword
-};
+  //  Recibir datos de contraseña expirada
+  const handlePasswordExpired = (data) => {
+    console.log(" Contraseña expirada con datos:", data);
+    setPasswordExpiredData(data);
+    setDiasRestantes(data.diasRestantes);
+    setShowPasswordContent(false);
+    setShowChangePassword(true); //  Mostrar directamente ChangePassword
+  };
 
- const handleLoginSuccess = (data) => {
-  console.log(" handleLoginSuccess EJECUTADO con:", data);
-  
-  if (!data) {
-    console.error(" ERROR: data es null/undefined");
-    return;
-  }
-  
-  console.log("Actualizando estado...");
-  setPasswordExpiredData(data);
-  setDiasRestantes(data.diasRestantes);
-  setShowPasswordContent(true);
-  
-  // Verificar que el estado se actualizó
-  setTimeout(() => {
-    console.log("Estado después de handleLoginSuccess:", {
-      showPasswordContent,
-      showChangePassword, 
-      diasRestantes,
-      passwordExpiredData
-    });
-  }, 100);
-}
+  const handleLoginSuccess = (data) => {
+    console.log(" handleLoginSuccess EJECUTADO con:", data);
+
+    if (!data) {
+      console.error(" ERROR: data es null/undefined");
+      return;
+    }
+
+    console.log("Actualizando estado...");
+    setPasswordExpiredData(data);
+    setDiasRestantes(data.diasRestantes);
+    setShowPasswordContent(true);
+
+    // Verificar que el estado se actualizó
+    setTimeout(() => {
+      console.log("Estado después de handleLoginSuccess:", {
+        showPasswordContent,
+        showChangePassword,
+        diasRestantes,
+        passwordExpiredData,
+      });
+    }, 100);
+  };
 
   // Función para manejar el click en "Sí" en PasswordChangeContent
   const handleAcceptPasswordChange = () => {
     console.log("Usuario aceptó cambiar contraseña. Datos disponibles:", {
       passwordExpiredData,
       tieneContraActual: passwordExpiredData?.contraActual ? " SÍ" : " NO",
-      usuario: passwordExpiredData?.username
+      usuario: passwordExpiredData?.username,
     });
-    
+
     if (!passwordExpiredData) {
-      console.error("ERROR: No hay passwordExpiredData para cambiar contraseña");
+      console.error(
+        "ERROR: No hay passwordExpiredData para cambiar contraseña",
+      );
       return;
     }
-    
+
     setShowPasswordContent(false);
     setShowChangePassword(true);
   };
@@ -93,24 +93,33 @@ const handlePasswordExpired = (data) => {
     console.log(" LoginCard - Estado actualizado:", {
       showPasswordContent,
       showChangePassword,
-      passwordExpiredData: passwordExpiredData ? {
-        username: passwordExpiredData.username,
-        contraActual: passwordExpiredData.contraActual ? "PRESENTE" : " AUSENTE",
-        diasRestantes: passwordExpiredData.diasRestantes,
-        mensaje: passwordExpiredData.mensaje
-      } : "NULL",
-      diasRestantes
+      passwordExpiredData: passwordExpiredData
+        ? {
+            username: passwordExpiredData.username,
+            contraActual: passwordExpiredData.contraActual
+              ? "PRESENTE"
+              : " AUSENTE",
+            diasRestantes: passwordExpiredData.diasRestantes,
+            mensaje: passwordExpiredData.mensaje,
+          }
+        : "NULL",
+      diasRestantes,
     });
-  }, [showPasswordContent, showChangePassword, passwordExpiredData, diasRestantes]);
+  }, [
+    showPasswordContent,
+    showChangePassword,
+    passwordExpiredData,
+    diasRestantes,
+  ]);
 
   const defaultContent = formComponent ? (
-    React.createElement(formComponent, { 
+    React.createElement(formComponent, {
       onLoginSuccess: handleLoginSuccess,
-      onPasswordExpired: handlePasswordExpired //  Pasar el callback
+      onPasswordExpired: handlePasswordExpired, //  Pasar el callback
     })
   ) : (
-    <LoginForm 
-      onLoginSuccess={handleLoginSuccess} 
+    <LoginForm
+      onLoginSuccess={handleLoginSuccess}
       onPasswordExpired={handlePasswordExpired} //  Pasar el callback
     />
   );
@@ -118,7 +127,6 @@ const handlePasswordExpired = (data) => {
   return (
     <div className="bg-bgcolor1 shadow-2xl shadow-gray-500 rounded-4xl">
       <div className="w-xs sm:w-md md:xl lg:w-3xl rounded-4xl h-4xl block lg:flex justify-center p-4 font-sans bg-cover bg-no-repeat bg-center bg-[url(/src/assets/backgroundLogin.svg)]">
-        
         {/* Logo - solo se muestra en login normal */}
         {!showPasswordContent && !showChangePassword && (
           <div className="lg:w-1/2">
@@ -139,29 +147,31 @@ const handlePasswordExpired = (data) => {
           </div>
         )}
 
-          {/* Contenido principal */}
-        <div className={(!showPasswordContent && !showChangePassword) ? "lg:w-1/2" : "w-full"}>
+        {/* Contenido principal */}
+        <div
+          className={
+            !showPasswordContent && !showChangePassword ? "lg:w-1/2" : "w-full"
+          }
+        >
           {showPasswordContent ? (
-            <PasswordChangeContent 
+            <PasswordChangeContent
               onClose={handleClosePasswordContent}
               onAccept={handleAcceptPasswordChange}
               dias={diasRestantes || 0}
             />
           ) : showChangePassword ? (
             <>
-              
               {/*  RENDER CONDICIONAL BASADO EN DATOS */}
               {passwordExpiredData && passwordExpiredData.contraActual ? (
-                <ChangePassword 
-                  onClose={handleCloseChangePassword} 
+                <ChangePassword
+                  onClose={handleCloseChangePassword}
                   show={true}
                   contraActual={passwordExpiredData.contraActual}
                   username={passwordExpiredData.username}
                   passwordData={passwordExpiredData}
                 />
               ) : (
-                <div>
-                </div>
+                <div></div>
               )}
             </>
           ) : (
@@ -174,5 +184,3 @@ const handlePasswordExpired = (data) => {
 };
 
 export default LoginCard;
-
-

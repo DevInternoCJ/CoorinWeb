@@ -8,8 +8,10 @@ const NewCampaign = ({ onCreated, buttonClassName, selectedProduct }) => {
   const [loadingNueva, setLoadingNueva] = useState(false);
   const [errorNueva, setErrorNueva] = useState("");
 
-  const userData = useUserStore((state) => state.userData);
-  const idEjecutivo = userData?.idEjecutivo;
+  // El store usa la clave `user` (no `userData`). Obtener user y usar fallbacks.
+  const user = useUserStore((state) => state.user);
+  const idEjecutivo =
+    user?.idEjecutivo ?? user?.id ?? user?.IdEjecutivo ?? null;
 
   const handleNuevaCampania = async () => {
     setErrorNueva("");
@@ -29,11 +31,27 @@ const NewCampaign = ({ onCreated, buttonClassName, selectedProduct }) => {
     setLoadingNueva(true);
     try {
       const idEjecutivoInsert = idEjecutivo;
-      const idProducto = selectedProduct?.value;
+      // Aceptar varios shapes para selectedProduct (value, id, IdProducto, idProducto)
+      const idProducto =
+        selectedProduct?.value ??
+        selectedProduct?.id ??
+        selectedProduct?.IdProducto ??
+        selectedProduct?.idProducto ??
+        null;
+
+      // Validaciones preventivas para evitar enviar `undefined`
+      if (!idEjecutivoInsert) {
+        toast.error("No se encontró idEjecutivo. Vuelve a iniciar sesión.");
+        setLoadingNueva(false);
+        return;
+      }
+      if (!idProducto) {
+        toast.error("Selecciona un producto antes de crear la campaña.");
+        setLoadingNueva(false);
+        return;
+      }
       const body = {
         campania: nombre,
-        numeroCuentas: 0,
-        encendido: false,
         idEjecutivoInsert,
         idProducto,
       };

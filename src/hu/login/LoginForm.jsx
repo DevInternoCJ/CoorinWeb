@@ -112,11 +112,12 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
 
   // Guardar datos de usuario en localStorage
   const saveUserData = useCallback((response) => {
+    // Preferir sessionStorage para que la sesión se borre al cerrar la pestaña
     if (response?.ejecutivo?.token) {
-      localStorage.setItem("token", response.ejecutivo.token);
-      localStorage.setItem("userData", JSON.stringify(response.ejecutivo));
+      sessionStorage.setItem("token", response.ejecutivo.token);
+      sessionStorage.setItem("userData", JSON.stringify(response.ejecutivo));
     } else if (response?.token) {
-      localStorage.setItem("token", response.token);
+      sessionStorage.setItem("token", response.token);
     }
   }, []);
 
@@ -203,14 +204,34 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
 
       setUser(userStoreData);
 
-      // GUARDAR EN LOCALSTORAGE CON CONTRASEÑA ACTUAL
-      const localStorageData = {
+      // GUARDAR EN sessionStorage CON CONTRASEÑA ACTUAL
+      const storageData = {
         ...userStoreData,
         contraActual: formData.password, // Guardar para ChangePassword
       };
-      localStorage.setItem("userData", JSON.stringify(localStorageData));
+      try {
+        sessionStorage.setItem("userData", JSON.stringify(storageData));
+      } catch (e) {
+        console.warn("No se pudo guardar userData en sessionStorage", e);
+        // Fallback a localStorage por compatibilidad
+        localStorage.setItem("userData", JSON.stringify(storageData));
+      }
 
       console.log("Datos guardados en store y localStorage:", userStoreData);
+      // Notificar al LoginCard sobre el resultado para mostrar cambio de contraseña
+      const diasRestantes = userInfo.Días;
+      const notificationData = {
+        diasRestantes,
+        username: formData.username,
+        contraActual: formData.password,
+      };
+      // Si la contraseña expiró (<= 0), usar onPasswordExpired
+      if (diasRestantes <= 0) {
+        onPasswordExpired?.({ ...notificationData, esExpirada: true });
+      } else if (diasRestantes < 30) {
+        // Si está próxima a expirar, notificar para mostrar la opción de cambio
+        onLoginSuccess?.({ ...notificationData, esExpirada: false });
+      }
 
       // try {
       //   const passwordValidation = await ValidatePassword(

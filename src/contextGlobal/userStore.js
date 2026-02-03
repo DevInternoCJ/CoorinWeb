@@ -51,7 +51,9 @@ export const useWalletProductStore = create((set) => ({
 
   // Acción mejorada que se puede llamar desde cualquier componente
   loadWalletProducts: async () => {
-    const token = localStorage.getItem("token");
+    // Preferir sessionStorage (persistir en recarga, limpiar al cerrar pestaña),
+    // pero mantener fallback a localStorage por compatibilidad.
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
     if (!token) {
       set({ 
         error: "No se puede cargar: Usuario no autenticado.",
