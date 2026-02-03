@@ -12,6 +12,6 @@
         public string? fechaInsert { get; set; }
         public string? segundoInsert { get; set; }
         public string? motivo { get; set; }
-        public string? servidor { get; set; }
+        //public string? servidor { get; set; }
     }
 }

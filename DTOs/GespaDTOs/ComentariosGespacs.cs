@@ -8,7 +8,7 @@
         public string? idCuenta { get; set; }
         public string? Comentario { get; set; }
         public int? idEjecutivo { get; set; }
-        public string? Servidor { get; set; }
+        //public string? Servidor { get; set; }
 
         public class ResultadoComentario
         {

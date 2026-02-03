@@ -18,10 +18,10 @@ namespace Loki.Mark.Procesos.Gespa.Bloqueo_cuentas.DAOs
             _daoBase = new DaoBase();
         }
 
-        public async Task<dynamic?> ValidateBloqueoCuentasBusqueda(BloqueoCuentasBusqueda request)
+        public async Task<dynamic?> ValidateBloqueoCuentasBusqueda(BloqueoCuentasBusqueda request, string servidor)
         {
             var tipoBase = "Collection";
-            var servidor = request.servidor;
+            //var servidor = request.servidor;
 
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 
@@ -55,10 +55,10 @@ namespace Loki.Mark.Procesos.Gespa.Bloqueo_cuentas.DAOs
 
         }
 
-        public async Task<dynamic?> ValidateBloqueoCuentas(BloqueoCuentasBusqueda request)
+        public async Task<dynamic?> ValidateBloqueoCuentas(BloqueoCuentasBusqueda request, string servidor)
         {
             var tipoBase = "Complemento";
-            var servidor = request.servidor;
+            //var servidor = request.servidor;
 
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 

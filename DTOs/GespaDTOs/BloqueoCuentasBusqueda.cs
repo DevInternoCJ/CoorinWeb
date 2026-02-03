@@ -7,6 +7,6 @@
         public string? idEjecutivo { get; set; }
         public string? comentarios { get; set; }
         public bool? bloqueo { get; set; }
-        public string? servidor { get; set; }
+        //public string? servidor { get; set; }
     }
 }

@@ -20,10 +20,10 @@ namespace Loki.Mark.Procesos.Gespa.Definicion.DAOs
         }
 
 
-        public async Task<dynamic?> ValidateDefinicionBusqueda(DefinicionBusqueda request)
+        public async Task<dynamic?> ValidateDefinicionBusqueda(DefinicionBusqueda request, string servidor)
         {
             var tipoBase = "Collection";
-            var servidor = request.Servidor;
+            //var servidor = request.Servidor;
 
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 
@@ -56,10 +56,10 @@ namespace Loki.Mark.Procesos.Gespa.Definicion.DAOs
 
         }
 
-        public async Task<dynamic?> ValidateDefinicion(Define request)
+        public async Task<dynamic?> ValidateDefinicion(Define request, string servidor)
         {
             var tipoBase = "Collection";
-            var servidor = request.Servidor;
+            //var servidor = request.Servidor;
 
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 

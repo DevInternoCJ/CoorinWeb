@@ -34,16 +34,24 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.Controllers
         {
 
             // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.Servidor))
+            //if (string.IsNullOrWhiteSpace(request.Servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
             {
-                return BadRequest(new { error = "Servidor es obligatorio." });
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
             }
+
+
             if (string.IsNullOrWhiteSpace(request.Comentario))
             {
                 return BadRequest(new { error = "Un comentario es obligatorio." });
             }
 
-            var resultComentarios = await _comentariosGespaInterfaces.ValidateComentario(request);
+            var resultComentarios = await _comentariosGespaInterfaces.ValidateComentario(request, servidorClaim);
             if (resultComentarios == 1)
             {
                 return Ok(new { Mensaje = "Actualizacion realizada con éxito." });

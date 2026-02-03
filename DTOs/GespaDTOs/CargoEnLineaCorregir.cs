@@ -11,6 +11,6 @@
         public decimal? monto { get; set; }
         public string? recurrente { get; set; }
         public string? fechaInsert { get; set; }
-        public string? servidor { get; set; }
+        //public string? servidor { get; set; }
     }
 }

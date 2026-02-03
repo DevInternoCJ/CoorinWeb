@@ -28,11 +28,17 @@ namespace Loki.Mark.Procesos.Gespa.Estados_de_cuenta.Controllers
         public async Task<dynamic?> ValidateEstadosDeCuenta([FromBody]EstadosDeCuenta request)
         {
             // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.servidor))
+            //if (string.IsNullOrWhiteSpace(request.servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
             {
-                return BadRequest(new { error = "Servidor es obligatorio." });
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
             }
-            var resultadoEstadosDeCuenta = await _estadosDeCuentaGespaInterfaces.ValidateEstadosDeCuenta(request);
+            var resultadoEstadosDeCuenta = await _estadosDeCuentaGespaInterfaces.ValidateEstadosDeCuenta(request, servidorClaim);
 
             if (resultadoEstadosDeCuenta != null)
             {
@@ -53,11 +59,17 @@ namespace Loki.Mark.Procesos.Gespa.Estados_de_cuenta.Controllers
         public async Task<dynamic?> ValidateEstadosDeCuentaModifica(EstadosDeCuentaGespaModificar request)
         {
             // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.servidor))
+            //if (string.IsNullOrWhiteSpace(request.servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
             {
-                return BadRequest(new { error = "Servidor es obligatorio." });
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
             }
-            var resultadoEstadosDeCuentaModifica = await _estadosDeCuentaGespaInterfaces.ValidateEstadosDeCuentaModifica(request);
+            var resultadoEstadosDeCuentaModifica = await _estadosDeCuentaGespaInterfaces.ValidateEstadosDeCuentaModifica(request, servidorClaim);
 
             if (resultadoEstadosDeCuentaModifica != null)
             {

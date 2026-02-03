@@ -4,6 +4,6 @@
     {
         public string? selector { get; set; }        
         public int? idCartera { get; set; }
-        public string? servidor { get; set; }
+        //public string? servidor { get; set; }
     }
 }

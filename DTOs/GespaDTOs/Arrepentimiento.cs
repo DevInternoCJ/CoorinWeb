@@ -10,6 +10,6 @@
         public DateTime? fechaInsert { get; set; }
         public DateTime? segundoInsert { get; set; }
         public DateTime? fechaHoraInsert { get; set; }
-        public string? Servidor { get; set; }
+        //public string? Servidor { get; set; }
     }
 }

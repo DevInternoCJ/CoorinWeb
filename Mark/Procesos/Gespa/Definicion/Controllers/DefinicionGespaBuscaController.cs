@@ -29,12 +29,18 @@ namespace Loki.Mark.Procesos.Gespa.Definicion.Controllers
         public async Task<IActionResult> DefinicionGespaBusca([FromBody] DefinicionBusqueda request)
         {
             // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.Servidor))
-            {
-                return BadRequest(new { error = "Servidor es obligatorio." });
-            }
+            //if (string.IsNullOrWhiteSpace(request.Servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
 
-            var resultadoDefinicionBusqueda = await _definicionGespaInterfaces.ValidateDefinicionBusqueda(request);
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+            {
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+            }
+            var resultadoDefinicionBusqueda = await _definicionGespaInterfaces.ValidateDefinicionBusqueda(request, servidorClaim);
             
             // El método QueryFirstOrDefaultAsync<T> de Dapper devuelve 'null' si no encuentra filas.
             if (resultadoDefinicionBusqueda == null)
@@ -60,12 +66,17 @@ namespace Loki.Mark.Procesos.Gespa.Definicion.Controllers
         public async Task<IActionResult> DefinicionGespa([FromBody] Define request)
         {
             // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.Servidor))
-            {
-                return BadRequest(new { error = "Servidor es obligatorio." });
-            }
+            //if (string.IsNullOrWhiteSpace(request.Servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
-            var resultadoDefinicion = await _definicionGespaInterfaces.ValidateDefinicion(request);
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+            {
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+            }
+            var resultadoDefinicion = await _definicionGespaInterfaces.ValidateDefinicion(request, servidorClaim);
 
             if (string.IsNullOrEmpty(resultadoDefinicion))
             {

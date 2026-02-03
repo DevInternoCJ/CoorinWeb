@@ -27,13 +27,19 @@ namespace Loki.Mark.Procesos.Gespa.Arrepentimientos.Controllers
         )]
         public async Task<IActionResult> ValidateArrepentimientoBusqueda([FromBody]DefinicionBusqueda request)
         {
-            // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.Servidor))
-            {
-                return BadRequest(new { error = "Servidor es obligatorio." });
-            }
+            //// Validación básica: el campo "Servidor" es obligatorio para la autenticación.
+            //if (string.IsNullOrWhiteSpace(request.Servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
 
-            var resultadoArrepentimientoBusqueda = await _arrepentimientosGespaInterfaces.ValidateArrepentimientoBusqueda(request);
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+            {
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+            }
+            var resultadoArrepentimientoBusqueda = await _arrepentimientosGespaInterfaces.ValidateArrepentimientoBusqueda(request, servidorClaim);
 
             if (resultadoArrepentimientoBusqueda != null)
             {
@@ -55,12 +61,18 @@ namespace Loki.Mark.Procesos.Gespa.Arrepentimientos.Controllers
         public async Task<IActionResult> ValidateArrepentimiento([FromBody] Arrepentimiento request)
         {
             // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.Servidor))
+            //if (string.IsNullOrWhiteSpace(request.Servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
             {
-                return BadRequest(new { error = "Servidor es obligatorio." });
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
             }
 
-            var resultadoArrepentimiento = await _arrepentimientosGespaInterfaces.ValidateArrepentimiento(request);
+            var resultadoArrepentimiento = await _arrepentimientosGespaInterfaces.ValidateArrepentimiento(request, servidorClaim);
 
             if(resultadoArrepentimiento == null)
             {

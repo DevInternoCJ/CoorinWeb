@@ -17,10 +17,10 @@ namespace Loki.Mark.Procesos.Gespa.Cargo_en_linea.DAOs
             _daoBase = new DaoBase();
         }
 
-        public async Task<dynamic?> ValidateCargoEnLineaAutorizarBuscar(CargoEnLineaGespaAutorizarBuscar request)
+        public async Task<dynamic?> ValidateCargoEnLineaAutorizarBuscar(CargoEnLineaGespaAutorizarBuscar request, string servidor)
         {
             var tipoBase = "Collection";
-            var servidor = request.servidor;
+            //var servidor = request.servidor;
 
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 
@@ -35,10 +35,10 @@ namespace Loki.Mark.Procesos.Gespa.Cargo_en_linea.DAOs
 
 
         }
-        public async Task<dynamic?> ValidateCargoEnLineaAutorizar(CargoEnLineaAutorizar request)
+        public async Task<dynamic?> ValidateCargoEnLineaAutorizar(CargoEnLineaAutorizar request, string servidor)
         {
             var tipoBase = "Collection";
-            var servidor = request.servidor;
+            //var servidor = request.servidor;
             int idCartera = Convert.ToInt32(request.idCartera);
 
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
@@ -81,10 +81,10 @@ namespace Loki.Mark.Procesos.Gespa.Cargo_en_linea.DAOs
 
         }
 
-        public async Task<dynamic?> ValidateCargoEnLineaCorregirBuscar(CargoEnLineaCorregirBuscar request)
+        public async Task<dynamic?> ValidateCargoEnLineaCorregirBuscar(CargoEnLineaCorregirBuscar request, string servidor)
         {
             var tipoBase = "Collection";
-            var servidor = request.servidor;
+            //var servidor = request.servidor;
 
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 
@@ -100,10 +100,10 @@ namespace Loki.Mark.Procesos.Gespa.Cargo_en_linea.DAOs
 
         }
 
-        public async Task<dynamic?> ValidateCargoEnLineaCorregir(CargoEnLineaCorregir request)
+        public async Task<dynamic?> ValidateCargoEnLineaCorregir(CargoEnLineaCorregir request, string servidor)
         {
             var tipoBase = "Collection";
-            var servidor = request.servidor;
+            //var servidor = request.servidor;
             string vencimiento = request.vencimiento;
             vencimiento = "20" + vencimiento.Substring(3, 2) + "-" + vencimiento.Substring(0, 2) + "-01";
 

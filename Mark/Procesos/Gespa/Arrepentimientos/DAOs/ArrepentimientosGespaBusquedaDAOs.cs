@@ -19,10 +19,10 @@ namespace Loki.Mark.Procesos.Gespa.Arrepentimientos.DAOs
             _daoBase = new DaoBase();
         }
 
-        public async Task<dynamic?> ValidateArrepentimientoBusqueda(DefinicionBusqueda request)
+        public async Task<dynamic?> ValidateArrepentimientoBusqueda(DefinicionBusqueda request, string servidor)
         {
             var tipoBase = "Collection";
-            var servidor = request.Servidor;
+            //var servidor = request.Servidor;
             string busqueda = request.CriterioBusqueda;
 
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
@@ -394,10 +394,10 @@ namespace Loki.Mark.Procesos.Gespa.Arrepentimientos.DAOs
             }
         }
 
-        public async Task<dynamic?> ValidateArrepentimiento(Arrepentimiento request)
+        public async Task<dynamic?> ValidateArrepentimiento(Arrepentimiento request, string servidor)
         {
             var tipoBase = "Collection";
-            var servidor = request.Servidor;
+            //var servidor = request.Servidor;
             string concepto = request.concepto;
 
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);

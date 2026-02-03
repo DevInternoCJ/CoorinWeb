@@ -5,9 +5,8 @@ namespace Loki.Mark.Procesos.Gespa.Definicion.Interfaces
 
     public interface IDefinicionGespaBuscaDAOs
     {
-        Task<dynamic?> ValidateDefinicionBusqueda(DefinicionBusqueda request);
-
-        Task<dynamic?> ValidateDefinicion(Define request);
+        Task<dynamic?> ValidateDefinicionBusqueda(DefinicionBusqueda request, string servidor);
+        Task<dynamic?> ValidateDefinicion(Define request, string servidor);
 
     }
     

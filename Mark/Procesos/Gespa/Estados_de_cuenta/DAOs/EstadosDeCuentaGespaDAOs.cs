@@ -18,10 +18,10 @@ namespace Loki.Mark.Procesos.Gespa.Estados_de_cuenta.DAOs
             _daoBase = new DaoBase();
         }
 
-        public async Task<dynamic?> ValidateEstadosDeCuenta(EstadosDeCuenta request)
+        public async Task<dynamic?> ValidateEstadosDeCuenta(EstadosDeCuenta request, string servidor)
         {
             var tipoBase = "Collection";
-            var servidor = request.servidor;
+            //var servidor = request.servidor;
 
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 
@@ -43,10 +43,10 @@ namespace Loki.Mark.Procesos.Gespa.Estados_de_cuenta.DAOs
         }
 
 
-        public async Task<dynamic?> ValidateEstadosDeCuentaModifica(EstadosDeCuentaGespaModificar request)
+        public async Task<dynamic?> ValidateEstadosDeCuentaModifica(EstadosDeCuentaGespaModificar request, string servidor)
         {
             var tipoBase = "Collection";
-            var servidor = request.servidor;
+            //var servidor = request.servidor;
 
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 

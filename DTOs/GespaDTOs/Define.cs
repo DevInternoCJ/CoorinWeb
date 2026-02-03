@@ -8,7 +8,7 @@
         public string? idSituacion { get; set; }
         public string? idCuenta { get; set; }
         public string? comentario { get; set; }
-        public string? Servidor { get; set; }
+        //public string? Servidor { get; set; }
 
     }
 }

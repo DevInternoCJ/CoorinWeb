@@ -27,12 +27,19 @@ namespace Loki.Mark.Procesos.Gespa.Bloqueo_cuentas.Controllers
         public async Task<IActionResult> ValidateBloqueoCuentasBusqueda([FromBody] BloqueoCuentasBusqueda request)
         {
             // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.servidor))
+            //if (string.IsNullOrWhiteSpace(request.servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
+
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
             {
-                return BadRequest(new { error = "Servidor es obligatorio." });
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
             }
 
-            var resultadoBloqueoCuentasBusqueda = await _bloqueoCuentasGespaInterfaces.ValidateBloqueoCuentasBusqueda(request);
+            var resultadoBloqueoCuentasBusqueda = await _bloqueoCuentasGespaInterfaces.ValidateBloqueoCuentasBusqueda(request, servidorClaim);
             
             if (resultadoBloqueoCuentasBusqueda != null)
             {
@@ -57,12 +64,17 @@ namespace Loki.Mark.Procesos.Gespa.Bloqueo_cuentas.Controllers
         public async Task<IActionResult> ValidateBloqueoCuentas([FromBody] BloqueoCuentasBusqueda request)
         {
             // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.servidor))
-            {
-                return BadRequest(new { error = "Servidor es obligatorio." });
-            }
+            //if (string.IsNullOrWhiteSpace(request.servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
 
-            var resultadoBloqueoCuentas = await _bloqueoCuentasGespaInterfaces.ValidateBloqueoCuentas(request);
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+            {
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+            }
+            var resultadoBloqueoCuentas = await _bloqueoCuentasGespaInterfaces.ValidateBloqueoCuentas(request, servidorClaim);
 
             if(resultadoBloqueoCuentas != null)
             {

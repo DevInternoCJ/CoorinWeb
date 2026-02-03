@@ -22,10 +22,10 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
         }
 
 
-        public async Task<dynamic?> ValidateComentario(ComentariosGespacs request)
+        public async Task<dynamic?> ValidateComentario(ComentariosGespacs request, string servidor)
         {            
             var tipoBase = "Collection";
-            var servidor = request.Servidor;           
+            //var servidor = request.Servidor;           
 
             var sqlConnectionvalida = _dbContFactory.GetSqlConnection(servidor, tipoBase);
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);

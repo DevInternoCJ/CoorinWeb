@@ -29,12 +29,19 @@ namespace Loki.Mark.Procesos.Gespa.Cargo_en_linea.Controllers
         public async Task<dynamic?> ValidateCargoEnLineaAutorizarBuscar([FromBody]CargoEnLineaGespaAutorizarBuscar request)
         {
             // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.servidor))
+            //if (string.IsNullOrWhiteSpace(request.servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
+
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
             {
-                return BadRequest(new { error = "Servidor es obligatorio." });
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
             }
 
-            var resultadoCargoEnLineaAutorizar = await _cargoEnLineaGespaInterfaces.ValidateCargoEnLineaAutorizarBuscar(request);
+            var resultadoCargoEnLineaAutorizar = await _cargoEnLineaGespaInterfaces.ValidateCargoEnLineaAutorizarBuscar(request, servidorClaim);
 
             if(resultadoCargoEnLineaAutorizar != null)
             {
@@ -55,11 +62,18 @@ namespace Loki.Mark.Procesos.Gespa.Cargo_en_linea.Controllers
         public async Task<dynamic?> ValidateCargoEnLineaAutorizar([FromBody] CargoEnLineaAutorizar request)
         {
             // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.servidor))
+            //if (string.IsNullOrWhiteSpace(request.servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
             {
-                return BadRequest(new { error = "Servidor es obligatorio." });
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
             }
-            var resultadoCargoEnLineaAutorizar = await _cargoEnLineaGespaInterfaces.ValidateCargoEnLineaAutorizar(request);
+
+            var resultadoCargoEnLineaAutorizar = await _cargoEnLineaGespaInterfaces.ValidateCargoEnLineaAutorizar(request, servidorClaim);
             if (resultadoCargoEnLineaAutorizar != null)
             {
                 return Ok(new {Mensaje = "Proceso correcto"});
@@ -79,12 +93,19 @@ namespace Loki.Mark.Procesos.Gespa.Cargo_en_linea.Controllers
         public async Task<dynamic?> ValidateCargoEnLineaCorregirBuscar([FromBody] CargoEnLineaCorregirBuscar request)
         {
             // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.servidor))
+            //if (string.IsNullOrWhiteSpace(request.servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
             {
-                return BadRequest(new { error = "Servidor es obligatorio." });
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
             }
 
-            var resultadoCargoEnLineaAutorizar = await _cargoEnLineaGespaInterfaces.ValidateCargoEnLineaCorregirBuscar(request);
+
+            var resultadoCargoEnLineaAutorizar = await _cargoEnLineaGespaInterfaces.ValidateCargoEnLineaCorregirBuscar(request, servidorClaim);
 
             if (resultadoCargoEnLineaAutorizar != null)
             {
@@ -105,11 +126,18 @@ namespace Loki.Mark.Procesos.Gespa.Cargo_en_linea.Controllers
         public async Task<dynamic?> ValidateCargoEnLineaCorregir(CargoEnLineaCorregir request)
         {
             // Validación básica: el campo "Servidor" es obligatorio para la autenticación.
-            if (string.IsNullOrWhiteSpace(request.servidor))
+            //if (string.IsNullOrWhiteSpace(request.servidor))
+            //{
+            //    return BadRequest(new { error = "Servidor es obligatorio." });
+            //}
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
             {
-                return BadRequest(new { error = "Servidor es obligatorio." });
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
             }
-            var resultadoCargoEnLineaCorregir = await _cargoEnLineaGespaInterfaces.ValidateCargoEnLineaCorregir(request);
+
+            var resultadoCargoEnLineaCorregir = await _cargoEnLineaGespaInterfaces.ValidateCargoEnLineaCorregir(request, servidorClaim);
             if (resultadoCargoEnLineaCorregir == 1)
             {
                 return Ok(new { Mensaje = "Actualizacion realizada con éxito." });
