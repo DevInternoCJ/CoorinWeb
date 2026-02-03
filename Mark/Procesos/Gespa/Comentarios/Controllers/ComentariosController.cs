@@ -59,6 +59,35 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.Controllers
 
             return BadRequest(new { Mensaje = "La cuenta no existe." });
         }
+        [HttpPost("insertar-expediente")]
 
+        [HttpPost("modificar")]
+        [AllowAnonymous]
+        [SwaggerOperation(
+            Summary = "Insertar por Expediente - Irene",
+            Description = "Inserta comentario por expediente."
+        )]
+        public async Task<IActionResult> InsertarExpediente([FromBody] ComentariosGespacs request)
+        {
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            // Extraemos la cartera asignada al ejecutivo desde el token/claim
+            int idCarteraEjecutivo = int.Parse(User.FindFirst("idCartera")?.Value ?? "0");
+
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+                return BadRequest(new { error = "No se encontró el servidor en el token." });
+
+            if (string.IsNullOrWhiteSpace(request.Comentario))
+                return BadRequest(new { error = "El comentario es obligatorio." });
+
+            // Ejecutar lógica del DAO
+            var resultado = await _comentariosGespaInterfaces.InsertarPorExpediente(request, servidorClaim, idCarteraEjecutivo);
+
+            if (resultado.Success)
+            {
+                return Ok(new { Mensaje = resultado.Mensaje });
+            }
+
+            return BadRequest(new { Mensaje = resultado.Mensaje });
+        }
     }
 }

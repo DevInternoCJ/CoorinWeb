@@ -85,5 +85,71 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
             }
            
         }
+        public async Task<dynamic> InsertarPorExpediente(ComentariosGespacs request, string servidor, int idCarteraEjecutivo)
+        {
+            var tipoBase = "Collection";
+            using var conn = _dbContFactory.GetSqlConnection(servidor, tipoBase);
+
+            // --- LÓGICA DE BUSCAEXPEDIENTE ---
+
+            // 1. Valida largo del expediente
+            if (request.idCuenta.Length <= 3)
+                return new { Success = false, Mensaje = "El expediente es demasiado corto" };
+
+            // 2. Valida número de expediente (Parsing de los últimos caracteres)
+            string parteNumerica = request.idCuenta.Substring(3).Replace("A", "").Replace("E", "");
+            if (!int.TryParse(parteNumerica, out int numeroExpediente) || numeroExpediente == 0)
+                return new { Success = false, Mensaje = "El número de expediente es inválido." };
+
+            // 3. Valida existencia en DB
+            // Nota: Se usa la abreviatura (primeros 3) y el número parseado
+            string abreviacion = request.idCuenta.Substring(0, 3);
+
+            var queryBusca = @"SELECT C.idCartera, C.idCuenta, C.NombreDeudor 
+                       FROM dbCollection..Cuentas C (NOLOCK)
+                       INNER JOIN dbCollection..Carteras Car ON Car.Abreviación = @Abreviacion
+                       WHERE C.Expediente = @Expediente";
+
+            var cuenta = await conn.QueryFirstOrDefaultAsync<dynamic>(queryBusca, new
+            {
+                Abreviacion = abreviacion,
+                Expediente = numeroExpediente
+            });
+
+            if (cuenta == null)
+                return new { Success = false, Mensaje = "El expediente no existe." };
+
+            int idCarteraDb = (int)cuenta.idCartera;
+            string idCuentaDb = cuenta.idCuenta.ToString();
+
+            // 4. Valida cartera asignada (Equivale a ValidaCartera = true en el legacy)
+            if (idCarteraEjecutivo != 0 && idCarteraDb != idCarteraEjecutivo)
+                return new { Success = false, Mensaje = "El expediente no corresponde a la cartera que está asignado." };
+
+            // --- LÓGICA DE INSERCIÓN ---
+
+            string sQuery = "";
+            if (request.situacion == 1)
+            {
+                sQuery += @"UPDATE dbCollection.dbo.Cuentas 
+                    SET idSituación = @idSituacion, Fecha_Update = GETDATE() 
+                    WHERE idCartera = @idCartera AND idCuenta = @idCuenta; ";
+            }
+
+            sQuery += @"INSERT INTO dbCollection..Comentarios 
+                (idCuenta, idCartera, Fecha_Insert, Segundo_Insert, idEjecutivo, Comentario) 
+                VALUES (@idCuenta, @idCartera, GETDATE(), GETDATE(), @idEjecutivo, @Comentario)";
+
+            var affectedRows = await conn.ExecuteAsync(sQuery, new
+            {
+                idCuenta = idCuentaDb,
+                idCartera = idCarteraDb,
+                idSituacion = request.idSituacion,
+                idEjecutivo = request.idEjecutivo,
+                Comentario = request.Comentario
+            });
+
+            return new { Success = affectedRows > 0, Mensaje = affectedRows > 0 ? "Comentario insertado con éxito." : "Falló al insertar comentario." };
+        }
     }
 }
