@@ -6,6 +6,8 @@ using Loki.Mark.Procesos.Gespa.Comentarios.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Data;
+
 
 namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
 {
@@ -150,6 +152,95 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
             });
 
             return new { Success = affectedRows > 0, Mensaje = affectedRows > 0 ? "Comentario insertado con éxito." : "Falló al insertar comentario." };
+        }
+        public async Task<CargaComentariosResponse> CargaAccionamientosAsync(DataTable tabla, int idCartera, int idEjecutivo, string servidor)
+        {
+            string baseName = "dbComplemento";
+            string schema = "Temp";
+            // Siguiendo tu nomenclatura: Com_ + ID
+            string tempTable = $"Com_{idEjecutivo}";
+            string tableQuoted = $"[{baseName}].[{schema}].[{tempTable}]";
+
+            using var conn = _dbContFactory.GetSqlConnection(servidor, "Collection");
+            await conn.OpenAsync();
+
+            try
+            {
+                // 1. Borrar tabla si existe de una ejecución previa
+                await conn.ExecuteAsync($"IF OBJECT_ID('{tableQuoted}', 'U') IS NOT NULL DROP TABLE {tableQuoted};");
+
+                // 2. CREAR TABLA DINÁMICA (Mapeando columnas del Excel/DataTable)
+                string sqlCreate = $"CREATE TABLE {tableQuoted} ( ";
+                foreach (DataColumn col in tabla.Columns)
+                {
+                    // Mantenemos lógica de tipos de datos
+                    string tipo = (col.ColumnName.Contains("Fecha") || col.ColumnName.Contains("Segundo"))
+                        ? "DATETIME NULL" : "VARCHAR(8000) NULL";
+
+                    sqlCreate += $"\r\n [{col.ColumnName}] {tipo},";
+                }
+                // Agregamos columna idEjecutivo si no viene en el Excel para el SP
+                if (!tabla.Columns.Contains("idEjecutivo"))
+                    sqlCreate += "\r\n [idEjecutivo] INT NULL,";
+
+                sqlCreate += "\r\n idRegistro INT NOT NULL IDENTITY(1,1) PRIMARY KEY );";
+                await conn.ExecuteAsync(sqlCreate);
+
+                using var trx = conn.BeginTransaction();
+                try
+                {
+                    // 3. BULK COPY
+                    using (var bulk = new SqlBulkCopy((SqlConnection)conn, SqlBulkCopyOptions.Default, (SqlTransaction)trx))
+                    {
+                        bulk.DestinationTableName = tableQuoted;
+                        bulk.BulkCopyTimeout = 600;
+                        foreach (DataColumn col in tabla.Columns)
+                            bulk.ColumnMappings.Add(col.ColumnName, col.ColumnName);
+
+                        await bulk.WriteToServerAsync(tabla);
+                    }
+
+                    // 4. EJECUTAR STORED PROCEDURE FINAL (El del legacy)
+                    // Nota: Tu legacy pasaba @idEjecutivo e @idCartera
+                    var erroresSp = (await conn.QueryAsync<dynamic>(
+                        $@"EXEC {baseName}.dbo.[1.3.1.InsertaComentarios] @idEjecutivo, @idCartera",
+                        new { idEjecutivo, idCartera },
+                        transaction: trx
+                    )).ToList();
+
+                    int totalRecords = tabla.Rows.Count;
+                    int totalErrores = erroresSp.Count;
+                    int insertadosRealmente = totalRecords - totalErrores;
+
+                    // 5. LIMPIEZA FINAL
+                    await conn.ExecuteAsync($"IF OBJECT_ID('{tableQuoted}', 'U') IS NOT NULL DROP TABLE {tableQuoted};", transaction: trx);
+
+                    trx.Commit();
+
+                    return new CargaComentariosResponse
+                    {
+                        Success = totalErrores == 0,
+                        Total = totalRecords,
+                        Insertados = insertadosRealmente,
+                        Incorrectos = totalErrores,
+                        Errores = erroresSp,
+                        Message = totalErrores == 0 ? "Carga masiva completada." : $"Se procesaron {insertadosRealmente} y fallaron {totalErrores}."
+                    };
+                }
+                catch (Exception)
+                {
+                    if (trx.Connection != null) trx.Rollback();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                return new CargaComentariosResponse
+                {
+                    Success = false,
+                    Message = $"Error Crítico: {ex.Message}"
+                };
+            }
         }
     }
 }

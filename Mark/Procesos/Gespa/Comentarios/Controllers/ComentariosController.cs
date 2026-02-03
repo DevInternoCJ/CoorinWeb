@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Drawing.Diagrams;
+using ExcelDataReader;
 using Loki.DTOs.GespaDTOs;
 using Loki.Mark.Auth.Controllers;
 using Loki.Mark.Procesos.Gespa.Comentarios.Interfaces;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Data;
 
 namespace Loki.Mark.Procesos.Gespa.Comentarios.Controllers
 {
@@ -60,9 +62,6 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.Controllers
             return BadRequest(new { Mensaje = "La cuenta no existe." });
         }
         [HttpPost("insertar-expediente")]
-
-        [HttpPost("modificar")]
-        [AllowAnonymous]
         [SwaggerOperation(
             Summary = "Insertar por Expediente - Irene",
             Description = "Inserta comentario por expediente."
@@ -88,6 +87,58 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.Controllers
             }
 
             return BadRequest(new { Mensaje = resultado.Mensaje });
+        }
+
+
+        [HttpPost("carga-accionamientos")]
+        [SwaggerOperation(
+             Summary = "Carga Accionamientos - Irene",
+             Description = "Endpoint para subir un archivo Excel (.xlsx) y procesar comentarios masivos."
+         )]
+        public async Task<IActionResult> CargaAccionamientos(IFormFile archivo, [FromQuery] int idCartera)
+        {
+            // 1. Validaciones de Identidad (Claims)
+            string? servidorClaim = User.FindFirst("Servidor")?.Value;
+            if (string.IsNullOrWhiteSpace(servidorClaim))
+            {
+                return BadRequest(new { error = "No se encontró el claim 'Servidor' en el token." });
+            }
+
+            int idEjecutivo = int.Parse(User.FindFirst("idEjecutivo")?.Value ?? "0");
+
+            // 2. Validación del Archivo
+            if (archivo == null || archivo.Length == 0)
+            {
+                return BadRequest("Por favor, seleccione un archivo Excel válido.");
+            }
+
+            // 3. Convertir el archivo subido a DataTable
+            DataTable tabla = new DataTable();
+            try
+            {
+                using (var stream = archivo.OpenReadStream())
+                {
+                    // Usamos ExcelDataReader para leer el Stream
+                    using (var reader = ExcelReaderFactory.CreateReader(stream))
+                    {
+                        var result = reader.AsDataSet(new ExcelDataSetConfiguration()
+                        {
+                            ConfigureDataTable = (_) => new ExcelDataTableConfiguration() { UseHeaderRow = true }
+                        });
+                        tabla = result.Tables[0];
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = "Error al leer el formato del archivo Excel", detalle = ex.Message });
+            }
+
+            // 4. Llamar al DAO con el DataTable resultante
+            // Tu método CargaAccionamientosAsync ya recibe el DataTable y hace el BulkCopy
+            var resultCarga = await _comentariosGespaInterfaces.CargaAccionamientosAsync(tabla, idCartera, idEjecutivo, servidorClaim);
+
+            return resultCarga.Success ? Ok(resultCarga) : BadRequest(resultCarga);
         }
     }
 }

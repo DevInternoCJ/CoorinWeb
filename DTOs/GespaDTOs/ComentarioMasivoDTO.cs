@@ -2,10 +2,18 @@
 {
     public class ComentarioMasivoDTO
     {
-        public string Cuenta { get; set; }      // Columna 0
-        public string Fecha { get; set; }       // Columna 1
-        public string Segundo_insert { get; set; } // Columna 2
-        public int idEjecutivo { get; set; }    // Columna 3
+        public string Cuenta { get; set; }
+
+        // Columna 1 en tu Excel: Fecha
+        public string Fecha { get; set; }
+
+        // Columna 2 en tu Excel: Segundo_insert
+        public string Segundo_insert { get; set; }
+
+        // Columna 3 en tu Excel: idEjecutivo
+        public int idEjecutivo { get; set; }
+
+        // Columna 4 en tu Excel: Comentario
         public string Comentario { get; set; }
     }
 }
