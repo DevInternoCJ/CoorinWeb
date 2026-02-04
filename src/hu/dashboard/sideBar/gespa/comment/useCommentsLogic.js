@@ -1,7 +1,7 @@
 // useCommentsLogic.js
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { PostComments, getCatalogoValueCard } from "../../../../../services/mark/Orochi/LokiServices";
+import { PostComments, getCatalogoValueCard, UpdateComments, InserExpedientComments} from "../../../../../services/mark/Orochi/LokiServices";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
 
 const VIEW_TYPES = Object.freeze({ ADD: "add", LIST: "list" });
@@ -110,7 +110,9 @@ export const useSaveComment = ({
   form,  //   CAMBIO: Recibir form directamente
   situationOptions, 
   onSaveComment, 
-  idCartera = 1, 
+  idCartera = 1,
+  // Nuevo: indicar si el checkbox "Cambiar situacion" está activo (true) o no (false)
+  changeSituationActive = false,
 } = {}) => {
   const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;
@@ -135,16 +137,32 @@ export const useSaveComment = ({
     }
 
     const selectedId = form.selectedSituation || null;
-    const selectedOpt = selectedId
-      ? situationOptions.find((o) => String(o.value) === String(selectedId))
-      : null;
+
+    // Normalizar tipos antes de comparar: `opt.value` puede ser Number mientras que
+    // `selectedId` viene como string desde el control. Usar String(...) evita falsos negativos.
+    // Solo validar la situación si el checkbox "Cambiar situacion" está activo.
+    if (changeSituationActive) {
+      const isValidSituation = situationOptions.some(
+        (opt) => String(opt.value) === String(selectedId),
+      );
+
+      if (selectedId && !isValidSituation) {
+        toast.error("La situación seleccionada no es válida.");
+        return false;
+      }
+    }
 
     const payload = {
-      situacion: selectedOpt ? selectedOpt.label : null,
-      idSituacion: selectedId ? (isNaN(Number(selectedId)) ? selectedId : Number(selectedId)) : null,
+      // La especificación nueva pide que 'situacion' sea 0 cuando el checkbox NO está seleccionado,
+      // y 1 cuando SÍ está seleccionado.
+      situacion: changeSituationActive ? 1 : 0,
+      // idSituacion mantiene el id específico seleccionado (o null si no hay uno)
+      idSituacion: changeSituationActive
+        ? (selectedId ? (isNaN(Number(selectedId)) ? selectedId : Number(selectedId)) : null)
+        : 0,
       idCartera: idCartera || null,
       // normalizar idCuenta: si es un número en string, enviarlo como Number
-      idCuenta: form.searchValue ? (isNaN(Number(form.searchValue)) ? form.searchValue : Number(form.searchValue)) : null,
+      idCuenta: form.searchValue || null,
       comentario: form.commentText || null,
       idEjecutivo: idEjecutivo || null,
 
@@ -153,8 +171,17 @@ export const useSaveComment = ({
     console.log("Payload completo para guardar:", payload);
     
     try {
-      const resp = await PostComments(payload);
-      toast.success("Comentario guardado correctamente");
+      let resp;
+      // Si la cartera seleccionada es 'expediente', usar el servicio específico
+      if (String(form.selectedWallet).toLowerCase() === "expediente") {
+        payload.esExpediente = true;
+        resp = await InserExpedientComments(payload);
+        toast.success("Comentario insertado correctamente (expediente)");
+      } else {
+        resp = await UpdateComments(payload);
+        toast.success("Comentario actualizado correctamente");
+      }
+
       if (onSaveComment) onSaveComment(form, resp);
       form.resetForm();
       return resp ?? true;
@@ -190,11 +217,12 @@ export const useSaveComment = ({
       return false;
     }
   }, [
-    form,  //   CAMBIO: Cambiar formRef a form en las dependencias
-    situationOptions, 
-    onSaveComment, 
-    idCartera, 
-    idEjecutivo, 
+    form, // CAMBIO: Cambiar formRef a form en las dependencias
+    situationOptions,
+    onSaveComment,
+    idCartera,
+    idEjecutivo,
+    changeSituationActive,
   ]);
 
   return { handleSave };

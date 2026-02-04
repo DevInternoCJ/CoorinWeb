@@ -167,6 +167,8 @@ const Comments = ({ onClose, onSaveComment }) => {
     form: form,
     situationOptions,
     onSaveComment,
+    // Pasar si el checkbox "Cambiar situacion" está activo
+    changeSituationActive: activeView === VIEW_TYPES.ADD,
   });
 
   // estados de archivo (gestionados aquí; la previsualización la renderiza PreviewRenderer)

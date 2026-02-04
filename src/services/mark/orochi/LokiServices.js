@@ -2379,9 +2379,9 @@ export const PostComments = async (data) => {
       throw new Error('No hay token de autenticación disponible.');
     }
 
-    console.log('  /Scripts/guardar', data);   
+    console.log('/Comentarios/insertar-expediente', data);   
     const response = await api.post(
-      `/Scripts/guardar`,data
+      `/Comentarios/insertar-expediente`,data
     );  
     console.log('  Respuesta:', response.data);
     return response.data;
@@ -2918,6 +2918,44 @@ export const getSuperInfoExcel = async (idCartera, fechaDesde, fechaHasta) => {
     } else {
       console.error('Error al configurar la solicitud:', error.message);
     }
+    throw error;
+  }
+};
+
+export const UpdateComments = async (data) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+
+    console.log('/Comentarios/modificar', data);   
+    const response = await api.post(
+      `/Comentarios/modificar`,data
+    );  
+    console.log('  Respuesta:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error(' Error:', error);
+    throw error;
+  }
+};
+
+export const InserExpedientComments = async (data) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+
+    console.log('/Comentarios/insertar-expediente', data);   
+    const response = await api.post(
+      `/Comentarios/insertar-expediente`,data
+    );  
+    console.log('  Respuesta:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error(' Error:', error);
     throw error;
   }
 };
