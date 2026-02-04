@@ -96,7 +96,6 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
             string idCuentaDb = "";
             int idCarteraDb = 0;
 
-            // 1. LÓGICA DE BÚSQUEDA Y VALIDACIÓN (Expediente vs Cuenta)
             if (request.EsExpediente)
             {
                 if (request.IdCuenta.Length <= 3)
@@ -167,7 +166,6 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
         {
             string baseName = "dbComplemento";
             string schema = "Temp";
-            // Siguiendo tu nomenclatura: Com_ + ID
             string tempTable = $"Com_{idEjecutivo}";
             string tableQuoted = $"[{baseName}].[{schema}].[{tempTable}]";
 
@@ -176,20 +174,16 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
 
             try
             {
-                // 1. Borrar tabla si existe de una ejecución previa
                 await conn.ExecuteAsync($"IF OBJECT_ID('{tableQuoted}', 'U') IS NOT NULL DROP TABLE {tableQuoted};");
 
-                // 2. CREAR TABLA DINÁMICA (Mapeando columnas del Excel/DataTable)
                 string sqlCreate = $"CREATE TABLE {tableQuoted} ( ";
                 foreach (DataColumn col in tabla.Columns)
                 {
-                    // Mantenemos lógica de tipos de datos
                     string tipo = (col.ColumnName.Contains("Fecha") || col.ColumnName.Contains("Segundo"))
                         ? "DATETIME NULL" : "VARCHAR(8000) NULL";
 
                     sqlCreate += $"\r\n [{col.ColumnName}] {tipo},";
                 }
-                // Agregamos columna idEjecutivo si no viene en el Excel para el SP
                 if (!tabla.Columns.Contains("idEjecutivo"))
                     sqlCreate += "\r\n [idEjecutivo] INT NULL,";
 
@@ -199,7 +193,6 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
                 using var trx = conn.BeginTransaction();
                 try
                 {
-                    // 3. BULK COPY
                     using (var bulk = new SqlBulkCopy((SqlConnection)conn, SqlBulkCopyOptions.Default, (SqlTransaction)trx))
                     {
                         bulk.DestinationTableName = tableQuoted;
@@ -210,8 +203,7 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
                         await bulk.WriteToServerAsync(tabla);
                     }
 
-                    // 4. EJECUTAR STORED PROCEDURE FINAL (El del legacy)
-                    // Nota: Tu legacy pasaba @idEjecutivo e @idCartera
+
                     var erroresSp = (await conn.QueryAsync<dynamic>(
                         $@"EXEC {baseName}.dbo.[1.3.1.InsertaComentarios] @idEjecutivo, @idCartera",
                         new { idEjecutivo, idCartera },
@@ -222,7 +214,6 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
                     int totalErrores = erroresSp.Count;
                     int insertadosRealmente = totalRecords - totalErrores;
 
-                    // 5. LIMPIEZA FINAL
                     await conn.ExecuteAsync($"IF OBJECT_ID('{tableQuoted}', 'U') IS NOT NULL DROP TABLE {tableQuoted};", transaction: trx);
 
                     trx.Commit();
