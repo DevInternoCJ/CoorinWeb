@@ -8,6 +8,7 @@ import {
   ResetPassword,
 } from "../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
+import { useUserStore } from "../../../../contextGlobal/userStore";
 
 // Tabla de sesiones
 const TablaSesiones = ({ selectedExecutiveId }) => {
@@ -42,10 +43,19 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
     }
   };
 
-  // Obtener el idEjecutivo del usuario logueado desde localStorage
-  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+  // Obtener el idEjecutivo del usuario logueado: preferir el store (sessionStorage),
+  // fallback a sessionStorage y luego a localStorage para compatibilidad.
+  const storeUser = useUserStore((state) => state.user);
+  const persistedSession =
+    storeUser ||
+    JSON.parse(sessionStorage.getItem("userData") || "null") ||
+    JSON.parse(localStorage.getItem("userData") || "null");
+
   const idEjecutivoSesion =
-    userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+    persistedSession?.idEjecutivo ||
+    persistedSession?.idejecutivo ||
+    persistedSession?.id ||
+    null;
 
   // Función para manejar el logout del ejecutivo
   const handleLogoutExecutive = async (rowIdEjecutivo) => {

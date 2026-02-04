@@ -111,7 +111,6 @@ export const useSaveComment = ({
   situationOptions, 
   onSaveComment, 
   idCartera = 1, 
-  servidor = "Orochi" 
 } = {}) => {
   const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;
@@ -148,7 +147,7 @@ export const useSaveComment = ({
       idCuenta: form.searchValue ? (isNaN(Number(form.searchValue)) ? form.searchValue : Number(form.searchValue)) : null,
       comentario: form.commentText || null,
       idEjecutivo: idEjecutivo || null,
-      servidor: servidor || null,
+
     };
     
     console.log("Payload completo para guardar:", payload);
@@ -196,7 +195,6 @@ export const useSaveComment = ({
     onSaveComment, 
     idCartera, 
     idEjecutivo, 
-    servidor
   ]);
 
   return { handleSave };
