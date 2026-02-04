@@ -4,12 +4,20 @@ namespace Loki.DTOs.GespaDTOs
 {
     public class InsertaExpediente
     {
-        public string idCuenta { get; set; } // En este caso recibirá el "sExpediente"
-        public int idCartera { get; set; }
-        public string Comentario { get; set; }
-        public int idEjecutivo { get; set; }
-        public int situacion { get; set; } // 1 para true, 0 para false (según tu código previo)
-        public int idSituacion { get; set; }
+        [Required]
+        public string IdCuenta { get; set; } = string.Empty; // Recibe el expediente (ej: "BAN12345")
+
+        public int IdCartera { get; set; }
+
+        [Required]
+        public string Comentario { get; set; } = string.Empty;
+
+        public int IdEjecutivo { get; set; }
+
+        public int Situacion { get; set; } // 1 para actualizar situación
+
+        public int IdSituacion { get; set; }
+
         public bool EsExpediente { get; set; }
     }
 }

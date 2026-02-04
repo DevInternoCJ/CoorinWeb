@@ -7,6 +7,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Data;
+using System.Text.RegularExpressions;
 
 
 namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
@@ -87,72 +88,81 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
             }
            
         }
-        public async Task<dynamic> InsertarPorExpediente(ComentariosGespacs request, string servidor, int idCarteraEjecutivo)
+        public async Task<dynamic> InsertarPorExpediente(InsertaExpediente request, string servidor, int idCarteraEjecutivo)
         {
             var tipoBase = "Collection";
             using var conn = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 
-            // --- LÓGICA DE BUSCAEXPEDIENTE ---
+            string idCuentaDb = "";
+            int idCarteraDb = 0;
 
-            // 1. Valida largo del expediente
-            if (request.idCuenta.Length <= 3)
-                return new { Success = false, Mensaje = "El expediente es demasiado corto" };
-
-            // 2. Valida número de expediente (Parsing de los últimos caracteres)
-            string parteNumerica = request.idCuenta.Substring(3).Replace("A", "").Replace("E", "");
-            if (!int.TryParse(parteNumerica, out int numeroExpediente) || numeroExpediente == 0)
-                return new { Success = false, Mensaje = "El número de expediente es inválido." };
-
-            // 3. Valida existencia en DB
-            // Nota: Se usa la abreviatura (primeros 3) y el número parseado
-            string abreviacion = request.idCuenta.Substring(0, 3);
-
-            var queryBusca = @"SELECT C.idCartera, C.idCuenta, C.NombreDeudor 
-                       FROM dbCollection..Cuentas C (NOLOCK)
-                       INNER JOIN dbCollection..Carteras Car ON Car.Abreviación = @Abreviacion
-                       WHERE C.Expediente = @Expediente";
-
-            var cuenta = await conn.QueryFirstOrDefaultAsync<dynamic>(queryBusca, new
+            // 1. LÓGICA DE BÚSQUEDA Y VALIDACIÓN (Expediente vs Cuenta)
+            if (request.EsExpediente)
             {
-                Abreviacion = abreviacion,
-                Expediente = numeroExpediente
-            });
+                if (request.IdCuenta.Length <= 3)
+                    return new { Success = false, Mensaje = "El expediente es demasiado corto" };
 
-            if (cuenta == null)
-                return new { Success = false, Mensaje = "El expediente no existe." };
+                string parteLimpia = request.IdCuenta.Substring(3).Replace("A", "").Replace("E", "").Trim();
+                if (!int.TryParse(parteLimpia, out int numeroExpediente) || numeroExpediente == 0)
+                    return new { Success = false, Mensaje = "El número de expediente es inválido." };
 
-            int idCarteraDb = (int)cuenta.idCartera;
-            string idCuentaDb = cuenta.idCuenta.ToString();
+                string abreviacion = request.IdCuenta.Substring(0, 3);
 
-            // 4. Valida cartera asignada (Equivale a ValidaCartera = true en el legacy)
+                var queryBusca = @"
+                SELECT C.idCartera, C.idCuenta 
+                FROM dbCollection..Cuentas C (NOLOCK) 
+                INNER JOIN dbCollection..Carteras Car (NOLOCK) ON Car.Abreviación = @Abreviacion
+                WHERE C.Expediente = @Expediente";
+
+                var tblCuenta = await conn.QueryFirstOrDefaultAsync<dynamic>(queryBusca, new
+                {
+                    Abreviacion = abreviacion,
+                    Expediente = numeroExpediente
+                });
+
+                if (tblCuenta == null) return new { Success = false, Mensaje = "El expediente no existe." };
+
+                idCarteraDb = (int)tblCuenta.idCartera;
+                idCuentaDb = tblCuenta.idCuenta.ToString();
+            }
+            else
+            {
+                var queryDirecta = "SELECT idCartera, idCuenta FROM dbCollection..Cuentas (NOLOCK) WHERE idCuenta = @IdCuenta";
+                var tblCuenta = await conn.QueryFirstOrDefaultAsync<dynamic>(queryDirecta, new { IdCuenta = request.IdCuenta.Trim() });
+
+                if (tblCuenta == null) return new { Success = false, Mensaje = "La cuenta no existe." };
+
+                idCarteraDb = (int)tblCuenta.idCartera;
+                idCuentaDb = tblCuenta.idCuenta.ToString();
+            }
+
             if (idCarteraEjecutivo != 0 && idCarteraDb != idCarteraEjecutivo)
                 return new { Success = false, Mensaje = "El expediente no corresponde a la cartera que está asignado." };
 
-            // --- LÓGICA DE INSERCIÓN ---
+            string comentarioProcesado = ValidaComentario(request.Comentario);
 
             string sQuery = "";
-            if (request.situacion == 1)
+            if (request.Situacion == 1)
             {
-                sQuery += @"UPDATE dbCollection.dbo.Cuentas 
-                    SET idSituación = @idSituacion, Fecha_Update = GETDATE() 
+                sQuery += @"UPDATE dbCollection.dbo.Cuentas SET idSituación = @idSituacion, Fecha_Update = GETDATE() 
                     WHERE idCartera = @idCartera AND idCuenta = @idCuenta; ";
             }
 
-            sQuery += @"INSERT INTO dbCollection..Comentarios 
-                (idCuenta, idCartera, Fecha_Insert, Segundo_Insert, idEjecutivo, Comentario) 
+            sQuery += @"INSERT INTO dbCollection..Comentarios (idCuenta, idCartera, Fecha_Insert, Segundo_Insert, idEjecutivo, Comentario) 
                 VALUES (@idCuenta, @idCartera, GETDATE(), GETDATE(), @idEjecutivo, @Comentario)";
 
             var affectedRows = await conn.ExecuteAsync(sQuery, new
             {
                 idCuenta = idCuentaDb,
                 idCartera = idCarteraDb,
-                idSituacion = request.idSituacion,
-                idEjecutivo = request.idEjecutivo,
-                Comentario = request.Comentario
+                idSituacion = request.IdSituacion,
+                idEjecutivo = request.IdEjecutivo,
+                Comentario = comentarioProcesado 
             });
 
-            return new { Success = affectedRows > 0, Mensaje = affectedRows > 0 ? "Comentario insertado con éxito." : "Falló al insertar comentario." };
+            return new { Success = affectedRows > 0, Mensaje = affectedRows > 0 ? "Comentario insertado con éxito." : "Error al insertar." };
         }
+        
         public async Task<CargaComentariosResponse> CargaAccionamientosAsync(DataTable tabla, int idCartera, int idEjecutivo, string servidor)
         {
             string baseName = "dbComplemento";
@@ -242,5 +252,51 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.DAOs
                 };
             }
         }
+
+        #region Auxiliar
+        private string ValidaComentario(string sComentario)
+        {
+            if (string.IsNullOrEmpty(sComentario)) return "";
+
+            string sComentarioOriginal = sComentario, sTelefonoSinModificar = "", sTelefonoModificado = "";
+            int iContador = 0;
+            Regex validador = new Regex("^([+\\d!/!\\\\$*!#%&/()=?¡_<>{}]|-)");
+
+            for (int i = 0; i < sComentario.Length; i++)
+            {
+                char s = sComentario[i];
+                if (validador.IsMatch(s.ToString()) || char.IsWhiteSpace(s))
+                {
+                    sTelefonoSinModificar += s;
+                    if (char.IsNumber(s))
+                        iContador++;
+                }
+
+                if ((!validador.IsMatch(s.ToString()) && !char.IsWhiteSpace(s)) || i == sComentario.Length - 1)
+                {
+                    if (iContador >= 10)
+                    {
+                        sTelefonoModificado = " " + sTelefonoSinModificar.Replace(" ", "") + " ";
+                        sTelefonoModificado = sTelefonoModificado.Replace("-", "");
+                        sTelefonoModificado = Regex.Replace(sTelefonoModificado, "[+|-|/|\\\\|!|#|$|%|&|/|(|)|=|?|¡'|¿|*|$|<|>|_|;|:|[|]|{|}|]", "");
+
+                        if (sTelefonoModificado.Length >= 5)
+                        {
+                            sComentarioOriginal = sComentarioOriginal.Replace(sTelefonoSinModificar, " XXXX-" + sTelefonoModificado.Substring(sTelefonoModificado.Length - 5, 4) + " ");
+                        }
+
+                        iContador = 0;
+                        sTelefonoSinModificar = "";
+                    }
+                    if (iContador < 10)
+                    {
+                        iContador = 0;
+                        sTelefonoSinModificar = "";
+                    }
+                }
+            }
+            return sComentarioOriginal;
+        }
+        #endregion
     }
 }

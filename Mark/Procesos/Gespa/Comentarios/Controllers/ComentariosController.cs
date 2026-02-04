@@ -64,21 +64,22 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.Controllers
         [HttpPost("insertar-expediente")]
         [SwaggerOperation(
             Summary = "Insertar por Expediente - Irene",
-            Description = "Inserta comentario por expediente."
+            Description = "Inserta comentario por expediente, Situación : 0 para insertar y Situación: 1 para actualizar"
         )]
-        public async Task<IActionResult> InsertarExpediente([FromBody] ComentariosGespacs request)
+        public async Task<IActionResult> InsertarExpediente([FromBody] InsertaExpediente request)
         {
             string? servidorClaim = User.FindFirst("Servidor")?.Value;
-            // Extraemos la cartera asignada al ejecutivo desde el token/claim
             int idCarteraEjecutivo = int.Parse(User.FindFirst("idCartera")?.Value ?? "0");
 
             if (string.IsNullOrWhiteSpace(servidorClaim))
                 return BadRequest(new { error = "No se encontró el servidor en el token." });
 
-            if (string.IsNullOrWhiteSpace(request.Comentario))
+            if (request == null || string.IsNullOrWhiteSpace(request.Comentario))
                 return BadRequest(new { error = "El comentario es obligatorio." });
 
-            // Ejecutar lógica del DAO
+            if (string.IsNullOrWhiteSpace(request.IdCuenta))
+                return BadRequest(new { error = "El expediente/cuenta es obligatorio." });
+
             var resultado = await _comentariosGespaInterfaces.InsertarPorExpediente(request, servidorClaim, idCarteraEjecutivo);
 
             if (resultado.Success)
@@ -88,7 +89,6 @@ namespace Loki.Mark.Procesos.Gespa.Comentarios.Controllers
 
             return BadRequest(new { Mensaje = resultado.Mensaje });
         }
-
 
         [HttpPost("carga-accionamientos")]
         [SwaggerOperation(
