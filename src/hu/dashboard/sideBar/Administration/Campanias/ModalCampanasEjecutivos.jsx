@@ -8,16 +8,19 @@ import { toast } from "sonner";
 
 const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
   const [executiveTree, setExecutiveTree] = useState([]);
-  const [loadingRow, setLoadingRow] = useState(null); // Para mostrar loading en el row
+  const [loadingRow, setLoadingRow] = useState(null);
+  const [loadingRestantes, setLoadingRestantes] = useState(false);
 
   useEffect(() => {
     const fetchExecutives = async () => {
       try {
         const userData = JSON.parse(localStorage.getItem("userData"));
         const idEjecutivo = userData?.idEjecutivo;
-        if (!idEjecutivo) return;
+        if (!idEjecutivo) {
+          console.warn("No se encontró idEjecutivo en userData");
+          return;
+        }
         const data = await obetenerJerarquiaEncargados(idEjecutivo);
-        // Mapeo: estructura completa según el endpoint
         const mapped = Array.isArray(data)
           ? data.map((e) => ({
               usuario: e.usuario || e.Usuario || "",
@@ -33,10 +36,10 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
           : [];
 
         console.log("Ejecutivos cargados del endpoint:", mapped.length);
-        console.log("Estructura de datos:", mapped.slice(0, 2)); // Mostrar primeros 2 para debug
         setExecutiveTree(mapped);
       } catch (error) {
         console.error("Error al cargar ejecutivos:", error);
+        toast.error("Error al cargar la lista de ejecutivos");
         setExecutiveTree([]);
       }
     };
@@ -45,51 +48,91 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
 
   // Consumir UsuarioRestante cada vez que cambie idCampaña
   useEffect(() => {
-    if (!idCampaña) return;
+    if (!idCampaña) {
+      console.log("No hay idCampaña, saltando fetchRestantes");
+      return;
+    }
+
     const fetchRestantes = async () => {
+      setLoadingRestantes(true);
       try {
+        console.log("Llamando a UsuarioRestante con idCampaña:", idCampaña);
         const respuesta = await UsuarioRestante(idCampaña);
         console.log("Respuesta UsuarioRestante:", respuesta);
-        // Actualizar el campo 'restantes' y 'asignado' en la tabla de ejecutivos
-        if (respuesta && Array.isArray(respuesta.data)) {
+
+        // Verificar si la respuesta tiene la estructura esperada
+        if (!respuesta) {
+          console.warn("Respuesta vacía de UsuarioRestante");
+          return;
+        }
+
+        // Manejar diferentes estructuras de respuesta
+        const data = respuesta.data || respuesta;
+        
+        if (Array.isArray(data) && data.length > 0) {
           setExecutiveTree((prev) =>
             prev.map((ej) => {
-              const encontrado = respuesta.data.find(
-                (r) => r.idEjecutivo === ej.idEjecutivo,
+              const encontrado = data.find(
+                (r) => r.idEjecutivo === ej.idEjecutivo || r.IdEjecutivo === ej.idEjecutivo
               );
               return encontrado
-                ? { ...ej, restantes: encontrado.Restantes, asignado: true }
+                ? { 
+                    ...ej, 
+                    restantes: encontrado.Restantes || encontrado.restantes || 0, 
+                    asignado: true 
+                  }
                 : { ...ej, restantes: 0, asignado: false };
-            }),
+            })
           );
 
-          // Mostrar mensaje de éxito cuando se cargan datos para la campaña
-          if (respuesta.data.length > 0 && nombreCampaña) {
-            const mensajeExito = `Datos cargados para la campaña "${nombreCampaña}"`;
-            toast.success(mensajeExito);
+          if (nombreCampaña) {
+            toast.success(`Datos cargados para "${nombreCampaña}"`);
           }
-        }
-      } catch (error) {
-        console.error("Error al consumir UsuarioRestante:", error);
-
-        // Verificar si es un error 404 (No se encontraron datos)
-        if (error.response?.status === 404) {
-          const mensajeError = nombreCampaña
-            ? `No se encontraron ejecutivos para la campaña "${nombreCampaña}"`
-            : "No se encontraron datos";
-          toast.error(mensajeError);
-
-          // Limpiar todos los checkboxes (resetear asignado y restantes a valores por defecto)
+        } else {
+          console.log("No se encontraron datos en la respuesta");
+          // Resetear a valores por defecto
           setExecutiveTree((prev) =>
             prev.map((ej) => ({
               ...ej,
               restantes: 0,
               asignado: false,
-            })),
+            }))
           );
         }
+      } catch (error) {
+        console.error("Error completo al consumir UsuarioRestante:", error);
+        console.error("Error response:", error.response);
+        console.error("Error message:", error.message);
+
+        // Verificar si es un error 404 (No se encontraron datos)
+        if (error.response?.status === 404) {
+          const mensajeError = nombreCampaña
+            ? `No hay ejecutivos asignados a "${nombreCampaña}"`
+            : "No se encontraron datos para esta campaña";
+          toast.info(mensajeError); // Cambié a toast.info porque es informativo, no un error crítico
+
+          // Limpiar todos los checkboxes
+          setExecutiveTree((prev) =>
+            prev.map((ej) => ({
+              ...ej,
+              restantes: 0,
+              asignado: false,
+            }))
+          );
+        } else if (error.response?.status === 400) {
+          toast.error("Solicitud incorrecta al servidor");
+        } else if (error.response?.status === 500) {
+          toast.error("Error interno del servidor");
+        } else {
+          // Error de red u otro tipo
+          const errorMsg = error.message || "Error al cargar datos de ejecutivos";
+          toast.error(errorMsg);
+        }
+      } finally {
+        setLoadingRestantes(false);
       }
     };
+
     fetchRestantes();
   }, [idCampaña, nombreCampaña]);
 
@@ -97,27 +140,18 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
   const ejecutivosOrdenados = useMemo(() => {
     if (!executiveTree.length) return [];
 
-    console.log("Mostrando TODOS los ejecutivos de la jerarquía...");
-    console.log("Total ejecutivos del endpoint:", executiveTree.length);
-
     const ejecutivosFiltrados = [];
-
-    // Tomar TODOS los ejecutivos principales (sin límite)
     const ejecutivosPrincipales = executiveTree;
-
-    // Separar principales y subordinados
     const listaEjecutivosPrincipales = [];
     const listaSubordinados = [];
 
     ejecutivosPrincipales.forEach((ejecutivo) => {
-      // Agregar el ejecutivo principal a su lista
       listaEjecutivosPrincipales.push({
         ...ejecutivo,
         nivelJerarquia: 1,
         esSubordinado: false,
       });
 
-      // Recopilar subordinados para agregar al final
       if (
         Array.isArray(ejecutivo.subordinados) &&
         ejecutivo.subordinados.length > 0
@@ -135,35 +169,17 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
               "",
             idEncargado: subordinado.idEncargado || ejecutivo.idEjecutivo,
             nivelJerarquia: 2,
-            esSubordinado: false, // Quitar marca de subordinado para no mostrar indentación
+            esSubordinado: false,
             encargadoPadre: ejecutivo.usuario,
           });
         });
       }
     });
 
-    // Ordenar subordinados en orden inverso (último hijo arriba, primer hijo abajo)
     listaSubordinados.reverse();
-
-    // Combinar: primero ejecutivos principales, luego subordinados al final
     ejecutivosFiltrados.push(
       ...listaEjecutivosPrincipales,
       ...listaSubordinados,
-    );
-
-    console.log(
-      "Ejecutivos mostrados (TODOS los principales + subordinados al final):",
-      ejecutivosFiltrados.length,
-    );
-    console.log(
-      "Ejecutivos principales:",
-      listaEjecutivosPrincipales.map((e) => e.usuario),
-    );
-    console.log(
-      "Subordinados al final (orden inverso):",
-      listaSubordinados.map(
-        (e) => `${e.usuario} (hijo de ${e.encargadoPadre})`,
-      ),
     );
 
     return ejecutivosFiltrados;
@@ -180,23 +196,45 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
 
   // Handler para asignar ejecutivo a campaña
   const handleAsignar = async (checked, row, idx) => {
-    if (!idCampaña || !row.idEjecutivo) return;
+    if (!idCampaña || !row.idEjecutivo) {
+      toast.error("Faltan datos para asignar el ejecutivo");
+      return;
+    }
+    
     setLoadingRow(idx);
     try {
-      // inserta = checked (true/false), idCampaña = prop, idEjecutivo = row.idEjecutivo
+      console.log("Asignando ejecutivo:", {
+        checked,
+        idCampaña,
+        idEjecutivo: row.idEjecutivo,
+      });
+
       const response = await asignaEjecutivoCampanas(
         checked,
         idCampaña,
         row.idEjecutivo,
       );
-      // Si la respuesta fue exitosa, actualiza el estado asignado
+
+      console.log("Respuesta de asignación:", response);
+
+      // Si la respuesta fue exitosa, actualiza el estado
       if (response?.data?.success || response?.status === 200) {
         setExecutiveTree((prev) =>
-          prev.map((r, i) => (i === idx ? { ...r, asignado: checked } : r)),
+          prev.map((r) => 
+            r.idEjecutivo === row.idEjecutivo 
+              ? { ...r, asignado: checked } 
+              : r
+          )
+        );
+        toast.success(
+          checked 
+            ? `Ejecutivo ${row.usuario} asignado` 
+            : `Ejecutivo ${row.usuario} desasignado`
         );
       }
     } catch (error) {
       console.error("Error al asignar ejecutivo:", error);
+      toast.error("Error al actualizar la asignación");
     } finally {
       setLoadingRow(null);
     }
@@ -215,6 +253,9 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
           Ejecutivos ({contadorEjecutivos.asignados} /{" "}
           {contadorEjecutivos.total})
         </span>
+        {loadingRestantes && (
+          <span className="ml-2 text-xs text-gray-500">Cargando...</span>
+        )}
       </div>
       <div
         style={{
@@ -293,7 +334,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
           <tbody>
             {ejecutivosOrdenados.map((row, i) => (
               <tr
-                key={i}
+                key={row.idEjecutivo || i}
                 style={{
                   background: row.asignado
                     ? "var(--color-jerarquia1)"
@@ -319,7 +360,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
                         id={`switch-asignado-${row.idEjecutivo || i}`}
                         className="peer sr-only"
                         checked={row.asignado || false}
-                        disabled={loadingRow === i}
+                        disabled={loadingRow === i || loadingRestantes}
                         onChange={(e) =>
                           handleAsignar(e.target.checked, row, i)
                         }

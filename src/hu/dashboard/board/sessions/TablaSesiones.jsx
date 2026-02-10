@@ -43,7 +43,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
   };
 
   // Obtener el idEjecutivo del usuario logueado desde localStorage
-  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+     const userData = JSON.parse(sessionStorage.getItem("userData"));
   const idEjecutivoSesion =
     userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
 

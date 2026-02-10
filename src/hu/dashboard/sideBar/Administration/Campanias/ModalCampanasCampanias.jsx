@@ -53,7 +53,7 @@ const ModalCampanasCampanias = ({
       selectedCartera?.value ||
       (function () {
         try {
-          const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+             const userData = JSON.parse(sessionStorage.getItem("userData"));
           return (
             userData?.idCartera ||
             userData?.idcartera ||

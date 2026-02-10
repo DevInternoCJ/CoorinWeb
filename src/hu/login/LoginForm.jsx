@@ -171,6 +171,7 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
       usuario: formData.username,
       contrasenia: formData.password,
       usuarioWindows: formData.username,
+      idEjecutivo: formData.idEjecutivo, // Enviar el username como idEjecutivo para que el backend lo resuelva
     };
 
     try {

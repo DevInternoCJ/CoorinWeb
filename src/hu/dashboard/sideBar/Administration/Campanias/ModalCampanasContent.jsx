@@ -5,7 +5,7 @@ import ModalHeader from "../gespa/ModalHeader";
 import IconCircular from "../../../../../components/iconos/IconCircular";
 import { IconCampaign } from "./IconCampaign";
 
-const ModalCampanas = ({ onClose }) => {
+const ModalCampanas = ({ onClose, idCampaña, nombreCampaña }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedCartera, setSelectedCartera] = useState(null); //  Nuevo estado
   const [verifyResult, setVerifyResult] = useState(null);
@@ -65,8 +65,8 @@ const ModalCampanas = ({ onClose }) => {
         </div>
         <div className="min-w-0 flex flex-col">
           <ModalCampanasEjecutivos
-            idCampaña={campañaSeleccionada.id}
-            nombreCampaña={campañaSeleccionada.nombre}
+            idCampaña={idCampaña}  // Asegúrate de que este valor no sea undefined
+  nombreCampaña={nombreCampaña}
           />
         </div>
       </div>

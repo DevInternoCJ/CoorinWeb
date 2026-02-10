@@ -155,7 +155,7 @@ const ModalEncargadosContent = (props) => {
   useEffect(() => {
     const fetchExecutives = async () => {
       try {
-        const userData = JSON.parse(localStorage.getItem("userData"));
+           const userData = JSON.parse(sessionStorage.getItem("userData"));
         const idEjecutivo = userData?.idEjecutivo;
         const usuarioSesion = userData?.usuario || userData?.Usuario || "";
         const nombreSesion = userData?.nombre || "";

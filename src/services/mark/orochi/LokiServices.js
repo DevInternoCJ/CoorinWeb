@@ -1906,51 +1906,66 @@ export const postReportCampaign = async (body) => {
 
 
 // Obtener Campañas Archivo
-export const sendArchiveCampanias = async (body) => {
+export const sendArchiveCampanias = async (formData) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    // Construir FormData
-    const formData = new FormData();
-    // Asume que body es un objeto con las claves necesarias y el archivo
-    Object.entries(body).forEach(([key, value]) => {
-      // Solo agregar si el valor no es null o undefined
-      if (value !== null && value !== undefined) {
-        // Si el valor es un array, agregar cada elemento por separado
-        if (Array.isArray(value)) {
-          value.forEach((v) => formData.append(key, v));
-        } else {
-          formData.append(key, value);
-        }
-      }
-    });
-    // El interceptor añade el token automáticamente
+    
+    // Verificar que sea FormData
+    if (!(formData instanceof FormData)) {
+      throw new Error('Se esperaba un objeto FormData');
+    }
+    
+    // Debug: ver qué se está enviando
+    console.log('FormData a enviar:');
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}:`, pair[1]);
+    }
+    
+    // IMPORTANTE: NO establecer Content-Type manualmente
     const response = await api.post('/carteras/cargar-archivo', formData, {
       headers: {
         'Accept': '*/*',
-        'Content-Type': 'multipart/form-data'
-        // No establecer Content-Type manualmente, el navegador lo gestiona automáticamente con FormData
+        // NO incluir 'Content-Type': axios lo gestiona automáticamente
       },
-      responseType: 'arraybuffer' // Para recibir datos binarios correctamente
+      // Para archivos grandes
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
     });
+    
     return response;
   } catch (error) {
-    console.error('Error al subir campanña Archivo:', error);
+    console.error('Error al subir campaña Archivo:', error);
+    
+    // Decodificar el error si viene como ArrayBuffer
+    if (error.response?.data instanceof ArrayBuffer) {
+      const decoder = new TextDecoder('utf-8');
+      const errorText = decoder.decode(error.response.data);
+      console.error('Error decodificado del servidor:', errorText);
+      try {
+        const errorJson = JSON.parse(errorText);
+        console.error('Error JSON parseado:', errorJson);
+      } catch (e) {
+        console.error('Error como texto plano:', errorText);
+      }
+    } else if (error.response?.data) {
+      console.error('Datos de respuesta del error:', error.response.data);
+    }
+    
+    console.error('Status del error:', error.response?.status);
+    
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
-    }
-    if (error.response) {
-      console.error('Datos de respuesta del error:', error.response.data);
-      console.error('Status del error:', error.response.status);
     } else if (error.request) {
       console.error('No se recibió respuesta del servidor:', error.request);
     } else {
       console.error('Error al configurar la solicitud:', error.message);
     }
+    
     throw error;
   }
 };

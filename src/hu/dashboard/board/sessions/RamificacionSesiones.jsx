@@ -24,8 +24,11 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
       setLoadingJerarquia(true);
       setErrorJerarquia(null);
       try {
-        const userData = JSON.parse(localStorage.getItem("userData"));
+     
+        const userData = JSON.parse(sessionStorage.getItem("userData"));
+           console.log("esto es datos del login",userData)
         const idEjecutivo = userData?.idEjecutivo;
+        console.log("ID del ejecutivo en sesión:", idEjecutivo);
         const usuario = userData?.usuario || userData?.Usuario || "";
         const nombreEjecutivo =
           userData?.NombreEjecutivo ||
@@ -33,7 +36,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
           userData?.nombre;
         if (!idEjecutivo)
           throw new Error("No se encontró el idEjecutivo del usuario logueado");
-
+        console.log("Obteniendo jerarquía para idEjecutivo:", idEjecutivo);
         const data = await obetenerJerarquiaEncargados(idEjecutivo);
         console.log("Respuesta jerarquía ejecutivos:", data);
 
