@@ -13,7 +13,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
   useEffect(() => {
     const fetchExecutives = async () => {
       try {
-        const userData = JSON.parse(localStorage.getItem("userData"));
+           const userData = JSON.parse(sessionStorage.getItem("userData"));
         const idEjecutivo = userData?.idEjecutivo;
         if (!idEjecutivo) return;
         const data = await obetenerJerarquiaEncargados(idEjecutivo);
