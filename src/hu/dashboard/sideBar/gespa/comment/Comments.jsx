@@ -9,10 +9,12 @@ import {
   useCommentForm,
   useSituationCatalog,
   useSaveComment,
+  useSaveCommentWithFile,
   VIEW_TYPES,
 } from "./useCommentsLogic";
 import PreviewRenderer from "./PreviewRenderer";
 import FileUploader from "./FileUploader";
+import { toast } from "sonner";
 
 /* LAS OPCIONES CARTERA */
 const WALLET_OPTIONS = [
@@ -157,33 +159,50 @@ const Comments = ({ onClose, onSaveComment }) => {
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
 
-  // lógica de hook
   const { activeView, toggleView } = useViewManager();
   const { situationOptions, loading } = useSituationCatalog();
   const form = useCommentForm();
 
-  //   SOLUCIÓN 1: Pasar form directamente al hook
+  // Hook para guardar comentario normal (sin archivo)
   const { handleSave } = useSaveComment({
     form: form,
     situationOptions,
     onSaveComment,
+    changeSituationActive: activeView === VIEW_TYPES.ADD,
   });
 
-  // estados de archivo (gestionados aquí; la previsualización la renderiza PreviewRenderer)
-  const fileStateRef = useRef({ file: null, name: "" });
+  // Hook para guardar con archivo
+  const { handleSaveWithFile } = useSaveCommentWithFile({
+    form: form,
+    situationOptions,
+    onSaveComment,
+    changeSituationActive: activeView === VIEW_TYPES.LIST,
+  });
 
-  // Para asegurar que PreviewRenderer se actualice al cambiar el archivo, mantenemos un pequeño estado sincronizado:
+    // Estados de archivo
+  const fileStateRef = useRef({ file: null, name: "" });
   const [, setFileTick] = React.useState(0);
+
   const handleFileChange = (file, name) => {
     fileStateRef.current.file = file;
     fileStateRef.current.name = name;
     setFileTick((t) => t + 1);
   };
 
-  const onSaveFileAction = () => {
-    if (!fileStateRef.current.file) return;
-    // pasamos allowEmpty=true porque en la vista LIST el textarea está oculto y el comentario puede venir del archivo
-    handleSave({ allowEmpty: true });
+   const onSaveFileAction = async () => {
+    if (!fileStateRef.current.file) {
+      toast.error("Debe seleccionar un archivo");
+      return;
+    }
+    
+    const success = await handleSaveWithFile(fileStateRef.current.file);
+    
+    if (success) {
+      // Limpiar el archivo después de guardar exitosamente
+      fileStateRef.current.file = null;
+      fileStateRef.current.name = "";
+      setFileTick((t) => t + 1);
+    }
   };
 
   const checkboxOptions = [

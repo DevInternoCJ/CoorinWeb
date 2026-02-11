@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { obetenerJerarquiaEncargados } from "../../../../services/mark/Orochi/LokiServices";
+import { useUserStore } from "../../../../contextGlobal/userStore";
 
 const RamificacionSesiones = ({ onExecutiveSelect }) => {
   // Estados para la jerarquía
@@ -19,21 +20,27 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
   const ramificacionRef = useRef(null);
 
   // Lógica para obtener la jerarquía de ejecutivos
+  const storeUser = useUserStore((state) => state.user);
+
   useEffect(() => {
     const fetchExecutiveTree = async () => {
       setLoadingJerarquia(true);
       setErrorJerarquia(null);
       try {
-     
-        const userData = JSON.parse(sessionStorage.getItem("userData"));
-           console.log("esto es datos del login",userData)
-        const idEjecutivo = userData?.idEjecutivo;
-        console.log("ID del ejecutivo en sesión:", idEjecutivo);
-        const usuario = userData?.usuario || userData?.Usuario || "";
+        // Preferir user desde el store (sessionStorage). Fallback a sessionStorage/localStorage.
+        const persisted =
+          storeUser ||
+          JSON.parse(sessionStorage.getItem("userData") || "null") ||
+          JSON.parse(localStorage.getItem("userData") || "null");
+
+        const idEjecutivo = persisted?.idEjecutivo || persisted?.id || null;
+        const usuario = persisted?.usuario || persisted?.Usuario || "";
         const nombreEjecutivo =
-          userData?.NombreEjecutivo ||
-          userData?.nombreEjecutivo ||
-          userData?.nombre;
+          persisted?.NombreEjecutivo ||
+          persisted?.nombreEjecutivo ||
+          persisted?.nombre ||
+          "";
+
         if (!idEjecutivo)
           throw new Error("No se encontró el idEjecutivo del usuario logueado");
         console.log("Obteniendo jerarquía para idEjecutivo:", idEjecutivo);
@@ -72,7 +79,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
       }
     };
     fetchExecutiveTree();
-  }, []);
+  }, [storeUser]);
 
   // Manejar la dirección del scroll para sticky
   useEffect(() => {
@@ -305,16 +312,24 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     });
   };
 
-  // Obtener datos de la sesión
-  const userData = JSON.parse(localStorage.getItem("userData"));
+  // Obtener datos de la sesión preferentemente desde el store
+  const persistedSession =
+    storeUser ||
+    JSON.parse(sessionStorage.getItem("userData") || "null") ||
+    JSON.parse(localStorage.getItem("userData") || "null");
+
   const idEjecutivoSesion =
-    userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
+    persistedSession?.idEjecutivo ||
+    persistedSession?.idejecutivo ||
+    persistedSession?.id ||
+    null;
   const nombreSesion =
-    userData?.NombreEjecutivo ||
-    userData?.nombreEjecutivo ||
-    userData?.nombre ||
+    persistedSession?.NombreEjecutivo ||
+    persistedSession?.nombreEjecutivo ||
+    persistedSession?.nombre ||
     "";
-  const usuarioSesion = userData?.usuario || userData?.Usuario || "";
+  const usuarioSesion =
+    persistedSession?.usuario || persistedSession?.Usuario || "";
 
   return (
     <div className="ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64 bg-white/80">

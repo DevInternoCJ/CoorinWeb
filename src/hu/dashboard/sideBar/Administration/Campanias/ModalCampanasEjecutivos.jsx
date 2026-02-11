@@ -14,7 +14,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
   useEffect(() => {
     const fetchExecutives = async () => {
       try {
-        const userData = JSON.parse(localStorage.getItem("userData"));
+           const userData = JSON.parse(sessionStorage.getItem("userData"));
         const idEjecutivo = userData?.idEjecutivo;
         if (!idEjecutivo) {
           console.warn("No se encontró idEjecutivo en userData");

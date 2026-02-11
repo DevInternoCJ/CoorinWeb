@@ -101,11 +101,6 @@ const ProcessGespa = ({ onClose }) => {
               </h2>
             </div>
           </div>
-          <div className="w-1/3">
-            <span className="text-lg text-jerarquia4 whitespace-pre p-1 rounded-md bg-neutral-300">
-              Cartera - American Express
-            </span>
-          </div>
           <div className="w-1/3 right-0 flex justify-end">
             <button
               onClick={onClose}

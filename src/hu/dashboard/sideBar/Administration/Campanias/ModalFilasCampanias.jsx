@@ -39,6 +39,21 @@ const ModalFilasCampañas = ({
   const [formatoValido, setFormatoValido] = useState(true);
   const [mensajeValidacion, setMensajeValidacion] = useState("");
 
+  const safeToString = (value) => {
+    if (value === undefined || value === null) {
+      return "";
+    }
+    return value.toString();
+  };
+
+  // Función para verificar si un campo está vacío
+  const isFieldEmpty = (value) => {
+    if (value === undefined || value === null) {
+      return true;
+    }
+    return safeToString(value).trim() === "";
+  };
+
   // Limpiar estados al cerrar el modal
   React.useEffect(() => {
     if (!open) {
@@ -98,7 +113,7 @@ const ModalFilasCampañas = ({
 
           // Si hay consultas, seleccionar la primera por defecto
           if (consultasArray.length > 0) {
-            setSelectedConsulta(consultasArray[0].idConsulta.toString());
+            setSelectedConsulta(safeToString(consultasArray[0].idConsulta));
             console.log(
               "Consulta seleccionada por defecto:",
               consultasArray[0].NombreConsulta,
@@ -125,7 +140,7 @@ const ModalFilasCampañas = ({
     const cleanHeaders = fileHeaders.map((header) =>
       header
         ? header
-            .toString()
+            .safeToString(header)
             .trim()
             .replace(/[\r\n]/g, "")
         : "",
@@ -135,7 +150,7 @@ const ModalFilasCampañas = ({
     const normalize = (text) => {
       if (!text) return "";
       return text
-        .toString()
+        .safeToString(text)
         .toLowerCase()
         .replace(/[áàäâ]/g, "a")
         .replace(/[éèëê]/g, "e")
@@ -173,9 +188,7 @@ const ModalFilasCampañas = ({
     // Limpiar los headers de espacios en blanco y caracteres especiales
     const cleanHeaders = headers.map((header) =>
       header
-        ? header
-            .toString()
-            .trim()
+        ? safeToString(header) 
             .replace(/[\r\n]/g, "")
         : "",
     );
@@ -197,8 +210,7 @@ const ModalFilasCampañas = ({
         return "";
       }
 
-      return text
-        .toString()
+      return safeToString(text)
         .toLowerCase()
         .replace(/[áàäâ]/g, "a")
         .replace(/[éèëê]/g, "e")
@@ -304,12 +316,12 @@ const ModalFilasCampañas = ({
       if (type === "number") {
         // Si el header es Teléfono, ordenar por longitud descendente
         if (fileHeaders[colIdx] === "Teléfono") {
-          sorted.sort(
-            (a, b) =>
-              (b[colIdx] || "").toString().length -
-              (a[colIdx] || "").toString().length,
-          );
-        } else {
+  sorted.sort(
+    (a, b) =>
+      safeToString(b[colIdx] || "").length -
+      safeToString(a[colIdx] || "").length,
+  );
+}else {
           sorted.sort((a, b) => {
             const numA = parseFloat(a[colIdx]) || 0;
             const numB = parseFloat(b[colIdx]) || 0;
@@ -318,8 +330,8 @@ const ModalFilasCampañas = ({
         }
       } else {
         sorted.sort((a, b) => {
-          const valA = (a[colIdx] || "").toString().toLowerCase();
-          const valB = (b[colIdx] || "").toString().toLowerCase();
+          const valA = safeToString(a[colIdx] || "").toLowerCase();
+const valB = safeToString(b[colIdx] || "").toLowerCase();
           return valA.localeCompare(valB);
         });
       }
@@ -455,13 +467,8 @@ const ModalFilasCampañas = ({
     // Validar que los campos requeridos no estén vacíos (Cuenta y Teléfono)
     // Usuario puede estar vacío
     const filasConErrores = fileRows.filter(
-      (row) =>
-        !row[0] ||
-        row[0].toString().trim() === "" || // Cuenta vacía
-        !row[2] ||
-        row[2].toString().trim() === "", // Teléfono vacío
-      // row[1] (Usuario) puede estar vacío - no se valida
-    );
+  (row) => isFieldEmpty(row[0]) || isFieldEmpty(row[2])
+);
 
     if (filasConErrores.length > 0) {
       toast.error(
@@ -529,7 +536,7 @@ const ModalFilasCampañas = ({
         }
         // Construir mensaje de éxito y, si corresponde, agregar el conteo de filas
         const total = data.totalRegistros || 0;
-        let serverMsg = (data.mensaje || "Carga exitosa").toString();
+        let serverMsg = safeToString(data.mensaje || "Carga exitosa");
         // Si el servidor reporta el mensaje de procesamiento estándar, mostrar sólo el conteo de filas
         if (/carga filas procesadas correctamente/i.test(serverMsg)) {
           serverMsg = `Se cargaron ${total} filas.`;
@@ -1100,63 +1107,68 @@ const ModalFilasCampañas = ({
                         </th>
                       </tr>
                     </thead>
-                    <tbody>
-                      {fileRows.map((row, idx) => (
-                        <tr key={idx}>
-                          {/* Columna 1 - Cuenta */}
-                          <td style={{ textAlign: "center" }}>
-                            {row[0] ? row[0] : ""}
-                            {/* Mostrar indicador de error solo si el formato es válido y el campo requerido está vacío */}
-                            {formatoValido &&
-                              (!row[0] || row[0].toString().trim() === "") && (
-                                <span
-                                  style={{
-                                    border: "1px solid red",
-                                    background: "#fff",
-                                    color: "red",
-                                    fontWeight: "bold",
-                                    borderRadius: 2,
-                                    padding: "0 2px",
-                                    fontSize: 16,
-                                    marginLeft: 4,
-                                  }}
-                                  title="Campo requerido"
-                                >
-                                  &#10006;
-                                </span>
-                              )}
-                          </td>
-                          {/* Columna 2 - Usuario */}
-                          <td style={{ textAlign: "center" }}>
-                            {row[1] ? row[1] : ""}
-                            {/* Usuario puede estar vacío - no mostrar error */}
-                          </td>
-                          {/* Columna 3 - Teléfono */}
-                          <td style={{ textAlign: "center" }}>
-                            {row[2] ? row[2] : ""}
-                            {/* Mostrar indicador de error solo si el formato es válido y el campo requerido está vacío */}
-                            {formatoValido &&
-                              (!row[2] || row[2].toString().trim() === "") && (
-                                <span
-                                  style={{
-                                    border: "1px solid red",
-                                    background: "#fff",
-                                    color: "red",
-                                    fontWeight: "bold",
-                                    borderRadius: 2,
-                                    padding: "0 2px",
-                                    fontSize: 16,
-                                    marginLeft: 4,
-                                  }}
-                                  title="Campo requerido"
-                                >
-                                  &#10006;
-                                </span>
-                              )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
+  <tbody>
+        {fileRows.map((row, idx) => {
+          if (!Array.isArray(row)) {
+            console.warn(`Fila ${idx} no es un array:`, row);
+            return null;
+          }
+
+          return (
+            <tr key={idx}>
+              {/* Columna 1 - Cuenta */}
+              <td style={{ textAlign: "center" }}>
+                {safeToString(row[0])}
+                {formatoValido && isFieldEmpty(row[0]) && (  // ✅ USAR isFieldEmpty
+                  <span
+                    style={{
+                      border: "1px solid red",
+                      background: "#fff",
+                      color: "red",
+                      fontWeight: "bold",
+                      borderRadius: 2,
+                      padding: "0 2px",
+                      fontSize: 16,
+                      marginLeft: 4,
+                    }}
+                    title="Campo requerido"
+                  >
+                    &#10006;
+                  </span>
+                )}
+              </td>
+              
+              {/* Columna 2 - Usuario */}
+              <td style={{ textAlign: "center" }}>
+                {safeToString(row[1])}
+              </td>
+              
+              {/* Columna 3 - Teléfono */}
+              <td style={{ textAlign: "center" }}>
+                {safeToString(row[2])}
+                {formatoValido && isFieldEmpty(row[2]) && (  // ✅ USAR isFieldEmpty
+                  <span
+                    style={{
+                      border: "1px solid red",
+                      background: "#fff",
+                      color: "red",
+                      fontWeight: "bold",
+                      borderRadius: 2,
+                      padding: "0 2px",
+                      fontSize: 16,
+                      marginLeft: 4,
+                    }}
+                    title="Campo requerido"
+                  >
+                    &#10006;
+                  </span>
+                )}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+      
                   </table>
                 </div>
               )}
@@ -1205,12 +1217,12 @@ const ModalFilasCampañas = ({
                     ) : (
                       <>
                         {consultas.map((consulta) => (
-                          <option
-                            key={consulta.idConsulta}
-                            value={consulta.idConsulta.toString()}
-                          >
-                            {consulta.NombreConsulta}
-                          </option>
+                         <option
+  key={consulta.idConsulta}
+  value={safeToString(consulta.idConsulta)}
+>
+  {consulta.NombreConsulta}
+</option>
                         ))}
                       </>
                     )}

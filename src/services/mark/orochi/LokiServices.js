@@ -2394,9 +2394,9 @@ export const PostComments = async (data) => {
       throw new Error('No hay token de autenticación disponible.');
     }
 
-    console.log('  /Scripts/guardar', data);   
+    console.log('/Comentarios/insertar-expediente', data);   
     const response = await api.post(
-      `/Scripts/guardar`,data
+      `/Comentarios/insertar-expediente`,data
     );  
     console.log('  Respuesta:', response.data);
     return response.data;
@@ -2933,6 +2933,87 @@ export const getSuperInfoExcel = async (idCartera, fechaDesde, fechaHasta) => {
     } else {
       console.error('Error al configurar la solicitud:', error.message);
     }
+    throw error;
+  }
+};
+
+export const UpdateComments = async (data) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+
+    console.log('/Comentarios/modificar', data);   
+    const response = await api.post(
+      `/Comentarios/modificar`,data
+    );  
+    console.log('  Respuesta:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error(' Error:', error);
+    throw error;
+  }
+};
+
+export const InserExpedientComments = async (data) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+
+    console.log('/Comentarios/insertar-expediente', data);   
+    const response = await api.post(
+      `/Comentarios/insertar-expediente`,data
+    );  
+    console.log('  Respuesta:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error(' Error:', error);
+    throw error;
+  }
+};
+
+///Comentarios/carga-accionamientos
+// LokiServices.js
+
+export const LoadDrivesComments = async (archivo, datosAdicionales = {}) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación disponible.');
+    }
+    // Crear FormData para enviar el archivo
+    const formData = new FormData();
+    formData.append('archivo', archivo);  
+    // Agregar otros campos si es necesario
+    Object.keys(datosAdicionales).forEach(key => {
+      const value = datosAdicionales[key];
+      // Si el valor es un objeto o array, convertirlo a JSON string
+      formData.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
+    });
+    console.log('Enviando archivo a /Comentarios/carga-accionamientos');
+    console.log('Archivo:', archivo.name, archivo.size, 'bytes');
+    console.log('Datos adicionales:', datosAdicionales);  
+    const response = await api.post(
+      `/Comentarios/carga-accionamientos`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+          const porcentaje = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          console.log(`Progreso de carga: ${porcentaje}%`);
+        }
+      }
+    );    
+    console.log(' Respuesta del servidor:', response.data);
+    return response.data;   
+  } catch (error) {
+    console.error('Error cargando archivo:', error);
+    console.error('Detalles del error:', error.response?.data);
     throw error;
   }
 };
