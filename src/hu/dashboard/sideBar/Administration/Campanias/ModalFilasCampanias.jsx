@@ -188,8 +188,7 @@ const ModalFilasCampañas = ({
     // Limpiar los headers de espacios en blanco y caracteres especiales
     const cleanHeaders = headers.map((header) =>
       header
-        ? header
-            .safeToString(header)
+        ? safeToString(header) 
             .replace(/[\r\n]/g, "")
         : "",
     );
@@ -211,8 +210,7 @@ const ModalFilasCampañas = ({
         return "";
       }
 
-      return text
-        .safeToString(text)
+      return safeToString(text)
         .toLowerCase()
         .replace(/[áàäâ]/g, "a")
         .replace(/[éèëê]/g, "e")
@@ -332,8 +330,8 @@ const ModalFilasCampañas = ({
         }
       } else {
         sorted.sort((a, b) => {
-          const valA = (a[colIdx] || "").safeToString().toLowerCase();
-          const valB = (b[colIdx] || "").safeToString().toLowerCase();
+          const valA = safeToString(a[colIdx] || "").toLowerCase();
+const valB = safeToString(b[colIdx] || "").toLowerCase();
           return valA.localeCompare(valB);
         });
       }
