@@ -152,53 +152,74 @@ const ModalEncargadosContent = (props) => {
   }, [cartera, producto, encargados, filtrarEncargados]);
 
   // Cargar ejecutivos jerarquía (igual que en ModalValidadoresContent)
-  useEffect(() => {
+ // Línea ~163 - Cargar ejecutivos jerarquía
+useEffect(() => {
     const fetchExecutives = async () => {
-      try {
-        const userData = JSON.parse(localStorage.getItem("userData"));
-        const idEjecutivo = userData?.idEjecutivo;
-        const usuarioSesion = userData?.usuario || userData?.Usuario || "";
-        const nombreSesion = userData?.nombre || "";
-        if (!idEjecutivo) return;
-        const data = await obetenerJerarquiaEncargados(idEjecutivo);
-        // Filtrar solo ejecutivos propios de nivel 1 (igual que en validadores)
-        const hijos = Array.isArray(data)
-          ? data
-              .filter((e) => e.jerarquia === undefined || e.jerarquia > 0)
-              .map((e) => ({
-                usuario: e.usuario,
-                nombreEjecutivo: e.nombreEjecutivo || "",
-                subordinados: Array.isArray(e.subordinados)
-                  ? e.subordinados.filter(
-                      (s) => s.jerarquia === undefined || s.jerarquia > 0,
-                    )
-                  : [],
-                idEjecutivo: e.idEjecutivo,
-                idEncargado: e.idEncargado || null,
+        try {
+            // ✅ CORRECTO: Usar sessionStorage primero
+            const userData = JSON.parse(
+                sessionStorage.getItem("userData") || 
+                localStorage.getItem("userData") || 
+                "{}"
+            );
+            
+            const idEjecutivo = userData?.idEjecutivo || userData?.idejecutivo || userData?.id;
+            const usuarioSesion = userData?.usuario || userData?.Usuario || "";
+            const nombreSesion = userData?.nombreEjecutivo || userData?.nombre || userData?.NombreEjecutivo || "";
+            
+            console.log("📊 Datos de sesión (Encargados):", { idEjecutivo, usuarioSesion, nombreSesion });
+            
+            if (!idEjecutivo) {
+                console.warn("⚠️ No se encontró idEjecutivo en userData (Encargados)");
+                return;
+            }
+            
+            const data = await obetenerJerarquiaEncargados(idEjecutivo);
+            console.log("📊 Jerarquía obtenida (Encargados):", data);
+            
+            // Filtrar solo ejecutivos propios de nivel 1
+            const hijos = Array.isArray(data)
+                ? data
+                    .filter((e) => e.jerarquia === undefined || e.jerarquia > 0)
+                    .map((e) => ({
+                        usuario: e.usuario,
+                        nombreEjecutivo: e.nombreEjecutivo || "",
+                        subordinados: Array.isArray(e.subordinados)
+                            ? e.subordinados.filter(
+                                (s) => s.jerarquia === undefined || s.jerarquia > 0,
+                            )
+                            : [],
+                        idEjecutivo: e.idEjecutivo,
+                        idEncargado: e.idEncargado || null,
+                        seleccionado: false,
+                        jerarquia: e.jerarquia || 1,
+                    }))
+                : [];
+
+            console.log("📊 Hijos procesados (Encargados):", hijos);
+
+            // Nodo raíz del usuario de sesión
+            const nodoSesion = {
+                usuario: usuarioSesion,
+                nombreEjecutivo: nombreSesion,
+                subordinados: hijos,
+                idEjecutivo: idEjecutivo,
+                idEncargado: null,
                 seleccionado: false,
-                jerarquia: e.jerarquia || 1,
-              }))
-          : [];
+                jerarquia: 1,
+            };
 
-        // Nodo raíz del usuario de sesión
-        const nodoSesion = {
-          usuario: usuarioSesion,
-          nombreEjecutivo: nombreSesion,
-          subordinados: hijos,
-          idEjecutivo: idEjecutivo,
-          idEncargado: null,
-          seleccionado: false,
-          jerarquia: 1,
-        };
-
-        setExecutiveTree([nodoSesion]);
-      } catch (error) {
-        toast.error("Error al cargar ejecutivos para encargados:", error);
-        setExecutiveTree([]);
-      }
+            console.log("📊 Nodo de sesión creado (Encargados):", nodoSesion);
+            setExecutiveTree([nodoSesion]);
+            console.log("✅ ExecutiveTree seteado exitosamente (Encargados)");
+        } catch (error) {
+            console.error("❌ Error al cargar ejecutivos para encargados:", error);
+            toast.error("Error al cargar ejecutivos para encargados");
+            setExecutiveTree([]);
+        }
     };
     fetchExecutives();
-  }, []);
+}, []);
 
   // Filtrar ejecutivos: Mostrar toda la jerarquía para encargados
   // Recursivo: agrega todos los nodos del árbol a usuariosEncargados
@@ -276,7 +297,7 @@ const ModalEncargadosContent = (props) => {
       }
 
       // Recargar la jerarquía de ejecutivos
-      const userData = JSON.parse(localStorage.getItem("userData"));
+      const userData = JSON.parse(sessionStorage.getItem("userData"));
       const idEjecutivo =
         userData?.idEjecutivo || userData?.idejecutivo || userData?.id;
       if (idEjecutivo) {
