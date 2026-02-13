@@ -332,10 +332,12 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     persistedSession?.usuario || persistedSession?.Usuario || "";
 
   return (
-    <div className="ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64 bg-white/80">
+      <div 
+        className=" bg-white/80 ring-1 ring-black/5 rounded-2xl flex flex-col px-4 lg:px-6 w-full h-auto lg:h-82 min-h-64"
+    >
       {/* Header unificado y responsive */}
-      <div className="mb-1">
-        <div className="flex items-center justify-between">
+      <div className="mb-5 overflow-auto">
+        <div className="flex items-center justify-between sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 px-3 mt-5 sm:px-4 md:px-6">
           {/* Título a la izquierda */}
           <div className="flex items-center text-gray-800">
             <span className="mr-2">
@@ -361,7 +363,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
           {/* Ejecutivo de la sesión a la derecha */}
           {idEjecutivoSesion && (
             <div
-              className={`sticky-session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? " selected" : ""} text-xs md:text-sm lg:text-base px-2 py-2 rounded-md bg-white md:bg-gray-100 border border-gray-300 text-center max-w-full truncate shadow-sm md:shadow font-semibold text-gray-800 md:text-green-700 transition-all duration-200`}
+              className={`session-executive${selectedExecutiveNode === Number(idEjecutivoSesion) ? " selected" : ""} text-xs md:text-sm lg:text-base px-2 py-2  bg-white  text-center max-w-full truncate  font-semibold text-gray-800  transition-all duration-200`}
               title={`Ejecutivo de la sesión actual: ${usuarioSesion} - ${nombreSesion}`}
               onClick={() => {
                 setSelectedExecutiveNode(Number(idEjecutivoSesion));
@@ -373,7 +375,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                   scrollToTop();
                 }, 100);
               }}
-              style={{ position: "static", margin: 0, zIndex: 0 }}
+
             >
               <span className="font-bold md:font-semibold lg:font-bold">
                 {usuarioSesion}
@@ -387,34 +389,32 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
         </div>
         {/* Contenedor de la ramificación con estilos de JerarquiaConR */}
         <div
-          ref={ramificacionRef}
-          className="productividad-branch flex-1 max-h-[35vh] lg:max-h-[26vh] xl:h-[56vh] "
-          style={{
-            overflowX: "auto",
-            overflowY: "auto",
-            width: "100%",
-            maxWidth: "100%",
-            background: "#ffffff",
-            borderRadius: 8,
-            border: "1px solid #e0e0e0",
-          }}
-        >
-          {/* Contenido de la jerarquía con Preline Tree View */}
-          {loadingJerarquia ? (
-            <div
-              style={{
-                color: "#2b463c",
-                fontWeight: 500,
-                fontSize: 15,
-                textAlign: "center",
-                marginTop: 30,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 10,
-              }}
+                ref={ramificacionRef}
+                className="productividad-branch"
+                style={{
+                    width: '100%',
+                    minHeight: '16vh',
+                    borderRadius: 8,
+                    border: '1px solid #e0e0e0',
+                    padding: '1vh 0.8vw',
+                    background: '#ffffff'
+                }}
             >
-              <div className="spinner-sonner" style={{ marginBottom: 8 }}>
+    {/* Contenido de la jerarquía con Preline Tree View */}
+    {loadingJerarquia ? (
+        <div style={{
+            color: "#2b463c",
+            fontWeight: 500,
+            fontSize: 15,
+            textAlign: "center",
+            marginTop: 30,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 10,
+        }}>
+            <div className="spinner-sonner" style={{ marginBottom: 8 }}>
+
                 <svg
                   width="38"
                   height="38"
@@ -449,6 +449,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                 fontSize: 14,
                 textAlign: "center",
                 marginTop: 30,
+                overflow: "auto",
               }}
             >
               {errorJerarquia}

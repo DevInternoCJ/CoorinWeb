@@ -31,7 +31,7 @@ const ModalProductividadContent = ({
       setLoadingJerarquia(true);
       setErrorJerarquia(null);
       try {
-        const userData = JSON.parse(localStorage.getItem("userData"));
+        const userData = JSON.parse(sessionStorage.getItem("userData"));
         const idEjecutivo = userData?.idEjecutivo || null;
         const usuario = userData?.usuario || "";
         // El campo del nombre puede estar en diferentes propiedades según el login

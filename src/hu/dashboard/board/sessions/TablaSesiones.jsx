@@ -167,7 +167,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
   }, [selectedExecutiveId, idEjecutivoSesion]);
 
   return (
-    <div className=" bg-white/80 ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64">
+    <div className=" bg-white/80 overflow-auto ring-1 ring-black/5 rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64">
       <h3 className="text-base lg:text-lg font-semibold mb-4 flex items-center text-gray-800">
         <span className="mr-2">
           {/* Icono personalizado para Sesiones */}
@@ -188,15 +188,13 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
         </span>
         Sesiones
       </h3>
-      <div className="bg-white/80 rounded-lg border border-[var(--color-jerarquia1)] flex-1 w-full overflow-hidden">
+      <div className="bg-white/80 overflow-auto rounded-lg border border-[var(--color-jerarquia1)] flex-1 w-full">
         <div
           style={{
-            overflowX: "auto",
-            overflowY: "auto",
             scrollbarColor: "#b0b0b0 #f5f5f5",
             scrollbarWidth: "thin",
           }}
-          className="scrollbar-gray w-full max-h-[35vh] lg:max-h-[27vh]"
+          className=" w-full max-h-[35vh] lg:max-h-[27vh]"
         >
           <table
             className="modal-table text-xs lg:text-sm"
