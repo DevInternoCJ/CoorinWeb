@@ -12,7 +12,7 @@ const JerarquiaConCheckbox = ({
     selectedExecutives = [] // Agregar selectedExecutives para manejar los checkboxes
 }) => {
     // Logo y datos de sesión
-    const userData = JSON.parse(localStorage.getItem('userData'));
+    const userData = JSON.parse(sessionStorage.getItem("userData"));
     const idEjecutivoSesion = userData?.idEjecutivo || userData?.idejecutivo || userData?.id || null;
     const nombreSesion = userData?.nombre || userData?.nombreEjecutivo || userData?.ejecutivo || '';
     const usuarioSesion = userData?.usuario || '';

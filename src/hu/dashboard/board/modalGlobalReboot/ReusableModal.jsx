@@ -12,8 +12,8 @@ const MODAL_SIZES = {
     catalogos: "w-full max-w-[clamp(280px,88vw,1100px)] min-w-[clamp(180px,50vw,700px)]",
     validadores: "w-full max-w-[clamp(270px,84vw,900px)] min-w-[clamp(180px,45vw,500px)]",
     encargados: "w-full max-w-[clamp(260px,70vw,1000px)] min-w-[clamp(160px,30vw,350px)]",
-    historicos: "w-full max-w-[clamp(280px,65vw,725px)] min-w-[clamp(150px,42vw,425px)] min-h-[120px] max-h-[80vh] lg:min-h-[120px] lg:max-h-[80vh]",
-    "historicos-inicial": "w-[420px] max-w-[520px] min-w-[220px] min-h-[56px] max-h-[260px] sm:min-h-[110px] sm:max-h-[220px] md:min-h-[120px] md:max-h-[260px] lg:min-h-[56px] lg:max-h-[260px]",
+    historicos: "w-5xl h-[35vh] max-h-[80vh]",
+    "historicos-inicial": " w-5xl h-[50vh] max-h-[80vh] pb-3",
     custom: ""
 };
 

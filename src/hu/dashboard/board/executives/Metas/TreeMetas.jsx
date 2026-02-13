@@ -18,7 +18,7 @@ const TreeMetas = ({
       setLoadingJerarquia(true);
       setErrorJerarquia(null);
       try {
-        const userData = JSON.parse(localStorage.getItem("userData"));
+        const userData = JSON.parse(sessionStorage.getItem("userData"));
         const idEjecutivo =
           userData?.idEjecutivo ||
           userData?.idejecutivo ||

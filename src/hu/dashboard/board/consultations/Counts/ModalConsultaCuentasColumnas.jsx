@@ -66,9 +66,9 @@ const ModalConsultaCuentasColumnas = ({ situacionOptions = [], allAvailableOptio
   return (
     <div
       className="bg-white rounded-lg p-2 flex flex-col"
-      style={{ height: "400px" }}
+
     >
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2 flex-shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-shrink-0">
         <div className="flex items-center justify-center gap-0">
           <IconCircular 
             bgColor="bg-iconCircular" 

@@ -157,6 +157,7 @@ const ValidadoresModal = ({
                     cartera={footerData.cartera}
                     arrepentimientos={footerData.arrepentimientos}
                     omitRootNode={true}
+                    isOpen={isOpen}
                 />
             </div>
         </ReusableModal>

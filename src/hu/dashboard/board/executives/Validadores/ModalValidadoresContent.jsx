@@ -12,17 +12,18 @@ import { toast } from "sonner";
 
 function ModalValidadoresContent(props) {
   // Limpiar estados al cerrar el modal (cuando isOpen pasa a false)
-  useEffect(() => {
-    if (props.isOpen === false) {
-      setExecutiveTree([]);
-      setUsuariosValidadores([]);
-      setValidadoresFromAPI([]);
-      setIsLoadingValidadores(false);
-      setIsProcessingChange(false);
-      setLastAction(null);
-      setLastUser(null);
-    }
-  }, [props.isOpen]);
+useEffect(() => {
+  if (props.isOpen === false) {  // Solo cuando explícitamente es false
+    console.log("Limpiando estados del modal de validadores");
+    setExecutiveTree([]);
+    setUsuariosValidadores([]);
+    setValidadoresFromAPI([]);
+    setIsLoadingValidadores(false);
+    setIsProcessingChange(false);
+    setLastAction(null);
+    setLastUser(null);
+  }
+}, [props.isOpen]);
   // Resetear estados al cerrar el modal
   useEffect(() => {
     if (typeof props.onClose === "function") {
@@ -88,55 +89,85 @@ function ModalValidadoresContent(props) {
   );
 
   // Cargar ejecutivos (idéntico a ModalCampanasEjecutivos)
-  useEffect(() => {
+useEffect(() => {
     const fetchExecutives = async () => {
-      try {
-        const userData = JSON.parse(localStorage.getItem("userData"));
-        const idEjecutivo = userData?.idEjecutivo;
-        const usuarioSesion = userData?.usuario || userData?.Usuario || "";
-        const nombreSesion =
-          userData?.nombreEjecutivo || userData?.nombre || "";
-        if (!idEjecutivo) return;
-        const data = await obetenerJerarquiaEncargados(idEjecutivo);
-        // Filtrar solo ejecutivos propios de nivel 1 (simula tvDependientes.CargaEjecutivosPropios(1))
-        const hijos = Array.isArray(data)
-          ? data
-              .filter((e) => e.jerarquia === undefined || e.jerarquia > 0) // Solo excluye jerarquía <= 0
-              .map((e) => ({
-                usuario: e.usuario,
-                nombreEjecutivo: e.nombreEjecutivo || "",
-                subordinados: Array.isArray(e.subordinados)
-                  ? e.subordinados.filter(
-                      (s) => s.jerarquia === undefined || s.jerarquia > 0,
-                    ) // Solo excluye jerarquía <= 0 en subordinados
-                  : [],
-                idEjecutivo: e.idEjecutivo,
-                idEncargado: e.idEncargado || null,
+        try {
+            const userData = JSON.parse(
+                sessionStorage.getItem("userData") || 
+                localStorage.getItem("userData") || 
+                "{}"
+            );
+            const idEjecutivo = userData?.idEjecutivo;
+            const usuarioSesion = userData?.usuario || userData?.Usuario || "";
+            const nombreSesion = userData?.nombreEjecutivo || userData?.nombre || userData?.NombreEjecutivo || "";
+            
+            console.log("📊 Datos de sesión:", { idEjecutivo, usuarioSesion, nombreSesion });
+            
+            if (!idEjecutivo) {
+                console.warn("⚠️ No se encontró idEjecutivo en userData");
+                return;
+            }
+            
+            const data = await obetenerJerarquiaEncargados(idEjecutivo);
+            console.log("📊 Jerarquía obtenida:", data);
+            
+            // ✅ AGREGAR ESTA PARTE QUE FALTA:
+            // Filtrar solo ejecutivos propios de nivel 1
+            const hijos = Array.isArray(data)
+                ? data
+                    .filter((e) => e.jerarquia === undefined || e.jerarquia > 0)
+                    .map((e) => ({
+                        usuario: e.usuario,
+                        nombreEjecutivo: e.nombreEjecutivo || "",
+                        subordinados: Array.isArray(e.subordinados)
+                            ? e.subordinados.filter(
+                                (s) => s.jerarquia === undefined || s.jerarquia > 0,
+                            )
+                            : [],
+                        idEjecutivo: e.idEjecutivo,
+                        idEncargado: e.idEncargado || null,
+                        seleccionado: false,
+                        jerarquia: e.jerarquia || 1,
+                    }))
+                : [];
+
+            console.log("📊 Hijos procesados:", hijos);
+
+            // Nodo raíz del usuario de sesión
+            const nodoSesion = {
+                usuario: usuarioSesion,
+                nombreEjecutivo: nombreSesion,
+                subordinados: hijos,
+                idEjecutivo: idEjecutivo,
+                idEncargado: null,
                 seleccionado: false,
-                jerarquia: e.jerarquia || 1,
-              }))
-          : [];
+                jerarquia: 1,
+            };
 
-        // Nodo raíz del usuario de sesión
-        const nodoSesion = {
-          usuario: usuarioSesion,
-          nombreEjecutivo: nombreSesion,
-          subordinados: hijos,
-          idEjecutivo: idEjecutivo,
-          idEncargado: null,
-          seleccionado: false,
-          jerarquia: obetenerJerarquiaEncargados.jerarquia,
-        };
+            console.log("📊 Nodo de sesión creado:", nodoSesion);
+            console.log("📊 ExecutiveTree que se va a setear:", [nodoSesion]);
 
-        setExecutiveTree([nodoSesion]);
-      } catch (error) {
-        toast.error("Error al cargar ejecutivos para validadores:", error);
-        setExecutiveTree([]);
-      }
+            setExecutiveTree([nodoSesion]);
+            
+            console.log("✅ ExecutiveTree seteado exitosamente");
+        } catch (error) {
+            console.error("❌ Error al cargar ejecutivos:", error);
+            toast.error("Error al cargar ejecutivos para validadores");
+            setExecutiveTree([]);
+        }
     };
+    
     fetchExecutives();
-  }, []);
+}, []);
 
+useEffect(() => {
+    console.log("🔄 ExecutiveTree actualizado:", executiveTree);
+    console.log("🔄 Número de nodos raíz:", executiveTree.length);
+    if (executiveTree.length > 0) {
+        console.log("🔄 Primer nodo:", executiveTree[0]);
+        console.log("🔄 Subordinados del primer nodo:", executiveTree[0].subordinados);
+    }
+}, [executiveTree]);
   // Filtrar ejecutivos: Replicar comportamiento exacto de ModalCampanasEjecutivos
   const usuariosFiltrados = useMemo(() => {
     if (!executiveTree.length) return [];
@@ -420,7 +451,7 @@ function ModalValidadoresContent(props) {
         handleSeleccionarUsuario={handleSeleccionarUsuario}
         producto={producto}
         style={{ height: "100%", width: "100%" }}
-        omitSessionExecutive={true}
+        omitSessionExecutive={false}
       />
     </div>
   );
