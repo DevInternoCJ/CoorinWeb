@@ -77,10 +77,15 @@ const ProductivityModal = ({
   const [idEjecutivoPrincipal, setIdEjecutivoPrincipal] = useState(null); // ID del usuario logueado
 
   // Obtener el idEjecutivo del usuario logueado al abrir el modal
-  useEffect(() => {
+ useEffect(() => {
     if (isOpen) {
       try {
-        const userData = JSON.parse(localStorage.getItem("userData"));
+        // ✅ Usar sessionStorage primero (consistente con otros componentes)
+        const userData = JSON.parse(
+          sessionStorage.getItem("userData") || 
+          localStorage.getItem("userData") || 
+          "{}"
+        );
         console.log("📋 userData completo:", userData);
 
         let idEjecutivo =
@@ -89,37 +94,33 @@ const ProductivityModal = ({
           userData?.id ||
           null;
 
-        // Convertir a número si es string
         if (idEjecutivo && typeof idEjecutivo === "string") {
           idEjecutivo = parseInt(idEjecutivo, 10);
         }
 
-        console.log(
-          "🔍 idEjecutivo extraído:",
-          idEjecutivo,
-          "tipo:",
-          typeof idEjecutivo,
-        );
+        console.log("idEjecutivo extraído:", idEjecutivo, "tipo:", typeof idEjecutivo);
 
         if (idEjecutivo && Number.isInteger(idEjecutivo) && idEjecutivo > 0) {
           setIdEjecutivoPrincipal(idEjecutivo);
           setSelectedExecutiveNode(idEjecutivo);
           setSelectedExecutiveInfo({
             idEjecutivo: idEjecutivo,
-            usuario: userData?.usuario || "--",
-            nombreEjecutivo:
-              userData?.nombre || userData?.nombreEjecutivo || "--",
+            usuario: userData?.usuario || userData?.Usuario || "--",
+            nombreEjecutivo: userData?.nombre || userData?.nombreEjecutivo || userData?.NombreEjecutivo || "--",
           });
-          console.log("✅ ID Ejecutivo Principal establecido:", idEjecutivo);
+          console.log("ID Ejecutivo Principal establecido:", idEjecutivo);
         } else {
-          console.warn(
-            "⚠️ No se encontró idEjecutivo válido en userData. Valor recibido:",
-            idEjecutivo,
-          );
+          console.warn("No se encontró idEjecutivo válido en userData. Valor:", idEjecutivo);
         }
       } catch (error) {
-        console.error("❌ Error al obtener idEjecutivo:", error);
+        console.error(" Error al obtener idEjecutivo:", error);
       }
+    } else {
+      // Limpiar estados cuando se cierra el modal
+      setIdEjecutivoPrincipal(null);
+      setSelectedExecutiveNode(null);
+      setSelectedExecutiveInfo(null);
+      setAllProductivityData([]);
     }
   }, [isOpen]);
 
@@ -144,11 +145,9 @@ const ProductivityModal = ({
     "SaldoSolucionado",
   ];
 
-  // Filtrar datos en frontend usando useMemo (sin llamar al backend)
   const productivityData = React.useMemo(() => {
     if (!allProductivityData || allProductivityData.length === 0) return [];
 
-    // Si no hay ejecutivo seleccionado o es el principal, mostrar todos
     if (
       !selectedExecutiveNode ||
       !selectedExecutiveInfo ||
@@ -157,32 +156,20 @@ const ProductivityModal = ({
       return allProductivityData;
     }
 
-    // Filtrar por ejecutivo seleccionado (funciona para Día y Hora)
     const filtered = allProductivityData.filter((item) => {
-      // Modo Hora: comparar con "encargado" o "idEncargado"
       const matchEncargado =
         item.encargado === String(selectedExecutiveInfo.idEjecutivo) ||
         item.idEncargado === String(selectedExecutiveInfo.idEjecutivo);
 
-      // Modo Día: comparar con "ejecutivo" (usuario)
       const matchEjecutivo = item.ejecutivo === selectedExecutiveInfo.usuario;
 
       return matchEncargado || matchEjecutivo;
     });
 
-    console.log(
-      `🔍 Filtrando para "${selectedExecutiveInfo.usuario}":`,
-      filtered.length,
-      "de",
-      allProductivityData.length,
-    );
+    console.log(`🔍 Filtrando para "${selectedExecutiveInfo.usuario}":`, filtered.length, "de", allProductivityData.length);
     return filtered;
-  }, [
-    allProductivityData,
-    selectedExecutiveNode,
-    selectedExecutiveInfo,
-    idEjecutivoPrincipal,
-  ]);
+  }, [allProductivityData, selectedExecutiveNode, selectedExecutiveInfo, idEjecutivoPrincipal]);
+
 
   // JSX para pasar como selector al header del modal (centrado junto al título)
   const indicadoresSelector = (
@@ -247,25 +234,29 @@ const ProductivityModal = ({
   );
 
   // Función para obtener datos de productividad
-  const fetchProductivityData = async (indicador, idsEjecutivos) => {
-    if (!indicador) return;
+   const fetchProductivityData = useCallback(async (indicador, idsEjecutivos) => {
+    if (!indicador) {
+      console.warn("⚠️ No se puede hacer fetch sin indicador");
+      return;
+    }
+
+    console.log("🚀 Iniciando fetchProductivityData con:", { indicador, idsEjecutivos, timeFilter });
 
     setLoadingProductivity(true);
     setErrorProductivity(null);
 
     try {
-      const idEjecutivoPrincipal = Array.isArray(idsEjecutivos)
+      const idEjecutivoPrincipalLocal = Array.isArray(idsEjecutivos)
         ? idsEjecutivos[0]
         : idsEjecutivos;
       const esModoHora = timeFilter === "Hora";
 
-      // Si no hay ID específico, usar 0 para mostrar todos
-      const idsToSend = !idEjecutivoPrincipal ? [0] : [idEjecutivoPrincipal];
+      const idsToSend = !idEjecutivoPrincipalLocal ? [0] : [idEjecutivoPrincipalLocal];
 
       const requestData = {
         indicador: indicador,
         idsEjecutivos: idsToSend,
-        idEjecutivoPrincipal: idEjecutivoPrincipal || 0,
+        idEjecutivoPrincipal: idEjecutivoPrincipalLocal || 0,
         esModoHora: esModoHora,
       };
 
@@ -275,23 +266,19 @@ const ProductivityModal = ({
       console.log("========================================");
 
       const data = await getProductivity(requestData);
-      console.log("  Respuesta raw del endpoint de productividad:", data);
+      console.log("📥 Respuesta raw del endpoint:", data);
 
-      // Manejar diferentes tipos de respuesta del servidor
+      // Procesar respuesta
       let processedData = [];
 
       if (data && data.datos && Array.isArray(data.datos)) {
-        // Si la respuesta tiene estructura con "datos", usar ese array
         processedData = data.datos.map((item) => {
-          // Normalizar campos según el modo
           const normalizedItem = { ...item };
 
-          // Si viene "encargado" pero no "idEncargado", mapear
           if (item.encargado !== undefined && !item.idEncargado) {
             normalizedItem.idEncargado = item.encargado;
           }
 
-          // Si es modo Hora, mapear hora6-hora22 a campos numéricos
           if (esModoHora && item.hora6 !== undefined) {
             normalizedItem["6"] = item.hora6 ?? 0;
             normalizedItem["7"] = item.hora7 ?? 0;
@@ -311,87 +298,68 @@ const ProductivityModal = ({
             normalizedItem["21"] = item.hora21 ?? 0;
             normalizedItem["22"] = item.hora22 ?? 0;
 
-            // Calcular total si no viene
-            if (
-              normalizedItem.total === undefined ||
-              normalizedItem.total === null
-            ) {
+            if (normalizedItem.total === undefined || normalizedItem.total === null) {
               const sum = [
-                item.hora6,
-                item.hora7,
-                item.hora8,
-                item.hora9,
-                item.hora10,
-                item.hora11,
-                item.hora12,
-                item.hora13,
-                item.hora14,
-                item.hora15,
-                item.hora16,
-                item.hora17,
-                item.hora18,
-                item.hora19,
-                item.hora20,
-                item.hora21,
-                item.hora22,
+                item.hora6, item.hora7, item.hora8, item.hora9, item.hora10,
+                item.hora11, item.hora12, item.hora13, item.hora14, item.hora15,
+                item.hora16, item.hora17, item.hora18, item.hora19, item.hora20,
+                item.hora21, item.hora22,
               ].reduce((acc, val) => acc + (Number(val) || 0), 0);
               normalizedItem.total = sum;
             }
           }
 
-          // Si el backend devuelve null en ejecutivo o idEncargado, rellenar con info del nodo seleccionado
-          if (
-            selectedExecutiveInfo &&
-            (normalizedItem.ejecutivo === null ||
-              normalizedItem.idEncargado === null)
-          ) {
-            normalizedItem.ejecutivo =
-              normalizedItem.ejecutivo || selectedExecutiveInfo.usuario || "--";
-            normalizedItem.idEncargado =
-              normalizedItem.idEncargado ||
-              selectedExecutiveInfo.idEjecutivo ||
-              "--";
+          if (selectedExecutiveInfo && (normalizedItem.ejecutivo === null || normalizedItem.idEncargado === null)) {
+            normalizedItem.ejecutivo = normalizedItem.ejecutivo || selectedExecutiveInfo.usuario || "--";
+            normalizedItem.idEncargado = normalizedItem.idEncargado || selectedExecutiveInfo.idEjecutivo || "--";
           }
 
           return normalizedItem;
         });
-        console.log(
-          "📥 Respuesta procesada (datos encontrado):",
-          processedData,
-        );
+        console.log("📊 Datos procesados (con datos):", processedData.length, "registros");
       } else if (Array.isArray(data)) {
-        // Si es un array directo
         processedData = data;
-        console.log("📥 Respuesta procesada (array directo):", processedData);
+        console.log("📊 Datos procesados (array directo):", processedData.length, "registros");
       } else if (data && typeof data === "object") {
-        // Buscar un array en las propiedades del objeto
         const dataArray = Object.values(data).find((val) => Array.isArray(val));
         processedData = dataArray || [];
-        console.log(
-          "📥 Respuesta procesada (array encontrado en objeto):",
-          processedData,
-        );
+        console.log("📊 Datos procesados (objeto):", processedData.length, "registros");
       } else {
         processedData = [];
+        console.warn("⚠️ No se encontraron datos válidos en la respuesta");
       }
 
       setAllProductivityData(processedData);
+      console.log("✅ Datos guardados en estado:", processedData.length, "registros");
     } catch (error) {
-      console.error("  Error al obtener datos de productividad:", error);
+      console.error("❌ Error al obtener datos de productividad:", error);
       setErrorProductivity("Error al obtener los datos de productividad");
       setAllProductivityData([]);
     } finally {
       setLoadingProductivity(false);
     }
-  };
+  }, [timeFilter, selectedExecutiveInfo]); // ✅ Dependencias correctas
+ 
+    useEffect(() => {
+    console.log("🔄 useEffect ejecutado. Estado:", {
+      selectedIndicator,
+      idEjecutivoPrincipal,
+      timeFilter,
+      isOpen
+    });
 
-  // Efecto para cargar TODOS los datos una sola vez (o cuando cambia indicador/timeFilter)
-  useEffect(() => {
-    if (selectedIndicator && idEjecutivoPrincipal) {
-      // Usar el ID principal para obtener todos los datos
+    if (isOpen && selectedIndicator && idEjecutivoPrincipal) {
+      console.log("✅ Condiciones cumplidas, llamando a fetchProductivityData");
       fetchProductivityData(selectedIndicator, [idEjecutivoPrincipal]);
+    } else {
+      console.warn("⚠️ Condiciones NO cumplidas para fetch:", {
+        isOpen,
+        selectedIndicator,
+        idEjecutivoPrincipal
+      });
     }
-  }, [selectedIndicator, timeFilter, idEjecutivoPrincipal]); // Solo cuando cambia indicador, modo o se obtiene el ID principal
+  }, [selectedIndicator, timeFilter, idEjecutivoPrincipal, isOpen, fetchProductivityData]); // ✅ Todas las dependencias
+
 
   return (
     <ReusableModal

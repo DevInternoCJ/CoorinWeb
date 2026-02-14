@@ -678,7 +678,7 @@ export const getCatalogoValueCard = async () => {
   }
 };
 
-export const getProductivity = async (requestData = null) => {
+export const getProductivity = async (requestData) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) {
