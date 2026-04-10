@@ -6,13 +6,13 @@ const RedirectToHome = () => <Navigate to="/" replace />;
 import "./index.css";
 import "./App.css";
 import ProtectedRoute from "./utils/ProtectedRoute";
-import { useUserStore } from "./contextGlobal/userStore";
+
 import { Toaster } from "sonner";
-import LoaderSuspense from "./components/loading/LoaderSuspense";
+import LoaderSuspense from "./components/Loading/LoaderSuspense";
 import CoorinBlack from "./assets/CoorinBlack.svg";
 
-const LoginPage = lazy(() => import("../src/hu/login/LoginPage"));
-const CoorinDashboard = lazy(() => import("./hu/dashboard/CoorinDashboard"));
+const LoginPage = lazy(() => import("../src/views/login/LoginPage"));
+const CoorinDashboard = lazy(() => import("./views/dashboard/CoorinDashboard"));
 
 const Loader = () => (
   <div className="flex items-center justify-center h-screen">
@@ -28,8 +28,7 @@ const Loader = () => (
 );
 
 function App() {
-  // Suscribirse al estado de autenticación para forzar re-render cuando cambie
-  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+
   return (
     <>
       <div className="container-fluid min-h-screen">
@@ -47,26 +46,7 @@ function App() {
           {/* Suspense para dashboardPage*/}
           <Route
             element={
-              <ProtectedRoute
-                // Permitir acceso solo si existe token y usuario autenticado (store o sessionStorage)
-                canActivate={(() => {
-                  try {
-                    const token =
-                      sessionStorage.getItem("token") ||
-                      localStorage.getItem("token");
-                    // `isAuthenticated` viene del store y es reactivo — provoca re-render
-                    const storedUser = JSON.parse(
-                      sessionStorage.getItem("userData") ||
-                        localStorage.getItem("userData") ||
-                        "null",
-                    );
-                    return !!token && (isAuthenticated || !!storedUser);
-                  } catch (e) {
-                    return false;
-                  }
-                })()}
-                redirectTo="/"
-              />
+              <ProtectedRoute redirectTo="/" />
             }
           >
             <Route

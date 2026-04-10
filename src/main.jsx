@@ -5,6 +5,10 @@ import { StrictMode } from "react";
 import "./index.css";
 import App from "./App.jsx";
 import "preline";
+import { useThemeStore } from "./contextGlobal/themeStore.js";
+
+// Inicializar tema ANTES del render para evitar parpadeo (flash of wrong theme)
+useThemeStore.getState().initTheme();
 
 // Sincronización de sesión entre pestañas:
 // Al iniciar sesión en una pestaña emitimos una señal breve en localStorage

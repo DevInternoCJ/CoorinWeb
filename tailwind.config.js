@@ -13,11 +13,10 @@ export default {
     // Para Preline UI
        'node_modules/preline/dist/*.js',
   ],
+  darkMode: 'class', // Habilitar dark mode por clase en el <html>
   theme: {
     extend: {
-      // Puedes extender el tema de Tailwind aquí si lo necesitas
       colors: {
-        // Ejemplo: agregar colores personalizados
         primary: "#3B82F6",
         secondary: "#1E40AF",
       },

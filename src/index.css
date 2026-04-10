@@ -2,56 +2,169 @@
 /* Preline UI */
 @import "../node_modules/preline/variants.css";
 
-
 @layer base {
   html {
     font-family: "Montserrat", sans-serif;
   }
 }
 body {
-
   font-family: "Montserrat", sans-serif;
-  /* Evitar que el body haga scroll */
   overflow: hidden;
   height: 100vh;
   margin: 0;
   padding: 0;
-  /* background: linear-gradient(135deg, #d9efea 0%, #e8f3f1 25%, #DEE5E5 50%, #DEE5E5 75%, #dfe9e6 100%); */
   background-attachment: fixed;
   background-color: var(--color-background-dashboard);
+  color: var(--color-text-primary);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
+/* ===== LIGHT MODE (default) ===== */
 :root {
-    --color-text-black: #00291a;
-    --color-text-terra: #505631;
-    --color-text-mint: #DEFFB9;
-    --color-btn-info-bg: #A9CDE0;
-    --color-btn-info-bg-hover: #3E86AC;
-    --color-btn-info-bg-focus: #1F4356;
-    --color-btn-info-text: #132934;
-    --color-btn-info-hover-text: #dbeafe;
-    --color-btn-info-focus-text: #bfdbfe;
+  /* Texto */
+  --color-text-black: #00291a;
+  --color-text-terra: #505631;
+  --color-text-mint: #deffb9;
 
-    --color-btn-warning-bg: #e4e4ab;
-    --color-btn-warning-bg-hover: #C1C13E;
-    --color-btn-warning-bg-focus: #59591D;
-    --color-btn-warning-text: #1f1f1f;
-    --color-btn-warning-hover-text: #fffcec;
-    --color-btn-warning-focus-text: #fffbe6;
+  /* Superficie base del layout */
+  --color-surface: #ffffff;
+  --color-surface-secondary: #f5f5f5;
+  --color-surface-modal: #efefef;
+  --color-text-primary: #1b4838;
+  --color-text-secondary: #374151;
+  --color-text-muted: #6b7280;
+  --color-border: #e5e7eb;
+  --color-scrollbar-track: #f5f5f5;
+  --color-scrollbar-thumb: #b0b0b0;
+  --color-sticky-bg: #ffffff;
+  --color-sticky-text: #2b463c;
 
-    --color-btn-danger-bg: #D78B84;
-    --color-btn-danger-bg-hover: #C1493E;
-    --color-btn-danger-bg-focus: #59221D;
-    --color-btn-danger-text: #361511;
-    --color-btn-danger-hover-text: #EECCC9;
-    --color-btn-danger-focus-text: #EECCC9;
+  /* Botones informativos */
+  --color-btn-info-bg: #a9cde0;
+  --color-btn-info-bg-hover: #3e86ac;
+  --color-btn-info-bg-focus: #1f4356;
+  --color-btn-info-text: #132934;
+  --color-btn-info-hover-text: #dbeafe;
+  --color-btn-info-focus-text: #bfdbfe;
+
+  /* Botones advertencia */
+  --color-btn-warning-bg: #e4e4ab;
+  --color-btn-warning-bg-hover: #c1c13e;
+  --color-btn-warning-bg-focus: #59591d;
+  --color-btn-warning-text: #1f1f1f;
+  --color-btn-warning-hover-text: #fffcec;
+  --color-btn-warning-focus-text: #fffbe6;
+
+  /* Botones peligro */
+  --color-btn-danger-bg: #d78b84;
+  --color-btn-danger-bg-hover: #c1493e;
+  --color-btn-danger-bg-focus: #59221d;
+  --color-btn-danger-text: #361511;
+  --color-btn-danger-hover-text: #eeccc9;
+  --color-btn-danger-focus-text: #eeccc9;
+
+  /* ===== Cards de Ejecutivos (tarjetas del dashboard) ===== */
+  /* Metas: fondo beige-oliva, texto verde tierra */
+  --color-card-metas-bg: #ddddb9;
+  --color-card-metas-font: #505631;
+  /* Validadores: fondo teal activo, texto verde oscuro */
+  --color-card-validadores-bg: #3eac91;
+  --color-card-validadores-font: #00291a;
+  /* Encargados: fondo verde profesional, texto mint */
+  --color-card-encargados-bg: #1b4838;
+  --color-card-encargados-font: #deffb9;
+  /* Catalogos: fondo teal claro, texto verde oscuro */
+  --color-card-catalogos-bg: #9dc5bc;
+  --color-card-catalogos-font: #00291a;
+  /* Scripts: fondo verde medio, texto mint claro */
+  --color-card-scripts-bg: #147f5e;
+  --color-card-scripts-font: #deffb9;
+  /* Pantalla: fondo teal activo, texto verde oscuro */
+  --color-card-pantalla-bg: #3eac91;
+  --color-card-pantalla-font: #00291a;
+}
+
+/* ===== DARK MODE ===== */
+.dark {
+  --color-text-black: #d1fae5;
+  --color-text-terra: #a3e635;
+  --color-text-mint: #6ee7b7;
+
+  /* Superficies */
+  --color-surface: #101311;
+  --color-surface-secondary: #162b20;
+  --color-surface-modal: #1a2e22;
+  --color-text-primary: #a7f3d0;
+  --color-text-secondary: #d1d5db;
+  --color-text-muted: #9ca3af;
+  --color-border: #2d4a3a;
+  --color-scrollbar-track: #1a2e22;
+  --color-scrollbar-thumb: #3eac91;
+  --color-sticky-bg: #162b20;
+  --color-sticky-text: #86efac;
+
+  /* Tokens de jerarquía oscuro (ligth shift) */
+  --color-iconCircular: #1b4838;
+  --color-bgsuccess: #155e42;
+  --color-jerarquia1: #2a7a6a;
+  --color-jerarquia2: #3eac91;
+  --color-jerarquia3: #50c9a8;
+  --color-jerarquia4: #86efac;
+  --color-bgcolor1: #07180d;
+  --color-background-primary: #0f2919;
+  --color-background-secondary: #0f2919;
+  --color-background-dashboard: #011008;
+  --color-background-tertiary: #162b20;
+
+  /* Botones informativos dark */
+  --color-btn-info-bg: #1e3a4a;
+  --color-btn-info-bg-hover: #1f4356;
+  --color-btn-info-bg-focus: #0d2535;
+  --color-btn-info-text: #bfdbfe;
+  --color-btn-info-hover-text: #dbeafe;
+  --color-btn-info-focus-text: #eff6ff;
+
+  /* Botones advertencia dark */
+  --color-btn-warning-bg: #3a3a0f;
+  --color-btn-warning-bg-hover: #59591d;
+  --color-btn-warning-bg-focus: #2a2a08;
+  --color-btn-warning-text: #fef9c3;
+  --color-btn-warning-hover-text: #fffcec;
+  --color-btn-warning-focus-text: #fffbe6;
+
+  /* Botones peligro dark */
+  --color-btn-danger-bg: #4a1a17;
+  --color-btn-danger-bg-hover: #7f1d1d;
+  --color-btn-danger-bg-focus: #450a0a;
+  --color-btn-danger-text: #fecaca;
+  --color-btn-danger-hover-text: #fee2e2;
+  --color-btn-danger-focus-text: #fef2f2;
+
+  /* ===== Cards de Ejecutivos — modo oscuro ===== */
+  /* Metas: fondo oliva saturado (café-lima), texto lima vivo */
+  --color-card-metas-bg: #2e3010;
+  --color-card-metas-font: #d4f06b;
+  /* Validadores: fondo teal profundo, texto agua clara */
+  --color-card-validadores-bg: #14413a;
+  --color-card-validadores-font: #6ee7b7;
+  /* Encargados: fondo verde oscuro elevado (distinguible del bg), texto mint brillante */
+  --color-card-encargados-bg: #1c4a34;
+  --color-card-encargados-font: #a7f3d0;
+  /* Catalogos: fondo teal aúlico, texto blanco-agua */
+  --color-card-catalogos-bg: #1a3d38;
+  --color-card-catalogos-font: #99f6e4;
+  /* Scripts: fondo verde-césped oscuro, texto lima pálido */
+  --color-card-scripts-bg: #163d28;
+  --color-card-scripts-font: #bbf7d0;
+  /* Pantalla: fondo teal oscuro con toques cyan, texto cyan pálido */
+  --color-card-pantalla-bg: #0f3040;
+  --color-card-pantalla-font: #67e8f9;
 }
 .coorin-bg {
- 
   background-repeat: no-repeat;
   background-position: center top;
   background-size: cover;
-
- 
 }
 /* Empujar el contenido principal cuando la sidebar está abierta o minificada (lg+)
    Usamos transform en el contenedor interno (.p-6) para que la animación sea GPU-accelerated
@@ -59,26 +172,27 @@ body {
 
 @theme {
   --color-iconCircular: #c8e7dd;
-  --color-bgsuccess: #87D4C1;
+  --color-bgsuccess: #87d4c1;
   --color-jerarquia1: #9dc5bc;
   --color-jerarquia2: #3eac91;
   --color-jerarquia3: #147f5e;
-  --color-jerarquia4: #1b4838; 
+  --color-jerarquia4: #1b4838;
   --color-bgcolor1: #efefef;
   --color-background-primary: #ddddb9;
   --color-background-secondary: #1b4838;
-  --color-background-dashboard: #DEE5E5;
+  --color-background-dashboard: #dee5e5;
   --color-background-tertiary: #f5f5f5;
   --animate-slide-x: slide-x 2s ease-in-out;
+}
+@keyframes slide-x {
+  0%,
+  100% {
+    transform: translateX(-8px);
   }
-   @keyframes slide-x {
-    0%, 100% {
-      transform: translateX(-8px);
-    }
-    50% {
-      transform: translateX(8px);
-    }
+  50% {
+    transform: translateX(8px);
   }
+}
 
 .perspective {
   perspective: 1000px;
@@ -89,16 +203,32 @@ body {
   will-change: transform;
 }
 .title-dashboard {
-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
   font-weight: 500;
   color: var(--color-jerarquia4);
-  background: linear-gradient(to right, rgb(255 255 255 / 63%), rgb(255 255 255 / 9%));
-  
+  background: linear-gradient(
+    to right,
+    rgb(255 255 255 / 63%),
+    rgb(255 255 255 / 9%)
+  );
+
   margin: 1px;
   padding: 0.5rem;
-  
+
   display: flex;
-  
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Dark mode override para el título del dashboard */
+.dark .title-dashboard {
+  color: var(--color-jerarquia4);
+  background: linear-gradient(
+    to right,
+    rgb(15 31 24 / 80%),
+    rgb(15 31 24 / 10%)
+  );
 }
 
 .input-floating-label {
@@ -114,26 +244,7 @@ backdrop-filter: blur(5px);
   border: 1.5px solid var(--color-jerarquia3);
 }
 
-
-
 /* === Scrollbar personalizado para ModalConsultaCuentas === */
-.scrollbar-gray::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
-    background: var(--color-jerarquia4);
-}
-.scrollbar-gray::-webkit-scrollbar-thumb {
-    background: var(--color-jerarquia4);
-    border-radius: 4px;
-}
-.scrollbar-gray::-webkit-scrollbar-thumb:hover {
-    background: var(--color-jerarquia4) ;
-}
-/* Scrollbar global para modales (colores y grosor) */
-.scrollbar-gray {
-  scrollbar-color: var(--color-jerarquia4) #f5f5f5;
-  scrollbar-width: thin;
-}
 .scrollbar-gray::-webkit-scrollbar {
   height: 8px;
   width: 8px;
@@ -144,10 +255,25 @@ backdrop-filter: blur(5px);
   border-radius: 4px;
 }
 .scrollbar-gray::-webkit-scrollbar-thumb:hover {
-  background: #888;
-  
+  background: var(--color-jerarquia2);
 }
-
+/* Scrollbar global para modales (colores y grosor) */
+.scrollbar-gray {
+  scrollbar-color: var(--color-jerarquia4) var(--color-scrollbar-track);
+  scrollbar-width: thin;
+}
+.scrollbar-gray::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+  background: var(--color-scrollbar-track);
+}
+.scrollbar-gray::-webkit-scrollbar-thumb {
+  background: var(--color-jerarquia4);
+  border-radius: 4px;
+}
+.scrollbar-gray::-webkit-scrollbar-thumb:hover {
+  background: var(--color-jerarquia2);
+}
 
 .table-border {
   border-collapse: unset;
@@ -160,48 +286,51 @@ backdrop-filter: blur(5px);
 /* === MODALES GENERALES (de modalBaseGenerales.css) === */
 .modal-blur-bg,
 .coorin-modal-blur-bg {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.3);
-    -webkit-backdrop-filter: blur(2px);
-    backdrop-filter: blur(2px);
-    width: 100vw;
-    height: 100vh;
-    min-width: 100vw;
-    min-height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
-    left: 0;
-    top: 0;
-    overflow: auto;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  width: 100vw;
+  height: 100vh;
+  min-width: 100vw;
+  min-height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  left: 0;
+  top: 0;
+  overflow: auto;
 }
 
 .modal-overlay {
-    position: absolute;
-    inset: 0;
-    cursor: pointer;
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
 }
 
 .modal-content {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    max-width: fit-content;
-   
-    height: auto;
-    /* Cambia este valor para hacer el modal más grande (ejemplo: 64rem = 1024px) */
-    background: var(--color-bgcolor1);
-    border-radius: 1rem;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    padding: 1.2rem;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: fit-content;
+  height: auto;
+  background: var(--color-surface-modal);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  padding: 1.2rem;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .modal-xl-container {
-    width: 100%;
+  width: 100%;
 }
 
 /* Fijo para el idEjecutivo de la sesión en la ramificación */
@@ -209,16 +338,19 @@ backdrop-filter: blur(5px);
   position: sticky;
   top: -10px;
   z-index: 3;
-  background: #ffffff;
+  background: var(--color-sticky-bg);
+  color: var(--color-sticky-text);
   margin-bottom: 10px;
   padding: 6px;
   border-radius: 4px;
   font-weight: 600;
-  color: #2b463c;
   font-size: 14px;
   text-align: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px #e0e0e033;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 /* Hover oscuro para elementos de la jerarquía de ejecutivos */
 .executive-hierarchy-item {
@@ -232,41 +364,41 @@ backdrop-filter: blur(5px);
   vertical-align: top;
 }
 .executive-hierarchy-item:hover {
-  background: #d9e0e9;
-  color: #f7f7f7;
-  /* font-weight: 600; */
+  background: var(--color-jerarquia1);
+  color: var(--color-jerarquia4);
   letter-spacing: 0.02em;
-  text-shadow: 0 1px 2px #111a, 0 0 1px #000a;
 }
 .executive-hierarchy-item.selected {
-  background: var(--color-jerarquia1, #e0f7fa);
-  color: #2b463c;
+  background: var(--color-jerarquia1);
+  color: var(--color-jerarquia4);
+  font-weight: 600;
 }
-
-
 
 /* === Estilo global para label === */
 label {
   color: var(--color-jerarquia3);
-
   font-weight: 600;
+  transition: color 0.2s;
 }
 /* === Ramificación Productividad === */
 .productividad-branch {
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 0.5rem;
   padding: 0.75rem;
-  
   border: 1px solid var(--color-jerarquia1);
   display: flex;
   flex-direction: column;
   flex: 1;
   min-width: 0;
   max-width: 300px;
-  color: #111;
+  color: var(--color-text-primary);
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
 }
 .productividad-branch * {
-  color: #111 !important;
+  color: var(--color-text-primary);
 }
 
 /* === Contenedor de jerarquía con scroll horizontal === */
@@ -290,7 +422,6 @@ label {
   max-height: 50vh;
   overflow: hidden;
   backdrop-filter: blur(5px) opacity(0.9);
-   
 }
 .ramificacion-sesiones .flex-1 {
   max-height: 25vh;
@@ -342,7 +473,9 @@ label {
   border-radius: 0.5rem;
   padding: 0.25rem 0.8rem;
   font-size: 1rem;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
   cursor: pointer;
   border: none;
 }
@@ -357,12 +490,14 @@ label {
 .modal-btn-close {
   background: transparent;
   color: var(--color-jerarquia3);
-  font-size: 2.0rem;
+  font-size: 2rem;
   border-radius: 50%;
   padding: 0;
   border: none;
   cursor: pointer;
-  transition: color 0.2s, background 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s;
 }
 .modal-btn-close:hover {
   color: #e53e3e;
@@ -375,14 +510,16 @@ label {
   height: 1rem;
   flex-shrink: 0;
   border-radius: 50%;
-  
+
   /* Colores personalizados */
   border: 1.5px solid var(--color-jerarquia1);
   background-color: white;
-  
+
   /* Transiciones */
-  transition: border 0.2s, background-color 0.2s;
-  
+  transition:
+    border 0.2s,
+    background-color 0.2s;
+
   /* Cursor */
   cursor: pointer;
 }
@@ -396,7 +533,6 @@ label {
 .modal-radio:focus {
   outline: none;
   border-color: var(--color-jerarquia3);
- 
 }
 
 .modal-radio:disabled {
@@ -434,17 +570,18 @@ label {
 .modal-table {
   width: 100%;
   font-size: 0.875rem;
-  color: #222;
-  background: #fff;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
   border-collapse: separate;
   border-spacing: 0;
   min-width: 300px;
- height: auto;
+  height: auto;
+  transition: background-color 0.3s ease;
 }
 .modal-table th,
 .modal-table td {
-  padding: 0.10rem 0.5rem;
-  border-bottom: 1px solid var(--color-jerarquia1);
+  padding: 0.1rem 0.5rem;
+  border-bottom: 1px solid var(--color-border);
   text-align: left;
 }
 .modal-table th {
@@ -463,11 +600,11 @@ label {
   border-bottom: none;
 }
 .modal-table tr {
-  background: #fff;
+  background: var(--color-surface);
   transition: background 0.2s;
 }
 .modal-table tr:hover {
-  background: #f5f5f5;
+  background: var(--color-surface-secondary);
 }
 
 /* === MODAL GLOBAL COORIN === */
@@ -478,7 +615,7 @@ label {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
 }
@@ -494,21 +631,38 @@ label {
   max-width: 90rem;
   max-height: 50rem;
   height: 100%;
-  background: var(--color-bgcolor1);
+  background: var(--color-surface-modal);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
   border-radius: 1rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
   padding: 1.5rem;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 .coorin-modal-xl-container {
   width: 100%;
 }
 @keyframes coorin-bounce-modal {
-  0% { transform: scale(1); }
-  20% { transform: scale(1.05, 0.95); }
-  40% { transform: scale(0.95, 1.05); }
-  60% { transform: scale(1.03, 0.97); }
-  80% { transform: scale(0.97, 1.03); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.05, 0.95);
+  }
+  40% {
+    transform: scale(0.95, 1.05);
+  }
+  60% {
+    transform: scale(1.03, 0.97);
+  }
+  80% {
+    transform: scale(0.97, 1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 .coorin-animate-bounce-modal {
   animation: coorin-bounce-modal 0.5s;
@@ -516,17 +670,17 @@ label {
 .coorin-modal-scroll-gray::-webkit-scrollbar {
   width: 8px;
   height: 8px;
-  background: #f5f5f5;
+  background: var(--color-scrollbar-track);
 }
 .coorin-modal-scroll-gray::-webkit-scrollbar-thumb {
-  background: #b0b0b0;
+  background: var(--color-scrollbar-thumb);
   border-radius: 4px;
 }
 .coorin-modal-scroll-gray::-webkit-scrollbar-thumb:hover {
-  background: #888;
+  background: var(--color-jerarquia2);
 }
 .coorin-modal-scroll-gray {
-  scrollbar-color: var(--color-jerarquia4) #f5f5f5;
+  scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
   scrollbar-width: thin;
 }
 
@@ -542,14 +696,16 @@ select:focus {
   padding: 0.2rem 0.35rem;
   display: inline-flex;
   align-items: center;
- 
+
   font-size: 0.875rem;
   font-weight: 500;
   border-radius: 0.5rem;
   border: 1px solid transparent;
   background: var(--color-bgsuccess);
   color: var(--color-background-secondary);
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 .btn-success:hover {
   background: var(--color-jerarquia3);
@@ -578,7 +734,9 @@ select:focus {
   border: 1px solid transparent;
   background: var(--color-btn-info-bg);
   color: var(--color-btn-info-text);
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 .btn-info:hover {
   background: var(--color-btn-info-bg-hover);
@@ -606,7 +764,9 @@ select:focus {
   border: 1px solid transparent;
   background: var(--color-btn-warning-bg);
   color: var(--color-btn-warning-text);
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 .btn-warning:hover {
   background: var(--color-btn-warning-bg-hover);
@@ -629,12 +789,14 @@ select:focus {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.875rem;
-  font-weight: 500; 
+  font-weight: 500;
   border-radius: 0.5rem;
   border: 1px solid transparent;
   background: var(--color-btn-danger-bg);
   color: var(--color-btn-danger-text);
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 .btn-danger:hover {
   background: var(--color-btn-danger-bg-hover);
@@ -668,6 +830,3 @@ select option:hover {
   outline: none;
   font-weight: 600;
 }
-
-
-

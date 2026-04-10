@@ -1,4 +1,4 @@
-import api from '../../../loki/apiConfig';
+import api from "../../../loki/apiConfig";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -13,37 +13,49 @@ export const loginUser = async (userData) => {
       dominio: "CONJUR",
       computadora: "Coorin",
       usuarioWindows: userData.usuarioWindows,
-      ip: "192.168.7.116",
+      ip: "192.168.7.33",
       aplicacion: "Coorin",
       version: "3.4.2",
-      servidor: "Albaz"
+      servidor: "Albaz",
     };
-    console.log('Enviando a /Auth/login:', requestData);
-    const response = await api.post('/Auth/login', requestData, {
+    console.log("Enviando a /Auth/login:", requestData);
+    const response = await api.post("/Auth/login", requestData, {
       headers: {
-        'Accept': 'application/json, text/plain, */*',
-        'Content-Type': 'application/json'
+        Accept: "application/json, text/plain, */*",
+        "Content-Type": "application/json",
       },
-      transformResponse: [(data) => {
-        try {
-          return JSON.parse(data);
-        } catch (jsonError) {
-          console.log('Respuesta en texto plano, devolviendo como string:', data);
-          return data;
-        }
-      }]
-    });  
- 
-    if (response.data && response.data.ejecutivo && response.data.ejecutivo.Token) {
+      transformResponse: [
+        (data) => {
+          try {
+            return JSON.parse(data);
+          } catch (jsonError) {
+            console.log(
+              "Respuesta en texto plano, devolviendo como string:",
+              data,
+            );
+            return data;
+          }
+        },
+      ],
+    });
+
+    if (
+      response.data &&
+      response.data.ejecutivo &&
+      response.data.ejecutivo.Token
+    ) {
       // Guardar en sessionStorage para que persista en recargas pero se borre al cerrar la pestaña
-      sessionStorage.setItem('token', response.data.ejecutivo.Token);
-      console.log(' Token guardado en sessionStorage:', response.data.ejecutivo.Token);
+      sessionStorage.setItem("token", response.data.ejecutivo.Token);
+      console.log(
+        " Token guardado en sessionStorage:",
+        response.data.ejecutivo.Token,
+      );
       // Verificar que realmente se guardó
-      const savedToken = sessionStorage.getItem('token');
-      console.log('Token recuperado de sessionStorage:', savedToken);
+      const savedToken = sessionStorage.getItem("token");
+      console.log("Token recuperado de sessionStorage:", savedToken);
       // Guardar datos del usuario en sessionStorage
       sessionStorage.setItem(
-        'userData',
+        "userData",
         JSON.stringify({
           idEjecutivo: response.data.ejecutivo.idEjecutivo,
           usuario: response.data.ejecutivo.Usuario,
@@ -64,20 +76,23 @@ export const loginUser = async (userData) => {
             Jerarquía: response.data.ejecutivo.Jerarquía,
           },
         };
-        localStorage.setItem('coorin-session-sync', JSON.stringify(syncPayload));
+        localStorage.setItem(
+          "coorin-session-sync",
+          JSON.stringify(syncPayload),
+        );
         // remove immediately to trigger storage event on other tabs
-        localStorage.removeItem('coorin-session-sync');
+        localStorage.removeItem("coorin-session-sync");
       } catch (e) {
-        console.warn('No se pudo emitir sincronización de sesión:', e);
+        console.warn("No se pudo emitir sincronización de sesión:", e);
       }
     } else {
-      console.warn('No se recibió token en la respuesta');
-      console.warn('Estructura completa de la respuesta:', response.data);
-    }    
+      console.warn("No se recibió token en la respuesta");
+      console.warn("Estructura completa de la respuesta:", response.data);
+    }
     return response.data;
   } catch (error) {
-    console.error('Error en el inicio de sesión:', error);
-    if (error.response && typeof error.response.data === 'string') {
+    console.error("Error en el inicio de sesión:", error);
+    if (error.response && typeof error.response.data === "string") {
       const customError = new Error(error.response.data);
       customError.response = error.response;
       throw customError;
@@ -85,7 +100,6 @@ export const loginUser = async (userData) => {
     throw error;
   }
 };
-
 
 //(userData, idEjecutivo)
 // export const ValidatePassword = async () => {
