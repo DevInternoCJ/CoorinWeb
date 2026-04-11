@@ -1,5 +1,6 @@
 // editar comentario
 import React, { useState, useRef, useMemo } from "react";
+import FloatingSelect from "../../../../../components/Select/FloatingSelect";
 import {
   GetInfoEditComments,
   PutEditComments,
@@ -125,25 +126,20 @@ const TabEditComment = () => {
       {/* Row 1: Select Cartera, Input Cuenta y Botón Buscar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
         {/* Select Cartera */}
-        <div className="relative flex-1">
-          <select
+        <div className="flex-1">
+          <FloatingSelect
+            id="cartera-select-comment"
+            label="Cartera"
             value={cartera}
             onChange={(e) => setCartera(e.target.value)}
-            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-            id="cartera-select-comment"
-          >
-            <option value="" disabled hidden></option>
-            <option value="cartera1">Cartera 1</option>
-            <option value="cartera2">Cartera 2</option>
-            <option value="cartera3">Cartera 3</option>
-            <option value="31">Cartera 31</option>
-          </select>
-          <label
-            htmlFor="cartera-select-comment"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-          >
-            Cartera
-          </label>
+            required
+            options={[
+              { value: "cartera1", label: "Cartera 1" },
+              { value: "cartera2", label: "Cartera 2" },
+              { value: "cartera3", label: "Cartera 3" },
+              { value: "31",       label: "Cartera 31" },
+            ]}
+          />
         </div>
 
         {/* Input Cuenta (no editable) */}

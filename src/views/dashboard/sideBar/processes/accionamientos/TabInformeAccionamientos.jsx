@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import FloatingSelect from "../../../../../components/Select/FloatingSelect";
 
 // Componente para los radio buttons de tipo de informe
 const TipoInformeRadios = ({ tipoInforme, setTipoInforme, layout = 'horizontal' }) => {
@@ -61,63 +62,45 @@ const InformeContent = () => {
             <div className="lg:hidden space-y-4 mt-2">
                 {/* Radio buttons móviles */}
                 <TipoInformeRadios tipoInforme={tipoInforme} setTipoInforme={setTipoInforme} layout="vertical" key={forceRender} />
-                <div className="relative w-full">
-                    <select
+                <div className="w-full">
+                    <FloatingSelect
+                        id="cartera-select"
+                        label="Cartera"
                         value={cartera}
                         onChange={(e) => setCartera(e.target.value)}
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                        id="cartera-select"
-                    >
-                        <option value="" disabled hidden></option>
-                        <option value="cartera1">Cartera 1</option>
-                        <option value="cartera2">Cartera 2</option>
-                        <option value="cartera3">Cartera 3</option>
-                    </select>
-                    <label
-                        htmlFor="cartera-select"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                    >
-                        Cartera
-                    </label>
+                        options={[
+                            { value: "cartera1", label: "Cartera 1" },
+                            { value: "cartera2", label: "Cartera 2" },
+                            { value: "cartera3", label: "Cartera 3" },
+                        ]}
+                    />
                 </div>
-                <div className="relative w-full">
-                    <select
+                <div className="w-full">
+                    <FloatingSelect
+                        id="consulta-select"
+                        label="Consulta"
                         value={consulta}
                         onChange={(e) => setConsulta(e.target.value)}
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                        id="consulta-select"
-                    >
-                        <option value="" disabled hidden></option>
-                        <option value="consulta1">Consulta 1</option>
-                        <option value="consulta2">Consulta 2</option>
-                        <option value="consulta3">Consulta 3</option>
-                    </select>
-                    <label
-                        htmlFor="consulta-select"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                    >
-                        Consulta
-                    </label>
+                        options={[
+                            { value: "consulta1", label: "Consulta 1" },
+                            { value: "consulta2", label: "Consulta 2" },
+                            { value: "consulta3", label: "Consulta 3" },
+                        ]}
+                    />
                 </div>
                 {tipoInforme === 'Detalles' && (
-                    <div className="relative w-full">
-                        <select
+                    <div className="w-full">
+                        <FloatingSelect
+                            id="acercamiento-select"
+                            label="Acercamiento"
                             value={acercamiento}
                             onChange={(e) => setAcercamiento(e.target.value)}
-                            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                            id="acercamiento-select"
-                        >
-                            <option value="" disabled hidden></option>
-                            <option value="acercamiento1">Acercamiento 1</option>
-                            <option value="acercamiento2">Acercamiento 2</option>
-                            <option value="acercamiento3">Acercamiento 3</option>
-                        </select>
-                        <label
-                            htmlFor="acercamiento-select"
-                            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                        >
-                            Acercamiento
-                        </label>
+                            options={[
+                                { value: "acercamiento1", label: "Acercamiento 1" },
+                                { value: "acercamiento2", label: "Acercamiento 2" },
+                                { value: "acercamiento3", label: "Acercamiento 3" },
+                            ]}
+                        />
                     </div>
                 )}
             </div>
@@ -127,63 +110,45 @@ const InformeContent = () => {
                 <TipoInformeRadios tipoInforme={tipoInforme} setTipoInforme={setTipoInforme} layout="horizontal" key={forceRender} />
                 <div className="space-y-2 mt-8">
                     <div className={`grid ${tipoInforme === 'Detalles' ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
-                        <div className="relative w-full">
-                            <select
+                        <div className="w-full">
+                            <FloatingSelect
+                                id="cartera-select-lg"
+                                label="Cartera"
                                 value={cartera}
                                 onChange={(e) => setCartera(e.target.value)}
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                id="cartera-select-lg"
-                            >
-                                <option value="" disabled hidden></option>
-                                <option value="cartera1">Cartera 1</option>
-                                <option value="cartera2">Cartera 2</option>
-                                <option value="cartera3">Cartera 3</option>
-                            </select>
-                            <label
-                                htmlFor="cartera-select-lg"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Cartera
-                            </label>
+                                options={[
+                                    { value: "cartera1", label: "Cartera 1" },
+                                    { value: "cartera2", label: "Cartera 2" },
+                                    { value: "cartera3", label: "Cartera 3" },
+                                ]}
+                            />
                         </div>
-                        <div className="relative w-full">
-                            <select
+                        <div className="w-full">
+                            <FloatingSelect
+                                id="consulta-select-lg"
+                                label="Consulta"
                                 value={consulta}
                                 onChange={(e) => setConsulta(e.target.value)}
-                                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                id="consulta-select-lg"
-                            >
-                                <option value="" disabled hidden></option>
-                                <option value="consulta1">Consulta 1</option>
-                                <option value="consulta2">Consulta 2</option>
-                                <option value="consulta3">Consulta 3</option>
-                            </select>
-                            <label
-                                htmlFor="consulta-select-lg"
-                                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                            >
-                                Consulta
-                            </label>
+                                options={[
+                                    { value: "consulta1", label: "Consulta 1" },
+                                    { value: "consulta2", label: "Consulta 2" },
+                                    { value: "consulta3", label: "Consulta 3" },
+                                ]}
+                            />
                         </div>
                         {tipoInforme === 'Detalles' && (
-                            <div className="relative w-full">
-                                <select
+                            <div className="w-full">
+                                <FloatingSelect
+                                    id="acercamiento-select-lg"
+                                    label="Acercamiento"
                                     value={acercamiento}
                                     onChange={(e) => setAcercamiento(e.target.value)}
-                                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                                    id="acercamiento-select-lg"
-                                >
-                                    <option value="" disabled hidden></option>
-                                    <option value="acercamiento1">Acercamiento 1</option>
-                                    <option value="acercamiento2">Acercamiento 2</option>
-                                    <option value="acercamiento3">Acercamiento 3</option>
-                                </select>
-                                <label
-                                    htmlFor="acercamiento-select-lg"
-                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                                >
-                                    Acercamiento
-                                </label>
+                                    options={[
+                                        { value: "acercamiento1", label: "Acercamiento 1" },
+                                        { value: "acercamiento2", label: "Acercamiento 2" },
+                                        { value: "acercamiento3", label: "Acercamiento 3" },
+                                    ]}
+                                />
                             </div>
                         )}
                     </div>

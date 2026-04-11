@@ -194,6 +194,97 @@ body {
   }
 }
 
+/* ===== FloatingSelect — Advanced Select con label flotante (Preline-style) ===== */
+
+/* Wrapper posicional */
+.floating-select-wrapper {
+  position: relative;
+}
+
+/* El select en sí: apariencia limpia, colores via var() */
+.floating-select {
+  display: block;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+  appearance: none;
+  -webkit-appearance: none;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.15s ease;
+}
+
+.floating-select:focus {
+  outline: none;
+  border-color: var(--color-jerarquia2);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--color-jerarquia2) 25%, transparent);
+}
+
+/* Estado con valor seleccionado — aplica padding top para que no tape el label */
+.floating-select:not(:placeholder-shown),
+.floating-select[data-has-value="true"] {
+  padding-top: 1.25rem;
+  padding-bottom: 0.25rem;
+}
+
+/* Dropdown de opciones (limited browser support, pero mejora Firefox/Chrome) */
+.floating-select option {
+  background-color: var(--color-surface-modal);
+  color: var(--color-text-primary);
+}
+
+/* Label flotante */
+.floating-select-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: var(--color-text-muted);
+  font-size: 0.875rem; /* text-sm */
+  transition:
+    transform 0.15s ease,
+    font-size 0.15s ease,
+    color 0.15s ease;
+  transform-origin: top left;
+}
+
+/* Label colapsado cuando el select tiene valor o está en foco */
+.floating-select:focus ~ .floating-select-label,
+.floating-select[data-has-value="true"] ~ .floating-select-label {
+  font-size: 0.625rem; /* 10px */
+  font-weight: 500;
+  transform: translateY(-50%) scaleY(0.85);
+  color: var(--color-jerarquia3);
+}
+
+/* Disabled */
+.floating-select:disabled ~ .floating-select-label {
+  opacity: 0.5;
+}
+
+/* ===== Input floating label global (text inputs) — misma línea visual ===== */
+.input-floating-label {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  font-weight: 400;
+  padding: 0.25rem 0.5rem;
+  outline: none;
+  transition:
+    border 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
 .perspective {
   perspective: 1000px;
 }
@@ -577,6 +668,7 @@ label {
   min-width: 300px;
   height: auto;
   transition: background-color 0.3s ease;
+  border-radius: 0.5rem;
 }
 .modal-table th,
 .modal-table td {

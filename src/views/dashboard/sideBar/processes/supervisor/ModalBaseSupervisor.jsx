@@ -1,6 +1,7 @@
 // src/hu/dashboard/sideBar/processes/supervisor/ModalBaseSupervisor.jsx
 
 import React, { useState, useRef, useEffect } from 'react';
+import FloatingSelect from "../../../../../components/Select/FloatingSelect";
 import ModalBase from '../../../board/ModalBase';
 import CloseButtonCampanas from '../../../components/CloseButtonReusable';
 
@@ -80,24 +81,18 @@ const ModalBaseSupervisor = ({
                                 <h2 className="text-lg font-semibold text-jerarquia3">Supervisor</h2>
                             </div>
                             {/* Select Cartera */}
-                            <div className="relative w-full sm:w-auto">
-                                <select
+                            <div className="w-full sm:w-auto sm:min-w-[11rem]">
+                                <FloatingSelect
+                                    id="cartera-supervisor-select"
+                                    label="Cartera"
                                     value={cartera}
                                     onChange={(e) => setCartera(e.target.value)}
-                                    className="peer p-4 pe-9 block w-full sm:w-45 bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 disabled:bg-gray-200 disabled:text-gray-500"
-                                    id="cartera-supervisor-select"
-                                >
-                                    <option value="" disabled hidden></option>
-                                    <option value="1">Cartera 1</option>
-                                    <option value="2">Cartera 2</option>
-                                    <option value="31">Cartera 31</option>
-                                </select>
-                                <label
-                                    htmlFor="cartera-supervisor-select"
-                                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                                >
-                                    Cartera
-                                </label>
+                                    options={[
+                                        { value: "1", label: "Cartera 1" },
+                                        { value: "2", label: "Cartera 2" },
+                                        { value: "31", label: "Cartera 31" },
+                                    ]}
+                                />
                             </div>
                             {/* Radio buttons Asignar / Consultar */}
                             <div className="flex items-center justify-center space-x-4">

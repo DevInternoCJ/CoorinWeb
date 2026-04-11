@@ -1,5 +1,6 @@
 import React, { useMemo, forwardRef, useImperativeHandle } from "react";
 import { useEffect, useState } from "react";
+import FloatingSelect from "../../../../../../components/Select/FloatingSelect";
 import { getCatalogoValueCard } from "../../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
@@ -268,198 +269,87 @@ const CapturaVisitsF2 = forwardRef(
         <h3 className="font-bold text-sm mb-2">Vivienda – F2</h3>
         <div className="grid grid-cols-2 gap-2">
           {/* Mapeo - siempre habilitado */}
-          <div className="relative w-full sm:col-span-2">
-            <select
-              className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          <div className="w-full sm:col-span-2">
+            <FloatingSelect
               id="mapeo-select"
-              value={mapeoSeleccionado}
+              label="Mapeo"
+              value={String(mapeoSeleccionado)}
               onChange={handleMapeoChange}
-            >
-              <option value="" disabled>
-                Seleccione mapeo
-              </option>
-              {opcionesMapeoConFiltro.map((opt) => (
-                <option
-                  key={opt.idValor}
-                  value={opt.idValor}
-                  disabled={opt.disabled}
-                >
-                  {opt.valor}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="mapeo-select"
-              className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-            >
-              Mapeo
-            </label>
+              options={opcionesMapeoConFiltro.map((opt) => ({ value: String(opt.idValor), label: opt.valor }))}
+              placeholder="Seleccione mapeo"
+            />
           </div>
           {/* Fachada */}
-          <div className="relative w-full sm:col-span-2">
-            <select
-              className={getSelectClass(camposHabilitados)}
+          <div className="w-full sm:col-span-2">
+            <FloatingSelect
               id="fachada-select"
+              label="Fachada"
               value={fachada}
               onChange={(e) => setFachada(e.target.value)}
+              options={fachadaOptions.filter(o => o.value !== "")}
               disabled={!camposHabilitados}
-            >
-              <option value="" disabled>
-                Seleccione color fachada
-              </option>
-              {fachadaOptions.map((opt) => (
-                <option
-                  key={opt.value}
-                  value={opt.value}
-                  hidden={opt.value === ""}
-                >
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="fachada-select"
-              className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-            >
-              Fachada
-            </label>
+              placeholder="Seleccione color fachada"
+            />
           </div>
           {/* Puerta */}
-          <div className="relative w-full sm:col-span-2">
-            <select
-              className={getSelectClass(camposHabilitados)}
+          <div className="w-full sm:col-span-2">
+            <FloatingSelect
               id="puerta-select"
+              label="Puerta"
               value={puerta}
               onChange={(e) => setPuerta(e.target.value)}
+              options={puertaOptions.filter(o => o.value !== "")}
               disabled={!camposHabilitados}
-            >
-              <option value="" disabled>
-                Seleccione color puerta
-              </option>
-              {puertaOptions.map((opt) => (
-                <option
-                  key={opt.value}
-                  value={opt.value}
-                  hidden={opt.value === ""}
-                >
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="puerta-select"
-              className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-            >
-              Puerta
-            </label>
+              placeholder="Seleccione color puerta"
+            />
           </div>
           {/* Herrería */}
-          <div className="relative w-full sm:col-span-2">
-            <select
-              className={getSelectClass(camposHabilitados)}
+          <div className="w-full sm:col-span-2">
+            <FloatingSelect
               id="herreria-select"
+              label="Herrería"
               value={herreria}
               onChange={(e) => setHerreria(e.target.value)}
+              options={herreriaOptions.filter(o => o.value !== "")}
               disabled={!camposHabilitados}
-            >
-              <option value="" disabled>
-                Seleccione color herrería
-              </option>
-              {herreriaOptions.map((opt) => (
-                <option
-                  key={opt.value}
-                  value={opt.value}
-                  hidden={opt.value === ""}
-                >
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="herreria-select"
-              className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-            >
-              Herrería
-            </label>
+              placeholder="Seleccione color herrería"
+            />
           </div>
           {/* NivelesPisos */}
-          <div className="relative w-full sm:col-span-2">
-            <select
-              className={getSelectClass(camposHabilitados)}
+          <div className="w-full sm:col-span-2">
+            <FloatingSelect
               id="nivelespisos-select"
+              label="NivelesPisos"
               value={nivelesPisos}
               onChange={(e) => setNivelesPisos(e.target.value)}
+              options={nivelesPisosOptions.filter(o => o.value !== "")}
               disabled={!camposHabilitados}
-            >
-              <option value="" disabled>
-                Seleccione niveles
-              </option>
-              {nivelesPisosOptions.map((opt) => (
-                <option
-                  key={opt.value}
-                  value={opt.value}
-                  hidden={opt.value === ""}
-                >
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="nivelespisos-select"
-              className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-            >
-              NivelesPisos
-            </label>
+              placeholder="Seleccione niveles"
+            />
           </div>
           {/* N.Economico - Catálogo 27 */}
-          <div className="relative w-full sm:col-span-2">
-            <select
-              className={getSelectClass(camposHabilitados)}
+          <div className="w-full sm:col-span-2">
+            <FloatingSelect
               id="neconomico-select"
-              value={nEconomico}
+              label="N.Economico"
+              value={String(nEconomico)}
               onChange={(e) => setNEconomico(e.target.value)}
+              options={opcionesEconomico.map((opt) => ({ value: String(opt.idValor), label: opt.valor }))}
               disabled={!camposHabilitados}
-            >
-              <option value="" disabled>
-                Seleccione económico
-              </option>
-              {opcionesEconomico.map((opt) => (
-                <option key={opt.idValor} value={opt.idValor}>
-                  {opt.valor}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="neconomico-select"
-              className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-            >
-              N.Economico
-            </label>
+              placeholder="Seleccione económico"
+            />
           </div>
           {/* Vivienda - Catálogo 25 */}
-          <div className="relative w-full sm:col-span-2">
-            <select
-              className={getSelectClass(camposHabilitados)}
+          <div className="w-full sm:col-span-2">
+            <FloatingSelect
               id="vivienda-select"
-              value={vivienda}
+              label="Vivienda"
+              value={String(vivienda)}
               onChange={(e) => setVivienda(e.target.value)}
+              options={opcionesVivienda.map((opt) => ({ value: String(opt.idValor), label: opt.valor }))}
               disabled={!camposHabilitados}
-            >
-              <option value="" disabled>
-                Seleccione vivienda
-              </option>
-              {opcionesVivienda.map((opt) => (
-                <option key={opt.idValor} value={opt.idValor}>
-                  {opt.valor}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="vivienda-select"
-              className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-            >
-              Vivienda
-            </label>
+              placeholder="Seleccione vivienda"
+            />
           </div>
         </div>
         {/* Propietario - input animado (solo letras - txtOnlyChars_KeyPress) */}

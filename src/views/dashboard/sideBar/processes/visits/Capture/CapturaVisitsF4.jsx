@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, forwardRef, useImperativeHandle } from "react";
+import FloatingSelect from "../../../../../../components/Select/FloatingSelect";
 import { getCatalogoValueCard } from "../../../../../../services/mark/albaz/LokiServices";
 
 // IDs de catálogos del C# LlenaComboBox()
@@ -418,26 +419,15 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
     <h3 className="font-bold text-sm mb-2">Visita – F4</h3>
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
       {/* Row 1 */}
-  <div className="relative w-full min-w-0 sm:max-w-none">
-        <select
-          className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+  <div className="w-full min-w-0 sm:max-w-none">
+        <FloatingSelect
           id="contacto-select-f4"
-          value={contacto}
+          label="Contacto"
+          value={String(contacto)}
           onChange={(e) => setContacto(e.target.value)}
-        >
-          <option value="" disabled>Seleccione contacto</option>
-          {contactoOptions.map((opt) => (
-            <option key={opt.idValor} value={opt.idValor}>
-              {opt.valor}
-            </option>
-          ))}
-        </select>
-        <label
-          htmlFor="contacto-select-f4"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-        >
-          Contacto
-        </label>
+          options={contactoOptions.map((opt) => ({ value: String(opt.idValor), label: opt.valor }))}
+          placeholder="Seleccione contacto"
+        />
       </div>
   <div className="relative w-full min-w-0 sm:col-span-2">
         <input
@@ -460,77 +450,38 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
         </label>
       </div>
       {/* Row 2 */}
-  <div className="relative w-full min-w-0">
-        <select
-          className={`peer p-4 pe-9 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 ${
-            parentescoEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
-          }`}
+  <div className="w-full min-w-0">
+        <FloatingSelect
           id="parentesco-select-f4"
-          value={parentesco}
+          label="Parentesco"
+          value={String(parentesco)}
           onChange={(e) => setParentesco(e.target.value)}
+          options={opcionesParentesco.map((opt) => ({ value: String(opt.idValor), label: opt.valor }))}
           disabled={!parentescoEnabled}
-        >
-          <option value="" disabled>Seleccione parentesco</option>
-          {opcionesParentesco.map((opt) => (
-            <option key={opt.idValor} value={opt.idValor}>
-              {opt.valor}
-            </option>
-          ))}
-        </select>
-        <label
-          htmlFor="parentesco-select-f4"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-        >
-          Parentesco
-        </label>
+          placeholder="Seleccione parentesco"
+        />
       </div>
-  <div className="relative w-full min-w-0">
-        <select
-          className={`peer p-4 pe-9 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 ${
-            situacionEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
-          }`}
+  <div className="w-full min-w-0">
+        <FloatingSelect
           id="situacion-select-f4"
-          value={situacion}
+          label="Situación"
+          value={String(situacion)}
           onChange={(e) => setSituacion(e.target.value)}
+          options={situacionOptions.map((opt) => ({ value: String(opt.idValor), label: opt.valor }))}
           disabled={!situacionEnabled}
-        >
-          <option value="" disabled>Seleccione situación</option>
-          {situacionOptions.map((opt) => (
-            <option key={opt.idValor} value={opt.idValor}>
-              {opt.valor}
-            </option>
-          ))}
-        </select>
-        <label
-          htmlFor="situacion-select-f4"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-        >
-          Situación
-        </label>
+          placeholder="Seleccione situación"
+        />
       </div>
-  <div className="relative w-full min-w-0">
-        <select
-          className={`peer p-4 pe-9 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 ${
-            noPagoEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
-          }`}
+  <div className="w-full min-w-0">
+        <FloatingSelect
           id="nopago-select-f4"
-          value={noPago}
+          label="No Pago"
+          value={String(noPago)}
           onChange={(e) => setNoPago(e.target.value)}
+          options={opcionesCausaNoPago.map((opt) => ({ value: String(opt.idValor), label: opt.valor }))}
           disabled={!noPagoEnabled}
-        >
-          <option value="" disabled>Seleccione causa no pago</option>
-          {opcionesCausaNoPago.map((opt) => (
-            <option key={opt.idValor} value={opt.idValor}>
-              {opt.valor}
-            </option>
-          ))}
-        </select>
-        <label
-          htmlFor="nopago-select-f4"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-        >
-          No Pago
-        </label>
+          placeholder="Seleccione causa no pago"
+        />
       </div>
       {/* Row 3 */}
       {/* Visita - calendario con label flotante */}
@@ -593,26 +544,15 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
         </label>
       </div>
       {/* Row 4 */}
-  <div className="relative w-full min-w-0">
-        <select
-          className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+  <div className="w-full min-w-0">
+        <FloatingSelect
           id="sucursal-select-f4"
-          value={sucursal}
+          label="Sucursal"
+          value={String(sucursal)}
           onChange={(e) => setSucursal(e.target.value)}
-        >
-          <option value="" disabled>Seleccione sucursal</option>
-          {opcionesSucursal.map((opt) => (
-            <option key={opt.idValor} value={opt.idValor}>
-              {opt.valor}
-            </option>
-          ))}
-        </select>
-        <label
-          htmlFor="sucursal-select-f4"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-        >
-          Sucursal
-        </label>
+          options={opcionesSucursal.map((opt) => ({ value: String(opt.idValor), label: opt.valor }))}
+          placeholder="Seleccione sucursal"
+        />
       </div>
   <div className="relative w-full min-w-0">
         <input

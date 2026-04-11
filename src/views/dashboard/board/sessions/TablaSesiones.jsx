@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import IconCircular from "../../../../components/Iconos/IconCircular";
-import CoorinGreen from "../../../../assets/CoorinGreen.svg";
 import {
   getSessions,
   patchLogoutEjecutive,
@@ -18,7 +17,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
   const [loggingOut, setLoggingOut] = useState(null); // Para mostrar estado de logout por ejecutivo
   const [unlocking, setUnlocking] = useState(null); // Para mostrar estado de desbloqueo por ejecutivo
   const [resettingPassword, setResettingPassword] = useState(null); // Para mostrar estado de reset de contraseña
-  const [passwordReset, setPasswordReset] = useState(new Set()); // Para rastrear qué usuarios ya tienen contraseña reestablecida
+  const [passwordReset, setPasswordReset] = useState(() => new Set()); // inicializador lazy — evita crear Set en cada render
   // Función para manejar el desbloqueo del ejecutivo
   const handleUnlockExecutive = async (rowIdEjecutivo) => {
     try {
@@ -46,16 +45,20 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
   // Obtener el idEjecutivo del usuario logueado: preferir el store (sessionStorage),
   // fallback a sessionStorage y luego a localStorage para compatibilidad.
   const storeUser = useUserStore((state) => state.user);
-  const persistedSession =
-    storeUser ||
-    JSON.parse(sessionStorage.getItem("userData") || "null") ||
-    JSON.parse(localStorage.getItem("userData") || "null");
-
-  const idEjecutivoSesion =
-    persistedSession?.idEjecutivo ||
-    persistedSession?.idejecutivo ||
-    persistedSession?.id ||
-    null;
+  // Memoizado para evitar que sea una dependencia inestable del useEffect
+  // (sin useMemo, se recalcula leyendo storage en cada render y causa bucle infinito de fetches)
+  const idEjecutivoSesion = useMemo(() => {
+    const persisted =
+      storeUser ||
+      JSON.parse(sessionStorage.getItem("userData") || "null") ||
+      JSON.parse(localStorage.getItem("userData") || "null");
+    return (
+      persisted?.idEjecutivo ||
+      persisted?.idejecutivo ||
+      persisted?.id ||
+      null
+    );
+  }, [storeUser]); // solo recalcula cuando cambia el store
 
   // Función para manejar el logout del ejecutivo
   const handleLogoutExecutive = async (rowIdEjecutivo) => {
@@ -337,7 +340,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                 !error &&
                 sessions.length > 0 &&
                 sessions.map((session, i) => (
-                  <tr key={session.id || i} style={{ height: "20px" }}>
+                  <tr key={session.idEjecutivo ?? i} style={{ height: "20px" }}>
                     <td style={{ whiteSpace: "nowrap" }}>
                       {session.nombreEjecutivo ||
                         session.ejecutivo ||

@@ -1,0 +1,393 @@
+/* ============================================================
+ *  coorin.css — Tema personalizado CoorinWeb (Preline-style)
+ *  --------------------------------------------------------------
+ *  Importar DESPUÉS de `../node_modules/preline/variants.css`
+ *  en index.css:
+ *
+ *    @import "./themes/coorin.css";
+ *
+ *  Esto mapea los tokens semánticos de Preline UI a los colores
+ *  de la paleta CoorinWeb, de modo que las clases de Tailwind
+ *  como `bg-background`, `text-foreground`, `border-line-1`,
+ *  `bg-surface`, `text-muted-foreground`, `bg-primary`, etc.
+ *  funcionen automáticamente en claro y oscuro SIN necesitar
+ *  variantes `dark:` en cada componente.
+ * ============================================================ */
+
+/* ------------------------------------------------------------------
+ *  1. @theme inline — nuevos tokens de Tailwind para CoorinWeb
+ *     Solo los que no existen en el base theme.css de Preline.
+ * ------------------------------------------------------------------ */
+@theme inline {
+  /* Jerarquía de color (acento verde) — accesibles como bg-jerarquia1, etc. */
+  --color-jerarquia1: var(--jerarquia1);
+  --color-jerarquia2: var(--jerarquia2);
+  --color-jerarquia3: var(--jerarquia3);
+  --color-jerarquia4: var(--jerarquia4);
+
+  /* Fondos de layout específicos */
+  --color-background-dashboard: var(--background-dashboard);
+  --color-background-primary:   var(--color-background);       /* alias Preline */
+  --color-background-tertiary:  var(--background-tertiary);
+
+  /* Superficies semánticas del proyecto */
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-modal:     var(--surface-modal);
+
+  /* Textos */
+  --color-text-primary:   var(--foreground);                   /* alias Preline */
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted:     var(--muted-foreground);             /* alias Preline */
+
+  /* Stickies */
+  --color-sticky-bg:   var(--sticky-bg);
+  --color-sticky-text: var(--sticky-text);
+
+  /* Iconos circulares */
+  --color-iconCircular:     var(--iconCircular);
+  --color-bgsuccess:        var(--bgsuccess);
+
+  /* Buttons — info */
+  --color-btn-info-bg:         var(--btn-info-bg);
+  --color-btn-info-bg-hover:   var(--btn-info-bg-hover);
+  --color-btn-info-text:       var(--btn-info-text);
+  --color-btn-info-hover-text: var(--btn-info-hover-text);
+
+  /* Buttons — warning */
+  --color-btn-warning-bg:         var(--btn-warning-bg);
+  --color-btn-warning-bg-hover:   var(--btn-warning-bg-hover);
+  --color-btn-warning-text:       var(--btn-warning-text);
+  --color-btn-warning-hover-text: var(--btn-warning-hover-text);
+
+  /* Buttons — danger */
+  --color-btn-danger-bg:         var(--btn-danger-bg);
+  --color-btn-danger-bg-hover:   var(--btn-danger-bg-hover);
+  --color-btn-danger-text:       var(--btn-danger-text);
+  --color-btn-danger-hover-text: var(--btn-danger-hover-text);
+
+  /* Cards de ejecutivos */
+  --color-card-metas-bg:         var(--card-metas-bg);
+  --color-card-metas-font:       var(--card-metas-font);
+  --color-card-validadores-bg:   var(--card-validadores-bg);
+  --color-card-validadores-font: var(--card-validadores-font);
+  --color-card-encargados-bg:    var(--card-encargados-bg);
+  --color-card-encargados-font:  var(--card-encargados-font);
+  --color-card-catalogos-bg:     var(--card-catalogos-bg);
+  --color-card-catalogos-font:   var(--card-catalogos-font);
+  --color-card-scripts-bg:       var(--card-scripts-bg);
+  --color-card-scripts-font:     var(--card-scripts-font);
+  --color-card-pantalla-bg:      var(--card-pantalla-bg);
+  --color-card-pantalla-font:    var(--card-pantalla-font);
+}
+
+/* ------------------------------------------------------------------
+ *  2. :root — Modo CLARO
+ *     Asigna los valores de la paleta CoorinWeb a los tokens
+ *     semánticos de Preline Y a los propios del proyecto.
+ * ------------------------------------------------------------------ */
+:root {
+  /* ── Preline core tokens (light) ─────────────────────────── */
+  --background:         #dee5e5;   /* --color-background-dashboard */
+  --background-1:       #f5f5f5;
+  --background-2:       #efefef;
+  --background-plain:   #ffffff;
+
+  --foreground:         #1b4838;   /* --color-text-primary */
+  --foreground-inverse: #ffffff;
+  --inverse:            #1b4838;
+
+  --border:             #e5e7eb;   /* --color-border */
+  --border-line-1:      #f5f5f5;
+  --border-line-2:      #e5e7eb;
+  --border-line-3:      #d1d5db;
+
+  /* Primary = jerarquia2 (teal activo) */
+  --primary:            #3eac91;
+  --primary-foreground: #ffffff;
+  --primary-hover:      #147f5e;
+  --primary-focus:      #147f5e;
+  --primary-active:     #147f5e;
+  --primary-checked:    #3eac91;
+  --primary-line:       transparent;
+
+  /* Secondary */
+  --secondary:          #1b4838;
+  --secondary-foreground: #deffb9;
+  --secondary-hover:    #0f2919;
+  --secondary-focus:    #0f2919;
+  --secondary-active:   #0f2919;
+  --secondary-line:     transparent;
+
+  /* Layer (panels, cards) */
+  --layer:              #ffffff;
+  --layer-line:         #e5e7eb;
+  --layer-foreground:   #1b4838;
+  --layer-hover:        #f5f5f5;
+  --layer-focus:        #f5f5f5;
+  --layer-active:       #f5f5f5;
+
+  /* Surface (inputs, secondary panels) */
+  --surface:            #f5f5f5;
+  --surface-1:          #efefef;
+  --surface-2:          #e5e7eb;
+  --surface-line:       transparent;
+  --surface-foreground: #1b4838;
+  --surface-hover:      #efefef;
+  --surface-focus:      #efefef;
+  --surface-active:     #efefef;
+
+  /* Muted */
+  --muted:              #f5f5f5;
+  --muted-foreground:   #6b7280;
+  --muted-foreground-1: #9ca3af;
+  --muted-foreground-2: #4b5563;
+  --muted-hover:        #efefef;
+  --muted-focus:        #efefef;
+  --muted-active:       #efefef;
+
+  /* Destructive */
+  --destructive:            #d78b84;
+  --destructive-foreground: #ffffff;
+  --destructive-hover:      #c1493e;
+  --destructive-focus:      #c1493e;
+
+  /* Card */
+  --card:         #ffffff;
+  --card-border:  #e5e7eb;
+  --card-divider: #e5e7eb;
+  --card-header:  #f5f5f5;
+  --card-footer:  #f5f5f5;
+  --card-inverse: #1b4838;
+
+  /* Overlay (modales) */
+  --overlay:         #efefef;
+  --overlay-border:  #e5e7eb;
+  --overlay-divider: #e5e7eb;
+  --overlay-header:  #f5f5f5;
+  --overlay-footer:  #f5f5f5;
+  --overlay-inverse: #1b4838;
+
+  /* Select dropdown */
+  --select:               #ffffff;
+  --select-1:             #f5f5f5;
+  --select-border:        transparent;
+  --select-item-foreground: #1b4838;
+  --select-item-hover:    #efefef;
+  --select-item-focus:    #efefef;
+  --select-item-active:   #efefef;
+  --select-inverse:       #1b4838;
+
+  /* Scrollbar */
+  --scrollbar-track:         #f5f5f5;
+  --scrollbar-thumb:         #9dc5bc;
+  --scrollbar-track-inverse: transparent;
+  --scrollbar-thumb-inverse: #ffffff;
+
+  /* Table */
+  --table-border: #e5e7eb;
+
+  /* ── Tokens propios de CoorinWeb (light) ─────────────────── */
+  --jerarquia1:  #9dc5bc;
+  --jerarquia2:  #3eac91;
+  --jerarquia3:  #147f5e;
+  --jerarquia4:  #1b4838;
+
+  --bgsuccess:  #87d4c1;
+  --iconCircular: #c8e7dd;
+
+  --background-dashboard:  #dee5e5;
+  --background-tertiary:   #f5f5f5;
+
+  --surface-secondary: #f5f5f5;
+  --surface-modal:     #efefef;
+
+  --text-secondary:    #374151;
+  --sticky-bg:         #ffffff;
+  --sticky-text:       #2b463c;
+
+  /* Buttons info */
+  --btn-info-bg:         #a9cde0;
+  --btn-info-bg-hover:   #3e86ac;
+  --btn-info-text:       #132934;
+  --btn-info-hover-text: #dbeafe;
+
+  /* Buttons warning */
+  --btn-warning-bg:         #e4e4ab;
+  --btn-warning-bg-hover:   #c1c13e;
+  --btn-warning-text:       #1f1f1f;
+  --btn-warning-hover-text: #fffcec;
+
+  /* Buttons danger */
+  --btn-danger-bg:         #d78b84;
+  --btn-danger-bg-hover:   #c1493e;
+  --btn-danger-text:       #361511;
+  --btn-danger-hover-text: #eeccc9;
+
+  /* Cards ejecutivos */
+  --card-metas-bg:         #ddddb9;
+  --card-metas-font:       #505631;
+  --card-validadores-bg:   #3eac91;
+  --card-validadores-font: #00291a;
+  --card-encargados-bg:    #1b4838;
+  --card-encargados-font:  #deffb9;
+  --card-catalogos-bg:     #9dc5bc;
+  --card-catalogos-font:   #00291a;
+  --card-scripts-bg:       #147f5e;
+  --card-scripts-font:     #deffb9;
+  --card-pantalla-bg:      #3eac91;
+  --card-pantalla-font:    #00291a;
+}
+
+/* ------------------------------------------------------------------
+ *  3. .dark — Modo OSCURO
+ *     Solo los tokens que cambian (los demás heredan de :root).
+ * ------------------------------------------------------------------ */
+.dark {
+  /* ── Preline core tokens (dark) ─────────────────────────── */
+  --background:       #011008;
+  --background-1:     #0f2919;
+  --background-2:     #162b20;
+  --background-plain: #101311;
+
+  --foreground:         #a7f3d0;
+  --foreground-inverse: #101311;
+  --inverse:            #101311;
+
+  --border:        #2d4a3a;
+  --border-line-1: #162b20;
+  --border-line-2: #1a2e22;
+  --border-line-3: #2d4a3a;
+
+  /* Primary */
+  --primary:            #3eac91;
+  --primary-foreground: #ffffff;
+  --primary-hover:      #50c9a8;
+  --primary-focus:      #50c9a8;
+  --primary-active:     #50c9a8;
+  --primary-checked:    #3eac91;
+
+  /* Secondary */
+  --secondary:          #86efac;
+  --secondary-foreground: #011008;
+  --secondary-hover:    #a7f3d0;
+  --secondary-focus:    #a7f3d0;
+  --secondary-active:   #a7f3d0;
+
+  /* Layer */
+  --layer:            #101311;
+  --layer-line:       #2d4a3a;
+  --layer-foreground: #a7f3d0;
+  --layer-hover:      #162b20;
+  --layer-focus:      #162b20;
+  --layer-active:     #162b20;
+
+  /* Surface */
+  --surface:            #162b20;
+  --surface-1:          #1a2e22;
+  --surface-2:          #2d4a3a;
+  --surface-foreground: #a7f3d0;
+  --surface-hover:      #1a2e22;
+  --surface-focus:      #1a2e22;
+  --surface-active:     #1a2e22;
+
+  /* Muted */
+  --muted:              #101311;
+  --muted-foreground:   #9ca3af;
+  --muted-foreground-1: #6b7280;
+  --muted-foreground-2: #4b5563;
+  --muted-hover:        #162b20;
+  --muted-focus:        #162b20;
+  --muted-active:       #162b20;
+
+  /* Destructive */
+  --destructive:            #b91c1c;
+  --destructive-foreground: #fecaca;
+  --destructive-hover:      #991b1b;
+  --destructive-focus:      #991b1b;
+
+  /* Card */
+  --card:         #101311;
+  --card-border:  #2d4a3a;
+  --card-divider: #2d4a3a;
+  --card-header:  #162b20;
+  --card-footer:  #162b20;
+  --card-inverse: #011008;
+
+  /* Overlay (modales) */
+  --overlay:         #1a2e22;
+  --overlay-border:  #2d4a3a;
+  --overlay-divider: #2d4a3a;
+  --overlay-header:  #162b20;
+  --overlay-footer:  #162b20;
+  --overlay-inverse: #011008;
+
+  /* Select dropdown */
+  --select:               #1a2e22;
+  --select-1:             #162b20;
+  --select-border:        transparent;
+  --select-item-foreground: #a7f3d0;
+  --select-item-hover:    #162b20;
+  --select-item-focus:    #162b20;
+  --select-item-active:   #162b20;
+  --select-inverse:       #011008;
+
+  /* Scrollbar */
+  --scrollbar-track:         #1a2e22;
+  --scrollbar-thumb:         #3eac91;
+  --scrollbar-track-inverse: #3eac91;
+  --scrollbar-thumb-inverse: #1a2e22;
+
+  /* Table */
+  --table-border: #2d4a3a;
+
+  /* ── Tokens propios de CoorinWeb (dark) ──────────────────── */
+  --jerarquia1: #2a7a6a;
+  --jerarquia2: #3eac91;
+  --jerarquia3: #50c9a8;
+  --jerarquia4: #86efac;
+
+  --bgsuccess:    #155e42;
+  --iconCircular: #1b4838;
+
+  --background-dashboard: #011008;
+  --background-tertiary:  #162b20;
+
+  --surface-secondary: #162b20;
+  --surface-modal:     #1a2e22;
+
+  --text-secondary:  #d1d5db;
+  --sticky-bg:       #162b20;
+  --sticky-text:     #86efac;
+
+  /* Buttons info */
+  --btn-info-bg:         #1e3a4a;
+  --btn-info-bg-hover:   #1f4356;
+  --btn-info-text:       #bfdbfe;
+  --btn-info-hover-text: #dbeafe;
+
+  /* Buttons warning */
+  --btn-warning-bg:         #3a3a0f;
+  --btn-warning-bg-hover:   #59591d;
+  --btn-warning-text:       #fef9c3;
+  --btn-warning-hover-text: #fffcec;
+
+  /* Buttons danger */
+  --btn-danger-bg:         #4a1a17;
+  --btn-danger-bg-hover:   #7f1d1d;
+  --btn-danger-text:       #fecaca;
+  --btn-danger-hover-text: #fee2e2;
+
+  /* Cards ejecutivos */
+  --card-metas-bg:         #2e3010;
+  --card-metas-font:       #d4f06b;
+  --card-validadores-bg:   #14413a;
+  --card-validadores-font: #6ee7b7;
+  --card-encargados-bg:    #1c4a34;
+  --card-encargados-font:  #a7f3d0;
+  --card-catalogos-bg:     #1a3d38;
+  --card-catalogos-font:   #99f6e4;
+  --card-scripts-bg:       #163d28;
+  --card-scripts-font:     #bbf7d0;
+  --card-pantalla-bg:      #0f3040;
+  --card-pantalla-font:    #67e8f9;
+}

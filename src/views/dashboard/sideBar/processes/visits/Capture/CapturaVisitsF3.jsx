@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, forwardRef, useImperativeHandle } from "react";
+import FloatingSelect from "../../../../../../components/Select/FloatingSelect";
 
 // Funciones de validación de entrada (del C# AgregaEventosTxtKeyPress)
 // Solo letras y números (txtOnlyNumbersLetters_KeyPress)
@@ -218,75 +219,38 @@ const CapturaVisitsF3 = forwardRef((props, ref) => {
   <div className="area-f5 p-2 rounded mb-2 h-full w-full sm:max-w-[540px]">
     <h3 className="font-bold text-sm mb-2">Auto – F3</h3>
     <div className="flex flex-col gap-2">
-  <div className="relative w-full min-w-0">
-        <select
-          className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+  <div className="w-full min-w-0">
+        <FloatingSelect
           id="mapeo-auto-select"
+          label="Mapeo"
           value={mapeo}
           onChange={(e) => setMapeo(e.target.value)}
-        >
-          <option value="" disabled>Seleccione mapeo auto</option>
-          {mapeoOptions.map((opt) => (
-            <option key={opt.value} value={opt.value} hidden={opt.value === ""}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-        <label
-          htmlFor="mapeo-auto-select"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-        >
-          Mapeo
-        </label>
+          options={mapeoOptions.filter(o => o.value !== "")}
+          placeholder="Seleccione mapeo auto"
+        />
       </div>
   <div className="flex flex-row gap-1 items-stretch">
-  <div className="relative basis-3/5 min-w-0">
-          <select
-            className={`peer p-4 pe-9 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 ${
-              camposEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
-            }`}
+  <div className="basis-3/5 min-w-0">
+          <FloatingSelect
             id="marca-select-f3"
+            label="Marca"
             value={marca}
             onChange={(e) => setMarca(e.target.value)}
+            options={marcaOptions.filter(o => o.value !== "")}
             disabled={!camposEnabled}
-          >
-            <option value="" disabled>Seleccione marca</option>
-            {marcaOptions.map((opt) => (
-              <option key={opt.value} value={opt.value} hidden={opt.value === ""}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-          <label
-            htmlFor="marca-select-f3"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-          >
-            Marca
-          </label>
+            placeholder="Seleccione marca"
+          />
         </div>
-  <div className="relative basis-2/5 min-w-0">
-          <select
-            className={`peer p-4 pe-9 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 ${
-              camposEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
-            }`}
+  <div className="basis-2/5 min-w-0">
+          <FloatingSelect
             id="anio-select-f3"
+            label="Año"
             value={anio}
             onChange={(e) => setAnio(e.target.value)}
+            options={anioOptions.filter(o => o.value !== "")}
             disabled={!camposEnabled}
-          >
-            <option value="" disabled>Seleccione año</option>
-            {anioOptions.map((opt) => (
-              <option key={opt.value} value={opt.value} hidden={opt.value === ""}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-          <label
-            htmlFor="anio-select-f3"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-          >
-            Año
-          </label>
+            placeholder="Seleccione año"
+          />
         </div>
       </div>
       {/* Modelo - input animado (alfanumérico - txtOnlyNumbersLetters_KeyPress) */}

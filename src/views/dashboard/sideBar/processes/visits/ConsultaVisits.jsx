@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import FloatingSelect from "../../../../../components/Select/FloatingSelect";
 import {
   infoEjecutivo,
   getSearchesInformation,
@@ -156,64 +157,40 @@ const ConsultVisitContent = ({ onClose }) => {
           </div>
 
           {/* Select Cartera */}
-          <div className="relative col-span-1 sm:col-span-4">
-            <select
-              value={cartera}
-              onChange={(e) => setCartera(e.target.value)}
-              className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          <div className="col-span-1 sm:col-span-4">
+            <FloatingSelect
               id="cartera-select-consults-visits"
-            >
-              {carterasOptions.length === 0 && (
-                <option value="">Cargando...</option>
-              )}
-              {carterasOptions.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.nombre}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="cartera-select-consults-visits"
-              className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-            >
-              Cartera
-            </label>
+              label="Cartera"
+              value={String(cartera)}
+              onChange={(e) => setCartera(e.target.value)}
+              options={carterasOptions.map((item) => ({ value: String(item.id), label: item.nombre }))}
+              placeholder={carterasOptions.length === 0 ? "Cargando..." : "Cartera"}
+              disabled={carterasOptions.length === 0}
+            />
           </div>
 
           {/* Select Consulta */}
-          <div className="relative col-span-1 sm:col-span-4">
-            <select
-              value={consulta}
-              onChange={(e) => setConsulta(e.target.value)}
-              className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+          <div className="col-span-1 sm:col-span-4">
+            <FloatingSelect
               id="consulta-select-consult-visits"
-              disabled={loadingConsultas || errorConsultas}
-            >
-              <option value="">- Todas -</option>
-              {consultasOptions.map((item) => (
-                <option
-                  key={item.idConsulta || item.NombreConsulta}
-                  value={item.idConsulta}
-                >
-                  {item.NombreConsulta}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="consulta-select-consult-visits"
-              className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-            >
-              Consulta
-            </label>
+              label="Consulta"
+              value={String(consulta)}
+              onChange={(e) => setConsulta(e.target.value)}
+              options={[
+                { value: "", label: "- Todas -" },
+                ...consultasOptions.map((item) => ({
+                  value: String(item.idConsulta),
+                  label: item.NombreConsulta,
+                })),
+              ]}
+              disabled={loadingConsultas || !!errorConsultas}
+              placeholder={loadingConsultas ? "Cargando..." : errorConsultas ? "Error" : "Consulta"}
+            />
             {loadingConsultas && (
-              <span className="text-xs text-gray-500 absolute right-2 top-2">
-                Cargando...
-              </span>
+              <span className="text-xs text-[var(--color-text-muted)] mt-0.5 block">Cargando...</span>
             )}
             {errorConsultas && (
-              <span className="text-xs text-red-500 absolute right-2 top-2">
-                {errorConsultas}
-              </span>
+              <span className="text-xs text-[var(--color-error,#b71c1c)] mt-0.5 block">{errorConsultas}</span>
             )}
           </div>
         </div>

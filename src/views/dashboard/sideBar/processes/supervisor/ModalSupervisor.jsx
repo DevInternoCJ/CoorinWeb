@@ -1,6 +1,7 @@
 // src/hu/dashboard/sideBar/processes/supervisor/ModalSupervisor.jsx
 
 import React, { useEffect, useState } from "react";
+import FloatingSelect from "../../../../../components/Select/FloatingSelect";
 import ModalBaseSupervisor from "./ModalBaseSupervisor";
 import {
   getSuperInfo,
@@ -441,39 +442,26 @@ const ModalSupervisor = ({ onClose }) => {
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 mb-4">
-            <div className="relative w-full sm:w-48">
-              <select
+            <div className="w-full sm:w-48">
+              <FloatingSelect
+                id="consulta-select"
+                label="Consulta"
                 value={consulta}
                 onChange={(e) => setConsulta(e.target.value)}
-                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 disabled:bg-gray-200 disabled:text-gray-500"
-                id="consulta-select"
-                disabled={loadingConsultas || errorConsultas}
-              >
-                <option value="">- Todas -</option>
-                {consultasOptions.map((item) => (
-                  <option
-                    key={item.idConsulta || item.nombreConsulta}
-                    value={item.idConsulta}
-                  >
-                    {item.nombreConsulta}
-                  </option>
-                ))}
-              </select>
-              <label
-                htmlFor="consulta-select"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-              >
-                Consulta
-              </label>
+                options={[
+                  { value: "", label: "- Todas -" },
+                  ...consultasOptions.map((item) => ({
+                    value: String(item.idConsulta),
+                    label: item.nombreConsulta,
+                  }))
+                ]}
+                disabled={!!(loadingConsultas || errorConsultas)}
+              />
               {loadingConsultas && (
-                <span className="text-xs text-gray-500 absolute right-2 top-2">
-                  Cargando...
-                </span>
+                <span className="text-xs text-gray-500 block mt-0.5">Cargando...</span>
               )}
               {errorConsultas && (
-                <span className="text-xs text-red-500 absolute right-2 top-2">
-                  {errorConsultas}
-                </span>
+                <span className="text-xs text-red-500 block mt-0.5">{errorConsultas}</span>
               )}
             </div>
             <div className="flex items-center justify-between w-full sm:w-auto sm:justify-center sm:gap-2">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import FloatingSelect from "../../../../components/Select/FloatingSelect";
 import {
   getRegrest,
   infoEjecutivo,
@@ -132,29 +133,18 @@ const RegrestContent = ({ growModal, isExpanded }) => {
         {/* sm y md: estructura vertical, lg/xl/2xl: horizontal con input expandible */}
         <div className="block lg:flex lg:flex-row lg:items-center lg:gap-2 w-full">
           {/* Dropdown cartera */}
-          <div className="relative w-full mb-4 lg:mb-0 lg:flex-shrink-0 lg:max-w-[180px]">
-            <select
+          <div className="w-full mb-4 lg:mb-0 lg:flex-shrink-0 lg:max-w-[180px]">
+            <FloatingSelect
               id="cartera-select"
-              className="peer py-3 px-3 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none"
-              value={cartera}
+              label="Cartera"
+              value={String(cartera)}
               onChange={(e) => setCartera(e.target.value)}
-            >
-              {carterasOptions.length === 0 ? (
-                <option value={cartera}>{`Cartera ${cartera}`}</option>
-              ) : (
-                carterasOptions.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.nombre}
-                  </option>
-                ))
-              )}
-            </select>
-            <label
-              htmlFor="cartera-select"
-              className="absolute top-0 start-0 py-1 px-3 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-            >
-              Cartera
-            </label>
+              options={
+                carterasOptions.length === 0
+                  ? [{ value: String(cartera), label: `Cartera ${cartera}` }]
+                  : carterasOptions.map((item) => ({ value: String(item.id), label: item.nombre }))
+              }
+            />
           </div>
           {/* Input cuenta adaptado de DarkList.jsx */}
           <div className="mb-4 lg:mb-0 flex-1 lg:flex-[5] xl:flex-[5] 2xl:flex-[5] min-w-0 flex items-center justify-center">

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import FloatingSelect from "../../../../../components/Select/FloatingSelect";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import CloseButtonReusable from "../../../components/CloseButtonReusable";
@@ -605,26 +606,21 @@ const LoadVisitsContent = ({ mostrarTabla, setMostrarTabla, onClose }) => {
           </div>
 
           {/* Select Cartera */}
-          <div className="relative col-span-1 sm:col-span-3">
-            <select
+          <div className="col-span-1 sm:col-span-3">
+            <FloatingSelect
+              id="cartera-select"
+              label="Cartera"
               value={cartera}
               onChange={(e) => setCartera(e.target.value)}
-              className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-              id="cartera-select"
-            >
-              <option value="" disabled hidden></option>
-              <option value="1">Cartera 1</option>
-              <option value="2">Cartera 2</option>
-              <option value="3">Cartera 3</option>
-              <option value="4">Cartera 4</option>
-              <option value="31">Cartera 31</option>
-            </select>
-            <label
-              htmlFor="cartera-select"
-              className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-            >
-              Cartera
-            </label>
+              required
+              options={[
+                { value: "1",  label: "Cartera 1"  },
+                { value: "2",  label: "Cartera 2"  },
+                { value: "3",  label: "Cartera 3"  },
+                { value: "4",  label: "Cartera 4"  },
+                { value: "31", label: "Cartera 31" },
+              ]}
+            />
           </div>
 
           {/* Input con botón anidado */}

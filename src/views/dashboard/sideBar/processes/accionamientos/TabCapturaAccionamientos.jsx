@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import FloatingSelect from "../../../../../components/Select/FloatingSelect";
 
 const CapturaContent = () => {
     const [cartera, setCartera] = useState('');
@@ -17,24 +18,18 @@ const CapturaContent = () => {
         <div className="p-6 flex flex-col h-full space-y-4">
             {/* Row 1: Select Cartera, Input Cuenta, Checkbox Expediente */}
             <div className="flex flex-col gap-4 sm:flex-row sm:gap-">
-                <div className="relative flex-1">
-                    <select
+                <div className="flex-1">
+                    <FloatingSelect
+                        id="cartera-captura-select"
+                        label="Cartera"
                         value={cartera}
                         onChange={(e) => setCartera(e.target.value)}
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                        id="cartera-captura-select"
-                    >
-                        <option value="" disabled hidden></option>
-                        <option value="cartera1">Cartera 1</option>
-                        <option value="cartera2">Cartera 2</option>
-                        <option value="cartera3">Cartera 3</option>
-                    </select>
-                    <label
-                        htmlFor="cartera-captura-select"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                    >
-                        Cartera
-                    </label>
+                        options={[
+                            { value: "cartera1", label: "Cartera 1" },
+                            { value: "cartera2", label: "Cartera 2" },
+                            { value: "cartera3", label: "Cartera 3" },
+                        ]}
+                    />
                 </div>
                 <div className="relative flex-1">
                     <input
@@ -71,24 +66,18 @@ const CapturaContent = () => {
 
             {/* Row 2: Select Dirección y Input Nombre (solo lectura) */}
             <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
-                <div className="relative flex-1">
-                    <select
+                <div className="flex-1">
+                    <FloatingSelect
+                        id="direccion-select"
+                        label="Dirección"
                         value={direccion}
                         onChange={(e) => setDireccion(e.target.value)}
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                        id="direccion-select"
-                    >
-                        <option value="" disabled hidden></option>
-                        <option value="direccion1">Dirección 1</option>
-                        <option value="direccion2">Dirección 2</option>
-                        <option value="direccion3">Dirección 3</option>
-                    </select>
-                    <label
-                        htmlFor="direccion-select"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                    >
-                        Dirección
-                    </label>
+                        options={[
+                            { value: "direccion1", label: "Dirección 1" },
+                            { value: "direccion2", label: "Dirección 2" },
+                            { value: "direccion3", label: "Dirección 3" },
+                        ]}
+                    />
                 </div>
                 <div className="relative flex-1">
                     <input
@@ -142,47 +131,35 @@ const CapturaContent = () => {
                         Devuelto
                     </label>
                 </div>
-                <div className="relative flex-1 sm:hidden md:hidden lg:flex">
-                    <select
+                <div className="flex-1 sm:hidden md:hidden lg:flex">
+                    <FloatingSelect
+                        id="causa-devolucion-select"
+                        label="Causa Devolución"
                         value={causaDevolucion}
                         onChange={(e) => setCausaDevolucion(e.target.value)}
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                        id="causa-devolucion-select"
-                    >
-                        <option value="" disabled hidden></option>
-                        <option value="causa1">Causa 1</option>
-                        <option value="causa2">Causa 2</option>
-                        <option value="causa3">Causa 3</option>
-                    </select>
-                    <label
-                        htmlFor="causa-devolucion-select"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                    >
-                        Causa Devolución
-                    </label>
+                        options={[
+                            { value: "causa1", label: "Causa 1" },
+                            { value: "causa2", label: "Causa 2" },
+                            { value: "causa3", label: "Causa 3" },
+                        ]}
+                    />
                 </div>
             </div>
 
             {/* Row 4: Select Causa Devolución y Botón Captura */}
             <div className="flex flex-col gap-4 sm:flex-row sm:gap-4 sm:items-stretch lg:justify-center">
-                <div className="relative flex-1 lg:hidden">
-                    <select
+                <div className="flex-1 lg:hidden">
+                    <FloatingSelect
+                        id="causa-devolucion-select-row4"
+                        label="Causa Devolución"
                         value={causaDevolucion}
                         onChange={(e) => setCausaDevolucion(e.target.value)}
-                        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                        id="causa-devolucion-select-row4"
-                    >
-                        <option value="" disabled hidden></option>
-                        <option value="causa1">Causa 1</option>
-                        <option value="causa2">Causa 2</option>
-                        <option value="causa3">Causa 3</option>
-                    </select>
-                    <label
-                        htmlFor="causa-devolucion-select-row4"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                    >
-                        Causa Devolución
-                    </label>
+                        options={[
+                            { value: "causa1", label: "Causa 1" },
+                            { value: "causa2", label: "Causa 2" },
+                            { value: "causa3", label: "Causa 3" },
+                        ]}
+                    />
                 </div>
                 <button
                     onClick={() => console.log('Captura')}
