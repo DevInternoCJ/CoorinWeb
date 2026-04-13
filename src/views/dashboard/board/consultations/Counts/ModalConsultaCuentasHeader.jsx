@@ -2,37 +2,11 @@ import React, { useState } from "react";
 import { IconCuentas } from "../IconesConsultations";
 import FloatingSelect from "../../../../../components/Select/FloatingSelect";
 
-// Flecha tipo chevron moderna
-const DropdownArrow = () => (
-  <span
-    style={{
-      pointerEvents: "none",
-      position: "absolute",
-      right: "0.75rem",
-      top: "50%",
-      transform: "translateY(-50%)",
-      fontSize: "1.15rem",
-      color: "#2b463c",
-      display: "flex",
-      alignItems: "center",
-    }}
-  >
-    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-      <path
-        d="M6 8l4 4 4-4"
-        stroke="#2b463c"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  </span>
-);
-
+// ModalHeader Component
 const ModalConsultaCuentasHeader = ({ onClose, onHeaderDataChange }) => {
   const [cartera, setCartera] = useState("american_express");
   const [producto, setProducto] = useState("amex");
-  const [consulta, setConsulta] = useState("");
+  const [consulta, setConsulta] = useState("Seleccionar");
 
   // Notificar cambios en los datos del header
   React.useEffect(() => {
@@ -57,14 +31,29 @@ const ModalConsultaCuentasHeader = ({ onClose, onHeaderDataChange }) => {
         {/* Botón de cierre */}
         <button
           onClick={onClose}
-          className="text-jerarquia3 hover:bg-background-dashboard hover:text-red-600 text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors "
+          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors focus:outline-none"
         >
           &times;
         </button>
       </div>
 
       {/* Fila 2: Grid de selects - 3 columnas en móvil/tablet, fila horizontal en desktop */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 lg:flex lg:flex-row gap-2 sm:gap-3 lg:gap-4 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:flex lg:flex-row gap-3 w-full">
+        {/* Consulta */}
+        <div className="relative w-full lg:flex-1">
+          <FloatingSelect
+            id="consulta-select"
+            value={consulta}
+            label="Tipo de consulta"
+            onChange={(e) => setConsulta(e.target.value)}
+            required
+            options={[
+              { value: "general", label: "General" },
+              { value: "detalle", label: "Detalle" },
+            ]}
+          />
+        </div>
+
         {/* Cartera */}
         <div className="relative w-full lg:flex-1">
           <FloatingSelect
@@ -93,21 +82,6 @@ const ModalConsultaCuentasHeader = ({ onClose, onHeaderDataChange }) => {
               { value: "amex", label: "Amex" },
               { value: "visa", label: "Visa" },
               { value: "mastercard", label: "Mastercard" },
-            ]}
-          />
-        </div>
-
-        {/* Consulta */}
-        <div className="relative w-full lg:flex-1">
-          <FloatingSelect
-            id="consulta-select"
-            label="Consulta"
-            value={consulta}
-            onChange={(e) => setConsulta(e.target.value)}
-            required
-            options={[
-              { value: "general", label: "General" },
-              { value: "detalle", label: "Detalle" },
             ]}
           />
         </div>

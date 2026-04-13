@@ -222,3 +222,48 @@ Para cambiar un color en **toda la app** (claro y oscuro) editar **solo** `src/t
 ```
 
 No es necesario tocar ningún componente.
+
+---
+
+## CoorinWeb — Compact Search Bar Pattern
+
+Use this pattern for internal search filters within data-rich modals or sidebars. It maximizes density while maintaining professional accessibility.
+
+### JSX Pattern
+
+```jsx
+const [query, setQuery] = useState("");
+
+<div className="relative mb-2">
+  {/* Magnifying Glass Icon (Start) */}
+  <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+    <svg className="size-3.5 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+  </div>
+  
+  <input
+    type="text"
+    className="py-1.5 ps-9 pe-8 block w-full bg-background-dashboard border-transparent rounded-lg text-xs font-medium focus:border-jerarquia2 focus:ring-jerarquia2 placeholder:text-muted-foreground/60 transition-all"
+    placeholder="Buscar..."
+    value={query}
+    onChange={(e) => setQuery(e.target.value)}
+  />
+
+  {/* Clear Button (End) — Only visible when query has text */}
+  {query && (
+    <button
+      type="button"
+      onClick={() => setQuery("")}
+      className="absolute inset-y-0 end-0 flex items-center pe-3 text-muted-foreground/60 hover:text-destructive transition-colors focus:outline-none"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+    </button>
+  )}
+</div>
+```
+
+### Key Design Guidelines
+1. **Vertical Alignment**: Icons must be perfectly centered (`inset-y-0 flex items-center`).
+2. **Padding Balance**: Use `ps-9` (start) for the search icon and `pe-8` (end) for the clear button to prevent text overlap.
+3. **Interactive Feedback**: The clear button should use `text-muted-foreground/60` and transition to `text-destructive` on hover for rapid visual feedback.
+4. **Contextual Styling**: Prefer `bg-background-dashboard` for inputs inside white panels to create subtle depth without high-contrast borders.
+5. **Aaccessible Text**: Default to `text-xs` with `font-medium` for dense data tables within modals.

@@ -171,8 +171,8 @@ const ModalConsultaCuentas = ({ onClose }) => {
 
       {/* Contenido con scroll */}
       <div
-        className="flex-1 scrollbar-gray py-2 overflow-y-auto overflow-x-hidden"
-        style={{ height: "400px" }}
+        className="flex-1 scrollbar-gray py-1 overflow-x-hidden"
+        style={{ minHeight: 0 }}
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 w-full">
           {/* Sección de Filtros - Toma todo el ancho en móvil, 8/12 columnas en desktop */}

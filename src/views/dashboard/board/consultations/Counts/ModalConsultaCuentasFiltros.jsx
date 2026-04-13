@@ -380,12 +380,12 @@ const ModalConsultaCuentasFiltros = ({
 
   return (
     <>
-      <div className="bg-white dark:bg-[color:var(--color-surface)] rounded-lg p-3 h-auto lg:h-[400px] flex flex-col">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2 flex-shrink-0">
+      <div className="bg-surface rounded-lg p-3 h-auto min-h-[400px] flex flex-col">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3 flex-shrink-0">
           <IconCircular
             bgColor="bg-iconCircular dark:bg-iconCircularDark"
             textColor="text-jerarquia3"
-            borderColor="border-gray-50"
+            borderColor="border-surface"
             size="size-8"
             borderWidth="border-4"
             tooltip="Filtros de búsqueda"
@@ -407,8 +407,7 @@ const ModalConsultaCuentasFiltros = ({
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <input
               type="date"
-              className="bg-gray-50 py-2.5 sm:py-2 px-4 block w-full sm:w-auto border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
-              placeholder="This is placeholder"
+              className="bg-surface-secondary py-2.5 sm:py-2 px-4 block w-full sm:w-auto border-border rounded-lg text-sm focus:border-jerarquia1 focus:ring-jerarquia1 disabled:opacity-50 disabled:pointer-events-none text-foreground"
               disabled={!isDateEnabled}
             />
             <div className="flex flex-row items-center gap-2 w-full sm:w-auto">
@@ -424,14 +423,13 @@ const ModalConsultaCuentasFiltros = ({
               </button>
 
               {/* Tooltip agregado aquí */}
-              <span className="hs-tooltip [--placement:top] inline-flex justify-center items-center size-7 rounded-lg bg-iconCircular flex-shrink-0">
+              <span className="hs-tooltip [--placement:top] inline-flex justify-center items-center size-8 rounded-lg bg-surface-secondary flex-shrink-0">
                 <IconCustomTable
-                  className="size-18 cursor-pointer"
-                  style={{ color: "var(--color-jerarquia3)" }}
+                  className="size-5 cursor-pointer text-jerarquia3"
                   onClick={() => setOpenSeleccionCampania(true)}
                 />
                 <span
-                  className="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-xs font-medium text-white rounded-md shadow-sm"
+                  className="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-inverse text-foreground-inverse text-[10px] font-medium rounded-md shadow-sm whitespace-nowrap"
                   role="tooltip"
                 >
                   Cargar filas de trabajo
@@ -529,99 +527,70 @@ const ModalConsultaCuentasFiltros = ({
           {/* Input de texto/fecha para otros filtros */}
           {cuenta !== "Cuenta" && (
             <div className="relative flex-1">
-              <input
-                type={cuenta === "Fechas" ? "date" : "text"}
-                className="peer p-4 block w-full bg-gray-100 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none
-                              focus:pt-6 focus:pb-2 [&:not(:placeholder-shown)]:pt-6 [&:not(:placeholder-shown)]:pb-2"
+              <FloatingInput
+                id="valores-input"
+                label={cuenta === "Fechas" ? "Fecha" : "Ingresa un valor"}
                 value={niegan}
                 onChange={(e) => setNiegan(e.target.value)}
-                id="valores-input"
-                placeholder=" "
+                required
+                type={cuenta === "Fechas" ? "date" : "text"}
               />
-              <label
-                htmlFor="valores-input"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
-                              peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500
-                              peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-              >
-                {cuenta === "Fechas" ? "Fecha" : "Ingresa un valor"}
-              </label>
             </div>
           )}
         </div>
 
         <div
-          style={{
-            overflowX: "auto",
-            overflowY: "auto",
-            maxHeight: "31vh",
-            height: "100%",
-            flex: 1,
-          }}
-          className="scrollbar-gray"
+          className="flex-1 overflow-y-auto overflow-x-auto scrollbar-gray h-[150px]"
+          style={{ minHeight: 0 }}
         >
-          <table className="modal-table mb-2">
-            <thead>
+          <table className="modal-table">
+            <thead className="sticky top-0 z-10">
               <tr>
-                <th>Concepto</th>
-                <th>Campo</th>
-                <th>Valores</th>
-                <th>Borrar</th>
+                <th className="py-2 px-3 text-xs uppercase tracking-wider">Concepto</th>
+                <th className="py-2 px-3 text-xs uppercase tracking-wider">Campo</th>
+                <th className="py-2 px-3 text-xs uppercase tracking-wider">Valores</th>
+                <th className="py-2 px-3 text-xs uppercase tracking-wider text-right">Acción</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border">
               {filtros.length === 0 ? (
                 <tr>
                   <td
                     colSpan="4"
-                    style={{
-                      textAlign: "center",
-                      color: "#666",
-                      fontStyle: "italic",
-                    }}
+                    className="py-8 text-center text-muted-foreground italic text-xs"
                   >
                     No hay filtros agregados
                   </td>
                 </tr>
               ) : (
                 filtros.map((filtro) => (
-                  <tr key={filtro.id}>
-                    <td>{filtro.concepto}</td>
-                    <td>{filtro.campo}</td>
-                    <td>{filtro.valores}</td>
-                    <td style={{ textAlign: "right" }}>
-                      <div className="inline-flex border border-gray-200 rounded-full p-0.5">
-                        <div className="hs-tooltip [--placement:left] inline-block">
-                          <button
-                            type="button"
-                            className="hs-tooltip-toggle inline-flex shrink-0 justify-center items-center size-5 
-                                                    rounded-full
-                                                     text-gray-500
-                                                      hover:bg-red-100
-                                                      hover:text-red-800 focus:outline-none 
-                                                      focus:bg-red-800 focus:text-red-100"
-                            onClick={() => eliminarFiltro(filtro.id)}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="13"
-                              height="13"
-                              viewBox="0 0 448 512"
-                            >
-                              <path
-                                fill="currentColor"
-                                d="M136.7 5.9C141.1-7.2 153.3-16 167.1-16H281c13.8 0 26 8.8 30.4 21.9L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64s14.3-32 32-32h96zM32 144h384v304c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64zm88 64c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V232c0-13.3-10.7-24-24-24m104 0c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V232c0-13.3-10.7-24-24-24m104 0c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V232c0-13.3-10.7-24-24-24"
-                              />
-                            </svg>
-                            <span
-                              className="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-xs font-medium text-white rounded-md shadow-sm"
-                              role="tooltip"
-                            >
-                              Borrar filtro
-                            </span>
-                          </button>
-                        </div>
-                      </div>
+                  <tr key={filtro.id} className="hover:bg-surface-secondary/50 transition-colors">
+                    <td className="py-1 px-3 text-sm text-foreground">{filtro.concepto}</td>
+                    <td className="py-1 px-3 text-sm text-foreground">{filtro.campo}</td>
+                    <td className="py-1 px-3 text-sm text-foreground font-medium">{filtro.valores}</td>
+                    <td className="py-1 px-3 text-right">
+                      <IconCircular
+                        bgColor="bg-btn-danger-bg"
+                        textColor="text-btn-danger-text"
+                        borderColor="border-transparent"
+                        size="size-7"
+                        borderWidth="border-0"
+                        tooltip="Eliminar"
+                        tooltipPlacement="left"
+                        onClick={() => eliminarFiltro(filtro.id)}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 448 512"
+                        >
+                          <path
+                            fill="currentColor"
+                            d="M136.7 5.9C141.1-7.2 153.3-16 167.1-16H281c13.8 0 26 8.8 30.4 21.9L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64s14.3-32 32-32h96zM32 144h384v304c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64zm88 64c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V232c0-13.3-10.7-24-24-24m104 0c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V232c0-13.3-10.7-24-24-24m104 0c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V232c0-13.3-10.7-24-24-24"
+                          />
+                        </svg>
+                      </IconCircular>
                     </td>
                   </tr>
                 ))

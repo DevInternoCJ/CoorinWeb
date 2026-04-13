@@ -20,20 +20,20 @@ import React from "react";
 const SIZE_MAP = {
   sm: {
     select: "ps-3 pe-9 pt-4 pb-1 text-xs",
-    label:  "ps-3 text-xs",
-    icon:   "w-4 h-4",
+    label: "ps-3 text-xs",
+    icon: "w-4 h-4",
     iconWrap: "left-3 top-1/2 -translate-y-1/2",
   },
   md: {
     select: "ps-4 pe-9 pt-5 pb-2 text-sm",
-    label:  "ps-4 text-sm",
-    icon:   "w-4 h-4",
+    label: "ps-4 text-sm",
+    icon: "w-4 h-4",
     iconWrap: "left-4 top-1/2 -translate-y-1/2",
   },
   lg: {
     select: "ps-5 pe-9 pt-6 pb-2 text-base",
-    label:  "ps-5 text-base",
-    icon:   "w-5 h-5",
+    label: "ps-5 text-base",
+    icon: "w-5 h-5",
     iconWrap: "left-5 top-1/2 -translate-y-1/2",
   },
 };
@@ -55,11 +55,13 @@ const FloatingSelect = ({
 
   // Normaliza las opciones para soportar strings o { value, label }
   const normalizedOptions = options.map((opt) =>
-    typeof opt === "string" ? { value: opt, label: opt } : opt
+    typeof opt === "string" ? { value: opt, label: opt } : opt,
   );
 
   const hasValue = value !== "" && value !== null && value !== undefined;
-  const iconPadding = icon ? "ps-10" : s.select.split(" ").find(c => c.startsWith("ps-"));
+  const iconPadding = icon
+    ? "ps-10"
+    : s.select.split(" ").find((c) => c.startsWith("ps-"));
 
   return (
     <div className={`floating-select-wrapper relative ${className}`}>
@@ -143,7 +145,10 @@ const FloatingSelect = ({
       >
         {label}
         {required && (
-          <span className="ml-0.5 text-[var(--color-btn-danger-text)]" aria-hidden="true">
+          <span
+            className="ml-0.5 text-[var(--color-btn-danger-text)]"
+            aria-hidden="true"
+          >
             *
           </span>
         )}

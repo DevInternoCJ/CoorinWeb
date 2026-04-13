@@ -1,393 +1,649 @@
-/* ============================================================
- *  coorin.css — Tema personalizado CoorinWeb (Preline-style)
- *  --------------------------------------------------------------
- *  Importar DESPUÉS de `../node_modules/preline/variants.css`
- *  en index.css:
- *
- *    @import "./themes/coorin.css";
- *
- *  Esto mapea los tokens semánticos de Preline UI a los colores
- *  de la paleta CoorinWeb, de modo que las clases de Tailwind
- *  como `bg-background`, `text-foreground`, `border-line-1`,
- *  `bg-surface`, `text-muted-foreground`, `bg-primary`, etc.
- *  funcionen automáticamente en claro y oscuro SIN necesitar
- *  variantes `dark:` en cada componente.
- * ============================================================ */
+@import "tailwindcss";
+@import "./theme.css";
 
-/* ------------------------------------------------------------------
- *  1. @theme inline — nuevos tokens de Tailwind para CoorinWeb
- *     Solo los que no existen en el base theme.css de Preline.
- * ------------------------------------------------------------------ */
-@theme inline {
-  /* Jerarquía de color (acento verde) — accesibles como bg-jerarquia1, etc. */
-  --color-jerarquia1: var(--jerarquia1);
-  --color-jerarquia2: var(--jerarquia2);
-  --color-jerarquia3: var(--jerarquia3);
-  --color-jerarquia4: var(--jerarquia4);
+/* ============================================== */
+/* Theme: Coorin                          */
+/* Generated: 2026-04-13                        */
+/* Hue: 165 | Style: vibrant                  */
+/* ============================================== */
 
-  /* Fondos de layout específicos */
-  --color-background-dashboard: var(--background-dashboard);
-  --color-background-primary:   var(--color-background);       /* alias Preline */
-  --color-background-tertiary:  var(--background-tertiary);
-
-  /* Superficies semánticas del proyecto */
-  --color-surface-secondary: var(--surface-secondary);
-  --color-surface-modal:     var(--surface-modal);
-
-  /* Textos */
-  --color-text-primary:   var(--foreground);                   /* alias Preline */
-  --color-text-secondary: var(--text-secondary);
-  --color-text-muted:     var(--muted-foreground);             /* alias Preline */
-
-  /* Stickies */
-  --color-sticky-bg:   var(--sticky-bg);
-  --color-sticky-text: var(--sticky-text);
-
-  /* Iconos circulares */
-  --color-iconCircular:     var(--iconCircular);
-  --color-bgsuccess:        var(--bgsuccess);
-
-  /* Buttons — info */
-  --color-btn-info-bg:         var(--btn-info-bg);
-  --color-btn-info-bg-hover:   var(--btn-info-bg-hover);
-  --color-btn-info-text:       var(--btn-info-text);
-  --color-btn-info-hover-text: var(--btn-info-hover-text);
-
-  /* Buttons — warning */
-  --color-btn-warning-bg:         var(--btn-warning-bg);
-  --color-btn-warning-bg-hover:   var(--btn-warning-bg-hover);
-  --color-btn-warning-text:       var(--btn-warning-text);
-  --color-btn-warning-hover-text: var(--btn-warning-hover-text);
-
-  /* Buttons — danger */
-  --color-btn-danger-bg:         var(--btn-danger-bg);
-  --color-btn-danger-bg-hover:   var(--btn-danger-bg-hover);
-  --color-btn-danger-text:       var(--btn-danger-text);
-  --color-btn-danger-hover-text: var(--btn-danger-hover-text);
-
-  /* Cards de ejecutivos */
-  --color-card-metas-bg:         var(--card-metas-bg);
-  --color-card-metas-font:       var(--card-metas-font);
-  --color-card-validadores-bg:   var(--card-validadores-bg);
-  --color-card-validadores-font: var(--card-validadores-font);
-  --color-card-encargados-bg:    var(--card-encargados-bg);
-  --color-card-encargados-font:  var(--card-encargados-font);
-  --color-card-catalogos-bg:     var(--card-catalogos-bg);
-  --color-card-catalogos-font:   var(--card-catalogos-font);
-  --color-card-scripts-bg:       var(--card-scripts-bg);
-  --color-card-scripts-font:     var(--card-scripts-font);
-  --color-card-pantalla-bg:      var(--card-pantalla-bg);
-  --color-card-pantalla-font:    var(--card-pantalla-font);
+@theme theme-coorin inline {
+  /* ============================================ */
+  /* CUSTOM COLOR PALETTES                        */
+  /* ============================================ */
+  
+  /* -------------------------------------------- */
+  /* BRAND PALETTE (vibrant)                     */
+  /* -------------------------------------------- */
+  
+  --color-coorin-50: oklch(92.8% 0.08 165);
+  --color-coorin-100: oklch(88.6% 0.1 165);
+  --color-coorin-200: oklch(80.4% 0.12 165);
+  --color-coorin-300: oklch(72.4% 0.14 165);
+  --color-coorin-400: oklch(64.6% 0.16 165);
+  --color-coorin-500: oklch(57% 0.14 165);
+  --color-coorin-600: oklch(49.6% 0.12 165);
+  --color-coorin-700: oklch(42.4% 0.1 165);
+  --color-coorin-800: oklch(35.4% 0.08 165);
+  --color-coorin-900: oklch(28.6% 0.06 165);
+  --color-coorin-950: oklch(25.3% 0.05 165);
+  
+  /* -------------------------------------------- */
+  /* GRAY PALETTE (bell curve chroma)             */
+  /* -------------------------------------------- */
+  
+  --color-coorin-gray-50: oklch(98% 0.002 165);
+  --color-coorin-gray-100: oklch(95.5% 0.004 165);
+  --color-coorin-gray-200: oklch(89.7% 0.008 165);
+  --color-coorin-gray-300: oklch(82.7% 0.012 165);
+  --color-coorin-gray-400: oklch(73% 0.018 165);
+  --color-coorin-gray-500: oklch(62.5% 0.02 165);
+  --color-coorin-gray-600: oklch(52.8% 0.016 165);
+  --color-coorin-gray-700: oklch(41.4% 0.012 165);
+  --color-coorin-gray-800: oklch(26.9% 0.006 165);
+  --color-coorin-gray-900: oklch(20.5% 0.004 165);
+  --color-coorin-gray-950: oklch(14.1% 0.002 165);
+  /* -------------------------------------------- */
+  /* CUSTOM ACTION MOTIFS                        */
+  /* -------------------------------------------- */
+  
+  --color-btn-danger-bg:         var(--color-btn-danger-bg);
+  --color-btn-danger-bg-hover:   var(--color-btn-danger-bg-hover);
+  --color-btn-danger-text:       var(--color-btn-danger-text);
+  
+  --color-btn-info-bg:         var(--color-btn-info-bg);
+  --color-btn-info-bg-hover:   var(--color-btn-info-bg-hover);
+  --color-btn-info-text:       var(--color-btn-info-text);
+  
+  --color-btn-warning-bg:         var(--color-btn-warning-bg);
+  --color-btn-warning-bg-hover:   var(--color-btn-warning-bg-hover);
+  --color-btn-warning-text:       var(--color-btn-warning-text);
 }
 
-/* ------------------------------------------------------------------
- *  2. :root — Modo CLARO
- *     Asigna los valores de la paleta CoorinWeb a los tokens
- *     semánticos de Preline Y a los propios del proyecto.
- * ------------------------------------------------------------------ */
-:root {
-  /* ── Preline core tokens (light) ─────────────────────────── */
-  --background:         #dee5e5;   /* --color-background-dashboard */
-  --background-1:       #f5f5f5;
-  --background-2:       #efefef;
-  --background-plain:   #ffffff;
+:root[data-theme="theme-coorin"],
+[data-theme="theme-coorin"] {
 
-  --foreground:         #1b4838;   /* --color-text-primary */
-  --foreground-inverse: #ffffff;
-  --inverse:            #1b4838;
-
-  --border:             #e5e7eb;   /* --color-border */
-  --border-line-1:      #f5f5f5;
-  --border-line-2:      #e5e7eb;
-  --border-line-3:      #d1d5db;
-
-  /* Primary = jerarquia2 (teal activo) */
-  --primary:            #3eac91;
-  --primary-foreground: #ffffff;
-  --primary-hover:      #147f5e;
-  --primary-focus:      #147f5e;
-  --primary-active:     #147f5e;
-  --primary-checked:    #3eac91;
-  --primary-line:       transparent;
-
-  /* Secondary */
-  --secondary:          #1b4838;
-  --secondary-foreground: #deffb9;
-  --secondary-hover:    #0f2919;
-  --secondary-focus:    #0f2919;
-  --secondary-active:   #0f2919;
-  --secondary-line:     transparent;
-
-  /* Layer (panels, cards) */
-  --layer:              #ffffff;
-  --layer-line:         #e5e7eb;
-  --layer-foreground:   #1b4838;
-  --layer-hover:        #f5f5f5;
-  --layer-focus:        #f5f5f5;
-  --layer-active:       #f5f5f5;
-
-  /* Surface (inputs, secondary panels) */
-  --surface:            #f5f5f5;
-  --surface-1:          #efefef;
-  --surface-2:          #e5e7eb;
-  --surface-line:       transparent;
-  --surface-foreground: #1b4838;
-  --surface-hover:      #efefef;
-  --surface-focus:      #efefef;
-  --surface-active:     #efefef;
-
-  /* Muted */
-  --muted:              #f5f5f5;
-  --muted-foreground:   #6b7280;
-  --muted-foreground-1: #9ca3af;
-  --muted-foreground-2: #4b5563;
-  --muted-hover:        #efefef;
-  --muted-focus:        #efefef;
-  --muted-active:       #efefef;
-
-  /* Destructive */
-  --destructive:            #d78b84;
-  --destructive-foreground: #ffffff;
-  --destructive-hover:      #c1493e;
-  --destructive-focus:      #c1493e;
-
-  /* Card */
-  --card:         #ffffff;
-  --card-border:  #e5e7eb;
-  --card-divider: #e5e7eb;
-  --card-header:  #f5f5f5;
-  --card-footer:  #f5f5f5;
-  --card-inverse: #1b4838;
-
-  /* Overlay (modales) */
-  --overlay:         #efefef;
-  --overlay-border:  #e5e7eb;
-  --overlay-divider: #e5e7eb;
-  --overlay-header:  #f5f5f5;
-  --overlay-footer:  #f5f5f5;
-  --overlay-inverse: #1b4838;
-
-  /* Select dropdown */
-  --select:               #ffffff;
-  --select-1:             #f5f5f5;
-  --select-border:        transparent;
-  --select-item-foreground: #1b4838;
-  --select-item-hover:    #efefef;
-  --select-item-focus:    #efefef;
-  --select-item-active:   #efefef;
-  --select-inverse:       #1b4838;
-
-  /* Scrollbar */
-  --scrollbar-track:         #f5f5f5;
-  --scrollbar-thumb:         #9dc5bc;
+  /* ============================================ */
+  /* GLOBAL SURFACES + TEXT                       */
+  /* ============================================ */
+  
+  --background: var(--color-white);
+  --background-1: var(--color-coorin-gray-50);
+  --background-2: var(--color-coorin-gray-100);
+  --background-plain: var(--color-white);
+  --foreground: var(--color-coorin-gray-800);
+  --foreground-inverse: var(--color-white);
+  
+  --inverse: var(--color-coorin-gray-800);
+  
+  /* ============================================ */
+  /* BORDERS (Full Scale)                         */
+  /* ============================================ */
+  
+  --border: var(--color-coorin-gray-200);
+  --border-line-inverse: var(--color-white);
+  --border-line-1: var(--color-coorin-gray-100);
+  --border-line-2: var(--color-coorin-gray-200);
+  --border-line-3: var(--color-coorin-gray-300);
+  --border-line-4: var(--color-coorin-gray-400);
+  --border-line-5: var(--color-coorin-gray-500);
+  --border-line-6: var(--color-coorin-gray-600);
+  --border-line-7: var(--color-coorin-gray-700);
+  --border-line-8: var(--color-coorin-gray-800);
+  
+  /* ============================================ */
+  /* PRIMARY RAMP (Full 11-shade scale)           */
+  /* ============================================ */
+  
+  --primary-50: var(--color-coorin-50);
+  --primary-100: var(--color-coorin-100);
+  --primary-200: var(--color-coorin-200);
+  --primary-300: var(--color-coorin-300);
+  --primary-400: var(--color-coorin-400);
+  --primary-500: var(--color-coorin-500);
+  --primary-600: var(--color-coorin-600);
+  --primary-700: var(--color-coorin-700);
+  --primary-800: var(--color-coorin-800);
+  --primary-900: var(--color-coorin-900);
+  --primary-950: var(--color-coorin-950);
+  
+  /* PRIMARY STATES */
+  --primary: var(--color-primary-600);
+  --primary-line: transparent;
+  --primary-foreground: var(--color-white);
+  --primary-hover: var(--color-primary-700);
+  --primary-focus: var(--color-primary-700);
+  --primary-active: var(--color-primary-700);
+  --primary-checked: var(--color-primary-600);
+  
+  /* ============================================ */
+  /* SECONDARY                                    */
+  /* ============================================ */
+  
+  --secondary: var(--color-coorin-gray-900);
+  --secondary-line: transparent;
+  --secondary-foreground: var(--color-white);
+  --secondary-hover: var(--color-coorin-gray-800);
+  --secondary-focus: var(--color-coorin-gray-800);
+  --secondary-active: var(--color-coorin-gray-800);
+  
+  /* ============================================ */
+  /* LAYER                                        */
+  /* ============================================ */
+  
+  --layer: var(--color-white);
+  --layer-line: var(--color-coorin-gray-200);
+  --layer-foreground: var(--color-coorin-gray-800);
+  --layer-hover: var(--color-coorin-gray-50);
+  --layer-focus: var(--color-coorin-gray-50);
+  --layer-active: var(--color-coorin-gray-50);
+  
+  /* ============================================ */
+  /* SURFACE                                      */
+  /* ============================================ */
+  
+  --surface: var(--color-coorin-gray-100);
+  --surface-1: var(--color-coorin-gray-200);
+  --surface-2: var(--color-coorin-gray-300);
+  --surface-3: var(--color-coorin-gray-400);
+  --surface-4: var(--color-coorin-gray-500);
+  --surface-5: var(--color-coorin-gray-600);
+  --surface-line: transparent;
+  --surface-foreground: var(--color-coorin-gray-800);
+  --surface-hover: var(--color-coorin-gray-200);
+  --surface-focus: var(--color-coorin-gray-200);
+  --surface-active: var(--color-coorin-gray-200);
+  
+  /* ============================================ */
+  /* MUTED                                        */
+  /* ============================================ */
+  
+  --muted: var(--color-coorin-gray-50);
+  --muted-foreground: var(--color-coorin-gray-500);
+  --muted-foreground-1: var(--color-coorin-gray-600);
+  --muted-foreground-2: var(--color-coorin-gray-700);
+  --muted-hover: var(--color-coorin-gray-100);
+  --muted-focus: var(--color-coorin-gray-100);
+  --muted-active: var(--color-coorin-gray-100);
+  
+  /* ============================================ */
+  /* DESTRUCTIVE                                  */
+  /* ============================================ */
+  
+  --destructive: var(--color-red-500);
+  --destructive-foreground: var(--color-white);
+  --destructive-hover: var(--color-red-600);
+  --destructive-focus: var(--color-red-600);
+  
+  /* ============================================ */
+  /* NAVBAR                                       */
+  /* ============================================ */
+  
+  --navbar: var(--color-white);
+  --navbar-line: var(--color-coorin-gray-200);
+  --navbar-divider: var(--color-coorin-gray-200);
+  --navbar-nav-foreground: var(--color-coorin-gray-800);
+  --navbar-nav-hover: var(--color-coorin-gray-100);
+  --navbar-nav-focus: var(--color-coorin-gray-100);
+  --navbar-nav-active: var(--color-coorin-gray-100);
+  --navbar-nav-list-divider: var(--color-coorin-gray-200);
+  --navbar-inverse: var(--color-primary-950);
+  
+  --navbar-1: var(--color-coorin-gray-50);
+  --navbar-1-line: var(--color-coorin-gray-200);
+  --navbar-1-divider: var(--color-coorin-gray-200);
+  --navbar-1-nav-foreground: var(--color-coorin-gray-800);
+  --navbar-1-nav-hover: var(--color-coorin-gray-200);
+  --navbar-1-nav-focus: var(--color-coorin-gray-200);
+  --navbar-1-nav-active: var(--color-coorin-gray-200);
+  --navbar-1-nav-list-divider: var(--color-coorin-gray-200);
+  
+  --navbar-2: var(--color-coorin-gray-100);
+  --navbar-2-line: transparent;
+  --navbar-2-divider: var(--color-coorin-gray-300);
+  --navbar-2-nav-foreground: var(--color-coorin-gray-800);
+  --navbar-2-nav-hover: var(--color-coorin-gray-200);
+  --navbar-2-nav-focus: var(--color-coorin-gray-200);
+  --navbar-2-nav-active: var(--color-coorin-gray-200);
+  --navbar-2-nav-list-divider: var(--color-coorin-gray-200);
+  
+  /* ============================================ */
+  /* SIDEBAR                                      */
+  /* ============================================ */
+  
+  --sidebar: var(--color-white);
+  --sidebar-line: var(--color-coorin-gray-200);
+  --sidebar-divider: var(--color-coorin-gray-200);
+  --sidebar-nav-foreground: var(--color-coorin-gray-800);
+  --sidebar-nav-hover: var(--color-coorin-gray-100);
+  --sidebar-nav-focus: var(--color-coorin-gray-100);
+  --sidebar-nav-active: var(--color-coorin-gray-100);
+  --sidebar-nav-list-divider: var(--color-coorin-gray-200);
+  --sidebar-inverse: var(--color-primary-950);
+  
+  --sidebar-1: var(--color-coorin-gray-50);
+  --sidebar-1-line: var(--color-coorin-gray-200);
+  --sidebar-1-divider: var(--color-coorin-gray-200);
+  --sidebar-1-nav-foreground: var(--color-coorin-gray-800);
+  --sidebar-1-nav-hover: var(--color-coorin-gray-200);
+  --sidebar-1-nav-focus: var(--color-coorin-gray-200);
+  --sidebar-1-nav-active: var(--color-coorin-gray-200);
+  --sidebar-1-nav-list-divider: var(--color-coorin-gray-200);
+  
+  --sidebar-2: var(--color-coorin-gray-100);
+  --sidebar-2-line: transparent;
+  --sidebar-2-divider: var(--color-coorin-gray-200);
+  --sidebar-2-nav-foreground: var(--color-coorin-gray-800);
+  --sidebar-2-nav-hover: var(--color-coorin-gray-200);
+  --sidebar-2-nav-focus: var(--color-coorin-gray-200);
+  --sidebar-2-nav-active: var(--color-coorin-gray-200);
+  --sidebar-2-nav-list-divider: var(--color-coorin-gray-200);
+  
+  /* ============================================ */
+  /* CARD                                         */
+  /* ============================================ */
+  
+  --card: var(--color-white);
+  --card-line: var(--color-coorin-gray-200);
+  --card-divider: var(--color-coorin-gray-200);
+  --card-header: var(--color-coorin-gray-200);
+  --card-footer: var(--color-coorin-gray-200);
+  --card-inverse: var(--color-primary-950);
+  
+  /* ============================================ */
+  /* DROPDOWN                                     */
+  /* ============================================ */
+  
+  --dropdown: var(--color-white);
+  --dropdown-1: var(--color-white);
+  --dropdown-line: transparent;
+  --dropdown-divider: var(--color-coorin-gray-200);
+  --dropdown-header: var(--color-coorin-gray-200);
+  --dropdown-footer: var(--color-coorin-gray-200);
+  --dropdown-item-foreground: var(--color-coorin-gray-800);
+  --dropdown-item-hover: var(--color-coorin-gray-100);
+  --dropdown-item-focus: var(--color-coorin-gray-100);
+  --dropdown-item-active: var(--color-coorin-gray-100);
+  --dropdown-inverse: var(--color-coorin-gray-900);
+  
+  /* ============================================ */
+  /* SELECT                                       */
+  /* ============================================ */
+  
+  --select: var(--color-white);
+  --select-1: var(--color-white);
+  --select-line: transparent;
+  --select-item-foreground: var(--color-coorin-gray-800);
+  --select-item-hover: var(--color-coorin-gray-100);
+  --select-item-focus: var(--color-coorin-gray-100);
+  --select-item-active: var(--color-coorin-gray-100);
+  --select-inverse: var(--color-coorin-gray-900);
+  
+  /* ============================================ */
+  /* OVERLAY                                      */
+  /* ============================================ */
+  
+  --overlay: var(--color-white);
+  --overlay-line: transparent;
+  --overlay-divider: var(--color-coorin-gray-200);
+  --overlay-header: var(--color-coorin-gray-200);
+  --overlay-footer: var(--color-coorin-gray-200);
+  --overlay-inverse: var(--color-coorin-gray-900);
+  
+  /* ============================================ */
+  /* POPOVER                                      */
+  /* ============================================ */
+  
+  --popover: var(--color-white);
+  --popover-line: var(--color-coorin-gray-100);
+  
+  /* ============================================ */
+  /* TOOLTIP                                      */
+  /* ============================================ */
+  
+  --tooltip: var(--color-coorin-gray-900);
+  --tooltip-foreground: var(--color-white);
+  --tooltip-line: transparent;
+  
+  /* ============================================ */
+  /* TABLE                                        */
+  /* ============================================ */
+  
+  --table-line: var(--color-coorin-gray-200);
+  
+  /* ============================================ */
+  /* SWITCH                                       */
+  /* ============================================ */
+  
+  --switch: var(--color-white);
+  
+  /* ============================================ */
+  /* FOOTER                                       */
+  /* ============================================ */
+  
+  --footer: var(--color-white);
+  --footer-line: var(--color-coorin-gray-200);
+  --footer-inverse: var(--color-coorin-gray-900);
+  
+  /* ============================================ */
+  /* SCROLLBAR                                    */
+  /* ============================================ */
+  
+  --scrollbar-track: var(--color-coorin-gray-100);
+  --scrollbar-thumb: var(--color-coorin-gray-300);
   --scrollbar-track-inverse: transparent;
-  --scrollbar-thumb-inverse: #ffffff;
+  --scrollbar-thumb-inverse: var(--color-white);
+  /* ============================================ */
+  /* CHARTS (Apexcharts)                          */
+  /* ============================================ */
+  /* NOTE: -hex tokens use valid hex for Apexcharts compatibility */
+  
+  --chart-colors-background-inverse: var(--color-coorin-gray-900);
+  --chart-colors-foreground: var(--color-coorin-gray-700);
+  
+  --chart-primary: var(--color-coorin-500);
+  --chart-colors-primary: var(--color-coorin-500);
+  --chart-colors-primary-inverse: var(--color-coorin-300);
+  --chart-colors-primary-hex: #008a5d;
+  --chart-colors-primary-hex-inverse: #58c69b;
 
-  /* Table */
-  --table-border: #e5e7eb;
-
-  /* ── Tokens propios de CoorinWeb (light) ─────────────────── */
-  --jerarquia1:  #9dc5bc;
-  --jerarquia2:  #3eac91;
-  --jerarquia3:  #147f5e;
-  --jerarquia4:  #1b4838;
-
-  --bgsuccess:  #87d4c1;
-  --iconCircular: #c8e7dd;
-
-  --background-dashboard:  #dee5e5;
-  --background-tertiary:   #f5f5f5;
-
-  --surface-secondary: #f5f5f5;
-  --surface-modal:     #efefef;
-
-  --text-secondary:    #374151;
-  --sticky-bg:         #ffffff;
-  --sticky-text:       #2b463c;
-
-  /* Buttons info */
-  --btn-info-bg:         #a9cde0;
-  --btn-info-bg-hover:   #3e86ac;
-  --btn-info-text:       #132934;
-  --btn-info-hover-text: #dbeafe;
-
-  /* Buttons warning */
-  --btn-warning-bg:         #e4e4ab;
-  --btn-warning-bg-hover:   #c1c13e;
-  --btn-warning-text:       #1f1f1f;
-  --btn-warning-hover-text: #fffcec;
-
-  /* Buttons danger */
-  --btn-danger-bg:         #d78b84;
-  --btn-danger-bg-hover:   #c1493e;
-  --btn-danger-text:       #361511;
-  --btn-danger-hover-text: #eeccc9;
-
-  /* Cards ejecutivos */
-  --card-metas-bg:         #ddddb9;
-  --card-metas-font:       #505631;
-  --card-validadores-bg:   #3eac91;
-  --card-validadores-font: #00291a;
-  --card-encargados-bg:    #1b4838;
-  --card-encargados-font:  #deffb9;
-  --card-catalogos-bg:     #9dc5bc;
-  --card-catalogos-font:   #00291a;
-  --card-scripts-bg:       #147f5e;
-  --card-scripts-font:     #deffb9;
-  --card-pantalla-bg:      #3eac91;
-  --card-pantalla-font:    #00291a;
+  --chart-1: oklch(55% 0.14 165);
+  --chart-colors-chart-1: oklch(55% 0.14 165);
+  --chart-colors-chart-1-inverse: oklch(75% 0.12600000000000003 165);
+  --chart-colors-chart-1-hex: #008a5d;
+  --chart-colors-chart-1-hex-inverse: #50c79a;
+  --chart-2: oklch(60% 0.12 195);
+  --chart-colors-chart-2: oklch(60% 0.12 195);
+  --chart-colors-chart-2-inverse: oklch(80% 0.108 195);
+  --chart-colors-chart-2-hex: #009696;
+  --chart-colors-chart-2-hex-inverse: #5ad3d3;
+  --chart-3: oklch(58% 0.12 135);
+  --chart-colors-chart-3: oklch(58% 0.12 135);
+  --chart-colors-chart-3-inverse: oklch(78% 0.108 135);
+  --chart-colors-chart-3-hex: #5a8a3d;
+  --chart-colors-chart-3-hex-inverse: #99c780;
+  --chart-4: oklch(55% 0.13 345);
+  --chart-colors-chart-4: oklch(55% 0.13 345);
+  --chart-colors-chart-4-inverse: oklch(75% 0.117 345);
+  --chart-colors-chart-4-hex: #a54f83;
+  --chart-colors-chart-4-hex-inverse: #e38fbf;
+  --chart-5: oklch(60% 0.11 315);
+  --chart-colors-chart-5: oklch(60% 0.11 315);
+  --chart-colors-chart-5-inverse: oklch(80% 0.099 315);
+  --chart-colors-chart-5-hex: #996bad;
+  --chart-colors-chart-5-hex-inverse: #d6abea;
+  --chart-6: oklch(58% 0.11 15);
+  --chart-colors-chart-6: oklch(58% 0.11 15);
+  --chart-colors-chart-6-inverse: oklch(78% 0.099 15);
+  --chart-colors-chart-6-hex: #b25d65;
+  --chart-colors-chart-6-hex-inverse: #f09da3;
+  --chart-7: oklch(62% 0.1 225);
+  --chart-colors-chart-7: oklch(62% 0.1 225);
+  --chart-colors-chart-7-inverse: oklch(82% 0.09000000000000001 225);
+  --chart-colors-chart-7-hex: #3292b3;
+  --chart-colors-chart-7-hex-inverse: #81d1f0;
+  --chart-8: oklch(56% 0.1 105);
+  --chart-colors-chart-8: oklch(56% 0.1 105);
+  --chart-colors-chart-8-inverse: oklch(76% 0.09000000000000001 105);
+  --chart-colors-chart-8-hex: #7d7728;
+  --chart-colors-chart-8-hex-inverse: #b9b570;
+  --chart-9: oklch(60% 0.09 255);
+  --chart-colors-chart-9: oklch(60% 0.09 255);
+  --chart-colors-chart-9-inverse: oklch(80% 0.081 255);
+  --chart-colors-chart-9-hex: #5b82b5;
+  --chart-colors-chart-9-hex-inverse: #9bc1f2;
+  --chart-10: oklch(58% 0.09 75);
+  --chart-colors-chart-10: oklch(58% 0.09 75);
+  --chart-colors-chart-10-inverse: oklch(78% 0.081 75);
+  --chart-colors-chart-10-hex: #997238;
+  --chart-colors-chart-10-hex-inverse: #d6b07c;
+  
+  --chart-colors-candlestick-upward: var(--color-green-500);
+  --chart-colors-candlestick-upward-inverse: var(--color-green-400);
+  --chart-colors-candlestick-downward: var(--color-red-500);
+  --chart-colors-candlestick-downward-inverse: var(--color-red-400);
+  
+  --chart-colors-labels: var(--color-coorin-gray-600);
+  --chart-colors-labels-inverse: var(--color-coorin-gray-400);
+  --chart-colors-xaxis-labels: var(--color-coorin-gray-500);
+  --chart-colors-xaxis-labels-inverse: var(--color-coorin-gray-400);
+  --chart-colors-yaxis-labels: var(--color-coorin-gray-500);
+  --chart-colors-yaxis-labels-inverse: var(--color-coorin-gray-400);
+  
+  --chart-colors-grid-border: var(--color-coorin-gray-200);
+  --chart-colors-grid-border-inverse: var(--color-coorin-gray-700);
+  --chart-colors-bar-ranges: var(--color-coorin-gray-200);
+  --chart-colors-bar-ranges-inverse: var(--color-coorin-gray-700);
+  /* ============================================ */
+  /* MAPS (jsvectormap)                           */
+  /* ============================================ */
+  
+  --map-colors-primary: var(--color-coorin-500);
+  --map-colors-primary-inverse: var(--color-coorin-400);
+  --map-colors-default: var(--color-coorin-gray-200);
+  --map-colors-default-inverse: var(--color-coorin-gray-700);
+  --map-colors-highlight: var(--color-coorin-300);
+  --map-colors-highlight-inverse: var(--color-coorin-500);
+  --map-colors-border: var(--color-coorin-gray-300);
+  --map-colors-border-inverse: var(--color-coorin-gray-600);
 }
 
-/* ------------------------------------------------------------------
- *  3. .dark — Modo OSCURO
- *     Solo los tokens que cambian (los demás heredan de :root).
- * ------------------------------------------------------------------ */
-.dark {
-  /* ── Preline core tokens (dark) ─────────────────────────── */
-  --background:       #011008;
-  --background-1:     #0f2919;
-  --background-2:     #162b20;
-  --background-plain: #101311;
+/* ============================================== */
+/* DARK MODE OVERRIDES                            */
+/* ============================================== */
 
-  --foreground:         #a7f3d0;
-  --foreground-inverse: #101311;
-  --inverse:            #101311;
+[data-theme="theme-coorin"].dark {
 
-  --border:        #2d4a3a;
-  --border-line-1: #162b20;
-  --border-line-2: #1a2e22;
-  --border-line-3: #2d4a3a;
-
-  /* Primary */
-  --primary:            #3eac91;
-  --primary-foreground: #ffffff;
-  --primary-hover:      #50c9a8;
-  --primary-focus:      #50c9a8;
-  --primary-active:     #50c9a8;
-  --primary-checked:    #3eac91;
-
-  /* Secondary */
-  --secondary:          #86efac;
-  --secondary-foreground: #011008;
-  --secondary-hover:    #a7f3d0;
-  --secondary-focus:    #a7f3d0;
-  --secondary-active:   #a7f3d0;
-
-  /* Layer */
-  --layer:            #101311;
-  --layer-line:       #2d4a3a;
-  --layer-foreground: #a7f3d0;
-  --layer-hover:      #162b20;
-  --layer-focus:      #162b20;
-  --layer-active:     #162b20;
-
-  /* Surface */
-  --surface:            #162b20;
-  --surface-1:          #1a2e22;
-  --surface-2:          #2d4a3a;
-  --surface-foreground: #a7f3d0;
-  --surface-hover:      #1a2e22;
-  --surface-focus:      #1a2e22;
-  --surface-active:     #1a2e22;
-
-  /* Muted */
-  --muted:              #101311;
-  --muted-foreground:   #9ca3af;
-  --muted-foreground-1: #6b7280;
-  --muted-foreground-2: #4b5563;
-  --muted-hover:        #162b20;
-  --muted-focus:        #162b20;
-  --muted-active:       #162b20;
-
-  /* Destructive */
-  --destructive:            #b91c1c;
-  --destructive-foreground: #fecaca;
-  --destructive-hover:      #991b1b;
-  --destructive-focus:      #991b1b;
-
-  /* Card */
-  --card:         #101311;
-  --card-border:  #2d4a3a;
-  --card-divider: #2d4a3a;
-  --card-header:  #162b20;
-  --card-footer:  #162b20;
-  --card-inverse: #011008;
-
-  /* Overlay (modales) */
-  --overlay:         #1a2e22;
-  --overlay-border:  #2d4a3a;
-  --overlay-divider: #2d4a3a;
-  --overlay-header:  #162b20;
-  --overlay-footer:  #162b20;
-  --overlay-inverse: #011008;
-
-  /* Select dropdown */
-  --select:               #1a2e22;
-  --select-1:             #162b20;
-  --select-border:        transparent;
-  --select-item-foreground: #a7f3d0;
-  --select-item-hover:    #162b20;
-  --select-item-focus:    #162b20;
-  --select-item-active:   #162b20;
-  --select-inverse:       #011008;
-
-  /* Scrollbar */
-  --scrollbar-track:         #1a2e22;
-  --scrollbar-thumb:         #3eac91;
-  --scrollbar-track-inverse: #3eac91;
-  --scrollbar-thumb-inverse: #1a2e22;
-
-  /* Table */
-  --table-border: #2d4a3a;
-
-  /* ── Tokens propios de CoorinWeb (dark) ──────────────────── */
-  --jerarquia1: #2a7a6a;
-  --jerarquia2: #3eac91;
-  --jerarquia3: #50c9a8;
-  --jerarquia4: #86efac;
-
-  --bgsuccess:    #155e42;
-  --iconCircular: #1b4838;
-
-  --background-dashboard: #011008;
-  --background-tertiary:  #162b20;
-
-  --surface-secondary: #162b20;
-  --surface-modal:     #1a2e22;
-
-  --text-secondary:  #d1d5db;
-  --sticky-bg:       #162b20;
-  --sticky-text:     #86efac;
-
-  /* Buttons info */
-  --btn-info-bg:         #1e3a4a;
-  --btn-info-bg-hover:   #1f4356;
-  --btn-info-text:       #bfdbfe;
-  --btn-info-hover-text: #dbeafe;
-
-  /* Buttons warning */
-  --btn-warning-bg:         #3a3a0f;
-  --btn-warning-bg-hover:   #59591d;
-  --btn-warning-text:       #fef9c3;
-  --btn-warning-hover-text: #fffcec;
-
-  /* Buttons danger */
-  --btn-danger-bg:         #4a1a17;
-  --btn-danger-bg-hover:   #7f1d1d;
-  --btn-danger-text:       #fecaca;
-  --btn-danger-hover-text: #fee2e2;
-
-  /* Cards ejecutivos */
-  --card-metas-bg:         #2e3010;
-  --card-metas-font:       #d4f06b;
-  --card-validadores-bg:   #14413a;
-  --card-validadores-font: #6ee7b7;
-  --card-encargados-bg:    #1c4a34;
-  --card-encargados-font:  #a7f3d0;
-  --card-catalogos-bg:     #1a3d38;
-  --card-catalogos-font:   #99f6e4;
-  --card-scripts-bg:       #163d28;
-  --card-scripts-font:     #bbf7d0;
-  --card-pantalla-bg:      #0f3040;
-  --card-pantalla-font:    #67e8f9;
+  /* ============================================ */
+  /* DARK MODE - Tailwind neutral */
+  /* ============================================ */
+  
+  /* BACKGROUNDS */
+  --background: var(--color-neutral-800);
+  --background-1: var(--color-neutral-900);
+  --background-2: var(--color-neutral-900);
+  --background-plain: var(--color-neutral-800);
+  
+  /* TEXT */
+  --foreground: var(--color-neutral-200);
+  
+  --inverse: var(--color-neutral-950);
+  
+  /* BORDERS */
+  --border: var(--color-neutral-700);
+  --border-line-inverse: var(--color-neutral-200);
+  --border-line-1: var(--color-neutral-800);
+  --border-line-2: var(--color-neutral-700);
+  --border-line-3: var(--color-neutral-600);
+  --border-line-4: var(--color-neutral-500);
+  --border-line-5: var(--color-neutral-400);
+  --border-line-6: var(--color-neutral-300);
+  --border-line-7: var(--color-neutral-200);
+  --border-line-8: var(--color-neutral-100);
+  
+  /* PRIMARY STATES */
+  --primary: var(--color-coorin-400);
+  --primary-foreground: var(--color-neutral-900);
+  --primary-hover: var(--color-coorin-500);
+  --primary-focus: var(--color-coorin-500);
+  --primary-active: var(--color-coorin-500);
+  --primary-checked: var(--color-coorin-400);
+  
+  /* SECONDARY */
+  --secondary: var(--color-white);
+  --secondary-foreground: var(--color-neutral-800);
+  --secondary-hover: var(--color-neutral-100);
+  --secondary-focus: var(--color-neutral-100);
+  --secondary-active: var(--color-neutral-100);
+  
+  /* LAYER */
+  --layer: var(--color-neutral-800);
+  --layer-line: var(--color-neutral-700);
+  --layer-foreground: var(--color-white);
+  --layer-hover: var(--color-neutral-700);
+  --layer-focus: var(--color-neutral-700);
+  --layer-active: var(--color-neutral-700);
+  
+  /* SURFACE */
+  --surface: var(--color-neutral-700);
+  --surface-1: var(--color-neutral-600);
+  --surface-2: var(--color-neutral-500);
+  --surface-3: var(--color-neutral-600);
+  --surface-4: var(--color-neutral-500);
+  --surface-5: var(--color-neutral-400);
+  --surface-foreground: var(--color-neutral-200);
+  --surface-hover: var(--color-neutral-600);
+  --surface-focus: var(--color-neutral-600);
+  --surface-active: var(--color-neutral-600);
+  
+  /* MUTED */
+  --muted: var(--color-neutral-800);
+  --muted-foreground: var(--color-neutral-500);
+  --muted-foreground-1: var(--color-neutral-400);
+  --muted-foreground-2: var(--color-neutral-300);
+  --muted-hover: var(--color-neutral-700);
+  --muted-focus: var(--color-neutral-700);
+  --muted-active: var(--color-neutral-700);
+  
+  /* DESTRUCTIVE */
+  --destructive: var(--color-red-500);
+  --destructive-foreground: var(--color-white);
+  --destructive-hover: var(--color-red-600);
+  --destructive-focus: var(--color-red-600);
+  
+  /* NAVBAR */
+  --navbar: var(--color-neutral-800);
+  --navbar-line: var(--color-neutral-700);
+  --navbar-divider: var(--color-neutral-700);
+  --navbar-nav-foreground: var(--color-neutral-200);
+  --navbar-nav-hover: var(--color-neutral-700);
+  --navbar-nav-focus: var(--color-neutral-700);
+  --navbar-nav-active: var(--color-neutral-700);
+  --navbar-nav-list-divider: var(--color-neutral-700);
+  --navbar-inverse: var(--color-coorin-950);
+  
+  --navbar-1: var(--color-neutral-900);
+  --navbar-1-line: var(--color-neutral-700);
+  --navbar-1-divider: var(--color-neutral-700);
+  --navbar-1-nav-foreground: var(--color-neutral-200);
+  --navbar-1-nav-hover: var(--color-neutral-700);
+  --navbar-1-nav-focus: var(--color-neutral-700);
+  --navbar-1-nav-active: var(--color-neutral-700);
+  --navbar-1-nav-list-divider: var(--color-neutral-700);
+  
+  --navbar-2: var(--color-neutral-900);
+  --navbar-2-line: transparent;
+  --navbar-2-divider: var(--color-neutral-700);
+  --navbar-2-nav-foreground: var(--color-neutral-200);
+  --navbar-2-nav-hover: var(--color-neutral-800);
+  --navbar-2-nav-focus: var(--color-neutral-800);
+  --navbar-2-nav-active: var(--color-neutral-800);
+  --navbar-2-nav-list-divider: var(--color-neutral-800);
+  
+  /* SIDEBAR */
+  --sidebar: var(--color-neutral-800);
+  --sidebar-line: var(--color-neutral-700);
+  --sidebar-divider: var(--color-neutral-700);
+  --sidebar-nav-foreground: var(--color-neutral-200);
+  --sidebar-nav-hover: var(--color-neutral-700);
+  --sidebar-nav-focus: var(--color-neutral-700);
+  --sidebar-nav-active: var(--color-neutral-700);
+  --sidebar-nav-list-divider: var(--color-neutral-700);
+  --sidebar-inverse: var(--color-coorin-950);
+  
+  --sidebar-1: var(--color-neutral-900);
+  --sidebar-1-line: var(--color-neutral-700);
+  --sidebar-1-divider: var(--color-neutral-700);
+  --sidebar-1-nav-foreground: var(--color-neutral-200);
+  --sidebar-1-nav-hover: var(--color-neutral-700);
+  --sidebar-1-nav-focus: var(--color-neutral-700);
+  --sidebar-1-nav-active: var(--color-neutral-700);
+  --sidebar-1-nav-list-divider: var(--color-neutral-700);
+  
+  --sidebar-2: var(--color-neutral-900);
+  --sidebar-2-line: transparent;
+  --sidebar-2-divider: var(--color-neutral-800);
+  --sidebar-2-nav-foreground: var(--color-neutral-200);
+  --sidebar-2-nav-hover: var(--color-neutral-800);
+  --sidebar-2-nav-focus: var(--color-neutral-800);
+  --sidebar-2-nav-active: var(--color-neutral-800);
+  --sidebar-2-nav-list-divider: var(--color-neutral-800);
+  
+  /* CARD */
+  --card: var(--color-neutral-800);
+  --card-line: var(--color-neutral-700);
+  --card-divider: var(--color-neutral-700);
+  --card-header: var(--color-neutral-700);
+  --card-footer: var(--color-neutral-700);
+  --card-inverse: var(--color-neutral-900);
+  
+  /* DROPDOWN */
+  --dropdown: var(--color-neutral-900);
+  --dropdown-1: var(--color-neutral-950);
+  --dropdown-line: transparent;
+  --dropdown-divider: var(--color-neutral-800);
+  --dropdown-header: var(--color-neutral-700);
+  --dropdown-footer: var(--color-neutral-700);
+  --dropdown-item-foreground: var(--color-neutral-200);
+  --dropdown-item-hover: var(--color-neutral-800);
+  --dropdown-item-focus: var(--color-neutral-800);
+  --dropdown-item-active: var(--color-neutral-800);
+  --dropdown-inverse: var(--color-neutral-900);
+  
+  /* SELECT */
+  --select: var(--color-neutral-900);
+  --select-1: var(--color-neutral-950);
+  --select-line: transparent;
+  --select-item-foreground: var(--color-neutral-200);
+  --select-item-hover: var(--color-neutral-800);
+  --select-item-focus: var(--color-neutral-800);
+  --select-item-active: var(--color-neutral-800);
+  --select-inverse: var(--color-neutral-900);
+  
+  /* OVERLAY */
+  --overlay: var(--color-neutral-800);
+  --overlay-line: transparent;
+  --overlay-divider: var(--color-neutral-700);
+  --overlay-header: var(--color-neutral-700);
+  --overlay-footer: var(--color-neutral-700);
+  --overlay-inverse: var(--color-neutral-900);
+  
+  /* POPOVER */
+  --popover: var(--color-neutral-900);
+  --popover-line: var(--color-neutral-700);
+  
+  /* TOOLTIP */
+  --tooltip: var(--color-white);
+  --tooltip-foreground: var(--color-neutral-800);
+  --tooltip-line: transparent;
+  
+  /* TABLE */
+  --table-line: var(--color-neutral-700);
+  
+  /* SWITCH */
+  --switch: var(--color-neutral-800);
+  
+  /* FOOTER */
+  --footer: var(--color-neutral-800);
+  --footer-line: var(--color-neutral-700);
+  --footer-inverse: var(--color-neutral-900);
+  
+  /* SCROLLBAR */
+  --scrollbar-track: var(--color-neutral-700);
+  --scrollbar-thumb: var(--color-neutral-500);
+  --scrollbar-track-inverse: var(--color-neutral-500);
+  --scrollbar-thumb-inverse: var(--color-neutral-700);
+  
+  /* CHARTS - dark mode adjustments */
+  --chart-colors-background-inverse: var(--color-neutral-100);
+  --chart-colors-foreground: var(--color-neutral-300);
+  --chart-colors-labels: var(--color-neutral-400);
+  --chart-colors-xaxis-labels: var(--color-neutral-400);
+  --chart-colors-yaxis-labels: var(--color-neutral-400);
+  --chart-colors-grid-border: var(--color-neutral-700);
+  --chart-colors-bar-ranges: var(--color-neutral-700);
+  
+  /* MAPS - dark mode adjustments */
+  --map-colors-default: var(--color-neutral-700);
+  --map-colors-border: var(--color-neutral-600);
 }

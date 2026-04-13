@@ -81,7 +81,10 @@ const JerarquiaConR = ({
           className="hs-accordion-heading py-px rounded-md flex items-center gap-x-0.5 w-full"
           style={
             isSelected
-              ? { background: "var(--color-jerarquia1)", color: "#2b463c" }
+              ? {
+                  background: "var(--color-jerarquia1)",
+                  color: "var(--color-jerarquia4)",
+                }
               : {}
           }
         >
@@ -123,9 +126,7 @@ const JerarquiaConR = ({
               >
                 <path d="M5 12h14"></path>
                 <path
-                  className={
-                    !isCollapsed ? "hs-accordion-active:hidden block" : ""
-                  }
+                  className={isCollapsed ? "block" : "hidden"}
                   d="M12 5v14"
                 ></path>
               </svg>
@@ -161,7 +162,9 @@ const JerarquiaConR = ({
             <span
               className="text-xs font-medium w-full"
               style={{
-                color: isSelected ? "#2b463c" : "#147f5e",
+                color: isSelected
+                  ? "var(--color-jerarquia4)"
+                  : "var(--color-text-black)",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -229,7 +232,10 @@ const JerarquiaConR = ({
           className="hs-accordion-heading py-0.5 rounded-md flex items-center gap-x-0.5 w-full"
           style={
             isChecked
-              ? { background: "var(--color-jerarquia1)", color: "#2b463c" }
+              ? {
+                  background: "var(--color-jerarquia1)",
+                  color: "var(--color-jerarquia4)",
+                }
               : {}
           }
         >
@@ -259,7 +265,7 @@ const JerarquiaConR = ({
               disabled={isDisabled}
             >
               <svg
-                className="size-4 text-gray-800"
+                className="size-4 text-jerarquia4"
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
                 height="24"
@@ -272,9 +278,7 @@ const JerarquiaConR = ({
               >
                 <path d="M5 12h14"></path>
                 <path
-                  className={
-                    !isCollapsed ? "hs-accordion-active:hidden block" : ""
-                  }
+                  className={isCollapsed ? "block" : "hidden"}
                   d="M12 5v14"
                 ></path>
               </svg>
@@ -286,7 +290,9 @@ const JerarquiaConR = ({
             disabled={isDisabled}
             className="modal-checkbox-small mr-2"
             style={{
-              accentColor: isChecked ? "#2563eb" : "var(--color-jerarquia1)",
+              accentColor: isChecked
+                ? "var(--color-jerarquia3)"
+                : "var(--color-jerarquia1)",
             }}
             onChange={(e) => {
               e.stopPropagation();
@@ -295,9 +301,13 @@ const JerarquiaConR = ({
             }}
           />
           <span
+            className="text-xs font-medium"
             style={{
               cursor: isDisabled ? "not-allowed" : "pointer",
               userSelect: "none",
+              color: isChecked
+                ? "var(--color-jerarquia4)"
+                : "var(--color-text-black)",
             }}
             onClick={() => {
               if (!isDisabled && indexUV !== -1)
@@ -334,13 +344,14 @@ const JerarquiaConR = ({
       ref={ramificacionRef}
       className="productividad-branch scrollbar-gray"
       style={{
-        height: "100%",
+        height: "55vh",
         maxHeight: "55vh",
         overflowY: "auto",
         width: "auto",
-        background: "#ffffff",
+
+        background: "var(--color-surface)",
         borderRadius: 8,
-        border: "1px solid #e0e0e0",
+        border: "1px solid var(--color-border)",
         padding: "1vh 0.8vw",
       }}
     >
@@ -403,7 +414,7 @@ const JerarquiaConR = ({
       {loadingJerarquia ? (
         <div
           style={{
-            color: "#2b463c",
+            color: "var(--color-jerarquia4)",
             fontWeight: 500,
             fontSize: "clamp(12px,1.2vw,18px)",
             textAlign: "center",
@@ -420,7 +431,7 @@ const JerarquiaConR = ({
               height="38"
               viewBox="0 0 38 38"
               xmlns="http://www.w3.org/2000/svg"
-              stroke="#2b463c"
+              stroke="var(--color-jerarquia4)"
             >
               <g fill="none" fillRule="evenodd">
                 <g transform="translate(1 1)" strokeWidth="3">
@@ -479,20 +490,20 @@ if (
         .productividad-branch {
             width: 100%;
             min-width: 160px;
-            height: auto;
+            height: 55vh;
             transition: width 0.2s;
             box-sizing: border-box;
         }
         @media (min-width: 1201px) {
             .productividad-branch {
                 max-width: 100%;
-                height: auto;
+                height: 55vh;
             }
         }
         @media (max-width: 1200px) {
             .productividad-branch {
                 max-width: 100%;
-                height: auto;
+                height: 55vh;
             }
         }
         @media (max-width: 900px) {
@@ -503,7 +514,7 @@ if (
                 border-radius: 0 !important;
                 padding-left: 0.5vw !important;
                 padding-right: 0.5vw !important;
-                height: auto !important;
+                height: 55vh !important;
             }
         }
     `;

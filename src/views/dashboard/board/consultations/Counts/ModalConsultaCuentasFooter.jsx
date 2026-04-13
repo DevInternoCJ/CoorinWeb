@@ -52,31 +52,26 @@ const ModalConsultaCuentasFooter = ({
         </div>
 
         {/* Tabla de resultados */}
-        <div className="w-full flex justify-center rounded-lg bg-white dark:bg-[var(--color-border-dark)] rounded-lg  p-0.5">
+        <div className="w-full flex justify-center rounded-lg bg-surface p-1 border border-border">
           <div
-            style={{
-              overflowX: "auto",
-              overflowY: "auto",
-              maxHeight: "20vh",
-              width: "100%",
-            }}
-            className="scrollbar-gray"
+            className="scrollbar-gray w-full overflow-auto max-h-[250px]"
+            style={{ minHeight: 0 }}
           >
             <table className="modal-table rounded-lg">
               {resultData.data.length > 0 ? (
                 <>
-                  <thead>
+                  <thead className="sticky top-0 z-10">
                     <tr>
                       {Object.keys(resultData.data[0]).map((header) => (
-                        <th key={header}>{header}</th>
+                        <th key={header} className="py-2 px-3 text-[10px] uppercase tracking-wider">{header}</th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-border">
                     {resultData.data.map((row, index) => (
-                      <tr key={index}>
+                      <tr key={index} className="hover:bg-surface-secondary/50 transition-colors">
                         {Object.values(row).map((value, cellIndex) => (
-                          <td key={cellIndex}>
+                          <td key={cellIndex} className="py-1 px-3 text-sm text-foreground">
                             {value && typeof value === "object"
                               ? JSON.stringify(value)
                               : value || ""}
@@ -90,12 +85,7 @@ const ModalConsultaCuentasFooter = ({
                 <tbody>
                   <tr>
                     <td
-                      style={{
-                        textAlign: "center",
-                        color: "#666",
-                        fontStyle: "italic",
-                        padding: "2rem",
-                      }}
+                      className="py-12 text-center text-muted-foreground italic text-xs"
                     >
                       No hay consultas realizadas
                     </td>

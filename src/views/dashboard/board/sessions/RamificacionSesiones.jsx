@@ -204,7 +204,10 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
             className="hs-accordion-heading py-0.5 rounded-md flex items-center gap-x-0.5 w-full transition-colors duration-150"
             style={
               isSelected
-                ? { background: "var(--color-jerarquia1)", color: "var(--color-jerarquia4)" }
+                ? {
+                    background: "var(--color-jerarquia1)",
+                    color: "var(--color-jerarquia4)",
+                  }
                 : {}
             }
           >
@@ -278,7 +281,9 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
               <span
                 className="text-sm font-medium w-full"
                 style={{
-                  color: isSelected ? "var(--color-jerarquia4)" : "var(--color-jerarquia3)",
+                  color: isSelected
+                    ? "var(--color-jerarquia4)"
+                    : "var(--color-jerarquia3)",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -332,15 +337,15 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     persistedSession?.usuario || persistedSession?.Usuario || "";
 
   return (
-      <div
-        className="bg-[var(--color-surface)] ring-1 ring-[var(--color-border)] rounded-2xl flex flex-col px-4 lg:px-6 w-full h-auto lg:h-82 min-h-64 transition-colors duration-300"
-    >
+    <div className="bg-[var(--color-surface)] ring-1 ring-[var(--color-border)] rounded-2xl flex flex-col px-4 lg:px-6 w-full h-auto lg:h-82 min-h-64 transition-colors duration-300">
       {/* Header unificado y responsive */}
       <div className="mb-5 overflow-auto">
-        <div className="flex items-center justify-between sticky top-0 z-10
+        <div
+          className="flex items-center justify-between sticky top-0 z-10
                         bg-[var(--color-surface)]/90 backdrop-blur-sm
                         border-b border-[var(--color-border)]
-                        px-3 mt-5 sm:px-4 md:px-6 transition-colors duration-300">
+                        px-3 mt-5 sm:px-4 md:px-6 transition-colors duration-300"
+        >
           {/* Título a la izquierda */}
           <div className="flex items-center text-[var(--color-text-secondary)]">
             <span className="mr-2">
@@ -360,14 +365,18 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                 />
               </svg>
             </span>
-            <h3 className="text-base lg:text-lg font-semibold text-[var(--color-text-primary)]">Ramificación</h3>
+            <h3 className="text-base lg:text-lg font-semibold text-[var(--color-text-primary)]">
+              Ramificación
+            </h3>
           </div>
 
           {/* Ejecutivo de la sesión a la derecha */}
           {idEjecutivoSesion && (
             <div
               className={`session-executive${
-                selectedExecutiveNode === Number(idEjecutivoSesion) ? " selected" : ""
+                selectedExecutiveNode === Number(idEjecutivoSesion)
+                  ? " selected"
+                  : ""
               } text-xs md:text-sm lg:text-base px-2 py-2
                 bg-[var(--color-surface-secondary)]
                 text-center max-w-full truncate
@@ -385,7 +394,6 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                   scrollToTop();
                 }, 100);
               }}
-
             >
               <span className="font-bold md:font-semibold lg:font-bold">
                 {usuarioSesion}
@@ -399,33 +407,33 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
         </div>
         {/* Contenedor de la ramificación con estilos de JerarquiaConR */}
         <div
-                ref={ramificacionRef}
-                className="productividad-branch"
-                style={{
-                    width: '100%',
-                    minHeight: '16vh',
-                    borderRadius: 8,
-                    border: '1px solid var(--color-border)',
-                    padding: '1vh 0.8vw',
-                    background: 'var(--color-surface)',
-                    transition: 'background 0.3s ease, border-color 0.3s ease',
-                }}
+          ref={ramificacionRef}
+          style={{
+            width: "100%",
+            minHeight: "16vh",
+            borderRadius: 8,
+            border: "1px solid var(--color-border)",
+            padding: "1vh 0.8vw",
+            background: "var(--color-surface)",
+            transition: "background 0.3s ease, border-color 0.3s ease",
+          }}
+        >
+          {/* Contenido de la jerarquía con Preline Tree View */}
+          {loadingJerarquia ? (
+            <div
+              style={{
+                color: "var(--color-jerarquia3)",
+                fontWeight: 500,
+                fontSize: 15,
+                textAlign: "center",
+                marginTop: 30,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 10,
+              }}
             >
-    {/* Contenido de la jerarquía con Preline Tree View */}
-    {loadingJerarquia ? (
-        <div style={{
-            color: "var(--color-jerarquia3)",
-            fontWeight: 500,
-            fontSize: 15,
-            textAlign: "center",
-            marginTop: 30,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 10,
-        }}>
-            <div className="spinner-sonner" style={{ marginBottom: 8 }}>
-
+              <div className="spinner-sonner" style={{ marginBottom: 8 }}>
                 <svg
                   width="38"
                   height="38"
