@@ -13,7 +13,7 @@ const TableMetas = ({
     // Normalizar valores para que siempre se pinte algo aunque vengan null/undefined
     const safe = (val, def = '') => val !== null && val !== undefined ? val : def;
     return (
-        <div className="metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full h-full overflow-hidden">
+        <div className="metas-block metas-block-3 bg-layer rounded-lg shadow border border-jerarquia1/30 flex flex-col min-w-0 min-h-0 w-full h-full overflow-hidden">
             {/* Contenedor de tabla con scroll */}
             <div
                 className="scrollbar-gray w-full flex-1"
@@ -61,7 +61,7 @@ const TableMetas = ({
                                 <td colSpan={12} style={{ textAlign: 'center', height: 120 }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 100 }}>
                                         <div className="spinner-sonner" style={{ marginBottom: 12 }}>
-                                            <svg width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" stroke="#111">
+                                            <svg width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" className="text-foreground">
                                                 <g fill="none" fillRule="evenodd">
                                                     <g transform="translate(1 1)" strokeWidth="3">
                                                         <circle strokeOpacity=".3" cx="18" cy="18" r="18" />
@@ -72,20 +72,20 @@ const TableMetas = ({
                                                 </g>
                                             </svg>
                                         </div>
-                                        <span style={{ color: '#2b463c', fontWeight: 500, fontSize: 16 }}>Cargando...</span>
+                                        <span className="text-foreground font-medium text-lg">Cargando...</span>
                                     </div>
                                 </td>
                             </tr>
                         )}
                         {error && !loading && (
                             <tr>
-                                <td colSpan={12} style={{ textAlign: 'center', color: '#b71c1c', fontWeight: 500 }}>
+                                <td colSpan={12} style={{ textAlign: 'center' }} className="text-destructive font-medium">
                                     {error}
                                 </td>
                             </tr>
                         )}
                         {!loading && !error && tablaMetas.length === 0 && (
-                            <tr><td colSpan={12} style={{ textAlign: 'center' }}>Sin datos</td></tr>
+                            <tr><td colSpan={12} style={{ textAlign: 'center' }} className="text-muted-foreground">Sin datos</td></tr>
                         )}
                         {!loading && !error && tablaMetas
                             .filter(row => {
@@ -98,9 +98,9 @@ const TableMetas = ({
                                 return (
                                     <tr
                                         key={rowKey}
-                                        className={selectedRows.includes(rowKey) ? 'row-selected' : ''}
+                                        className={`${selectedRows.includes(rowKey) ? 'row-selected' : ''} text-foreground hover:bg-overlay/50 transition-colors`}
                                         style={selectedRows.includes(rowKey)
-                                            ? { cursor: 'pointer', background: 'var(--color-jerarquia1)', color: '#000' }
+                                            ? { cursor: 'pointer', background: 'var(--color-jerarquia1)', color: 'var(--color-text-black)' }
                                             : { cursor: 'pointer' }}
                                         onClick={() => handleRowCheckbox(rowKey)}
                                     >

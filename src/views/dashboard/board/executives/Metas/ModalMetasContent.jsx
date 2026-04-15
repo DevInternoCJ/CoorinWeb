@@ -3,6 +3,7 @@ import TableMetas from "./TableMetas.jsx";
 // import { Input, Label } from 'preline'
 import TreeMetas from "./TreeMetas.jsx";
 import { Toaster, toast } from "sonner";
+import FloatingInput from "../../../../../components/Select/FloatingInput.jsx";
 
 import {
   obetenerTablaMetas,
@@ -200,7 +201,7 @@ const ModalMetasContent = () => {
   const TooltipIcon = ({ message }) => (
     <span className="relative group">
       {WarningIcon(message, () => toast.warning(message))}
-      <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300">
+      <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300 dark:border-yellow-800">
         {message}
       </span>
     </span>
@@ -1133,7 +1134,7 @@ const ModalMetasContent = () => {
                   d="M10.01 21.01c0 1.1.89 1.99 1.99 1.99s1.99-.89 1.99-1.99zM12 6c2.76 0 5 2.24 5 5v7H7v-7c0-2.76 2.24-5 5-5m0-4.5c-.83 0-1.5.67-1.5 1.5v1.17C7.36 4.85 5 7.65 5 11v6l-2 2v1h18v-1l-2-2v-6c0-3.35-2.36-6.15-5.5-6.83V3c0-.83-.67-1.5-1.5-1.5M11 8h2v4h-2zm0 6h2v2h-2z"
                 />
               </svg>
-              <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300">
+              <span className="absolute z-10 left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-yellow-100 dark:bg-yellow-800/40 text-yellow-800 dark:text-yellow-100 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none min-w-max shadow-lg border border-yellow-300 dark:border-yellow-700">
                 {message}
               </span>
             </span>
@@ -1236,7 +1237,7 @@ const ModalMetasContent = () => {
 
   return (
     <div
-      className="metas-responsive-blocks h-full w-full flex flex-col lg:flex-row gap-3"
+      className="metas-responsive-blocks h-full w-full flex flex-col lg:flex-row gap-3 bg-surface-modal"
       style={{ maxHeight: "68vh" }}
     >
       {/* Bloque 1: Jerarquía - En lg+: lateral izquierdo, en <lg: altura auto */}
@@ -1253,484 +1254,236 @@ const ModalMetasContent = () => {
       <div className="flex-1 flex flex-col min-w-0 w-full gap-3">
         {/* Fila de inputs */}
         <div className="w-full shrink-0">
-          <div className="bg-white rounded-lg p-2 sm:p-3 shadow border border-[var(--color-jerarquia1)] w-full">
+          <div className="bg-jerarquia1/10 rounded-lg p-2 sm:p-3 shadow border border-jerarquia1/20 w-full">
             {/* Grid responsive: xs=1col, sm=2cols, md=3cols, lg+=5cols */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 items-start">
               {/* Cuentas */}
               <div className="w-full">
-                <div className="relative w-full min-w-0">
-                  <input
-                    type="text"
-                    className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${
-                      validationState.cuentas.requiredError
-                        ? "border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2"
-                        : "border-transparent focus:ring-jerarquia1 focus:border-jerarquia1"
-                    }`}
-                    id="input-cuentas"
-                    placeholder=" "
-                    style={{ color: "var(--color-jerarquia3)" }}
-                    value={inputValues.cuentas}
-                    onChange={(e) => {
-                      let v = e.target.value;
-                      v = v.replace(/[^0-9]/g, "");
-                      if (v.length > 9) v = v.substring(0, 9);
-                      setInputValues((prev) => ({ ...prev, cuentas: v }));
-                      validateAndSetField("cuentas", v);
-                    }}
-                    min={0}
-                    step={1}
-                    onBlur={(e) => {
-                      const v = e.target.value;
-                      validateAndSetField(
-                        "cuentas",
-                        v,
-                        inputValues,
-                        true,
-                        "blur",
-                      );
-                    }}
-                  />
-                  <label
-                    htmlFor="input-cuentas"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    {typeof validationState.cuentas.error === "string" &&
-                      validationState.cuentas.showIcon &&
-                      WarningIcon(validationState.cuentas.error, () =>
-                        toast.warning(validationState.cuentas.error),
-                      )}
-                    Cuentas
-                  </label>
-                </div>
+                <FloatingInput
+                  id="input-cuentas"
+                  label="Cuentas"
+                  value={inputValues.cuentas}
+                  onChange={(e) => {
+                    let v = e.target.value.replace(/[^0-9]/g, "");
+                    if (v.length > 9) v = v.substring(0, 9);
+                    setInputValues((prev) => ({ ...prev, cuentas: v }));
+                    validateAndSetField("cuentas", v);
+                  }}
+                  onBlur={(e) => {
+                    validateAndSetField("cuentas", e.target.value, inputValues, true, "blur");
+                  }}
+                  icon={
+                    typeof validationState.cuentas.error === "string" &&
+                    validationState.cuentas.showIcon && (
+                      <div className="flex items-center" onClick={() => toast.warning(validationState.cuentas.error)}>
+                        {WarningIcon(validationState.cuentas.error)}
+                      </div>
+                    )
+                  }
+                  error={validationState.cuentas.requiredError ? "Requerido" : ""}
+                />
               </div>
               {/* Titulares */}
               <div className="w-full">
-                <div className="relative w-full min-w-0">
-                  <input
-                    type="text"
-                    className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${
-                      validationState.titulares.requiredError
-                        ? "border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2"
-                        : "border-transparent focus:ring-jerarquia1 focus:border-jerarquia1"
-                    }`}
-                    id="input-titulares"
-                    placeholder=" "
-                    style={{ color: "var(--color-jerarquia3)" }}
-                    value={inputValues.titulares}
-                    onChange={(e) => {
-                      let v = e.target.value;
-                      v = v.replace(/[^0-9]/g, "");
-                      if (v.length > 9) v = v.substring(0, 9);
-                      setInputValues((prev) => ({ ...prev, titulares: v }));
-                      validateAndSetField("titulares", v);
-                    }}
-                    min={0}
-                    step={1}
-                    onBlur={(e) => {
-                      const v = e.target.value;
-                      validateAndSetField(
-                        "titulares",
-                        v,
-                        inputValues,
-                        true,
-                        "blur",
-                      );
-                    }}
-                  />
-                  <label
-                    htmlFor="input-titulares"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    {typeof validationState.titulares.error === "string" &&
-                      validationState.titulares.showIcon &&
-                      WarningIcon(validationState.titulares.error, () =>
-                        toast.warning(validationState.titulares.error),
-                      )}
-                    Titulares
-                  </label>
-                </div>
+                <FloatingInput
+                  id="input-titulares"
+                  label="Titulares"
+                  value={inputValues.titulares}
+                  onChange={(e) => {
+                    let v = e.target.value.replace(/[^0-9]/g, "");
+                    if (v.length > 9) v = v.substring(0, 9);
+                    setInputValues((prev) => ({ ...prev, titulares: v }));
+                    validateAndSetField("titulares", v);
+                  }}
+                  onBlur={(e) => {
+                    validateAndSetField("titulares", e.target.value, inputValues, true, "blur");
+                  }}
+                  icon={
+                    typeof validationState.titulares.error === "string" &&
+                    validationState.titulares.showIcon && (
+                      <div className="flex items-center" onClick={() => toast.warning(validationState.titulares.error)}>
+                        {WarningIcon(validationState.titulares.error)}
+                      </div>
+                    )
+                  }
+                  error={validationState.titulares.requiredError ? "Requerido" : ""}
+                />
               </div>
               {/* Negociaciones */}
               <div className="w-full">
-                <div className="relative w-full min-w-0">
-                  <input
-                    type="text"
-                    className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${
-                      validationState.negociaciones.requiredError
-                        ? "border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2"
-                        : "border-transparent focus:ring-jerarquia1 focus:border-jerarquia1"
-                    }`}
-                    id="input-negociaciones"
-                    placeholder=" "
-                    style={{ color: "var(--color-jerarquia3)" }}
-                    value={inputValues.negociaciones}
-                    onChange={(e) => {
-                      let v = e.target.value;
-                      v = v.replace(/[^0-9]/g, "");
-                      if (v.length > 9) v = v.substring(0, 9);
-                      setInputValues((prev) => ({ ...prev, negociaciones: v }));
-                      validateAndSetField("negociaciones", v);
-                    }}
-                    min={0}
-                    step={1}
-                    onBlur={() => {
-                      validateAndSetField(
-                        "negociaciones",
-                        inputValues.negociaciones,
-                        inputValues,
-                        true,
-                        "blur",
-                      );
-                    }}
-                  />
-                  <label
-                    htmlFor="input-negociaciones"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    {Array.isArray(validationState.negociaciones.errors) &&
-                      validationState.negociaciones.showIcon &&
-                      validationState.negociaciones.errors.map((err, idx) => (
-                        <TooltipIcon key={idx} message={err.msg} />
-                      ))}
-                    Negociaciones
-                  </label>
-                </div>
+                <FloatingInput
+                  id="input-negociaciones"
+                  label="Negociaciones"
+                  value={inputValues.negociaciones}
+                  onChange={(e) => {
+                    let v = e.target.value.replace(/[^0-9]/g, "");
+                    if (v.length > 9) v = v.substring(0, 9);
+                    setInputValues((prev) => ({ ...prev, negociaciones: v }));
+                    validateAndSetField("negociaciones", v);
+                  }}
+                  onBlur={() => {
+                    validateAndSetField("negociaciones", inputValues.negociaciones, inputValues, true, "blur");
+                  }}
+                  icon={
+                    Array.isArray(validationState.negociaciones.errors) &&
+                    validationState.negociaciones.showIcon && (
+                      <div className="flex items-center gap-0.5" onClick={() => validationState.negociaciones.errors.forEach(err => toast.warning(err.msg))}>
+                        {validationState.negociaciones.errors.map((err, idx) => (
+                          <TooltipIcon key={idx} message={err.msg} />
+                        ))}
+                      </div>
+                    )
+                  }
+                  error={validationState.negociaciones.requiredError ? "Requerido" : ""}
+                />
               </div>
               {/* Cumplimientos */}
               <div className="w-full">
-                <div className="relative w-full min-w-0">
-                  <input
-                    type="text"
-                    className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${
-                      validationState.cumplimientos.requiredError
-                        ? "border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2"
-                        : "border-transparent focus:ring-jerarquia1 focus:border-jerarquia1"
-                    }`}
-                    id="input-cumplimientos"
-                    placeholder=" "
-                    style={{ color: "var(--color-jerarquia3)" }}
-                    value={inputValues.cumplimientos}
-                    onChange={(e) => {
-                      let v = e.target.value;
-                      v = v.replace(/[^0-9]/g, "");
-                      if (v.length > 9) v = v.substring(0, 9);
-                      setInputValues((prev) => ({ ...prev, cumplimientos: v }));
-                      validateAndSetField("cumplimientos", v);
-                    }}
-                    min={0}
-                    step={1}
-                    onBlur={() => {
-                      validateAndSetField(
-                        "cumplimientos",
-                        inputValues.cumplimientos,
-                        inputValues,
-                        true,
-                        "blur",
-                      );
-                    }}
-                  />
-                  <label
-                    htmlFor="input-cumplimientos"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    {typeof validationState.cumplimientos.error === "string" &&
-                      validationState.cumplimientos.showIcon &&
-                      WarningIcon(validationState.cumplimientos.error, () =>
-                        toast.warning(validationState.cumplimientos.error),
-                      )}
-                    Cumplimientos
-                  </label>
-                </div>
+                <FloatingInput
+                  id="input-cumplimientos"
+                  label="Cumplimientos"
+                  value={inputValues.cumplimientos}
+                  onChange={(e) => {
+                    let v = e.target.value.replace(/[^0-9]/g, "");
+                    if (v.length > 9) v = v.substring(0, 9);
+                    setInputValues((prev) => ({ ...prev, cumplimientos: v }));
+                    validateAndSetField("cumplimientos", v);
+                  }}
+                  onBlur={() => {
+                    validateAndSetField("cumplimientos", inputValues.cumplimientos, inputValues, true, "blur");
+                  }}
+                  icon={
+                    typeof validationState.cumplimientos.error === "string" &&
+                    validationState.cumplimientos.showIcon && (
+                      <div className="flex items-center" onClick={() => toast.warning(validationState.cumplimientos.error)}>
+                        {WarningIcon(validationState.cumplimientos.error)}
+                      </div>
+                    )
+                  }
+                  error={validationState.cumplimientos.requiredError ? "Requerido" : ""}
+                />
               </div>
               {/* Monto Cumplido */}
               <div className="w-full">
-                <div className="relative w-full min-w-0">
-                  <input
-                    type="text"
-                    className={`peer pl-6 pr-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${
-                      validationState.montoCumplido.requiredError
-                        ? "border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2"
-                        : "border-transparent focus:ring-jerarquia1 focus:border-jerarquia1"
-                    }`}
-                    id="input-montoCumplido"
-                    placeholder=" "
-                    style={{ color: "var(--color-jerarquia3)" }}
-                    value={inputValues.montoCumplido}
-                    onChange={(e) => {
-                      let v = e.target.value;
-                      v = v.replace(/[^0-9.]/g, "");
-                      const parts = v.split(".");
-                      let intPart = parts[0] || "";
-                      let decPart = parts[1] || "";
-                      if (intPart.length > 9) intPart = intPart.substring(0, 9);
-                      if (decPart.length > 2) decPart = decPart.substring(0, 2);
-                      v = decPart ? `${intPart}.${decPart}` : intPart;
-                      setInputValues((prev) => ({ ...prev, montoCumplido: v }));
-                      validateAndSetField("montoCumplido", v);
-                    }}
-                    onBlur={() => {
-                      validateAndSetField(
-                        "montoCumplido",
-                        inputValues.montoCumplido,
-                        inputValues,
-                        true,
-                        "blur",
-                      );
-                    }}
-                  />
-                  <label
-                    htmlFor="input-montoCumplido"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    {validationState.montoCumplido.showIcon && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        className="text-yellow-500 mr-1 cursor-pointer"
-                        title={validationState.montoCumplido.error}
-                        onClick={() =>
-                          toast.warning(
-                            "Error en Monto Cumplido: " +
-                              validationState.montoCumplido.error,
-                          )
-                        }
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M10.01 21.01c0 1.1.89 1.99 1.99 1.99s1.99-.89 1.99-1.99zM12 6c2.76 0 5 2.24 5 5v7H7v-7c0-2.76 2.24-5 5-5m0-4.5c-.83 0-1.5.67-1.5 1.5v1.17C7.36 4.85 5 7.65 5 11v6l-2 2v1h18v-1l-2-2v-6c0-3.35-2.36-6.15-5.5-6.83V3c0-.83-.67-1.5-1.5-1.5M11 8h2v4h-2zm0 6h2v2h-2z"
-                        />
-                      </svg>
-                    )}
-                    Monto Cumplido
-                  </label>
-                </div>
+                <FloatingInput
+                  id="input-montoCumplido"
+                  label="Monto Cumplido"
+                  value={inputValues.montoCumplido}
+                  onChange={(e) => {
+                    let v = e.target.value.replace(/[^0-9.]/g, "");
+                    const parts = v.split(".");
+                    let intPart = parts[0] || "";
+                    let decPart = parts[1] || "";
+                    if (intPart.length > 9) intPart = intPart.substring(0, 9);
+                    if (decPart.length > 2) decPart = decPart.substring(0, 2);
+                    v = decPart ? `${intPart}.${decPart}` : intPart;
+                    setInputValues((prev) => ({ ...prev, montoCumplido: v }));
+                    validateAndSetField("montoCumplido", v);
+                  }}
+                  onBlur={() => {
+                    validateAndSetField("montoCumplido", inputValues.montoCumplido, inputValues, true, "blur");
+                  }}
+                  icon={
+                    validationState.montoCumplido.showIcon && (
+                      <div className="flex items-center" onClick={() => toast.warning("Error en Monto Cumplido: " + validationState.montoCumplido.error)}>
+                        {WarningIcon(validationState.montoCumplido.error)}
+                      </div>
+                    )
+                  }
+                  error={validationState.montoCumplido.requiredError ? "Requerido" : ""}
+                />
               </div>
               {/* Saldo Solucionado */}
               <div className="w-full">
-                <div className="relative w-full min-w-0">
-                  <input
-                    type="text"
-                    className={`peer pl-6 pr-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${
-                      validationState.saldoSolucionado.requiredError
-                        ? "border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2"
-                        : "border-transparent focus:ring-jerarquia1 focus:border-jerarquia1"
-                    }`}
-                    id="input-saldoSolucionado"
-                    placeholder=" "
-                    style={{ color: "var(--color-jerarquia3)" }}
-                    value={inputValues.saldoSolucionado}
-                    onChange={(e) => {
-                      let v = e.target.value;
-                      v = v.replace(/[^0-9.]/g, "");
-                      const parts = v.split(".");
-                      let intPart = parts[0] || "";
-                      let decPart = parts[1] || "";
-                      if (intPart.length > 9) intPart = intPart.substring(0, 9);
-                      if (decPart.length > 2) decPart = decPart.substring(0, 2);
-                      v = decPart ? `${intPart}.${decPart}` : intPart;
-                      setInputValues((prev) => ({
-                        ...prev,
-                        saldoSolucionado: v,
-                      }));
-                      validateAndSetField("saldoSolucionado", v);
-                    }}
-                    onBlur={() => {
-                      validateAndSetField(
-                        "saldoSolucionado",
-                        inputValues.saldoSolucionado,
-                        inputValues,
-                        true,
-                        "blur",
-                      );
-                    }}
-                  />
-                  <label
-                    htmlFor="input-saldoSolucionado"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    {validationState.saldoSolucionado.showIcon && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        className="text-yellow-500 mr-1 cursor-pointer"
-                        title={validationState.saldoSolucionado.error}
-                        onClick={() =>
-                          toast.warning(
-                            "Error en Saldo Solucionado: " +
-                              validationState.saldoSolucionado.error,
-                          )
-                        }
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M10.01 21.01c0 1.1.89 1.99 1.99 1.99s1.99-.89 1.99-1.99zM12 6c2.76 0 5 2.24 5 5v7H7v-7c0-2.76 2.24-5 5-5m0-4.5c-.83 0-1.5.67-1.5 1.5v1.17C7.36 4.85 5 7.65 5 11v6l-2 2v1h18v-1l-2-2v-6c0-3.35-2.36-6.15-5.5-6.83V3c0-.83-.67-1.5-1.5-1.5M11 8h2v4h-2zm0 6h2v2h-2z"
-                        />
-                      </svg>
-                    )}
-                    Saldo Solucionado
-                  </label>
-                </div>
+                <FloatingInput
+                  id="input-saldoSolucionado"
+                  label="Saldo Solucionado"
+                  value={inputValues.saldoSolucionado}
+                  onChange={(e) => {
+                    let v = e.target.value.replace(/[^0-9.]/g, "");
+                    const parts = v.split(".");
+                    let intPart = parts[0] || "";
+                    let decPart = parts[1] || "";
+                    if (intPart.length > 9) intPart = intPart.substring(0, 9);
+                    if (decPart.length > 2) decPart = decPart.substring(0, 2);
+                    v = decPart ? `${intPart}.${decPart}` : intPart;
+                    setInputValues((prev) => ({ ...prev, saldoSolucionado: v }));
+                    validateAndSetField("saldoSolucionado", v);
+                  }}
+                  onBlur={() => {
+                    validateAndSetField("saldoSolucionado", inputValues.saldoSolucionado, inputValues, true, "blur");
+                  }}
+                  icon={
+                    validationState.saldoSolucionado.showIcon && (
+                      <div className="flex items-center" onClick={() => toast.warning("Error en Saldo Solucionado: " + validationState.saldoSolucionado.error)}>
+                        {WarningIcon(validationState.saldoSolucionado.error)}
+                      </div>
+                    )
+                  }
+                  error={validationState.saldoSolucionado.requiredError ? "Requerido" : ""}
+                />
               </div>
               {/* Segmento */}
               <div className="w-full">
-                <div className="relative w-full min-w-0">
-                  <input
-                    type="text"
-                    className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${
-                      validationState.segmento.requiredError
-                        ? "border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2"
-                        : "border-transparent focus:ring-jerarquia1 focus:border-jerarquia1"
-                    }`}
-                    id="input-segmento"
-                    placeholder=" "
-                    style={{ color: "var(--color-jerarquia3)" }}
-                    value={inputValues.segmento}
-                    onChange={(e) =>
-                      setInputValues((v) => ({
-                        ...v,
-                        segmento: e.target.value,
-                      }))
-                    }
-                  />
-                  <label
-                    htmlFor="input-segmento"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    Segmento
-                  </label>
-                </div>
+                <FloatingInput
+                  id="input-segmento"
+                  label="Segmento"
+                  value={inputValues.segmento}
+                  onChange={(e) => setInputValues((v) => ({ ...v, segmento: e.target.value }))}
+                  error={validationState.segmento.requiredError ? "Requerido" : ""}
+                />
               </div>
               {/* Hora Entrada */}
+              {/* Hora Entrada */}
               <div className="w-full">
-                <div className="relative w-full min-w-0">
-                  <input
-                    type="time"
-                    min="07:00"
-                    max="19:00"
-                    className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${
-                      validationState.horaEntrada.requiredError
-                        ? "border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2"
-                        : "border-transparent focus:ring-jerarquia1 focus:border-jerarquia1"
-                    }`}
-                    id="input-horaEntrada"
-                    placeholder="00:00"
-                    style={{ color: "var(--color-jerarquia3)" }}
-                    value={
-                      inputValues.horaEntrada === null
-                        ? ""
-                        : inputValues.horaEntrada
-                    }
-                    onChange={(e) => {
-                      const val = e.target.value === "" ? null : e.target.value;
-                      setInputValues((v) => ({ ...v, horaEntrada: val }));
-                      validateAndSetField("horaEntrada", val);
-                    }}
-                    onBlur={() => {
-                      validateAndSetField(
-                        "horaEntrada",
-                        inputValues.horaEntrada,
-                        inputValues,
-                        true,
-                        "blur",
-                      );
-                    }}
-                  />
-                  <label
-                    htmlFor="input-horaEntrada"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    {validationState.horaEntrada.showIcon && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        className="text-yellow-500 mr-1 cursor-pointer"
-                        title={validationState.horaEntrada.error}
-                        onClick={() =>
-                          toast.warning(
-                            "Error en Hora Entrada: " +
-                              validationState.horaEntrada.error,
-                          )
-                        }
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M10.01 21.01c0 1.1.89 1.99 1.99 1.99s1.99-.89 1.99-1.99zM12 6c2.76 0 5 2.24 5 5v7H7v-7c0-2.76 2.24-5 5-5m0-4.5c-.83 0-1.5.67-1.5 1.5v1.17C7.36 4.85 5 7.65 5 11v6l-2 2v1h18v-1l-2-2v-6c0-3.35-2.36-6.15-5.5-6.83V3c0-.83-.67-1.5-1.5-1.5M11 8h2v4h-2zm0 6h2v2h-2z"
-                        />
-                      </svg>
-                    )}
-                    Hora Entrada
-                  </label>
-                </div>
+                <FloatingInput
+                  id="input-horaEntrada"
+                  label="Hora Entrada"
+                  type="time"
+                  value={inputValues.horaEntrada || ""}
+                  onChange={(e) => {
+                    const val = e.target.value === "" ? null : e.target.value;
+                    setInputValues((v) => ({ ...v, horaEntrada: val }));
+                    validateAndSetField("horaEntrada", val);
+                  }}
+                  onBlur={() => {
+                    validateAndSetField("horaEntrada", inputValues.horaEntrada, inputValues, true, "blur");
+                  }}
+                  icon={
+                    validationState.horaEntrada.showIcon && (
+                      <div className="flex items-center" onClick={() => toast.warning("Error en Hora Entrada: " + validationState.horaEntrada.error)}>
+                        {WarningIcon(validationState.horaEntrada.error)}
+                      </div>
+                    )
+                  }
+                  error={validationState.horaEntrada.requiredError ? "Requerido" : ""}
+                />
               </div>
               {/* Hora Salida */}
+              {/* Hora Salida */}
               <div className="w-full">
-                <div className="relative w-full min-w-0">
-                  <input
-                    type="time"
-                    min="07:00"
-                    max="19:00"
-                    className={`peer px-3 py-2 block w-full bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:pt-5 focus:pb-1 not-placeholder-shown:pt-5 not-placeholder-shown:pb-1 autofill:pt-5 autofill:pb-1 ${
-                      validationState.horaSalida.requiredError
-                        ? "border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400 border-2"
-                        : "border-transparent focus:ring-jerarquia1 focus:border-jerarquia1"
-                    }`}
-                    id="input-horaSalida"
-                    placeholder="00:00"
-                    style={{ color: "var(--color-jerarquia3)" }}
-                    value={
-                      inputValues.horaSalida === null
-                        ? ""
-                        : inputValues.horaSalida
-                    }
-                    onChange={(e) => {
-                      const val = e.target.value === "" ? null : e.target.value;
-                      setInputValues((v) => ({ ...v, horaSalida: val }));
-                      validateAndSetField("horaSalida", val);
-                    }}
-                    onBlur={() => {
-                      validateAndSetField(
-                        "horaSalida",
-                        inputValues.horaSalida,
-                        inputValues,
-                        true,
-                        "blur",
-                      );
-                    }}
-                  />
-                  <label
-                    htmlFor="input-horaSalida"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs flex items-center gap-1 peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    {validationState.horaSalida.showIcon && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        className="text-yellow-500 mr-1 cursor-pointer"
-                        title={validationState.horaSalida.error}
-                        onClick={() =>
-                          toast.warning(
-                            "Error en Hora Salida: " +
-                              validationState.horaSalida.error,
-                          )
-                        }
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M10.01 21.01c0 1.1.89 1.99 1.99 1.99s1.99-.89 1.99-1.99zM12 6c2.76 0 5 2.24 5 5v7H7v-7c0-2.76 2.24-5 5-5m0-4.5c-.83 0-1.5.67-1.5 1.5v1.17C7.36 4.85 5 7.65 5 11v6l-2 2v1h18v-1l-2-2v-6c0-3.35-2.36-6.15-5.5-6.83V3c0-.83-.67-1.5-1.5-1.5M11 8h2v4h-2zm0 6h2v2h-2z"
-                        />
-                      </svg>
-                    )}
-                    Hora Salida
-                  </label>
-                </div>
+                <FloatingInput
+                  id="input-horaSalida"
+                  label="Hora Salida"
+                  type="time"
+                  value={inputValues.horaSalida || ""}
+                  onChange={(e) => {
+                    const val = e.target.value === "" ? null : e.target.value;
+                    setInputValues((v) => ({ ...v, horaSalida: val }));
+                    validateAndSetField("horaSalida", val);
+                  }}
+                  onBlur={() => {
+                    validateAndSetField("horaSalida", inputValues.horaSalida, inputValues, true, "blur");
+                  }}
+                  icon={
+                    validationState.horaSalida.showIcon && (
+                      <div className="flex items-center" onClick={() => toast.warning("Error en Hora Salida: " + validationState.horaSalida.error)}>
+                        {WarningIcon(validationState.horaSalida.error)}
+                      </div>
+                    )
+                  }
+                  error={validationState.horaSalida.requiredError ? "Requerido" : ""}
+                />
               </div>
               {/* Botón Guardar */}
               <div className="w-full flex items-end">
@@ -1765,9 +1518,8 @@ const ModalMetasContent = () => {
                   return (
                     <button
                       type="button"
-                      className={`btn-success w-full px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center${
-                        isDisabled ? " opacity-50 cursor-not-allowed" : ""
-                      }`}
+                      className={`btn-success w-full px-4 py-2 text-base font-medium rounded-lg shadow-sm flex justify-center${isDisabled ? " opacity-50 cursor-not-allowed" : ""
+                        }`}
                       onClick={handleGuardar}
                       disabled={isDisabled}
                     >

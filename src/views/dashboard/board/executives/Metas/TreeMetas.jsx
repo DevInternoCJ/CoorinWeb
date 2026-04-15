@@ -102,7 +102,7 @@ const TreeMetas = ({
 
   return (
     <div
-      className="metas-block metas-block-1 w-full lg:w-auto bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] p-1.5"
+      className="metas-block metas-block-1 w-full lg:w-auto bg-layer rounded-lg shadow border border-jerarquia1/30 p-1.5"
       style={{ fontSize: "0.92em" }}
     >
       <JerarquiaConR
