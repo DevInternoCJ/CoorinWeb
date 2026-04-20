@@ -19,20 +19,26 @@ import React from "react";
 
 const SIZE_MAP = {
   sm: {
-    select: "ps-3 pe-9 pt-4 pb-1 text-xs",
-    label: "ps-3 text-xs",
+    select: "p-3 pe-9",
+    selectFocus: "pt-5 pb-1",
+    label: "p-3 text-xs",
+    labelFocus: "text-[10px] -translate-y-1",
     icon: "w-4 h-4",
     iconWrap: "left-3 top-1/2 -translate-y-1/2",
   },
   md: {
-    select: "ps-4 pe-9 pt-5 pb-2 text-sm",
-    label: "ps-4 text-sm",
+    select: "p-4 pe-9 text-sm",
+    selectFocus: "pt-6 pb-2",
+    label: "p-4 text-sm",
+    labelFocus: "text-xs -translate-y-1.5",
     icon: "w-4 h-4",
     iconWrap: "left-4 top-1/2 -translate-y-1/2",
   },
   lg: {
-    select: "ps-5 pe-9 pt-6 pb-2 text-base",
-    label: "ps-5 text-base",
+    select: "p-5 pe-9 text-base",
+    selectFocus: "pt-7 pb-3",
+    label: "p-3 text-base",
+    labelFocus: "text-sm -translate-y-2",
     icon: "w-5 h-5",
     iconWrap: "left-5 top-1/2 -translate-y-1/2",
   },
@@ -89,13 +95,13 @@ const FloatingSelect = ({
           "text-[var(--color-text-primary)]",
           "transition-colors duration-150",
           // padding dinámico según tamaño y si hay ícono
-          icon ? `${s.select.replace(/ps-\S+/, "ps-10")}` : s.select,
+          icon ? `${s.select.replace(/p-\S+/, "py-4 pe-9 ps-10")}` : s.select,
           // ring al focus usando variables de jerarquía
           "focus:outline-none focus:ring-2 focus:ring-[var(--color-jerarquia2)]",
           "focus:border-[var(--color-jerarquia2)]",
-          // label flotante via peer
-          "focus:pt-5 focus:pb-1",
-          hasValue ? "pt-5 pb-1" : "",
+          // paddings cuando hay foco o valor (para empujar el texto hacia abajo)
+          `focus:${s.selectFocus.replace(" ", " focus:")}`,
+          hasValue ? s.selectFocus : "",
           // disabled
           "disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed",
           // apariencia nativa del select
@@ -125,17 +131,17 @@ const FloatingSelect = ({
         htmlFor={id}
         className={[
           "floating-select-label",
-          "absolute top-0 start-0 h-full",
+          "absolute top-0 start-0 h-full truncate",
           s.label,
-          "flex items-center",
           "pointer-events-none",
           "transition-all ease-in-out duration-150",
           "text-[var(--color-text-muted)]",
-          "peer-focus:text-[10px] peer-focus:font-medium",
-          "peer-focus:-translate-y-2 peer-focus:text-[var(--color-jerarquia3)]",
-          // cuando tiene valor
+          // foco
+          `peer-focus:${s.labelFocus.replace(" ", " peer-focus:")}`,
+          "peer-focus:font-medium peer-focus:text-[var(--color-jerarquia3)]",
+          // tiene valor
           hasValue
-            ? "text-[10px] font-medium -translate-y-2 text-[var(--color-jerarquia3)]"
+            ? `${s.labelFocus} font-medium text-[var(--color-jerarquia3)]`
             : "",
           // disabled
           "peer-disabled:opacity-50",

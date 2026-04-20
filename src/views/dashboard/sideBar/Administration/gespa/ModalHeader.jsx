@@ -182,7 +182,7 @@ const ModalHeader = ({
   };
 
   return (
-    <div className="bg-neutral-100 rounded-xl px-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-gray-200 mb-2">
+    <div className=" px-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-gray-200 dark:border-gray-800 mb-2">
       <div className="block md:flex items-start justify-between w-3/4 gap-3">
         <div className="flex items-center gap-2 text-jerarquia3">
           {icon}

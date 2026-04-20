@@ -445,13 +445,27 @@ export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
     const idNum = Number(idEjecutivo);
     const requestData = [idNum];
     const url = `/Encargados/ejecutivos-propios/${idNum}`;
-    console.log('Enviando a', url, 'con:', requestData);
+    console.log('Enviando a', url);
     // El interceptor añade el token automáticamente
-    const response = await api.get(url, requestData);
+    // Agregamos un timeout manual seguro de 12 segundos para evitar que la petición quede colgada
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('TIMEOUT_ERROR')), 12000)
+    );
+    // requestData estaba siendo ignorado como params, solo lo quitamos
+    const response = await Promise.race([
+      api.get(url, { timeout: 12000 }), 
+      timeoutPromise
+    ]);
+    
     console.log('Respuesta de', url + ':', response.data);
     return response.data;
   } catch (error) {
     console.error('Error al obtener la ramificación de encargados:', error);
+    
+    if (error.message === 'TIMEOUT_ERROR' || error.code === 'ECONNABORTED') {
+      throw new Error("El servidor tardó demasiado en responder el árbol de ejecutivos. Por favor, intente nuevamente.");
+    }
+
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
       localStorage.removeItem('token');

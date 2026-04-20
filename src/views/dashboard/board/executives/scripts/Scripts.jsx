@@ -47,34 +47,33 @@ const Scripts = ({ onClose }) => {
       document.body.style.cursor = inside ? "grabbing" : "not-allowed";
     };
 
-  const handleDrop = (e) => {
-  if (!dropAreaRef.current) return;
-  const rect = dropAreaRef.current.getBoundingClientRect();
-  const inside =
-    e.clientX >= rect.left &&
-    e.clientX <= rect.right &&
-    e.clientY >= rect.top &&
-    e.clientY <= rect.bottom;
+    const handleDrop = (e) => {
+      if (!dropAreaRef.current) return;
+      const rect = dropAreaRef.current.getBoundingClientRect();
+      const inside =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
 
-  if (!inside) {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-    document.body.style.cursor = "default";
+      if (!inside) {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+        document.body.style.cursor = "default";
 
-    toast.wa("Debes soltar el placeholder dentro del área editable.", {
-      duration: 2500,
-      position: "top-center",
-      style: {
-        background: "#fef2f2",
-        border: "1px solid #fca5a5",
-        color: "#b91c1c",
-        fontWeight: "500",
-      },
-    });
-  }
-};
-
+        toast.wa("Debes soltar el placeholder dentro del área editable.", {
+          duration: 2500,
+          position: "top-center",
+          style: {
+            background: "#fef2f2",
+            border: "1px solid #fca5a5",
+            color: "#b91c1c",
+            fontWeight: "500",
+          },
+        });
+      }
+    };
 
     const handleDragStart = () => setIsDragging(true);
     const handleDragEnd = () => {
@@ -102,7 +101,7 @@ const Scripts = ({ onClose }) => {
         ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-white rounded-lg shadow-2xl w-full max-w-4xl overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]`}
+        } bg-[var(--color-surface-modal)] rounded-lg shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -136,7 +135,7 @@ const Scripts = ({ onClose }) => {
                 <DataCharges onDataLoaded={handleDataLoaded} />
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center text-center text-gray-500 bg-gray-100 rounded-lg py-20">
+              <div className="flex flex-col items-center justify-center text-center text-gray-500 bg-[var(--color-surface-modal)] rounded-lg py-20">
                 <IconWarning className="size-8" />
                 <p className="text-sm text-gray-400 mt-1">
                   Seleccione el producto para gestionar scripts.

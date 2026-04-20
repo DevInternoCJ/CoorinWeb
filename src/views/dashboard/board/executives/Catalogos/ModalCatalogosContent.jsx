@@ -216,7 +216,7 @@ const ModalCatalogosContent = () => {
     >
       {/* NIVEL 2: Tabla de Catálogos */}
       <div
-        className="bg-white rounded-lg p-4 shadow border border-[var(--color-jerarquia1)] flex flex-col"
+        className="bg-[var(--color-card-scripts-bg)] rounded-xl p-4 shadow flex flex-col"
         style={{ flex: 1, minHeight: "280px", maxHeight: "280px" }}
       >
         <div className="flex items-center mb-3 w-full">
@@ -314,7 +314,9 @@ const ModalCatalogosContent = () => {
                   >
                     <td
                       className={`font-semibold ${
-                        selectedCatalog === item.catalog ? "text-blue-600" : ""
+                        selectedCatalog === item.catalog
+                          ? "text-[var(--color-sticky-text)] bg-[var(--color-surface-modal)]"
+                          : ""
                       }`}
                     >
                       {item.catalog}
@@ -330,7 +332,7 @@ const ModalCatalogosContent = () => {
 
       {/* NIVEL 3: Tabla de Valores */}
       <div
-        className="bg-white rounded-lg p-4 shadow border border-[var(--color-jerarquia1)] flex flex-col"
+        className="bg-[var(--color-card-scripts-bg)] rounded-xl p-4 shadow flex flex-col"
         style={{ flex: 1, minHeight: "280px", maxHeight: "280px" }}
       >
         <div className="flex items-center mb-3 w-full">
@@ -418,14 +420,16 @@ const ModalCatalogosContent = () => {
                     key={item.idValor}
                     className={`cursor-pointer transition-colors ${
                       selectedValue === item.idValor
-                        ? "bg-blue-50"
-                        : "hover:bg-gray-50"
+                        ? "bg-[var(--color-card-scripts-bg)]"
+                        : "hover:bg-[var(--color-card-scripts-bg)]"
                     }`}
                     onClick={() => setSelectedValue(item.idValor)}
                   >
                     <td
                       className={`font-semibold ${
-                        selectedValue === item.idValor ? "text-blue-600" : ""
+                        selectedValue === item.idValor
+                          ? "text-[var(--color-sticky-text)]"
+                          : ""
                       }`}
                     >
                       {item.valor || "Sin valor"}

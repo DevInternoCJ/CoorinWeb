@@ -155,7 +155,7 @@ const DataCharges = ({ onDataLoaded }) => {
   // Spinner de carga
   if (loading || isLoadingStore) {
     return (
-      <div className="min-h-60 flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl">
+      <div className="min-h-60 flex flex-col bg-[var(--color-surface-modal)] border border-gray-200 shadow-2xs rounded-xl">
         <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
           <div className="flex justify-center">
             <div
@@ -187,6 +187,30 @@ const DataCharges = ({ onDataLoaded }) => {
       </div>
     );
   }
+  const getLabelColors = (color) => {
+    switch (color) {
+      case "blue":
+        return "text-blue-700 [.dark_&]:text-blue-300 hover:text-blue-800 [.dark_&]:hover:text-blue-200";
+      case "green":
+        return "text-green-700 [.dark_&]:text-green-300 hover:text-green-800 [.dark_&]:hover:text-green-200";
+      case "gray":
+      default:
+        return "text-gray-700 [.dark_&]:text-gray-300 hover:text-gray-800 [.dark_&]:hover:text-gray-200";
+    }
+  };
+
+  const getValueColors = (color) => {
+    switch (color) {
+      case "blue":
+        return "text-blue-800 [.dark_&]:text-blue-200";
+      case "green":
+        return "text-green-800 [.dark_&]:text-green-200";
+      case "gray":
+      default:
+        return "text-gray-800 [.dark_&]:text-gray-200";
+    }
+  };
+
   // Datos de las tarjetas (de ejemploCuentas)
   const cardData = ejemploCuentas
     ? [
@@ -237,24 +261,22 @@ const DataCharges = ({ onDataLoaded }) => {
                   draggable="true"
                   onDragStart={(e) => handleDragStart(e, item.label)}
                   onDragEnd={handleDragEnd}
-                  className={`inline-block text-xs font-medium text-${
+                  className={`inline-block text-xs font-medium ${getLabelColors(
                     item.color
-                  }-600 tracking-wide mb-2 cursor-grabbing select-none hover:bg-gray-100 hover:text-${
-                    item.color
-                  }-700 active:opacity-50 rounded-md transition-all duration-150 ${
+                  )} tracking-wide mb-2 cursor-grabbing select-none hover:bg-gray-100 [.dark_&]:hover:bg-gray-700/50 rounded-md transition-all duration-150 ${
                     draggedLabel === item.label ? "opacity-50 scale-95" : ""
                   }`}
                   title="Arrastra el texto al campo mensaje"
                 >
-                  <div className=" flex items-center gap-1 bg-jerarquia1/50 pt-1 pr-1 rounded-sm hover:bg-jerarquia3/30 hover:shadow-jerarquia3 shadow-sm  hover:shadow-md transition-shadow duration-200">
-                    <IconDrag className=" text-jerarquia3" />
+                  <div className=" flex items-center gap-1 bg-jerarquia1/50 pt-1 pr-1 rounded-sm hover:bg-[var(--color-scrollbar-thumb)] hover:shadow-jerarquia3 shadow-sm  hover:shadow-md transition-shadow duration-200">
+                    <IconDrag className=" text-[var(--color-icon-drag)] hover:text-[var(--color-icon-drag-hover)]" />
                     <span className="inline-flex items-center text-sm font-semibold gap-1 text-jerarquia4">
                       {item.label}
                     </span>
                   </div>
                 </div>
                 <div
-                  className={`text-sm text-${item.color}-700 font-medium break-words`}
+                  className={`text-sm ${getValueColors(item.color)} font-medium break-words`}
                 >
                   {item.value}
                 </div>
@@ -265,8 +287,8 @@ const DataCharges = ({ onDataLoaded }) => {
         {/* Tabla de datos del producto */}
         {ejemploProducto && Object.keys(ejemploProducto).length > 0 && (
           <div className="mt-4">
-            <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-              <table className="bg-white min-w-full">
+            <div className="overflow-x-auto scrollbar-gray  rounded-lg border">
+              <table className="bg-[var(--color-surface-modal)] min-w-full">
                 <tbody>
                   <tr className="bg-jerarquia4">
                     {Object.keys(ejemploProducto).map((key) => (
@@ -275,13 +297,13 @@ const DataCharges = ({ onDataLoaded }) => {
                         draggable="true"
                         onDragStart={(e) => handleDragStart(e, key)}
                         onDragEnd={handleDragEnd}
-                        className={`py-3 overflow-x-auto px-4 text-xs font-semibold tracking-wider whitespace-nowrap align-top cursor-grabbing select-none hover:bg-green-950 active:bg-slate-500 transition-all duration-150 bg-jerarquia4 text-background-tertiary ${
+                        className={`py-3 overflow-x-auto px-4 text-xs font-semibold tracking-wider whitespace-nowrap align-top cursor-grabbing select-none hover:bg-[var(--color-scrollbar-thumb)] active:bg-slate-500 transition-all duration-150 bg-jerarquia4 text-background-tertiary ${
                           draggedLabel === key ? "opacity-50 scale-95" : ""
                         }`}
                         title="Arrastra el texto al campo mensaje"
                       >
                         <div className=" flex items-center gap-1">
-                          <IconDrag className=" text-bgsuccess" />
+                          <IconDrag className=" text-[var(--color-icon-drag)] hover:text-[var(--color-icon-drag-hover)]" />
                           <span className="inline-fle text-sm items-center gap-2">
                             {key.replace(/([A-Z])/g, " $1").trim()}
                           </span>
@@ -290,7 +312,7 @@ const DataCharges = ({ onDataLoaded }) => {
                     ))}
                   </tr>
                   {/* Fila de valores */}
-                  <tr className="hover:bg-gray-50">
+                  <tr className="hover:bg-[var(--color-background-primary)]">
                     {Object.entries(ejemploProducto).map(
                       ([key, value], index) => (
                         <td

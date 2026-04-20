@@ -8,12 +8,9 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
   const [loadingJerarquia, setLoadingJerarquia] = useState(false);
   const [errorJerarquia, setErrorJerarquia] = useState(null);
   const [selectedExecutiveNode, setSelectedExecutiveNode] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [showScrollTopBtn, setShowScrollTopBtn] = useState(false);
 
-  // Estados para el comportamiento sticky
-  const [stickyDirection, setStickyDirection] = useState("none"); // 'none', 'top', 'bottom'
-  const [lastScrollTop, setLastScrollTop] = useState(0);
-
-  // Estado para expandir/colapsar nodos
   const [collapsedNodes, setCollapsedNodes] = useState({});
 
   // Ref para el contenedor de scroll
@@ -72,88 +69,16 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
         setSelectedExecutiveNode(idEjecutivo);
       } catch (e) {
         console.error("Error al obtener la jerarquía:", e);
-        setErrorJerarquia("Error al obtener la jerarquía de ejecutivos");
+        setErrorJerarquia(
+          e.message || "Error al obtener la jerarquía de ejecutivos",
+        );
         setExecutiveTree([]);
       } finally {
         setLoadingJerarquia(false);
       }
     };
     fetchExecutiveTree();
-  }, [storeUser]);
-
-  // Manejar la dirección del scroll para sticky
-  useEffect(() => {
-    const container = ramificacionRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      if (!selectedExecutiveNode) {
-        setStickyDirection("none");
-        return;
-      }
-
-      const currentScrollTop = container.scrollTop;
-      const scrollDirection = currentScrollTop > lastScrollTop ? "down" : "up";
-
-      // Buscar el elemento seleccionado en el DOM
-      const selectedElement = container.querySelector(
-        `.executive-hierarchy-item.selected:not(.sticky-selected-top):not(.sticky-selected-bottom)`,
-      );
-
-      if (!selectedElement) {
-        setLastScrollTop(currentScrollTop);
-        return;
-      }
-
-      const containerRect = container.getBoundingClientRect();
-      const elementRect = selectedElement.getBoundingClientRect();
-
-      // Calcular posiciones relativas al contenedor
-      const elementTop = elementRect.top - containerRect.top;
-      const elementBottom = elementRect.bottom - containerRect.top;
-      const containerHeight = containerRect.height;
-
-      // Verificar si el elemento está completamente visible en su posición original
-      const isElementInOriginalViewport =
-        elementTop >= 0 && elementBottom <= containerHeight;
-
-      if (isElementInOriginalViewport) {
-        // El elemento está visible en su posición original, quitar sticky
-        setStickyDirection("none");
-      } else {
-        // El elemento no está visible, determinar el sticky según posición y dirección
-        if (Math.abs(currentScrollTop - lastScrollTop) > 5) {
-          // Caso 1: Scroll hacia abajo - el elemento se sale por arriba
-          if (scrollDirection === "down" && elementTop < 0) {
-            setStickyDirection("top");
-          }
-          // Caso 2: Scroll hacia arriba - el elemento se sale por abajo
-          else if (
-            scrollDirection === "up" &&
-            elementBottom > containerHeight
-          ) {
-            setStickyDirection("bottom");
-          }
-          // Caso 3: Mantener sticky si ya estaba activo y el elemento sigue fuera de vista
-          else if (stickyDirection === "top" && elementTop < 0) {
-            // Mantener sticky arriba hasta que el elemento sea visible desde arriba
-            setStickyDirection("top");
-          } else if (
-            stickyDirection === "bottom" &&
-            elementBottom > containerHeight
-          ) {
-            // Mantener sticky abajo hasta que el elemento sea visible desde abajo
-            setStickyDirection("bottom");
-          }
-        }
-      }
-
-      setLastScrollTop(currentScrollTop);
-    };
-
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, [lastScrollTop, selectedExecutiveNode, stickyDirection]);
+  }, [storeUser, retryCount]);
 
   // Función para hacer scroll hacia arriba
   const scrollToTop = () => {
@@ -184,81 +109,53 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
       return (
         <div
           key={nodeKey}
-          className={`hs-accordion hs-dragged:bg-blue-100 hs-dragged:rounded nested-2-${level + 1}${isSelected ? " hs-tree-view-selected:bg-gray-100" : ""}`}
+          className={`hs-accordion ${!isCollapsed ? "active" : ""}`}
           role="treeitem"
           aria-expanded={hasSub ? !isCollapsed : undefined}
           id={headingId}
-          data-hs-tree-view-item={JSON.stringify({
-            value:
-              node.usuario ||
-              node.NombreEjecutivo ||
-              node.nombreEjecutivo ||
-              node.ejecutivo ||
-              node.nombre ||
-              node.idEjecutivo,
-            isDir: hasSub,
-          })}
         >
-          {/* Heading */}
+          {/* Heading container */}
           <div
-            className="hs-accordion-heading py-0.5 rounded-md flex items-center gap-x-0.5 w-full transition-colors duration-150"
-            style={
-              isSelected
-                ? {
-                    background: "var(--color-jerarquia1)",
-                    color: "var(--color-jerarquia4)",
-                  }
-                : {}
-            }
+            className={`hs-accordion-heading py-0 flex items-center gap-x-0.5 w-full rounded-md transition-colors duration-150 ${
+              isSelected ? "bg-[var(--color-jerarquia1)] shadow-sm" : ""
+            }`}
           >
-            {hasSub && (
+            {/* Toggle Arrow (if has sub) or spacing placeholder */}
+            {hasSub ? (
               <button
-                className="hs-accordion-toggle size-6 flex justify-center items-center rounded-md focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
+                className="hs-accordion-toggle size-5 flex justify-center items-center rounded-md shrink-0 focus:outline-none transition-colors duration-200 bg-[var(--color-jerarquia1)]/40 hover:bg-[var(--color-jerarquia2)] focus:bg-[var(--color-jerarquia2)]"
                 aria-expanded={!isCollapsed}
                 aria-controls={collapseId}
                 type="button"
-                style={{ background: "var(--color-jerarquia1)" }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.background = "var(--color-jerarquia2)")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.background = "var(--color-jerarquia1)")
-                }
-                onFocus={(e) =>
-                  (e.currentTarget.style.background = "var(--color-jerarquia2)")
-                }
-                onBlur={(e) =>
-                  (e.currentTarget.style.background = "var(--color-jerarquia1)")
-                }
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleCollapse(node.idEjecutivo);
                 }}
               >
                 <svg
-                  className="size-4 text-[var(--color-text-primary)]"
+                  className={`size-4 transition-transform duration-200 text-[var(--color-jerarquia3)] ${!isCollapsed ? "rotate-90" : ""}`}
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="1.5"
+                  strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path d="M5 12h14"></path>
-                  <path
-                    className={
-                      !isCollapsed ? "hs-accordion-active:hidden block" : ""
-                    }
-                    d="M12 5v14"
-                  ></path>
+                  <path d="m9 18 6-6-6-6"></path>
                 </svg>
               </button>
+            ) : (
+              <div className="size-5 shrink-0" />
             )}
+
+            {/* Clickable Area for Selection */}
             <div
-              className={`grow rounded-md cursor-pointer flex items-center`}
+              className={`grow rounded-md cursor-pointer flex items-center px-1 py-0.5 transition-colors ${
+                !isSelected ? "hover:bg-[var(--color-surface-secondary)]" : ""
+              }`}
               onClick={() => {
                 setSelectedExecutiveNode(node.idEjecutivo);
                 if (onExecutiveSelect) {
@@ -279,16 +176,11 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
               }
             >
               <span
-                className="text-sm font-medium w-full"
-                style={{
-                  color: isSelected
-                    ? "var(--color-jerarquia4)"
-                    : "var(--color-jerarquia3)",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "inline-block",
-                }}
+                className={`text-xs font-semibold w-full truncate tracking-tight ${
+                  isSelected
+                    ? "text-[var(--color-jerarquia4)]"
+                    : "text-[var(--color-jerarquia3)]"
+                }`}
               >
                 {node.usuario} -{" "}
                 {node.NombreEjecutivo ||
@@ -299,15 +191,19 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
               </span>
             </div>
           </div>
-          {/* Collapse */}
+
+          {/* Children items */}
           {hasSub && !isCollapsed && (
             <div
               id={collapseId}
-              className="hs-accordion-content w-full overflow-hidden transition-[height] duration-300"
+              className="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 relative"
               role="group"
               aria-labelledby={headingId}
             >
-              <div className="ps-7 border-l border-jerarquia1 pl-3">
+              {/* Connector line for nested items */}
+              <div className="absolute top-0 bottom-0 left-[9px] w-[1px] bg-[var(--color-jerarquia1)]/50 pointer-events-none"></div>
+
+              <div className="ps-4 ms-1 pt-0.5 space-y-0.5">
                 {renderExecutiveTree(node.subordinados, level + 1, nodeKey)}
               </div>
             </div>
@@ -337,14 +233,14 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     persistedSession?.usuario || persistedSession?.Usuario || "";
 
   return (
-    <div className="bg-[var(--color-surface)] ring-1 ring-[var(--color-border)] rounded-2xl flex flex-col px-4 lg:px-6 w-full h-auto lg:h-82 min-h-64 transition-colors duration-300">
+    <div className="bg-[var(--color-surface)]  rounded-2xl flex flex-col px-4 lg:px-6 w-full h-auto lg:h-82 min-h-64 transition-colors duration-300">
       {/* Header unificado y responsive */}
-      <div className="mb-5 overflow-auto">
+      <div className="flex flex-col h-full py-4">
         <div
-          className="flex items-center justify-between sticky top-0 z-10
+          className="flex items-center justify-between z-10
                         bg-[var(--color-surface)]/90 backdrop-blur-sm
                         border-b border-[var(--color-border)]
-                        px-3 mt-5 sm:px-4 md:px-6 transition-colors duration-300"
+                        px-3 mb-4 pb-3 sm:px-4 md:px-6 transition-colors duration-300"
         >
           {/* Título a la izquierda */}
           <div className="flex items-center text-[var(--color-text-secondary)]">
@@ -405,85 +301,124 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
             </div>
           )}
         </div>
-        {/* Contenedor de la ramificación con estilos de JerarquiaConR */}
-        <div
-          ref={ramificacionRef}
-          style={{
-            width: "100%",
-            minHeight: "16vh",
-            borderRadius: 8,
-            border: "1px solid var(--color-border)",
-            padding: "1vh 0.8vw",
-            background: "var(--color-surface)",
-            transition: "background 0.3s ease, border-color 0.3s ease",
-          }}
-        >
-          {/* Contenido de la jerarquía con Preline Tree View */}
-          {loadingJerarquia ? (
-            <div
-              style={{
-                color: "var(--color-jerarquia3)",
-                fontWeight: 500,
-                fontSize: 15,
-                textAlign: "center",
-                marginTop: 30,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
-              <div className="spinner-sonner" style={{ marginBottom: 8 }}>
-                <svg
-                  width="38"
-                  height="38"
-                  viewBox="0 0 38 38"
-                  xmlns="http://www.w3.org/2000/svg"
-                  stroke="var(--color-jerarquia3)"
-                >
-                  <g fill="none" fillRule="evenodd">
-                    <g transform="translate(1 1)" strokeWidth="3">
-                      <circle strokeOpacity=".3" cx="18" cy="18" r="18" />
-                      <path d="M36 18c0-9.94-8.06-18-18-18">
-                        <animateTransform
-                          attributeName="transform"
-                          type="rotate"
-                          from="0 18 18"
-                          to="360 18 18"
-                          dur="1s"
-                          repeatCount="indefinite"
-                        />
-                      </path>
+
+        {/* Contenedor de la ramificación con clases de Tailwind (scroll individual) */}
+        <div className="relative w-full flex-auto min-h-0 flex flex-col">
+          <div
+            ref={ramificacionRef}
+            onScroll={(e) => {
+              if (e.target.scrollTop > 100) {
+                if (!showScrollTopBtn) setShowScrollTopBtn(true);
+              } else {
+                if (showScrollTopBtn) setShowScrollTopBtn(false);
+              }
+            }}
+            className="w-full flex-auto min-h-[16vh] overflow-y-auto scrollbar-gray rounded-lg border border-[var(--color-border)] p-3 lg:p-4 bg-[var(--color-surface)] transition-all duration-300"
+          >
+            {/* Contenido de la jerarquía con Preline Tree View */}
+            {loadingJerarquia ? (
+              <div
+                style={{
+                  color: "var(--color-jerarquia3)",
+                  fontWeight: 500,
+                  fontSize: 15,
+                  textAlign: "center",
+                  marginTop: 30,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                <div className="spinner-sonner" style={{ marginBottom: 8 }}>
+                  <svg
+                    width="38"
+                    height="38"
+                    viewBox="0 0 38 38"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="var(--color-jerarquia3)"
+                  >
+                    <g fill="none" fillRule="evenodd">
+                      <g transform="translate(1 1)" strokeWidth="3">
+                        <circle strokeOpacity=".3" cx="18" cy="18" r="18" />
+                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                          <animateTransform
+                            attributeName="transform"
+                            type="rotate"
+                            from="0 18 18"
+                            to="360 18 18"
+                            dur="1s"
+                            repeatCount="indefinite"
+                          />
+                        </path>
+                      </g>
                     </g>
-                  </g>
-                </svg>
+                  </svg>
+                </div>
+                <span>Cargando jerarquía...</span>
               </div>
-              <span>Cargando jerarquía...</span>
-            </div>
-          ) : errorJerarquia ? (
-            <div
-              style={{
-                color: "var(--color-error, #b71c1c)",
-                fontWeight: 500,
-                fontSize: 14,
-                textAlign: "center",
-                marginTop: 30,
-                overflow: "auto",
-              }}
-            >
-              {errorJerarquia}
-            </div>
-          ) : (
-            <div
-              id="hs-tree-view-checkbox"
-              role="tree"
-              aria-orientation="vertical"
-              data-hs-tree-view='{"controlBy": "checkbox", "autoSelectChildren": true}'
-            >
-              <div data-hs-nested-draggable="">
-                {renderExecutiveTree(executiveTree)}
+            ) : errorJerarquia ? (
+              <div className="flex flex-col items-center justify-center gap-4 mt-8 px-4 text-center">
+                <div className="text-[var(--color-error,#b71c1c)] font-medium text-sm">
+                  {errorJerarquia}
+                </div>
+                <button
+                  onClick={() => setRetryCount((c) => c + 1)}
+                  className="px-4 py-2 bg-[var(--color-jerarquia2)] text-white font-medium text-xs rounded-md shadow-sm hover:bg-[var(--color-jerarquia3)] transition-colors duration-200 flex items-center gap-2"
+                  title="Recargar árbol de ejecutivos"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                  </svg>
+                  Intentar nuevamente
+                </button>
               </div>
-            </div>
+            ) : (
+              <div
+                id="hs-tree-view-checkbox"
+                role="tree"
+                aria-orientation="vertical"
+                data-hs-tree-view='{"controlBy": "checkbox", "autoSelectChildren": true}'
+              >
+                <div data-hs-nested-draggable="">
+                  {renderExecutiveTree(executiveTree)}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Botón flotante para subir (Scroll to top) local */}
+          {showScrollTopBtn && (
+            <button
+              onClick={scrollToTop}
+              title="Volver arriba"
+              className="absolute bottom-6 right-6 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-[var(--color-jerarquia2)] text-[var(--color-surface,white)] shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:bg-[var(--color-jerarquia3)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 15l7-7 7 7"
+                />
+              </svg>
+            </button>
           )}
         </div>
       </div>
