@@ -69,8 +69,14 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
         setSelectedExecutiveNode(idEjecutivo);
       } catch (e) {
         console.error("Error al obtener la jerarquía:", e);
+        const status = e.response?.status;
+        const serverError = e.response?.data?.error;
+
         setErrorJerarquia(
-          e.message || "Error al obtener la jerarquía de ejecutivos",
+          status === 404
+            ? serverError ||
+                "El usuario no tiene una ramificación de ejecutivos asignada"
+            : e.message || "Error al obtener la jerarquía de ejecutivos",
         );
         setExecutiveTree([]);
       } finally {
@@ -123,7 +129,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
             {/* Toggle Arrow (if has sub) or spacing placeholder */}
             {hasSub ? (
               <button
-                className="hs-accordion-toggle size-5 flex justify-center items-center rounded-md shrink-0 focus:outline-none transition-colors duration-200 bg-[var(--color-jerarquia1)]/40 hover:bg-[var(--color-jerarquia2)] focus:bg-[var(--color-jerarquia2)]"
+                className="hs-accordion-toggle size-5 flex justify-center items-center rounded-md shrink-0 focus:outline-none transition-colors duration-200 bg-[var(--color-jerarquia3)]/40 hover:bg-[var(--color-jerarquia2)] focus:bg-[var(--color-jerarquia2)]"
                 aria-expanded={!isCollapsed}
                 aria-controls={collapseId}
                 type="button"
@@ -133,7 +139,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                 }}
               >
                 <svg
-                  className={`size-4 transition-transform duration-200 text-[var(--color-jerarquia3)] ${!isCollapsed ? "rotate-90" : ""}`}
+                  className={`size-4 transition-transform duration-200 text-[var(--color-text-black)] ${!isCollapsed ? "rotate-90" : ""}`}
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
@@ -178,8 +184,8 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
               <span
                 className={`text-xs font-semibold w-full truncate tracking-tight ${
                   isSelected
-                    ? "text-[var(--color-jerarquia4)]"
-                    : "text-[var(--color-jerarquia3)]"
+                    ? "text-[var(--color-text-black)]"
+                    : "text-[var(--color-jerarquia2)]"
                 }`}
               >
                 {node.usuario} -{" "}
@@ -233,7 +239,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     persistedSession?.usuario || persistedSession?.Usuario || "";
 
   return (
-    <div className="bg-[var(--color-surface)]  rounded-2xl flex flex-col px-4 lg:px-6 w-full h-auto lg:h-82 min-h-64 transition-colors duration-300">
+    <div className="bg-[var(--color-surface)] border border-dashed border-[var(--color-jerarquia1)]  rounded-2xl flex flex-col px-4 lg:px-6 w-full h-auto lg:h-82 min-h-64 transition-colors duration-300">
       {/* Header unificado y responsive */}
       <div className="flex flex-col h-full py-4">
         <div
@@ -278,7 +284,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                 text-center max-w-full truncate
                 font-semibold text-[var(--color-text-primary)]
                 transition-all duration-200 cursor-pointer rounded-md
-                hover:bg-[var(--color-jerarquia1)] hover:text-[var(--color-jerarquia4)]`}
+                hover:bg-[var(--color-jerarquia1)] hover:text-[var(--color-text-inverse)]`}
               title={`Ejecutivo de la sesión actual: ${usuarioSesion} - ${nombreSesion}`}
               onClick={() => {
                 setSelectedExecutiveNode(Number(idEjecutivoSesion));
@@ -363,8 +369,16 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                   {errorJerarquia}
                 </div>
                 <button
+                  disabled={
+                    errorJerarquia.includes(
+                      "El usuario no tiene una ramificación de ejecutivos asignada",
+                    ) ||
+                    errorJerarquia.includes(
+                      "El encargado no cuenta con ejecutivos bajo su jerarquía",
+                    )
+                  }
                   onClick={() => setRetryCount((c) => c + 1)}
-                  className="px-4 py-2 bg-[var(--color-jerarquia2)] text-white font-medium text-xs rounded-md shadow-sm hover:bg-[var(--color-jerarquia3)] transition-colors duration-200 flex items-center gap-2"
+                  className="disabled:opacity-50 cursor-pointer px-4 py-2 bg-[var(--color-jerarquia2)] text-white font-medium text-xs rounded-md shadow-sm hover:bg-[var(--color-jerarquia3)] transition-colors duration-200 flex items-center gap-2"
                   title="Recargar árbol de ejecutivos"
                 >
                   <svg

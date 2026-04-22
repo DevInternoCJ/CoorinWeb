@@ -53,7 +53,7 @@ const GridLampsFields = () => {
 
   if (loading) {
     return (
-      <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+      <div className="bg-[var(--color-background-secondary)] p-4 rounded-lg shadow-sm">
         <div className="flex justify-center items-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           <span className="ml-3 text-gray-600">Cargando datos...</span>
@@ -106,8 +106,8 @@ const GridLampsFields = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-      <div className="overflow-x-auto border border-background-primary rounded-lg max-h-96">
+    <div className="bg-[var(--color-border)] rounded-lg shadow-sm h-106">
+      <div className="overflow-x-auto rounded-lg h-106">
         <table className="min-w-full bg-white">
           <thead>
             <tr className="bg-background-secondary border-b">
@@ -118,9 +118,9 @@ const GridLampsFields = () => {
                   onDragStart={(e) => handleDragStart(e, key)}
                   onDragEnd={handleDragEnd}
                   className={`
-                    py-2 px-3 text-left text-xs font-bold text-neutral-100 whitespace-nowrap
+                    py-2 px-3 text-left text-xs font-bold text-[var(--color-text-inverse)] whitespace-nowrap
                     cursor-grabb ing select-none
-                    hover:bg-green-950 bg-jerarquia4
+                    hover:bg-green-950 hover:text-[var(--color-text-black)] bg-jerarquia4
                     transition-all duration-150
                     cursor-grabbing
                     ${
@@ -144,7 +144,7 @@ const GridLampsFields = () => {
               <tr
                 key={index}
                 className={`
-                  ${index % 2 === 0 ? "bg-white" : "bg-gray-100"} 
+                  ${index % 2 === 0 ? "bg-[var(--color-jerarquia2)]" : "bg-[var(--color-jerarquia3)]"} 
                   border-b-jerarquia4 
                   cursor-pointer 
                   transition-colors 

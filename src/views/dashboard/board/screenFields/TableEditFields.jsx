@@ -178,7 +178,7 @@ const TableEditFields = ({
 
     toast.custom(
       (t) => (
-        <div className="bg-amber-50 text-amber-700 px-4 py-3 rounded-lg shadow-lg flex flex-col gap-3 w-80">
+        <div className="bg-[var(--color-surface-modal)] text-amber-700 px-4 py-3 rounded-lg shadow-lg flex flex-col gap-3 w-80">
           <span className="font-medium text-sm">
             ¿Está seguro de guardar los cambios?
           </span>
@@ -236,7 +236,7 @@ const TableEditFields = ({
 
   if (error) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+      <div className="bg-[var(--color-surface-modal)] p-6 rounded-lg border border-gray-200 shadow-sm">
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <div className="flex items-center">
             <div className="text-red-400 mr-2">
@@ -267,8 +267,8 @@ const TableEditFields = ({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm max-h-75 overflow-auto">
-      <div className="bg-background-secondary sticky top-0  rounded-t-lg grid grid-cols-12 gap-3 mb-4 border border-gray-200 shadow-sm py-2 px-3 font-semibold text-white text-sm">
+    <div className="bg-[var(--color-border)] rounded-lg shadow-sm max-h-75 overflow-auto">
+      <div className="bg-[var(--color-surface-sidebar)] sticky top-0  rounded-t-lg grid grid-cols-12 gap-3 mb-4 py-2 px-3 font-semibold text-white text-sm">
         <div className="col-span-1 w-full">Position</div>
         <div className="col-span-3 w-full">Alias</div>
         <div className="col-span-4 w-full">Campos</div>
@@ -302,7 +302,7 @@ const TableEditFields = ({
         </div>
       )}
 
-      <div className="flex justify-end my-3 mr-3 sticky bottom-0 bg-white py-2">
+      <div className="flex justify-end my-3 mr-3 sticky bottom-0 py-2">
         <SaveButton
           onClick={handleSaveClick}
           loading={saving}

@@ -66,7 +66,7 @@ const LampshadeFields = ({ isOpen, onClose }) => {
 
   return (
     <div className=" modal-blur-bg overflow-hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]">
+      <div className="bg-[var(--color-surface-modal)] rounded-lg shadow-2xl w-full max-w-6xl overflow-hidden flex flex-col max-h-[90vh]">
         <ModalHeader
           icon={
             <IconCircular size="size-10">
@@ -82,26 +82,26 @@ const LampshadeFields = ({ isOpen, onClose }) => {
           loading={loading}
           setLoading={setLoading}
         />
-       {selectedProduct ? (  
-        <div className="p-4 overflow-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
-          {memoizedInfoSection}
-          {selectedProduct && selectedProduct.value !== 0 && (
-            <>
-              {memoizedTableEditFields}
-              {memoizedGridLampsFields}
-            </>
-          )}
-        </div>
+        {selectedProduct ? (
+          <div className="p-4 overflow-auto scrollbar-gray  max-h-[calc(90vh-120px)] bg-[var(--color-surface-modal)] space-y-4">
+            {memoizedInfoSection}
+            {selectedProduct && selectedProduct.value !== 0 && (
+              <>
+                {memoizedTableEditFields}
+                {memoizedGridLampsFields}
+              </>
+            )}
+          </div>
         ) : (
           <div>
-              <div className="flex m-5 flex-col items-center justify-center text-center text-gray-500 bg-gray-200 rounded-lg py-20">
-                          <IconWarning className="size-8"/>
-                          <p className="text-sm text-gray-400 mt-1">
-                            Seleccione el producto para gestionar scripts.
-                          </p>
-                        </div>
-                        </div>
-                      )}
+            <div className="flex m-5 flex-col items-center justify-center text-center text-gray-500 bg-[var(--color-surface-modal)] rounded-lg py-20">
+              <IconWarning className="size-8" />
+              <p className="text-sm text-gray-400 mt-1">
+                Seleccione el producto para gestionar scripts.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

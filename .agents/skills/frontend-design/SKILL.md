@@ -43,6 +43,17 @@ Remember: Claude is capable of extraordinary creative work. Don't hold back, sho
 
 ---
 
+## Preline UI as Base Framework
+
+**CRITICAL RULE**: ALWAYS use [Preline UI](https://preline.co/) components and utility classes as the foundational base for any new UI element, especially buttons, inputs, modals, and navigation elements.
+
+- **Buttons**: Do not write custom CSS buttons from scratch. Use Preline's button class structures (e.g., `py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-[var(--color-jerarquia2)] text-white hover:bg-[var(--color-jerarquia3)] disabled:opacity-50 disabled:pointer-events-none`) adapted to our CSS variables.
+- **Form Elements**: Checkboxes, selects, and inputs must use Preline's form structures, leveraging the Tailwind Forms plugin aesthetics combined with our theme colors.
+- **Modals and Overlays**: Base any new modal or overlay on Preline's modal components.
+- **Consistency**: By anchoring everything in Preline, we ensure consistent accessibility, focus states (`focus:ring-2`, `focus:outline-none`), disabled states (`disabled:opacity-50 disabled:pointer-events-none`), and responsive behaviors. Adapt the colors using `var(--color-jerarquiaX)` o our semantic tailwind classes (`bg-primary`, `bg-surface`, etc.) to match the CoorinWeb theme.
+
+---
+
 ## CoorinWeb — Reusable Select/Input Component System
 
 These three components live in `src/components/Select/` and share the same design tokens (`--color-*` CSS variables) enabling automatic dark-mode support. **Always prefer these over native `<select>` or `<input>` elements.**

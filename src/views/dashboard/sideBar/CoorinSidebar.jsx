@@ -54,7 +54,7 @@ const RenderSubMenus = ({
       {subMenus.map((item, idx) => {
         const id = `${parentId || "accordion"}-${item.id || idx}`;
         const hasChildren = Object.keys(item).some(
-          (k) => k.startsWith("subMenus") && Array.isArray(item[k])
+          (k) => k.startsWith("subMenus") && Array.isArray(item[k]),
         );
         // Si el item tiene hijos, lo renderizamos como acordeón. Si no tiene hijos,
         // renderizamos un <li> simple con <a> para evitar mostrar un toggle vacío.
@@ -72,16 +72,14 @@ const RenderSubMenus = ({
                   e.preventDefault();
                   // Crear ID compuesto: parentItemId_itemId (ej: "1CC_2CCC" o "2CC_2CCC")
                   if (onMenuClick) {
-                    const compositeId = parentItemId ? `${parentItemId}_${item.id}` : item.id;
-                    console.log("=== SIDEBAR CLICK DEBUG ===");
-                    console.log("parentItemId:", parentItemId);
-                    console.log("item.id:", item.id);
-                    console.log("item.title:", item.title);
-                    console.log("compositeId:", compositeId);
-                    console.log("===========================");
+                    const compositeId = parentItemId
+                      ? `${parentItemId}_${item.id}`
+                      : item.id;
+
                     onMenuClick(compositeId, item.title);
                   }
-                }}>
+                }}
+              >
                 {item.icon && iconMap[item.icon] && (
                   <span className="flex-shrink-0">
                     {React.createElement(iconMap[item.icon], {
@@ -108,7 +106,8 @@ const RenderSubMenus = ({
                          focus:outline-hidden focus:bg-[var(--color-surface-secondary)]
                          transition-colors duration-150"
               aria-expanded="false"
-              aria-controls={`${id}-collapse`}>
+              aria-controls={`${id}-collapse`}
+            >
               {item.icon && iconMap[item.icon] && (
                 <span className="inline-flex mr-2">
                   {React.createElement(iconMap[item.icon], {
@@ -132,7 +131,8 @@ const RenderSubMenus = ({
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
-                strokeLinejoin="round">
+                strokeLinejoin="round"
+              >
                 <path d="m18 15-6-6-6 6" />
               </svg>
               <svg
@@ -145,7 +145,8 @@ const RenderSubMenus = ({
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
-                strokeLinejoin="round">
+                strokeLinejoin="round"
+              >
                 <path d="m6 9 6 6 6-6" />
               </svg>
             </button>
@@ -154,11 +155,12 @@ const RenderSubMenus = ({
               id={`${id}-collapse`}
               className="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 hidden"
               role="region"
-              aria-labelledby={id}>
+              aria-labelledby={id}
+            >
               {/* Buscar la primera clave que contiene submenus (subMenus, subMenus2...) */}
               {(() => {
                 const nextKey = Object.keys(item).find(
-                  (k) => k.startsWith("subMenus") && Array.isArray(item[k])
+                  (k) => k.startsWith("subMenus") && Array.isArray(item[k]),
                 );
                 return (
                   <RenderSubMenus
@@ -194,19 +196,25 @@ export const CoorinSidebar = ({
     try {
       if (!sidebarRef.current) return;
       const toggles = Array.from(
-        sidebarRef.current.querySelectorAll('.hs-accordion-toggle[aria-expanded="true"]')
+        sidebarRef.current.querySelectorAll(
+          '.hs-accordion-toggle[aria-expanded="true"]',
+        ),
       );
       toggles.forEach((t) => {
-        const aria = t.getAttribute('aria-controls');
+        const aria = t.getAttribute("aria-controls");
         if (aria) savedAccordionsRef.current.add(aria);
       });
       // Colapsar cada toggle que esté abierto
       toggles.forEach((t) => {
-        try { t.click(); } catch { /* ignore */ }
+        try {
+          t.click();
+        } catch {
+          /* ignore */
+        }
       });
     } catch (e) {
       // no crítico
-      console.warn('saveAndCollapseAccordions failed', e);
+      console.warn("saveAndCollapseAccordions failed", e);
     }
   };
 
@@ -215,14 +223,20 @@ export const CoorinSidebar = ({
       if (!sidebarRef.current) return;
       const toRestore = Array.from(savedAccordionsRef.current);
       toRestore.forEach((ariaControls) => {
-        const toggle = sidebarRef.current.querySelector(`.hs-accordion-toggle[aria-controls="${ariaControls}"]`);
-        if (toggle && toggle.getAttribute('aria-expanded') !== 'true') {
-          try { toggle.click(); } catch { /* ignore */ }
+        const toggle = sidebarRef.current.querySelector(
+          `.hs-accordion-toggle[aria-controls="${ariaControls}"]`,
+        );
+        if (toggle && toggle.getAttribute("aria-expanded") !== "true") {
+          try {
+            toggle.click();
+          } catch {
+            /* ignore */
+          }
         }
       });
       // Leave saved set as-is so open/close cycles preserve the same saved groups
     } catch (e) {
-      console.warn('restoreAccordions failed', e);
+      console.warn("restoreAccordions failed", e);
     }
   };
 
@@ -286,7 +300,9 @@ export const CoorinSidebar = ({
   const prevStateRef = useRef({ isOpen: null, isMinified: null });
   const [isLockedByModal, setIsLockedByModal] = useState(false);
   const isLockedRef = useRef(isLockedByModal);
-  useEffect(() => { isLockedRef.current = isLockedByModal; }, [isLockedByModal]);
+  useEffect(() => {
+    isLockedRef.current = isLockedByModal;
+  }, [isLockedByModal]);
 
   // blocked flag
   const blocked = isModalOpen || isLockedByModal;
@@ -307,8 +323,10 @@ export const CoorinSidebar = ({
       // modal prop closed -> restore previous state if we had locked it
       if (isLockedRef.current) {
         const prev = prevStateRef.current || {};
-        if (prev.isOpen !== null && prev.isOpen !== undefined) setIsOpen(prev.isOpen);
-        if (prev.isMinified !== null && prev.isMinified !== undefined) setIsMinified(prev.isMinified);
+        if (prev.isOpen !== null && prev.isOpen !== undefined)
+          setIsOpen(prev.isOpen);
+        if (prev.isMinified !== null && prev.isMinified !== undefined)
+          setIsMinified(prev.isMinified);
         setIsLockedByModal(false);
       }
     }
@@ -324,7 +342,12 @@ export const CoorinSidebar = ({
       const byClose = !!detail.byClose;
       if (open) {
         // first modal -> save
-        try { window.__coorin_modal_open_count = (window.__coorin_modal_open_count || 0) + 1; } catch (err) { console.warn(err); }
+        try {
+          window.__coorin_modal_open_count =
+            (window.__coorin_modal_open_count || 0) + 1;
+        } catch (err) {
+          console.warn(err);
+        }
         if (!isLockedRef.current) {
           prevStateRef.current = { isOpen, isMinified };
           // minimize and lock
@@ -333,7 +356,14 @@ export const CoorinSidebar = ({
           setIsLockedByModal(true);
         }
       } else {
-        try { window.__coorin_modal_open_count = Math.max((window.__coorin_modal_open_count || 1) - 1, 0); } catch (err) { console.warn(err); }
+        try {
+          window.__coorin_modal_open_count = Math.max(
+            (window.__coorin_modal_open_count || 1) - 1,
+            0,
+          );
+        } catch (err) {
+          console.warn(err);
+        }
         const remaining = window.__coorin_modal_open_count || 0;
         if (remaining === 0) {
           // restore only if closed via close button
@@ -349,26 +379,30 @@ export const CoorinSidebar = ({
         }
       }
     };
-    window.addEventListener('coorin-modal-open', handle);
-    return () => window.removeEventListener('coorin-modal-open', handle);
+    window.addEventListener("coorin-modal-open", handle);
+    return () => window.removeEventListener("coorin-modal-open", handle);
   }, [isMobile, isMinified, isOpen]);
 
   // Efecto para detectar clics fuera del sidebar
   useEffect(() => {
-  const handleClickOutside = (event) => {
+    const handleClickOutside = (event) => {
       // Solo cerrar en móviles o cuando el sidebar esté abierto y no minificado en desktop
-      const shouldClose = (isMobile && isOpen) || (!isMobile && isOpen && !isMinified);
-      
-      if (shouldClose && 
-          sidebarRef.current && 
-          !sidebarRef.current.contains(event.target)) {
-        
+      const shouldClose =
+        (isMobile && isOpen) || (!isMobile && isOpen && !isMinified);
+
+      if (
+        shouldClose &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target)
+      ) {
         // Verificar que el clic no sea en el botón hamburger
-        const hamburgerButton = document.querySelector('[data-hs-overlay="#hs-coorin-sidebar"], [aria-controls="hs-sidebar-content-push-to-mini-sidebar"]');
+        const hamburgerButton = document.querySelector(
+          '[data-hs-overlay="#hs-coorin-sidebar"], [aria-controls="hs-sidebar-content-push-to-mini-sidebar"]',
+        );
         if (hamburgerButton && hamburgerButton.contains(event.target)) {
           return; // No cerrar si se hizo clic en el botón hamburger
         }
-        
+
         if (isMobile) {
           saveAndCollapseAccordions();
           setIsOpen(false);
@@ -390,7 +424,7 @@ export const CoorinSidebar = ({
 
     // Agregar el event listener
     document.addEventListener("mousedown", handleClickOutside);
-    
+
     // Limpiar el event listener
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -430,27 +464,36 @@ export const CoorinSidebar = ({
   // so call the components' autoInit() here to initialize elements rendered by React.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    
+
     // small defer to ensure DOM is present
     const timeoutId = setTimeout(() => {
       try {
         // Solo inicializar si el sidebar está montado
         if (sidebarRef.current) {
-          if (window.HSAccordion && typeof window.HSAccordion.autoInit === "function") {
+          if (
+            window.HSAccordion &&
+            typeof window.HSAccordion.autoInit === "function"
+          ) {
             try {
               window.HSAccordion.autoInit();
             } catch (e) {
               console.warn("HSAccordion.autoInit failed:", e);
             }
           }
-          if (window.HSOverlay && typeof window.HSOverlay.autoInit === "function") {
+          if (
+            window.HSOverlay &&
+            typeof window.HSOverlay.autoInit === "function"
+          ) {
             try {
               window.HSOverlay.autoInit();
             } catch (e) {
               console.warn("HSOverlay.autoInit failed:", e);
             }
           }
-          if (window.HSCollapse && typeof window.HSCollapse.autoInit === "function") {
+          if (
+            window.HSCollapse &&
+            typeof window.HSCollapse.autoInit === "function"
+          ) {
             try {
               window.HSCollapse.autoInit();
             } catch (e) {
@@ -458,7 +501,10 @@ export const CoorinSidebar = ({
             }
           }
           // Inicializa el dropdown del footer
-          if (window.HSDropdown && typeof window.HSDropdown.autoInit === "function") {
+          if (
+            window.HSDropdown &&
+            typeof window.HSDropdown.autoInit === "function"
+          ) {
             try {
               window.HSDropdown.autoInit();
             } catch (e) {
@@ -471,7 +517,7 @@ export const CoorinSidebar = ({
         console.warn("Preline re-init failed");
       }
     }, 50);
-    
+
     return () => clearTimeout(timeoutId);
   }, []);
 
@@ -479,15 +525,13 @@ export const CoorinSidebar = ({
     isMinified ? "hs-overlay-minified " : ""
   }hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0
    transition-all duration-150 transform fixed top-0 start-0 bottom-0
-   ${
-    blocked ? "z-50" : "z-100"
-  }
+   ${blocked ? "z-50" : "z-100"}
    bg-[var(--color-surface)] border-e border-[var(--color-border)]
    ${
-    isMinified ? "w-[3.25rem]" : "w-64"
-  } min-h-screen flex flex-col overflow-x-hidden ${
-    isOpen ? "translate-x-0" : "-translate-x-full hidden"
-  } ${blocked ? "pointer-events-none sidebar-blocked" : ""}
+     isMinified ? "w-[3.25rem]" : "w-64"
+   } min-h-screen flex flex-col overflow-x-hidden ${
+     isOpen ? "translate-x-0" : "-translate-x-full hidden"
+   } ${blocked ? "pointer-events-none sidebar-blocked" : ""}
   `.trim();
   // Función para expandir la sidebar si está en modo minificado
   const expandSidebar = () => {
@@ -525,16 +569,17 @@ export const CoorinSidebar = ({
       <button
         type="button"
         className={`py-2 px-3 inline-flex justify-center items-center gap-x-2 text-start bg-gray-800 border-none text-white text-sm font-medium rounded-lg shadow-2xs align-middle hover:bg-gray-950 focus:outline-hidden focus:bg-gray-900 dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200 dark:focus:bg-neutral-200 ${
-          (blocked && isMinified) ? 'cursor-default' : ''
+          blocked && isMinified ? "cursor-default" : ""
         }`}
-        style={ (blocked && isMinified) ? { cursor: 'default' } : undefined }
+        style={blocked && isMinified ? { cursor: "default" } : undefined}
         aria-haspopup="dialog"
         aria-expanded="false"
         aria-controls="hs-sidebar-content-push-to-mini-sidebar"
         aria-label="Toggle navigation"
         data-hs-overlay="#hs-sidebar-content-push-to-mini-sidebar"
-  disabled={blocked}
-  onClick={blocked ? undefined : toggleOpen}>
+        disabled={blocked}
+        onClick={blocked ? undefined : toggleOpen}
+      >
         <svg
           className="hidden hs-overlay-minified:block shrink-0 w-4 h-4"
           xmlns="http://www.w3.org/2000/svg"
@@ -545,7 +590,8 @@ export const CoorinSidebar = ({
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
-          strokeLinejoin="round">
+          strokeLinejoin="round"
+        >
           <rect width="18" height="18" x="3" y="3" rx="2" />
           <path d="M15 3v18" />
           <path d="m8 9 3 3-3 3" />
@@ -560,7 +606,8 @@ export const CoorinSidebar = ({
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
-          strokeLinejoin="round">
+          strokeLinejoin="round"
+        >
           <rect width="18" height="18" x="3" y="3" rx="2" />
           <path d="M15 3v18" />
           <path d="m10 15-3-3 3-3" />
@@ -577,15 +624,23 @@ export const CoorinSidebar = ({
         className={asideClass}
         role="navigation"
         aria-label="Coorin sidebar"
-        style={{ overflowY: isMinified ? 'hidden' : undefined, pointerEvents: blocked ? 'none' : undefined, cursor: blocked ? 'default' : undefined }}>
+        style={{
+          overflowY: isMinified ? "hidden" : undefined,
+          pointerEvents: blocked ? "none" : undefined,
+          cursor: blocked ? "default" : undefined,
+        }}
+      >
         <div className="flex flex-col h-full max-h-full">
           {/* Header */}
-          <header className="py-4 px-2 flex justify-between items-center gap-x-2
-                             border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+          <header
+            className="py-4 px-2 flex justify-between items-center gap-x-2
+                             border-b border-[var(--color-border)] bg-[var(--color-surface)]"
+          >
             <a
               className="flex-none font-semibold text-xl text-[var(--color-text-primary)] focus:outline-hidden focus:opacity-80 hs-overlay-minified:hidden"
               href="#"
-              aria-label="Brand">
+              aria-label="Brand"
+            >
               <span className="inline-block transition-all duration-150 overflow-hidden whitespace-nowrap">
                 Coorin
               </span>
@@ -600,7 +655,8 @@ export const CoorinSidebar = ({
                            hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text-secondary)]
                            focus:outline-hidden focus:bg-[var(--color-surface-secondary)]
                            transition-colors"
-                onClick={closeMobile}>
+                onClick={closeMobile}
+              >
                 <svg
                   className="shrink-0 w-4 h-4"
                   xmlns="http://www.w3.org/2000/svg"
@@ -611,7 +667,8 @@ export const CoorinSidebar = ({
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
-                  strokeLinejoin="round">
+                  strokeLinejoin="round"
+                >
                   <path d="M18 6 6 18" />
                   <path d="m6 6 12 12" />
                 </svg>
@@ -629,7 +686,9 @@ export const CoorinSidebar = ({
                            hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text-secondary)]
                            focus:outline-hidden focus:bg-[var(--color-surface-secondary)]
                            transition-colors"
-                style={ (blocked && isMinified) ? { cursor: 'default' } : undefined }
+                style={
+                  blocked && isMinified ? { cursor: "default" } : undefined
+                }
               >
                 <svg
                   className="hidden hs-overlay-minified:block shrink-0 w-4 h-4"
@@ -641,7 +700,8 @@ export const CoorinSidebar = ({
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
-                  strokeLinejoin="round">
+                  strokeLinejoin="round"
+                >
                   <rect width="18" height="18" x="3" y="3" rx="2" />
                   <path d="M15 3v18" />
                   <path d="m8 9 3 3-3 3" />
@@ -656,7 +716,8 @@ export const CoorinSidebar = ({
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
-                  strokeLinejoin="round">
+                  strokeLinejoin="round"
+                >
                   <rect width="18" height="18" x="3" y="3" rx="2" />
                   <path d="M15 3v18" />
                   <path d="m10 15-3-3 3-3" />
@@ -670,16 +731,21 @@ export const CoorinSidebar = ({
           <div
             className={`flex-1 flex flex-col px-2 pt-2 min-h-0 overflow-x-hidden coorin-scroll-area
                         bg-[var(--color-surface)] transition-colors duration-300
-                        ${isMinified ? 'overflow-y-hidden' : (isOpen ? 'overflow-y-auto' : 'overflow-y-hidden')}`}
-            style={{ overflowY: isMinified ? 'hidden' : (isOpen ? 'auto' : 'hidden') }}
+                        ${isMinified ? "overflow-y-hidden" : isOpen ? "overflow-y-auto" : "overflow-y-hidden"}`}
+            style={{
+              overflowY: isMinified ? "hidden" : isOpen ? "auto" : "hidden",
+            }}
           >
-            <ul className="space-y-0.5 p-0 pb-4 overflow-x-hidden
+            <ul
+              className="space-y-0.5 p-0 pb-4 overflow-x-hidden
                            bg-[var(--color-surface)] transition-colors duration-300"
-                style={{ overflowY: isMinified ? 'hidden' : undefined }}>
+              style={{ overflowY: isMinified ? "hidden" : undefined }}
+            >
               {Object.values(dataSidebar).map((indiceArr, indiceIdx) =>
                 indiceArr.map((section, sectionIdx) => (
                   <React.Fragment
-                    key={`indice-${indiceIdx}-section-${sectionIdx}`}>
+                    key={`indice-${indiceIdx}-section-${sectionIdx}`}
+                  >
                     {section.Menu &&
                       section.Menu.map((menu, menuIdx) => {
                         const menuId = `menu-app-${indiceIdx}-${sectionIdx}-${menuIdx}`;
@@ -696,13 +762,14 @@ export const CoorinSidebar = ({
                                 onClick={(e) => {
                                   e.preventDefault();
                                   onMenuClick("4CC", menu.title);
-                                }}>
+                                }}
+                              >
                                 {section.collapsetoggle &&
                                   iconMap[section.collapsetoggle] && (
                                     <span className="inline-flex w-6 flex-shrink-0 text-jerarquia3">
                                       {React.createElement(
                                         iconMap[section.collapsetoggle],
-                                        { className: "w-5 h-5" }
+                                        { className: "w-5 h-5" },
                                       )}
                                     </span>
                                   )}
@@ -710,7 +777,7 @@ export const CoorinSidebar = ({
                                   {section.divider || menu.title || "Abrir"}
                                 </span>
                               </a>
-                              ) : (
+                            ) : (
                               // Accordion para otros menús
                               <div className="hs-accordion" id={menuId}>
                                 <button
@@ -722,13 +789,14 @@ export const CoorinSidebar = ({
                                              transition-colors duration-150"
                                   aria-expanded="false"
                                   aria-controls={`${menuId}-collapse`}
-                                  onClick={expandSidebar}>
+                                  onClick={expandSidebar}
+                                >
                                   {section.collapsetoggle &&
                                     iconMap[section.collapsetoggle] && (
                                       <span className="inline-flex w-6 flex-shrink-0 text-jerarquia3">
                                         {React.createElement(
                                           iconMap[section.collapsetoggle],
-                                          { className: "w-5 h-5" }
+                                          { className: "w-5 h-5" },
                                         )}
                                       </span>
                                     )}
@@ -746,7 +814,8 @@ export const CoorinSidebar = ({
                                     stroke="currentColor"
                                     strokeWidth="2"
                                     strokeLinecap="round"
-                                    strokeLinejoin="round">
+                                    strokeLinejoin="round"
+                                  >
                                     <path d="m18 15-6-6-6 6" />
                                   </svg>
                                   <svg
@@ -760,7 +829,8 @@ export const CoorinSidebar = ({
                                     stroke="currentColor"
                                     strokeWidth="2"
                                     strokeLinecap="round"
-                                    strokeLinejoin="round">
+                                    strokeLinejoin="round"
+                                  >
                                     <path d="m6 9 6 6 6-6" />
                                   </svg>
                                 </button>
@@ -768,7 +838,8 @@ export const CoorinSidebar = ({
                                   id={`${menuId}-collapse`}
                                   className="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 hidden"
                                   role="region"
-                                  aria-labelledby={menuId}>
+                                  aria-labelledby={menuId}
+                                >
                                   {menu.subMenus && (
                                     <RenderSubMenus
                                       subMenus={menu.subMenus}
@@ -785,7 +856,7 @@ export const CoorinSidebar = ({
                         );
                       })}
                   </React.Fragment>
-                ))
+                )),
               )}
             </ul>
           </div>

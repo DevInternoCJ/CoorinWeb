@@ -26,10 +26,12 @@ body {
   --color-text-black: #00291a;
   --color-text-terra: #505631;
   --color-text-mint: #deffb9;
+  --color-text-inverse: #ffffff;
 
   /* Superficie base del layout */
   --color-surface: #ffffff;
   --color-surface-secondary: #f5f5f5;
+  --color-surface-sidebar: #c8e7dd;
   --color-surface-modal: #efefef;
   --color-text-primary: #1b4838;
   --color-text-secondary: #374151;
@@ -47,7 +49,7 @@ body {
   --color-btn-info-bg-hover: #3e86ac;
   --color-btn-info-bg-focus: #1f4356;
   --color-btn-info-text: #132934;
-  --color-btn-info-hover-text: #dbeafe;
+  --color-btn-info-hover-text: #4c5764;
   --color-btn-info-focus-text: #bfdbfe;
 
   /* Botones advertencia */
@@ -92,12 +94,14 @@ body {
   --color-text-black: #d1fae5;
   --color-text-terra: #a3e635;
   --color-text-mint: #6ee7b7;
+  --color-text-inverse: #020201;
 
   /* Superficies */
-  --color-surface: #101311;
+  --color-surface: #090e0a;
   --color-surface-secondary: #001007;
-  --color-surface-modal: #1a2e22;
-  --color-text-primary: #a7f3d0;
+  --color-surface-sidebar: #042917;
+  --color-surface-modal: #11271a;
+  --color-text-primary: #96c9b2;
   --color-text-secondary: #d1d5db;
   --color-text-muted: #9ca3af;
   --color-border: #2d4a3a;
@@ -111,10 +115,10 @@ body {
   /* Tokens de jerarquía oscuro (ligth shift) */
   --color-iconCircular: #1b4838;
   --color-bgsuccess: #155e42;
-  --color-jerarquia1: #2a7a6a;
+  --color-jerarquia1: #4b9989;
   --color-jerarquia2: #3eac91;
   --color-jerarquia3: #50c9a8;
-  --color-jerarquia4: #86efac;
+  --color-jerarquia4: #44be71;
   --color-bgcolor1: #07180d;
   --color-background-primary: #0f2919;
   --color-background-secondary: #0f2919;
@@ -321,7 +325,7 @@ body {
 
 /* Dark mode override para el título del dashboard */
 .dark .title-dashboard {
-  color: var(--color-jerarquia4);
+  color: var(--color-jerarquia3);
   background: linear-gradient(
     to right,
     rgb(15 31 24 / 80%),
@@ -638,31 +642,14 @@ label {
   cursor: not-allowed;
   pointer-events: none;
 }
-/* === Checkbox global para modales === */
+/* === Checkbox global para modales (Preline Style) === */
 .modal-checkbox {
-  width: 1.1rem;
-  height: 1.1rem;
-  accent-color: var(--color-jerarquia3);
-  border-radius: 0.25rem;
-  border: 1.5px solid var(--color-jerarquia1);
-  transition: border 0.2s;
+  @apply shrink-0 w-[1.1rem] h-[1.1rem] border-[var(--color-border)] rounded text-[var(--color-jerarquia3)] focus:ring-[var(--color-jerarquia3)] disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-[var(--color-jerarquia3)] dark:checked:border-[var(--color-jerarquia3)] dark:focus:ring-offset-gray-800 cursor-pointer transition-all duration-200;
 }
-.modal-checkbox:focus {
-  outline: 2px solid var(--color-jerarquia3);
-  outline-offset: 1px;
-}
-/* === Checkbox pequeño para tablas === */
+
+/* === Checkbox pequeño para tablas (Preline Style) === */
 .modal-checkbox-small {
-  width: 0.8rem;
-  height: 0.8rem;
-  accent-color: var(--color-jerarquia3);
-  border-radius: 0.2rem;
-  border: 1px solid var(--color-jerarquia1);
-  transition: border 0.2s;
-}
-.modal-checkbox-small:focus {
-  outline: 1px solid var(--color-jerarquia3);
-  outline-offset: 1px;
+  @apply shrink-0 w-3.5 h-3.5 border-[var(--color-border)] rounded text-[var(--color-jerarquia3)] focus:ring-[var(--color-jerarquia3)] disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-[var(--color-jerarquia3)] dark:checked:border-[var(--color-jerarquia3)] dark:focus:ring-offset-gray-800 cursor-pointer transition-all duration-200;
 }
 /* === Tabla global para modales === */
 .modal-table {

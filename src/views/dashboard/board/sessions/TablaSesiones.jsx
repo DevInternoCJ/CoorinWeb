@@ -8,6 +8,18 @@ import {
 } from "../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 import { useUserStore } from "../../../../contextGlobal/userStore";
+const TABLE_HEADERS = [
+  { id: "ejecutivo", label: "Ejecutivo", align: "left", noWrap: true },
+  { id: "usuario", label: "Usuario", align: "center", noWrap: false },
+  { id: "bloqueado", label: "Bloqueado", align: "center", noWrap: false },
+  { id: "contrasena", label: "Contraseña", align: "center", noWrap: false },
+  {
+    id: "sesion_abierta",
+    label: "Sesión Abierta",
+    align: "center",
+    noWrap: true,
+  },
+];
 
 // Tabla de sesiones
 const TablaSesiones = ({ selectedExecutiveId }) => {
@@ -18,6 +30,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
   const [unlocking, setUnlocking] = useState(null); // Para mostrar estado de desbloqueo por ejecutivo
   const [resettingPassword, setResettingPassword] = useState(null); // Para mostrar estado de reset de contraseña
   const [passwordReset, setPasswordReset] = useState(() => new Set()); // inicializador lazy — evita crear Set en cada render
+  const [retryCount, setRetryCount] = useState(0);
   // Función para manejar el desbloqueo del ejecutivo
   const handleUnlockExecutive = async (rowIdEjecutivo) => {
     try {
@@ -53,10 +66,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
       JSON.parse(sessionStorage.getItem("userData") || "null") ||
       JSON.parse(localStorage.getItem("userData") || "null");
     return (
-      persisted?.idEjecutivo ||
-      persisted?.idejecutivo ||
-      persisted?.id ||
-      null
+      persisted?.idEjecutivo || persisted?.idejecutivo || persisted?.id || null
     );
   }, [storeUser]); // solo recalcula cuando cambia el store
 
@@ -167,42 +177,64 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
     };
 
     fetchSessions();
-  }, [selectedExecutiveId, idEjecutivoSesion]);
+  }, [selectedExecutiveId, idEjecutivoSesion, retryCount]);
 
   return (
-    <div className="bg-[var(--color-surface)] overflow-auto ring-1 ring-[var(--color-border)] rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64 transition-colors duration-300">
-      <h3 className="text-base lg:text-lg font-semibold mb-4 flex items-center text-[var(--color-text-primary)]">
-        <span className="mr-2">
-          {/* Icono personalizado para Sesiones */}
+    <div className="bg-[var(--color-surface)] overflow-auto rounded-2xl flex flex-col p-4 lg:p-6 w-full h-auto lg:h-82 min-h-64 transition-colors duration-300 border border-dashed border-[var(--color-jerarquia1)]">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base lg:text-lg font-semibold flex items-center text-[var(--color-text-primary)]">
+          <span className="mr-2">
+            {/* Icono personalizado para Sesiones */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="inline-block w-5 h-5 lg:w-6 lg:h-6 text-[var(--color-text-muted)]"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"
+              />
+            </svg>
+          </span>
+          Sesiones
+        </h3>
+
+        <button
+          onClick={() => setRetryCount((c) => c + 1)}
+          className="p-1.5 rounded-md hover:bg-[var(--color-surface-secondary)] text-[var(--color-jerarquia3)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-jerarquia3)]"
+          title="Recargar sesiones"
+          disabled={loading}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            strokeWidth="1.5"
+            strokeWidth="2"
             stroke="currentColor"
-            className="inline-block w-5 h-5 lg:w-6 lg:h-6 text-[var(--color-text-muted)]"
+            className={`w-5 h-5 lg:w-6 lg:h-6 ${loading ? "animate-spin" : ""}`}
           >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"
+              d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
             />
           </svg>
-        </span>
-        Sesiones
-      </h3>
+        </button>
+      </div>
       <div className="bg-[var(--color-surface)] overflow-auto rounded-lg border border-[var(--color-jerarquia1)] flex-1 w-full">
         <div
           style={{
-            scrollbarColor: "var(--color-scrollbar-thumb) var(--color-scrollbar-track)",
+            scrollbarColor:
+              "var(--color-scrollbar-thumb) var(--color-scrollbar-track)",
             scrollbarWidth: "thin",
           }}
           className="w-full max-h-[35vh] lg:max-h-[27vh]"
         >
-          <table
-            className="modal-table text-xs lg:text-sm"
-            style={{ minWidth: "100%" }}
-          >
+          <table className="modal-table text-xs" style={{ minWidth: "100%" }}>
             <thead
               style={{
                 position: "sticky",
@@ -212,57 +244,22 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
               }}
             >
               <tr>
-                <th
-                  style={{
-                    top: 0,
-                    background: "bg-jerarquia4",
-                    color: "#fff",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  Ejecutivo
-                </th>
-                <th
-                  style={{
-                    textAlign: "center",
-                    top: 0,
-                    background: "bg-jerarquia4¿",
-                    color: "#fff",
-                  }}
-                >
-                  Usuario
-                </th>
-                <th
-                  style={{
-                    textAlign: "center",
-                    top: 0,
-                    background: "bg-jerarquia4",
-                    color: "#fff",
-                  }}
-                >
-                  Bloqueado
-                </th>
-                <th
-                  style={{
-                    textAlign: "center",
-                    top: 0,
-                    background: "bg-jerarquia4",
-                    color: "#fff",
-                  }}
-                >
-                  Contraseña
-                </th>
-                <th
-                  style={{
-                    textAlign: "center",
-                    top: 0,
-                    background: "bg-jerarquia4",
-                    color: "#fff",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  Sesión Abierta
-                </th>
+                {TABLE_HEADERS.map((header) => (
+                  <th
+                    key={header.id}
+                    style={{
+                      textAlign:
+                        header.align !== "left" ? header.align : undefined,
+                      top: 0,
+                      background: "var(--color-jerarquia4)",
+                      color: "#fff",
+                      whiteSpace: header.noWrap ? "nowrap" : undefined,
+                      color: "var(--color-text-inverse)",
+                    }}
+                  >
+                    {header.label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -307,7 +304,12 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                           </g>
                         </svg>
                       </div>
-                      <span style={{ color: "var(--color-jerarquia3)", fontSize: "0.875rem" }}>
+                      <span
+                        style={{
+                          color: "var(--color-jerarquia3)",
+                          fontSize: "0.875rem",
+                        }}
+                      >
                         Cargando sesiones...
                       </span>
                     </div>
@@ -318,7 +320,10 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                 <tr>
                   <td
                     colSpan={5}
-                    style={{ textAlign: "center", color: "var(--color-error, #b71c1c)" }}
+                    style={{
+                      textAlign: "center",
+                      color: "var(--color-error, #b71c1c)",
+                    }}
                   >
                     {error}
                   </td>
@@ -328,7 +333,10 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                 <tr>
                   <td
                     colSpan={5}
-                    style={{ textAlign: "center", color: "var(--color-text-muted)" }}
+                    style={{
+                      textAlign: "center",
+                      color: "var(--color-text-muted)",
+                    }}
                   >
                     {selectedExecutiveId
                       ? "No hay sesiones para este ejecutivo"
@@ -340,14 +348,18 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                 !error &&
                 sessions.length > 0 &&
                 sessions.map((session, i) => (
-                  <tr key={session.idEjecutivo ?? i} style={{ height: "20px" }}>
-                    <td style={{ whiteSpace: "nowrap" }}>
+                  <tr key={session.idEjecutivo ?? i} style={{ height: "auto" }}>
+                    <td
+                      className="px-1 py-0.5"
+                      style={{ whiteSpace: "nowrap" }}
+                    >
                       {session.nombreEjecutivo ||
                         session.ejecutivo ||
                         session.nombre ||
                         "---"}
                     </td>
                     <td
+                      className="px-1 py-0.5"
                       style={{
                         letterSpacing: "0.05em",
                         fontVariantNumeric: "tabular-nums",
@@ -357,7 +369,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                     >
                       {session.usuario || session.user || "---"}
                     </td>
-                    <td style={{ textAlign: "center" }}>
+                    <td className="px-1 py-0.5" style={{ textAlign: "center" }}>
                       {session.bloqueado !== undefined ? (
                         <>
                           <input
@@ -400,6 +412,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                       )}
                     </td>
                     <td
+                      className="px-1 py-0.5"
                       style={{ textAlign: "center", verticalAlign: "middle" }}
                     >
                       <div
@@ -411,7 +424,7 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                         }}
                       >
                         <button
-                          className="modal-btn modal-btn-outline text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-2"
+                          className="modal-btn modal-btn-outline text-[10px] px-1.5 py-0.5"
                           onClick={() => {
                             if (
                               !passwordReset.has(session.usuario) &&
@@ -445,13 +458,13 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                             bgColor="bg-jerarquia1"
                             textColor="text-jerarquia4"
                             borderColor="border-jerarquia2"
-                            size="size-6"
-                            borderWidth="border-2"
+                            size="size-5"
+                            borderWidth="border"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
+                              width="16"
+                              height="16"
                               viewBox="0 0 24 24"
                             >
                               <path
@@ -463,7 +476,10 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                         </button>
                       </div>
                     </td>
-                    <td style={{ textAlign: "center", whiteSpace: "nowrap" }}>
+                    <td
+                      className="px-1 py-0.5"
+                      style={{ textAlign: "center", whiteSpace: "nowrap" }}
+                    >
                       {session.sesionAbierta !== undefined ? (
                         <input
                           type="checkbox"
