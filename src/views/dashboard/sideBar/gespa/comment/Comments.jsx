@@ -24,7 +24,7 @@ const WALLET_OPTIONS = [
 
 // Componentes pequeños
 const ModalHeader = ({ onClose }) => (
-  <header className="bg-neutral-100 p-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-gray-200">
+  <header className="bg-[var(--color-surface-secondary)] p-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-[var(--color-border)]">
     <div className="block md:flex items-start justify-between w-2/4 gap-3">
       <div className="flex items-center gap-2 text-jerarquia3">
         <IconCircular>
@@ -35,7 +35,7 @@ const ModalHeader = ({ onClose }) => (
     </div>
     <button
       onClick={onClose}
-      className="text-jerarquia3 hover:bg-background-dashboard hover:text-red-600 text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+      className="text-jerarquia3 hover:bg-[var(--color-surface)] hover:text-red-600 text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors"
       aria-label="Cerrar modal"
     >
       &times;
@@ -56,9 +56,9 @@ const CheckboxGroup = ({ options, childrenBelow }) => (
           type="checkbox"
           checked={opt.checked}
           onChange={opt.onChange}
-          className="shrink-0 w-4 h-4 border-gray-300 rounded text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+          className="modal-checkbox"
         />
-        <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">
+        <span className="text-sm font-medium text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)] transition-colors">
           {opt.label}
         </span>
       </label>
@@ -75,11 +75,11 @@ const FloatingInput = ({ id, label, value, onChange, type = "text" }) => (
       value={value}
       onChange={onChange}
       placeholder={label}
-      className="peer px-5 pt-4 pb-1 block w-full bg-gray-100 border-2 border-gray-200 rounded-lg text-sm placeholder:text-transparent focus:outline-none focus:border-jerarquia2 focus:ring-jerarquia2 disabled:opacity-50"
+      className="peer px-5 pt-4 pb-1 block w-full bg-[var(--color-surface-secondary)] border-2 border-[var(--color-border)] text-[var(--color-text-primary)] rounded-lg text-sm placeholder:text-transparent focus:outline-none focus:border-jerarquia2 focus:ring-jerarquia2 disabled:opacity-50"
     />
     <label
       htmlFor={id}
-      className="absolute top-0 left-0 px-5 p-2 h-full text-sm truncate pointer-events-none transition ease-in-out duration-100 origin-[0_0] peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+      className="absolute top-0 left-0 px-5 p-2 h-full text-sm truncate pointer-events-none transition ease-in-out duration-100 origin-[0_0] peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-[var(--color-text-muted)] peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-[var(--color-text-muted)] text-[var(--color-text-muted)]"
     >
       {label}
     </label>
@@ -93,11 +93,11 @@ const FloatingTextarea = ({ id, label, value, onChange }) => (
       value={value}
       onChange={onChange}
       placeholder={label}
-      className="peer px-5 pt-5 pb-1 block w-full min-h-40 bg-gray-200 border-2 border-gray-200 transition-colors focus:pt-4 duration-200 focus:border-jerarquia3 rounded-lg text-sm placeholder:text-transparent"
+      className="peer px-5 pt-5 pb-1 block w-full min-h-40 bg-[var(--color-surface-secondary)] border-2 border-[var(--color-border)] text-[var(--color-text-primary)] transition-colors focus:pt-4 duration-200 focus:border-jerarquia3 rounded-lg text-sm placeholder:text-transparent"
     />
     <label
       htmlFor={id}
-      className="absolute top-0 left-0 px-5 p-2 h-full text-sm truncate pointer-events-none transition ease-in-out duration-100 peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+      className="absolute top-0 left-0 px-5 p-2 h-full text-sm truncate pointer-events-none transition ease-in-out duration-100 peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-[var(--color-text-muted)] peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-[var(--color-text-muted)] text-[var(--color-text-muted)]"
     >
       {label}
     </label>
@@ -112,7 +112,7 @@ const SituationSelectSection = ({
 }) => (
   <div className="w-1/2 space-y-3">
     {loading ? (
-      <div className="text-sm text-gray-500">Cargando situaciones...</div>
+      <div className="text-sm text-[var(--color-text-muted)]">Cargando situaciones...</div>
     ) : (
       <SelectWallet
         options={situationOptions}
@@ -132,8 +132,8 @@ const CommentForm = ({
   commentError,
   showTextarea = true,
 }) => (
-  <div className="bg-gray-50">
-    <div className="m-5">
+  <div className="bg-[var(--color-surface-secondary)]">
+    <div className="m-5 py-4">
       {showTextarea ? (
         <>
           <FloatingTextarea
@@ -148,7 +148,7 @@ const CommentForm = ({
         </>
       ) : null}
       {commentError ? (
-        <p className="mt-2 text-sm text-red-500">{commentError}</p>
+        <p className="mt-2 text-sm text-red-600 dark:text-red-400">{commentError}</p>
       ) : null}
     </div>
   </div>
@@ -228,12 +228,12 @@ const Comments = ({ onClose, onSaveComment }) => {
         ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]`}
+        } bg-[var(--color-surface)] rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader onClose={onClose} />
-        <div className="flex-1 overflow-y-auto bg-gray-50">
-          <section className="flex w-full justify-center items-start px-6 py-4 bg-white border-b border-gray-200">
+        <div className="flex-1 overflow-y-auto bg-[var(--color-surface-secondary)]">
+          <section className="flex w-full justify-center items-start px-6 py-4 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
             <CheckboxGroup
               options={checkboxOptions}
               childrenBelow={

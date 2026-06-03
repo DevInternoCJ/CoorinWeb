@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import FloatingInput from "../../../../components/Select/FloatingInput";
 import { darkListV2 } from "../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
@@ -175,82 +176,89 @@ const DarkListContent = () => {
             <div className="w-full mb-4">
               {/* md: fila con radio buttons distribuidos uniformemente */}
               <div className="hidden md:flex w-full flex-row justify-between items-center">
-                <label className="flex-1 flex justify-start items-center gap-1">
+                <label className="flex-1 flex justify-start items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="tipo"
                     value="telefono"
                     checked={tipo === "telefono"}
                     onChange={() => handleTipoChange("telefono")}
-                    className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                    className="modal-radio"
                   />
-                  <span className="text-sm text-gray-700">Teléfono</span>
+                  <span className="text-sm text-[var(--color-text-secondary)]">Teléfono</span>
                 </label>
-                <label className="flex-1 flex justify-center items-center gap-1">
+                <label className="flex-1 flex justify-center items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="tipo"
                     value="cuenta"
                     checked={tipo === "cuenta"}
                     onChange={() => handleTipoChange("cuenta")}
-                    className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                    className="modal-radio"
                   />
-                  <span className="text-sm text-gray-700">Cuenta</span>
+                  <span className="text-sm text-[var(--color-text-secondary)]">Cuenta</span>
                 </label>
-                <label className="flex-1 flex justify-end items-center gap-1">
+                <label className="flex-1 flex justify-end items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="tipo"
                     value="correo"
                     checked={tipo === "correo"}
                     onChange={() => handleTipoChange("correo")}
-                    className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                    className="modal-radio"
                   />
-                  <span className="text-sm text-gray-700">Correo</span>
+                  <span className="text-sm text-[var(--color-text-secondary)]">Correo</span>
                 </label>
               </div>
               {/* sm: fila expandida al ancho completo, siempre horizontal */}
               <div className="flex md:hidden w-full flex-row gap-4 justify-between items-center">
-                <label className="flex-1 flex justify-start items-center gap-1">
+                <label className="flex-1 flex justify-start items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="tipo"
                     value="telefono"
                     checked={tipo === "telefono"}
                     onChange={() => handleTipoChange("telefono")}
-                    className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                    className="modal-radio"
                   />
-                  <span className="text-sm text-gray-700">Teléfono</span>
+                  <span className="text-sm text-[var(--color-text-secondary)]">Teléfono</span>
                 </label>
-                <label className="flex-1 flex justify-center items-center gap-1">
+                <label className="flex-1 flex justify-center items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="tipo"
                     value="cuenta"
                     checked={tipo === "cuenta"}
                     onChange={() => handleTipoChange("cuenta")}
-                    className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                    className="modal-radio"
                   />
-                  <span className="text-sm text-gray-700">Cuenta</span>
+                  <span className="text-sm text-[var(--color-text-secondary)]">Cuenta</span>
                 </label>
-                <label className="flex-1 flex justify-end items-center gap-1">
+                <label className="flex-1 flex justify-end items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="tipo"
                     value="correo"
                     checked={tipo === "correo"}
                     onChange={() => handleTipoChange("correo")}
-                    className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                    className="modal-radio"
                   />
-                  <span className="text-sm text-gray-700">Correo</span>
+                  <span className="text-sm text-[var(--color-text-secondary)]">Correo</span>
                 </label>
               </div>
             </div>
             {/* Input: segundo row */}
             <div className="w-full flex justify-center items-center mb-4">
-              <input
-                className="block w-full max-w-xl bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
+              <FloatingInput
                 type="text"
+                id="darklist-input-md-sm"
+                label={
+                  tipo === "telefono"
+                    ? "Teléfono"
+                    : tipo === "cuenta"
+                      ? "Cuenta"
+                      : "Correo"
+                }
                 value={valor}
                 onChange={(e) => {
                   if (tipo === "telefono") {
@@ -277,13 +285,6 @@ const DarkListContent = () => {
                     setValor(soloNumeros);
                   }
                 }}
-                placeholder={
-                  tipo === "telefono"
-                    ? "Teléfono"
-                    : tipo === "cuenta"
-                      ? "Cuenta"
-                      : "Correo"
-                }
                 disabled={loading}
                 maxLength={
                   tipo === "telefono" ? 15 : tipo === "cuenta" ? 16 : undefined
@@ -305,9 +306,16 @@ const DarkListContent = () => {
           <div className="hidden lg:flex flex-row justify-center items-center gap-4 w-full">
             {/* Input */}
             <div className="flex-[2] min-w-0">
-              <input
-                className="block w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
+              <FloatingInput
                 type="text"
+                id="darklist-input-lg"
+                label={
+                  tipo === "telefono"
+                    ? "Teléfono"
+                    : tipo === "cuenta"
+                      ? "Cuenta"
+                      : "Correo"
+                }
                 value={valor}
                 onChange={(e) => {
                   if (tipo === "telefono") {
@@ -334,13 +342,6 @@ const DarkListContent = () => {
                     setValor(soloNumeros);
                   }
                 }}
-                placeholder={
-                  tipo === "telefono"
-                    ? "Teléfono"
-                    : tipo === "cuenta"
-                      ? "Cuenta"
-                      : "Correo"
-                }
                 disabled={loading}
                 maxLength={
                   tipo === "telefono" ? 15 : tipo === "cuenta" ? 16 : undefined
@@ -349,38 +350,38 @@ const DarkListContent = () => {
             </div>
             {/* Radio buttons */}
             <div className="flex flex-row gap-4 flex-1 min-w-0 justify-end">
-              <label className="inline-flex items-center gap-1">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="tipo"
                   value="telefono"
                   checked={tipo === "telefono"}
                   onChange={() => handleTipoChange("telefono")}
-                  className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                  className="modal-radio"
                 />
-                <span className="text-sm text-gray-700">Teléfono</span>
+                <span className="text-sm text-[var(--color-text-secondary)]">Teléfono</span>
               </label>
-              <label className="inline-flex items-center gap-1">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="tipo"
                   value="cuenta"
                   checked={tipo === "cuenta"}
                   onChange={() => handleTipoChange("cuenta")}
-                  className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                  className="modal-radio"
                 />
-                <span className="text-sm text-gray-700">Cuenta</span>
+                <span className="text-sm text-[var(--color-text-secondary)]">Cuenta</span>
               </label>
-              <label className="inline-flex items-center gap-1">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="tipo"
                   value="correo"
                   checked={tipo === "correo"}
                   onChange={() => handleTipoChange("correo")}
-                  className="h-4 w-4 text-jerarquia2 focus:ring-jerarquia2"
+                  className="modal-radio"
                 />
-                <span className="text-sm text-gray-700">Correo</span>
+                <span className="text-sm text-[var(--color-text-secondary)]">Correo</span>
               </label>
             </div>
             {/* Botón buscar */}
@@ -396,18 +397,18 @@ const DarkListContent = () => {
           </div>
         </div>
       </form>
-      <div className="w-full h-0.5 bg-gray-200 rounded" />
+      <div className="w-full h-0.5 bg-[var(--color-border)] rounded my-4" />
 
       {(resultado || error) && (
         <div className="w-full flex flex-col items-center">
           {resultado ? (
             <div
-              className={`text-sm font-semibold ${resultado.enListaNegra ? "text-red-600" : "text-emerald-600"}`}
+              className={`text-sm font-semibold ${resultado.enListaNegra ? "text-[var(--color-btn-danger-text,#dc2626)]" : "text-emerald-600"}`}
             >
               {resultado.msg}
             </div>
           ) : (
-            <div className="text-sm text-red-600">{error}</div>
+            <div className="text-sm text-[var(--color-btn-danger-text,#dc2626)]">{error}</div>
           )}
         </div>
       )}

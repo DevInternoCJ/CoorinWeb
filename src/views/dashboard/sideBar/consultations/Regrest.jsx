@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import FloatingSelect from "../../../../components/Select/FloatingSelect";
+import FloatingInput from "../../../../components/Select/FloatingInput";
 import {
   getRegrest,
   infoEjecutivo,
@@ -148,9 +149,10 @@ const RegrestContent = ({ growModal, isExpanded }) => {
           </div>
           {/* Input cuenta adaptado de DarkList.jsx */}
           <div className="mb-4 lg:mb-0 flex-1 lg:flex-[5] xl:flex-[5] 2xl:flex-[5] min-w-0 flex items-center justify-center">
-            <input
-              className="block w-full lg:max-w-xl xl:max-w-xl 2xl:max-w-xl bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2"
+            <FloatingInput
               type="text"
+              id="cuenta-input"
+              label="Ingrese nú. de cuenta"
               value={valor}
               onChange={(e) =>
                 setValor(e.target.value.replace(/\D/g, "").slice(0, 16))
@@ -161,7 +163,6 @@ const RegrestContent = ({ growModal, isExpanded }) => {
                 const soloNumeros = pasted.replace(/\D/g, "").slice(0, 16);
                 setValor(soloNumeros);
               }}
-              placeholder="Ingrese nú. de cuenta"
               disabled={loading}
               maxLength={16}
             />
@@ -193,22 +194,21 @@ const RegrestContent = ({ growModal, isExpanded }) => {
                   maxWidth: 1100,
                   minHeight: 480,
                   maxHeight: "68vh",
-                  background: "#fff",
+                  background: "var(--color-surface)",
                   borderRadius: 8,
-                  border: "1px solid #e0e0e0",
+                  border: "1px solid var(--color-border)",
                 }
               : { maxHeight: 480, minHeight: 480 }
           }
         >
           <table className="modal-table w-full">
             <thead>
-              <tr className="bg-gray-100">
+              <tr>
                 <th
                   style={{
                     position: "sticky",
                     top: 0,
-                    background: "var(--color-jerarquia4)",
-                    color: "#fff",
+                    background: "var(--color-surface-secondary)",
                     zIndex: 2,
                   }}
                 >
@@ -218,8 +218,7 @@ const RegrestContent = ({ growModal, isExpanded }) => {
                   style={{
                     position: "sticky",
                     top: 0,
-                    background: "var(--color-jerarquia4)",
-                    color: "#fff",
+                    background: "var(--color-surface-secondary)",
                     zIndex: 2,
                   }}
                 >
@@ -229,8 +228,7 @@ const RegrestContent = ({ growModal, isExpanded }) => {
                   style={{
                     position: "sticky",
                     top: 0,
-                    background: "var(--color-jerarquia4)",
-                    color: "#fff",
+                    background: "var(--color-surface-secondary)",
                     zIndex: 2,
                   }}
                 >
@@ -240,8 +238,7 @@ const RegrestContent = ({ growModal, isExpanded }) => {
                   style={{
                     position: "sticky",
                     top: 0,
-                    background: "var(--color-jerarquia4)",
-                    color: "#fff",
+                    background: "var(--color-surface-secondary)",
                     zIndex: 2,
                   }}
                 >
@@ -249,7 +246,7 @@ const RegrestContent = ({ growModal, isExpanded }) => {
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-[var(--color-surface)] text-[var(--color-text-primary)]">
               {resultados.map((item, idx) => (
                 <tr key={idx}>
                   <td>

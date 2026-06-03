@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, lazy, Suspense } from "react";
 import ModalBase from "../../../board/ModalBase";
 import IconCircular from "../../../../../components/Iconos/IconCircular";
 import {
@@ -10,12 +10,14 @@ import {
   IconStatement,
   IconBranchOffice
 } from "./IconsProcessGespa";
-import Definition from "./process/Definition";
-import Repentance from "./process/Repentance";
-import AccountBloking from "./process/AccountBlocking";
-import OnlineCharges from "./process/OnlineCharges";
-import AccountStatements from "./process/AccountStatements";
-import BranchOffice from "./process/BranchOffice";
+
+const Definition = lazy(() => import("./process/Definition"));
+const Repentance = lazy(() => import("./process/Repentance"));
+const AccountBloking = lazy(() => import("./process/AccountBlocking"));
+const OnlineCharges = lazy(() => import("./process/OnlineCharges"));
+const AccountStatements = lazy(() => import("./process/AccountStatements"));
+const BranchOffice = lazy(() => import("./process/BranchOffice"));
+
 import { IconWarning } from "../../../board/executives/scripts/IconScripts";
 
 const ProcessGespa = ({ onClose }) => {
@@ -86,25 +88,25 @@ const ProcessGespa = ({ onClose }) => {
         ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-white rounded-2xl shadow-2xl w-full max-w-6xl overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]`}
+        } bg-[var(--color-surface)] rounded-2xl shadow-2xl w-full max-w-6xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className=" bg-neutral-100 px-3 pt-3 w-full flex pb-3 gap-5 justify-between items-start border-b border-gray-200">
+        <div className=" bg-[var(--color-surface-secondary)] px-3 pt-3 w-full flex pb-3 gap-5 justify-between items-start border-b border-[var(--color-border)]">
           <div className="block md:flex items-start justify-between w-1/3 gap-3">
             <div className="flex items-center gap-2 text-jerarquia3">
               <IconCircular size="size-10">
                 <IconProcess className="size-6" />
               </IconCircular>
               <h2 className="text-xl font-bold text-jerarquia3">
-                <span className="text-gray-500">Procesos {">"} </span>Gespa
+                <span className="text-[var(--color-text-muted)]">Procesos {">"} </span>Gespa
               </h2>
             </div>
           </div>
           <div className="w-1/3 right-0 flex justify-end">
             <button
               onClick={onClose}
-              className="text-jerarquia3 hover:bg-background-dashboard hover:text-red-600 text-4xl items-center rounded-full flex w-8 h-8 transition-colors"
+              className="text-jerarquia3 hover:bg-[var(--color-surface)] hover:text-red-600 text-4xl items-center rounded-full flex w-8 h-8 transition-colors"
             >
               <span className="p-1.5"> &times;</span>
             </button>
@@ -114,15 +116,15 @@ const ProcessGespa = ({ onClose }) => {
         {/* Tabs Container */}
         <div className="flex items-start gap-8 w-full pr-5">
           {/* Sidebar Tabs */}
-          <ul className="space-y-2 min-w-[230px] pl-4 bg-gray-100 inline-block py-3">
+          <ul className="space-y-2 min-w-[230px] pl-4 bg-[var(--color-surface-secondary)] inline-block py-3">
             {tabs.map((tab) => (
               <li
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex gap-2 items-center text-sm cursor-pointer py-4 px-6 transition-all ${
                   activeTab === tab.id
-                    ? "text-jerarquia3 bg-white rounded-l-xl font-semibold"
-                    : "text-slate-900 font-medium hover:text-jerarquia2"
+                    ? "text-jerarquia3 bg-[var(--color-surface)] rounded-l-xl font-semibold"
+                    : "text-[var(--color-text-secondary)] font-medium hover:text-jerarquia2"
                 }`}
               >
                 {tab.icon}
@@ -133,38 +135,40 @@ const ProcessGespa = ({ onClose }) => {
 
           {/* Content Area */}
           <div className="flex-1 mt-8 pr-4 w-full">
-            {tabs.map((tab) => (
-              <div
-                key={tab.id}
-                className={`max-w-2xl ${
-                  activeTab === tab.id ? "block" : "hidden"
-                }`}
-              >
-                {/* Mostrar SearchBar SOLO en el tab Definición */}
-                {tab.id === "definicion" && (
-                  <Definition
-                    cartera={cartera}
-                    onCarteraChange={setCartera}
-                    tipo={tipo}
-                    onTipoChange={setTipo}
-                    searchValue={search}
-                    onSearchChange={setSearch}
-                    onSearchClick={handleBuscar}
-                  />
-                )}
-                {tab.id === "arrepentimientos" && <Repentance />}
-                {tab.id === "bloqueo-cuentas" && <AccountBloking />}
-                {tab.id === "cargos-en-linea" && <OnlineCharges />}
-                {tab.id === "estados-cuenta" && <AccountStatements />}
-                {tab.id === "sucursales" && (<BranchOffice />)}
-              </div>
-            ))}
+            <Suspense fallback={<div className="text-sm text-[var(--color-text-muted)]">Cargando proceso...</div>}>
+              {tabs.map((tab) => (
+                <div
+                  key={tab.id}
+                  className={`max-w-2xl ${
+                    activeTab === tab.id ? "block" : "hidden"
+                  }`}
+                >
+                  {/* Mostrar SearchBar SOLO en el tab Definición */}
+                  {tab.id === "definicion" && (
+                    <Definition
+                      cartera={cartera}
+                      onCarteraChange={setCartera}
+                      tipo={tipo}
+                      onTipoChange={setTipo}
+                      searchValue={search}
+                      onSearchChange={setSearch}
+                      onSearchClick={handleBuscar}
+                    />
+                  )}
+                  {tab.id === "arrepentimientos" && <Repentance />}
+                  {tab.id === "bloqueo-cuentas" && <AccountBloking />}
+                  {tab.id === "cargos-en-linea" && <OnlineCharges />}
+                  {tab.id === "estados-cuenta" && <AccountStatements />}
+                  {tab.id === "sucursales" && (<BranchOffice />)}
+                </div>
+              ))}
+            </Suspense>
 
             {/* Si no hay pestaña seleccionada, mostrar mensaje */}
             {!isTabSelected && (
-                <div className="flex flex-col items-center w-full justify-center text-center text-gray-500 bg-gray-100 rounded-lg py-20">
+                <div className="flex flex-col items-center w-full justify-center text-center text-[var(--color-text-muted)] bg-[var(--color-surface-secondary)] rounded-lg py-20">
                               <IconWarning className="size-8" />
-                              <p className="text-sm text-gray-400 mt-1">
+                              <p className="text-sm text-[var(--color-text-muted)] mt-1">
                                 Seleccione un proceso.
                               </p>
                 </div>

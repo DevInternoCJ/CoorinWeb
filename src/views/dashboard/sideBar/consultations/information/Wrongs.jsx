@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import FloatingSelect from "../../../../../components/Select/FloatingSelect";
+import FloatingInput from "../../../../../components/Select/FloatingInput";
 import { toast } from "sonner";
 import {
   getCatalogoValueCard,
@@ -171,11 +173,11 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
           <div className="w-full max-w-4xl">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
               {/* Desde */}
-              <div className="relative w-full min-w-0">
-                <input
+              <div className="w-full">
+                <FloatingInput
                   type="date"
                   id="fecha-desde-wrongs"
-                  className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  label="Desde"
                   value={desde}
                   onChange={(e) => setDesde(e.target.value)}
                   min="2016-01-01"
@@ -184,55 +186,35 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                     d.setDate(d.getDate() - 1);
                     return d.toISOString().slice(0, 10);
                   })()}
-                  placeholder=" "
                 />
-                <label
-                  htmlFor="fecha-desde-wrongs"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                >
-                  Desde
-                </label>
               </div>
               {/* Hasta */}
-              <div className="relative w-full min-w-0">
-                <input
+              <div className="w-full">
+                <FloatingInput
                   type="date"
                   id="fecha-hasta-wrongs"
-                  className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  label="Hasta"
                   value={hasta}
                   onChange={(e) => setHasta(e.target.value)}
                   min="2016-01-01"
                   max={new Date().toISOString().slice(0, 10)}
-                  placeholder=" "
                 />
-                <label
-                  htmlFor="fecha-hasta-wrongs"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                >
-                  Hasta
-                </label>
               </div>
               {/* Dato Erróneo */}
-              <div className="relative w-full">
-                <select
-                  className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+              <div className="w-full">
+                <FloatingSelect
+                  id="datos-erroneos-select"
+                  label="Datos Erróneos"
                   value={datoErroneo}
                   onChange={(e) => setDatoErroneo(e.target.value)}
-                  id="datos-erroneos-select"
-                >
-                  <option value="">--Todos--</option>
-                  {catalogoOptions.map((item) => (
-                    <option key={item.idValor} value={item.idValor}>
-                      {item.valor}
-                    </option>
-                  ))}
-                </select>
-                <label
-                  htmlFor="datos-erroneos-select"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                >
-                  Datos Erróneos
-                </label>
+                  options={[
+                    { value: "", label: "--Todos--" },
+                    ...catalogoOptions.map((item) => ({
+                      value: String(item.idValor),
+                      label: item.valor,
+                    })),
+                  ]}
+                />
               </div>
               {/* Buscar */}
               <div className="flex justify-center">
@@ -254,67 +236,47 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
           style={{ flex: 1, minHeight: 0 }}
         >
           {/* Grid responsivo: lg=4cols | md=2cols x 2filas | sm=1col apilado */}
-          <div className="w-full max-w-4xl">
+          <div className="w-full max-w-4xl mb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
               {/* Desde */}
-              <div className="relative w-full min-w-0">
-                <input
+              <div className="w-full">
+                <FloatingInput
                   type="date"
                   id="fecha-desde-wrongs-ext"
-                  className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  label="Desde"
                   value={desde}
                   onChange={(e) => setDesde(e.target.value)}
                   min="2016-01-01"
                   max={new Date().toISOString().slice(0, 10)}
-                  placeholder=" "
                 />
-                <label
-                  htmlFor="fecha-desde-wrongs-ext"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                >
-                  Desde
-                </label>
               </div>
               {/* Hasta */}
-              <div className="relative w-full min-w-0">
-                <input
+              <div className="w-full">
+                <FloatingInput
                   type="date"
                   id="fecha-hasta-wrongs-ext"
-                  className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  label="Hasta"
                   value={hasta}
                   onChange={(e) => setHasta(e.target.value)}
                   min="2016-01-01"
                   max={new Date().toISOString().slice(0, 10)}
-                  placeholder=" "
                 />
-                <label
-                  htmlFor="fecha-hasta-wrongs-ext"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                >
-                  Hasta
-                </label>
               </div>
               {/* Dato Erróneo */}
-              <div className="relative w-full">
-                <select
-                  className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+              <div className="w-full">
+                <FloatingSelect
+                  id="datos-erroneos-select-ext"
+                  label="Datos Erróneos"
                   value={datoErroneo}
                   onChange={(e) => setDatoErroneo(e.target.value)}
-                  id="datos-erroneos-select-ext"
-                >
-                  <option value="">--Todos--</option>
-                  {catalogoOptions.map((item) => (
-                    <option key={item.idValor} value={item.idValor}>
-                      {item.valor}
-                    </option>
-                  ))}
-                </select>
-                <label
-                  htmlFor="datos-erroneos-select-ext"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                >
-                  Datos Erróneos
-                </label>
+                  options={[
+                    { value: "", label: "--Todos--" },
+                    ...catalogoOptions.map((item) => ({
+                      value: String(item.idValor),
+                      label: item.valor,
+                    })),
+                  ]}
+                />
               </div>
               {/* Buscar */}
               <div className="flex justify-center">
@@ -330,16 +292,14 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
             </div>
           </div>
           <div
+            className="w-full border border-[var(--color-border)] bg-[var(--color-surface)]"
             style={{
-              width: "100%",
               maxWidth: 1100,
               flex: "1 1 auto",
               minHeight: 0,
               marginTop: 0,
               marginBottom: 0,
               borderRadius: 8,
-              border: "1px solid #e0e0e0",
-              background: "#fff",
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
@@ -366,7 +326,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                   }}
                 >
                   <thead
-                    style={{ position: "sticky", top: 0, background: "#fff" }}
+                    style={{ position: "sticky", top: 0, background: "var(--color-surface-secondary)" }}
                   >
                     <tr>
                       <th
@@ -443,7 +403,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                       </th>
                     </tr>
                   </thead>
-                  <tbody style={{ background: "#b6d6f6" }}>
+                  <tbody className="bg-[var(--color-surface)] text-[var(--color-text-primary)]">
                     {loadingTabla ? (
                       <tr>
                         <td
@@ -466,15 +426,15 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                             <div
                               className="animate-spin"
                               style={{
-                                border: "4px solid #e0e0e0",
-                                borderTop: "4px solid #3b82f6",
+                                border: "4px solid var(--color-border)",
+                                borderTop: "4px solid var(--color-jerarquia2)",
                                 borderRadius: "50%",
                                 width: 48,
                                 height: 48,
                                 marginBottom: 12,
                               }}
                             ></div>
-                            <span className="text-gray-500">Cargando...</span>
+                            <span className="text-[var(--color-text-muted)]">Cargando...</span>
                           </div>
                         </td>
                       </tr>
@@ -497,7 +457,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                             }}
                           >
                             <span
-                              className="text-gray-500"
+                              className="text-[var(--color-text-muted)]"
                               style={{ fontSize: 18 }}
                             >
                               Aún no hay registros

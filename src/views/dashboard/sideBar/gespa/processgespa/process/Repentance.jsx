@@ -83,7 +83,7 @@ const Repentance = ({
               type="text"
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full bg-gray-200 h-8 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mr-4"
+              className="w-full bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] h-8 px-3 rounded-lg border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-jerarquia2)] mr-4"
             />
             <SaveButton onClick={onSearchClick} className="btn-success">
               Buscar

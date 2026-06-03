@@ -38,7 +38,7 @@ const Logout = ({ onLogout, expandSidebar }) => {
       <button
         id="hs-sidebar-footer-example-with-dropdown"
         type="button"
-        className="w-full inline-flex shrink-0 items-center gap-x-2 p-2 text-start text-sm text-gray-800 rounded-md hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
+        className="w-full inline-flex shrink-0 items-center gap-x-2 p-2 text-start text-sm text-[var(--color-text-secondary)] rounded-md hover:bg-[var(--color-surface-secondary)] focus:outline-hidden focus:bg-[var(--color-surface-secondary)]"
         aria-haspopup="menu"
         aria-expanded="false"
         aria-label="Dropdown"
@@ -49,11 +49,11 @@ const Logout = ({ onLogout, expandSidebar }) => {
           alt={`${nombreEjecutivo} Avatar`}
           src={CoorinGrenn}
         />
-        <span className="hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden whitespace-nowrap">
+        <span className="truncate hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden whitespace-nowrap">
           {nombreEjecutivo}
         </span>
         <svg
-          className="shrink-0 size-3.5 ms-auto hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden"
+          className="shrink-0 size-3.5 ms-auto hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden text-[var(--color-text-muted)]"
           xmlns="http://www.w3.org/2000/svg"
           width="24"
           height="24"
@@ -69,17 +69,17 @@ const Logout = ({ onLogout, expandSidebar }) => {
         </svg>
       </button>
       <div
-        className="hs-dropdown-menu hs-dropdown-open:opacity-100 w-60 transition-[opacity,margin] duration opacity-0 hidden z-20 bg-white border border-gray-200 rounded-lg shadow-lg hs-overlay-minified:hidden"
+        className="hs-dropdown-menu hs-dropdown-open:opacity-100 w-60 transition-[opacity,margin] duration opacity-0 hidden z-20 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg hs-overlay-minified:hidden"
         role="menu"
         aria-orientation="vertical"
         aria-labelledby="hs-sidebar-footer-example-with-dropdown"
       >
         <div className="p-1">
-          <div className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100">
-            ID: {idEjecutivo}
+          <div className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-[var(--color-text-secondary)] disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-[var(--color-surface-secondary)]">
+            No. Empleado: {idEjecutivo}
           </div>
           <a
-            className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-50 hover:text-red-700 focus:outline-hidden focus:bg-red-50"
+            className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-800 hover:text-red-900  dark:hover:text-red-300 focus:outline-hidden focus:bg-red-50 dark:focus:bg-red-950/30"
             href="#"
             onClick={(e) => {
               e.preventDefault();

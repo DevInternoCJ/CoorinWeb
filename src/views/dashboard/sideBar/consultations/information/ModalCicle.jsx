@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 
-// Importar componentes de información
-import OffersContent from "./Offers";
-import PaymentsContent from "./Payments";
-import ReportingPaymentsContent from "./ReportingPayments";
-import SearchesContent from "./Searches";
-import WrongsContent from "./Wrongs";
-import DarkListContent from "../DarkList";
-import RegrestContent from "../Regrest";
-import AddressesContent from "./Addresses";
-import EmailsContent from "./Emails";
-import CommentsContent from "./Comments";
-import VGP from "./VGP";
+// Importar componentes de información con lazy loading
+const OffersContent = lazy(() => import("./Offers"));
+const PaymentsContent = lazy(() => import("./Payments"));
+const ReportingPaymentsContent = lazy(() => import("./ReportingPayments"));
+const SearchesContent = lazy(() => import("./Searches"));
+const WrongsContent = lazy(() => import("./Wrongs"));
+const DarkListContent = lazy(() => import("../DarkList"));
+const RegrestContent = lazy(() => import("../Regrest"));
+const AddressesContent = lazy(() => import("./Addresses"));
+const EmailsContent = lazy(() => import("./Emails"));
+const CommentsContent = lazy(() => import("./Comments"));
+const VGP = lazy(() => import("./VGP"));
 
 // Identificadores para los componentes
 const COMPONENT_KEYS = {
@@ -224,17 +224,14 @@ export const CarouselNavigation = ({
   componentIcons = COMPONENT_ICONS,
 }) => {
   return (
-    <div className="flex items-center gap-2">
-      <span style={{ color: "var(--color-jerarquia3)" }}>
+    <div className="flex items-center gap-2 text-jerarquia3">
+      <span className="flex-shrink-0">
         {componentIcons[currentName]}
       </span>
-      <span
-        className="text-sm font-semibold"
-        style={{ color: "var(--color-jerarquia3)" }}
-      >
+      <span className="text-sm font-semibold">
         {currentName}
       </span>
-      <span className="text-xs text-gray-500">
+      <span className="text-xs text-[var(--color-text-muted)]">
         ({currentIndex + 1} / {tabsList.length})
       </span>
     </div>
@@ -379,22 +376,24 @@ const ModalCicle = ({
   };
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col h-full w-full bg-surface">
       {/* Contenido del tab activo */}
       <div className="flex-1 overflow-auto">
-        {tabsList.map((tab, index) => (
-          <div
-            key={tab.key}
-            id={`tab-info-content-${index}`}
-            className={activeTab === index ? "" : "hidden"}
-            role="tabpanel"
-            aria-labelledby={`tab-info-item-${index}`}
-          >
-            <div key={`component-${index}-${componentKey}`}>
-              {activeTab === index && renderTabContent(tab.key)}
+        <Suspense fallback={<div className="text-center p-5 text-sm text-[var(--color-text-muted)]">Cargando información...</div>}>
+          {tabsList.map((tab, index) => (
+            <div
+              key={tab.key}
+              id={`tab-info-content-${index}`}
+              className={activeTab === index ? "" : "hidden"}
+              role="tabpanel"
+              aria-labelledby={`tab-info-item-${index}`}
+            >
+              <div key={`component-${index}-${componentKey}`}>
+                {activeTab === index && renderTabContent(tab.key)}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </Suspense>
       </div>
     </div>
   );

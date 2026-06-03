@@ -31,7 +31,7 @@ const OnlineCharges = () => {
               {actionOptions.map((option) => (
                 <label 
                   key={option.value} 
-                  className="flex items-center gap-1 cursor-pointer"
+                  className="flex items-center gap-1.5 cursor-pointer"
                 >
                   <input
                     type="radio"
@@ -39,9 +39,11 @@ const OnlineCharges = () => {
                     value={option.value}
                     checked={action === option.value}
                     onChange={() => setAction(option.value)}
-                    className="cursor-pointer"
+                    className="modal-radio"
                   />
-                  {option.label}
+                  <span className="text-sm font-medium text-[var(--color-text-secondary)]">
+                    {option.label}
+                  </span>
                 </label>
               ))}
             </div>
@@ -55,7 +57,7 @@ const OnlineCharges = () => {
                 {[...Array(8)].map((_, i) => (
                   <div
                     key={i}
-                    className="absolute w-2 h-2 bg-blue-600 rounded-full"
+                    className="absolute w-2 h-2 bg-[var(--color-jerarquia2)] rounded-full"
                     style={{
                       top: '50%',
                       left: '50%',

@@ -51,20 +51,22 @@ const SearchForm = ({
         {radioConfig && (
           <div className="flex flex-col gap-1">
             {radioConfig.label && (
-              <span className="text-xs text-gray-500 font-medium">
+              <span className="text-xs text-[var(--color-text-muted)] font-medium">
                 {radioConfig.label}
               </span>
             )}
             <div className="flex gap-6">
               {radioConfig.options.map((option) => (
-                <label key={option.value} className="flex items-center gap-1 cursor-pointer">
+                <label key={option.value} className="flex items-center gap-1.5 cursor-pointer">
                   <input
                     type="radio"
                     checked={radioConfig.value === option.value}
                     onChange={() => radioConfig.onChange(option.value)}
-                    className="cursor-pointer"
+                    className="modal-radio"
                   />
-                  {option.label}
+                  <span className="text-sm font-medium text-[var(--color-text-secondary)]">
+                    {option.label}
+                  </span>
                 </label>
               ))}
             </div>
@@ -79,7 +81,7 @@ const SearchForm = ({
           value={searchConfig.value}
           onChange={(e) => searchConfig.onChange(e.target.value)}
           placeholder={searchConfig.placeholder}
-          className="flex-1 bg-gray-200 h-8 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] h-8 px-3 rounded-lg border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-jerarquia2)]"
         />
         <SaveButton
           onClick={buttonConfig.onClick}

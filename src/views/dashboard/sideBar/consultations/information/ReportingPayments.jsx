@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import FloatingSelect from "../../../../../components/Select/FloatingSelect";
+import FloatingInput from "../../../../../components/Select/FloatingInput";
 import { Toaster, toast } from "sonner";
 import {
   infoEjecutivo,
@@ -259,78 +261,44 @@ const ReportingPaymentsContent = ({
             <div className="w-full">
               <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 items-center">
                 {/* Desde */}
-                <div className="relative w-full min-w-0">
-                  <input
+                <div className="w-full">
+                  <FloatingInput
                     type="date"
                     id="fecha-desde-reporting"
-                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                    label="Desde"
                     value={desde}
-                    onChange={(e) => setDesde(e.target.value)}
                     min="2016-01-01"
                     max={new Date().toISOString().slice(0, 10)}
-                    placeholder=" "
+                    onChange={(e) => setDesde(e.target.value)}
                   />
-                  <label
-                    htmlFor="fecha-desde-reporting"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    Desde
-                  </label>
                 </div>
                 {/* Hasta */}
-                <div className="relative w-full min-w-0">
-                  <input
+                <div className="w-full">
+                  <FloatingInput
                     type="date"
                     id="fecha-hasta-reporting"
-                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                    label="Hasta"
                     value={hasta}
-                    onChange={(e) => setHasta(e.target.value)}
                     min="2016-01-01"
                     max={new Date().toISOString().slice(0, 10)}
-                    placeholder=" "
+                    onChange={(e) => setHasta(e.target.value)}
                   />
-                  <label
-                    htmlFor="fecha-hasta-reporting"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    Hasta
-                  </label>
                 </div>
                 {/* Consulta */}
-                <div className="relative w-full">
-                  <select
-                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                <div className="w-full">
+                  <FloatingSelect
+                    id="consulta-select-reporting"
+                    label="Consulta"
                     value={consulta}
                     onChange={(e) => setConsulta(e.target.value)}
-                    id="consulta-select-reporting"
-                    disabled={loadingConsultas || errorConsultas}
-                  >
-                    <option value="0">- Todas -</option>
-                    {consultasOptions.map((item) => (
-                      <option
-                        key={item.idConsulta || item.nombreConsulta}
-                        value={item.idConsulta}
-                      >
-                        {item.nombreConsulta}
-                      </option>
-                    ))}
-                  </select>
-                  <label
-                    htmlFor="consulta-select-reporting"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                  >
-                    Consulta
-                  </label>
-                  {loadingConsultas && (
-                    <span className="text-xs text-gray-500 absolute right-2 top-2">
-                      Cargando...
-                    </span>
-                  )}
-                  {errorConsultas && (
-                    <span className="text-xs text-red-500 absolute right-2 top-2">
-                      {errorConsultas}
-                    </span>
-                  )}
+                    options={[
+                      { value: "0", label: "- Todas -" },
+                      ...consultasOptions.map((item) => ({ value: String(item.idConsulta), label: item.nombreConsulta }))
+                    ]}
+                    disabled={!!(loadingConsultas || errorConsultas)}
+                  />
+                  {loadingConsultas && <span className="text-xs text-[var(--color-text-muted)] block mt-0.5">Cargando...</span>}
+                  {errorConsultas && <span className="text-xs text-[var(--color-btn-danger-text,#b91c1c)] block mt-0.5">{errorConsultas}</span>}
                 </div>
                 {/* Botón Buscar */}
                 <div className="flex justify-center">
@@ -365,68 +333,42 @@ const ReportingPaymentsContent = ({
             <div className="w-full max-w-4xl mb-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 items-center">
                 {/* Desde */}
-                <div className="relative w-full min-w-0">
-                  <input
+                <div className="w-full">
+                  <FloatingInput
                     type="date"
                     id="fecha-desde-reporting-ext"
-                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                    label="Desde"
                     value={desde}
-                    onChange={(e) => setDesde(e.target.value)}
                     min="2016-01-01"
                     max={new Date().toISOString().slice(0, 10)}
-                    placeholder=" "
+                    onChange={(e) => setDesde(e.target.value)}
                   />
-                  <label
-                    htmlFor="fecha-desde-reporting-ext"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    Desde
-                  </label>
                 </div>
                 {/* Hasta */}
-                <div className="relative w-full min-w-0">
-                  <input
+                <div className="w-full">
+                  <FloatingInput
                     type="date"
                     id="fecha-hasta-reporting-ext"
-                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                    label="Hasta"
                     value={hasta}
-                    onChange={(e) => setHasta(e.target.value)}
                     min="2016-01-01"
                     max={new Date().toISOString().slice(0, 10)}
-                    placeholder=" "
+                    onChange={(e) => setHasta(e.target.value)}
                   />
-                  <label
-                    htmlFor="fecha-hasta-reporting-ext"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                  >
-                    Hasta
-                  </label>
                 </div>
                 {/* Consulta */}
-                <div className="relative w-full">
-                  <select
-                    className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                <div className="w-full">
+                  <FloatingSelect
+                    id="consulta-select-reporting-ext"
+                    label="Consulta"
                     value={consulta}
                     onChange={(e) => setConsulta(e.target.value)}
-                    id="consulta-select-reporting-ext"
-                    disabled={loadingConsultas || errorConsultas}
-                  >
-                    <option value="0">- Todas -</option>
-                    {consultasOptions.map((item) => (
-                      <option
-                        key={item.idConsulta || item.nombreConsulta}
-                        value={item.idConsulta}
-                      >
-                        {item.nombreConsulta}
-                      </option>
-                    ))}
-                  </select>
-                  <label
-                    htmlFor="consulta-select-reporting-ext"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                  >
-                    Consulta
-                  </label>
+                    options={[
+                      { value: "0", label: "- Todas -" },
+                      ...consultasOptions.map((item) => ({ value: String(item.idConsulta), label: item.nombreConsulta }))
+                    ]}
+                    disabled={!!(loadingConsultas || errorConsultas)}
+                  />
                 </div>
                 {/* Botones: visibles en lg dentro del grid de 5 cols */}
                 <div className="hidden lg:flex justify-center">
@@ -471,14 +413,12 @@ const ReportingPaymentsContent = ({
               </div>
             </div>
             <div
-              className="flex-1 w-full overflow-auto"
+              className="flex-1 w-full overflow-auto border border-[var(--color-border)] bg-[var(--color-surface)]"
               style={{
                 maxWidth: 1100,
                 marginTop: 0,
                 marginBottom: 0,
                 borderRadius: 8,
-                border: "1px solid #e0e0e0",
-                background: "#fff",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "flex-start",
@@ -499,7 +439,7 @@ const ReportingPaymentsContent = ({
                     }}
                   >
                     <thead
-                      style={{ position: "sticky", top: 0, background: "#fff" }}
+                      style={{ position: "sticky", top: 0, background: "var(--color-surface-secondary)" }}
                     >
                       <tr>
                         <th
@@ -576,7 +516,7 @@ const ReportingPaymentsContent = ({
                         </th>
                       </tr>
                     </thead>
-                    <tbody style={{ background: "#b6d6f6" }}>
+                    <tbody className="bg-[var(--color-surface)] text-[var(--color-text-primary)]">
                       {loadingTabla && (
                         <tr>
                           <td
@@ -599,15 +539,15 @@ const ReportingPaymentsContent = ({
                               <div
                                 className="animate-spin"
                                 style={{
-                                  border: "4px solid #e0e0e0",
-                                  borderTop: "4px solid #3b82f6",
+                                  border: "4px solid var(--color-border)",
+                                  borderTop: "4px solid var(--color-jerarquia2)",
                                   borderRadius: "50%",
                                   width: 48,
                                   height: 48,
                                   marginBottom: 12,
                                 }}
                               ></div>
-                              <span className="text-gray-500">Cargando...</span>
+                              <span className="text-[var(--color-text-muted)]">Cargando...</span>
                             </div>
                           </td>
                         </tr>
@@ -631,7 +571,7 @@ const ReportingPaymentsContent = ({
                               }}
                             >
                               <span
-                                className="text-gray-500"
+                                className="text-[var(--color-text-muted)]"
                                 style={{ fontSize: 18 }}
                               >
                                 Aún no hay registros

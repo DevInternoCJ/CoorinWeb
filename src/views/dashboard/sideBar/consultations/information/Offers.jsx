@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import FloatingSelect from "../../../../../components/Select/FloatingSelect";
+import FloatingInput from "../../../../../components/Select/FloatingInput";
 import { toast } from "sonner";
 import {
   infoEjecutivo,
@@ -184,41 +185,27 @@ const OffersContent = () => {
           {loadingConsultas && <span className="text-xs text-gray-500 block mt-0.5">Cargando...</span>}
           {errorConsultas && <span className="text-xs text-red-500 block mt-0.5">{errorConsultas}</span>}
         </div>
-        <div className="relative w-full min-w-0">
-          <input
+        <div className="w-full">
+          <FloatingInput
             type="date"
             id="fecha-desde-offers-xl"
-            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+            label="Desde"
             value={desde}
             min={minDate}
             max={maxDate}
             onChange={(e) => setDesde(e.target.value)}
-            placeholder=" "
           />
-          <label
-            htmlFor="fecha-desde-offers-xl"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-          >
-            Desde
-          </label>
         </div>
-        <div className="relative w-full min-w-0">
-          <input
+        <div className="w-full">
+          <FloatingInput
             type="date"
             id="fecha-hasta-offers-xl"
-            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+            label="Hasta"
             value={hasta}
             min={minDate}
             max={maxDate}
             onChange={(e) => setHasta(e.target.value)}
-            placeholder=" "
           />
-          <label
-            htmlFor="fecha-hasta-offers-xl"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-          >
-            Hasta
-          </label>
         </div>
         <div className="flex items-center justify-center">
           <button
@@ -267,43 +254,27 @@ const OffersContent = () => {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {/* Desde */}
-          <div className="relative w-full min-w-0">
-            <input
+          <div className="w-full">
+            <FloatingInput
               type="date"
               id="fecha-desde-offers-md"
-              className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+              label="Desde"
               value={desde}
               min={minDate}
               max={maxDate}
               onChange={(e) => setDesde(e.target.value)}
-              placeholder=" "
             />
-            <label
-              htmlFor="fecha-desde-offers-md"
-              className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-            >
-              Desde
-            </label>
           </div>
-          {/* Hasta */}
-          <div className="relative w-full min-w-0">
-            <input
+          <div className="w-full">
+            <FloatingInput
               type="date"
               id="fecha-hasta-offers-md"
-              className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+              label="Hasta"
               value={hasta}
               min={minDate}
               max={maxDate}
               onChange={(e) => setHasta(e.target.value)}
-              placeholder=" "
             />
-            <label
-              htmlFor="fecha-hasta-offers-md"
-              className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-            >
-              Hasta
-            </label>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-3">
@@ -348,41 +319,27 @@ const OffersContent = () => {
           {loadingConsultas && <span className="text-xs text-gray-500 block mt-0.5">Cargando...</span>}
           {errorConsultas && <span className="text-xs text-red-500 block mt-0.5">{errorConsultas}</span>}
         </div>
-        <div className="relative w-full min-w-0">
-          <input
+        <div className="w-full">
+          <FloatingInput
             type="date"
             id="fecha-desde-offers-sm"
-            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+            label="Desde"
             value={desde}
             min={minDate}
             max={maxDate}
             onChange={(e) => setDesde(e.target.value)}
-            placeholder=" "
           />
-          <label
-            htmlFor="fecha-desde-offers-sm"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-          >
-            Desde
-          </label>
         </div>
-        <div className="relative w-full min-w-0">
-          <input
+        <div className="w-full">
+          <FloatingInput
             type="date"
             id="fecha-hasta-offers-sm"
-            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+            label="Hasta"
             value={hasta}
             min={minDate}
             max={maxDate}
             onChange={(e) => setHasta(e.target.value)}
-            placeholder=" "
           />
-          <label
-            htmlFor="fecha-hasta-offers-sm"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-          >
-            Hasta
-          </label>
         </div>
         <button
           type="button"

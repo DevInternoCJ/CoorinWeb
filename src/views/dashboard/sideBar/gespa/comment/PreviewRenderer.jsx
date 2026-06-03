@@ -202,7 +202,7 @@ const PreviewRenderer = ({ file, fileName }) => {
   // Render
   if (!file) {
     return (
-      <div className="border-none rounded-lg p-3 bg-white text-sm text-gray-500">
+      <div className="border-none rounded-lg p-3 bg-white dark:bg-[var(--color-surface)] text-sm text-gray-500">
         No hay archivo seleccionado
       </div>
     );
@@ -210,7 +210,7 @@ const PreviewRenderer = ({ file, fileName }) => {
 
   if (previewUrl) {
     return (
-      <div className="border-none rounded p-2 bg-white">
+      <div className="border border-[var(--color-border)] rounded p-2 bg-[var(--color-surface)]">
         <img src={previewUrl} alt={fileName || "preview"} className="max-h-96 w-auto mx-auto" />
       </div>
     );
@@ -218,12 +218,12 @@ const PreviewRenderer = ({ file, fileName }) => {
 
   if (previewTable) {
     return (
-      <div className="border-none rounded-lg bg-white max-h-96 overflow-auto text-xs">
-        <table className="min-w-full table-auto rounded-lg border-collapse text-sm">
+      <div className="border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] max-h-96 overflow-auto text-xs coorin-modal-scroll-gray">
+        <table className="modal-table">
           <thead>
-            <tr className=" bg-jerarquia4">
+            <tr>
               {["Cuenta", "Fechas", "Horas", "Ejecutivo", "Comentario"].map((label, ci) => (
-                <th key={ci} className="border-none p-2 text-white text-left">
+                <th key={ci} className="sticky top-0 bg-[var(--color-background-secondary)] text-white text-left p-2 border-none">
                   {label}
                 </th>
               ))}
@@ -231,9 +231,9 @@ const PreviewRenderer = ({ file, fileName }) => {
           </thead>
           <tbody>
             {previewTable.slice(1, 51).map((row, ri) => (
-              <tr key={ri} className={ri % 2 ? "bg-gray-100" : ""}>
+              <tr key={ri} className="even:bg-[var(--color-surface-secondary)]/50">
                 {[0, 1, 2, 3, 4].map((ci) => (
-                  <td key={ci} className="border-none p-2 align-top">
+                  <td key={ci} className="p-2 align-top text-[var(--color-text-secondary)] border-b border-[var(--color-border)]">
                     {String((row || [])[ci] ?? "")}
                   </td>
                 ))}
@@ -247,14 +247,14 @@ const PreviewRenderer = ({ file, fileName }) => {
 
   if (previewText) {
     return (
-      <div className="border-none rounded p-3 bg-white max-h-96 overflow-auto text-xs">
+      <div className="border border-[var(--color-border)] rounded p-3 bg-[var(--color-surface)] text-[var(--color-text-secondary)] max-h-96 overflow-auto text-xs coorin-modal-scroll-gray">
         <pre className="whitespace-pre-wrap">{previewText}</pre>
       </div>
     );
   }
 
   return (
-    <div className="border-none rounded p-3 bg-white text-sm text-gray-600">
+    <div className="border border-[var(--color-border)] rounded p-3 bg-[var(--color-surface)] text-sm text-[var(--color-text-secondary)]">
       Vista previa no disponible para este tipo de archivo: <strong>{fileName}</strong>
     </div>
   );

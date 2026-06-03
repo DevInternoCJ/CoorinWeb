@@ -34,7 +34,7 @@ const AccountStatements = ({
         
         {/* Desde */}
         <div className=" items-center gap-2">
-          <label className="text-sm text-gray-600 font-medium">
+          <label className="text-sm text-[var(--color-text-secondary)] font-medium">
             Desde
           </label>
           <div className="relative">
@@ -42,13 +42,13 @@ const AccountStatements = ({
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+              className="bg-[var(--color-surface-secondary)] py-2.5 sm:py-3 px-4 block w-full border border-[var(--color-border)] rounded-lg sm:text-sm text-[var(--color-text-primary)] focus:border-[var(--color-jerarquia2)] focus:ring-[var(--color-jerarquia2)] disabled:opacity-50 disabled:pointer-events-none"
             />
           </div>
         </div>
         {/* Hasta */}
         <div className=" items-center gap-2">
-          <label className="text-sm text-gray-600 font-medium">
+          <label className="text-sm text-[var(--color-text-secondary)] font-medium">
             Hasta
           </label>
           <div className="relative">
@@ -56,7 +56,7 @@ const AccountStatements = ({
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+              className="bg-[var(--color-surface-secondary)] py-2.5 sm:py-3 px-4 block w-full border border-[var(--color-border)] rounded-lg sm:text-sm text-[var(--color-text-primary)] focus:border-[var(--color-jerarquia2)] focus:ring-[var(--color-jerarquia2)] disabled:opacity-50 disabled:pointer-events-none"
             />
           </div>
         </div>

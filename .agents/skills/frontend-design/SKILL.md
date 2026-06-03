@@ -197,18 +197,34 @@ className="bg-primary"        // botón/acento teal
 
 ### Tokens semánticos más usados en CoorinWeb
 
-| Token semántico | Clase Tailwind | Luz | Oscuro |
+| Token semántico | Clase / CSS Variable | Luz | Oscuro | Descripción |
+|---|---|---|---|---|
+| `--background` | `bg-background` | `#dee5e5` | `#011008` | Fondo de la aplicación |
+| `--background-1` | `bg-background-1` | `#f5f5f5` | `#0f2919` | Fondo alternativo |
+| `--foreground` | `text-foreground` | `#1b4838` | `#a7f3d0` | Texto principal |
+| `--surface` | `bg-surface` | `#f5f5f5` | `#162b20` | Superficies de contenedores principales |
+| `--layer` | `bg-layer` | `#ffffff` | `#101311` | Capa base de cards y modales |
+| `--overlay` | `bg-overlay` | `#efefef` | `#1a2e22` | Superposiciones / backdrops |
+| `--border` | `border-border` | `#e5e7eb` | `#2d4a3a` | Bordes estándar |
+| `--muted-foreground` | `text-muted-foreground` | `#6b7280` | `#9ca3af` | Texto secundario o muted |
+| `--primary` | `bg-primary` | `#3eac91` | `#3eac91` | Color primario de marca (Verde Coorin) |
+| `--destructive` | `bg-destructive` | `#d78b84` | `#b91c1c` | Color destructivo / peligro |
+
+### Variables del sistema de diseño (CSS custom properties)
+
+| Variable CSS | Valor Claro | Valor Oscuro | Uso común en la app |
 |---|---|---|---|
-| `--background` | `bg-background` | `#dee5e5` | `#011008` |
-| `--background-1` | `bg-background-1` | `#f5f5f5` | `#0f2919` |
-| `--foreground` | `text-foreground` | `#1b4838` | `#a7f3d0` |
-| `--surface` | `bg-surface` | `#f5f5f5` | `#162b20` |
-| `--layer` | `bg-layer` | `#ffffff` | `#101311` |
-| `--overlay` | `bg-overlay` | `#efefef` | `#1a2e22` |
-| `--border` | `border-border` | `#e5e7eb` | `#2d4a3a` |
-| `--muted-foreground` | `text-muted-foreground` | `#6b7280` | `#9ca3af` |
-| `--primary` | `bg-primary` | `#3eac91` | `#3eac91` |
-| `--destructive` | `bg-destructive` | `#d78b84` | `#b91c1c` |
+| `--color-text-primary` | `#1b4838` | `#96c9b2` | Texto de títulos y etiquetas principales |
+| `--color-text-secondary`| `#374151` | `#d1d5db` | Texto de cuerpo e inputs |
+| `--color-text-muted` | `#6b7280` | `#9ca3af` | Subtítulos y textos de soporte |
+| `--color-surface` | `#ffffff` | `#090e0a` | Fondo principal de paneles y layouts |
+| `--color-surface-secondary`| `#f5f5f5` | `#001007` | Fondos de inputs, selectores y cabeceras |
+| `--color-surface-modal` | `#efefef` | `#11271a` | Fondo base de las ventanas modales |
+| `--color-border` | `#e5e7eb` | `#2d4a3a` | Líneas divisorias y bordes de elementos |
+| `--color-jerarquia1` | `#9dc5bc` | `#4b9989` | Acento secundario (Verde claro) |
+| `--color-jerarquia2` | `#3eac91` | `#3eac91` | Color principal de acción / foco (Verde medio) |
+| `--color-jerarquia3` | `#147f5e` | `#50c9a8` | Color de énfasis destacado (Verde oscuro) |
+| `--color-jerarquia4` | `#1b4838` | `#44be71` | Fondo de cabeceras o etiquetas seleccionadas |
 
 ### Tokens propios del proyecto (via `@theme`)
 

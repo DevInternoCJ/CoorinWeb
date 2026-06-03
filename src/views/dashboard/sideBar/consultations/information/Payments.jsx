@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import FloatingSelect from "../../../../../components/Select/FloatingSelect";
+import FloatingInput from "../../../../../components/Select/FloatingInput";
 import {
   infoEjecutivo,
   getPaymentsInformation,
@@ -161,104 +163,56 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
         <div className="w-full relative">
           {/* xl y 2xl: 1 fila, 5 columnas, visible desde xl en adelante */}
           <div className="hidden xl:grid grid-cols-5 gap-3 w-full mb-3">
-            <div className="relative w-full">
-              {/* Cartera */}
-              <select
-                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                value={cartera}
+            <div className="w-full">
+              <FloatingSelect
+                id="cartera-select-payments-xl"
+                label="Cartera"
+                value={String(cartera)}
                 onChange={(e) => setCartera(e.target.value)}
-                id="cartera-select-ofrecimiento-2xl"
-              >
-                {carterasOptions.length === 0 ? (
-                  <option value={cartera}>{`Cartera ${cartera}`}</option>
-                ) : (
-                  carterasOptions.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.nombre}
-                    </option>
-                  ))
-                )}
-              </select>
-              <label
-                htmlFor="cartera-select-ofrecimiento-2xl"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-              >
-                Cartera
-              </label>
+                options={
+                  carterasOptions.length === 0
+                    ? [{ value: String(cartera), label: `Cartera ${cartera}` }]
+                    : carterasOptions.map((item) => ({ value: String(item.id), label: item.nombre }))
+                }
+                disabled={loadingConsultas}
+              />
             </div>
-            <div className="relative w-full">
-              {/* Consulta */}
-              <select
-                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+            <div className="w-full">
+              <FloatingSelect
+                id="consulta-select-payments-xl"
+                label="Consulta"
                 value={consulta}
                 onChange={(e) => setConsulta(e.target.value)}
-                id="consulta-select-ofrecimiento-2xl"
-                disabled={loadingConsultas || errorConsultas}
-              >
-                <option value="">- Todas -</option>
-                {consultasOptions.map((item) => (
-                  <option
-                    key={item.idConsulta || item.nombreConsulta}
-                    value={item.idConsulta}
-                  >
-                    {item.nombreConsulta}
-                  </option>
-                ))}
-              </select>
-              <label
-                htmlFor="consulta-select-ofrecimiento-2xl"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-              >
-                Consulta
-              </label>
-              {loadingConsultas && (
-                <span className="text-xs text-gray-500 absolute right-2 top-2">
-                  Cargando...
-                </span>
-              )}
-              {errorConsultas && (
-                <span className="text-xs text-red-500 absolute right-2 top-2">
-                  {errorConsultas}
-                </span>
-              )}
+                options={[
+                  { value: "", label: "- Todas -" },
+                  ...consultasOptions.map((item) => ({ value: String(item.idConsulta), label: item.nombreConsulta }))
+                ]}
+                disabled={!!(loadingConsultas || errorConsultas)}
+              />
+              {loadingConsultas && <span className="text-xs text-[var(--color-text-muted)] block mt-0.5">Cargando...</span>}
+              {errorConsultas && <span className="text-xs text-[var(--color-btn-danger-text,#b91c1c)] block mt-0.5">{errorConsultas}</span>}
             </div>
-            <div className="relative w-full min-w-0">
-              {/* Desde */}
-              <input
+            <div className="w-full">
+              <FloatingInput
                 type="date"
-                id="fecha-desde-offers-2xl"
-                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                id="fecha-desde-payments-xl"
+                label="Desde"
                 value={desde}
                 min={minDate}
                 max={maxDate}
                 onChange={(e) => setDesde(e.target.value)}
-                placeholder=" "
               />
-              <label
-                htmlFor="fecha-desde-offers-2xl"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-              >
-                Desde
-              </label>
             </div>
-            <div className="relative w-full min-w-0">
-              {/* Hasta */}
-              <input
+            <div className="w-full">
+              <FloatingInput
                 type="date"
-                id="fecha-hasta-offers-2xl"
-                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                id="fecha-hasta-payments-xl"
+                label="Hasta"
                 value={hasta}
                 min={minDate}
                 max={maxDate}
                 onChange={(e) => setHasta(e.target.value)}
-                placeholder=" "
               />
-              <label
-                htmlFor="fecha-hasta-offers-2xl"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-              >
-                Hasta
-              </label>
             </div>
             <div className="flex items-center justify-center">
               <button
@@ -272,113 +226,61 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
               </button>
             </div>
           </div>
-          {/* md: 3 filas, 2 col + 2 col + 1 col, solo visible en md */}
+          {/* md: 3 filas, 2 col + 2 col + 1 col */}
           <div className="hidden md:grid xl:hidden w-full gap-3 mb-3">
             <div className="grid grid-cols-2 gap-3">
-              {/* Cartera */}
-              <div className="relative w-full">
-                {/* ...código cartera... */}
-                <select
-                  className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                  value={cartera}
+              <div className="w-full">
+                <FloatingSelect
+                  id="cartera-select-payments-md"
+                  label="Cartera"
+                  value={String(cartera)}
                   onChange={(e) => setCartera(e.target.value)}
-                  id="cartera-select-ofrecimiento-md"
-                >
-                  {carterasOptions.length === 0 ? (
-                    <option value={cartera}>{`Cartera ${cartera}`}</option>
-                  ) : (
-                    carterasOptions.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.nombre}
-                      </option>
-                    ))
-                  )}
-                </select>
-                <label
-                  htmlFor="cartera-select-ofrecimiento-md"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                >
-                  Cartera
-                </label>
+                  options={
+                    carterasOptions.length === 0
+                      ? [{ value: String(cartera), label: `Cartera ${cartera}` }]
+                      : carterasOptions.map((item) => ({ value: String(item.id), label: item.nombre }))
+                  }
+                  disabled={loadingConsultas}
+                />
               </div>
-              {/* Consulta */}
-              <div className="relative w-full">
-                {/* ...código consulta... */}
-                <select
-                  className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+              <div className="w-full">
+                <FloatingSelect
+                  id="consulta-select-payments-md"
+                  label="Consulta"
                   value={consulta}
                   onChange={(e) => setConsulta(e.target.value)}
-                  id="consulta-select-ofrecimiento-md"
-                  disabled={loadingConsultas || errorConsultas}
-                >
-                  <option value="">- Todas -</option>
-                  {consultasOptions.map((item) => (
-                    <option
-                      key={item.idConsulta || item.nombreConsulta}
-                      value={item.idConsulta}
-                    >
-                      {item.nombreConsulta}
-                    </option>
-                  ))}
-                </select>
-                <label
-                  htmlFor="consulta-select-ofrecimiento-md"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-                >
-                  Consulta
-                </label>
-                {loadingConsultas && (
-                  <span className="text-xs text-gray-500 absolute right-2 top-2">
-                    Cargando...
-                  </span>
-                )}
-                {errorConsultas && (
-                  <span className="text-xs text-red-500 absolute right-2 top-2">
-                    {errorConsultas}
-                  </span>
-                )}
+                  options={[
+                    { value: "", label: "- Todas -" },
+                    ...consultasOptions.map((item) => ({ value: String(item.idConsulta), label: item.nombreConsulta }))
+                  ]}
+                  disabled={!!(loadingConsultas || errorConsultas)}
+                />
+                {loadingConsultas && <span className="text-xs text-[var(--color-text-muted)] block mt-0.5">Cargando...</span>}
+                {errorConsultas && <span className="text-xs text-[var(--color-btn-danger-text,#b91c1c)] block mt-0.5">{errorConsultas}</span>}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {/* Desde */}
-              <div className="relative w-full min-w-0">
-                {/* ...código desde... */}
-                <input
+              <div className="w-full">
+                <FloatingInput
                   type="date"
-                  id="fecha-desde-offers-md"
-                  className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  id="fecha-desde-payments-md"
+                  label="Desde"
                   value={desde}
                   min={minDate}
                   max={maxDate}
                   onChange={(e) => setDesde(e.target.value)}
-                  placeholder=" "
                 />
-                <label
-                  htmlFor="fecha-desde-offers-md"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                >
-                  Desde
-                </label>
               </div>
-              {/* Hasta */}
-              <div className="relative w-full min-w-0">
-                {/* ...código hasta... */}
-                <input
+              <div className="w-full">
+                <FloatingInput
                   type="date"
-                  id="fecha-hasta-offers-md"
-                  className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  id="fecha-hasta-payments-md"
+                  label="Hasta"
                   value={hasta}
                   min={minDate}
                   max={maxDate}
                   onChange={(e) => setHasta(e.target.value)}
-                  placeholder=" "
                 />
-                <label
-                  htmlFor="fecha-hasta-offers-md"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-                >
-                  Hasta
-                </label>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-3">
@@ -393,106 +295,58 @@ const PaymentsContent = ({ headerControlsActive = false }) => {
               </button>
             </div>
           </div>
-          {/* sm: 5 filas, 1 columna cada una, solo visible en sm */}
+          {/* sm: 5 filas, 1 columna cada una */}
           <div className="grid md:hidden w-full grid-cols-1 gap-3 mb-3">
-            <div className="relative w-full">
-              {/* ...código cartera... */}
-              <select
-                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-                value={cartera}
+            <div className="w-full">
+              <FloatingSelect
+                id="cartera-select-payments-sm"
+                label="Cartera"
+                value={String(cartera)}
                 onChange={(e) => setCartera(e.target.value)}
-                id="cartera-select-ofrecimiento-sm"
-              >
-                {carterasOptions.length === 0 ? (
-                  <option value={cartera}>{`Cartera ${cartera}`}</option>
-                ) : (
-                  carterasOptions.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.nombre}
-                    </option>
-                  ))
-                )}
-              </select>
-              <label
-                htmlFor="cartera-select-ofrecimiento-sm"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-              >
-                Cartera
-              </label>
+                options={
+                  carterasOptions.length === 0
+                    ? [{ value: String(cartera), label: `Cartera ${cartera}` }]
+                    : carterasOptions.map((item) => ({ value: String(item.id), label: item.nombre }))
+                }
+                disabled={loadingConsultas}
+              />
             </div>
-            <div className="relative w-full">
-              {/* ...código consulta... */}
-              <select
-                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+            <div className="w-full">
+              <FloatingSelect
+                id="consulta-select-payments-sm"
+                label="Consulta"
                 value={consulta}
                 onChange={(e) => setConsulta(e.target.value)}
-                id="consulta-select-ofrecimiento-sm"
-                disabled={loadingConsultas || errorConsultas}
-              >
-                <option value="">- Todas -</option>
-                {consultasOptions.map((item) => (
-                  <option
-                    key={item.idConsulta || item.nombreConsulta}
-                    value={item.idConsulta}
-                  >
-                    {item.nombreConsulta}
-                  </option>
-                ))}
-              </select>
-              <label
-                htmlFor="consulta-select-ofrecimiento-sm"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-              >
-                Consulta
-              </label>
-              {loadingConsultas && (
-                <span className="text-xs text-gray-500 absolute right-2 top-2">
-                  Cargando...
-                </span>
-              )}
-              {errorConsultas && (
-                <span className="text-xs text-red-500 absolute right-2 top-2">
-                  {errorConsultas}
-                </span>
-              )}
+                options={[
+                  { value: "", label: "- Todas -" },
+                  ...consultasOptions.map((item) => ({ value: String(item.idConsulta), label: item.nombreConsulta }))
+                ]}
+                disabled={!!(loadingConsultas || errorConsultas)}
+              />
+              {loadingConsultas && <span className="text-xs text-[var(--color-text-muted)] block mt-0.5">Cargando...</span>}
+              {errorConsultas && <span className="text-xs text-[var(--color-btn-danger-text,#b91c1c)] block mt-0.5">{errorConsultas}</span>}
             </div>
-            <div className="relative w-full min-w-0">
-              {/* ...código desde... */}
-              <input
+            <div className="w-full">
+              <FloatingInput
                 type="date"
-                id="fecha-desde-offers-sm"
-                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                id="fecha-desde-payments-sm"
+                label="Desde"
                 value={desde}
                 min={minDate}
                 max={maxDate}
                 onChange={(e) => setDesde(e.target.value)}
-                placeholder=" "
               />
-              <label
-                htmlFor="fecha-desde-offers-sm"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-              >
-                Desde
-              </label>
             </div>
-            <div className="relative w-full min-w-0">
-              {/* ...código hasta... */}
-              <input
+            <div className="w-full">
+              <FloatingInput
                 type="date"
-                id="fecha-hasta-offers-sm"
-                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                id="fecha-hasta-payments-sm"
+                label="Hasta"
                 value={hasta}
                 min={minDate}
                 max={maxDate}
                 onChange={(e) => setHasta(e.target.value)}
-                placeholder=" "
               />
-              <label
-                htmlFor="fecha-hasta-offers-sm"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500"
-              >
-                Hasta
-              </label>
             </div>
             <button
               type="button"

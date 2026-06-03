@@ -1,7 +1,6 @@
 // FileUploader.jsx
 import React, { useRef, useState, useEffect } from "react";
 import SaveButton from "../../../Administration/gespa/ButtonSave";
-import { IconFile } from "../../comment/IconsComments";
 import SelectWallet from "../../../../board/screenFields/SelectWallet";
 import { getCarteras } from "../../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
@@ -12,24 +11,22 @@ const FileUploader = ({
   saveDisabled,
   cartera,
   onCarteraChange,
-  selectWidth = "w-64",
+  selectWidth = "w-full",
 }) => {
   const [carteraOptions, setCarteraOptions] = useState([
     { value: "", label: "Seleccione una cartera" },
   ]);
   const fileInputRef = useRef(null);
-  const [selectedFileName, setSelectedFileName] = useState("");
 
   const handleInputChange = (e) => {
     const f = e.target.files && e.target.files[0];
     if (f) {
-      setSelectedFileName(f.name);
       onFileChange && onFileChange(f, f.name);
     } else {
-      setSelectedFileName("");
       onFileChange && onFileChange(null, "");
     }
   };
+
   useEffect(() => {
     const fetchCarteras = async () => {
       try {
@@ -54,8 +51,14 @@ const FileUploader = ({
     fetchCarteras();
   }, []);
 
+  useEffect(() => {
+    if (saveDisabled && fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }, [saveDisabled]);
+
   return (
-    <div className=" d-flex items-center justify-center">
+    <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto">
       <div className={selectWidth}>
         <SelectWallet
           label="Cartera"
@@ -64,27 +67,24 @@ const FileUploader = ({
           options={carteraOptions}
         />
       </div>
-      <div className="my-3 bg-neutral-100 flex items-center gap-5 rounded-md border-none">
-        <div className="flex-1 bg-background-tertiary border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600 truncate">
-          {selectedFileName || "Seleccione archivo"}
+
+      <div className="flex items-center gap-3">
+        <div className="relative flex-grow">
+          <label htmlFor="file-input" className="sr-only">
+            Seleccionar archivo
+          </label>
+          <input 
+            id="file-input"
+            ref={fileInputRef} 
+            type="file" 
+            onChange={handleInputChange}
+            disabled={false}
+            className="block w-full border border-[var(--color-border)] shadow-xs rounded-lg text-sm text-[var(--color-text-secondary)] focus:z-10 focus:border-[var(--color-jerarquia2)] focus:ring-[var(--color-jerarquia2)] disabled:opacity-50 disabled:pointer-events-none bg-[var(--color-surface)] file:bg-[var(--color-surface-secondary)] file:border-0 file:me-4 file:py-2.5 file:px-4 file:text-[var(--color-text-primary)] file:font-semibold file:cursor-pointer hover:file:bg-[var(--color-surface-secondary)]/80 file:transition-colors"
+          />
         </div>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="hidden"
-          onChange={handleInputChange}
-        />
         <SaveButton
-          tooltip="Seleccionar archivo"
-          className="btn-info w-14"
-          onClick={() => fileInputRef.current && fileInputRef.current.click()}
-        >
-          <IconFile className="size-5.5 " />
-        </SaveButton>
-
-        <SaveButton
-          className={`btn-success ${saveDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`btn-success shrink-0 ${saveDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
           onClick={() => {
             if (saveDisabled) return;
             onSave && onSave();
