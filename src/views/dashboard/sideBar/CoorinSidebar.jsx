@@ -865,10 +865,11 @@ export const CoorinSidebar = ({
           {/* Footer */}
           <footer className="mt-auto p-2 border-t border-[var(--color-border)] bg-[var(--color-surface)] transition-colors duration-300">
             <div className="flex items-center justify-between gap-2 hs-overlay-minified:flex-col hs-overlay-minified:justify-center hs-overlay-minified:gap-y-2">
-              <div className="flex-1 min-w-0 hs-overlay-minified:flex-none hs-overlay-minified:w-full">
+             
+              <ThemeToggle className="flex-shrink-0" />
+               <div className="flex-1 min-w-0 hs-overlay-minified:flex-none hs-overlay-minified:w-full">
                 <Logout expandSidebar={expandSidebar} />
               </div>
-              <ThemeToggle className="flex-shrink-0" />
             </div>
           </footer>
           {/* End Footer */}

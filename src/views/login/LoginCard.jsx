@@ -137,7 +137,7 @@ const LoginCard = ({ logo = null, formComponent = null, children }) => {
       viewBox="0 0 900 600"
       preserveAspectRatio="xMidYMid slice"
       xmlns="http://www.w3.org/2000/svg"
-      className="absolute inset-0 w-full h-full rounded-4xl transition-colors duration-500 pointer-events-none"
+      className="absolute inset-0 w-full h-full rounded-4xl transition-colors duration-500 pointer-events-none z-0"
       aria-hidden="true"
     >
       <path
@@ -159,7 +159,7 @@ const LoginCard = ({ logo = null, formComponent = null, children }) => {
         <LoginBgSvg />
         {/* Logo - solo se muestra en login normal */}
         {!showPasswordContent && !showChangePassword && (
-          <div className="lg:w-1/2">
+          <div className="relative z-10 lg:w-1/2">
             <div className="w-full text-center md:pt-8 px-6">
               <LogicCard
                 id="login-logo-card"
@@ -179,9 +179,9 @@ const LoginCard = ({ logo = null, formComponent = null, children }) => {
 
         {/* Contenido principal */}
         <div
-          className={
+          className={`relative z-10 ${
             !showPasswordContent && !showChangePassword ? "lg:w-1/2" : "w-full"
-          }
+          }`}
         >
           {showPasswordContent ? (
             <PasswordChangeContent

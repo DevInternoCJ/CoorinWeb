@@ -69,8 +69,7 @@ const ChangePassword = ({
 
   // Alternar visibilidad de contraseña
   const togglePasswordVisibility = (setter) => {
-    setter(true);
-    setTimeout(() => setter(false), 400);
+    setter((prev) => !prev);
   };
 
   const handleSubmit = async (e) => {
@@ -352,16 +351,16 @@ const ChangePassword = ({
           </div>
 
           {/* Requisitos de la contraseña */}
-          <div className="bg-jerarquia1 p-4 rounded-3xl mt-4">
-            <h4 className="text-jerarquia4 font-semibold mb-2">
+          <div className="bg-neutral-100 dark:bg-neutral-900 p-4 rounded-3xl mt-4">
+            <h4 className="text-jerarquia4  dark:text-white font-semibold mb-2">
               Requisitos de la contraseña
             </h4>
             <ul className="text-sm">
               {PASSWORD_REQUIREMENTS.map((req) => (
                 <li
                   key={req.key}
-                  className={`flex items-center ${
-                    errors[req.key] ? "text-red-900" : "text-jerarquia3"
+                  className={`flex items-center font-semibold ${
+                    errors[req.key] ? "text-red-900 dark:text-red-300" : "text-jerarquia3"
                   }`}
                 >
                   <span className="mr-2">{errors[req.key] ? "•" : "✓"}</span>{" "}
@@ -369,8 +368,8 @@ const ChangePassword = ({
                 </li>
               ))}
               <li
-                className={`flex items-center ${
-                  errors.matchError ? "text-red-900" : "text-jerarquia3"
+                className={`flex items-center font-semibold ${
+                  errors.matchError ? "text-red-900 dark:text-red-300" : "text-jerarquia3"
                 }`}
               >
                 <span className="mr-2">{errors.matchError ? "•" : "✓"}</span> La

@@ -38,7 +38,7 @@ const Logout = ({ onLogout, expandSidebar }) => {
       <button
         id="hs-sidebar-footer-example-with-dropdown"
         type="button"
-        className="w-full inline-flex shrink-0 items-center gap-x-2 p-2 text-start text-sm text-[var(--color-text-secondary)] rounded-md hover:bg-[var(--color-surface-secondary)] focus:outline-hidden focus:bg-[var(--color-surface-secondary)]"
+        className="w-full inline-flex shrink-0 items-center gap-x-2 p-2 text-start text-sm text-[var(--color-text-secondary)] rounded-md hover:bg-neutral-200/70 dark:hover:bg-gray-900 focus:outline-hidden focus:bg-[var(--color-surface-secondary)]"
         aria-haspopup="menu"
         aria-expanded="false"
         aria-label="Dropdown"

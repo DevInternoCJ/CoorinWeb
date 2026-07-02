@@ -39,13 +39,13 @@ const PasswordChangeContent = ({ onAccept }) => {
       <div className="w-full relative mb-6">
         <div className="flex items-center justify-center">
           <ExclamationKey className="size-10 p-0 text-yellow-500" />
-          <h3 className="text-2xl font-bold text-neutral-950 ml-3">
+          <h3 className="text-2xl font-bold text-neutral-950 dark:text-white ml-3  ">
             Gestor de Contraseña
           </h3>
         </div>
       </div>
 
-      <div className="text-black w-full text-center mb-2 p-2 rounded-lg opacity-80">
+      <div className="text-black dark:text-white w-full text-center mb-2 p-2 rounded-lg opacity-80">
         <h6 className={`text-lg font-semibold ${passwordExpired ? 'text-red-600' : ''}`}>
           {getMensaje()}
         </h6>
