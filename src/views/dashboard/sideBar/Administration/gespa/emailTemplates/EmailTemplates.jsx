@@ -60,12 +60,12 @@ const EmailTemplates = ({ onClose }) => {
   }, []);
 
   return (
-    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black/55 flex items-center justify-center z-50 p-4">
       <div
         ref={modalRef}
         className={`${
           bounce ? " animate-bounce-modal" : ""
-        } bg-white rounded-lg shadow-2xl w-full max-w-4xl overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]`}
+        } bg-surface text-foreground rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-border flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -85,7 +85,7 @@ const EmailTemplates = ({ onClose }) => {
           setShowDataTables={setShowDataTables}
         />
         {selectedProduct ? (
-          <div className="px-6 pb-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50 space-y-4">
+          <div className="px-6 pb-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-surface-secondary space-y-4">
             {selectedProduct && (
               <Template
                 plantillas={plantillas}
@@ -110,9 +110,9 @@ const EmailTemplates = ({ onClose }) => {
           </div>
         ) : (
           <div>
-            <div className="flex m-5 flex-col items-center justify-center text-center text-gray-500 bg-gray-200 rounded-lg py-20">
+            <div className="flex m-5 flex-col items-center justify-center text-center text-muted-foreground bg-surface-secondary border border-border rounded-lg py-20">
               <IconWarning className="size-8" />
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Seleccione el producto para gestionar scripts.
               </p>
             </div>

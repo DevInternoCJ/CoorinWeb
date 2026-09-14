@@ -932,7 +932,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
         iconClassName: "text-[#147f5e]",
         onClose,
         closeButtonClassName:
-          "transition-colors duration-200 rounded-full p-1 sm:p-1.5 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-300",
+          "transition-colors duration-200 rounded-full p-1 sm:p-1.5 hover:bg-surface-secondary focus:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-jerarquia2",
         // El color base y hover se controlan por eventos inline para igualar el comportamiento de Metas
         closeButtonStyle: {
           color: "#147f5e",
@@ -958,7 +958,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
         {/* Header y formulario */}
         <div className="flex items-center gap-6 mb-4 mt-4 px-4">
           {/* Logo */}
-          <div className="w-32 h-32 flex flex-col items-center justify-center bg-gray-50 rounded-full overflow-hidden">
+          <div className="w-32 h-32 flex flex-col items-center justify-center bg-surface-secondary border border-border rounded-full overflow-hidden">
             <img
               src={ConsorcioLogo}
               alt="Consorcio Jurídico"
@@ -972,7 +972,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
               {/* Cartera */}
               <div className="relative w-full">
                 <select
-                  className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  className="peer p-4 pe-9 block w-full bg-surface-secondary border border-border text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                   value={cartera}
                   onChange={(e) => setCartera(e.target.value)}
                   id="cartera-select"
@@ -990,7 +990,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
               {/* Producto */}
               <div className="relative w-full">
                 <select
-                  className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  className="peer p-4 pe-9 block w-full bg-surface-secondary border border-border text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                   value={producto}
                   onChange={(e) => setProducto(e.target.value)}
                   id="producto-select"
@@ -1009,7 +1009,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
               {/* Encargado moved here (after Indicador) */}
               <div className="relative w-full">
                 <select
-                  className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  className="peer p-4 pe-9 block w-full bg-surface-secondary border border-border text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                   value={encargado}
                   onChange={(e) => setEncargado(e.target.value)}
                   id="encargado-select-row2"
@@ -1046,7 +1046,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
               {/* Indicador moved to row1 col4 (replaces placeholder) */}
               <div className="relative w-full">
                 <select
-                  className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  className="peer p-4 pe-9 block w-full bg-surface-secondary border border-border text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                   value={indicador}
                   onChange={(e) => setIndicador(e.target.value)}
                   id="indicador-select-row1"
@@ -1078,7 +1078,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                   <input
                     type="date"
                     max={yesterdayISO}
-                    className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                    className="bg-surface-secondary text-foreground py-2.5 sm:py-3 px-4 block w-full border border-border rounded-lg sm:text-sm focus:border-jerarquia2 focus:ring-jerarquia2 disabled:opacity-50 disabled:pointer-events-none"
                     value={desde}
                     onChange={(e) => setDesde(e.target.value)}
                   />
@@ -1094,7 +1094,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                   <input
                     type="date"
                     max={yesterdayISO}
-                    className="bg-gray-50 py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                    className="bg-surface-secondary text-foreground py-2.5 sm:py-3 px-4 block w-full border border-border rounded-lg sm:text-sm focus:border-jerarquia2 focus:ring-jerarquia2 disabled:opacity-50 disabled:pointer-events-none"
                     value={hasta}
                     onChange={(e) => setHasta(e.target.value)}
                   />

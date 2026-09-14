@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { getColumsProduct } from "../../services/mark/Orochi/LokiServices";
-import { chargueCatalog } from "../../services/mark/Orochi/LokiServices";
+import { getColumsProduct } from "../../services/mark/orochi/LokiServices";
+import { chargueCatalog } from "../../services/mark/orochi/LokiServices";
 import FloatingSelect from "./FloatingSelect";
+import { useCatalogStore } from "../../contextGlobal/catalogStore";
+import { ACTIVE_SERVER } from "../../config/backend";
+const EMPTY_OPTIONS = [];
 const ConsultFilter = ({
-  options = [],
+  options = EMPTY_OPTIONS,
   label = "Seleccione",
   onSelectionChange,
   onAllOptionsLoaded, // Nueva prop para enviar todas las opciones cargadas
@@ -11,11 +14,20 @@ const ConsultFilter = ({
   id = "consult-filter-select",
   filterType = "", // Nueva prop para identificar qué tipo de filtro es
   idProducto = null, // ID del producto para la consulta
+  idCartera = null,
 }) => {
   const [selectedValue, setSelectedValue] = useState(defaultValue);
   const [dynamicOptions, setDynamicOptions] = useState(options);
   const [isLoading, setIsLoading] = useState(false);
+  const consultasCatalogo = useCatalogStore((state) => state.consultas);
   const previousOptionsRef = useRef([]);
+  const onSelectionChangeRef = useRef(onSelectionChange);
+  const onAllOptionsLoadedRef = useRef(onAllOptionsLoaded);
+
+  useEffect(() => {
+    onSelectionChangeRef.current = onSelectionChange;
+    onAllOptionsLoadedRef.current = onAllOptionsLoaded;
+  }, [onSelectionChange, onAllOptionsLoaded]);
 
   // Función para cargar opciones dinámicas según el tipo de filtro
   const loadDynamicOptions = useCallback(
@@ -23,12 +35,16 @@ const ConsultFilter = ({
       setIsLoading(true);
 
       try {
+        if (options.length > 0 && ["Cuenta", "Conteos", "Fechas"].includes(filterValue)) {
+          setDynamicOptions(options);
+          return;
+        }
         switch (filterValue) {
           case "Producto": {
             // Producto
             const productData = await getColumsProduct({
               params: {
-                servidor: "Orochi",
+                servidor: ACTIVE_SERVER,
                 idProducto: idProducto,
               },
             });
@@ -47,10 +63,14 @@ const ConsultFilter = ({
           }
 
           case "Cuenta": {
+            if (consultasCatalogo.length) {
+              setDynamicOptions(consultasCatalogo.filter((item) => item.detalle === "Cuenta").map((item) => ({ value: item.valor, label: item.valor, concepto: "Cuenta" })));
+              break;
+            }
             // Cuenta
             const catalogDataCuenta = await chargueCatalog({
               params: {
-                servidor: "Orochi",
+                servidor: ACTIVE_SERVER,
               },
             });
 
@@ -75,10 +95,14 @@ const ConsultFilter = ({
           }
 
           case "Conteos": {
+            if (consultasCatalogo.length) {
+              setDynamicOptions(consultasCatalogo.filter((item) => item.detalle === "Conteos").map((item) => ({ value: item.valor, label: item.valor, concepto: "Conteos" })));
+              break;
+            }
             // Conteos
             const catalogDataConteos = await chargueCatalog({
               params: {
-                servidor: "Orochi",
+                servidor: ACTIVE_SERVER,
               },
             });
 
@@ -103,10 +127,14 @@ const ConsultFilter = ({
           }
 
           case "Fechas": {
+            if (consultasCatalogo.length) {
+              setDynamicOptions(consultasCatalogo.filter((item) => item.detalle === "Fechas").map((item) => ({ value: item.valor, label: item.valor, concepto: "Fechas" })));
+              break;
+            }
             // Fechas
             const catalogDataFechas = await chargueCatalog({
               params: {
-                servidor: "Orochi",
+                servidor: ACTIVE_SERVER,
               },
             });
             if (
@@ -140,7 +168,7 @@ const ConsultFilter = ({
         setIsLoading(false);
       }
     },
-    [options, idProducto],
+    [options, idProducto, idCartera, consultasCatalogo],
   );
 
   // Efecto para cargar opciones cuando cambia el filterType
@@ -151,7 +179,7 @@ const ConsultFilter = ({
       // Cargar por defecto las opciones de "Cuenta" cuando no hay filterType
       loadDynamicOptions("Cuenta");
     }
-  }, [filterType, loadDynamicOptions, options]);
+  }, [filterType, loadDynamicOptions]);
 
   // Notificar cuando las opciones se carguen y seleccionar la primera opción
   useEffect(() => {
@@ -166,33 +194,32 @@ const ConsultFilter = ({
         previousOptionsRef.current = dynamicOptions;
 
         // Seleccionar automáticamente la primera opción solo cuando las opciones cambien
-        const firstOption = dynamicOptions[0];
+        const preferredOption = defaultValue && dynamicOptions.find((option) => String(option.value) === String(defaultValue));
+        const firstOption = preferredOption || dynamicOptions[0];
         setSelectedValue(firstOption.value);
 
         // Notificar la selección de la primera opción
-        if (onSelectionChange) {
-          onSelectionChange(firstOption);
-        }
+        onSelectionChangeRef.current?.(firstOption);
       }
 
       // Notificar todas las opciones cargadas (esto sí se hace siempre)
-      if (onAllOptionsLoaded) {
-        onAllOptionsLoaded(dynamicOptions);
-      }
+      onAllOptionsLoadedRef.current?.(dynamicOptions);
+    } else {
+      previousOptionsRef.current = [];
+      setSelectedValue("");
+      onAllOptionsLoadedRef.current?.([]);
     }
-  }, [dynamicOptions, onAllOptionsLoaded, onSelectionChange]);
+  }, [dynamicOptions, defaultValue]);
 
   const handleChange = (e) => {
     const value = e.target.value;
     setSelectedValue(value);
 
     // Enviar el objeto completo de la opción seleccionada
-    if (onSelectionChange) {
-      const selectedOption = dynamicOptions.find(
-        (option) => option.value === value,
-      );
-      onSelectionChange(selectedOption);
-    }
+    const selectedOption = dynamicOptions.find(
+      (option) => String(option.value) === String(value),
+    );
+    onSelectionChangeRef.current?.(selectedOption);
   };
 
   return (

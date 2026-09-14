@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import ModalConsultaCuentasHeader from "./ModalConsultaCuentasHeader";
 import ModalConsultaCuentasFiltros from "./ModalConsultaCuentasFiltros";
 import ModalConsultaCuentasColumnas from "./ModalConsultaCuentasColumnas";
@@ -8,13 +8,14 @@ import { toast } from "sonner";
 import { postReportCampaign } from "../../../../../services/mark/Orochi/LokiServices";
 import * as XLSX from "xlsx";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
+import { ACTIVE_SERVER } from "../../../../../config/backend";
+import { buildSearchCriteria } from "../../../../../forms/queryAdapters";
+import { realizarBusquedaRequestSchema } from "../../../../../schemas/formSchemas";
 const ModalConsultaCuentas = ({ onClose }) => {
   const user = useUserStore((state) => state.user);
   const jerarquia = user?.Jerarquía;
   const [situacionOptions, setSituacionOptions] = useState([]);
   const [allAvailableOptions, setAllAvailableOptions] = useState([]);
-  const [totalFiltros, setTotalFiltros] = useState(0);
-  const [totalColumnas, setTotalColumnas] = useState(0);
   const [filtros, setFiltros] = useState([]);
   const [columnas, setColumnas] = useState([]);
   const [headerData, setHeaderData] = useState({});
@@ -34,14 +35,6 @@ const ModalConsultaCuentas = ({ onClose }) => {
 
   const handleGetAllAvailableOptions = useCallback((options) => {
     setAllAvailableOptions(options);
-  }, []);
-
-  const handleFiltrosCount = useCallback((count) => {
-    setTotalFiltros(count);
-  }, []);
-
-  const handleColumnasCount = useCallback((count) => {
-    setTotalColumnas(count);
   }, []);
 
   const handleFiltrosChange = useCallback((filtrosData) => {
@@ -83,6 +76,16 @@ const ModalConsultaCuentas = ({ onClose }) => {
   };
 
   const handleConsultar = async () => {
+    if (!headerData.idCartera) {
+      toast.warning("Debe seleccionar una cartera");
+      return;
+    }
+
+    if (!headerData.tipoConsulta) {
+      toast.warning("Debe seleccionar un tipo de consulta");
+      return;
+    }
+
     // Validar que haya filtros y columnas
     if (filtros.length === 0) {
       toast.warning("Debe agregar al menos un filtro");
@@ -94,24 +97,22 @@ const ModalConsultaCuentas = ({ onClose }) => {
       return;
     }
 
-    // Construir el JSON
-    const consultaJSON = {
-      servidor: "Orochi",
-      idCartera: headerData.idCartera || 1,
-      idProducto: headerData.idProducto || 1,
-      desdeFecha: fechaDesde || "2025-06-11",
+    const consultaJSON = buildSearchCriteria({
+      servidor: ACTIVE_SERVER,
+      idCartera: headerData.idCartera,
+      idProducto: headerData.idProducto || undefined,
+      desdeFecha: fechaDesde || undefined,
       esDetalleResultado: tipoConsulta === "detalle",
-      parametros: filtros.map((filtro) => ({
-        concepto: filtro.concepto,
-        campo: filtro.campo,
-        valores: filtro.valores,
-      })),
-      agrupar: columnas.map((columna) => ({
-        campo: columna.nombre,
-        concepto: columna.concepto,
-      })),
+      parametros: filtros,
+      agrupar: columnas,
       jerarquiaEjecutivo: jerarquia ? jerarquia : 0,
-    };
+    });
+
+    const validation = realizarBusquedaRequestSchema.safeParse(consultaJSON);
+    if (!validation.success) {
+      toast.error(validation.error.issues[0]?.message || "La consulta no es válida");
+      return;
+    }
 
     console.log("  JSON de consulta:", JSON.stringify(consultaJSON, null, 2));
 
@@ -119,7 +120,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
       setIsLoading(true);
       toast.info("Realizando consulta...");
 
-      const response = await postReportCampaign(consultaJSON);
+      const response = await postReportCampaign(validation.data);
 
       console.log("  Respuesta de la consulta:", response);
 
@@ -157,15 +158,16 @@ const ModalConsultaCuentas = ({ onClose }) => {
     }
   };
 
-  const totalItems = totalFiltros + totalColumnas;
+  const filtersEnabled = Boolean(headerData.idCartera && headerData.tipoConsulta);
 
   return (
     <div className="modal-xl-container flex flex-col w-full sm:max-h-[95vh] sm:max-w-[95vw] max-h-[90vh] max-w-[90vw]">
       {/* Header fijo */}
       <div className="flex-shrink-0 px-2 sm:px-0">
-        <ModalConsultaCuentasHeader
-          onClose={onClose}
-          onHeaderDataChange={handleHeaderDataChange}
+          <ModalConsultaCuentasHeader
+            onClose={onClose}
+            onHeaderDataChange={handleHeaderDataChange}
+            jerarquia={jerarquia}
         />
       </div>
 
@@ -180,11 +182,12 @@ const ModalConsultaCuentas = ({ onClose }) => {
             <ModalConsultaCuentasFiltros
               onGetSituacionOptions={handleGetSituacionOptions}
               onGetAllAvailableOptions={handleGetAllAvailableOptions}
-              idProducto={1}
-              idCartera={1}
-              onFiltrosCountChange={handleFiltrosCount}
+              idProducto={headerData.idProducto}
+              idCartera={headerData.idCartera}
               onFiltrosChange={handleFiltrosChange}
-              isDateEnabled={totalItems >= 4}
+              fechaDesde={fechaDesde}
+              onFechaDesdeChange={setFechaDesde}
+              enabled={filtersEnabled}
             />
           </div>
 
@@ -193,9 +196,9 @@ const ModalConsultaCuentas = ({ onClose }) => {
             <ModalConsultaCuentasColumnas
               situacionOptions={situacionOptions}
               allAvailableOptions={allAvailableOptions}
-              onColumnasCountChange={handleColumnasCount}
               onColumnasChange={handleColumnasChange}
               onTipoChange={setTipoConsulta}
+              enabled={filtersEnabled}
             />
           </div>
         </div>
@@ -206,6 +209,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
             onConsultar={handleConsultar}
             isLoading={isLoading}
             resultData={resultData}
+            isDetail={tipoConsulta === "detalle"}
           />
         </div>
       </div>

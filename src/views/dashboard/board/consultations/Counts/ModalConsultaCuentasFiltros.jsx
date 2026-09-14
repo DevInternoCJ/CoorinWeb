@@ -4,12 +4,19 @@ import ModalSeleccionCampania from "../ModalCamapañas/ModalSeleccionCampania";
 import IconCircular from "../../../../../components/Iconos/IconCircular";
 import ConsultFilter from "../../../../../components/Select/ConsultFilter";
 import { toast } from "sonner";
-import { getCatalogoValueCard } from "../../../../../services/mark/Orochi/LokiServices";
 import FloatingSelect from "../../../../../components/Select/FloatingSelect";
 import FloatingInput from "../../../../../components/Select/FloatingInput";
-const situacionOptions = [
-  { value: "Sin información", label: "Sin información" },
-];
+import DatePicker from "../../../../../components/Select/DatePicker";
+import CatalogSelect from "../../../../../components/Select/CatalogSelect";
+import { useCatalogStore } from "../../../../../contextGlobal/catalogStore";
+const fieldOptions = {
+  Cuenta: ["Situación", "Nivel", "Sucursal", "CausaNoPago", "RFC", "Bloqueo"],
+  Conteos: ["Gestiones", "Visitas", "Chats", "Comentarios", "Negociaciones", "Seguimientos", "Teléfonos", "Correos", "Domicilios", "Cartas", "Blasters", "Emails", "SMSs", "Telegramas", "Pagos", "SumaPagos"],
+  Fechas: ["Activación", "Última gestión", "Última visita", "Última negociación", "Último pago", "Próximo seguimiento"],
+};
+const situacionOptions = [{ value: "Situación", label: "Situación", concepto: "Cuenta" }];
+const catalogByField = { Situación: { idCatalogo: 2 }, Nivel: { idCatalogo: 4 }, Sucursal: { idCatalogo: 1 }, CausaNoPago: { idCatalogo: 10 } };
+const bitOptions = [{ value: "1", label: "Sí" }, { value: "0", label: "No" }];
 
 const ModalConsultaCuentasFiltros = ({
   onGetSituacionOptions,
@@ -17,10 +24,12 @@ const ModalConsultaCuentasFiltros = ({
   idProducto,
   idCartera,
   onFiltrosCountChange,
-  isDateEnabled,
+  fechaDesde = "",
+  onFechaDesdeChange,
   onFiltrosChange,
+  enabled = false,
 }) => {
-  const [campoSeleccionado, setCampoSeleccionado] = useState("");
+  const [campoSeleccionado, setCampoSeleccionado] = useState("Situación");
   const [cuenta, setCuenta] = useState("Cuenta");
   const [selectedConsultFilter, setSelectedConsultFilter] = useState(null);
   const [operador, setOperador] = useState("=");
@@ -28,15 +37,40 @@ const ModalConsultaCuentasFiltros = ({
   const [filtros, setFiltros] = useState([]);
   const [openSeleccionCampania, setOpenSeleccionCampania] = useState(false);
   const [nieganOptions, setNieganOptions] = useState([]);
-
+  const valoresFor = useCatalogStore((state) => state.valoresFor);
+  const catalogValues = useCatalogStore((state) => state.valores);
+  const explicitFieldOptions = React.useMemo(
+    () => (fieldOptions[cuenta] || []).map((field) => ({ value: field, label: field, concepto: cuenta })),
+    [cuenta],
+  );
   const eliminarFiltro = (id) => {
     setFiltros(filtros.filter((filtro) => filtro.id !== id));
   };
 
   const agregarFiltro = () => {
-    const campoSeleccionado = selectedConsultFilter
-      ? selectedConsultFilter.label
-      : "";
+    if (!enabled) {
+      toast.warning("Seleccione el tipo de consulta y la cartera antes de agregar filtros");
+      return;
+    }
+    const operadorInterno = operador === "≤" ? "<=" : operador === "≥" ? ">=" : operador === "≠" ? "<>" : operador;
+    const campoSeleccionado = selectedConsultFilter?.label || (cuenta === "Cuenta" ? "Situación" : "");
+
+    if (!campoSeleccionado) {
+      toast.warning("Seleccione un campo para el filtro");
+      return;
+    }
+    if (!String(niegan).trim()) {
+      toast.warning("Capture o seleccione un valor para el filtro");
+      return;
+    }
+    if (cuenta === "Conteos" && !/^\\d+$/.test(String(niegan).trim())) {
+      toast.warning("Los conteos deben ser enteros");
+      return;
+    }
+    if (cuenta === "Fechas" && !/^\\d{4}-\\d{2}-\\d{2}$/.test(String(niegan).trim())) {
+      toast.warning("Capture una fecha válida");
+      return;
+    }
 
     // Obtener el texto legible del valor seleccionado para "Niegan acreditado"
     let valorMostrar = niegan;
@@ -47,7 +81,28 @@ const ModalConsultaCuentasFiltros = ({
       if (opcionSeleccionada) {
         valorMostrar = opcionSeleccionada.valor;
       }
+      const catalogConfig = catalogByField[campoSeleccionado];
+      if (catalogConfig) {
+        const selected = valoresFor(catalogConfig.idCatalogo, catalogConfig).find((item) => String(item.idValor) === String(niegan));
+        if (selected) valorMostrar = selected.valor;
+      }
     }
+
+    const isCatalogValue = Boolean(catalogByField[campoSeleccionado]);
+    const isBitValue = cuenta === "Cuenta" && campoSeleccionado === "Bloqueo";
+    const inferredType = isCatalogValue
+      ? "catalogo"
+      : isBitValue
+        ? "bit"
+        : cuenta === "Conteos"
+          ? "numero"
+          : cuenta === "Fechas" || /^\d{4}-\d{2}-\d{2}$/.test(String(niegan))
+            ? "fecha"
+            : cuenta === "Producto" && !Number.isNaN(Number(niegan))
+              ? "numero"
+              : "texto";
+    const rawValue = String(niegan).trim();
+    const apiExpression = `${operadorInterno}${rawValue}`;
 
     // Verificar si ya existe un filtro con el mismo concepto y campo
     const filtroExistente = filtros.find(
@@ -84,6 +139,7 @@ const ModalConsultaCuentasFiltros = ({
                 ? {
                     ...filtro,
                     valores: filtro.valores + ", " + valorMostrar,
+                    apiValores: `${filtro.apiValores || filtro.operador + String(filtro.idValor ?? filtro.valorTexto ?? "")},${apiExpression}`,
                   }
                 : filtro,
             ),
@@ -118,6 +174,7 @@ const ModalConsultaCuentasFiltros = ({
                 ? {
                     ...filtro,
                     valores: filtro.valores + ", " + valorMostrar,
+                    apiValores: `${filtro.apiValores || filtro.operador + String(filtro.idValor ?? filtro.valorTexto ?? "")},${apiExpression}`,
                   }
                 : filtro,
             ),
@@ -153,6 +210,7 @@ const ModalConsultaCuentasFiltros = ({
                     ...filtro,
                     valores:
                       filtro.valores + ", " + operador + " " + valorMostrar,
+                    apiValores: `${filtro.apiValores || filtro.operador + String(filtro.idValor ?? filtro.valorTexto ?? "")},${apiExpression}`,
                   }
                 : filtro,
             ),
@@ -195,6 +253,7 @@ const ModalConsultaCuentasFiltros = ({
                     ...filtro,
                     valores:
                       filtro.valores + ", " + operador + " " + valorMostrar,
+                    apiValores: `${filtro.apiValores || filtro.operador + String(filtro.idValor ?? filtro.valorTexto ?? "")},${apiExpression}`,
                   }
                 : filtro,
             ),
@@ -292,6 +351,7 @@ const ModalConsultaCuentasFiltros = ({
                 ...filtro,
                 valores: filtro.valores + ", " + operador + valorMostrar,
                 operador: filtro.operador + "," + operador, // Guardar múltiples operadores
+                apiValores: `${filtro.apiValores || filtro.operador + String(filtro.idValor ?? filtro.valorTexto ?? "")},${apiExpression}`,
               }
             : filtro,
         ),
@@ -303,7 +363,10 @@ const ModalConsultaCuentasFiltros = ({
         concepto: cuenta,
         campo: campoSeleccionado,
         valores: operador + valorMostrar,
-        operador: operador,
+        operador: operadorInterno,
+        apiValores: apiExpression,
+        tipoValor: inferredType,
+        ...((isCatalogValue || isBitValue) ? { idValor: Number(niegan), ...(isCatalogValue ? { idCatalogo: catalogByField[campoSeleccionado].idCatalogo } : {}) } : { valorTexto: rawValue }),
       };
       setFiltros((prevFiltros) => [...prevFiltros, nuevoFiltro]);
     }
@@ -320,7 +383,7 @@ const ModalConsultaCuentasFiltros = ({
   // Limpiar la selección cuando cambie el tipo de filtro
   React.useEffect(() => {
     setSelectedConsultFilter(null);
-    setCampoSeleccionado("");
+    setCampoSeleccionado(cuenta === "Cuenta" ? "Situación" : "");
     setNiegan("");
     if (onGetSituacionOptions) {
       onGetSituacionOptions([]);
@@ -333,12 +396,19 @@ const ModalConsultaCuentasFiltros = ({
     }
   }, [cuenta, onGetSituacionOptions]);
 
+  React.useEffect(() => {
+    setFiltros([]);
+    setNiegan("");
+    setSelectedConsultFilter(null);
+    onGetSituacionOptions?.([]);
+  }, [idCartera, idProducto, onGetSituacionOptions]);
+
   // Cargar opciones de "Niegan acreditado" cuando se seleccione "Cuenta"
   React.useEffect(() => {
     const loadNieganOptions = async () => {
       if (cuenta === "Cuenta") {
         try {
-          const catalogData = await getCatalogoValueCard();
+          const catalogData = valoresFor(2, {});
           if (catalogData && Array.isArray(catalogData)) {
             // Filtrar solo los que tienen idCatálogo === 2
             const filteredOptions = catalogData.filter(
@@ -365,7 +435,7 @@ const ModalConsultaCuentasFiltros = ({
     };
 
     loadNieganOptions();
-  }, [cuenta]);
+  }, [cuenta, valoresFor, catalogValues]);
 
   // Notificar cambios en el conteo de filtros
   React.useEffect(() => {
@@ -378,8 +448,11 @@ const ModalConsultaCuentasFiltros = ({
     }
   }, [filtros.length, onFiltrosCountChange, onFiltrosChange, filtros]);
 
+  const showPeriod = filtros.some((filtro) => filtro.concepto === "Conteos");
+
   return (
     <>
+      <fieldset className={!enabled ? "opacity-60" : ""}>
       <div className="bg-surface rounded-lg p-3 h-auto min-h-[400px] flex flex-col">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3 flex-shrink-0">
           <IconCircular
@@ -405,25 +478,30 @@ const ModalConsultaCuentasFiltros = ({
           </IconCircular>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-            <input
-              type="date"
-              className="bg-surface-secondary py-2.5 sm:py-2 px-4 block w-full sm:w-auto border-border rounded-lg text-sm focus:border-jerarquia1 focus:ring-jerarquia1 disabled:opacity-50 disabled:pointer-events-none text-foreground"
-              disabled={!isDateEnabled}
+            <DatePicker
+              id="consulta-cuentas-desde"
+              label="Desde fecha"
+              value={fechaDesde}
+              onChange={onFechaDesdeChange}
+              className="w-full sm:w-44"
             />
             <div className="flex flex-row items-center gap-2 w-full sm:w-auto">
-              <button className="btn-success flex-1 sm:flex-none">
+              <button
+                type="button"
+                className="btn-success flex-1 sm:flex-none h-[38px] px-3.5 text-xs font-medium rounded-lg flex items-center justify-center"
+              >
                 Exportar
-                <span className="material-icons text-base align-middle"></span>
               </button>
               <button
-                className="btn-info flex-1 sm:flex-none"
+                type="button"
+                className="btn-info flex-1 sm:flex-none h-[38px] px-3.5 text-xs font-medium rounded-lg flex items-center justify-center"
                 onClick={agregarFiltro}
               >
                 Agregar
               </button>
 
               {/* Tooltip agregado aquí */}
-              <span className="hs-tooltip [--placement:top] inline-flex justify-center items-center size-8 rounded-lg bg-surface-secondary flex-shrink-0">
+              <span className="hs-tooltip [--placement:top] inline-flex justify-center items-center size-[38px] rounded-lg bg-surface-secondary border border-border flex-shrink-0">
                 <IconCustomTable
                   className="size-5 cursor-pointer text-jerarquia3"
                   onClick={() => setOpenSeleccionCampania(true)}
@@ -440,36 +518,35 @@ const ModalConsultaCuentasFiltros = ({
         </div>
         {/* Selects en columnas y responsivo */}
         <div className="flex flex-col sm:flex-row items-stretch gap-2 mb-2 w-full">
-          {/* Cuenta */}
+          {/* Concepto: determina los campos y el tipo de valor */}
           <div className="relative flex-1">
             <FloatingSelect
               id="cuenta-select"
-              label="Cuenta"
+              label="Concepto"
               value={cuenta}
               onChange={(e) => setCuenta(e.target.value)}
               required
               options={[
                 { value: "Cuenta", label: "Cuenta" },
                 { value: "Producto", label: "Producto" },
+                { value: "Conteos", label: "Conteos" },
+                { value: "Fechas", label: "Fechas" },
               ]}
             />
           </div>
           {/* Situación - Usando ConsultFilter */}
           <ConsultFilter
-            options={situacionOptions}
-            label="Seleccione"
-            defaultValue=""
+            options={explicitFieldOptions.length ? explicitFieldOptions : situacionOptions}
+            label="Campo"
+            defaultValue={cuenta === "Cuenta" ? "Situación" : ""}
             onSelectionChange={(selectedOption) => {
               if (selectedOption) {
                 setSelectedConsultFilter(selectedOption);
                 setCampoSeleccionado(selectedOption.label || "");
+                setNiegan("");
               }
             }}
-            onAllOptionsLoaded={(allOptions) => {
-              if (onGetAllAvailableOptions) {
-                onGetAllAvailableOptions(allOptions);
-              }
-            }}
+            onAllOptionsLoaded={onGetAllAvailableOptions}
             id="situacion-select"
             filterType={cuenta}
             idProducto={idProducto}
@@ -483,13 +560,16 @@ const ModalConsultaCuentasFiltros = ({
               value={operador}
               onChange={(e) => setOperador(e.target.value)}
               required
-              options={[
-                { value: "=", label: "=" },
-                { value: "≠", label: "≠" },
-                { value: ">", label: ">" },
-                { value: "<", label: "<" },
-                { value: ">=", label: ">=" },
-                { value: "<=", label: "<=" },
+              options={cuenta === "Cuenta" ? [
+                { value: "=", label: "= Igual" },
+                { value: "≠", label: "≠ Diferente" },
+              ] : [
+                { value: "<", label: "< Menor" },
+                { value: "≤", label: "≤ Menor o igual" },
+                { value: "=", label: "= Igual" },
+                { value: "≥", label: "≥ Mayor o igual" },
+                { value: ">", label: "> Mayor" },
+                { value: "≠", label: "≠ Diferente" },
               ]}
             />
           </div>
@@ -501,7 +581,7 @@ const ModalConsultaCuentasFiltros = ({
                 <div className="relative flex-1">
                   <FloatingInput
                     id="rfc-input"
-                    label="RFC"
+                    label="Valor (RFC)"
                     value={niegan}
                     onChange={(e) => setNiegan(e.target.value)}
                     required
@@ -509,17 +589,27 @@ const ModalConsultaCuentasFiltros = ({
                     maxLength={13}
                   />
                 </div>
+              ) : campoSeleccionado === "Bloqueo" ? (
+                <FloatingSelect id="bloqueo-select" label="Valor (Bloqueo)" value={niegan} onChange={(e) => setNiegan(e.target.value)} required options={bitOptions} />
               ) : (
                 // Select para otros campos de Cuenta
                 <>
-                  <FloatingSelect
+                  {catalogByField[campoSeleccionado] ? <CatalogSelect
+                    id="niegan-catalogo"
+                    label="Valor"
+                    catalogId={catalogByField[campoSeleccionado].idCatalogo}
+                    filter={catalogByField[campoSeleccionado]}
+                    value={niegan}
+                    onChange={(e) => setNiegan(e.target.value)}
+                    required
+                  /> : <FloatingSelect
                     id="niegan-select"
-                    label="Niegan"
+                    label="Valor"
                     value={niegan}
                     onChange={(e) => setNiegan(e.target.value)}
                     required
                     options={nieganOptions}
-                  />
+                  />}
                 </>
               )}
             </div>
@@ -529,11 +619,11 @@ const ModalConsultaCuentasFiltros = ({
             <div className="relative flex-1">
               <FloatingInput
                 id="valores-input"
-                label={cuenta === "Fechas" ? "Fecha" : "Ingresa un valor"}
+                label={cuenta === "Fechas" ? "Valor (fecha)" : cuenta === "Conteos" ? "Valor (entero)" : "Valor"}
                 value={niegan}
                 onChange={(e) => setNiegan(e.target.value)}
                 required
-                type={cuenta === "Fechas" ? "date" : "text"}
+                type={cuenta === "Fechas" ? "date" : cuenta === "Conteos" ? "number" : "text"}
               />
             </div>
           )}
@@ -599,6 +689,7 @@ const ModalConsultaCuentasFiltros = ({
           </table>
         </div>
       </div>
+      </fieldset>
       {openSeleccionCampania && (
         <ModalSeleccionCampania
           open={openSeleccionCampania}

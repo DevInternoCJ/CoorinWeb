@@ -11,12 +11,12 @@ const ModalBaseCampanas = ({ open, onClose }) => {
     if (!open) return null;
 
     return (
-        <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black/55 flex items-center justify-center z-50 p-4">
             <div
                   ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-white rounded-lg shadow-2xl w-full max-w-6xl p-4 overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]`}
+        } bg-surface text-foreground rounded-xl shadow-2xl w-full max-w-6xl p-4 overflow-hidden border border-border flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
             >
                 {/* Header y contenido principal */}
@@ -37,17 +37,17 @@ const ModalBaseCampanas = ({ open, onClose }) => {
                 .modal-scroll-gray::-webkit-scrollbar {
                     width: 8px;
                     height: 8px;
-                    background: #f5f5f5;
+                    background: var(--color-surface-secondary);
                 }
                 .modal-scroll-gray::-webkit-scrollbar-thumb {
-                    background: #b0b0b0;
+                    background: var(--color-border);
                     border-radius: 4px;
                 }
                 .modal-scroll-gray::-webkit-scrollbar-thumb:hover {
-                    background: #888;
+                    background: var(--color-text-muted);
                 }
                 .modal-scroll-gray {
-                    scrollbar-color: #b0b0b0 #f5f5f5;
+                    scrollbar-color: var(--color-border) var(--color-surface-secondary);
                     scrollbar-width: thin;
                 }
             `}</style>

@@ -4,10 +4,13 @@ import FloatingSelect from "../../../../../components/Select/FloatingSelect";
 import { getQueryComplement } from "../../../../../services/mark/Orochi/LokiServices";
 import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 import { toast } from "sonner";
+import FieldError from "../../../../../components/Formulario/FieldError";
+import useZodValidation from "../../../../../hooks/useZodValidation";
+import { consultaGestionesSchema, normalizeDateRange } from "../../../../../schemas/formSchemas";
 
 const TabQueryComplement = () => {
   // Obtener datos de usuario desde localStorage
-  const userData = JSON.parse(localStorage.getItem("userData"));
+  const userData = JSON.parse(sessionStorage.getItem("userData") || localStorage.getItem("userData") || "{}");
   const idCartera = userData?.idCartera || 0;
   const idProducto = userData?.idProducto ?? 0;
   const jerarquia = userData?.Jerarquía ?? 0;
@@ -24,6 +27,7 @@ const TabQueryComplement = () => {
   });
   const [loadingExcel, setLoadingExcel] = useState(false);
   const [abortController, setAbortController] = useState(null);
+  const { errors, validate, clearError } = useZodValidation(consultaGestionesSchema);
 
   const minDate = "2016-01-01";
   const maxDate = fechaHoy;
@@ -34,8 +38,15 @@ const TabQueryComplement = () => {
   }, [cartera]);
 
   const handleGuardarExcel = async () => {
-    if (!cartera || !desde || !hasta) {
-      toast.warning("Por favor complete todos los campos requeridos");
+    const filters = validate({
+      idCartera: cartera,
+      fechaInicio: desde,
+      fechaFin: hasta,
+      idProducto,
+      jerarquia,
+    });
+    if (!filters) {
+      toast.warning("Revise los filtros marcados.");
       return;
     }
 
@@ -47,11 +58,10 @@ const TabQueryComplement = () => {
     try {
       // Convertir nombres de parámetros y agregar formato de fecha
       const params = {
-        idCartera: parseInt(cartera),
-        fechaInicial: desde ? `${desde}T00:00:00Z` : null,
-        fechaFinal: hasta ? `${hasta}T00:00:00Z` : null,
-        jerarquia,
-        idProducto: idProducto || null,
+        idCartera: filters.idCartera,
+        ...normalizeDateRange(filters),
+        jerarquia: filters.jerarquia,
+        idProducto: filters.idProducto || null,
       };
 
       console.log("Parámetros enviados:", params);
@@ -199,7 +209,10 @@ const TabQueryComplement = () => {
           <input
             type="date"
             value={desde}
-            onChange={(e) => setDesde(e.target.value)}
+            onChange={(e) => {
+              setDesde(e.target.value);
+              clearError("fechaInicio");
+            }}
             min={minDate}
             max={maxDate}
             className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
@@ -212,6 +225,7 @@ const TabQueryComplement = () => {
           >
             Desde
           </label>
+          <FieldError id="fechaInicio-error" message={errors.fechaInicio} />
         </div>
 
         <div className="flex-1 order-1 sm:order-2">
@@ -219,7 +233,10 @@ const TabQueryComplement = () => {
             id="cartera-select"
             label="Cartera"
             value={String(cartera)}
-            onChange={(e) => setCartera(e.target.value)}
+            onChange={(e) => {
+              setCartera(e.target.value);
+              clearError("idCartera");
+            }}
             options={[
               { value: "1", label: "Cartera 1" },
               { value: "2", label: "Cartera 2" },
@@ -227,6 +244,7 @@ const TabQueryComplement = () => {
               { value: "31", label: "Cartera 31" },
             ]}
           />
+          <FieldError id="idCartera-error" message={errors.idCartera} />
         </div>
       </div>
 
@@ -236,7 +254,10 @@ const TabQueryComplement = () => {
           <input
             type="date"
             value={hasta}
-            onChange={(e) => setHasta(e.target.value)}
+            onChange={(e) => {
+              setHasta(e.target.value);
+              clearError("fechaFin");
+            }}
             min={minDate}
             max={maxDate}
             className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
@@ -249,6 +270,7 @@ const TabQueryComplement = () => {
           >
             Hasta
           </label>
+          <FieldError id="fechaFin-error" message={errors.fechaFin} />
         </div>
 
         <button

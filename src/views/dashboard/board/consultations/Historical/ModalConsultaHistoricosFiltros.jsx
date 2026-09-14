@@ -501,11 +501,11 @@ const ModalConsultaHistoricosFiltros = ({
         <div className="w-full flex flex-col lg:flex-row gap-4 items-start">
           {/* Columna izquierda: checkboxes y input/botón */}
           <div className="w-full lg:w-2/3 flex flex-col gap-2">
-            <div className="grid grid-cols-2 grid-rows-3 gap-x-4 gap-y-2 w-full bg-white rounded-lg p-4 shadow-sm sm:grid-cols-2 sm:grid-rows-3 md:grid-cols-3 md:grid-rows-2">
+            <div className="grid grid-cols-2 grid-rows-3 gap-x-4 gap-y-2 w-full bg-surface rounded-lg p-4 shadow-sm border border-border sm:grid-cols-2 sm:grid-rows-3 md:grid-cols-3 md:grid-rows-2">
               {Object.entries(checkedItems).map(([key, checked]) => (
                 <label
                   key={key}
-                  className="flex items-center gap-x-2 text-xs font-medium text-gray-700 mb-2 w-full"
+                  className="flex items-center gap-x-2 text-xs font-medium text-foreground mb-2 w-full"
                 >
                   <input
                     type="checkbox"
@@ -538,12 +538,12 @@ const ModalConsultaHistoricosFiltros = ({
                         setExcelBlob(null);
                       }}
                       placeholder="Ingresa número de cuenta"
-                      className="peer pt-4 pb-2 px-2 block w-full bg-gray-50 border border-jerarquia1 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1"
+                      className="peer pt-4 pb-2 px-2 block w-full bg-surface-secondary border border-border text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2"
                       style={{ color: "var(--color-jerarquia3)" }}
                     />
                     <label
                       htmlFor="cuentaInput"
-                      className="absolute left-2 top-2 bg-gray-50 px-1 text-xs text-jerarquia1 pointer-events-none transition-all duration-150 peer-focus:-translate-y-4 peer-focus:scale-90 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:scale-90"
+                      className="absolute left-2 top-2 bg-surface-secondary px-1 text-xs text-jerarquia2 pointer-events-none transition-all duration-150 peer-focus:-translate-y-4 peer-focus:scale-90 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:scale-90"
                       style={{ zIndex: 10 }}
                     >
                       Cuenta
@@ -695,8 +695,8 @@ const ModalConsultaHistoricosFiltros = ({
             </div>
           </div>
           {/* Columna derecha: Período y calendarios solo en lg+ */}
-          <div className="hidden lg:flex flex-col gap-0 w-1/3 bg-white rounded-lg pt-4 px-4 shadow-sm items-start">
-            <label className="flex items-center gap-x-2 text-xs font-medium text-gray-700 mb-1 justify-end self-end">
+          <div className="hidden lg:flex flex-col gap-0 w-1/3 bg-surface rounded-lg pt-4 px-4 shadow-sm border border-border items-start">
+            <label className="flex items-center gap-x-2 text-xs font-medium text-foreground mb-1 justify-end self-end">
               <span className="capitalize">Período</span>
               <input
                 type="checkbox"
@@ -712,7 +712,7 @@ const ModalConsultaHistoricosFiltros = ({
                   id="fecha-desde-input"
                   max={getFechaMaxima()}
                   min={getFechaMinima()}
-                  className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  className="peer p-4 block w-full bg-surface-secondary border border-border text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                   value={fechaDesde.split("/").reverse().join("-")}
                   onChange={(e) => {
                     const nuevaFecha = e.target.value
@@ -744,7 +744,7 @@ const ModalConsultaHistoricosFiltros = ({
                   id="fecha-hasta-input"
                   max={getFechaMaxima()}
                   min={getFechaMinima()}
-                  className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  className="peer p-4 block w-full bg-surface-secondary border border-border text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                   value={fechaHasta.split("/").reverse().join("-")}
                   onChange={(e) => {
                     const nuevaFecha = e.target.value
@@ -766,8 +766,8 @@ const ModalConsultaHistoricosFiltros = ({
             </div>
           </div>
           {/* Período y calendarios debajo del grid solo en md y menores */}
-          <div className="flex flex-col gap-0 w-full bg-white rounded-lg pt-4 px-4 shadow-sm items-start lg:hidden mt-4">
-            <label className="flex items-center gap-x-2 text-xs font-medium text-gray-700 mb-1 justify-end self-end">
+          <div className="flex flex-col gap-0 w-full bg-surface rounded-lg pt-4 px-4 shadow-sm border border-border items-start lg:hidden mt-4">
+            <label className="flex items-center gap-x-2 text-xs font-medium text-foreground mb-1 justify-end self-end">
               <span className="capitalize">Período</span>
               <input
                 type="checkbox"
@@ -783,7 +783,7 @@ const ModalConsultaHistoricosFiltros = ({
                   id="fecha-desde-input"
                   max={getFechaMaxima()}
                   min={getFechaMinima()}
-                  className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  className="peer p-4 block w-full bg-surface-secondary border border-border text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                   value={fechaDesde.split("/").reverse().join("-")}
                   onChange={(e) => {
                     const nuevaFecha = e.target.value
@@ -815,7 +815,7 @@ const ModalConsultaHistoricosFiltros = ({
                   id="fecha-hasta-input"
                   max={getFechaMaxima()}
                   min={getFechaMinima()}
-                  className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  className="peer p-4 block w-full bg-surface-secondary border border-border text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                   value={fechaHasta.split("/").reverse().join("-")}
                   onChange={(e) => {
                     const nuevaFecha = e.target.value

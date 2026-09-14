@@ -137,7 +137,7 @@ const ModalCampanasCampanias = ({
 
   return (
     <div
-      className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col justify-between"
+      className="bg-surface text-foreground rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col justify-between"
       style={{ minWidth: 0 }}
     >
       <div>
@@ -452,9 +452,9 @@ const ModalCampanasCampanias = ({
                             }
                           }}
                         />
-                        <span className="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-jerarquia3"></span>
-                        <span className="absolute top-1/2 start-0.5 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
-                        <span className="absolute top-1/2 start-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-white transition-colors duration-200">
+                        <span className="absolute inset-0 bg-layer border border-border rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-jerarquia3"></span>
+                        <span className="absolute top-1/2 start-0.5 -translate-y-1/2 w-4 h-4 bg-surface rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                        <span className="absolute top-1/2 start-0.5 -translate-y-1/2 flex justify-center items-center text-muted-foreground peer-checked:text-white transition-colors duration-200">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width={13}
@@ -467,7 +467,7 @@ const ModalCampanasCampanias = ({
                             ></path>
                           </svg>
                         </span>
-                        <span className="absolute top-1/2 end-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-jerarquia3 transition-colors duration-200 ">
+                        <span className="absolute top-1/2 end-0.5 -translate-y-1/2 flex justify-center items-center text-muted-foreground peer-checked:text-jerarquia3 transition-colors duration-200 ">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width={13}

@@ -21,6 +21,9 @@ import Phrases from "./sideBar/Administration/gespa/phrases/Phrases";
 import ConsultVisitContent from "./sideBar/processes/visits/ConsultaVisits";
 import CaptureVisit from "./sideBar/processes/visits/Capture/CaptureVisit";
 import LoadVisitsContent from "./sideBar/processes/visits/LoadVisits";
+import CorrectVisits from "./sideBar/processes/visits/CorrectVisits";
+import DeleteVisits from "./sideBar/processes/visits/DeleteVisits";
+import PendingAuditForm from "./sideBar/processes/PendingAuditForm";
 import ModalSupervisor from "./sideBar/processes/supervisor/ModalSupervisor";
 import IconCircular from "../../components/Iconos/IconCircular";
 import ConsorcioLogo from "../../../src/assets//CoorinBlack.svg";
@@ -98,7 +101,9 @@ export default function CoorinDashboard() {
       "Lista Negra", "Arrepentimientos",
       "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios", 
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios2",
-      "Consulta Visitas", "Captura Visitas", "Carga Visitas"
+      "Consulta Visitas", "Captura Visitas", "Carga Visitas",
+      "Corregir Visitas", "Eliminar Visitas", "Configuración Correos",
+      "Envios Ejecutivos", "Carga Conversación"
     ];
 
     if (informationComponents.includes(selectedSidebarOption)) {
@@ -176,6 +181,36 @@ export default function CoorinDashboard() {
             mostrarTabla: false,
             setMostrarTabla: () => { },
             onClose: closeModal,
+          };
+          break;
+        case "Corregir Visitas":
+          ContentComponent = CorrectVisits;
+          break;
+        case "Eliminar Visitas":
+          ContentComponent = DeleteVisits;
+          break;
+        case "Configuración Correos":
+          ContentComponent = PendingAuditForm;
+          contentProps = {
+            title: "Configuración de correo",
+            formId: "frmConfiguraciónCorreo",
+            description: "Falta auditar servidores, credenciales, permisos y endpoints antes de exponer campos sensibles.",
+          };
+          break;
+        case "Envios Ejecutivos":
+          ContentComponent = PendingAuditForm;
+          contentProps = {
+            title: "Envío a ejecutivos",
+            formId: "frmEnvíoEjecutivos",
+            description: "Falta consolidar destinatarios, plantillas y contrato de envío con el backend.",
+          };
+          break;
+        case "Carga Conversación":
+          ContentComponent = PendingAuditForm;
+          contentProps = {
+            title: "Carga de conversación",
+            formId: "frmCargaConversacion",
+            description: "La pantalla especial AMEX requiere extraer controles y reglas del handler legacy antes de habilitar cargas.",
           };
           break;
         default:
@@ -329,7 +364,8 @@ export default function CoorinDashboard() {
       "información", "Lista Negra", "Arrepentimientos",
       "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios",
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
-      "Consulta Visitas", "Captura Visitas", "Carga Visitas",
+      "Consulta Visitas", "Captura Visitas", "Carga Visitas", "Corregir Visitas",
+      "Eliminar Visitas", "Configuración Correos", "Envios Ejecutivos", "Carga Conversación",
       "Campañas", "Plantillas-Correo", "Frases", "Accionamientos", "Gestiones", "Supervisor", "Procesos-Gespa", // Procesos-Gespa (Gespa)
     ];
 

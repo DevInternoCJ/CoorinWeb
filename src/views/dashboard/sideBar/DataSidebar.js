@@ -70,7 +70,7 @@ const dataSidebar = {
               icon: "UserGroupIcon",
               subMenus2: [
                 { id: "1CCC", title: "Comentarios", icon: "EnvelopeIcon" },
-                { id: "2CCC", title: "Procesos-Gespa", icon: "BookOpenIcon" },
+                // { id: "2CCC", title: "Procesos-Gespa", icon: "BookOpenIcon" },
               ],
             },
             {
@@ -78,43 +78,43 @@ const dataSidebar = {
               title: "Visitas",
               icon: "UserIcon",
               subMenus2: [
-                { id: "1CCC", title: "Consulta", icon: "EnvelopeIcon" },
-                { id: "2CCC", title: "Captura", icon: "BookOpenIcon" },
+                // { id: "1CCC", title: "Consulta", icon: "EnvelopeIcon" },
+                // { id: "2CCC", title: "Captura", icon: "BookOpenIcon" },
                 { id: "3CCC", title: "Carga", icon: "BookOpenIcon" },
                 { id: "4CCC", title: "Corregir", icon: "BookOpenIcon" },
                 { id: "5CCC", title: "Eliminar", icon: "BookOpenIcon" },
               ],
             },
-            {
-              id: "3CC",
-              title: "Correos",
-              icon: "UserIcon",
-              subMenus2: [
-                { id: "1CCC", title: "Configuración", icon: "EnvelopeIcon" },
-                {
-                  id: "2CCC",
-                  title: "Envios Ejecutivos",
-                  icon: "BookOpenIcon",
-                },
-                {
-                  id: "3CCC",
-                  title: "Carga Conversación",
-                  icon: "BookOpenIcon",
-                },
-              ],
-            },
-            {
-              id: "4CC",
-              title: "Accionamientos",
-              icon: "UserIcon",
-              // Sin subMenus2 - abre el modal directamente
-            },
-            {
-              id: "5CC",
-              title: "Gestiones",
-              icon: "UserIcon",
-              // Sin subMenus2 - abre el modal directamente
-            },
+            // {
+            //   id: "3CC",
+            //   title: "Correos",
+            //   icon: "UserIcon",
+            //   subMenus2: [
+            //     { id: "1CCC", title: "Configuración", icon: "EnvelopeIcon" },
+            //     {
+            //       id: "2CCC",
+            //       title: "Envios Ejecutivos",
+            //       icon: "BookOpenIcon",
+            //     },
+            //     {
+            //       id: "3CCC",
+            //       title: "Carga Conversación",
+            //       icon: "BookOpenIcon",
+            //     },
+            //   ],
+            // },
+            // {
+            //   id: "4CC",
+            //   title: "Accionamientos",
+            //   icon: "UserIcon",
+            //   // Sin subMenus2 - abre el modal directamente
+            // },
+            // {
+            //   id: "5CC",
+            //   title: "Gestiones",
+            //   icon: "UserIcon",
+            //   // Sin subMenus2 - abre el modal directamente
+            // },
             { id: "6CC", title: "Supervisor", icon: "UserIcon" },
 
 

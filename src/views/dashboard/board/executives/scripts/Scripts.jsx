@@ -96,12 +96,12 @@ const Scripts = ({ onClose }) => {
   }, []);
 
   return (
-    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black/55 flex items-center justify-center z-50 p-4">
       <div
         ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-[var(--color-surface-modal)] rounded-lg shadow-2xl w-full max-w-6xl overflow-hidden flex flex-col max-h-[90vh]`}
+        } bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] rounded-xl shadow-2xl w-full max-w-6xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -135,9 +135,9 @@ const Scripts = ({ onClose }) => {
                 <DataCharges onDataLoaded={handleDataLoaded} />
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center text-center text-gray-500 bg-[var(--color-surface-modal)] rounded-lg py-20">
+              <div className="flex flex-col items-center justify-center text-center text-[var(--color-text-muted)] bg-[var(--color-surface-secondary)] border border-[var(--color-border)] rounded-lg py-20">
                 <IconWarning className="size-8" />
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-[var(--color-text-muted)] mt-1">
                   Seleccione el producto para gestionar scripts.
                 </p>
               </div>

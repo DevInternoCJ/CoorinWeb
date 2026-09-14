@@ -4,8 +4,8 @@ import api from '../../../loki/apiConfig';
 export const getToken = () => {
   try {
     return sessionStorage.getItem('token') || localStorage.getItem('token') || null;
-  } catch (e) {
-    return localStorage.getItem('token') || null;
+  } catch {
+    return null;
   }
 };
 
@@ -14,47 +14,16 @@ export const clearAuth = () => {
   try {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('userData');
-  } catch (e) {
+  } catch {
     // ignore
   }
   try {
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
-  } catch (e) {
+  } catch {
     // ignore
   }
 };
-
-// Shim de compatibilidad: hacer que lecturas/eliminiaciones legadas en localStorage
-// respeten la nueva lógica de sesión por pestaña (sessionStorage primero).
-try {
-  const _origGetItem = localStorage.getItem.bind(localStorage);
-  localStorage.getItem = function (key) {
-    if (key === 'token') {
-      try {
-        return sessionStorage.getItem('token') || _origGetItem(key);
-      } catch (e) {
-        return _origGetItem(key);
-      }
-    }
-    return _origGetItem(key);
-  };
-
-  const _origRemoveItem = localStorage.removeItem.bind(localStorage);
-  localStorage.removeItem = function (key) {
-    if (key === 'token' || key === 'userData') {
-      try {
-        clearAuth();
-        return;
-      } catch (e) {
-        // fall back to original
-      }
-    }
-    return _origRemoveItem(key);
-  };
-} catch (e) {
-  // Si por alguna razón no podemos reconfigurar localStorage, no fallar.
-}
 
 // export const ValidatePassword = async (userData, idEjecutivo) => {
 //   try {
@@ -99,7 +68,7 @@ export const UpdatePassword = async (passwordData) => {
   try {
     // Verificar que el token existe antes de proceder
     const token = getToken();
-    
+
     console.log('  Enviando a /Auth/restablecer-contrasenia:', passwordData);
     console.log('  Token disponible:', token);
     //   DEJA QUE EL INTERCEPTOR AÑADA EL TOKEN AUTOMÁTICAMENTE
@@ -130,28 +99,27 @@ export const UpdatePassword = async (passwordData) => {
 // services/LokiServices.js
 export const GetScreenFields = async (idProducto) => {
   try {
-    const token = localStorage.getItem('token');
-    
+    const token = getToken();
+
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    
+
     console.log('  Enviando a /CamposPantalla/obtener');
     console.log('  Parámetros:', { idProducto });
-    
+
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
     const response = await api.get(`/CamposPantalla/obtener/${idProducto}`);
-    
+
     console.log('  Respuesta de /CamposPantalla/obtener:', response.data);
-    
+
     return response.data;
   } catch (error) {
      console.error('  Error al actualizar la contraseña:', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -168,28 +136,27 @@ export const GetScreenFields = async (idProducto) => {
 
 export const GetGridFields = async (idProducto) => {
   try {
-    const token = localStorage.getItem('token');
-    
+    const token = getToken();
+
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    
+
     console.log('  Enviando a /CamposPantalla/grid-producto-sample');
     console.log('  Parámetros:', {idProducto });
-    
+
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
     const response = await api.get(`/CamposPantalla/grid-producto-sample/${idProducto}/70/5`);
-    
+
     console.log('  Respuesta de /CamposPantalla/grid-producto-sample:', response.data);
-    
+
     return response.data;
   } catch (error) {
      console.error('  Error al actualizar la contraseña:', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -206,28 +173,27 @@ export const GetGridFields = async (idProducto) => {
 
 export const GetVerifyProduct = async (idProducto) => {
   try {
-    const token = localStorage.getItem('token');
-    
+    const token = getToken();
+
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    
+
     console.log('  Enviando a /CamposPantalla/existe-tabla-producto');
     console.log('  Parámetros:', {idProducto });
-    
+
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
     const response = await api.get(`/CamposPantalla/existe-tabla-producto/${idProducto}`);
-    
+
     console.log('  Respuesta de /CamposPantalla/existe-tabla-producto:', response.data);
-    
+
     return response.data;
   } catch (error) {
      console.error('  Error al verificar producto:', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -245,8 +211,8 @@ export const GetVerifyProduct = async (idProducto) => {
 export const SaveScreenFields = async (data) => {
   try {
     // Verificar que el token existe antes de proceder
-    const token = localStorage.getItem('token');
-    
+    const token = getToken();
+
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -262,8 +228,7 @@ export const SaveScreenFields = async (data) => {
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -281,7 +246,7 @@ export const SaveScreenFields = async (data) => {
 // Nuevo endpoint para Lista Negra con parámetros
 export const darkListV2 = async ({ idCartera, selector, dato }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -295,8 +260,7 @@ export const darkListV2 = async ({ idCartera, selector, dato }) => {
     console.error('Error al obtener la ListaNegra:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -312,7 +276,7 @@ export const darkListV2 = async ({ idCartera, selector, dato }) => {
 
 export const getRegrest = async ({ idCartera, cuenta }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -326,8 +290,7 @@ export const getRegrest = async ({ idCartera, cuenta }) => {
     console.error('Error al obtener la Arrepentimientos:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -343,7 +306,7 @@ export const getRegrest = async ({ idCartera, cuenta }) => {
 
 export const actualizarMetas = async (payload) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -356,8 +319,7 @@ export const actualizarMetas = async (payload) => {
     console.error('  Error al obtener los catalogos:', error);
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
@@ -374,7 +336,7 @@ export const actualizarMetas = async (payload) => {
 
 export const getSessions = async ({ idEjecutivo }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -388,8 +350,7 @@ export const getSessions = async ({ idEjecutivo }) => {
     console.error('Error al obtener las sesiones:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -406,7 +367,7 @@ export const getSessions = async ({ idEjecutivo }) => {
 
 export const getValidators = async ({ idProducto }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -420,8 +381,7 @@ export const getValidators = async ({ idProducto }) => {
     console.error('Error al obtener la Arrepentimientos:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -438,38 +398,36 @@ export const getValidators = async ({ idProducto }) => {
 // Obtener ramificación de encargados (sin parámetros)
 export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
     const idNum = Number(idEjecutivo);
-    const requestData = [idNum];
     const url = `/Encargados/ejecutivos-propios/${idNum}`;
     console.log('Enviando a', url);
     // El interceptor añade el token automáticamente
     // Agregamos un timeout manual seguro de 12 segundos para evitar que la petición quede colgada
-    const timeoutPromise = new Promise((_, reject) => 
+    const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('TIMEOUT_ERROR')), 12000)
     );
     // requestData estaba siendo ignorado como params, solo lo quitamos
     const response = await Promise.race([
-      api.get(url, { timeout: 12000 }), 
+      api.get(url, { timeout: 12000 }),
       timeoutPromise
     ]);
-    
+
     console.log('Respuesta de', url + ':', response.data);
     return response.data;
   } catch (error) {
     console.error('Error al obtener la ramificación de encargados:', error);
-    
+
     if (error.message === 'TIMEOUT_ERROR' || error.code === 'ECONNABORTED') {
       throw new Error("El servidor tardó demasiado en responder el árbol de ejecutivos. Por favor, intente nuevamente.");
     }
 
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -485,7 +443,7 @@ export const obetenerJerarquiaEncargados = async (idEjecutivo) => {
 
 export const obetenerTablaMetas = async (idEjecutivo) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -499,8 +457,7 @@ export const obetenerTablaMetas = async (idEjecutivo) => {
     console.error('  Error al obtener la tabla metas:', error);
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
@@ -517,7 +474,7 @@ export const obetenerTablaMetas = async (idEjecutivo) => {
 // Obtener ramificación de encargados (sin parámetros)
 export const obetenerDropdownsEncargados = async () => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -530,8 +487,7 @@ export const obetenerDropdownsEncargados = async () => {
     console.error('Error al obtener la ramificación de encargados:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -545,7 +501,7 @@ export const obetenerDropdownsEncargados = async () => {
   }
 };
 
-// Obtener carteras de encargados 
+// Obtener carteras de encargados
 export const getCarteras = async () => {
   try {
     // El interceptor añade el token automáticamente
@@ -566,7 +522,7 @@ export const getCarteras = async () => {
   }
 };
 
-// Obtener carteras de encargados 
+// Obtener carteras de encargados
 export const getCarterasProductos = async () => {
   try {
     const token = getToken();
@@ -599,22 +555,21 @@ export const getCarterasProductos = async () => {
 export const PostLoadData = async (data) => {
   try {
     // Verificar que el token existe antes de proceder
-    const token = localStorage.getItem('token');  
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
-    }  
+    }
     console.log('  Enviando a /PlantillasCorreo/carga-datos:', data);
     console.log('  Token disponible:', token);
     const response = await api.post(`/PlantillasCorreo/carga-datos`, data);
     console.log('  Respuesta de /PlantillasCorreo/carga-datos', response.data);
     return response.data;
   } catch (error) {
-    console.error('  Error al cargar datos', error);  
+    console.error('  Error al cargar datos', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');   
+      clearAuth();
       // Redirigir al login si es necesario
       window.location.href = '/login';
     }
@@ -625,14 +580,14 @@ export const PostLoadData = async (data) => {
       console.error('  No se recibió respuesta del servidor:', error.request);
     } else {
       console.error('  Error al configurar la solicitud:', error.message);
-    }  
+    }
     throw error;
   }
 };
 
 export const getCatalogoCard = async () => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -646,8 +601,7 @@ export const getCatalogoCard = async () => {
     console.error('Error al obtener las descripciones catalogo:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -663,12 +617,12 @@ export const getCatalogoCard = async () => {
 //Valores Catalogo
 export const getCatalogoValueCard = async () => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
     const url = `/Catalogos/valores-catalogo`;
- 
+
     // El interceptor añade el token automáticamente
     const response = await api.get(url);
 
@@ -677,8 +631,7 @@ export const getCatalogoValueCard = async () => {
     console.error('Error al obtener los valores actalogo:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -694,26 +647,25 @@ export const getCatalogoValueCard = async () => {
 
 export const getProductivity = async (requestData) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    
+
     console.log('Enviando a /Productividad/get-productividad con:', requestData);
-    
+
     // Si se envían datos, hacer POST con body, sino POST sin body
-    const response = requestData 
+    const response = requestData
       ? await api.post('/Productividad/get-productividad', requestData)
       : await api.post('/Productividad/get-productividad');
-    
+
     console.log('Respuesta de /Productividad/get-productividad:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error al obtener la productividad:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -730,7 +682,7 @@ export const getProductivity = async (requestData) => {
 
 export const PostInsertScreen = async (data) => {
   try {
-    const token = localStorage.getItem('token');  
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible');
     }
@@ -743,15 +695,14 @@ export const PostInsertScreen = async (data) => {
     });
 
     return response.data;
-    
+
   } catch (error) {
     // Manejo mejorado de errores
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
       window.location.href = '/login'; // Redirigir al login
     }
-    
+
     throw new Error(error.response?.data?.message || 'Error al crear plantilla');
   }
 };
@@ -759,7 +710,7 @@ export const PostInsertScreen = async (data) => {
 // Obtener Historico invidual
 export const historySingle = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -778,8 +729,7 @@ export const historySingle = async (body) => {
     console.error('Error al obtener historico:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -796,7 +746,7 @@ export const historySingle = async (body) => {
 // Obtener Historico Archivo
 export const historyArchivoUpload = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -830,8 +780,7 @@ export const historyArchivoUpload = async (body) => {
     console.error('Error al obtener historico Archivo:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -847,7 +796,7 @@ export const historyArchivoUpload = async (body) => {
 
 export const patchLogoutEjecutive = async (idEjecutivo) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -866,8 +815,7 @@ export const patchLogoutEjecutive = async (idEjecutivo) => {
     console.error('Error al cerrar sesion:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -884,7 +832,7 @@ export const patchLogoutEjecutive = async (idEjecutivo) => {
 
 export const patchUnlockedEjecutive = async (idEjecutivo) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -903,8 +851,7 @@ export const patchUnlockedEjecutive = async (idEjecutivo) => {
     console.error('Error al desbloquear ejecutivo:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -920,7 +867,7 @@ export const patchUnlockedEjecutive = async (idEjecutivo) => {
 
 export const newCampaign = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -938,8 +885,7 @@ export const newCampaign = async (body) => {
     console.error('Error al crear campaña:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -955,7 +901,7 @@ export const newCampaign = async (body) => {
 
 export const campaignCleaning = async ({ idCampaña }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -974,8 +920,7 @@ export const campaignCleaning = async ({ idCampaña }) => {
     console.error('Error al limpiar la campaña:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -991,7 +936,7 @@ export const campaignCleaning = async ({ idCampaña }) => {
 
 export const campaignDeleteada = async ({ idCampaña }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1010,8 +955,7 @@ export const campaignDeleteada = async ({ idCampaña }) => {
     console.error('Error al eliminar campaña:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1027,7 +971,7 @@ export const campaignDeleteada = async ({ idCampaña }) => {
 
 export const campainghInCharge = async ({ idEncargado, idCartera, idProducto }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1045,8 +989,7 @@ export const campainghInCharge = async ({ idEncargado, idCartera, idProducto }) 
     console.error('Error al obtener la Campañas de encargado:', error);
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1062,7 +1005,7 @@ export const campainghInCharge = async ({ idEncargado, idCartera, idProducto }) 
 
 export const enabledUnenabledCampaign = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1082,8 +1025,7 @@ export const enabledUnenabledCampaign = async (body) => {
     console.error('Error al encender o apagar campaña:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1100,7 +1042,7 @@ export const enabledUnenabledCampaign = async (body) => {
 
 export const topCampaign = async ({ idCampaña }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1119,8 +1061,7 @@ export const topCampaign = async ({ idCampaña }) => {
     console.error('Error al obtener las 100 filas:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1137,7 +1078,7 @@ export const topCampaign = async ({ idCampaña }) => {
 
 export const CargaFilasExcel = async (idCampaña, idCartera) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1158,8 +1099,7 @@ export const CargaFilasExcel = async (idCampaña, idCartera) => {
     console.error('Error al cargar filas excel:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1177,7 +1117,7 @@ export const CargaFilasExcel = async (idCampaña, idCartera) => {
 
 export const UsuarioRestante = async (idCampaña) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1195,8 +1135,7 @@ export const UsuarioRestante = async (idCampaña) => {
     console.error('Error al cargar Ejecutivos en Campaña:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1215,7 +1154,7 @@ export const UsuarioRestante = async (idCampaña) => {
 
 export const asignaEjecutivoCampanas = async (inserta, idCampaña, idEjecutivo) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1232,8 +1171,7 @@ export const asignaEjecutivoCampanas = async (inserta, idCampaña, idEjecutivo) 
     console.error('Error al asignar ejecutivos a campañas:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1249,7 +1187,7 @@ export const asignaEjecutivoCampanas = async (inserta, idCampaña, idEjecutivo) 
 
 export const ValidatorsNormal = async (idProducto) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1267,8 +1205,7 @@ export const ValidatorsNormal = async (idProducto) => {
     console.error('Error al obtener validadores:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1285,7 +1222,7 @@ export const ValidatorsNormal = async (idProducto) => {
 
 export const Validatorsregrets = async (idProducto) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1303,8 +1240,7 @@ export const Validatorsregrets = async (idProducto) => {
     console.error('Error al obtener validadores arrepentimientos:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1321,7 +1257,7 @@ export const Validatorsregrets = async (idProducto) => {
 
 export const InsertDeletedValidators = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1338,8 +1274,7 @@ export const InsertDeletedValidators = async (body) => {
     console.error('Error insertar o eliminar validador:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1355,7 +1290,7 @@ export const InsertDeletedValidators = async (body) => {
 
 export const InsertDeletedValidatorsRegrets = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1372,8 +1307,7 @@ export const InsertDeletedValidatorsRegrets = async (body) => {
     console.error('Error insertar o eliminar validador arrepentimientos:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1389,7 +1323,7 @@ export const InsertDeletedValidatorsRegrets = async (body) => {
 
 export const ResetPassword = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1406,8 +1340,7 @@ export const ResetPassword = async (body) => {
     console.error('Error al resetear contraseña:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1424,7 +1357,7 @@ export const ResetPassword = async (body) => {
 
 export const AvanceCampaing = async (idEncargado, idCartera, idProducto) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1442,8 +1375,7 @@ export const AvanceCampaing = async (idEncargado, idCartera, idProducto) => {
     console.error('Error al obtener avance de campañas:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1457,10 +1389,10 @@ export const AvanceCampaing = async (idEncargado, idCartera, idProducto) => {
   }
 };
 
-// Guardar plantilla 
+// Guardar plantilla
 export const SaveCreateTemplate = async (payload) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1478,13 +1410,12 @@ export const SaveCreateTemplate = async (payload) => {
     console.log('  Respuesta de /PlantillasCorreo/crear-plantilla', response.data);
     return response.data;
   } catch (error) {
-    
+
     console.error('  Error al guardar platilla', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -1501,28 +1432,27 @@ export const SaveCreateTemplate = async (payload) => {
 
 export const ShowFieldScreen = async (idProducto) => {
   try {
-    const token = localStorage.getItem('token');
-    
+    const token = getToken();
+
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    
+
     console.log('  Enviando a /CamposPantalla/mostrar/');
     console.log('  Parámetros:', { idProducto });
-    
+
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
       const response = await api.get(`/CamposPantalla/mostrar/${idProducto}`);
-    
+
     console.log('  Respuesta de /CamposPantalla/mostrar/', response.data);
-    
+
     return response.data;
   } catch (error) {
      console.error('  Error al verificar producto:', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -1539,28 +1469,27 @@ export const ShowFieldScreen = async (idProducto) => {
 
 export const DeleteTemplate = async (data) => {
   try {
-    const token = localStorage.getItem('token');
-    
+    const token = getToken();
+
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    
+
     console.log('  Enviando a /PlantillasCorreo/eliminar-plantillas', data);
     console.log('  Parámetros:', { data });
-    
+
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
       const response = await api.delete(`/PlantillasCorreo/eliminar-plantillas`, data);
-    
+
     console.log('  Respuesta de /PlantillasCorreo/eliminar-plantillas', response.data);
-    
+
     return response.data;
   } catch (error) {
      console.error('  Error al eliminar plantilla', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -1577,28 +1506,27 @@ export const DeleteTemplate = async (data) => {
 
 export const UpdateTemplate = async (data) => {
   try {
-    const token = localStorage.getItem('token');
-    
+    const token = getToken();
+
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    
+
     console.log('  Enviando a /PlantillasCorreo/actualizar-plantillas', data);
     console.log('  Parámetros:', { data });
-    
+
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
       const response = await api.put(`/PlantillasCorreo/actualizar-plantillas`, data);
-    
+
     console.log('  Respuesta de PlantillasCorreo/actualizar-plantillas', response.data);
-    
+
     return response.data;
   } catch (error) {
      console.error('  Error al Actualizar plantilla', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -1615,13 +1543,13 @@ export const UpdateTemplate = async (data) => {
 
 export const AsignaEncargados = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    
+
     console.log('  Enviando a /Encargados/asignar-encargado-cartera:', body);
-    
+
     // El interceptor añade el token automáticamente
     const response = await api.patch('/Encargados/asignar-encargado-cartera', body, {
       headers: {
@@ -1629,19 +1557,18 @@ export const AsignaEncargados = async (body) => {
         'Content-Type': 'application/json'
       }
     });
-    
+
     console.log('  Respuesta de /Encargados/asignar-encargado-cartera:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error al asignar encargados:', error);
-    
+
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
-    
+
     // Mostrar más detalles del error
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1651,7 +1578,7 @@ export const AsignaEncargados = async (body) => {
     } else {
       console.error('Error al configurar la solicitud:', error.message);
     }
-    
+
     throw error;
   }
 };
@@ -1659,7 +1586,7 @@ export const AsignaEncargados = async (body) => {
 
 export const infoEjecutivo = async (idEjecutivo) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1676,8 +1603,7 @@ export const infoEjecutivo = async (idEjecutivo) => {
     console.error('Error al obtener info Ejecutivo:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1693,7 +1619,7 @@ export const infoEjecutivo = async (idEjecutivo) => {
 
 export const CargarFilasConsulta = async (payload) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1705,8 +1631,7 @@ export const CargarFilasConsulta = async (payload) => {
     console.error('Error al obtener los flas consulta para cargar:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1722,7 +1647,7 @@ export const CargarFilasConsulta = async (payload) => {
 
 export const getPaymentsInformation = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1741,8 +1666,7 @@ export const getPaymentsInformation = async (body) => {
     console.error('Error al obtener pagos informacion:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -1758,28 +1682,27 @@ export const getPaymentsInformation = async (body) => {
 
 export const putLogout = async (data) => {
   try {
-    const token = localStorage.getItem('token');
-    
+    const token = getToken();
+
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    
+
     console.log('  Enviando a /Auth/cerrar-sesion', data);
     console.log('  Parámetros:', { data });
-    
+
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
       const response = await api.put(`/Auth/cerrar-sesion`, data);
-    
+
     console.log('  Respuesta de /Auth/cerrar-sesión ', response.data);
-    
+
     return response.data;
   } catch (error) {
      console.error('  Error al Cerrar sesion', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -1796,27 +1719,26 @@ export const putLogout = async (data) => {
 
 export const getWalletProduct = async () => {
   try {
-    const token = localStorage.getItem('token');
-    
+    const token = getToken();
+
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    
+
     console.log('  Enviando a /campañas/carteras-productos');
-    
+
     // Para path parameters: /CamposPantalla/{servidor}/{idProducto}/campos-pantalla
       const response = await api.get(`/campañas/carteras-productos`);
-    
+
     console.log('  Respuesta de /campañas/carteras-productos');
-    
+
     return response.data;
   } catch (error) {
      console.error('  Error al verificar producto:', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -1833,7 +1755,7 @@ export const getWalletProduct = async () => {
 
 export const postSavePhrases = async (data) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1851,13 +1773,12 @@ export const postSavePhrases = async (data) => {
     console.log('  Respuesta de /Frases/guardar', response.data);
     return response.data;
   } catch (error) {
-    
+
     console.error('  Error al guardar Frase', error);
     // Manejo específico de errores de autenticación
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     // Mostrar más detalles del error
     if (error.response) {
@@ -1875,7 +1796,7 @@ export const postSavePhrases = async (data) => {
 //Endponts de Consultas para Reportes de Campañas
 export const getColumsProduct = async (Data) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -1891,9 +1812,9 @@ console.log('Enviando a /Catalogo/ColumnasProducto con:', Data);
 
 export const chargueCatalog = async (data) => {
   try {
- 
+
     const response = await api.get('Catalogo/cargaCatalogos', data);
-  
+
     return response.data;
   }
   catch (error) {
@@ -1904,15 +1825,16 @@ export const chargueCatalog = async (data) => {
 
 export const postReportCampaign = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    const response = await api.post('Busquedas/realizar-busqueda', body);
+    const response = await api.post('/Busquedas/realizar-busqueda', body);
     return response.data;
   }
   catch (error) {
     console.error('Error al obtener el reporte de campaña:', error);
+    throw error;
   }
 };
 //Fin Reportes de Campañas
@@ -1922,22 +1844,22 @@ export const postReportCampaign = async (body) => {
 // Obtener Campañas Archivo
 export const sendArchiveCampanias = async (formData) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    
+
     // Verificar que sea FormData
     if (!(formData instanceof FormData)) {
       throw new Error('Se esperaba un objeto FormData');
     }
-    
+
     // Debug: ver qué se está enviando
     console.log('FormData a enviar:');
     for (let pair of formData.entries()) {
       console.log(`${pair[0]}:`, pair[1]);
     }
-    
+
     // IMPORTANTE: NO establecer Content-Type manualmente
     const response = await api.post('/carteras/cargar-archivo', formData, {
       headers: {
@@ -1948,11 +1870,11 @@ export const sendArchiveCampanias = async (formData) => {
       maxContentLength: Infinity,
       maxBodyLength: Infinity,
     });
-    
+
     return response;
   } catch (error) {
     console.error('Error al subir campaña Archivo:', error);
-    
+
     // Decodificar el error si viene como ArrayBuffer
     if (error.response?.data instanceof ArrayBuffer) {
       const decoder = new TextDecoder('utf-8');
@@ -1961,25 +1883,24 @@ export const sendArchiveCampanias = async (formData) => {
       try {
         const errorJson = JSON.parse(errorText);
         console.error('Error JSON parseado:', errorJson);
-      } catch (e) {
+      } catch {
         console.error('Error como texto plano:', errorText);
       }
     } else if (error.response?.data) {
       console.error('Datos de respuesta del error:', error.response.data);
     }
-    
+
     console.error('Status del error:', error.response?.status);
-    
+
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     } else if (error.request) {
       console.error('No se recibió respuesta del servidor:', error.request);
     } else {
       console.error('Error al configurar la solicitud:', error.message);
     }
-    
+
     throw error;
   }
 };
@@ -1987,7 +1908,7 @@ export const sendArchiveCampanias = async (formData) => {
 
 export const getExportReportPayments = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2004,8 +1925,7 @@ export const getExportReportPayments = async (body) => {
     console.error('Error al obtener o exportar los pagos recibidos:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2023,7 +1943,7 @@ export const getExportReportPayments = async (body) => {
 
 export const getAddress = async (idCartera, idConsulta) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2040,8 +1960,7 @@ export const getAddress = async (idCartera, idConsulta) => {
     console.error('Error al obtener Domicilios:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2058,7 +1977,7 @@ export const getAddress = async (idCartera, idConsulta) => {
 
 export const getEmailsInfo = async (idCartera, idConsulta) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2075,8 +1994,7 @@ export const getEmailsInfo = async (idCartera, idConsulta) => {
     console.error('Error al obtener Correos:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2093,7 +2011,7 @@ export const getEmailsInfo = async (idCartera, idConsulta) => {
 
 export const getSearchesInformation = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2112,8 +2030,7 @@ export const getSearchesInformation = async (body) => {
     console.error('Error al obtener busquedas', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2130,7 +2047,7 @@ export const getSearchesInformation = async (body) => {
 
 export const getOffersInformation = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2149,8 +2066,7 @@ export const getOffersInformation = async (body) => {
     console.error('Error al obtener Ofrecimientos', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2167,7 +2083,7 @@ export const getOffersInformation = async (body) => {
 
 export const getCommentsInformation = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2186,8 +2102,7 @@ export const getCommentsInformation = async (body) => {
     console.error('Error al obtener Comentarios', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2203,7 +2118,7 @@ export const getCommentsInformation = async (body) => {
 
 export const getWrongsInformation = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2222,8 +2137,7 @@ export const getWrongsInformation = async (body) => {
     console.error('Error al obtener Datos Erróneos', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2240,7 +2154,7 @@ export const getWrongsInformation = async (body) => {
 
 export const ReportEjecutives = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2257,8 +2171,7 @@ export const ReportEjecutives = async (body) => {
     console.error('Error al obetener Reporte de Ejecutivos:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2275,21 +2188,21 @@ export const ReportEjecutives = async (body) => {
 // EnLokiServices.js
 export const PostDataCharge = async (data) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
 
     console.log('  /Scripts/carga-datos-producto', data);
-    
+
     const response = await api.post(
       `/Scripts/carga-datos-producto`,
-      null, 
+      null,
       {
-        params: data 
+        params: data
       }
     );
-    
+
     console.log('  Respuesta:', response.data);
     return response.data;
   } catch (error) {
@@ -2300,15 +2213,15 @@ export const PostDataCharge = async (data) => {
 
 export const PostSaveScripts = async (data) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
 
-    console.log('  /Scripts/guardar', data);   
+    console.log('  /Scripts/guardar', data);
     const response = await api.post(
       `/Scripts/guardar`,data
-    );  
+    );
     console.log('  Respuesta:', response.data);
     return response.data;
   } catch (error) {
@@ -2319,16 +2232,16 @@ export const PostSaveScripts = async (data) => {
 
 export const deleteScripts = async ({ idScript }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
-    console.log(' /Scripts/eliminar', { idScript });   
-    
+    console.log(' /Scripts/eliminar', { idScript });
+
     const response = await api.delete('/Scripts/eliminar',{
       data: { idScript }
     });
-    
+
     console.log('  Respuesta:', response.data);
     return response.data;
   } catch (error) {
@@ -2339,18 +2252,18 @@ export const deleteScripts = async ({ idScript }) => {
 
 export const putUpdateScripts = async (data) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
-    console.log(' /Scripts/actualizar', data);   
-    
+    console.log(' /Scripts/actualizar', data);
+
     const response = await api.put('/Scripts/actualizar', data, {
       headers: {
         'Accept': '*/*',
         'Content-Type': 'application/json'
       }
-    });  
+    });
     console.log('  Respuesta:', response.data);
     return response.data;
   } catch (error) {
@@ -2361,15 +2274,15 @@ export const putUpdateScripts = async (data) => {
 
 export const getPhrases = async (idEjecutivo) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
-    console.log('  Solicitando frases para idEjecutivo:', idEjecutivo);    
+    console.log('  Solicitando frases para idEjecutivo:', idEjecutivo);
     // Tal vez el parámetro se llama 'ejecutivo' y no 'idEjecutivo'
     const response = await api.get('/Frases/frases', {
       params: { ejecutivo: idEjecutivo } // Cambiado el nombre del parámetro
-    });   
+    });
     console.log('  Respuesta completa:', response);
     console.log('  Data:', response.data);
     return response.data;
@@ -2381,18 +2294,18 @@ export const getPhrases = async (idEjecutivo) => {
 
 export const putPhrases = async (idRegistro, activo) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
-    
-    console.log('Enviando a /Frases/activar-frase:', { idRegistro, activo });     
-    
+
+    console.log('Enviando a /Frases/activar-frase:', { idRegistro, activo });
+
     const response = await api.put('/Frases/activar-frase', {
       idRegistro,
       activo
-    });  
-    
+    });
+
     console.log('  Respuesta:', response.data);
     return response.data;
   } catch (error) {
@@ -2403,15 +2316,15 @@ export const putPhrases = async (idRegistro, activo) => {
 
 export const PostComments = async (data) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
 
-    console.log('/Comentarios/insertar-expediente', data);   
+    console.log('/Comentarios/insertar-expediente', data);
     const response = await api.post(
       `/Comentarios/insertar-expediente`,data
-    );  
+    );
     console.log('  Respuesta:', response.data);
     return response.data;
   } catch (error) {
@@ -2422,7 +2335,7 @@ export const PostComments = async (data) => {
 
 export const getAddressesCapture = async (idCartera, cuentaOrExpediente, esExpediente) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2446,8 +2359,7 @@ export const getAddressesCapture = async (idCartera, cuentaOrExpediente, esExped
     console.error('Error al obtener domicilios captura:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2475,7 +2387,7 @@ export const obtenerLatitudLongitud = async (direccion) => {
 
     // Usar Nominatim (OpenStreetMap) - API gratuita, sin API key
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}&limit=1`;
-    
+
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'CoorinWeb/1.0 (Captura de Visitas)' // Requerido por Nominatim
@@ -2513,7 +2425,7 @@ export const obtenerLatitudLongitud = async (direccion) => {
  */
 export const guardarVisitaCapturada = async (visitaData) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2533,8 +2445,7 @@ export const guardarVisitaCapturada = async (visitaData) => {
     console.error('  Error al guardar visita:', error);
     if (error.response?.status === 401) {
       console.warn('  Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('  Datos de respuesta del error:', error.response.data);
@@ -2551,7 +2462,7 @@ export const guardarVisitaCapturada = async (visitaData) => {
 
 export const GetInfoEditManagments = async ({idCartera, idCuenta}) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2570,8 +2481,7 @@ export const GetInfoEditManagments = async ({idCartera, idCuenta}) => {
     console.error('Error al obtener las gestiones:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2588,7 +2498,7 @@ export const GetInfoEditManagments = async ({idCartera, idCuenta}) => {
 
 export const PutEditManagments = async ({ idCartera, idCuenta, fecha, hora, comentario }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2607,8 +2517,7 @@ export const PutEditManagments = async ({ idCartera, idCuenta, fecha, hora, come
     console.error('Error al alctualizar gestion:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2624,7 +2533,7 @@ export const PutEditManagments = async ({ idCartera, idCuenta, fecha, hora, come
 
 export const GetInfoEditComments = async ({idCartera, cuenta}) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2643,8 +2552,7 @@ export const GetInfoEditComments = async ({idCartera, cuenta}) => {
     console.error('Error al obtener las gestiones:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2660,17 +2568,17 @@ export const GetInfoEditComments = async ({idCartera, cuenta}) => {
 
 export const PutEditComments = async ({ comentario, idCuenta, idCartera, fechaOriginal, segundoInsert, fechaNueva }) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    const body = { 
-      comentario, 
-      idCuenta, 
-      idCartera, 
-      fechaOriginal, 
-      segundoInsert, 
-      fechaNueva 
+    const body = {
+      comentario,
+      idCuenta,
+      idCartera,
+      fechaOriginal,
+      segundoInsert,
+      fechaNueva
     };
     console.log('Enviando a /Gestiones/actualiza-comentarios con:', body);
     // El interceptor añade el token automáticamente
@@ -2686,8 +2594,7 @@ export const PutEditComments = async ({ comentario, idCuenta, idCartera, fechaOr
     console.error('Error al actualizar comentario de comentarios:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2703,11 +2610,11 @@ export const PutEditComments = async ({ comentario, idCuenta, idCartera, fechaOr
 
 export const getQueryComplement = async (params, options = {}) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
-    
+
     console.log('Enviando a /Gestiones/consulta-llamadas:', params);
     // El interceptor añade el token automáticamente
     const response = await api.get('/Gestiones/consulta-llamadas', {
@@ -2724,8 +2631,7 @@ export const getQueryComplement = async (params, options = {}) => {
     console.error('Error al obtener la consulta de complementos:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2739,10 +2645,10 @@ export const getQueryComplement = async (params, options = {}) => {
   }
 };
 
-// Cargar Archivo de Gestiones Complemento 
+// Cargar Archivo de Gestiones Complemento
 export const ManagmentLoadFile = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2776,8 +2682,7 @@ export const ManagmentLoadFile = async (body) => {
     console.error('Error al obtener historico Archivo:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2791,10 +2696,10 @@ export const ManagmentLoadFile = async (body) => {
   }
 };
 
-// Cargar Archivo de Carga Complemento  
+// Cargar Archivo de Carga Complemento
 export const VisitsLoadFile = async (body) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2827,8 +2732,7 @@ export const VisitsLoadFile = async (body) => {
     console.error('Error al obtener cargar archivo:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2843,7 +2747,7 @@ export const VisitsLoadFile = async (body) => {
 
   export const getSuperInfo = async (idCartera) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2860,8 +2764,7 @@ export const VisitsLoadFile = async (body) => {
     console.error('Error al obtener Supervisores:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2877,7 +2780,7 @@ export const VisitsLoadFile = async (body) => {
 
 export const InsertSuper = async (payload) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
@@ -2897,8 +2800,7 @@ export const InsertSuper = async (payload) => {
     console.error('Error al insertar supervisor:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2915,29 +2817,28 @@ export const InsertSuper = async (payload) => {
 
 export const getSuperInfoExcel = async (idCartera, fechaDesde, fechaHasta) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
 
     const url = `/Supervisores/cuentas?idCartera=${idCartera}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`;
-    
+
     console.log('Consultando:', url);
-    
+
     const response = await api.get(url, {
       headers: {
         'Accept': '*/*'
       }
     });
-    
+
     console.log('Respuesta de /Supervisores/cuentas:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error al obtener cuentas de Supervisores:', error);
     if (error.response?.status === 401) {
       console.warn('Error 401 - Token inválido o expirado');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
+      clearAuth();
     }
     if (error.response) {
       console.error('Datos de respuesta del error:', error.response.data);
@@ -2953,15 +2854,15 @@ export const getSuperInfoExcel = async (idCartera, fechaDesde, fechaHasta) => {
 
 export const UpdateComments = async (data) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
 
-    console.log('/Comentarios/modificar', data);   
+    console.log('/Comentarios/modificar', data);
     const response = await api.post(
       `/Comentarios/modificar`,data
-    );  
+    );
     console.log('  Respuesta:', response.data);
     return response.data;
   } catch (error) {
@@ -2972,15 +2873,15 @@ export const UpdateComments = async (data) => {
 
 export const InserExpedientComments = async (data) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
 
-    console.log('/Comentarios/insertar-expediente', data);   
+    console.log('/Comentarios/insertar-expediente', data);
     const response = await api.post(
       `/Comentarios/insertar-expediente`,data
-    );  
+    );
     console.log('  Respuesta:', response.data);
     return response.data;
   } catch (error) {
@@ -2994,13 +2895,13 @@ export const InserExpedientComments = async (data) => {
 
 export const LoadDrivesComments = async (archivo, datosAdicionales = {}) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       throw new Error('No hay token de autenticación disponible.');
     }
     // Crear FormData para enviar el archivo
     const formData = new FormData();
-    formData.append('archivo', archivo);  
+    formData.append('archivo', archivo);
     // Agregar otros campos si es necesario
     Object.keys(datosAdicionales).forEach(key => {
       const value = datosAdicionales[key];
@@ -3009,7 +2910,7 @@ export const LoadDrivesComments = async (archivo, datosAdicionales = {}) => {
     });
     console.log('Enviando archivo a /Comentarios/carga-accionamientos');
     console.log('Archivo:', archivo.name, archivo.size, 'bytes');
-    console.log('Datos adicionales:', datosAdicionales);  
+    console.log('Datos adicionales:', datosAdicionales);
     const response = await api.post(
       `/Comentarios/carga-accionamientos`,
       formData,
@@ -3022,9 +2923,9 @@ export const LoadDrivesComments = async (archivo, datosAdicionales = {}) => {
           console.log(`Progreso de carga: ${porcentaje}%`);
         }
       }
-    );    
+    );
     console.log(' Respuesta del servidor:', response.data);
-    return response.data;   
+    return response.data;
   } catch (error) {
     console.error('Error cargando archivo:', error);
     console.error('Detalles del error:', error.response?.data);

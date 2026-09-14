@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getWalletProduct } from '../services/mark/Orochi/LokiServices';
+import { useCatalogStore } from './catalogStore';
 
 export const useUserStore = create(
   persist(
@@ -24,6 +25,7 @@ export const useUserStore = create(
           console.warn('No se pudo limpiar sessionStorage en logout', e);
         }
         set({ user: null, isAuthenticated: false });
+        useCatalogStore.getState().clearCatalogs();
       },
       
       clearUserData: () => {
@@ -35,6 +37,7 @@ export const useUserStore = create(
         }
 
         set({ user: null, isAuthenticated: false });
+        useCatalogStore.getState().clearCatalogs();
       }
     }),
     {

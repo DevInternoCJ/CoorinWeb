@@ -7,6 +7,7 @@ const ModalConsultaCuentasColumnas = ({
   onColumnasCountChange,
   onColumnasChange,
   onTipoChange,
+  enabled = false,
 }) => {
   const [columnas, setColumnas] = React.useState([]);
   const [tipoConsulta, setTipoConsulta] = React.useState("contar");
@@ -29,37 +30,60 @@ const ModalConsultaCuentasColumnas = ({
     if (situacionOptions.length > 0) {
       // Verificar que la columna no exista ya para evitar duplicados
       const nuevaColumna = situacionOptions[0]; // Solo la primera (que es la seleccionada)
-      const existe = columnas.some((col) => col.nombre === nuevaColumna.label);
+      const nombre = nuevaColumna.label ?? nuevaColumna.value;
+      const concepto = nuevaColumna.concepto || "Cuenta";
+      const existe = columnas.some(
+        (col) => col.nombre === nombre && col.concepto === concepto,
+      );
 
       if (!existe) {
         const columnaNueva = {
           id: Date.now(),
-          nombre: nuevaColumna.label,
-          concepto: nuevaColumna.concepto || "Cuenta", // Agregar el concepto
+          nombre,
+          concepto,
         };
         setColumnas((prevColumnas) => [...prevColumnas, columnaNueva]);
+      } else {
+        toast.warning("La columna seleccionada ya fue agregada");
       }
+    } else {
+      toast.warning("Seleccione un campo antes de agregar la columna");
     }
   };
 
   const agregarTodasLasColumnas = () => {
-    if (allAvailableOptions.length > 0) {
-      // Filtrar las opciones que no estén ya agregadas
-      const baseTime = Date.now();
-      const nuevasColumnas = allAvailableOptions
-        .filter(
-          (option) => !columnas.some((col) => col.nombre === option.label),
-        )
-        .map((option, index) => ({
-          id: baseTime + index, // Asegurar IDs únicos incrementales
-          nombre: option.label,
-          concepto: option.concepto || "Cuenta", // Agregar el concepto
-        }));
-
-      if (nuevasColumnas.length > 0) {
-        setColumnas((prevColumnas) => [...prevColumnas, ...nuevasColumnas]);
-      }
+    if (allAvailableOptions.length === 0) {
+      toast.warning("El filtro Campo todavía no tiene opciones disponibles");
+      return;
     }
+
+    const baseTime = Date.now();
+    const nuevasColumnas = allAvailableOptions
+      .map((option) => ({
+        nombre: option.label ?? option.value,
+        concepto: option.concepto || "Cuenta",
+      }))
+      .filter((option) => option.nombre)
+      .filter(
+        (option, index, options) =>
+          options.findIndex(
+            (item) => item.nombre === option.nombre && item.concepto === option.concepto,
+          ) === index,
+      )
+      .filter(
+        (option) =>
+          !columnas.some(
+            (col) => col.nombre === option.nombre && col.concepto === option.concepto,
+          ),
+      )
+      .map((option, index) => ({ ...option, id: baseTime + index }));
+
+    if (nuevasColumnas.length === 0) {
+      toast.info("Todas las opciones del filtro Campo ya están agregadas");
+      return;
+    }
+
+    setColumnas((prevColumnas) => [...prevColumnas, ...nuevasColumnas]);
   };
 
   // Filtrar columnas por texto
@@ -79,6 +103,7 @@ const ModalConsultaCuentasColumnas = ({
   }, [columnas.length, onColumnasCountChange, onColumnasChange, columnas]);
 
   return (
+    <fieldset disabled={!enabled} className={!enabled ? "opacity-60" : ""}>
     <div className="bg-surface rounded-lg p-3 flex flex-col h-[400px]">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3 flex-shrink-0">
         <div className="flex items-center justify-center gap-0">
@@ -314,6 +339,7 @@ const ModalConsultaCuentasColumnas = ({
         </table>
       </div>
     </div>
+    </fieldset>
   );
 };
 

@@ -6,6 +6,9 @@ import { loginUser } from "../../services/mark/login/AuthServices";
 import ButtonLogin from "./ButtonLogin";
 import { LoginUser, LoginKey } from "./LoginIcons";
 import { useUserStore } from "../../contextGlobal/userStore";
+import useZodValidation from "../../hooks/useZodValidation";
+import { loginSchema } from "../../schemas/formSchemas";
+import { useCatalogStore } from "../../contextGlobal/catalogStore";
 
 // Constantes para mensajes de error
 const ERROR_MESSAGES = {
@@ -30,6 +33,7 @@ const InputField = ({
   maxLength,
   required,
   disabled,
+  error,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
@@ -39,7 +43,7 @@ const InputField = ({
     <div className="flex mb-4">
       {/* Prefijo con ícono — estilo Preline input-group addon */}
       <span className="inline-flex items-center justify-center min-w-fit px-3 rounded-s-lg border border-e-0 border-white/20 bg-white/10 backdrop-blur-sm">
-        <Icon className="size-4 text-slate-200 shrink-0" />
+        {React.createElement(Icon, { className: "size-4 text-slate-200 shrink-0" })}
       </span>
 
       {/* Contenedor floating label */}
@@ -54,11 +58,14 @@ const InputField = ({
           maxLength={maxLength}
           required={required}
           disabled={disabled}
+          name={id === "floatingInput" ? "username" : "password"}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? `${id}-error` : undefined}
           autoComplete={type === "password" ? "current-password" : "username"}
           className={`
             peer py-3 block w-full h-full
             bg-white
-            border border-white/20
+            border ${error ? "border-red-400" : "border-white/20"}
             rounded-e-lg
             text-sm placeholder:text-transparent
             focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40
@@ -140,6 +147,7 @@ const InputField = ({
 
 const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
   const setUser = useUserStore((state) => state.setUser);
+  const loadCatalogs = useCatalogStore((state) => state.loadCatalogs);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -147,10 +155,12 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
   const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const { errors, validate, clearError } = useZodValidation(loginSchema);
   const navigate = useNavigate();
 
   // Handler para cambios en los inputs
   const handleInputChange = useCallback((field, value) => {
+    clearError(field);
     if (field === "username") {
       const formattedValue = value
         .replace(/[^a-zA-Z]/g, "")
@@ -159,23 +169,9 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
       setFormData((prev) => ({ ...prev, username: formattedValue }));
     } else if (field === "password") {
       setFormData((prev) => ({ ...prev, password: value }));
-      setPasswordError(
-        value.length > 0 && value.length < 8
-          ? ERROR_MESSAGES.PASSWORD_LENGTH
-          : "",
-      );
+      setPasswordError("");
     }
-  }, []);
-
-  // Extraer idEjecutivo de la respuesta
-  const extractIdEjecutivo = useCallback((response) => {
-    if (response?.ejecutivo?.idEjecutivo) {
-      return response.ejecutivo.idEjecutivo;
-    } else if (response?.idEjecutivo) {
-      return response.idEjecutivo;
-    }
-    throw new Error(ERROR_MESSAGES.NO_ID_EJECUTIVO);
-  }, []);
+  }, [clearError]);
 
   // Guardar datos de usuario en localStorage
   const saveUserData = useCallback((response) => {
@@ -188,38 +184,20 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
     }
   }, []);
 
-  const processSuccessfulLogin = useCallback(
-    (response, passwordValidation, onLoginSuccess, navigate) => {
-      if (passwordValidation) {
-        toast.info("Contraseña válida.");
-        onLoginSuccess?.();
-      } else {
-        toast.success("¡Inicio de sesión exitoso!");
-        saveUserData(response);
-        onLoginSuccess?.();
-        navigate("/dashboardPage");
-      }
-    },
-    [saveUserData],
-  );
-
   // Handler principal de submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (passwordError) {
-      toast.error(passwordError);
-      return;
-    }
-    if (!formData.username || !formData.password) {
+    const parsedForm = validate(formData);
+    if (!parsedForm) {
       toast.error(ERROR_MESSAGES.REQUIRED_FIELDS);
       return;
     }
     setLoading(true);
     setApiError("");
     const userData = {
-      usuario: formData.username,
-      contrasenia: formData.password,
-      usuarioWindows: formData.username,
+      usuario: parsedForm.username,
+      contrasenia: parsedForm.password,
+      usuarioWindows: parsedForm.username,
     };
 
     try {
@@ -298,6 +276,10 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
       };
 
       setUser(userStoreData);
+      // Hidratar la caché de catálogos después de autenticar, antes de montar formularios dependientes.
+      loadCatalogs(userStoreData).catch((catalogError) => {
+        console.warn("No se pudieron precargar todos los catálogos:", catalogError);
+      });
 
       // GUARDAR EN sessionStorage
       const storageData = { ...userStoreData, contraActual: formData.password };
@@ -478,7 +460,11 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
         maxLength={4}
         required
         disabled={loading}
+        error={errors.username}
       />
+      {errors.username && (
+        <p id="floatingInput-error" role="alert" className="mb-2 -mt-2 text-xs text-red-300">{errors.username}</p>
+      )}
       <InputField
         icon={LoginKey}
         type="password"
@@ -492,9 +478,12 @@ const LoginForm = ({ onLoginSuccess, onPasswordExpired }) => {
         required
         disabled={loading}
         autoComplete
+        error={errors.password}
       />
-      {passwordError && (
-        <p className="text-red-400 text-xs mt-1 mb-2">{passwordError}</p>
+      {(errors.password || passwordError || apiError) && (
+        <p id="password-floating-error" role="alert" className="text-red-300 text-xs mt-1 mb-2">
+          {errors.password || passwordError || apiError}
+        </p>
       )}
       <ButtonLogin
         type="submit"

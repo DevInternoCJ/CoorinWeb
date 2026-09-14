@@ -2,17 +2,19 @@ import React, { useState, useEffect } from "react";
 import FloatingSelect from "../../../../../components/Select/FloatingSelect";
 import {
   infoEjecutivo,
-  getSearchesInformation,
 } from "../../../../../services/mark/Orochi/LokiServices";
 import CloseButtonReusable from "../../../components/CloseButtonReusable";
+import { VisitService } from "../../../../../services/visits/VisitService";
+import FieldError from "../../../../../components/Formulario/FieldError";
+import useZodValidation from "../../../../../hooks/useZodValidation";
+import { consultaVisitasSchema } from "../../../../../schemas/formSchemas";
 
 const ConsultVisitContent = ({ onClose }) => {
   // Obtener datos de usuario desde localStorage
-  const userData = JSON.parse(localStorage.getItem("userData"));
+  const userData = JSON.parse(sessionStorage.getItem("userData") || localStorage.getItem("userData") || "{}");
   const idCartera = userData?.idCartera || 1;
   const idProducto =
     userData?.idProducto ?? userData?.idproducto ?? userData?.producto ?? 1;
-  const jerarquia = userData?.jerarquia ?? userData?.Jerarquia ?? 4;
   const idEjecutivo =
     userData?.idEjecutivo ??
     userData?.idejecutivo ??
@@ -30,6 +32,7 @@ const ConsultVisitContent = ({ onClose }) => {
   const [errorConsultas, setErrorConsultas] = useState(null);
   const [loadingExcel, setLoadingExcel] = useState(false);
   const [errorExcel, setErrorExcel] = useState(null);
+  const { errors, validate, clearError } = useZodValidation(consultaVisitasSchema);
 
   useEffect(() => {
     if (!idEjecutivo) return;
@@ -72,19 +75,27 @@ const ConsultVisitContent = ({ onClose }) => {
 
   // Handler para exportar búsquedas a Excel/CSV
   const handleDownloadExcel = async () => {
+    const parsed = validate({
+      idCartera: cartera,
+      idConsulta: consulta,
+      fechaInicio: desde,
+      fechaFin: hasta,
+      complemento: false,
+    });
+    if (!parsed) {
+      setErrorExcel("Revise los filtros marcados.");
+      return;
+    }
     setLoadingExcel(true);
     setErrorExcel(null);
     try {
-      // Usar los parámetros actuales
-      const params = {
-        idCartera: cartera,
-        idConsulta: consulta,
-        idProducto,
-        desde,
-        hasta,
-        jerarquia,
-      };
-      const response = await getSearchesInformation(params);
+      const response = await VisitService.consultar({
+        idCartera: parsed.idCartera,
+        idConsulta: parsed.idConsulta,
+        fechaInicio: parsed.fechaInicio,
+        fechaFin: parsed.fechaFin,
+        complemento: false,
+      });
       // response.data es un Blob
       if (response && response.data instanceof Blob) {
         // Leer el contenido del blob como texto
@@ -162,11 +173,16 @@ const ConsultVisitContent = ({ onClose }) => {
               id="cartera-select-consults-visits"
               label="Cartera"
               value={String(cartera)}
-              onChange={(e) => setCartera(e.target.value)}
+              onChange={(e) => {
+                setCartera(e.target.value);
+                setConsulta("");
+                clearError("idCartera");
+              }}
               options={carterasOptions.map((item) => ({ value: String(item.id), label: item.nombre }))}
               placeholder={carterasOptions.length === 0 ? "Cargando..." : "Cartera"}
               disabled={carterasOptions.length === 0}
             />
+            <FieldError id="idCartera-error" message={errors.idCartera} />
           </div>
 
           {/* Select Consulta */}
@@ -175,7 +191,10 @@ const ConsultVisitContent = ({ onClose }) => {
               id="consulta-select-consult-visits"
               label="Consulta"
               value={String(consulta)}
-              onChange={(e) => setConsulta(e.target.value)}
+              onChange={(e) => {
+                setConsulta(e.target.value);
+                clearError("idConsulta");
+              }}
               options={[
                 { value: "", label: "- Todas -" },
                 ...consultasOptions.map((item) => ({
@@ -186,6 +205,7 @@ const ConsultVisitContent = ({ onClose }) => {
               disabled={loadingConsultas || !!errorConsultas}
               placeholder={loadingConsultas ? "Cargando..." : errorConsultas ? "Error" : "Consulta"}
             />
+            <FieldError id="idConsulta-error" message={errors.idConsulta} />
             {loadingConsultas && (
               <span className="text-xs text-[var(--color-text-muted)] mt-0.5 block">Cargando...</span>
             )}
@@ -207,6 +227,7 @@ const ConsultVisitContent = ({ onClose }) => {
                 value={desde}
                 onChange={(e) => {
                   setDesde(e.target.value);
+                  clearError("fechaInicio");
                   if (e.target.value > hasta) {
                     setHasta(e.target.value);
                   }
@@ -219,6 +240,7 @@ const ConsultVisitContent = ({ onClose }) => {
               >
                 Desde
               </label>
+              <FieldError id="fechaInicio-error" message={errors.fechaInicio} />
             </div>
           </div>
 
@@ -230,7 +252,10 @@ const ConsultVisitContent = ({ onClose }) => {
                 id="fecha-hasta-consults-visits"
                 className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                 value={hasta}
-                onChange={(e) => setHasta(e.target.value)}
+                onChange={(e) => {
+                  setHasta(e.target.value);
+                  clearError("fechaFin");
+                }}
                 placeholder=" "
               />
               <label
@@ -239,6 +264,7 @@ const ConsultVisitContent = ({ onClose }) => {
               >
                 Hasta
               </label>
+              <FieldError id="fechaFin-error" message={errors.fechaFin} />
             </div>
           </div>
 

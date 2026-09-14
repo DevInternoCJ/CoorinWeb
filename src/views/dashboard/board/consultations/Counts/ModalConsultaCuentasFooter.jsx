@@ -4,6 +4,7 @@ const ModalConsultaCuentasFooter = ({
   onConsultar,
   isLoading = false,
   resultData = { data: [], totalRows: 0, excelUrl: "" },
+  isDetail = false,
 }) => {
   const handleConsultar = () => {
     if (onConsultar && !isLoading) {
@@ -51,7 +52,33 @@ const ModalConsultaCuentasFooter = ({
           </button>
         </div>
 
-        {/* Tabla de resultados */}
+        {isDetail ? (
+          <div className="w-full rounded-lg bg-surface-secondary border border-border px-5 py-6 text-center">
+            <div className="mx-auto mb-3 flex size-11 items-center justify-center rounded-full bg-jerarquia2/15 text-jerarquia3">
+              <svg
+                className="size-6"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-8m0 0-3 3m3-3 3 3M5 20h14a2 2 0 0 0 2-2V8.8a2 2 0 0 0-.6-1.4l-3.8-3.8a2 2 0 0 0-1.4-.6H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
+              </svg>
+            </div>
+            <p className="text-sm font-semibold text-foreground">
+              {resultData.data.length > 0
+                ? "El detalle fue generado y descargado"
+                : "La consulta detallada se descargará en Excel"}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {resultData.data.length > 0
+                ? `${resultData.data.length.toLocaleString()} registros exportados. Revisa tu carpeta de descargas.`
+                : "Al ejecutar la consulta no se mostrará una tabla en este modal."}
+            </p>
+          </div>
+        ) : (
+        /* Tabla de resultados */
         <div className="w-full flex justify-center rounded-lg bg-surface p-1 border border-border">
           <div
             className="scrollbar-gray w-full overflow-auto max-h-[250px]"
@@ -95,6 +122,7 @@ const ModalConsultaCuentasFooter = ({
             </table>
           </div>
         </div>
+        )}
       </div>
     </>
   );

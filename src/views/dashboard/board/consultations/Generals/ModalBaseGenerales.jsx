@@ -49,17 +49,17 @@ const ModalBaseGenerales = ({ open, children }) => {
                 .modal-scroll-gray::-webkit-scrollbar {
                     width: 8px;
                     height: 8px;
-                    background: #f5f5f5;
+                    background: var(--color-surface-secondary);
                 }
                 .modal-scroll-gray::-webkit-scrollbar-thumb {
-                    background: #b0b0b0;
+                    background: var(--color-border);
                     border-radius: 4px;
                 }
                 .modal-scroll-gray::-webkit-scrollbar-thumb:hover {
-                    background: #888;
+                    background: var(--color-text-muted);
                 }
                 .modal-scroll-gray {
-                    scrollbar-color: #b0b0b0 #f5f5f5;
+                    scrollbar-color: var(--color-border) var(--color-surface-secondary);
                     scrollbar-width: thin;
                 }
             `}</style>

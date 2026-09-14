@@ -1,19 +1,21 @@
 import React, { useState } from "react";
 import { IconCuentas } from "../IconesConsultations";
 import FloatingSelect from "../../../../../components/Select/FloatingSelect";
+import CatalogSelect from "../../../../../components/Select/CatalogSelect";
 
 // ModalHeader Component
-const ModalConsultaCuentasHeader = ({ onClose, onHeaderDataChange }) => {
-  const [cartera, setCartera] = useState("american_express");
-  const [producto, setProducto] = useState("amex");
-  const [consulta, setConsulta] = useState("Seleccionar");
+const ModalConsultaCuentasHeader = ({ onClose, onHeaderDataChange, jerarquia = 0 }) => {
+  const [cartera, setCartera] = useState("");
+  const [producto, setProducto] = useState("");
+  const [consulta, setConsulta] = useState("");
 
   // Notificar cambios en los datos del header
   React.useEffect(() => {
     if (onHeaderDataChange) {
       onHeaderDataChange({
-        idCartera: 1, // Por ahora hardcodeado, podrías mapear los valores
-        idProducto: 1, // Por ahora hardcodeado
+        idCartera: Number(cartera) || null,
+        idProducto: Number(producto) || null,
+        tipoConsulta: consulta,
         esDetalleResultado: consulta === "detalle",
       });
     }
@@ -49,42 +51,16 @@ const ModalConsultaCuentasHeader = ({ onClose, onHeaderDataChange }) => {
             required
             options={[
               { value: "general", label: "General" },
-              { value: "detalle", label: "Detalle" },
+              ...(Number(jerarquia) > 1 ? [{ value: "detalle", label: "Detalle" }] : []),
             ]}
           />
         </div>
 
         {/* Cartera */}
-        <div className="relative w-full lg:flex-1">
-          <FloatingSelect
-            id="cartera-select"
-            label="Cartera"
-            value={cartera}
-            onChange={(e) => setCartera(e.target.value)}
-            required
-            options={[
-              { value: "american_express", label: "American Express" },
-              { value: "hsbc", label: "HSBC" },
-              { value: "santander", label: "Santander" },
-            ]}
-          />
-        </div>
+        <div className="relative w-full lg:flex-1"><CatalogSelect id="cartera-select" label="Cartera" value={cartera} onChange={(e) => { setCartera(e.target.value); setProducto(""); }} required /></div>
 
         {/* Producto */}
-        <div className="relative w-full lg:flex-1">
-          <FloatingSelect
-            id="producto-select"
-            label="Producto"
-            value={producto}
-            onChange={(e) => setProducto(e.target.value)}
-            required
-            options={[
-              { value: "amex", label: "Amex" },
-              { value: "visa", label: "Visa" },
-              { value: "mastercard", label: "Mastercard" },
-            ]}
-          />
-        </div>
+        <div className="relative w-full lg:flex-1"><CatalogSelect type="producto" id="producto-select" label="Producto (opcional)" idCartera={cartera} value={producto} onChange={(e) => setProducto(e.target.value)} /></div>
       </div>
     </div>
   );

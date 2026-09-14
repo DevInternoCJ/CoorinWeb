@@ -72,14 +72,14 @@ const ModalBaseAccionamientos = ({
 
     return (
         <div className={`fixed inset-0 z-60 flex items-center justify-center ${overlayClassName}`}>
-            {backdropBlur && <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={handleBackdropClick} />}
+            {backdropBlur && <div className="absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={handleBackdropClick} />}
             <div
                 ref={modalRef}
-                className={`relative bg-white rounded-lg shadow-xl overflow-hidden ${modalClassName} ${localBounce ? 'animate-bounce' : ''}`}
+                className={`relative bg-surface text-foreground border border-border rounded-xl shadow-xl overflow-hidden ${modalClassName} ${localBounce ? 'animate-bounce' : ''}`}
                 style={mergedModalStyle}
             >
                 {showHeader && (
-                    <header className="flex items-center justify-between p-4 border-b border-gray-200">
+                    <header className="flex items-center justify-between p-4 bg-surface-secondary border-b border-border">
                         <div className="flex items-center gap-3 flex-1">
                             {headerIcon}
                             <div className="flex gap-2 ml-4">
@@ -87,7 +87,7 @@ const ModalBaseAccionamientos = ({
                                     <button
                                         key={tab.key}
                                         onClick={() => setActiveTab(index)}
-                                        className={`px-2 py-1 text-sm rounded ${activeTab === index ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                        className={`px-2 py-1 text-sm rounded-md transition-colors ${activeTab === index ? 'bg-jerarquia3 text-white' : 'bg-surface text-muted-foreground hover:bg-layer hover:text-foreground'}`}
                                     >
                                         {COMPONENT_ICONS_ACCIONAMIENTOS[tab.key]}
                                     </button>
@@ -95,11 +95,11 @@ const ModalBaseAccionamientos = ({
                             </div>
                         </div>
                         <div className="flex-1 text-center px-4">
-                            <label className={`text-sm font-medium text-gray-700 ${activeTab === 2 ? '' : 'invisible'}`}>Nombre: Federico Uriel Maradonio Pascual Montes Gomez</label>
+                            <label className={`text-sm font-medium text-foreground ${activeTab === 2 ? '' : 'invisible'}`}>Nombre: Federico Uriel Maradonio Pascual Montes Gomez</label>
                         </div>
                         <button
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                            className="text-muted-foreground hover:text-destructive focus:outline-none rounded-md focus-visible:ring-2 focus-visible:ring-jerarquia3"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -122,7 +122,7 @@ const ModalBaseAccionamientos = ({
                     />
                 </div>
                 {showFooter && (
-                    <footer className="p-4 border-t border-gray-200">
+                    <footer className="p-4 bg-surface-secondary border-t border-border">
                         {/* Footer content */}
                     </footer>
                 )}

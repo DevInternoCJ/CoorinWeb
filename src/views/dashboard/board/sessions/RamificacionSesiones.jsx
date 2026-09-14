@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { obetenerJerarquiaEncargados } from "../../../../services/mark/Orochi/LokiServices";
 import { useUserStore } from "../../../../contextGlobal/userStore";
 
-const RamificacionSesiones = ({ onExecutiveSelect }) => {
+const RamificacionSesiones = ({ onExecutiveSelect, className = "" }) => {
   // Estados para la jerarquía
   const [executiveTree, setExecutiveTree] = useState([]);
   const [loadingJerarquia, setLoadingJerarquia] = useState(false);
@@ -15,6 +15,18 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
 
   // Ref para el contenedor de scroll
   const ramificacionRef = useRef(null);
+  const onExecutiveSelectRef = useRef(onExecutiveSelect);
+
+  useEffect(() => {
+    onExecutiveSelectRef.current = onExecutiveSelect;
+  }, [onExecutiveSelect]);
+
+  const selectExecutive = (node) => {
+    const idEjecutivo = Number(node?.idEjecutivo);
+    if (!Number.isInteger(idEjecutivo) || idEjecutivo <= 0) return;
+    setSelectedExecutiveNode(idEjecutivo);
+    onExecutiveSelectRef.current?.(idEjecutivo, node);
+  };
 
   // Lógica para obtener la jerarquía de ejecutivos
   const storeUser = useUserStore((state) => state.user);
@@ -65,8 +77,9 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
         }
         setExecutiveTree(tree);
 
-        // Seleccionar el nodo raíz por defecto
-        setSelectedExecutiveNode(idEjecutivo);
+        // Seleccionar y comunicar el nodo raíz por defecto al consumidor.
+        const initialNode = tree.find((node) => Number(node.idEjecutivo) === Number(idEjecutivo)) || tree[0];
+        if (initialNode) selectExecutive(initialNode);
       } catch (e) {
         console.error("Error al obtener la jerarquía:", e);
         const status = e.response?.status;
@@ -163,10 +176,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                 !isSelected ? "hover:bg-[var(--color-surface-secondary)]" : ""
               }`}
               onClick={() => {
-                setSelectedExecutiveNode(node.idEjecutivo);
-                if (onExecutiveSelect) {
-                  onExecutiveSelect(node.idEjecutivo);
-                }
+                selectExecutive(node);
               }}
               onDoubleClick={() => {
                 if (hasSub) toggleCollapse(node.idEjecutivo);
@@ -239,7 +249,7 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
     persistedSession?.usuario || persistedSession?.Usuario || "";
 
   return (
-    <div className="bg-[var(--color-surface)] border border-dashed border-[var(--color-jerarquia1)]  rounded-2xl flex flex-col px-4 lg:px-6 w-full h-auto lg:h-82 min-h-64 transition-colors duration-300">
+    <div className={`bg-[var(--color-surface)] border border-dashed border-[var(--color-jerarquia1)] rounded-2xl flex flex-col px-4 lg:px-6 w-full h-auto lg:h-82 min-h-64 transition-colors duration-300 ${className}`}>
       {/* Header unificado y responsive */}
       <div className="flex flex-col h-full py-4">
         <div
@@ -287,10 +297,11 @@ const RamificacionSesiones = ({ onExecutiveSelect }) => {
                 hover:bg-[var(--color-jerarquia1)] hover:text-[var(--color-text-inverse)]`}
               title={`Ejecutivo de la sesión actual: ${usuarioSesion} - ${nombreSesion}`}
               onClick={() => {
-                setSelectedExecutiveNode(Number(idEjecutivoSesion));
-                if (onExecutiveSelect) {
-                  onExecutiveSelect(Number(idEjecutivoSesion));
-                }
+                selectExecutive({
+                  idEjecutivo: Number(idEjecutivoSesion),
+                  usuario: usuarioSesion,
+                  NombreEjecutivo: nombreSesion,
+                });
                 // Hacer autoscroll hacia arriba
                 setTimeout(() => {
                   scrollToTop();

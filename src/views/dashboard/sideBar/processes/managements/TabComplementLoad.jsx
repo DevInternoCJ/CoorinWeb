@@ -4,18 +4,22 @@ import FloatingSelect from "../../../../../components/Select/FloatingSelect";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import { ManagmentLoadFile } from "../../../../../services/mark/Orochi/LokiServices";
+import FieldError from "../../../../../components/Formulario/FieldError";
+import useZodValidation from "../../../../../hooks/useZodValidation";
+import { gestionUploadSchema } from "../../../../../schemas/formSchemas";
 
 const TabComplementLoad = () => {
   const [cartera, setCartera] = useState("");
   const [rutaArchivo, setRutaArchivo] = useState("");
   const [archivo, setArchivo] = useState(null);
   const [fileData, setFileData] = useState([]);
-  const [fileHeaders, setFileHeaders] = useState([]);
+  const [, setFileHeaders] = useState([]);
   const [numColumnas, setNumColumnas] = useState(0);
   const [numFilas, setNumFilas] = useState(0);
-  const [validationMessage, setValidationMessage] = useState("");
+  const [, setValidationMessage] = useState("");
   const [isValidFormat, setIsValidFormat] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const { errors, validate, clearError, setErrors } = useZodValidation(gestionUploadSchema);
 
   // Campos esperados en el archivo Excel (tal cual vienen)
   const camposEsperadosExcel = [
@@ -30,20 +34,6 @@ const TabComplementLoad = () => {
     "Extension",
     "Duracion",
   ];
-
-  // Mapeo de campos Excel a nombres de visualización en el front
-  const camposMapping = {
-    Cuenta: "Cuenta",
-    FechaGestion: "Fecha Ges.",
-    HoraGestion: "Hora Ges",
-    ClaveEjecutivo: "Clv. Ejecutivo",
-    Contacto: "Contacto",
-    Comentario: "Comentario",
-    Telefono: "Teléfono",
-    Sucursal: "Sucursal",
-    Extension: "Extensión",
-    Duracion: "Duración",
-  };
 
   const validateHeaders = (headers) => {
     const headersNormalized = headers.map((h) => String(h).trim());
@@ -170,7 +160,7 @@ const TabComplementLoad = () => {
         }
         break;
 
-      case "Extension":
+      case "Extension": {
         // 4 dígitos, solo números (acepta 0000)
         // Convertir a string y rellenar con ceros si es necesario
         let extension = String(valor).trim();
@@ -184,6 +174,7 @@ const TabComplementLoad = () => {
           );
         }
         break;
+      }
 
       case "Duracion":
         // Formato hh:mm:ss (00:05:15)
@@ -282,6 +273,15 @@ const TabComplementLoad = () => {
     input.onchange = (e) => {
       const file = e.target.files[0];
       if (file) {
+        const fileResult = gestionUploadSchema.shape.archivo.safeParse(file);
+        if (!fileResult.success) {
+          setErrors({ archivo: fileResult.error.issues[0]?.message });
+          setRutaArchivo("");
+          setArchivo(null);
+          setFileData([]);
+          return;
+        }
+        clearError("archivo");
         setRutaArchivo(file.name);
         setArchivo(file);
 
@@ -328,6 +328,11 @@ const TabComplementLoad = () => {
   };
 
   const handleCargar = async () => {
+    const validatedUpload = validate({ idCartera: cartera, archivo });
+    if (!validatedUpload) {
+      toast.warning("Revise la cartera y el archivo seleccionado.");
+      return;
+    }
     if (!isValidFormat) {
       toast.warning(
         "No se puede cargar el archivo. Los campos no coinciden con el formato esperado.",
@@ -360,11 +365,11 @@ const TabComplementLoad = () => {
         id: "cargar-loading",
       });
 
-      const userData = JSON.parse(localStorage.getItem("userData"));
+      const userData = JSON.parse(sessionStorage.getItem("userData") || localStorage.getItem("userData") || "{}");
       const idEjecutivo = userData?.idEjecutivo || 0;
 
       // Usar la cartera seleccionada en el select, no la de localStorage
-      const idCarteraSeleccionada = parseInt(cartera, 10);
+      const idCarteraSeleccionada = validatedUpload.idCartera;
 
       if (!idCarteraSeleccionada || isNaN(idCarteraSeleccionada)) {
         toast.dismiss("cargar-loading");
@@ -374,7 +379,7 @@ const TabComplementLoad = () => {
       }
 
       const body = {
-        Archivo: archivo,
+        Archivo: validatedUpload.archivo,
         IdCartera: idCarteraSeleccionada,
         IdEjecutivo: idEjecutivo,
       };
@@ -513,7 +518,10 @@ const TabComplementLoad = () => {
             id="cartera-select"
             label="Cartera"
             value={cartera}
-            onChange={(e) => setCartera(e.target.value)}
+            onChange={(e) => {
+              setCartera(e.target.value);
+              clearError("idCartera");
+            }}
             options={[
               { value: "1", label: "Cartera 1" },
               { value: "2", label: "Cartera 2" },
@@ -522,6 +530,7 @@ const TabComplementLoad = () => {
               { value: "31", label: "Cartera 31" },
             ]}
           />
+          <FieldError id="idCartera-error" message={errors.idCartera} />
         </div>
 
         {/* Input con botón anidado */}
@@ -547,6 +556,7 @@ const TabComplementLoad = () => {
           >
             Archivo
           </button>
+          <FieldError id="archivo-error" message={errors.archivo} className="absolute -bottom-5 start-0" />
         </div>
       </div>
 

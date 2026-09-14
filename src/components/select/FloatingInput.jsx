@@ -64,6 +64,7 @@ const FloatingInput = ({
   onBlur,
   onFocus,
   onKeyDown,
+  onClick,
   ...rest
 }) => {
   const s = SIZE_MAP[size] || SIZE_MAP.md;
@@ -77,6 +78,18 @@ const FloatingInput = ({
   const inputPaddingStart = icon
     ? s.input.replace(/ps-\S+/, "ps-10")
     : s.input;
+
+  const handleClick = (event) => {
+    onClick?.(event);
+    if (type !== "date" || disabled || readOnly || event.defaultPrevented) return;
+
+    try {
+      event.currentTarget.showPicker?.();
+    } catch {
+      // Algunos navegadores abren el selector de forma nativa y bloquean
+      // showPicker; en ese caso se conserva el comportamiento estándar.
+    }
+  };
 
   return (
     <div className={`floating-input-wrapper relative ${className}`}>
@@ -99,6 +112,7 @@ const FloatingInput = ({
         onBlur={onBlur}
         onFocus={onFocus}
         onKeyDown={onKeyDown}
+        onClick={handleClick}
         required={required}
         disabled={disabled}
         readOnly={readOnly}
@@ -124,6 +138,7 @@ const FloatingInput = ({
           // disabled / readonly
           "disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed",
           readOnly ? "cursor-default" : "",
+          type === "date" && !disabled && !readOnly ? "cursor-pointer" : "",
         ]
           .filter(Boolean)
           .join(" ")}

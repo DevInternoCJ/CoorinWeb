@@ -82,6 +82,11 @@ export const TITULOS_MODAL = {
   "Consulta Visitas": "Consulta Visitas - Coorin",
   "Captura Visitas": "Captura Visitas - Coorin",
   "Carga Visitas": "Carga de Visitas - Coorin",
+  "Corregir Visitas": "Corrección de Visitas - Coorin",
+  "Eliminar Visitas": "Eliminación de Visitas - Coorin",
+  "Configuración Correos": "Configuración de correo - Coorin",
+  "Envios Ejecutivos": "Envíos a ejecutivos - Coorin",
+  "Carga Conversación": "Carga de conversación - Coorin",
   VGP: "VGP - Coorin",
 };
 

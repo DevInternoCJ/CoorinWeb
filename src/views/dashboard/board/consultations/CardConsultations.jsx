@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDashboardModalUrlSync } from "../../../../hooks/useDashboardModalUrlSync";
 import DataDashConsul from "../../DataDashConsul";
 import { ExecutiveChart } from "../../DashboardIcons";
@@ -10,12 +10,22 @@ import ModalConsultaGenerales from "./Generals/ModalConsultaGenerales";
 import ModalBaseGenerales from "./Generals/ModalBaseGenerales";
 import HistoricosModal from "./Historical/ModalHistoricosModal";
 import ModalConsultaEjecutivosModal from "./Executives/ModalConsultaEjecutivosModal";
+import ModalDayExecutive from "./DayExecutive/ModalDayExecutive";
+import { useUserStore } from "../../../../contextGlobal/userStore";
+import { useCatalogStore } from "../../../../contextGlobal/catalogStore";
 const CardConsultations = ({ onModalOpen, onModalClose }) => {
+    const user = useUserStore((state) => state.user);
+    const loadCatalogs = useCatalogStore((state) => state.loadCatalogs);
+
+    useEffect(() => {
+        if (user) loadCatalogs(user).catch(() => undefined);
+    }, [user, loadCatalogs]);
     const [open, setOpen] = useState(false);
     const [openProductividad, setOpenProductividad] = useState(false);
     const [openGenerales, setOpenGenerales] = useState(false);
     const [openHistoricos, setOpenHistoricos] = useState(false);
     const [openEjecutivos, setOpenEjecutivos] = useState(false);
+    const [openDayExecutive, setOpenDayExecutive] = useState(false);
     // Estado para el nombre del modal actual
     const [activeModalName, setActiveModalName] = useState("");
 
@@ -94,6 +104,7 @@ const CardConsultations = ({ onModalOpen, onModalClose }) => {
         openGenerales ? "Generales" :
         openHistoricos ? "Historicos" :
         openEjecutivos ? "Ejecutivos" :
+        openDayExecutive ? "Dia del Ejecutivo" :
         activeModalName ? activeModalName : ""
     );
 
@@ -112,6 +123,8 @@ const CardConsultations = ({ onModalOpen, onModalClose }) => {
                             handleOpenModal(setOpenHistoricos, "Historicos");
                         } else if (catalog.title === "Ejecutivos") {
                             handleOpenModal(setOpenEjecutivos, "Ejecutivos");
+                        } else if (catalog.title === "Dia del Ejecutivo") {
+                            handleOpenModal(setOpenDayExecutive, "Dia del Ejecutivo");
                         } else {
                             setActiveModalName(catalog.title);
                             alert(`Click en ${catalog.title}`);
@@ -138,6 +151,10 @@ const CardConsultations = ({ onModalOpen, onModalClose }) => {
             <ModalConsultaEjecutivosModal 
                 isOpen={openEjecutivos}
                 onClose={() => handleCloseModal(setOpenEjecutivos)}
+            />
+            <ModalDayExecutive
+                isOpen={openDayExecutive}
+                onClose={() => handleCloseModal(setOpenDayExecutive)}
             />
         </>
     );

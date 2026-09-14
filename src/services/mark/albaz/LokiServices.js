@@ -1847,6 +1847,7 @@ export const chargueCatalog = async (data) => {
 export const postReportCampaign = async (body) => {
   try {
     const token = localStorage.getItem('token');
+    console.log('Enviando a /Busqueda/realizar-busqueda con:', body);
     if (!token) {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }

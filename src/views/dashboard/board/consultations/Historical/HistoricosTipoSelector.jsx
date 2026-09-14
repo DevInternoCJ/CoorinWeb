@@ -21,7 +21,7 @@ const HistoricosTipoSelector = ({
             <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-4">
                 <div className="relative w-full sm:w-auto">
                     <select
-                        className="peer p-2 pt-4 pe-8 block w-full bg-gray-50 border border-jerarquia1 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
+                        className="peer p-2 pt-4 pe-8 block w-full bg-surface-secondary border border-border text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 disabled:opacity-50 disabled:pointer-events-none"
                         value={cartera}
                         onChange={e => {
                             setCartera(e.target.value);
@@ -41,7 +41,7 @@ const HistoricosTipoSelector = ({
                     </select>
                     <label
                         htmlFor="cartera-select"
-                        className="absolute left-2 top-1 text-xs text-gray-500 pointer-events-none"
+                        className="absolute left-2 top-1 text-xs text-muted-foreground pointer-events-none"
                     >
                         Cartera
                     </label>
@@ -80,9 +80,9 @@ const HistoricosTipoSelector = ({
             {/* Mensaje cuando no hay selección */}
             {noSeleccionado && (
                <div className="">
-              <div className="flex m-5 flex-col items-center justify-center text-center text-gray-500 bg-gray-200 rounded-lg py-20">
+              <div className="flex m-5 flex-col items-center justify-center text-center text-muted-foreground bg-surface-secondary border border-border rounded-lg py-20">
                           <IconWarning className="size-8"/>
-                          <p className="text-sm text-gray-400 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             Seleccione una opcion para continuar.
                           </p>
                         </div>

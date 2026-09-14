@@ -4,20 +4,23 @@ import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import CloseButtonReusable from "../../../components/CloseButtonReusable";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
-import { VisitsLoadFile } from "../../../../../services/mark/Orochi/LokiServices";
+import { VisitService } from "../../../../../services/visits/VisitService";
+import FieldError from "../../../../../components/Formulario/FieldError";
+import useZodValidation from "../../../../../hooks/useZodValidation";
+import { visitFileSchema } from "../../../../../schemas/formSchemas";
 
-const LoadVisitsContent = ({ mostrarTabla, setMostrarTabla, onClose }) => {
+const LoadVisitsContent = ({ onClose }) => {
   const [selectedFile, setSelectedFile] = useState(null);
-  const [footerMsg] = useState("Seleccione un archivo para subir visitas.");
   const [cartera, setCartera] = useState("");
   const [rutaArchivo, setRutaArchivo] = useState("");
   const [archivo, setArchivo] = useState(null);
   const [fileData, setFileData] = useState([]);
-  const [fileHeaders, setFileHeaders] = useState([]);
+  const [, setFileHeaders] = useState([]);
   const [numColumnas, setNumColumnas] = useState(0);
   const [numFilas, setNumFilas] = useState(0);
   const [isValidFormat, setIsValidFormat] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const { errors, validate, clearError, setErrors } = useZodValidation(visitFileSchema);
 
   // Campos esperados en el archivo Excel (tal cual vienen)
   const camposEsperadosExcel = [
@@ -387,6 +390,16 @@ const LoadVisitsContent = ({ mostrarTabla, setMostrarTabla, onClose }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      const fileResult = visitFileSchema.shape.archivo.safeParse(file);
+      if (!fileResult.success) {
+        setErrors({ archivo: fileResult.error.issues[0]?.message });
+        setSelectedFile(null);
+        setArchivo(null);
+        setRutaArchivo("");
+        setFileData([]);
+        return;
+      }
+      clearError("archivo");
       setSelectedFile(file);
       setRutaArchivo(file.name);
       setArchivo(file);
@@ -443,12 +456,9 @@ const LoadVisitsContent = ({ mostrarTabla, setMostrarTabla, onClose }) => {
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) {
-      toast.warning("Por favor seleccione un archivo.");
-      return;
-    }
-    if (!cartera) {
-      toast.warning("Por favor seleccione una cartera.");
+    const upload = validate({ idCartera: cartera, archivo: selectedFile, complemento: false });
+    if (!upload) {
+      toast.warning("Revise la cartera y el archivo seleccionado.");
       return;
     }
     if (!isValidFormat) {
@@ -466,7 +476,7 @@ const LoadVisitsContent = ({ mostrarTabla, setMostrarTabla, onClose }) => {
 
     try {
       // Obtener datos del usuario
-      const userData = JSON.parse(localStorage.getItem("userData"));
+      const userData = JSON.parse(sessionStorage.getItem("userData") || localStorage.getItem("userData") || "{}");
       const idEjecutivo = userData?.idEjecutivo;
 
       if (!idEjecutivo) {
@@ -477,9 +487,9 @@ const LoadVisitsContent = ({ mostrarTabla, setMostrarTabla, onClose }) => {
 
       // Construir el body con idCartera, idEjecutivo y el archivo
       const body = {
-        idCartera: parseInt(cartera, 10),
+        idCartera: upload.idCartera,
         idEjecutivo: idEjecutivo,
-        archivo: archivo, // Usar el estado 'archivo' que contiene el objeto File
+        archivo: upload.archivo,
       };
 
       console.log("📤 Enviando carga de visitas:", {
@@ -491,7 +501,7 @@ const LoadVisitsContent = ({ mostrarTabla, setMostrarTabla, onClose }) => {
       });
 
       // Llamar al servicio
-      const response = await VisitsLoadFile(body);
+      const response = await VisitService.cargar(body);
 
       console.log("📥 Respuesta recibida:", response);
 
@@ -611,7 +621,10 @@ const LoadVisitsContent = ({ mostrarTabla, setMostrarTabla, onClose }) => {
               id="cartera-select"
               label="Cartera"
               value={cartera}
-              onChange={(e) => setCartera(e.target.value)}
+              onChange={(e) => {
+                setCartera(e.target.value);
+                clearError("idCartera");
+              }}
               required
               options={[
                 { value: "1",  label: "Cartera 1"  },
@@ -621,6 +634,7 @@ const LoadVisitsContent = ({ mostrarTabla, setMostrarTabla, onClose }) => {
                 { value: "31", label: "Cartera 31" },
               ]}
             />
+            <FieldError id="idCartera-error" message={errors.idCartera} />
           </div>
 
           {/* Input con botón anidado */}
@@ -646,6 +660,7 @@ const LoadVisitsContent = ({ mostrarTabla, setMostrarTabla, onClose }) => {
             >
               Archivo
             </button>
+            <FieldError id="archivo-error" message={errors.archivo} className="absolute -bottom-5 start-0" />
           </div>
         </div>
 

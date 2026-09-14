@@ -44,12 +44,12 @@ const Phrases = ({ onClose }) => {
   ];
 
   return (
-    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black/55 flex items-center justify-center z-50 p-4">
       <div
         ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-white rounded-lg shadow-2xl w-full max-w-4xl overflow-hidden border border-gray-300 flex flex-col max-h-[90vh]`}
+        } bg-surface text-foreground rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-border flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -67,9 +67,9 @@ const Phrases = ({ onClose }) => {
           loading={loading}
           setLoading={setLoading}
         />
-        <div className="flex-1 overflow-y-auto bg-gray-100">
+        <div className="flex-1 overflow-y-auto bg-surface-secondary">
           {selectedProduct && (
-            <div className="flex items-center gap-6 px-6 py-4 bg-200 border-b border-gray-200">
+            <div className="flex items-center gap-6 px-6 py-4 bg-surface border-b border-border">
               {checkboxOptions.map((option) => (
                 <label
                   key={option.id}
@@ -81,9 +81,9 @@ const Phrases = ({ onClose }) => {
                     id={option.id}
                     checked={option.checked}
                     onChange={option.onChange}
-                    className="shrink-0 w-4 h-4 border-gray-300 rounded text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+                    className="modal-checkbox shrink-0 w-4 h-4 rounded transition-colors cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
                   />
-                  <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">
+                  <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                     {option.label}
                   </span>
                 </label>
@@ -93,7 +93,7 @@ const Phrases = ({ onClose }) => {
           {/* Contenido principal */}
           <div className="">
             {!selectedProduct && (
-              <div className="flex py-10 m-5 flex-col items-center h-60 justify-center rounded-lg bg-gray-200 text-gray-500">
+              <div className="flex py-10 m-5 flex-col items-center h-60 justify-center rounded-lg bg-surface border border-border text-muted-foreground">
                 <IconWarning className="size-8 mb-2" />
                 <p className="text-sm font-medium">
                   Selecciona un producto para continuar
@@ -102,9 +102,9 @@ const Phrases = ({ onClose }) => {
             )}
             {/* Mensaje cuando hay producto pero no hay vista seleccionada */}
             {selectedProduct && !activeView && (
-              <div className="flex flex-col items-center justify-center text-center text-gray-500 bg-gray-100 rounded-lg py-20">
+              <div className="flex flex-col items-center justify-center text-center text-muted-foreground bg-surface border border-border rounded-lg py-20">
                 <IconWarning className="size-8" />
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Seleccione el producto para gestionar scripts.
                 </p>
               </div>

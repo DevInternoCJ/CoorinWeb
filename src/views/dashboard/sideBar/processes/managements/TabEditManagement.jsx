@@ -1,6 +1,10 @@
 // editar gestiones
-import React, { useState, useRef, useEffect } from "react";
-import FloatingSelect from "../../../../../components/Select/FloatingSelect";
+import React, { useState, useRef } from "react";
+import CatalogSelect from "../../../../../components/Select/CatalogSelect";
+import FloatingInput from "../../../../../components/Select/FloatingInput";
+import FieldError from "../../../../../components/Formulario/FieldError";
+import useZodValidation from "../../../../../hooks/useZodValidation";
+import { gestionEditSchema, gestionSearchSchema } from "../../../../../schemas/formSchemas";
 import {
   GetInfoEditManagments,
   PutEditManagments,
@@ -15,18 +19,18 @@ const TabEditManagement = () => {
   const [loading, setLoading] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const rowRefs = useRef([]);
+  const searchValidation = useZodValidation(gestionSearchSchema);
+  const editValidation = useZodValidation(gestionEditSchema);
 
   const handleBuscar = async () => {
-    if (!cartera || !cuenta) {
-      console.warn("Cartera y Cuenta son requeridos");
-      return;
-    }
+    const filters = searchValidation.validate({ idCartera: cartera, idCuenta: cuenta });
+    if (!filters) return;
 
     setLoading(true);
     try {
       const data = await GetInfoEditManagments({
-        idCartera: parseInt(cartera),
-        idCuenta: cuenta,
+        idCartera: filters.idCartera,
+        idCuenta: filters.idCuenta,
       });
       setGestiones(data || []);
       setHasBuscado(true);
@@ -56,7 +60,7 @@ const TabEditManagement = () => {
     const currentSelectedIndex = selectedRow;
 
     const params = {
-      idCartera: parseInt(cartera),
+      idCartera: cartera,
       idCuenta: cuenta,
       fecha: gestionSeleccionada.Fecha
         ? gestionSeleccionada.Fecha.split("T")[0]
@@ -65,11 +69,14 @@ const TabEditManagement = () => {
       comentario: comentario,
     };
 
+    const parsedParams = editValidation.validate(params);
+    if (!parsedParams) return;
+
     console.log("Parámetros a enviar al endpoint PutEditManagments:", params);
 
     setLoading(true);
     try {
-      const response = await PutEditManagments(params);
+      const response = await PutEditManagments(parsedParams);
       console.log("Respuesta exitosa de PutEditManagments:", response);
 
       // Recargar las gestiones después de editar
@@ -105,11 +112,15 @@ const TabEditManagement = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
         {/* Select Cartera */}
         <div className="flex-1">
-          <FloatingSelect
+          <CatalogSelect
             id="cartera-select-edit"
             label="Cartera"
             value={cartera}
-            onChange={(e) => setCartera(e.target.value)}
+              onChange={(e) => {
+                setCartera(e.target.value);
+                searchValidation.clearError("idCartera");
+                editValidation.clearError("idCartera");
+              }}
             required
             options={[
               { value: "1",  label: "Cartera 1"  },
@@ -118,30 +129,28 @@ const TabEditManagement = () => {
               { value: "31", label: "Cartera 31" },
             ]}
           />
+          <FieldError id="idCartera-error" message={searchValidation.errors.idCartera || editValidation.errors.idCartera} />
         </div>
 
-        {/* Input Cuenta (no editable) */}
-        <div className="relative flex-1">
-          <input
-            type="text"
-            value={cuenta}
-            onChange={(e) => setCuenta(e.target.value)}
-            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
-            id="cuenta-input"
-            placeholder=" "
-          />
-          <label
-            htmlFor="cuenta-input"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
-          >
-            Cuenta
-          </label>
-        </div>
+        <FloatingInput
+          id="idCuenta"
+          label="Cuenta"
+          value={cuenta}
+          onChange={(e) => {
+            setCuenta(e.target.value);
+            searchValidation.clearError("idCuenta");
+            editValidation.clearError("idCuenta");
+          }}
+          error={searchValidation.errors.idCuenta || editValidation.errors.idCuenta}
+          required
+        />
 
         {/* Botón Buscar */}
         <div className="flex items-center">
           <button
             onClick={handleBuscar}
+            type="button"
+            disabled={loading}
             className="btn-info w-full px-6 py-2 text-sm font-medium rounded-lg shadow-sm flex justify-center items-center"
           >
             Buscar
@@ -351,8 +360,14 @@ const TabEditManagement = () => {
         {/* Textarea con botón */}
         <div className="relative min-h-[100px] flex-shrink-0">
           <textarea
+            id="comentario-gestion"
+            name="comentario"
             value={comentario}
-            onChange={(e) => setComentario(e.target.value)}
+            onChange={(e) => {
+              setComentario(e.target.value);
+              editValidation.clearError("comentario");
+            }}
+            aria-invalid={Boolean(editValidation.errors.comentario)}
             className="w-full h-full p-4 pr-28 pb-4 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 resize-y"
             placeholder="Comentario de la Gestion. "
             style={{
@@ -365,6 +380,7 @@ const TabEditManagement = () => {
               backgroundRepeat: "no-repeat",
             }}
           />
+          <FieldError id="comentario-gestion-error" message={editValidation.errors.comentario || editValidation.errors.fecha || editValidation.errors.hora} className="absolute -bottom-5 start-0" />
           <button
             type="button"
             onClick={handleEditar}
