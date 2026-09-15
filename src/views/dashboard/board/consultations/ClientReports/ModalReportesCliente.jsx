@@ -55,8 +55,9 @@ export default function ModalReportesCliente({ isOpen, onClose, size = "producti
   };
   const reportOptions = definitions.map((item) => ({
     value: String(get(item, "id", "Id", "idReporte", "IdReporte") ?? ""),
-    label: String(get(item, "nombre", "Nombre", "descripcion", "Descripcion", "reporte", "Reporte") ?? "Reporte sin nombre"),
+    label: String(get(item, "reporte", "Reporte", "nombre", "Nombre") ?? "Reporte sin nombre"),
   })).filter((item) => item.value);
+  const selectedDescription = String(get(selected, "descripcion", "Descripcion") ?? "").trim();
   const segmentOptions = (get(selected, "segmentos", "Segmentos") || []).map((item) => ({ value: String(get(item, "id", "Id", "value", "Valor") ?? item), label: String(get(item, "nombre", "Nombre", "label", "Valor") ?? item) }));
 
   const selectDefinition = (event) => {
@@ -106,6 +107,7 @@ export default function ModalReportesCliente({ isOpen, onClose, size = "producti
           {visible.hasta && <DatePicker id="reporte-cliente-hasta" label="Fecha hasta" value={hasta} onChange={setHasta} min={desde || undefined} className="w-full" />}
           {visible.segmento && (segmentOptions.length ? <FloatingSelect id="reporte-cliente-segmento" label="Segmento" value={segmento} onChange={(event) => setSegmento(event.target.value)} options={segmentOptions} required /> : <FloatingInput id="reporte-cliente-segmento" label="Segmento" value={segmento} onChange={(event) => setSegmento(event.target.value)} />)}
         </div>
+        {selectedDescription && <div className="mt-3 rounded-lg border border-border bg-layer px-3 py-2.5 text-sm text-muted-foreground"><span className="font-semibold text-foreground">Descripción: </span>{selectedDescription}</div>}
         {error && <p className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
         <div className="mt-4 flex justify-end"><button type="button" onClick={downloadReport} disabled={loading || generating || !definitionId || !cartera} className="inline-flex items-center gap-x-2 rounded-lg border border-transparent bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-jerarquia3 focus:outline-none focus:ring-2 focus:ring-primary disabled:pointer-events-none disabled:opacity-50">{generating ? "Generando archivo…" : "Descargar Excel"}</button></div>
       </section>

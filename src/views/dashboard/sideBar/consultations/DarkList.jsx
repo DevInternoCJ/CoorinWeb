@@ -182,8 +182,8 @@ const DarkListContent = () => {
             {/* Radio buttons: primer row */}
             <div className="w-full mb-4">
               {/* md: fila con radio buttons distribuidos uniformemente */}
-              <div className="hidden md:flex w-full flex-row justify-between items-center">
-                <label className="flex-1 flex justify-start items-center gap-2 cursor-pointer">
+              <div className="hidden md:grid w-full grid-cols-3 items-center gap-3">
+                <label className="flex min-w-0 items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="tipo"
@@ -194,7 +194,7 @@ const DarkListContent = () => {
                   />
                   <span className="text-sm text-[var(--color-text-secondary)]">Teléfono</span>
                 </label>
-                <label className="flex-1 flex justify-center items-center gap-2 cursor-pointer">
+                <label className="flex min-w-0 items-center justify-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="tipo"
@@ -205,7 +205,7 @@ const DarkListContent = () => {
                   />
                   <span className="text-sm text-[var(--color-text-secondary)]">Cuenta</span>
                 </label>
-                <label className="flex-1 flex justify-end items-center gap-2 cursor-pointer">
+                <label className="flex min-w-0 items-center justify-end gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="tipo"
@@ -218,8 +218,8 @@ const DarkListContent = () => {
                 </label>
               </div>
               {/* sm: fila expandida al ancho completo, siempre horizontal */}
-              <div className="flex md:hidden w-full flex-row gap-4 justify-between items-center">
-                <label className="flex-1 flex justify-start items-center gap-2 cursor-pointer">
+              <div className="grid md:hidden w-full grid-cols-3 items-center gap-2">
+                <label className="flex min-w-0 items-center gap-1 cursor-pointer">
                   <input
                     type="radio"
                     name="tipo"
@@ -228,9 +228,9 @@ const DarkListContent = () => {
                     onChange={() => handleTipoChange("telefono")}
                     className="modal-radio"
                   />
-                  <span className="text-sm text-[var(--color-text-secondary)]">Teléfono</span>
+                  <span className="truncate text-sm text-[var(--color-text-secondary)]">Teléfono</span>
                 </label>
-                <label className="flex-1 flex justify-center items-center gap-2 cursor-pointer">
+                <label className="flex min-w-0 items-center justify-center gap-1 cursor-pointer">
                   <input
                     type="radio"
                     name="tipo"
@@ -239,9 +239,9 @@ const DarkListContent = () => {
                     onChange={() => handleTipoChange("cuenta")}
                     className="modal-radio"
                   />
-                  <span className="text-sm text-[var(--color-text-secondary)]">Cuenta</span>
+                  <span className="truncate text-sm text-[var(--color-text-secondary)]">Cuenta</span>
                 </label>
-                <label className="flex-1 flex justify-end items-center gap-2 cursor-pointer">
+                <label className="flex min-w-0 items-center justify-end gap-1 cursor-pointer">
                   <input
                     type="radio"
                     name="tipo"
@@ -250,7 +250,7 @@ const DarkListContent = () => {
                     onChange={() => handleTipoChange("correo")}
                     className="modal-radio"
                   />
-                  <span className="text-sm text-[var(--color-text-secondary)]">Correo</span>
+                  <span className="truncate text-sm text-[var(--color-text-secondary)]">Correo</span>
                 </label>
               </div>
             </div>
@@ -310,9 +310,9 @@ const DarkListContent = () => {
             </div>
           </div>
           {/* lg, xl, 2xl: fila única con todos los elementos como antes */}
-          <div className="hidden lg:flex flex-row justify-center items-center gap-4 w-full">
+          <div className="hidden lg:grid w-full grid-cols-6 items-center gap-3">
             {/* Input */}
-            <div className="flex-[2] min-w-0">
+            <div className="col-span-2 min-w-0">
               <FloatingInput
                 type="text"
                 id="darklist-input-lg"
@@ -356,8 +356,8 @@ const DarkListContent = () => {
               />
             </div>
             {/* Radio buttons */}
-            <div className="flex flex-row gap-4 flex-1 min-w-0 justify-end">
-              <label className="inline-flex items-center gap-2 cursor-pointer">
+            <div className="col-span-3 grid min-w-0 grid-cols-3 gap-2">
+              <label className="inline-flex min-w-0 items-center gap-1.5 cursor-pointer">
                 <input
                   type="radio"
                   name="tipo"
@@ -366,9 +366,9 @@ const DarkListContent = () => {
                   onChange={() => handleTipoChange("telefono")}
                   className="modal-radio"
                 />
-                <span className="text-sm text-[var(--color-text-secondary)]">Teléfono</span>
+                <span className="truncate text-sm text-[var(--color-text-secondary)]">Teléfono</span>
               </label>
-              <label className="inline-flex items-center gap-2 cursor-pointer">
+              <label className="inline-flex min-w-0 items-center justify-center gap-1.5 cursor-pointer">
                 <input
                   type="radio"
                   name="tipo"
@@ -377,9 +377,9 @@ const DarkListContent = () => {
                   onChange={() => handleTipoChange("cuenta")}
                   className="modal-radio"
                 />
-                <span className="text-sm text-[var(--color-text-secondary)]">Cuenta</span>
+                <span className="truncate text-sm text-[var(--color-text-secondary)]">Cuenta</span>
               </label>
-              <label className="inline-flex items-center gap-2 cursor-pointer">
+              <label className="inline-flex min-w-0 items-center justify-end gap-1.5 cursor-pointer">
                 <input
                   type="radio"
                   name="tipo"
@@ -388,11 +388,11 @@ const DarkListContent = () => {
                   onChange={() => handleTipoChange("correo")}
                   className="modal-radio"
                 />
-                <span className="text-sm text-[var(--color-text-secondary)]">Correo</span>
+                <span className="truncate text-sm text-[var(--color-text-secondary)]">Correo</span>
               </label>
             </div>
             {/* Botón buscar */}
-            <div className="flex-1 min-w-0 flex justify-center">
+            <div className="col-span-1 min-w-0 flex justify-center">
               <button
                 type="submit"
                 className="btn-success w-full px-4 py-2 rounded-lg text-white text-sm font-medium shadow-sm hover:brightness-95 flex justify-center"

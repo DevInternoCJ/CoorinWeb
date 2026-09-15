@@ -253,7 +253,7 @@ Esta sección complementa el inventario anterior con el lugar donde ASP.NET enla
 | `POST /api/PlantillasCorreo/carga-datos` | JSON body | `CargaDatosRequest` según firma actual. |
 | `POST /api/Auditoria/consulta-auditoria` | JSON body | `AuditoriaFilterDto`. |
 | `POST /api/procesos/accionamientos/carga` | Form-data | `CargaAccionamientosRequestDto`; el controlador declara `multipart/form-data` y enlaza con `[FromForm]`. |
-| `POST /api/procesos/accionamientos/Informe/consultar` | JSON body | `InformeRequestDto`. |
+| `POST /api/procesos/accionamientos/Informe/consultar` | JSON body | `{ idCartera, idConsulta, idAcercamiento, fechaDesde, fechaHasta, conteo, usarComplemento }`. Las fechas se envían como `YYYY-MM-DD`; `conteo` es `0` o `1` y `usarComplemento` es booleano. |
 | `GET /api/procesos/carteo/buscar-cuenta` | Query | `idCartera` (int), `cuentaOrExpediente` (string), `esExpediente` (bool, opcional; default false). |
 | `POST /api/procesos/carteo/guardar-manual` | JSON body | `GuardarCarteoManualRequestDto`. |
 | `POST /api/procesos/carteo/carga-masiva` | Form-data | `CargaCarteoRequestDto`. |

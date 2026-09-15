@@ -691,6 +691,17 @@ export const getProductivityReport = async (requestData) => {
   }
 };
 
+/** Obtiene la información del informe de accionamientos. */
+export const getAccionamientosInforme = async (requestData) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+  }
+
+  const response = await api.post('/procesos/accionamientos/Informe/consultar', requestData);
+  return response.data;
+};
+
 export const getClientReportDefinitions = async (config = {}) => {
   const token = getToken();
   if (!token) throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');

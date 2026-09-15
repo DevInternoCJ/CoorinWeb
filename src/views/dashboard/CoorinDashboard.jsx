@@ -279,6 +279,8 @@ export default function CoorinDashboard() {
         );
           case "Accionamientos":
         return <ModalBaseInformacion tipoInformacion="Accionamientos" onClose={closeModal} />;
+      case "Informe":
+        return <ModalBaseInformacion tipoInformacion="Accionamientos" onClose={closeModal} />;
       case "Supervisor":
         return <ModalSupervisor onClose={closeModal} />;
       case "Procesos-Gespa":
@@ -377,7 +379,7 @@ export default function CoorinDashboard() {
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
       "Consulta Visitas", "Captura Visitas", "Carga Visitas", "Corregir Visitas",
       "Eliminar Visitas", "Configuración Correos", "Envios Ejecutivos", "Carga Conversación",
-      "Campañas", "Productividad", "Reportes al Cliente", "Plantillas-Correo", "Frases", "Accionamientos", "Gestiones", "Supervisor", "Procesos-Gespa", // Procesos-Gespa (Gespa)
+      "Campañas", "Productividad", "Reportes al Cliente", "Plantillas-Correo", "Frases", "Accionamientos", "Informe", "Gestiones", "Supervisor", "Procesos-Gespa", // Procesos-Gespa (Gespa)
     ];
 
     if (sidebarOptionsMap[menuId]) {

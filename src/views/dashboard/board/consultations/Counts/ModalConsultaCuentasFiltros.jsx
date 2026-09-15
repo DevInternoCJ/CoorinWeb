@@ -484,7 +484,7 @@ const ModalConsultaCuentasFiltros = ({
           </IconCircular>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-            <div className={showPeriod ? "block" : "hidden"}>
+            <div>
               <DatePicker
                 id="consulta-cuentas-desde"
                 label="Desde fecha"

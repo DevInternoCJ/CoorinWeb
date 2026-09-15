@@ -31,6 +31,11 @@ Este documento define los componentes, estados visuales y reglas de interacción
 5. Área de resultados en `bg-layer`: encabezado, contador de registros y tabla con scroll interno.
 6. Estados explícitos: inicial, cargando, vacío y error. Nunca mostrar una tabla vacía sin explicación.
 
+## Controles en filas y columnas
+
+- Los grupos de radios y controles cortos deben usar `grid` con columnas explícitas, nunca depender sólo de `flex-1` para distribuirlos.
+- En pantallas compactas mantener cada opción dentro de su celda con `min-w-0` y texto truncable; el campo de captura debe ocupar una fila independiente debajo del grupo de opciones.
+
 ## Dependencias entre filtros
 
 - Cartera es la fuente de productos y debe resolverse antes de habilitar Producto.
@@ -49,6 +54,7 @@ Este documento define los componentes, estados visuales y reglas de interacción
 
 - Para `frmReportesAlCliente`, cargar primero `/api/reportes-cliente/definiciones`.
 - Producto es un control esencial y permanece siempre visible. `requiereProducto` sólo controla si es obligatorio. Los flags `requiereDesde` y `requiereHasta` controlan la visibilidad de fechas. Tomar `idCartera` de la definición como valor inicial de Cartera.
+- El selector de reportes muestra el campo `reporte`; una vez seleccionado, presentar `descripcion` debajo de los filtros como texto de ayuda, sin usarlo como valor del select.
 - El botón de descarga debe permanecer dentro del panel de filtros, deshabilitado mientras falten requeridos o haya una descarga en curso. La respuesta binaria se descarga usando el nombre de `Content-Disposition` cuando exista.
 
 ## Referencias de implementación
