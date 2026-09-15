@@ -679,6 +679,33 @@ export const getProductivity = async (requestData) => {
   }
 };
 
+export const getProductivityReport = async (requestData) => {
+  const token = getToken();
+  if (!token) throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+  try {
+    const response = await api.post('/reportes/ProductividadInfo/consultar', requestData);
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 401) clearAuth();
+    throw error;
+  }
+};
+
+export const getClientReportDefinitions = async (config = {}) => {
+  const token = getToken();
+  if (!token) throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+  const response = await api.get('/reportes-cliente/definiciones', config);
+  return response.data;
+};
+
+export const generateClientReport = async (payload) => {
+  const token = getToken();
+  if (!token) throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+  console.log("Reporte al cliente", payload);
+  const response = await api.post('/reportes-cliente/generar', payload);
+  return response.data;
+};
+
 
 export const PostInsertScreen = async (data) => {
   try {

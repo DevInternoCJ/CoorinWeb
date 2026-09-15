@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import FloatingSelect from "../../../../components/Select/FloatingSelect";
 import FloatingInput from "../../../../components/Select/FloatingInput";
+import CatalogSelect from "../../../../components/Select/CatalogSelect";
 import {
   getRegrest,
-  infoEjecutivo,
 } from "../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
@@ -12,50 +12,9 @@ const RegrestContent = ({ growModal, isExpanded }) => {
   const [resultados, setResultados] = useState(null); // array de arrepentimientos
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [abortController, setAbortController] = useState(null);
+  const abortControllerRef = useRef(null);
 
-  const [cartera, setCartera] = useState(() => {
-    const ud = JSON.parse(localStorage.getItem("userData") || "{}");
-    return ud?.idCartera || 0;
-  });
-  const [carterasOptions, setCarterasOptions] = useState([]);
-
-  // Obtener idCartera desde localStorage
-  const getIdCartera = () => {
-    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-    return userData?.idCartera || 0; // fallback a 1 si no existe
-  };
-
-  // Obtener idEjecutivo desde localStorage
-  const getIdEjecutivo = () => {
-    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-    return userData?.idEjecutivo ?? null;
-  };
-
-  // Cargar carteras (similar a Addresses.jsx)
-  useEffect(() => {
-    const idEjecutivo = getIdEjecutivo();
-    if (!idEjecutivo) return;
-    infoEjecutivo(idEjecutivo)
-      .then((data) => {
-        const carterasUnicas = Array.isArray(data)
-          ? Array.from(
-              new Map(
-                data.map((item) => [
-                  item.idCartera,
-                  {
-                    id: item.idCartera,
-                    nombre: item.NombreCartera || `Cartera ${item.idCartera}`,
-                  },
-                ]),
-              ).values(),
-            )
-          : [];
-        setCarterasOptions(carterasUnicas);
-        // Si cartera actual no está en opciones, mantenerla
-      })
-      .catch(() => setCarterasOptions([]));
-  }, []);
+  const [cartera, setCartera] = useState("");
 
   const handleBuscar = async () => {
     setResultados(null);
@@ -66,15 +25,17 @@ const RegrestContent = ({ growModal, isExpanded }) => {
       return;
     }
 
-    const idCartera = getIdCartera();
-    console.log("🔍 Usando idCartera:", idCartera);
+    if (!cartera) {
+      toast.warning("Seleccione una cartera");
+      return;
+    }
 
     setLoading(true);
     const controller = new AbortController();
-    setAbortController(controller);
+    abortControllerRef.current = controller;
     try {
       const data = await getRegrest(
-        { idCartera, cuenta: valor },
+        { idCartera: Number(cartera), cuenta: valor },
         { signal: controller.signal },
       );
       if (Array.isArray(data) && data.length > 0) {
@@ -102,19 +63,17 @@ const RegrestContent = ({ growModal, isExpanded }) => {
       setError("Verifica que la cuenta sea correcta.");
     } finally {
       setLoading(false);
-      setAbortController(null);
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
     }
   };
 
   // Cancelar petición al desmontar el componente
-  useEffect(() => {
-    return () => {
-      if (abortController) {
-        toast.warning("Petición cancelada al cerrar el modal.");
-        abortController.abort();
-      }
-    };
-  }, [abortController]);
+  useEffect(() => () => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+  }, []);
 
   useEffect(() => {
     if (error === "Verifica que la cuenta sea correcta.") {
@@ -135,16 +94,11 @@ const RegrestContent = ({ growModal, isExpanded }) => {
         <div className="block lg:flex lg:flex-row lg:items-center lg:gap-2 w-full">
           {/* Dropdown cartera */}
           <div className="w-full mb-4 lg:mb-0 lg:flex-shrink-0 lg:max-w-[180px]">
-            <FloatingSelect
+            <CatalogSelect
               id="cartera-select"
               label="Cartera"
-              value={String(cartera)}
+              value={cartera}
               onChange={(e) => setCartera(e.target.value)}
-              options={
-                carterasOptions.length === 0
-                  ? [{ value: String(cartera), label: `Cartera ${cartera}` }]
-                  : carterasOptions.map((item) => ({ value: String(item.id), label: item.nombre }))
-              }
             />
           </div>
           {/* Input cuenta adaptado de DarkList.jsx */}

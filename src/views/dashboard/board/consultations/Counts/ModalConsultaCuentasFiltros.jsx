@@ -9,13 +9,19 @@ import FloatingInput from "../../../../../components/Select/FloatingInput";
 import DatePicker from "../../../../../components/Select/DatePicker";
 import CatalogSelect from "../../../../../components/Select/CatalogSelect";
 import { useCatalogStore } from "../../../../../contextGlobal/catalogStore";
+import { CONFIRMED_CATALOG_IDS } from "../../../../../schemas/formSchemas";
 const fieldOptions = {
   Cuenta: ["Situación", "Nivel", "Sucursal", "CausaNoPago", "RFC", "Bloqueo"],
   Conteos: ["Gestiones", "Visitas", "Chats", "Comentarios", "Negociaciones", "Seguimientos", "Teléfonos", "Correos", "Domicilios", "Cartas", "Blasters", "Emails", "SMSs", "Telegramas", "Pagos", "SumaPagos"],
   Fechas: ["Activación", "Última gestión", "Última visita", "Última negociación", "Último pago", "Próximo seguimiento"],
 };
 const situacionOptions = [{ value: "Situación", label: "Situación", concepto: "Cuenta" }];
-const catalogByField = { Situación: { idCatalogo: 2 }, Nivel: { idCatalogo: 4 }, Sucursal: { idCatalogo: 1 }, CausaNoPago: { idCatalogo: 10 } };
+const catalogByField = {
+  Situación: { idCatalogo: CONFIRMED_CATALOG_IDS.SITUACIONES },
+  Nivel: { idCatalogo: CONFIRMED_CATALOG_IDS.NIVELES },
+  Sucursal: { idCatalogo: CONFIRMED_CATALOG_IDS.SUCURSALES },
+  CausaNoPago: { idCatalogo: CONFIRMED_CATALOG_IDS.CAUSAS_NO_PAGO },
+};
 const bitOptions = [{ value: "1", label: "Sí" }, { value: "0", label: "No" }];
 
 const ModalConsultaCuentasFiltros = ({
@@ -408,7 +414,7 @@ const ModalConsultaCuentasFiltros = ({
     const loadNieganOptions = async () => {
       if (cuenta === "Cuenta") {
         try {
-          const catalogData = valoresFor(2, {});
+          const catalogData = valoresFor(CONFIRMED_CATALOG_IDS.SITUACIONES, {});
           if (catalogData && Array.isArray(catalogData)) {
             // Filtrar solo los que tienen idCatálogo === 2
             const filteredOptions = catalogData.filter(
@@ -478,13 +484,15 @@ const ModalConsultaCuentasFiltros = ({
           </IconCircular>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-            <DatePicker
-              id="consulta-cuentas-desde"
-              label="Desde fecha"
-              value={fechaDesde}
-              onChange={onFechaDesdeChange}
-              className="w-full sm:w-44"
-            />
+            <div className={showPeriod ? "block" : "hidden"}>
+              <DatePicker
+                id="consulta-cuentas-desde"
+                label="Desde fecha"
+                value={fechaDesde}
+                onChange={onFechaDesdeChange}
+                className="w-full sm:w-44"
+              />
+            </div>
             <div className="flex flex-row items-center gap-2 w-full sm:w-auto">
               <button
                 type="button"

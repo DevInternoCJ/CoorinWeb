@@ -16,7 +16,7 @@ const ModalBaseCampanas = ({ open, onClose }) => {
                   ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-surface text-foreground rounded-xl shadow-2xl w-full max-w-6xl p-4 overflow-hidden border border-border flex flex-col max-h-[90vh]`}
+        } bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] rounded-xl shadow-2xl w-full max-w-6xl p-4 overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
             >
                 {/* Header y contenido principal */}

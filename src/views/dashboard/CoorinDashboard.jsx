@@ -29,6 +29,8 @@ import IconCircular from "../../components/Iconos/IconCircular";
 import ConsorcioLogo from "../../../src/assets//CoorinBlack.svg";
 import CoorinGreenLogo from "../../../src/assets/CoorinGreen.svg";
 import ProcessGespa from "../dashboard/sideBar/gespa/processgespa/ProcessGespa";
+import ModalProductividadReporte from "./board/consultations/Productivity/ModalProductividadReporte";
+import ModalReportesCliente from "./board/consultations/ClientReports/ModalReportesCliente";
 import { useDashboardModalUrlSync } from "../../hooks/useDashboardModalUrlSync";
 import { useThemeStore } from "../../contextGlobal/themeStore";
 
@@ -61,7 +63,7 @@ export default function CoorinDashboard() {
   const [mostrarTablaDomicilios, setMostrarTablaDomicilios] = useState(false);
 
   // Estado para controlar el tamaño del modal de arrepentimientos
-  const [regrestModalSize, setRegrestModalSize] = useState("pagos");
+  const [regrestModalSize, setRegrestModalSize] = useState("consultaStandalone");
   const [sidebarModalPath, setSidebarModalPath] = useState("");
   // Función para cerrar el sidebar (será pasada al CoorinSidebar)
   useDashboardModalUrlSync(
@@ -231,6 +233,8 @@ export default function CoorinDashboard() {
         size = captureVisitModalSize;
       } else if (selectedSidebarOption === "Arrepentimientos") {
         size = regrestModalSize;
+      } else if (selectedSidebarOption === "Lista Negra" || selectedSidebarOption === "Arrepentimientos") {
+        size = selectedSidebarOption === "Arrepentimientos" ? regrestModalSize : "consultaStandalone";
       }
 
       return (
@@ -251,6 +255,10 @@ export default function CoorinDashboard() {
 
     // Otros componentes que mantienen su lógica original
     switch (selectedSidebarOption) {
+      case "Productividad":
+        return <ModalProductividadReporte isOpen={modalSidebarOpen} onClose={closeModal} />;
+      case "Reportes al Cliente":
+        return <ModalReportesCliente isOpen={modalSidebarOpen} onClose={closeModal} />;
       case "Campañas":
         return (
           <ModalBaseCampanas open={modalSidebarOpen} onClose={closeModal} />
@@ -314,6 +322,8 @@ export default function CoorinDashboard() {
     // Mapeo de IDs del sidebar a opciones del modal
     const sidebarOptionsMap = {
       "1BB": "información", // Información - abre carrusel circular
+      "2BB": "Lista Negra",
+      "3BB": "Arrepentimientos",
 
       // === Administración ===
       "1AA": "Campañas",
@@ -355,7 +365,8 @@ export default function CoorinDashboard() {
       "13CC": "Metas",
 
       // === Reportes ===
-      "1DD": "Campañas",
+      "1DD": "Productividad",
+      "2DD": "Reportes al Cliente",
       "2DD_1DDD": "Plantillas-Correo",
       "2DD_2DDD": "Catalogos",
     };
@@ -366,7 +377,7 @@ export default function CoorinDashboard() {
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
       "Consulta Visitas", "Captura Visitas", "Carga Visitas", "Corregir Visitas",
       "Eliminar Visitas", "Configuración Correos", "Envios Ejecutivos", "Carga Conversación",
-      "Campañas", "Plantillas-Correo", "Frases", "Accionamientos", "Gestiones", "Supervisor", "Procesos-Gespa", // Procesos-Gespa (Gespa)
+      "Campañas", "Productividad", "Reportes al Cliente", "Plantillas-Correo", "Frases", "Accionamientos", "Gestiones", "Supervisor", "Procesos-Gespa", // Procesos-Gespa (Gespa)
     ];
 
     if (sidebarOptionsMap[menuId]) {
@@ -384,7 +395,7 @@ export default function CoorinDashboard() {
       setSelectedSidebarOption(option);
       setModalSidebarOpen(true);
       // Reiniciar tamaño del modal de arrepentimientos al abrir
-      if (option === "Arrepentimientos") setRegrestModalSize("pagos");
+      if (option === "Arrepentimientos") setRegrestModalSize("consultaStandalone");
     } else {
       // Si no está en el mapeo, verificar si el título está implementado
       if (!implementedOptions.includes(menuTitle)) {

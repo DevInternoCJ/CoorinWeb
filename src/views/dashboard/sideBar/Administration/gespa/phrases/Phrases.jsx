@@ -49,7 +49,7 @@ const Phrases = ({ onClose }) => {
         ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-surface text-foreground rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-border flex flex-col max-h-[90vh]`}
+        } bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -67,9 +67,9 @@ const Phrases = ({ onClose }) => {
           loading={loading}
           setLoading={setLoading}
         />
-        <div className="flex-1 overflow-y-auto bg-surface-secondary">
+        <div className="flex-1 overflow-y-auto bg-[var(--color-surface-secondary)]">
           {selectedProduct && (
-            <div className="flex items-center gap-6 px-6 py-4 bg-surface border-b border-border">
+            <div className="flex items-center gap-6 px-6 py-4 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
               {checkboxOptions.map((option) => (
                 <label
                   key={option.id}
@@ -93,7 +93,7 @@ const Phrases = ({ onClose }) => {
           {/* Contenido principal */}
           <div className="">
             {!selectedProduct && (
-              <div className="flex py-10 m-5 flex-col items-center h-60 justify-center rounded-lg bg-surface border border-border text-muted-foreground">
+              <div className="flex py-10 m-5 flex-col items-center h-60 justify-center rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)]">
                 <IconWarning className="size-8 mb-2" />
                 <p className="text-sm font-medium">
                   Selecciona un producto para continuar
@@ -102,7 +102,7 @@ const Phrases = ({ onClose }) => {
             )}
             {/* Mensaje cuando hay producto pero no hay vista seleccionada */}
             {selectedProduct && !activeView && (
-              <div className="flex flex-col items-center justify-center text-center text-muted-foreground bg-surface border border-border rounded-lg py-20">
+              <div className="flex flex-col items-center justify-center text-center text-[var(--color-text-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg py-20">
                 <IconWarning className="size-8" />
                 <p className="text-sm text-muted-foreground mt-1">
                   Seleccione el producto para gestionar scripts.

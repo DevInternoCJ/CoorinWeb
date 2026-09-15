@@ -65,7 +65,7 @@ const EmailTemplates = ({ onClose }) => {
         ref={modalRef}
         className={`${
           bounce ? " animate-bounce-modal" : ""
-        } bg-surface text-foreground rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-border flex flex-col max-h-[90vh]`}
+        } bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -85,7 +85,7 @@ const EmailTemplates = ({ onClose }) => {
           setShowDataTables={setShowDataTables}
         />
         {selectedProduct ? (
-          <div className="px-6 pb-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-surface-secondary space-y-4">
+          <div className="px-6 pb-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-[var(--color-surface-secondary)] space-y-4">
             {selectedProduct && (
               <Template
                 plantillas={plantillas}
@@ -110,7 +110,7 @@ const EmailTemplates = ({ onClose }) => {
           </div>
         ) : (
           <div>
-            <div className="flex m-5 flex-col items-center justify-center text-center text-muted-foreground bg-surface-secondary border border-border rounded-lg py-20">
+            <div className="flex m-5 flex-col items-center justify-center text-center text-[var(--color-text-muted)] bg-[var(--color-surface-secondary)] border border-[var(--color-border)] rounded-lg py-20">
               <IconWarning className="size-8" />
               <p className="text-sm text-muted-foreground mt-1">
                 Seleccione el producto para gestionar scripts.

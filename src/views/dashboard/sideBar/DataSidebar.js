@@ -50,6 +50,16 @@ const dataSidebar = {
               icon: "UserGroupIcon",
               // Sin subMenus2 - abre el carrusel circular con todos los componentes
             },
+            {
+              id: "2BB",
+              title: "Lista negra",
+              icon: "UserGroupIcon",
+            },
+            {
+              id: "3BB",
+              title: "Arrepentimientos",
+              icon: "UserGroupIcon",
+            },
           ],
         },
       ],
@@ -70,21 +80,21 @@ const dataSidebar = {
               icon: "UserGroupIcon",
               subMenus2: [
                 { id: "1CCC", title: "Comentarios", icon: "EnvelopeIcon" },
-                // { id: "2CCC", title: "Procesos-Gespa", icon: "BookOpenIcon" },
+                 { id: "2CCC", title: "Procesos-Gespa", icon: "BookOpenIcon" },
               ],
             },
-            {
-              id: "2CC",
-              title: "Visitas",
-              icon: "UserIcon",
-              subMenus2: [
-                // { id: "1CCC", title: "Consulta", icon: "EnvelopeIcon" },
-                // { id: "2CCC", title: "Captura", icon: "BookOpenIcon" },
-                { id: "3CCC", title: "Carga", icon: "BookOpenIcon" },
-                { id: "4CCC", title: "Corregir", icon: "BookOpenIcon" },
-                { id: "5CCC", title: "Eliminar", icon: "BookOpenIcon" },
-              ],
-            },
+            // {
+            //   id: "2CC",
+            //   title: "Visitas",
+            //   icon: "UserIcon",
+            //   subMenus2: [
+            //     // { id: "1CCC", title: "Consulta", icon: "EnvelopeIcon" },
+            //     // { id: "2CCC", title: "Captura", icon: "BookOpenIcon" },
+            //     { id: "3CCC", title: "Carga", icon: "BookOpenIcon" },
+            //     { id: "4CCC", title: "Corregir", icon: "BookOpenIcon" },
+            //     { id: "5CCC", title: "Eliminar", icon: "BookOpenIcon" },
+            //   ],
+            // },
             // {
             //   id: "3CC",
             //   title: "Correos",
@@ -103,12 +113,12 @@ const dataSidebar = {
             //     },
             //   ],
             // },
-            // {
-            //   id: "4CC",
-            //   title: "Accionamientos",
-            //   icon: "UserIcon",
-            //   // Sin subMenus2 - abre el modal directamente
-            // },
+            {
+              id: "4CC",
+              title: "Accionamientos",
+              icon: "UserIcon",
+              // Sin subMenus2 - abre el modal directamente
+            },
             // {
             //   id: "5CC",
             //   title: "Gestiones",
@@ -138,21 +148,21 @@ const dataSidebar = {
           subMenus: [
             {
               id: "1DD",
-              title: "Campañas",
+              title: "Productividad",
               icon: "UserIcon",
             },
             {
               id: "2DD",
-              title: "Gespa",
+              title: "Reportes al Cliente",
               icon: "UserGroupIcon",
-              subMenus2: [
-                {
-                  id: "1DDD",
-                  title: "Plantillas-Correo",
-                  icon: "EnvelopeIcon",
-                },
-                { id: "2DDD", title: "Catalogos", icon: "BookOpenIcon" },
-              ],
+              // subMenus2: [
+              //   {
+              //     id: "1DDD",
+              //     title: "Plantillas-Correo",
+              //     icon: "EnvelopeIcon",
+              //   },
+              //   { id: "2DDD", title: "Catalogos", icon: "BookOpenIcon" },
+              // ],
             },
           ],
         },

@@ -222,6 +222,15 @@ export const confirmedCatalogFilters = {
   habitacionVisita: { idCatalogo: 26, excludeValues: [2807] },
 };
 
+// IDs confirmados en el legacy para formularios de consulta/cuentas.
+// Bloqueo no se incluye porque proviene de TablaBit(), no de ValoresDelCatálogo().
+export const CONFIRMED_CATALOG_IDS = Object.freeze({
+  SUCURSALES: 1,
+  SITUACIONES: 2,
+  NIVELES: 4,
+  CAUSAS_NO_PAGO: 10,
+});
+
 export const catalogBootstrapSchema = z.object({
   carteras: z.array(carteraSchema).default([]),
   productos: z.array(productoSchema).default([]),

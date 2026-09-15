@@ -89,6 +89,7 @@ const ModalBaseInformacion = ({
   const isAccionamientos = tipoInformacion === "Accionamientos";
   const isGestiones = tipoInformacion === "Gestiones";
   const isSupervisor = tipoInformacion === "supervisor";
+  const isStandaloneQuery = tipoInformacion === "Lista Negra" || tipoInformacion === "Arrepentimientos";
 
   // Datos del ejecutivo (desde sessionStorage)
   const userData = JSON.parse(localStorage.getItem("userData"));
@@ -217,6 +218,25 @@ const ModalBaseInformacion = ({
               carouselNav={carouselNav}
               onClose={handleSafeClose}
             />
+          ) : isStandaloneQuery ? (
+            <header className="flex items-center justify-between gap-3 px-4 py-3 bg-[var(--color-surface-secondary)] border-b border-[var(--color-border)]">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-jerarquia3)]/15 text-[var(--color-jerarquia3)]">
+                  <ClipboardDocumentListIcon className="size-5" aria-hidden="true" />
+                </div>
+                <h2 className="truncate text-lg font-semibold text-[var(--color-text-primary)]">
+                  {tipoInformacion}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={handleSafeClose}
+                aria-label={`Cerrar ${tipoInformacion}`}
+                className="inline-flex size-9 items-center justify-center rounded-lg text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface)] hover:text-[var(--color-destructive,#b91c1c)] focus:outline-none focus:ring-2 focus:ring-[var(--color-jerarquia2)]"
+              >
+                <span aria-hidden="true" className="text-2xl leading-none">&times;</span>
+              </button>
+            </header>
           ) : null
         )}
 

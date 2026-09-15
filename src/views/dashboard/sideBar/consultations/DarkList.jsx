@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import FloatingInput from "../../../../components/Select/FloatingInput";
+import CatalogSelect from "../../../../components/Select/CatalogSelect";
 import { darkListV2 } from "../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
 const DarkListContent = () => {
   const [tipo, setTipo] = useState("cuenta");
+  const [idCartera, setIdCartera] = useState("");
   useEffect(() => {
     // Log para depuración del estado de los radio buttons
     console.log("Tipo seleccionado:", tipo);
@@ -13,13 +15,7 @@ const DarkListContent = () => {
   const [resultado, setResultado] = useState(null); // {enListaNegra: bool, msg: string}
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [abortController, setAbortController] = useState(null);
-
-  // Obtener idCartera desde localStorage
-  const getIdCartera = () => {
-    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-    return userData?.idCartera || 0; // fallback a 1 si no existe
-  };
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     // Mostrar toast de ayuda inicial para "cuenta"
@@ -30,8 +26,8 @@ const DarkListContent = () => {
     e.preventDefault();
     setResultado(null);
     setError(null);
-    if (!tipo || !valor) {
-      toast.error("Seleccione un tipo y escriba un dato para buscar.");
+    if (!idCartera || !tipo || !valor) {
+      toast.error("Seleccione una cartera, un tipo y escriba un dato para buscar.");
       return;
     }
     if (tipo === "correo" && !/^.+@.+\.[a-zA-Z]{2,}$/.test(valor)) {
@@ -102,10 +98,10 @@ const DarkListContent = () => {
     }
     setLoading(true);
     const controller = new AbortController();
-    setAbortController(controller);
+    abortControllerRef.current = controller;
     try {
       const res = await darkListV2(
-        { idCartera: getIdCartera(), selector: tipo, dato: valor },
+        { idCartera: Number(idCartera), selector: tipo, dato: valor },
         { signal: controller.signal },
       );
       if (typeof res?.enListaNegra === "boolean") {
@@ -126,19 +122,17 @@ const DarkListContent = () => {
       toast.error("Error al consultar la lista negra.");
     } finally {
       setLoading(false);
-      setAbortController(null);
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
     }
   };
 
   // Cancelar petición al desmontar el componente
-  useEffect(() => {
-    return () => {
-      if (abortController) {
-        toast.warning("Petición cancelada al cerrar el modal.");
-        abortController.abort();
-      }
-    };
-  }, [abortController]);
+  useEffect(() => () => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+  }, []);
 
   const handleTipoChange = (nuevoTipo) => {
     setTipo(nuevoTipo);
@@ -168,6 +162,19 @@ const DarkListContent = () => {
   return (
     <div className="w-full box-border flex flex-col items-center">
       <form onSubmit={handleBuscar} className="w-full">
+        <div className="mb-4 w-full max-w-sm">
+          <CatalogSelect
+            id="lista-negra-cartera"
+            label="Cartera"
+            value={idCartera}
+            onChange={(e) => {
+              setIdCartera(e.target.value);
+              setResultado(null);
+              setError(null);
+            }}
+            required
+          />
+        </div>
         {/* Layout para md y sm: filas separadas, para lg/xl/2xl: fila única */}
         <div className="w-full">
           {/* md y sm: filas separadas */}

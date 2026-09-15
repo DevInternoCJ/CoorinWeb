@@ -4,6 +4,7 @@ import FloatingSelect from "../../../../components/Select/FloatingSelect";
 import CatalogSelect from "../../../../components/Select/CatalogSelect";
 import { postReportCampaign } from "../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
+import { CONFIRMED_CATALOG_IDS } from "../../../../schemas/formSchemas";
 import { ACTIVE_SERVER } from "../../../../config/backend";
 import { buildSearchCriteria } from "../../../../forms/queryAdapters";
 import { realizarBusquedaRequestSchema } from "../../../../schemas/formSchemas";
@@ -16,7 +17,21 @@ const CONCEPT_FIELDS = {
   Chats: ["Salida", "Contacto", "Etapa", "Situación", "Parentesco", "CausaNoPago", "Sucursal", "Fecha"],
 };
 const GENERAL_FIELDS = CONCEPT_FIELDS.Teléfonos;
-const catalogByField = { Clase: 12, Telefonía: 23, Origen: 24, Contacto: 5, Situación: 2, Sucursal: 1, Modo: 21, Acercamiento: 8, Parentesco: 11, CausaNoPago: 10, Etapa: 13, Estado: 9, TipoNegociación: 8 };
+const catalogByField = {
+  Clase: 12,
+  Telefonía: 23,
+  Origen: 24,
+  Contacto: 5,
+  Situación: CONFIRMED_CATALOG_IDS.SITUACIONES,
+  Sucursal: CONFIRMED_CATALOG_IDS.SUCURSALES,
+  Modo: 21,
+  Acercamiento: 8,
+  Parentesco: 11,
+  CausaNoPago: CONFIRMED_CATALOG_IDS.CAUSAS_NO_PAGO,
+  Etapa: 13,
+  Estado: 9,
+  TipoNegociación: 8,
+};
 
 export default function QueryBuilder({ idCartera, idProducto, modo = "detalle", onResult }) {
   const [concepto, setConcepto] = useState("Teléfonos");

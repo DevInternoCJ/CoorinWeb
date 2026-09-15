@@ -29,6 +29,14 @@ export const MODAL_SIZES = {
     height: "340px",
     maxHeight: "85vh",
   },
+  consultaStandalone: {
+    maxWidth: "min(900px, 95vw)",
+    minWidth: "min(320px, 95vw)",
+    width: "min(760px, 95vw)",
+    height: "auto",
+    minHeight: "280px",
+    maxHeight: "85vh",
+  },
   consultaVisits: {
     maxWidth: "min(800px, 95vw)",
     minWidth: "320px",

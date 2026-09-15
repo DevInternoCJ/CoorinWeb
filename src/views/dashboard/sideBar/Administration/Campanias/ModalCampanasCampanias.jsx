@@ -137,7 +137,7 @@ const ModalCampanasCampanias = ({
 
   return (
     <div
-      className="bg-surface text-foreground rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col justify-between"
+      className="bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col justify-between"
       style={{ minWidth: 0 }}
     >
       <div>

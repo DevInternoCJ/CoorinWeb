@@ -72,11 +72,11 @@ const ProcessGespa = ({ onClose }) => {
       label: "Estados de cuenta",
       icon: <IconStatement className="size-5" />,
     },
-    {
-      id: "sucursales",
-      label: "Sucursales",
-      icon: <IconBranchOffice className="size-5" />,
-    },
+    // {
+    //   id: "sucursales",
+    //   label: "Sucursales",
+    //   icon: <IconBranchOffice className="size-5" />,
+    // },
   ];
 
   // indicar si hay una pestaña seleccionada válida
