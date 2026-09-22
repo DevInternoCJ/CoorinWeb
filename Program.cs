@@ -99,6 +99,9 @@ using Loki.Mark.Consulta.Productividad.Services;
 using Loki.Mark.Procesos.Accionamientos.Carteo.DAOs;
 using Loki.Mark.Procesos.Accionamientos.Carteo.Interfaces;
 using Loki.Mark.Procesos.Accionamientos.Carteo.Services;
+using Loki.Mark.Procesos.Accionamientos.Carga.DAOs;
+using Loki.Mark.Procesos.Accionamientos.Carga.Interfaces;
+using Loki.Mark.Procesos.Accionamientos.Carga.Services;
 using Loki.Mark.Procesos.Accionamientos.Informe.DAOs;
 using Loki.Mark.Procesos.Accionamientos.Informe.Interfaces;
 using Loki.Mark.Procesos.Accionamientos.Informe.Services;
@@ -523,6 +526,10 @@ builder.Services.AddScoped<Loki.Mark.Procesos.Metas.Interfaces.IMetasDao, Loki.M
 #endregion
 
 #region Accionamientos
+// Carga masiva de accionamientos
+builder.Services.AddScoped<ICargaAccionamientosService, CargaAccionamientosService>();
+builder.Services.AddScoped<ICargaAccionamientosDAO, CargaAccionamientosDAO>();
+
 //Procesos -> Accionamientos -> Informe
 builder.Services.AddScoped<IInformeService, InformeService>();
 builder.Services.AddScoped<IInformeDAO, InformeDAO>();

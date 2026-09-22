@@ -1,4 +1,4 @@
-﻿using CoorinWeb.Loki.Global;
+using CoorinWeb.Loki.Global;
 using CoorinWeb.Loki.Mark.Auth.DAOs;
 using Dapper;
 using Loki.DTOs.GespaDTOs;
@@ -67,11 +67,11 @@ namespace Loki.Mark.Procesos.Gespa.Bloqueo_cuentas.DAOs
             return await _daoBase.ExecuteStoredProcedure(
                 sqlConnection,
                 querybloqueoCuentas,
-                new SqlParameter("@idCartera", request.idCartera),
-                new SqlParameter("@idCuenta", request.idCuenta),                
-                new SqlParameter("@idEjecutivo", request.idEjecutivo),
-                new SqlParameter("@Comentario", request.comentarios),
-                new SqlParameter("@Bloqueo", request.bloqueo)
+                new SqlParameter("@idCartera", request.idCartera.HasValue ? (object)request.idCartera.Value : DBNull.Value),
+                new SqlParameter("@idCuenta", string.IsNullOrWhiteSpace(request.idCuenta) ? (object)DBNull.Value : request.idCuenta),                
+                new SqlParameter("@idEjecutivo", string.IsNullOrWhiteSpace(request.idEjecutivo) ? (object)DBNull.Value : request.idEjecutivo),
+                new SqlParameter("@Comentario", string.IsNullOrWhiteSpace(request.comentarios) ? (object)DBNull.Value : request.comentarios),
+                new SqlParameter("@Bloqueo", request.bloqueo.HasValue ? (object)request.bloqueo.Value : DBNull.Value)
             );
         }
 

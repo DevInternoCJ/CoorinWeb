@@ -1,4 +1,4 @@
-﻿using CoorinWeb.Loki.Global;
+using CoorinWeb.Loki.Global;
 using CoorinWeb.Loki.Mark.Auth.DAOs;
 using Dapper;
 using Loki.DTOs.GespaDTOs;
@@ -398,25 +398,54 @@ namespace Loki.Mark.Procesos.Gespa.Arrepentimientos.DAOs
         {
             var tipoBase = "Collection";
             var servidor = request.Servidor;
-            string concepto = request.concepto;
 
             var sqlConnection = _dbContFactory.GetSqlConnection(servidor, tipoBase);
 
             var queryArrepentimientos = "[4.2.Arrepentimientos]";
 
-            return await _daoBase.ExecuteStoredProcedure(
+            var spResult = await _daoBase.ExecuteStoredProcedure(
                 sqlConnection,
                 queryArrepentimientos,
-                new SqlParameter("@idCartera", request.idCartera),
-                new SqlParameter("@idCuenta", request.idCuenta),
-                new SqlParameter("@idEjecutivo", request.idEjecutivo),
-                new SqlParameter("@Concepto", request.concepto),
-                new SqlParameter("@Dato", request.dato),
-                new SqlParameter("@Fecha_Insert", request.fechaInsert),
-                new SqlParameter("@Segundo_Insert", request.segundoInsert),
-                new SqlParameter("@Fecha_HoraInsert", request.fechaHoraInsert)
+                new SqlParameter("@idCartera", request.idCartera.HasValue ? (object)request.idCartera.Value : DBNull.Value),
+                new SqlParameter("@idCuenta", string.IsNullOrWhiteSpace(request.idCuenta) ? (object)DBNull.Value : request.idCuenta),
+                new SqlParameter("@idEjecutivo", request.idEjecutivo.HasValue ? (object)request.idEjecutivo.Value : DBNull.Value),
+                new SqlParameter("@Concepto", string.IsNullOrWhiteSpace(request.concepto) ? (object)DBNull.Value : request.concepto),
+                new SqlParameter("@Dato", string.IsNullOrWhiteSpace(request.dato) ? (object)DBNull.Value : request.dato),
+                new SqlParameter("@Fecha_Insert", request.fechaInsert.HasValue ? (object)request.fechaInsert.Value : DBNull.Value),
+                new SqlParameter("@Segundo_Insert", request.segundoInsert.HasValue ? (object)request.segundoInsert.Value : DBNull.Value),
+                new SqlParameter("@Fecha_HoraInsert", request.fechaHoraInsert.HasValue ? (object)request.fechaHoraInsert.Value : DBNull.Value)
             );
 
+            // Replicar la lógica de frmArrepentimientos.cs:
+            // Si el SP devuelve un mensaje de advertencia/error (equivalente al Escalar en legacy), retornarlo.
+            if (spResult != null && spResult.Count > 0)
+            {
+                var primeraFila = spResult[0];
+                if (primeraFila is IDictionary<string, object> dictFila)
+                {
+                    if (dictFila.TryGetValue("Mensaje", out var msgVal) && msgVal != null && !string.IsNullOrWhiteSpace(msgVal.ToString()))
+                        return msgVal.ToString();
+                    if (dictFila.TryGetValue("mensaje", out var msgValLower) && msgValLower != null && !string.IsNullOrWhiteSpace(msgValLower.ToString()))
+                        return msgValLower.ToString();
+                    if (dictFila.TryGetValue("Error", out var errVal) && errVal != null && !string.IsNullOrWhiteSpace(errVal.ToString()))
+                        return errVal.ToString();
+                }
+                else
+                {
+                    try
+                    {
+                        var propMensaje = primeraFila?.Mensaje ?? primeraFila?.mensaje ?? primeraFila?.Error;
+                        if (propMensaje != null && !string.IsNullOrWhiteSpace(propMensaje.ToString()))
+                            return propMensaje.ToString();
+                    }
+                    catch
+                    {
+                        // Si no contiene columna de mensaje o error, la ejecución fue exitosa.
+                    }
+                }
+            }
+
+            return null;
         }
 
     }

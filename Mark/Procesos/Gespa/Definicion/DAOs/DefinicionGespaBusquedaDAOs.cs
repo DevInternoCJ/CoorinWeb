@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using CoorinWeb.Loki.Global;
 using CoorinWeb.Loki.Mark.Auth.DAOs;
 using Dapper;
@@ -65,17 +65,51 @@ namespace Loki.Mark.Procesos.Gespa.Definicion.DAOs
 
             var querydefine = "[4.4.DefineCuentas]";
 
-            return await _daoBase.ExecuteStoredProcedure(
+            var spResult = await _daoBase.ExecuteStoredProcedure(
                 sqlConnection, 
                 querydefine,
-                new SqlParameter("@idCartera", request.idCartera),
-                new SqlParameter("@idCuenta", request.idCuenta),
-                new SqlParameter("@Selector", request.selector),
-                new SqlParameter("@idEjecutivo", request.idEjecutivo),
-                new SqlParameter("@idSituacion", request.idSituacion),
-                new SqlParameter("@Comentario", request.comentario)
+                new SqlParameter("@idCartera", string.IsNullOrWhiteSpace(request.idCartera) ? (object)DBNull.Value : request.idCartera),
+                new SqlParameter("@idCuenta", string.IsNullOrWhiteSpace(request.idCuenta) ? (object)DBNull.Value : request.idCuenta),
+                new SqlParameter("@Selector", string.IsNullOrWhiteSpace(request.selector) ? (object)DBNull.Value : request.selector),
+                new SqlParameter("@idEjecutivo", string.IsNullOrWhiteSpace(request.idEjecutivo) ? (object)DBNull.Value : request.idEjecutivo),
+                new SqlParameter("@idSituacion", string.IsNullOrWhiteSpace(request.idSituacion) ? (object)DBNull.Value : request.idSituacion),
+                new SqlParameter("@Comentario", string.IsNullOrWhiteSpace(request.comentario) ? (object)DBNull.Value : request.comentario)
             );
 
+            // Replicar la lógica legacy de frmDefinirCuentas.cs:
+            // if ( tblResultado.Columns.Contains("Mensaje") ) lblResultado.Text = tblResultado.Rows[0]["Mensaje"].ToString();
+            if (spResult != null && spResult.Count > 0)
+            {
+                var primeraFila = spResult[0];
+                if (primeraFila is IDictionary<string, object> dictFila)
+                {
+                    if (dictFila.TryGetValue("Mensaje", out var msgVal) && msgVal != null && !string.IsNullOrWhiteSpace(msgVal.ToString()))
+                    {
+                        return msgVal.ToString();
+                    }
+                    if (dictFila.TryGetValue("mensaje", out var msgValLower) && msgValLower != null && !string.IsNullOrWhiteSpace(msgValLower.ToString()))
+                    {
+                        return msgValLower.ToString();
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        var propMensaje = primeraFila?.Mensaje ?? primeraFila?.mensaje;
+                        if (propMensaje != null && !string.IsNullOrWhiteSpace(propMensaje.ToString()))
+                        {
+                            return propMensaje.ToString();
+                        }
+                    }
+                    catch
+                    {
+                        // Si no contiene la propiedad Mensaje, se asume ejecución exitosa sin advertencias.
+                    }
+                }
+            }
+
+            return null;
         }
 
     }
