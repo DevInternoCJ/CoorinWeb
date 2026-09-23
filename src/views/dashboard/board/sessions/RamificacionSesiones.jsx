@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { obetenerJerarquiaEncargados } from "../../../../services/mark/Orochi/LokiServices";
 import { useUserStore } from "../../../../contextGlobal/userStore";
 
@@ -10,6 +10,7 @@ const RamificacionSesiones = ({ onExecutiveSelect, className = "" }) => {
   const [selectedExecutiveNode, setSelectedExecutiveNode] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
   const [showScrollTopBtn, setShowScrollTopBtn] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [collapsedNodes, setCollapsedNodes] = useState({});
 
@@ -114,12 +115,31 @@ const RamificacionSesiones = ({ onExecutiveSelect, className = "" }) => {
     setCollapsedNodes((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const filteredExecutiveTree = useMemo(() => {
+    const query = searchTerm.trim().toLocaleLowerCase();
+    if (!query) return executiveTree;
+
+    const filterNodes = (nodes) => (Array.isArray(nodes) ? nodes.reduce((result, node) => {
+      const user = String(node?.usuario || node?.Usuario || "");
+      const name = String(
+        node?.NombreEjecutivo || node?.nombreEjecutivo || node?.ejecutivo || node?.nombre || "",
+      );
+      const children = filterNodes(node?.subordinados);
+      if (`${user} ${name}`.toLocaleLowerCase().includes(query) || children.length) {
+        result.push({ ...node, subordinados: children });
+      }
+      return result;
+    }, []) : []);
+
+    return filterNodes(executiveTree);
+  }, [executiveTree, searchTerm]);
+
   // Renderizar la jerarquía usando el Tree View de Preline
   const renderExecutiveTree = (tree, level = 0, parentKey = "") => {
     if (!Array.isArray(tree)) return null;
     return tree.map((node, idx) => {
       const isSelected = node.idEjecutivo === selectedExecutiveNode;
-      const isCollapsed = collapsedNodes[node.idEjecutivo];
+      const isCollapsed = searchTerm.trim() ? false : collapsedNodes[node.idEjecutivo];
       const hasSub =
         Array.isArray(node.subordinados) && node.subordinados.length > 0;
       const nodeKey = `${parentKey}${node.idEjecutivo || node.usuario || idx}`;
@@ -321,6 +341,34 @@ const RamificacionSesiones = ({ onExecutiveSelect, className = "" }) => {
 
         {/* Contenedor de la ramificación con clases de Tailwind (scroll individual) */}
         <div className="relative w-full flex-auto min-h-0 flex flex-col">
+          <div className="relative mb-2">
+            <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+              <svg className="size-3.5 text-[var(--color-text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </div>
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Buscar por nombre o usuario…"
+              aria-label="Buscar ejecutivo por nombre o usuario"
+              className="block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-secondary)] py-2 ps-9 pe-9 text-xs font-medium text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]/70 focus:border-[var(--color-jerarquia2)] focus:outline-none focus:ring-2 focus:ring-[var(--color-jerarquia2)]"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                aria-label="Limpiar búsqueda"
+                className="absolute inset-y-0 end-0 flex items-center pe-3 text-[var(--color-text-muted)] transition hover:text-[var(--color-jerarquia3)]"
+              >
+                <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
           <div
             ref={ramificacionRef}
             onScroll={(e) => {
@@ -416,7 +464,11 @@ const RamificacionSesiones = ({ onExecutiveSelect, className = "" }) => {
                 data-hs-tree-view='{"controlBy": "checkbox", "autoSelectChildren": true}'
               >
                 <div data-hs-nested-draggable="">
-                  {renderExecutiveTree(executiveTree)}
+                  {filteredExecutiveTree.length ? renderExecutiveTree(filteredExecutiveTree) : (
+                    <p className="px-2 py-6 text-center text-xs text-[var(--color-text-muted)]">
+                      No se encontraron ejecutivos.
+                    </p>
+                  )}
                 </div>
               </div>
             )}

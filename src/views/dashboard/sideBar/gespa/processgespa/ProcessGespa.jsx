@@ -20,11 +20,11 @@ const BranchOffice = lazy(() => import("./process/BranchOffice"));
 
 import { IconWarning } from "../../../board/executives/scripts/IconScripts";
 
-const ProcessGespa = ({ onClose }) => {
+const ProcessGespa = ({ onClose, initialTab = "definicion" }) => {
   const modalRef = useRef(null);
   const { bounce } = ModalBase.useModalLogic();
   // Estado para controlar qué tab está activo
-  const [activeTab, setActiveTab] = useState("setting");
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [cartera, setCartera] = useState("");
   const [tipo, setTipo] = useState("individual");
   const [search, setSearch] = useState("");

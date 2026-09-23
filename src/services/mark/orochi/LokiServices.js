@@ -702,6 +702,48 @@ export const getAccionamientosInforme = async (requestData) => {
   return response.data;
 };
 
+/** Consulta los estados de cuenta Gespa para una cartera y rango de fechas. */
+export const getAccountStatementsGespa = async (requestData) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+  }
+
+  const response = await api.post('/EstadosDeCuentaGespa/EstadosDeCuenta', requestData);
+  return response.data;
+};
+
+/** Marca un estado de cuenta individual como enviado. */
+export const markAccountStatementGespa = async (requestData) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+  }
+
+  const response = await api.post('/EstadosDeCuentaGespa/EstadosDeCuenta/Modificar', requestData);
+  return response.data;
+};
+
+export const searchCargoAutorizarGespa = async (payload) => {
+  const response = await api.post('/CargoEnLineaGespa/BusquedaAutorizar', payload);
+  return response.data;
+};
+
+export const executeCargoAutorizarGespa = async (payload) => {
+  const response = await api.post('/CargoEnLineaGespa/EjecutaAutorizar', payload);
+  return response.data;
+};
+
+export const searchCargoCorregirGespa = async (payload) => {
+  const response = await api.post('/CargoEnLineaGespa/BusquedaCorregir', payload);
+  return response.data;
+};
+
+export const executeCargoCorregirGespa = async (payload) => {
+  const response = await api.post('/CargoEnLineaGespa/EjecutaCorregir', payload);
+  return response.data;
+};
+
 export const getClientReportDefinitions = async (config = {}) => {
   const token = getToken();
   if (!token) throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');

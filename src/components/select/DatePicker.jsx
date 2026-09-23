@@ -1,5 +1,4 @@
 import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 
 const MONTHS = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -181,7 +180,7 @@ const DatePicker = ({
         </button>
       </div>
 
-      {isOpen && createPortal(
+      {isOpen && (
         <div
           ref={popoverRef}
           role="dialog"
@@ -245,8 +244,7 @@ const DatePicker = ({
             <button type="button" onClick={() => { onChange?.(""); setIsOpen(false); }} disabled={!value} className="rounded-md px-2 py-1.5 text-xs font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-surface-secondary)] disabled:pointer-events-none disabled:opacity-40">Limpiar</button>
             <button type="button" onClick={() => selectDate(new Date())} disabled={isUnavailable(new Date())} className="rounded-md bg-[var(--color-jerarquia3)] px-3 py-1.5 text-xs font-semibold text-white transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[var(--color-jerarquia2)] focus:ring-offset-2">Hoy</button>
           </div>
-        </div>,
-        document.body,
+        </div>
       )}
     </div>
   );

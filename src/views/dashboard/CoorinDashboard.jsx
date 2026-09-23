@@ -285,6 +285,8 @@ export default function CoorinDashboard() {
         return <ModalSupervisor onClose={closeModal} />;
       case "Procesos-Gespa":
         return <ProcessGespa onClose={closeModal} />;
+      case "Estados de cuenta":
+        return <ProcessGespa onClose={closeModal} initialTab="estados-cuenta" />;
       case "Gestiones":
         return <ModalBaseInformacion tipoInformacion="Gestiones" onClose={closeModal} />;
       default:
@@ -379,7 +381,7 @@ export default function CoorinDashboard() {
       "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
       "Consulta Visitas", "Captura Visitas", "Carga Visitas", "Corregir Visitas",
       "Eliminar Visitas", "Configuración Correos", "Envios Ejecutivos", "Carga Conversación",
-      "Campañas", "Productividad", "Reportes al Cliente", "Plantillas-Correo", "Frases", "Accionamientos", "Informe", "Gestiones", "Supervisor", "Procesos-Gespa", // Procesos-Gespa (Gespa)
+      "Campañas", "Productividad", "Reportes al Cliente", "Plantillas-Correo", "Frases", "Accionamientos", "Informe", "Gestiones", "Supervisor", "Procesos-Gespa", "Estados de cuenta", // Procesos-Gespa (Gespa)
     ];
 
     if (sidebarOptionsMap[menuId]) {
