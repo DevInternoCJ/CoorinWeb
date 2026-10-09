@@ -6,7 +6,7 @@ import React from 'react';
 const TableCargaAccionamientos = ({ tipo }) => {
     if (tipo === 'carga') {
         return (
-            <div className="metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full h-full overflow-hidden">
+            <div className="metas-block metas-block-3 bg-surface rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full h-full overflow-hidden">
                 {/* Contenedor de tabla con scroll */}
                 <div
                     className="scrollbar-gray w-full flex-1"
@@ -53,7 +53,7 @@ const TableCargaAccionamientos = ({ tipo }) => {
         );
     } else if (tipo === 'consulta') {
         return (
-            <div className="metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full h-full overflow-hidden">
+            <div className="metas-block metas-block-3 bg-surface rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full h-full overflow-hidden">
                 {/* Contenedor de tabla con scroll */}
                 <div
                     className="scrollbar-gray w-full flex-1"

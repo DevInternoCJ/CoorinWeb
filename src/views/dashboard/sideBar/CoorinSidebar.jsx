@@ -88,7 +88,7 @@ const RenderSubMenus = ({
                   </span>
                 )}
 
-                <span className="hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden whitespace-nowrap">
+                <span className="hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-[opacity,max-width] duration-200 ease-out motion-reduce:transition-none overflow-hidden whitespace-nowrap">
                   {item.title}
                 </span>
               </a>
@@ -116,7 +116,7 @@ const RenderSubMenus = ({
                 </span>
               )}
 
-              <span className="inline-block transition-all duration-150 overflow-hidden whitespace-nowrap max-w-[160px] hs-overlay-minified:max-w-0 hs-overlay-minified:opacity-0">
+              <span className="inline-block transition-[opacity,max-width] duration-150 ease-out motion-reduce:transition-none overflow-hidden whitespace-nowrap max-w-[160px] hs-overlay-minified:max-w-0 hs-overlay-minified:opacity-0">
                 {item.title}
               </span>
 
@@ -524,7 +524,7 @@ export const CoorinSidebar = ({
   const asideClass = `${
     isMinified ? "hs-overlay-minified " : ""
   }hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0
-   transition-all duration-150 transform fixed top-0 start-0 bottom-0
+   transition-[width,transform] duration-200 ease-out motion-reduce:transition-none transform fixed top-0 start-0 bottom-0
    ${blocked ? "z-50" : "z-100"}
    bg-[var(--color-surface)] border-e border-[var(--color-border)]
    ${
@@ -568,7 +568,7 @@ export const CoorinSidebar = ({
       {/* Mobile hamburger button */}
       <button
         type="button"
-        className={`py-2 px-3 inline-flex justify-center items-center gap-x-2 text-start bg-gray-800 border-none text-white text-sm font-medium rounded-lg shadow-2xs align-middle hover:bg-gray-950 focus:outline-hidden focus:bg-gray-900 dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200 dark:focus:bg-neutral-200 ${
+        className={`py-2 px-3 inline-flex justify-center items-center gap-x-2 text-start bg-surface-secondary border border-border text-foreground text-sm font-medium rounded-lg shadow-2xs align-middle hover:bg-surface focus:outline-none focus:ring-2 focus:ring-jerarquia2 ${
           blocked && isMinified ? "cursor-default" : ""
         }`}
         style={blocked && isMinified ? { cursor: "default" } : undefined}
@@ -641,7 +641,7 @@ export const CoorinSidebar = ({
               href="#"
               aria-label="Brand"
             >
-              <span className="inline-block transition-all duration-150 overflow-hidden whitespace-nowrap">
+              <span className="inline-block transition-opacity duration-150 ease-out motion-reduce:transition-none overflow-hidden whitespace-nowrap">
                 Coorin
               </span>
             </a>

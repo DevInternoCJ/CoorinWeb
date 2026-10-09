@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import GlobalModal from "../../../../../components/Modal/GlobalModal";
 import { topCampaign } from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
@@ -43,26 +44,13 @@ const ModalToponeHundred = ({ open, onClose, idCampaña }) => {
 
   if (!open) return null;
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        background: "rgba(0,0,0,0.2)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-      }}
-    >
+    <GlobalModal isOpen={open} onClose={onClose} title="Top 100" mode="content" showHeader={false} showCloseButton={false}>
       <div
         style={{
-          background: "white",
+          background: "var(--color-surface)",
           borderRadius: 8,
           padding: 24,
-          minWidth: 420,
+          minWidth: "min(420px, calc(100vw - 2rem))",
           boxShadow: "0 2px 16px rgba(0,0,0,0.15)",
           position: "relative",
           display: "flex",
@@ -124,7 +112,7 @@ const ModalToponeHundred = ({ open, onClose, idCampaña }) => {
                           role="status"
                           aria-label="loading"
                         />
-                        <span className="mt-2 text-sm text-gray-500">
+                        <span className="mt-2 text-sm text-muted-foreground">
                           Cargando datos...
                         </span>
                       </div>
@@ -136,7 +124,7 @@ const ModalToponeHundred = ({ open, onClose, idCampaña }) => {
                       colSpan={3}
                       style={{ textAlign: "center", padding: "24px 0" }}
                     >
-                      <span className="text-gray-500 text-sm">
+                      <span className="text-muted-foreground text-sm">
                         Aún no se cuenta con registros
                       </span>
                     </td>
@@ -157,7 +145,7 @@ const ModalToponeHundred = ({ open, onClose, idCampaña }) => {
           </div>
         )}
       </div>
-    </div>
+    </GlobalModal>
   );
 };
 

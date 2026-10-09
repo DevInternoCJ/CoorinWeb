@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import ReusableModal from "../../modalGlobalReboot/ReusableModal";
+import ReusableModal from "../../../../../components/Modal/GlobalModal";
 import CatalogSelect from "../../../../../components/Select/CatalogSelect";
 import DatePicker from "../../../../../components/Select/DatePicker";
 import FloatingInput from "../../../../../components/Select/FloatingInput";

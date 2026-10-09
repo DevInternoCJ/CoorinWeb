@@ -20,7 +20,7 @@ const InputsMetas = ({
     };
 
     return (
-    <div className="flex flex-col gap-2 w-full p-4 bg-white rounded-lg shadow-md border border-gray-200">
+    <div className="flex flex-col gap-2 w-full p-4 bg-surface rounded-lg shadow-md border border-border">
             {/* Primera fila: 5 campos */}
             <div className="grid grid-cols-5 gap-2 mb-2">
                 {/* Cuentas */}

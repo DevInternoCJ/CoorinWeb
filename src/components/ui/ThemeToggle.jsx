@@ -25,7 +25,7 @@ const ThemeToggle = ({ className = "" }) => {
         border border-jerarquia2/40
         bg-jerarquia1/10 hover:bg-jerarquia2/20
         text-jerarquia3 dark:text-jerarquia4
-        transition-all duration-300 ease-in-out
+        transition-colors duration-200 ease-out motion-reduce:transition-none
         focus:outline-none focus:ring-2 focus:ring-jerarquia2/50
         group cursor-pointer
         ${className}
@@ -33,7 +33,7 @@ const ThemeToggle = ({ className = "" }) => {
     >
       {/* Ícono Sol (modo claro) */}
       <span
-        className={`absolute transition-all duration-300 ${
+        className={`absolute transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none ${
           isDark ? "opacity-0 scale-50 rotate-90" : "opacity-100 scale-100 rotate-0"
         }`}
       >
@@ -55,7 +55,7 @@ const ThemeToggle = ({ className = "" }) => {
 
       {/* Ícono Luna (modo oscuro) */}
       <span
-        className={`absolute transition-all duration-300 ${
+        className={`absolute transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none ${
           isDark ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 -rotate-90"
         }`}
       >

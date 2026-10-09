@@ -84,8 +84,8 @@ const SavePhrases = () => {
   const renderEmptyState = () => {
     if (!idEjecutivo) {
       return (
-        <div className="p-4 py-10 text-center bg-gray-200">
-          <p className="text-gray-800">Sesion expirada sesion</p>
+        <div className="p-4 py-10 text-center bg-surface-secondary">
+          <p className="text-foreground">Sesion expirada sesion</p>
         </div>
       );
     }
@@ -93,15 +93,15 @@ const SavePhrases = () => {
     if (loading) {
       return (
         <div className="p-8 text-center">
-          <p className="text-gray-500">Cargando frases...</p>
+          <p className="text-muted-foreground">Cargando frases...</p>
         </div>
       );
     }
 
     if (error) {
       return (
-        <div className="p-4 bg-red-50 border-l-4 border-red-400">
-          <p className="text-red-700">Error: {error}</p>
+        <div className="p-4 bg-destructive/10 border-l-4 border-destructive/30">
+          <p className="text-destructive">Error: {error}</p>
         </div>
       );
     }
@@ -109,7 +109,7 @@ const SavePhrases = () => {
     if (phrases.length === 0) {
       return (
         <div className="p-8 text-center">
-          <p className="text-gray-500">No hay frases guardadas</p>
+          <p className="text-muted-foreground">No hay frases guardadas</p>
         </div>
       );
     }
@@ -153,12 +153,12 @@ const SavePhrases = () => {
           checked={phrase.fraseActiva}
           onChange={() => handleTogglePhrase(phrase)}
         />
-        <span className="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-jerarquia3"></span>
-        <span className="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
-        <span className="absolute top-1/2 start-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-white transition-colors duration-200">
+        <span className="absolute inset-0 bg-surface-secondary rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-jerarquia3"></span>
+        <span className="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-surface rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+        <span className="absolute top-1/2 start-0.5 -translate-y-1/2 flex justify-center items-center text-muted-foreground peer-checked:text-white transition-colors duration-200">
           <IconActive />
         </span>
-        <span className="absolute top-1/2 end-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-jerarquia3 transition-colors duration-200 ">
+        <span className="absolute top-1/2 end-0.5 -translate-y-1/2 flex justify-center items-center text-muted-foreground peer-checked:text-jerarquia3 transition-colors duration-200 ">
           <IconOffActive />
         </span>
       </label>
@@ -168,24 +168,24 @@ const SavePhrases = () => {
   const renderTableRow = (phrase, index) => (
     <tr
       key={phrase.idRegistro || index}
-      className="hover:bg-gray-50 transition-colors"
+      className="hover:bg-surface-secondary transition-colors"
     >
-      <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-800">
+      <td className="px-6 py-2 whitespace-nowrap text-sm text-foreground">
         {phrase.idEjecutivo}
       </td>
 
-      <td className="px-6 py-2 text-sm text-gray-800">
-        <kbd className="min-h-7.5 inline-flex justify-center items-center py-1 px-1.5 bg-gray-200 border border-transparent font-mono text-sm text-gray-800 rounded-md">
+      <td className="px-6 py-2 text-sm text-foreground">
+        <kbd className="min-h-7.5 inline-flex justify-center items-center py-1 px-1.5 bg-surface-secondary border border-transparent font-mono text-sm text-foreground rounded-md">
           {phrase.texto}
         </kbd>
       </td>
       <td className="px-6 py-2 whitespace-nowrap text-sm">
         {renderSwitch(phrase)}
       </td>
-      <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-800">
+      <td className="px-6 py-2 whitespace-nowrap text-sm text-foreground">
         {phrase.fechaInsert}
       </td>
-      <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-800">
+      <td className="px-6 py-2 whitespace-nowrap text-sm text-foreground">
         {phrase.segundoInsert}
       </td>
     </tr>
@@ -193,9 +193,9 @@ const SavePhrases = () => {
 
   const renderTable = () => (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
+      <table className="min-w-full divide-y divide-border">
         {renderTableHeader()}
-        <tbody className="bg-white divide-y text-start items-center divide-gray-200">
+        <tbody className="bg-surface divide-y text-start items-center divide-border">
           {phrases.map((phrase, index) => renderTableRow(phrase, index))}
         </tbody>
       </table>
@@ -203,11 +203,11 @@ const SavePhrases = () => {
   );
 
   return (
-    <div className="m-5 bg-gray-100">
+    <div className="m-5 bg-surface-secondary">
       <div className="flex justify-between items-center mb-2">
-        <h5 className="font-semibold text-gray-800">Frases guardadas</h5>
+        <h5 className="font-semibold text-foreground">Frases guardadas</h5>
       </div>
-      <div className="relative bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="relative bg-surface border border-border rounded-lg overflow-hidden">
         {!loading && !error && phrases.length > 0
           ? renderTable()
           : renderEmptyState()}

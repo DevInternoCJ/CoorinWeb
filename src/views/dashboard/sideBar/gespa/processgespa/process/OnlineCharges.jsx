@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import CatalogSelect from "../../../../../../components/Select/CatalogSelect";
 import FloatingInput from "../../../../../../components/Select/FloatingInput";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
+import { ACTIVE_SERVER } from "../../../../../../config/backend";
 import { searchCargoAutorizarGespa, executeCargoAutorizarGespa, searchCargoCorregirGespa, executeCargoCorregirGespa } from "../../../../../../services/mark/Orochi/LokiServices";
 
 const rowsOf = (response) => Array.isArray(response) ? response : Array.isArray(response?.data) ? response.data : Array.isArray(response?.datos) ? response.datos : Array.isArray(response?.Tabla1) ? response.Tabla1 : Object.values(response || {}).find(Array.isArray) || [];
@@ -33,7 +34,7 @@ export default function OnlineCharges() {
     if (desde && hasta && desde > hasta) return setError("La fecha inicial no puede ser posterior a la fecha final.");
     setLoading(true); setError(""); setMessage(""); setSelected(null);
     try {
-      const payload = { selector, idCartera: Number(cartera), servidor: null };
+      const payload = { selector, idCartera: Number(cartera), servidor: ACTIVE_SERVER };
       const response = action === "corregir" ? await searchCargoCorregirGespa(payload) : await searchCargoAutorizarGespa(payload);
       const result = rowsOf(response);
       setRows(result);
@@ -59,7 +60,7 @@ export default function OnlineCharges() {
           monto: Number(correction.monto ?? val(row, ["monto", "Monto"]) ?? 0),
           recurrente: correction.recurrente ?? val(row, ["recurrente", "Recurrente"]),
           fechaInsert: correction.fechaInsert ?? val(row, ["fechaInsert", "FechaInsert", "Fecha", "fecha"]),
-          servidor: null,
+          servidor: ACTIVE_SERVER,
         });
       } else {
         await executeCargoAutorizarGespa({
@@ -73,7 +74,7 @@ export default function OnlineCharges() {
           fechaInsert: val(row, ["fechaInsert", "FechaInsert", "Fecha", "fecha"]),
           segundoInsert: val(row, ["segundoInsert", "SegundoInsert", "Hora", "hora"]),
           motivo: correction.motivo || "",
-          servidor: null,
+          servidor: ACTIVE_SERVER,
         });
       }
       setRows((current) => current.filter((_, index) => index !== selected.index));

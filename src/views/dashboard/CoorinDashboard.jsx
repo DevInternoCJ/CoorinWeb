@@ -29,8 +29,12 @@ import IconCircular from "../../components/Iconos/IconCircular";
 import ConsorcioLogo from "../../../src/assets//CoorinBlack.svg";
 import CoorinGreenLogo from "../../../src/assets/CoorinGreen.svg";
 import ProcessGespa from "../dashboard/sideBar/gespa/processgespa/ProcessGespa";
+import Definition from "./sideBar/processes/gespa/definition/Definition";
 import ModalProductividadReporte from "./board/consultations/Productivity/ModalProductividadReporte";
 import ModalReportesCliente from "./board/consultations/ClientReports/ModalReportesCliente";
+import ModalMetas from "./board/executives/Metas/ModalMetasModal";
+import ModalCatalogos from "./board/executives/Catalogos/ModalCatalogosModal";
+import ModalBaseAccionamientos from "./sideBar/processes/accionamientos/ModalBaseAccionamientos";
 import { useDashboardModalUrlSync } from "../../hooks/useDashboardModalUrlSync";
 import { useThemeStore } from "../../contextGlobal/themeStore";
 
@@ -102,7 +106,7 @@ export default function CoorinDashboard() {
       "información", // Carrusel circular con todos los componentes
       "Lista Negra", "Arrepentimientos",
       "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios", 
-      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios2",
+      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
       "Consulta Visitas", "Captura Visitas", "Carga Visitas",
       "Corregir Visitas", "Eliminar Visitas", "Configuración Correos",
       "Envios Ejecutivos", "Carga Conversación"
@@ -159,7 +163,7 @@ export default function CoorinDashboard() {
         case "Ofrecimientos":
           ContentComponent = OffersContent;
           break;
-        case "Contultas Comentarios":
+        case "Comentarios":
           ContentComponent = CommentsContent;
           break;
         case "Consulta Visitas":
@@ -267,7 +271,7 @@ export default function CoorinDashboard() {
         return <EmailTemplates onClose={closeModal} />;
       case "Frases":
         return <Phrases onClose={closeModal} />;
-      case "Comentarios":
+      case "Comentarios-Gespa":
         return (
           <Suspense
             fallback={
@@ -277,20 +281,38 @@ export default function CoorinDashboard() {
             <Comments onClose={closeModal} />
           </Suspense>
         );
-          case "Accionamientos":
-        return <ModalBaseInformacion tipoInformacion="Accionamientos" onClose={closeModal} />;
+      case "Accionamientos":
+        return <ModalBaseAccionamientos onClose={closeModal} />;
       case "Informe":
-        return <ModalBaseInformacion tipoInformacion="Accionamientos" onClose={closeModal} />;
+        return <ModalBaseAccionamientos onClose={closeModal} />;
+      case "Carga Accionamientos":
+        return <ModalBaseAccionamientos onClose={closeModal} initialTab={1} />;
+      case "Captura Carteo":
+        return <ModalBaseAccionamientos onClose={closeModal} initialTab={2} />;
+      case "Consulta Carteo":
+        return <ModalBaseAccionamientos onClose={closeModal} initialTab={3} />;
       case "Supervisor":
         return <ModalSupervisor onClose={closeModal} />;
       case "Procesos-Gespa":
         return <ProcessGespa onClose={closeModal} />;
+      case "Definición":
+        return <Definition onClose={closeModal} />;
+      case "Bloqueo cuentas":
+        return <ProcessGespa onClose={closeModal} initialTab="bloqueo-cuentas" />;
+      case "Cargos en línea":
+        return <ProcessGespa onClose={closeModal} initialTab="cargos-en-linea" />;
+      case "Sucursales":
+        return <ProcessGespa onClose={closeModal} initialTab="sucursales" />;
       case "Estados de cuenta":
         return <ProcessGespa onClose={closeModal} initialTab="estados-cuenta" />;
       case "Gestiones":
         return <ModalBaseInformacion tipoInformacion="Gestiones" onClose={closeModal} />;
+      case "Metas":
+        return <ModalMetas isOpen={modalSidebarOpen} onClose={closeModal} />;
+      case "Catalogos":
+        return <ModalCatalogos isOpen={modalSidebarOpen} onClose={closeModal} />;
       default:
-        return null;
+        return <PendingAuditForm title={selectedSidebarOption || "Módulo pendiente"} formId={selectedSidebarOption || "modulo-pendiente"} description="Este formulario está identificado en el mapeo legacy, pero requiere confirmar su contrato de backend antes de habilitar operaciones reales." />;
     }
   };
 
@@ -335,7 +357,7 @@ export default function CoorinDashboard() {
       "2AA_3AAA": "Frases",
 
       // === Procesos > Gespa (padre: 1CC) ===
-      "1CC_1CCC": "Comentarios",
+      "1CC_1CCC": "Comentarios-Gespa",
       "1CC_2CCC": "Procesos-Gespa",
       "1CC_2CC2": "Definición",
       "1CC_3CCC": "Arrepentimientos",
@@ -378,10 +400,10 @@ export default function CoorinDashboard() {
     const implementedOptions = [
       "información", "Lista Negra", "Arrepentimientos",
       "Pagos", "Pagos Reportados", "Datos Erroneos", "Domicilios",
-      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios",
+      "Correos", "Búsquedas", "Ofrecimientos", "Comentarios", "Comentarios-Gespa",
       "Consulta Visitas", "Captura Visitas", "Carga Visitas", "Corregir Visitas",
       "Eliminar Visitas", "Configuración Correos", "Envios Ejecutivos", "Carga Conversación",
-      "Campañas", "Productividad", "Reportes al Cliente", "Plantillas-Correo", "Frases", "Accionamientos", "Informe", "Gestiones", "Supervisor", "Procesos-Gespa", "Estados de cuenta", // Procesos-Gespa (Gespa)
+      "Campañas", "Productividad", "Reportes al Cliente", "Plantillas-Correo", "Frases", "Accionamientos", "Informe", "Carga Accionamientos", "Captura Carteo", "Consulta Carteo", "Gestiones", "Supervisor", "Metas", "Catalogos", "Procesos-Gespa", "Definición", "Bloqueo cuentas", "Cargos en línea", "Sucursales", "Estados de cuenta", // Procesos-Gespa (Gespa)
     ];
 
     if (sidebarOptionsMap[menuId]) {
@@ -389,8 +411,9 @@ export default function CoorinDashboard() {
 
       // Verificar si la opción tiene componente implementado
       if (!implementedOptions.includes(option)) {
-        console.log(" Opción sin implementar:", option);
-        // No abrir modal, solo mostrar mensaje en consola (o podrías mostrar un toast)
+        setSidebarModalPath(option);
+        setSelectedSidebarOption(option);
+        setModalSidebarOpen(true);
         return;
       }
 
@@ -403,7 +426,9 @@ export default function CoorinDashboard() {
     } else {
       // Si no está en el mapeo, verificar si el título está implementado
       if (!implementedOptions.includes(menuTitle)) {
-        console.log(" Opción sin implementar:", menuTitle);
+        setSidebarModalPath(menuTitle);
+        setSelectedSidebarOption(menuTitle);
+        setModalSidebarOpen(true);
         return;
       }
 
@@ -444,19 +469,19 @@ export default function CoorinDashboard() {
         }
         onRegisterCloseFunction={setCloseSidebarFn}
       />
-      <main className="flex-1 h-screen flex flex-col overflow-hidden">
+      <main className="min-w-0 flex-1 h-dvh flex flex-col overflow-hidden">
         <div
           className="transition-transform duration-200 flex-1 overflow-y-auto overflow-x-hidden"
           style={{
             marginLeft: sidebarMinified ? "2.5rem" : "2.5rem",
             marginBottom: "0",
             marginTop: "0",
-            maxHeight: "100vh",
+            maxHeight: "100dvh",
           }}
         >
           <div className=" py-5 sm:py-2">
-            <div className="w-full px-0 lg:px-8 pt-0">
-              <div className="flex justify-between items-center mb-0 mt-0 p-0">
+            <div className="w-full min-w-0 px-2 sm:px-4 lg:px-8 pt-0">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-0 mt-0 p-0">
                 <span className="rounded-2xl backdrop-blur-sm flex items-center gap-2 title-dashboard text-3xl font-medium tracking-tight text-balance sm:text-3xl">
                   <IconCircular
                     size="size-10"
@@ -482,7 +507,7 @@ export default function CoorinDashboard() {
                 {/* Logo y texto con efecto de gota */}
                 <div className="flex items-center relative">
                   <span
-                    className="text-4xl font-medium tracking-[-0.02em] flex items-center gap-3 relative transition-colors duration-300"
+                    className="text-2xl sm:text-4xl font-medium tracking-[-0.02em] flex items-center gap-3 relative transition-colors duration-300"
                     style={{
                       color: isDark ? "#a7f3d0" : "#000000",
                       background: isDark

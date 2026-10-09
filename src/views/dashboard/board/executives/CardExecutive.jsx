@@ -74,7 +74,7 @@ const CardExecutive = ({ onModalOpen, onModalClose }) => {
   const CardTile = ({ catalog }) => {
     return (
       <div
-        className="card card-sm sm:max-w-sm rounded-2xl p-2 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer shadow-none h-[156px] min-h-[156px] flex flex-col justify-between"
+        className="card card-sm sm:max-w-sm rounded-2xl p-2 xl:max-w-none transition-transform duration-200 ease-out hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100 group relative overflow-visible animated-border cursor-pointer shadow-none h-[156px] min-h-[156px] flex flex-col justify-between"
         style={{ backgroundColor: `var(--${catalog.color})` }}
         tabIndex={0}
         role="button"
@@ -93,44 +93,44 @@ const CardExecutive = ({ onModalOpen, onModalClose }) => {
           <div className="flex justify-center">
             <div className="avatar avatar-placeholder">
               <div
-                className="w-15 h-15 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-300 group-hover:w-16 group-hover:h-16"
+                className="w-15 h-15 rounded-full flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                 style={{
                   backgroundColor: "rgba(253, 253, 253, 0.16)",
                 }}
               >
                 {catalog.title === "Metas" ? (
                   <IconMetas
-                    className="size-9 transition-all duration-300 group-hover:size-12"
+                    className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                     style={{ color: `var(--${catalog.fontcolor})` }}
                   />
                 ) : catalog.title === "Validadores" ? (
                   <IconValidadores
-                    className="size-9 transition-all duration-300 group-hover:size-12"
+                    className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                     style={{ color: `var(--${catalog.fontcolor})` }}
                   />
                 ) : catalog.title === "Encargados" ? (
                   <IconEncargados
-                    className="size-9 transition-all duration-300 group-hover:size-12"
+                    className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                     style={{ color: `var(--${catalog.fontcolor})` }}
                   />
                 ) : catalog.title === "Catalogos" ? (
                   <IconCatalogos
-                    className="size-9 transition-all duration-300 group-hover:size-12"
+                    className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                     style={{ color: `var(--${catalog.fontcolor})` }}
                   />
                 ) : catalog.title === "Scripts" ? (
                   <IconScripts
-                    className="size-9 transition-all duration-300 group-hover:size-12"
+                    className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                     style={{ color: `var(--${catalog.fontcolor})` }}
                   />
                 ) : catalog.title === "Pantalla" ? (
                   <IconPantalla
-                    className="size-9 transition-all duration-300 group-hover:size-12"
+                    className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                     style={{ color: `var(--${catalog.fontcolor})` }}
                   />
                 ) : (
                   <ExecutiveChart
-                    className="size-9 transition-all duration-300 group-hover:size-12"
+                    className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                     style={{ color: `var(--${catalog.fontcolor})` }}
                   />
                 )}

@@ -64,6 +64,7 @@ body {
 
   /* Botones peligro */
   --color-btn-danger-bg: #d78b84;
+  --color-status-destructive: #b91c1c;
   --color-btn-danger-bg-hover: #c1493e;
   --color-btn-danger-bg-focus: #59221d;
   --color-btn-danger-text: #361511;
@@ -89,6 +90,16 @@ body {
   /* Pantalla: fondo teal activo, texto verde oscuro */
   --color-card-pantalla-bg: #3eac91;
   --color-card-pantalla-font: #00291a;
+}
+
+/* Consultation cards use dedicated theme tokens, like executive cards. */
+:root {
+  --color-card-cuentas-bg: #526581;
+  --color-card-cuentas-font: #deffb9;
+  --color-card-productividad-bg: #9dc5bc;
+  --color-card-productividad-font: #1b4838;
+  --color-card-generales-bg: #efefef;
+  --color-card-generales-font: #505631;
 }
 
 /* ===== DARK MODE ===== */
@@ -145,6 +156,7 @@ body {
 
   /* Botones peligro dark */
   --color-btn-danger-bg: #4a1a17;
+  --color-status-destructive: #fca5a5;
   --color-btn-danger-bg-hover: #7f1d1d;
   --color-btn-danger-bg-focus: #450a0a;
   --color-btn-danger-text: #fecaca;
@@ -170,6 +182,12 @@ body {
   /* Pantalla: fondo teal oscuro con toques cyan, texto cyan pálido */
   --color-card-pantalla-bg: #0f3040;
   --color-card-pantalla-font: #67e8f9;
+  --color-card-cuentas-bg: #0f3040;
+  --color-card-cuentas-font: #67e8f9;
+  --color-card-productividad-bg: #1a3d38;
+  --color-card-productividad-font: #99f6e4;
+  --color-card-generales-bg: #163d28;
+  --color-card-generales-font: #bbf7d0;
 }
 .coorin-bg {
   background-repeat: no-repeat;
@@ -192,18 +210,32 @@ body {
   --color-background-secondary: #1b4838;
   --color-background-dashboard: #dee5e5;
   --color-background-tertiary: #f5f5f5;
-  --animate-slide-x: slide-x 2s ease-in-out;
-}
-@keyframes slide-x {
-  0%,
-  100% {
-    transform: translateX(-8px);
-  }
-  50% {
-    transform: translateX(8px);
-  }
 }
 
+/* Semantic utilities share the existing light/dark Coorin palette. */
+@utility bg-surface {
+  background-color: var(--color-surface);
+}
+@utility bg-surface-secondary {
+  background-color: var(--color-surface-secondary);
+}
+@utility bg-surface-modal {
+  background-color: var(--color-surface-modal);
+}
+@utility border-border {
+  border-color: var(--color-border);
+}
+
+@theme inline {
+  --color-background: var(--color-background-dashboard);
+  --color-layer: var(--color-surface);
+  --color-foreground: var(--color-text-primary);
+  --color-muted-foreground: var(--color-text-muted);
+  --color-primary: var(--color-jerarquia2);
+  --color-primary-foreground: var(--color-text-inverse);
+  --color-destructive: var(--color-status-destructive);
+  --color-destructive-foreground: var(--color-text-inverse);
+}
 /* ===== FloatingSelect — Advanced Select con label flotante (Preline-style) ===== */
 
 /* Wrapper posicional */
@@ -437,6 +469,114 @@ body {
   width: 100%;
 }
 
+.dashboard-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: 1rem;
+}
+
+.dashboard-card-grid > [role="button"] {
+  min-width: 0;
+}
+
+/* Stable dialog geometry: only the body scrolls as data and tabs change. */
+.modal-container,
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  height: min(80dvh, 700px) !important;
+  max-height: calc(100dvh - 2rem) !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden;
+}
+
+.modal-content {
+  max-width: min(100% - 1rem, 1400px);
+}
+
+.modal-container > .flex-shrink-0,
+.modal-content > header,
+.modal-content > footer {
+  flex-shrink: 0;
+}
+
+.modal-scroll-body {
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.modal-content-grid {
+  min-width: 0;
+  min-height: 100%;
+}
+
+.modal-content > .modal-xl-container {
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+}
+
+/* Modal motion stays on the compositor: opacity and transform only. */
+.coorin-modal-backdrop-enter {
+  animation: coorin-backdrop-enter 140ms ease-out both;
+}
+
+.coorin-modal-enter {
+  animation: coorin-modal-enter 180ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes coorin-backdrop-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes coorin-modal-enter {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes coorin-modal-nudge {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  25%, 75% { transform: translate3d(-0.25rem, 0, 0); }
+  50% { transform: translate3d(0.25rem, 0, 0); }
+}
+
+.animate-bounce-modal {
+  animation: coorin-modal-nudge 260ms ease-out both;
+}
+
+.animate-shake-modal {
+  animation: coorin-modal-nudge 260ms ease-out both;
+}
+
+@media (max-width: 639px) {
+  .modal-container,
+  .modal-content {
+    height: calc(100dvh - 1rem) !important;
+    max-height: calc(100dvh - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
+    margin-block: 0 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coorin-modal-backdrop-enter,
+  .coorin-modal-enter,
+  .animate-bounce-modal,
+  .animate-shake-modal {
+    animation: none !important;
+  }
+
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Fijo para el idEjecutivo de la sesión en la ramificación */
 .sticky-session-executive {
   position: sticky;
@@ -646,12 +786,12 @@ label {
 }
 /* === Checkbox global para modales (Preline Style) === */
 .modal-checkbox {
-  @apply shrink-0 w-[1.1rem] h-[1.1rem] border-[var(--color-border)] rounded text-[var(--color-jerarquia3)] focus:ring-[var(--color-jerarquia3)] disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-[var(--color-jerarquia3)] dark:checked:border-[var(--color-jerarquia3)] dark:focus:ring-offset-gray-800 cursor-pointer transition-all duration-200;
+  @apply shrink-0 w-[1.1rem] h-[1.1rem] border-[var(--color-border)] rounded text-[var(--color-jerarquia3)] focus:ring-[var(--color-jerarquia3)] disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-[var(--color-jerarquia3)] dark:checked:border-[var(--color-jerarquia3)] dark:focus:ring-offset-gray-800 cursor-pointer transition-colors duration-150;
 }
 
 /* === Checkbox pequeño para tablas (Preline Style) === */
 .modal-checkbox-small {
-  @apply shrink-0 w-3.5 h-3.5 border-[var(--color-border)] rounded text-[var(--color-jerarquia3)] focus:ring-[var(--color-jerarquia3)] disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-[var(--color-jerarquia3)] dark:checked:border-[var(--color-jerarquia3)] dark:focus:ring-offset-gray-800 cursor-pointer transition-all duration-200;
+  @apply shrink-0 w-3.5 h-3.5 border-[var(--color-border)] rounded text-[var(--color-jerarquia3)] focus:ring-[var(--color-jerarquia3)] disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-[var(--color-jerarquia3)] dark:checked:border-[var(--color-jerarquia3)] dark:focus:ring-offset-gray-800 cursor-pointer transition-colors duration-150;
 }
 /* === Tabla global para modales === */
 .modal-table {
@@ -730,29 +870,6 @@ label {
 }
 .coorin-modal-xl-container {
   width: 100%;
-}
-@keyframes coorin-bounce-modal {
-  0% {
-    transform: scale(1);
-  }
-  20% {
-    transform: scale(1.05, 0.95);
-  }
-  40% {
-    transform: scale(0.95, 1.05);
-  }
-  60% {
-    transform: scale(1.03, 0.97);
-  }
-  80% {
-    transform: scale(0.97, 1.03);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-.coorin-animate-bounce-modal {
-  animation: coorin-bounce-modal 0.5s;
 }
 .coorin-modal-scroll-gray::-webkit-scrollbar {
   width: 8px;

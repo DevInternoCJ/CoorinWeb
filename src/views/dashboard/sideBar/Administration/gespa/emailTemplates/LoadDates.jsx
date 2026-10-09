@@ -144,7 +144,7 @@ const LoadDates = ({
   // Función para determinar la clase de estilo basada en el valor
   const getValueClass = (value, key) => {
     if (key === "Notas") {
-      return "text-red-600 font-semibold";
+      return "text-destructive font-semibold";
     }
     if (
       value === null ||
@@ -152,7 +152,7 @@ const LoadDates = ({
       value === "" ||
       (typeof value === "object" && Object.keys(value).length === 0)
     ) {
-      return "text-gray-400 italic";
+      return "text-muted-foreground italic";
     }
     if (
       (typeof value === "number" || !isNaN(parseFloat(value))) &&
@@ -163,23 +163,23 @@ const LoadDates = ({
     if (typeof value === "string" && value.match(/\d{2}\/\d{2}\/\d{4}/)) {
       return "text-green-700";
     }
-    return "text-gray-800";
+    return "text-foreground";
   };
 
   // 🎯 Componente Spinner de Preline
   const SpinnerLoader = ({ message = "Cargando..." }) => (
-    <div className="min-h-60 flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl ">
+    <div className="min-h-60 flex flex-col bg-surface border border-border shadow-2xs rounded-xl ">
       <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
         <div className="flex justify-center">
           <div
-            className="animate-spin inline-block size-6 border-[3px] border-current border-t-transparent text-blue-600 rounded-full dark:text-blue-500"
+            className="animate-spin inline-block size-6 border-[3px] border-current border-t-transparent text-jerarquia2 rounded-full dark:text-blue-500"
             role="status"
             aria-label="loading"
           >
             <span className="sr-only">Loading...</span>
           </div>
         </div>
-        <p className="mt-4 text-sm text-gray-600 dark:text-neutral-400">
+        <p className="mt-4 text-sm text-muted-foreground">
           {message}
         </p>
       </div>
@@ -194,9 +194,9 @@ const LoadDates = ({
   }
   if (error) {
     return (
-      <div className="min-h-60 flex flex-col bg-white border border-red-200 shadow-2xs rounded-xl">
+      <div className="min-h-60 flex flex-col bg-surface border border-destructive/30 shadow-2xs rounded-xl">
         <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
-          <div className="text-red-500 text-center">
+          <div className="text-destructive text-center">
             <svg
               className="w-12 h-12 mx-auto mb-4"
               fill="none"
@@ -219,7 +219,7 @@ const LoadDates = ({
   }
   if (!idCartera || !idProducto) {
     return (
-      <div className="min-h-60 flex flex-col bg-white border border-yellow-200 shadow-2xs rounded-xl">
+      <div className="min-h-60 flex flex-col bg-surface border border-yellow-200 shadow-2xs rounded-xl">
         <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
           <div className="text-yellow-600 text-center">
             <svg
@@ -287,10 +287,10 @@ const LoadDates = ({
                 className={`hs-tooltip [--placement:auto] inline-block
                   text-xs font-medium text-${item.color}-600 tracking-wide mb-2
                   cursor-grabbing select-none
-                  hover:bg-gray-100 hover:text-${item.color}-700
+                  hover:bg-surface-secondary hover:text-${item.color}-700
                   active:opacity-50
                   rounded-md inline-block
-                  transition-all duration-150
+                  transition-[color,background-color,opacity,transform] duration-150
                   ${draggedLabel === item.label ? "opacity-50 scale-95" : ""}
                 `}
                 title="Arrastra el texto al campo mensaje"
@@ -311,8 +311,8 @@ const LoadDates = ({
       </div>
       {/* Vista de tabla horizontal - Encabezados TAMBIÉN arrastrables */}
       <div className="mt-4">
-        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-          <table className="bg-white min-w-full">
+        <div className="overflow-x-auto rounded-lg border border-border shadow-sm">
+          <table className="bg-surface min-w-full">
             <tbody>
               {/* Fila de encabezados - AHORA ARRASTRABLES */}
               <tr className="bg-jerarquia4">
@@ -328,7 +328,7 @@ const LoadDates = ({
                       whitespace-nowrap align-top
                       cursor-grabbing select-none
                       hover:bg-green-950 active:bg-slate-500
-                      transition-all duration-150
+                      transition-[background-color,color,opacity,transform] duration-150
                      bg-jerarquia4
                      text-background-tertiary 
                       ${
@@ -351,7 +351,7 @@ const LoadDates = ({
                 ))}
               </tr>
               {/* Fila de valores */}
-              <tr className="hover:bg-gray-50">
+              <tr className="hover:bg-surface-secondary">
                 {Object.entries(datosProductoCompleto).map(
                   ([key, value], index) => (
                     <td

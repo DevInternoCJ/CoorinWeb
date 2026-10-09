@@ -691,6 +691,38 @@ export const getProductivityReport = async (requestData) => {
   }
 };
 
+/** Busca una cuenta para el formulario de definición Gespa. */
+export const buscarDefinicionGespa = async (payload) => {
+  const response = await api.post('/DefinicionGespaBusca/Buscar', payload);
+  return response.data;
+};
+
+/** Define o actualiza la situación de una cuenta Gespa. */
+export const definirCuentaGespa = async (payload) => {
+  const response = await api.post('/DefinicionGespaBusca/Define', payload);
+  return response.data;
+};
+
+export const buscarBloqueoCuentaGespa = async (payload) => {
+  const response = await api.post('/BloqueoCuentasGespa/Buscar', payload);
+  return response.data;
+};
+
+export const ejecutarBloqueoCuentaGespa = async (payload) => {
+  const response = await api.post('/BloqueoCuentasGespa/Bloqueo', payload);
+  return response.data;
+};
+
+export const buscarArrepentimientoGespa = async (payload) => {
+  const response = await api.post('/ArrepentimientosGespa/Buscar', payload);
+  return response.data;
+};
+
+export const ejecutarArrepentimientoGespa = async (payload) => {
+  const response = await api.post('/ArrepentimientosGespa/Arrepentimiento', payload);
+  return response.data;
+};
+
 /** Obtiene la información del informe de accionamientos. */
 export const getAccionamientosInforme = async (requestData) => {
   const token = getToken();
@@ -699,6 +731,26 @@ export const getAccionamientosInforme = async (requestData) => {
   }
 
   const response = await api.post('/procesos/accionamientos/Informe/consultar', requestData);
+  return response.data;
+};
+
+/** Carga el archivo de accionamientos según CargaAccionamientosRequestDto. */
+export const postAccionamientosCarga = async ({ idCartera, archivo }) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
+  }
+  if (!idCartera || !(archivo instanceof File)) {
+    throw new Error('La cartera y el archivo de accionamientos son obligatorios.');
+  }
+  const formData = new FormData();
+  formData.append('idCartera', String(idCartera));
+  formData.append('archivo', archivo);
+  const response = await api.post('/procesos/accionamientos/carga', formData, {
+    headers: { Accept: '*/*' },
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+  });
   return response.data;
 };
 

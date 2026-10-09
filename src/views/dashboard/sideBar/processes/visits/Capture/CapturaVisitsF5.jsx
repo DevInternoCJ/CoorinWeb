@@ -51,7 +51,7 @@ const CapturaVisitsF5 = forwardRef(({ disabled = false }, ref) => {
   }), [calleNorte, calleSur, calleEste, calleOeste]);
 
   // Clases dinámicas para campos habilitados/deshabilitados (equivalente a grpCalles.Enabled)
-  const disabledClasses = disabled ? "bg-gray-100 cursor-not-allowed opacity-60 text-gray-600" : "bg-gray-50 text-gray-700";
+  const disabledClasses = disabled ? "bg-surface-secondary cursor-not-allowed opacity-60 text-muted-foreground" : "bg-surface-secondary text-foreground";
 
   return (
     <div className="area-f5 p-2 rounded mb-2 h-full w-full">
@@ -60,7 +60,7 @@ const CapturaVisitsF5 = forwardRef(({ disabled = false }, ref) => {
   <div className="relative w-full min-w-0">
         <input
           type="text"
-          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500`}
+          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground`}
           id="calle-norte-input-f5"
           placeholder="Ingrese calle horizontal norte"
           value={calleNorte}
@@ -77,14 +77,14 @@ const CapturaVisitsF5 = forwardRef(({ disabled = false }, ref) => {
         />
         <label
           htmlFor="calle-norte-input-f5"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"        >
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-muted-foreground"        >
           Calle Horiznl Norte
         </label>
       </div>
   <div className="relative w-full min-w-0">
         <input
           type="text"
-          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500`}
+          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground`}
           id="calle-sur-input-f5"
           placeholder="Ingrese calle horizontal sur"
           value={calleSur}
@@ -101,14 +101,14 @@ const CapturaVisitsF5 = forwardRef(({ disabled = false }, ref) => {
         />
         <label
           htmlFor="calle-sur-input-f5"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"        >
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-muted-foreground"        >
           Calle Horiznl Sur
         </label>
       </div>
   <div className="relative w-full min-w-0">
         <input
           type="text"
-          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500`}
+          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground`}
           id="calle-este-input-f5"
           placeholder="Ingrese calle vertical este"
           value={calleEste}
@@ -125,14 +125,14 @@ const CapturaVisitsF5 = forwardRef(({ disabled = false }, ref) => {
         />
         <label
           htmlFor="calle-este-input-f5"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"        >
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-muted-foreground"        >
           Calle Vert Este
         </label>
       </div>
   <div className="relative w-full min-w-0">
         <input
           type="text"
-          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500`}
+          className={`peer p-4 block w-full ${disabledClasses} border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground`}
           id="calle-ost-input-f5"
           placeholder="Ingrese calle vertical oeste"
           value={calleOeste}
@@ -149,7 +149,7 @@ const CapturaVisitsF5 = forwardRef(({ disabled = false }, ref) => {
         />
         <label
           htmlFor="calle-ost-input-f5"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"        >
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-muted-foreground"        >
           Calle Vert Ost.
         </label>
       </div>

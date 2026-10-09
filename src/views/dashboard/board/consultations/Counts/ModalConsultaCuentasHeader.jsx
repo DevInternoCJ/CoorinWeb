@@ -25,15 +25,17 @@ const ModalConsultaCuentasHeader = ({ onClose, onHeaderDataChange, jerarquia = 0
     <div className="flex flex-col gap-3 mb-2 w-full">
       {/* Fila 1: Título y botón de cierre alineados */}
       <div className="flex items-center justify-between w-full">
-        <h2 className="modal-title whitespace-nowrap">
+        <h2 className="modal-title min-w-0 flex-1">
           <IconCuentas className="modal-title-icon" />
           Consulta cuentas
         </h2>
 
         {/* Botón de cierre */}
         <button
+          type="button"
+          aria-label="Cerrar consulta de cuentas"
           onClick={onClose}
-          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive text-4xl rounded-full w-8 h-8 flex items-center justify-center transition-colors focus:outline-none"
+          className="shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive text-3xl rounded-lg size-9 flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-jerarquia2"
         >
           &times;
         </button>

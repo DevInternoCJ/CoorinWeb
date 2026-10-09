@@ -1,9 +1,7 @@
 // FileUploader.jsx
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import SaveButton from "../../../Administration/gespa/ButtonSave";
-import SelectWallet from "../../../../board/screenFields/SelectWallet";
-import { getCarteras } from "../../../../../../services/mark/Orochi/LokiServices";
-import { toast } from "sonner";
+import CatalogSelect from "../../../../../../components/Select/CatalogSelect";
 
 const FileUploader = ({
   onFileChange,
@@ -13,9 +11,6 @@ const FileUploader = ({
   onCarteraChange,
   selectWidth = "w-full",
 }) => {
-  const [carteraOptions, setCarteraOptions] = useState([
-    { value: "", label: "Seleccione una cartera" },
-  ]);
   const fileInputRef = useRef(null);
 
   const handleInputChange = (e) => {
@@ -28,30 +23,6 @@ const FileUploader = ({
   };
 
   useEffect(() => {
-    const fetchCarteras = async () => {
-      try {
-        const carteras = await getCarteras();
-
-        const options = [
-          { value: "", label: "Seleccione una cartera" },
-          ...carteras.map((cartera) => ({
-            label: cartera.cartera,
-            value: cartera.idCartera,
-          })),
-        ];
-
-        setCarteraOptions(options);
-      } catch (error) {
-        console.error("Error fetching carteras:", error);
-        toast.error("Error al cargar las carteras");
-        setCarteraOptions([{ value: "", label: "Error al cargar" }]);
-      }
-    };
-
-    fetchCarteras();
-  }, []);
-
-  useEffect(() => {
     if (saveDisabled && fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -60,11 +31,12 @@ const FileUploader = ({
   return (
     <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto">
       <div className={selectWidth}>
-        <SelectWallet
+        <CatalogSelect
+          id="sucursales-cartera"
           label="Cartera"
           value={cartera}
           onChange={onCarteraChange}
-          options={carteraOptions}
+          required
         />
       </div>
 

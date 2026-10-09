@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { GetGridFields } from "../../../../services/mark/Orochi/LokiServices";
+import { GetGridFields } from "../../../../services/mark/albaz/LokiServices";
 import useSelectedRowStore from "./selectedRowStore";
 import { useWalletProducts } from "../../../login/WalletProduct";
 import { IconDrag } from "../../../../components/Iconos/IconDrag";
@@ -9,7 +9,6 @@ const GridLampsFields = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [draggedHeader, setDraggedHeader] = useState(""); // Estado para el header que se arrastra
-  const servidor = "Orochi";
   const { setSelectedRow, selectedRowIndex } = useSelectedRowStore();
   const { walletProducts } = useWalletProducts();
   const idProducto = walletProducts?.[0]?.idProducto;
@@ -30,7 +29,7 @@ const GridLampsFields = () => {
       }
     };
     fetchGridData();
-  }, [servidor, idProducto]);
+  }, [idProducto]);
 
   // Cuando comienza el arrastre del header
   const handleDragStart = (e, headerName) => {
@@ -55,21 +54,21 @@ const GridLampsFields = () => {
     return (
       <div className="bg-[var(--color-background-secondary)] p-4 rounded-lg shadow-sm">
         <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <span className="ml-3 text-gray-600">Cargando datos...</span>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-jerarquia2"></div>
+          <span className="ml-3 text-muted-foreground">Cargando datos...</span>
         </div>
       </div>
     );
   }
   if (error) {
     return (
-      <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-        <h3 className="text-lg font-bold mb-3 text-blue-800 border-b pb-2">
+      <div className="bg-surface p-4 rounded-lg border border-border shadow-sm">
+        <h3 className="text-lg font-bold mb-3 text-jerarquia3 border-b pb-2">
           batchdate
         </h3>
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div className="bg-destructive/10 border border-destructive/30 rounded-md p-4">
           <div className="flex items-center">
-            <div className="text-red-400 mr-2">
+            <div className="text-destructive mr-2">
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -85,10 +84,10 @@ const GridLampsFields = () => {
               </svg>
             </div>
             <div>
-              <h3 className="text-red-800 font-medium">
+              <h3 className="text-destructive font-medium">
                 Error al cargar los datos
               </h3>
-              <p className="text-red-600 text-sm">{error}</p>
+              <p className="text-destructive text-sm">{error}</p>
             </div>
           </div>
         </div>
@@ -97,8 +96,8 @@ const GridLampsFields = () => {
   }
   if (tableData.length === 0) {
     return (
-      <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-        <div className="text-center py-8 text-gray-500">
+      <div className="bg-surface p-4 rounded-lg border border-border shadow-sm">
+        <div className="text-center py-8 text-muted-foreground">
           No hay datos disponibles
         </div>
       </div>
@@ -108,7 +107,7 @@ const GridLampsFields = () => {
   return (
     <div className="bg-[var(--color-border)] rounded-lg shadow-sm h-106">
       <div className="overflow-x-auto rounded-lg h-106">
-        <table className="min-w-full bg-white">
+        <table className="min-w-full bg-surface">
           <thead>
             <tr className="bg-background-secondary border-b">
               {Object.keys(tableData[0] || {}).map((key) => (
@@ -121,7 +120,7 @@ const GridLampsFields = () => {
                     py-2 px-3 text-left text-xs font-bold text-[var(--color-text-inverse)] whitespace-nowrap
                     cursor-grabb ing select-none
                     hover:bg-green-950 hover:text-[var(--color-text-black)] bg-jerarquia4
-                    transition-all duration-150
+                    transition-[background-color,color,opacity,transform] duration-150 ease-out
                     cursor-grabbing
                     ${
                       draggedHeader === key
@@ -151,8 +150,8 @@ const GridLampsFields = () => {
                   duration-200
                   ${
                     selectedRowIndex === index
-                      ? "bg-blue-100 border-blue-500 border-2"
-                      : "hover:bg-gray-200"
+                      ? "bg-blue-100 border-jerarquia2 border-2"
+                      : "hover:bg-surface-secondary"
                   }
                 `}
                 onClick={() => handleRowClick(row, index)}
@@ -168,7 +167,7 @@ const GridLampsFields = () => {
                       Object.keys(row)[i] === "currentbalance" ||
                       Object.keys(row)[i] === "initialbalance"
                         ? "text-green-700"
-                        : "text-gray-800"
+                        : "text-foreground"
                     }`}
                   >
                     {value === null || value === "NULL"

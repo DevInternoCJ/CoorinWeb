@@ -1,4 +1,5 @@
 import React, { useRef } from "react"
+import GlobalModal from "../../../../../components/Modal/GlobalModal";
 import ModalBase from "../../../board/ModalBase";
 import ModalCampanasContent from "../Campanias/ModalCampanasContent";
 
@@ -11,29 +12,18 @@ const ModalBaseCampanas = ({ open, onClose }) => {
     if (!open) return null;
 
     return (
-        <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black/55 flex items-center justify-center z-50 p-4">
+        <GlobalModal isOpen={open} onClose={onClose} onBackdropClick={handleBackdropClick} title="Campañas" mode="content" showHeader={false} showCloseButton={false} closeOnBackdropClick={false}>
             <div
                   ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] rounded-xl shadow-2xl w-full max-w-6xl p-4 overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
+        } modal-container bg-surface-modal text-foreground rounded-xl shadow-2xl w-full max-w-6xl p-4 overflow-hidden border border-border flex flex-col`}
         onClick={(e) => e.stopPropagation()}
             >
                 {/* Header y contenido principal */}
                 <ModalCampanasContent onClose={onClose} />
             </div>
             <style>{`
-                @keyframes bounce-modal {
-                    0% { transform: scale(1); }
-                    20% { transform: scale(1.05, 0.95); }
-                    40% { transform: scale(0.95, 1.05); }
-                    60% { transform: scale(1.03, 0.97); }
-                    80% { transform: scale(0.97, 1.03); }
-                    100% { transform: scale(1); }
-                }
-                .animate-bounce-modal {
-                    animation: bounce-modal 0.5s;
-                }
                 .modal-scroll-gray::-webkit-scrollbar {
                     width: 8px;
                     height: 8px;
@@ -51,7 +41,7 @@ const ModalBaseCampanas = ({ open, onClose }) => {
                     scrollbar-width: thin;
                 }
             `}</style>
-        </div>
+        </GlobalModal>
     );
 };
 

@@ -240,7 +240,6 @@ export const CarouselNavigation = ({
 
 const ModalCicle = ({
   tabsList = tabsListInformacion,
-  componentIcons = COMPONENT_ICONS_INFORMACION,
   mostrarTabla,
   setMostrarTabla,
   onNavigationReady,

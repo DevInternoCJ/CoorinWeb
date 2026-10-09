@@ -32,7 +32,7 @@ const CapturaVisitsF7 = forwardRef(({ disabled = false }, ref) => {
   };
   
   // Clases dinámicas para campos deshabilitados
-  const disabledClasses = disabled ? "bg-gray-200 cursor-not-allowed opacity-60" : "bg-gray-50";
+  const disabledClasses = disabled ? "bg-surface-secondary cursor-not-allowed opacity-60" : "bg-surface-secondary";
 
   // Exponer datos y métodos al padre vía ref
   useImperativeHandle(ref, () => ({
@@ -161,7 +161,7 @@ const CapturaVisitsF7 = forwardRef(({ disabled = false }, ref) => {
           </select>
           <label
             htmlFor="foto-detalle-select-f7"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
           >
             Detalle Fotografía
           </label>
@@ -187,7 +187,7 @@ const CapturaVisitsF7 = forwardRef(({ disabled = false }, ref) => {
         />
         <label
           htmlFor="medidor-input-f7"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"        >
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-muted-foreground"        >
           Número de medidor
         </label>
       </div>

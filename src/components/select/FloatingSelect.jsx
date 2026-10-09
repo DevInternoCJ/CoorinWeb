@@ -65,10 +65,6 @@ const FloatingSelect = ({
   );
 
   const hasValue = value !== "" && value !== null && value !== undefined;
-  const iconPadding = icon
-    ? "ps-10"
-    : s.select.split(" ").find((c) => c.startsWith("ps-"));
-
   return (
     <div className={`floating-select-wrapper relative ${className}`}>
       {/* Ícono opcional */}
@@ -134,7 +130,7 @@ const FloatingSelect = ({
           "absolute top-0 start-0 h-full truncate",
           s.label,
           "pointer-events-none",
-          "transition-all ease-in-out duration-150",
+          "transition-[transform,color,font-size] ease-out duration-150",
           "text-[var(--color-text-muted)]",
           // foco
           `peer-focus:${s.labelFocus.replace(" ", " peer-focus:")}`,

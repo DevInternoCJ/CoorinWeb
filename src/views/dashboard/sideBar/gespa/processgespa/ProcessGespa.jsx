@@ -1,4 +1,5 @@
 import React, { useRef, useState, lazy, Suspense } from "react";
+import GlobalModal from "../../../../../components/Modal/GlobalModal";
 import ModalBase from "../../../board/ModalBase";
 import IconCircular from "../../../../../components/Iconos/IconCircular";
 import {
@@ -11,7 +12,7 @@ import {
   IconBranchOffice
 } from "./IconsProcessGespa";
 
-const Definition = lazy(() => import("./process/Definition"));
+const Definition = lazy(() => import("../../processes/gespa/definition/Definition"));
 const Repentance = lazy(() => import("./process/Repentance"));
 const AccountBloking = lazy(() => import("./process/AccountBlocking"));
 const OnlineCharges = lazy(() => import("./process/OnlineCharges"));
@@ -72,23 +73,23 @@ const ProcessGespa = ({ onClose, initialTab = "definicion" }) => {
       label: "Estados de cuenta",
       icon: <IconStatement className="size-5" />,
     },
-    // {
-    //   id: "sucursales",
-    //   label: "Sucursales",
-    //   icon: <IconBranchOffice className="size-5" />,
-    // },
+    {
+      id: "sucursales",
+      label: "Sucursales",
+      icon: <IconBranchOffice className="size-5" />,
+    },
   ];
 
   // indicar si hay una pestaña seleccionada válida
   const isTabSelected = tabs.some((t) => t.id === activeTab);
 
   return (
-    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black/55 flex items-center justify-center z-50 p-4">
+    <GlobalModal isOpen onClose={onClose} title="Procesos" mode="content" showHeader={false} showCloseButton={false}>
       <div
         ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-2xl shadow-2xl w-full max-w-6xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
+        } bg-[var(--color-surface)] text-[var(--color-text-primary)] modal-container rounded-2xl shadow-2xl w-full max-w-6xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -114,14 +115,14 @@ const ProcessGespa = ({ onClose, initialTab = "definicion" }) => {
         </div>
 
         {/* Tabs Container */}
-        <div className="flex items-start gap-8 w-full pr-5">
+        <div className="modal-scroll-body flex flex-col md:flex-row items-start gap-3 md:gap-6 w-full p-3">
           {/* Sidebar Tabs */}
-          <ul className="space-y-2 min-w-[230px] pl-4 bg-[var(--color-surface-secondary)] inline-block py-3">
+          <ul className="flex flex-wrap md:flex-col gap-2 w-full md:w-56 shrink-0 bg-surface-secondary rounded-lg p-2">
             {tabs.map((tab) => (
               <li
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex gap-2 items-center text-sm cursor-pointer py-4 px-6 transition-all ${
+                className={`flex gap-2 items-center text-sm cursor-pointer py-4 px-6 transition-colors duration-150 ${
                   activeTab === tab.id
                     ? "text-jerarquia3 bg-[var(--color-surface)] rounded-l-xl font-semibold"
                     : "text-[var(--color-text-secondary)] font-medium hover:text-jerarquia2"
@@ -134,7 +135,7 @@ const ProcessGespa = ({ onClose, initialTab = "definicion" }) => {
           </ul>
 
           {/* Content Area */}
-          <div className="flex-1 mt-8 pr-4 w-full">
+          <div className="min-w-0 flex-1 w-full">
             <Suspense fallback={<div className="text-sm text-[var(--color-text-muted)]">Cargando proceso...</div>}>
               {tabs.map((tab) => (
                 <div
@@ -155,7 +156,7 @@ const ProcessGespa = ({ onClose, initialTab = "definicion" }) => {
                       onSearchClick={handleBuscar}
                     />
                   )}
-                  {tab.id === "arrepentimientos" && <Repentance />}
+                  {tab.id === "arrepentimientos" && <Repentance cartera={cartera} onCarteraChange={setCartera} searchValue={search} onSearchChange={setSearch} onSearchClick={handleBuscar} />}
                   {tab.id === "bloqueo-cuentas" && <AccountBloking />}
                   {tab.id === "cargos-en-linea" && <OnlineCharges />}
                   {tab.id === "estados-cuenta" && <AccountStatements />}
@@ -176,7 +177,7 @@ const ProcessGespa = ({ onClose, initialTab = "definicion" }) => {
           </div>
         </div>
       </div>
-    </div>
+    </GlobalModal>
   );
 };
 

@@ -34,7 +34,6 @@ const ModalSupervisor = ({ onClose }) => {
   const [consultasOptions, setConsultasOptions] = useState([]);
   const [loadingConsultas, setLoadingConsultas] = useState(false);
   const [errorConsultas, setErrorConsultas] = useState(null);
-  const [updatingId, setUpdatingId] = useState(null);
   const [loadingAsignar, setLoadingAsignar] = useState(false);
 
   // Estados para Consultar
@@ -122,7 +121,7 @@ const ModalSupervisor = ({ onClose }) => {
             })
           : [];
         setTableData(sortedData);
-      } catch (err) {
+      } catch {
         if (!isMounted) return;
         setError("No se pudieron cargar los supervisores.");
         setTableData([]);
@@ -185,7 +184,7 @@ const ModalSupervisor = ({ onClose }) => {
 
       console.log("Payload a enviar:", payload);
 
-      const response = await InsertSuper(payload);
+      await InsertSuper(payload);
       toast.success(`Asignación exitosa: ${cuentas} cuentas asignadas`);
 
       // Limpiar selección
@@ -263,7 +262,7 @@ const ModalSupervisor = ({ onClose }) => {
             </div>
             <input
               type="text"
-              className="py-2.5 ps-10 pe-8 block w-full bg-[var(--color-surface-secondary)] border border-[var(--color-border)] rounded-lg text-sm font-medium text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--color-jerarquia2)] focus:border-[var(--color-jerarquia2)] transition-all"
+              className="py-2.5 ps-10 pe-8 block w-full bg-[var(--color-surface-secondary)] border border-[var(--color-border)] rounded-lg text-sm font-medium text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--color-jerarquia2)] focus:border-[var(--color-jerarquia2)] transition-[color,background-color,border-color,box-shadow] duration-150"
               placeholder="Buscar supervisor por nombre, usuario o segmento..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

@@ -7,7 +7,6 @@ const ModalProductividadContent = ({
   selectedIndicator,
   selectedExecutiveNode,
   setSelectedExecutiveNode,
-  selectedExecutiveInfo,
   setSelectedExecutiveInfo,
   productivityData,
   loadingProductivity,

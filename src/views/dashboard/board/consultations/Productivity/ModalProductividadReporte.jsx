@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ReusableModal from "../../modalGlobalReboot/ReusableModal";
+import ReusableModal from "../../../../../components/Modal/GlobalModal";
 import CatalogSelect from "../../../../../components/Select/CatalogSelect";
 import DatePicker from "../../../../../components/Select/DatePicker";
 import { getProductivityReport } from "../../../../../services/mark/Orochi/LokiServices";

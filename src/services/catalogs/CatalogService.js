@@ -6,7 +6,8 @@ import {
   productoSchema,
   valorCatalogoSchema,
 } from "../../schemas/formSchemas";
-import { clearAuth, getToken } from "../mark/orochi/LokiServices";
+import { clearAuth, getToken } from "../mark/albaz/LokiServices";
+import { ACTIVE_SERVER } from "../../config/backend";
 
 const unwrap = (payload, keys = []) => {
   if (Array.isArray(payload)) return payload;
@@ -15,6 +16,24 @@ const unwrap = (payload, keys = []) => {
   }
   return [];
 };
+
+const firstDefined = (row, keys) => keys.reduce((value, key) => value ?? row?.[key], undefined);
+const numeric = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+const normalizeCartera = (row) => ({
+  ...row,
+  idCartera: numeric(firstDefined(row, ["idCartera", "IdCartera", "id_cartera", "carteraId", "id", "Id"])),
+  cartera: firstDefined(row, ["cartera", "Cartera", "NombreCartera", "nombreCartera", "nombre_cartera", "descripcion", "Descripcion", "nombre"]),
+});
+const normalizeProducto = (row) => ({
+  ...row,
+  idCartera: numeric(firstDefined(row, ["idCartera", "IdCartera", "id_cartera", "carteraId"])),
+  cartera: firstDefined(row, ["cartera", "Cartera", "NombreCartera", "nombreCartera", "nombre_cartera"]),
+  idProducto: numeric(firstDefined(row, ["idProducto", "IdProducto", "id_producto", "productoId", "id", "Id"])),
+  producto: firstDefined(row, ["producto", "Producto", "NombreProducto", "nombreProducto", "nombre_producto", "descripcion", "Descripcion", "nombre"]),
+});
 
 const request = async (config) => {
   if (!getToken()) throw new Error("No hay token de autenticación disponible.");
@@ -39,24 +58,14 @@ const parseList = (schema, payload, keys) => {
 export const CatalogService = {
   async getCarteras() {
     const data = await request({ method: "GET", url: "/campañas/carteras" });
-    return parseList(carteraSchema, unwrap(data, ["Carteras", "carteras"]).map((row) => ({
-      ...row,
-      idCartera: row?.idCartera ?? row?.IdCartera,
-      cartera: row?.cartera ?? row?.Cartera ?? row?.NombreCartera,
-    })), []);
+    return parseList(carteraSchema, unwrap(data, ["Carteras", "carteras"]).map(normalizeCartera), []);
   },
 
   async getCarterasProductos() {
     const data = await request({ method: "GET", url: "/campañas/carteras-productos" });
     const rows = unwrap(data, ["Productos", "productos", "CarterasProductos", "carterasProductos"]);
     return rows.flatMap((row) => {
-      const normalized = {
-        ...row,
-        idCartera: row?.idCartera ?? row?.IdCartera,
-        cartera: row?.cartera ?? row?.Cartera ?? row?.NombreCartera,
-        idProducto: row?.idProducto ?? row?.IdProducto,
-        producto: row?.producto ?? row?.Producto ?? row?.NombreProducto,
-      };
+      const normalized = normalizeProducto(row);
       const parsed = productoSchema.safeParse(normalized);
       return parsed.success ? [parsed.data] : [];
     });
@@ -82,19 +91,14 @@ export const CatalogService = {
   },
 
   async getConsultaBootstrap() {
-    const data = await request({ method: "GET", url: "/Catalogo/cargaCatalogos" });
+    const data = await request({
+      method: "GET",
+      url: "/Catalogo/cargaCatalogos",
+      params: { servidor: ACTIVE_SERVER },
+    });
     const normalized = {
-      carteras: unwrap(data, ["Carteras", "carteras"]).map((row) => ({
-        ...row,
-        idCartera: row?.idCartera ?? row?.IdCartera,
-        cartera: row?.cartera ?? row?.Cartera,
-      })),
-      productos: unwrap(data, ["Productos", "productos"]).map((row) => ({
-        ...row,
-        idProducto: row?.idProducto ?? row?.IdProducto,
-        producto: row?.producto ?? row?.Producto,
-        idCartera: row?.idCartera ?? row?.IdCartera,
-      })),
+      carteras: unwrap(data, ["Carteras", "carteras"]).map(normalizeCartera).filter((row) => Number.isFinite(row.idCartera) && typeof row.cartera === "string" && row.cartera.trim()),
+      productos: unwrap(data, ["Productos", "productos"]).map(normalizeProducto).filter((row) => Number.isFinite(row.idProducto) && typeof row.producto === "string" && row.producto.trim()),
       rechazos: unwrap(data, ["Rechazos", "rechazos"]),
       catalogosConsultas: unwrap(data, ["CatalogosConsultas", "catalogosConsultas"]),
       versiones: unwrap(data, ["Versiones", "versiones"]),
@@ -106,7 +110,7 @@ export const CatalogService = {
     const data = await request({
       method: "GET",
       url: "/Catalogo/ColumnasProducto",
-      params: { idProducto },
+      params: { servidor: ACTIVE_SERVER, idProducto },
     });
     return unwrap(data, ["Columnas", "columnas"]).map((item) => String(item?.nombre ?? item?.Nombre ?? item)).filter(Boolean);
   },

@@ -95,11 +95,11 @@ export const InputPhrases = ({ onPhraseSaved }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+    <div className="bg-surface rounded-lg border border-border shadow-sm p-4">
       <div className="w-full">
         <h5
           htmlFor="textarea-phrase"
-          className="block text-sm font-semibold text-gray-700 mb-2"
+          className="block text-sm font-semibold text-foreground mb-2"
         >
           Escribe la frase
         </h5>
@@ -108,7 +108,7 @@ export const InputPhrases = ({ onPhraseSaved }) => {
           value={phrase}
           onChange={handlePhraseChange}
           onKeyDown={handleKeyDown}
-          className="py-2 border border-gray-300 rounded-lg px-3 sm:py-3 sm:px-4 block w-full sm:text-sm focus:ring-2 focus:border-jerarquia2 focus:ring-jerarquia2 focus:outline-none transition-colors disabled:opacity-50 disabled:pointer-events-none disabled:bg-gray-100"
+          className="py-2 border border-border rounded-lg px-3 sm:py-3 sm:px-4 block w-full sm:text-sm focus:ring-2 focus:border-jerarquia2 focus:ring-jerarquia2 focus:outline-none transition-colors disabled:opacity-50 disabled:pointer-events-none disabled:bg-surface-secondary"
           rows="4"
           placeholder="Frase..."
           disabled={loading}

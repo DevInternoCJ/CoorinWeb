@@ -1,6 +1,6 @@
 // editar comentario
 import React, { useState, useRef, useMemo } from "react";
-import FloatingSelect from "../../../../../components/Select/FloatingSelect";
+import CatalogSelect from "../../../../../components/Select/CatalogSelect";
 import {
   GetInfoEditComments,
   PutEditComments,
@@ -127,18 +127,12 @@ const TabEditComment = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
         {/* Select Cartera */}
         <div className="flex-1">
-          <FloatingSelect
+          <CatalogSelect
             id="cartera-select-comment"
             label="Cartera"
             value={cartera}
             onChange={(e) => setCartera(e.target.value)}
             required
-            options={[
-              { value: "cartera1", label: "Cartera 1" },
-              { value: "cartera2", label: "Cartera 2" },
-              { value: "cartera3", label: "Cartera 3" },
-              { value: "31",       label: "Cartera 31" },
-            ]}
           />
         </div>
 
@@ -148,13 +142,13 @@ const TabEditComment = () => {
             type="text"
             value={cuenta}
             onChange={(e) => setCuenta(e.target.value)}
-            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+            className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
             id="cuenta-input-comment"
             placeholder=" "
           />
           <label
             htmlFor="cuenta-input-comment"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
           >
             Cuenta
           </label>
@@ -168,13 +162,13 @@ const TabEditComment = () => {
             onChange={(e) => setFecha(e.target.value)}
             min="2016-01-01"
             max={fechaHoy}
-            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+            className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
             id="fecha-input-comment"
             placeholder=" "
           />
           <label
             htmlFor="fecha-input-comment"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
+            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-muted-foreground"
           >
             Fecha (Opcional)
           </label>
@@ -194,7 +188,7 @@ const TabEditComment = () => {
       {/* Row 2: Tabla y Textarea apilados */}
       <div className="flex-1 flex flex-col gap-4 min-h-0">
         {/* Tabla */}
-        <div className="flex-1 metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 overflow-hidden">
+        <div className="flex-1 metas-block metas-block-3 bg-surface rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 overflow-hidden">
           <div
             className="scrollbar-gray w-full flex-1"
             style={{
@@ -424,7 +418,7 @@ const TabEditComment = () => {
           <textarea
             value={comentario}
             onChange={(e) => setComentario(e.target.value)}
-            className="w-full h-full p-4 pr-28 pb-4 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 resize-y"
+            className="w-full h-full p-4 pr-28 pb-4 bg-surface-secondary border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 resize-y"
             placeholder="Comentarios."
             style={{
               minHeight: "100px",

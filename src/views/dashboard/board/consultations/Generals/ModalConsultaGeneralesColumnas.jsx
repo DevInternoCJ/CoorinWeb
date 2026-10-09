@@ -1,7 +1,7 @@
 import React from "react";
 
 const ModalConsultaGeneralesColumnas = () => (
-    <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col" style={{ minWidth: 0 }}>
+    <div className="bg-surface rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col" style={{ minWidth: 0 }}>
         <div className="flex items-center mb-2 w-full">
             <span className="text-xs font-semibold pl-1" style={{ color: "var(--color-jerarquia2)", minWidth: 80 }}>Columnas</span>
             <div className="flex-1 flex justify-center">

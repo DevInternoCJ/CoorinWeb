@@ -31,6 +31,7 @@ const SearchForm = ({
   layout = "horizontal", // "horizontal" | "vertical"
   selectWidth = "w-64",
 }) => {
+  const SelectComponent = selectConfig.component || SelectWallet;
   return (
     <div className={`flex ${layout === "vertical" ? "flex-col" : "flex-col"} gap-3 w-full`}>
       
@@ -39,11 +40,13 @@ const SearchForm = ({
         
         {/* Select reutilizable */}
         <div className={selectWidth}>
-          <SelectWallet
+          <SelectComponent
+            id="gespa-search-cartera"
             label={selectConfig.label}
-            options={selectConfig.options}
+            options={selectConfig.options || []}
             value={selectConfig.value}
             onChange={selectConfig.onChange}
+            required
           />
         </div>
         

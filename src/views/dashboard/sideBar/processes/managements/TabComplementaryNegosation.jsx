@@ -1,6 +1,6 @@
 // negociacion complemento
 import React, { useState } from 'react';
-import FloatingSelect from "../../../../../components/Select/FloatingSelect";
+import CatalogSelect from "../../../../../components/Select/CatalogSelect";
 
 const TabComplementaryNegosation = () => {
     const [cartera, setCartera] = useState('');
@@ -27,31 +27,25 @@ const TabComplementaryNegosation = () => {
             <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
                 {/* Select Cartera */}
                 <div className="flex-1">
-                    <FloatingSelect
+                    <CatalogSelect
                         id="cartera-select-negosation"
                         label="Cartera"
                         value={cartera}
                         onChange={(e) => setCartera(e.target.value)}
-                        options={[
-                            { value: "cartera1", label: "Cartera 1" },
-                            { value: "cartera2", label: "Cartera 2" },
-                            { value: "cartera3", label: "Cartera 3" },
-                        ]}
+                        required
                     />
                 </div>
 
                 {/* Select Producto */}
                 <div className="flex-1">
-                    <FloatingSelect
+                    <CatalogSelect
                         id="producto-select-negosation"
                         label="Producto"
                         value={producto}
                         onChange={(e) => setProducto(e.target.value)}
-                        options={[
-                            { value: "producto1", label: "Producto 1" },
-                            { value: "producto2", label: "Producto 2" },
-                            { value: "producto3", label: "Producto 3" },
-                        ]}
+                        type="producto"
+                        idCartera={cartera}
+                        disabled={!cartera}
                     />
                 </div>
 
@@ -61,13 +55,13 @@ const TabComplementaryNegosation = () => {
                         type="text"
                         value={cuenta}
                         onChange={(e) => setCuenta(e.target.value)}
-                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="cuenta-input-negosation"
                         placeholder=" "
                     />
                     <label
                         htmlFor="cuenta-input-negosation"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                     >
                         Cuenta
                     </label>
@@ -82,13 +76,13 @@ const TabComplementaryNegosation = () => {
                         type="number"
                         value={monto}
                         onChange={(e) => setMonto(e.target.value)}
-                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="monto-input-negosation"
                         placeholder=" "
                     />
                     <label
                         htmlFor="monto-input-negosation"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                     >
                         Monto
                     </label>
@@ -100,13 +94,13 @@ const TabComplementaryNegosation = () => {
                         type="date"
                         value={fecha}
                         onChange={(e) => setFecha(e.target.value)}
-                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="fecha-input-negosation"
                         placeholder=" "
                     />
                     <label
                         htmlFor="fecha-input-negosation"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-muted-foreground"
                     >
                         Fecha
                     </label>
@@ -119,9 +113,9 @@ const TabComplementaryNegosation = () => {
                             type="checkbox"
                             checked={recurrente}
                             onChange={(e) => setRecurrente(e.target.checked)}
-                            className="w-4 h-4 text-jerarquia1 bg-gray-50 border-gray-300 rounded focus:ring-jerarquia1 focus:ring-2"
+                            className="w-4 h-4 text-jerarquia1 bg-surface-secondary border-border rounded focus:ring-jerarquia1 focus:ring-2"
                         />
-                        <span className="ml-2 text-sm text-gray-700">Recurrente</span>
+                        <span className="ml-2 text-sm text-foreground">Recurrente</span>
                     </label>
                 </div>
             </div>
@@ -134,13 +128,13 @@ const TabComplementaryNegosation = () => {
                         type="text"
                         value={usuario}
                         onChange={(e) => setUsuario(e.target.value)}
-                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="usuario-input-negosation"
                         placeholder=" "
                     />
                     <label
                         htmlFor="usuario-input-negosation"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                     >
                         Usuario
                     </label>
@@ -152,13 +146,13 @@ const TabComplementaryNegosation = () => {
                         type="number"
                         value={montoNego}
                         onChange={(e) => setMontoNego(e.target.value)}
-                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="monto-nego-input-negosation"
                         placeholder=" "
                     />
                     <label
                         htmlFor="monto-nego-input-negosation"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                     >
                         Monto Nego
                     </label>
@@ -170,13 +164,13 @@ const TabComplementaryNegosation = () => {
                         type="number"
                         value={montoReq}
                         onChange={(e) => setMontoReq(e.target.value)}
-                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="monto-req-input-negosation"
                         placeholder=" "
                     />
                     <label
                         htmlFor="monto-req-input-negosation"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                     >
                         Monto Req
                     </label>
@@ -188,13 +182,13 @@ const TabComplementaryNegosation = () => {
                         type="number"
                         value={saldo}
                         onChange={(e) => setSaldo(e.target.value)}
-                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="saldo-input-negosation"
                         placeholder=" "
                     />
                     <label
                         htmlFor="saldo-input-negosation"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                     >
                         Saldo
                     </label>
@@ -206,13 +200,13 @@ const TabComplementaryNegosation = () => {
                         type="number"
                         value={descuento}
                         onChange={(e) => setDescuento(e.target.value)}
-                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="descuento-input-negosation"
                         placeholder=" "
                     />
                     <label
                         htmlFor="descuento-input-negosation"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                     >
                         Descuento
                     </label>
@@ -230,7 +224,7 @@ const TabComplementaryNegosation = () => {
             </div>
 
             {/* Tabla de Negociaciones */}
-            <div className="flex-1 metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 overflow-hidden">
+            <div className="flex-1 metas-block metas-block-3 bg-surface rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 overflow-hidden">
                 <div
                     className="scrollbar-gray w-full flex-1"
                     style={{

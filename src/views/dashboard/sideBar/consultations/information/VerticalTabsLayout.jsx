@@ -35,8 +35,8 @@ const VerticalTabsLayout = ({
   extraSidebarClass = "",
 }) => {
   return (
-    <div className="flex flex-col">
-      <div className="flex">
+    <div className="flex min-h-0 min-w-0 flex-col">
+      <div className="flex min-h-0 min-w-0">
         {/* Columna izquierda: tabs verticales */}
         <div
           className={`w-16 md:w-64 flex-shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface-secondary)] overflow-auto h-fit ${extraSidebarClass}`}
@@ -62,13 +62,13 @@ const VerticalTabsLayout = ({
                   key={tab.key}
                   type="button"
                   className={`
-                    w-full py-1 px-1 md:py-3 md:px-4
+                    w-full min-h-11 py-1 px-1 md:py-3 md:px-4
                     inline-flex items-center justify-center md:justify-start
                     gap-x-1 md:gap-x-3 text-sm font-medium text-left
                     border border-[var(--color-border)] rounded-lg
                     transition-colors duration-200
                     hover:bg-[var(--color-surface-secondary)]
-                    focus:outline-hidden
+                    focus:outline-none focus:ring-2 focus:ring-jerarquia2
                     disabled:opacity-50 disabled:pointer-events-none
                     ${
                       activeTab === index
@@ -81,6 +81,7 @@ const VerticalTabsLayout = ({
                   data-hs-tab={`#tab-${sectionTitle.toLowerCase()}-vertical-content-${index}`}
                   aria-controls={`tab-${sectionTitle.toLowerCase()}-vertical-content-${index}`}
                   role="tab"
+                  aria-label={tab.key}
                   title={tab.key}
                   onClick={() => setActiveTab(index)}
                 >
@@ -109,9 +110,9 @@ const VerticalTabsLayout = ({
         </div>
 
         {/* Columna derecha: contenido del tab activo */}
-        <div className="flex-1 h-full relative overflow-hidden">
+        <div className="min-w-0 flex-1 h-full relative overflow-hidden">
           <div className="overflow-visible h-full">
-            <div className="px-4 py-4">
+            <div className="px-2 py-3 sm:px-4 sm:py-4">
               <ModalCicle
                 tabsList={tabsList}
                 componentIcons={componentIcons}

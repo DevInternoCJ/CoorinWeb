@@ -66,7 +66,7 @@ const JerarquiaConR = ({
     return (
       <div
         key={nodeKey}
-        className={`hs-accordion hs-dragged:bg-blue-100 hs-dragged:rounded nested-2-${level + 1}${isSelected ? " hs-tree-view-selected:bg-gray-100" : ""}`}
+        className={`hs-accordion hs-dragged:bg-primary/10 hs-dragged:rounded nested-2-${level + 1}${isSelected ? " hs-tree-view-selected:bg-surface-secondary" : ""}`}
         role="treeitem"
         aria-expanded={hasSub ? !isCollapsed : undefined}
         id={`hs-cco-${nodeKey}-heading`}
@@ -113,7 +113,7 @@ const JerarquiaConR = ({
               }}
             >
               <svg
-                className="size-4 text-gray-800"
+                className="size-4 text-foreground"
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
                 height="24"
@@ -213,7 +213,7 @@ const JerarquiaConR = ({
     return (
       <div
         key={nodeKey}
-        className={`hs-accordion hs-dragged:bg-blue-100 hs-dragged:rounded nested-2-${level + 1}${isChecked ? " hs-tree-view-selected:bg-gray-100" : ""}`}
+        className={`hs-accordion hs-dragged:bg-primary/10 hs-dragged:rounded nested-2-${level + 1}${isChecked ? " hs-tree-view-selected:bg-surface-secondary" : ""}`}
         role="treeitem"
         aria-expanded={hasSub ? !isCollapsed : undefined}
         id={`hs-cco-${nodeKey}-heading`}

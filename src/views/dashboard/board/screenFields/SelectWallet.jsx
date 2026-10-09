@@ -4,10 +4,8 @@ import FloatingSelect from "../../../../components/Select/FloatingSelect";
 const SelectWallet = ({
   options = [], // Valor por defecto para evitar el error
   value,
-  defaultValue = "",
   onChange,
   label,
-  relative = true,
   ...props
 }) => {
   // Generamos un ID único si no se proporciona para accesibilidad

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import ReusableModal from "../../modalGlobalReboot/ReusableModal";
+import React, { useState, useEffect, useCallback } from "react";
+import ReusableModal from "../../../../../components/Modal/GlobalModal";
 import ModalProductividadContent from "./ModalProductividadContent";
 import { IconProductividad } from "../IconesConsultations";
 import { getProductivity } from "../../../../../services/mark/Orochi/LokiServices";
@@ -376,6 +376,7 @@ const ProductivityModal = ({
       showHeader={true}
       // Pasamos un headerComponent personalizado para controlar el layout exacto
       headerComponent={ProductivityHeader}
+      customHeaderHasCloseButton
       headerProps={{
         title: "Productividad en Línea - Coorin",
         icon: IconProductividad,

@@ -543,7 +543,7 @@ const ModalConsultaHistoricosFiltros = ({
                     />
                     <label
                       htmlFor="cuentaInput"
-                      className="absolute left-2 top-2 bg-surface-secondary px-1 text-xs text-jerarquia2 pointer-events-none transition-all duration-150 peer-focus:-translate-y-4 peer-focus:scale-90 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:scale-90"
+                      className="absolute left-2 top-2 bg-surface-secondary px-1 text-xs text-jerarquia2 pointer-events-none transition-transform duration-150 ease-out peer-focus:-translate-y-4 peer-focus:scale-90 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:scale-90"
                       style={{ zIndex: 10 }}
                     >
                       Cuenta
@@ -593,15 +593,15 @@ const ModalConsultaHistoricosFiltros = ({
                     >
                       {isLoading ? (
                         <>
-                          <span
-                            style={{
+                            <span
+                              className="animate-spin motion-reduce:animate-none"
+                              style={{
                               display: "inline-block",
                               width: "16px",
                               height: "16px",
                               border: "2px solid #ffffff",
                               borderTop: "2px solid transparent",
                               borderRadius: "50%",
-                              animation: "spin 1s linear infinite",
                               marginRight: "8px",
                             }}
                           ></span>
@@ -671,15 +671,15 @@ const ModalConsultaHistoricosFiltros = ({
                     >
                       {isLoading ? (
                         <>
-                          <span
-                            style={{
+                            <span
+                              className="animate-spin motion-reduce:animate-none"
+                              style={{
                               display: "inline-block",
                               width: "16px",
                               height: "16px",
                               border: "2px solid #ffffff",
                               borderTop: "2px solid transparent",
                               borderRadius: "50%",
-                              animation: "spin 1s linear infinite",
                               marginRight: "8px",
                             }}
                           ></span>
@@ -733,7 +733,7 @@ const ModalConsultaHistoricosFiltros = ({
                 />
                 <label
                   htmlFor="fecha-desde-input"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
+                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-muted-foreground"
                 >
                   Desde
                 </label>
@@ -758,7 +758,7 @@ const ModalConsultaHistoricosFiltros = ({
                 />
                 <label
                   htmlFor="fecha-hasta-input"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
+                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-muted-foreground"
                 >
                   Hasta
                 </label>
@@ -804,7 +804,7 @@ const ModalConsultaHistoricosFiltros = ({
                 />
                 <label
                   htmlFor="fecha-desde-input"
-                  className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
+                  className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-muted-foreground"
                 >
                   Desde
                 </label>
@@ -829,7 +829,7 @@ const ModalConsultaHistoricosFiltros = ({
                 />
                 <label
                   htmlFor="fecha-hasta-input"
-                  className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
+                  className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-muted-foreground"
                 >
                   Hasta
                 </label>

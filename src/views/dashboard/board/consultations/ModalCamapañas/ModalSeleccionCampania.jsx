@@ -1,4 +1,5 @@
 import React from "react";
+import GlobalModal from "../../../../../components/Modal/GlobalModal";
 
 const DropdownArrow = () => (
     <span
@@ -25,12 +26,9 @@ const ModalSeleccionCampania = ({ open, onClose, onCargar }) => {
     
 
     return (
-        <div 
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
-        >
+        <GlobalModal isOpen={open} onClose={onClose} title="Carga filas a campaña" mode="content" showHeader={false} showCloseButton={false}>
             <div
-                className="bg-white rounded-xl shadow-2xl border border-[var(--color-jerarquia1)] relative flex flex-col"
+                className="bg-surface text-foreground rounded-xl shadow-2xl border border-[var(--color-jerarquia1)] relative flex flex-col"
                 style={{
                     minWidth: 300,
                     maxWidth: 800,
@@ -42,7 +40,7 @@ const ModalSeleccionCampania = ({ open, onClose, onCargar }) => {
                 {/* Botón de cierre en esquina superior derecha */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-[var(--color-jerarquia3)] hover:text-red-600 transition rounded-full p-1"
+                    className="absolute top-4 right-4 text-foreground hover:text-destructive transition rounded-full p-1"
                     style={{ fontSize: "1.5rem", lineHeight: 1 }}
                     aria-label="Cerrar"
                 >
@@ -50,15 +48,15 @@ const ModalSeleccionCampania = ({ open, onClose, onCargar }) => {
                 </button>
                 
                 {/* Título */}
-                <div className="text-xl font-bold mb-8 text-[var(--color-jerarquia3)] flex items-center gap-2 w-full">
+                <div className="text-xl font-bold mb-8 text-foreground flex items-center gap-2 w-full">
                     Carga filas de trabajo a Campaña - Consorcio Jurídico
                 </div>
                 
                 {/* Select campaña centrado */}
                 <div className="flex items-center justify-center mb-4 gap-3 w-full">
-                    <span className="font-semibold text-[var(--color-jerarquia4)]">Campaña</span>
+                    <span className="font-semibold text-foreground">Campaña</span>
                     <div className="relative">
-                        <select className="w-32 font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none">
+                        <select className="w-32 font-semibold text-foreground bg-surface border border-border rounded px-2 py-1 appearance-none">
                             <option>ALL CHARGE</option>
                         </select>
                         <DropdownArrow />
@@ -84,10 +82,10 @@ const ModalSeleccionCampania = ({ open, onClose, onCargar }) => {
                 
                 {/* Tabla expandida */}
                 <div
-                    className="rounded-lg border border-[var(--color-jerarquia1)] bg-white mb-6 overflow-auto w-full flex-1 flex flex-col"
+                    className="rounded-lg border border-[var(--color-jerarquia1)] bg-surface mb-6 overflow-auto w-full flex-1 flex flex-col"
                     style={{ minHeight: "200px" }}
                 >
-                    <table className="w-full text-xs text-black bg-white">
+                    <table className="w-full text-xs text-foreground bg-surface">
                         <thead style={{ position: "sticky", top: 0, zIndex: 2, background: "var(--color-background-secondary)" }}>
                             <tr className="bg-[var(--color-background-secondary)] text-white">
                                 <th className="px-2 py-1 text-center border-r border-[var(--color-jerarquia1)] rounded-tl-md font-semibold">Cuenta</th>
@@ -123,12 +121,12 @@ const ModalSeleccionCampania = ({ open, onClose, onCargar }) => {
                 
                 {/* Mensaje inferior alineado a la izquierda con color negro */}
                 <div className="w-full mt-8 mb-2 flex justify-start">
-                <span className="text-base text-[var(--color-jerarquia4)] ">
+                <span className="text-base text-foreground ">
                     Seleccione la campaña a la que desea agregar los registros y de clic en Cargar.
                 </span>
             </div>
             </div>
-        </div>
+        </GlobalModal>
     );
 };
 

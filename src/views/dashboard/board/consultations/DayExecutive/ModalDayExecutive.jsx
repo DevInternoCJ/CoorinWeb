@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import ReusableModal from "../../modalGlobalReboot/ReusableModal";
+import ReusableModal from "../../../../../components/Modal/GlobalModal";
 import DatePicker from "../../../../../components/Select/DatePicker";
 import { IconDayExecutive } from "../IconesConsultations";
 import RamificacionSesiones from "../../sessions/RamificacionSesiones";

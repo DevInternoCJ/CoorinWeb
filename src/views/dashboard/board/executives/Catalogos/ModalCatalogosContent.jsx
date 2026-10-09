@@ -272,7 +272,7 @@ const ModalCatalogosContent = () => {
                 <tr>
                   <td
                     colSpan="2"
-                    className="px-3 py-8 text-center text-gray-500"
+                    className="px-3 py-8 text-center text-muted-foreground"
                   >
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
@@ -296,7 +296,7 @@ const ModalCatalogosContent = () => {
                 <tr>
                   <td
                     colSpan="2"
-                    className="px-3 py-8 text-center text-gray-500"
+                    className="px-3 py-8 text-center text-muted-foreground"
                   >
                     No hay catálogos disponibles
                   </td>
@@ -308,7 +308,7 @@ const ModalCatalogosContent = () => {
                     className={`cursor-pointer transition-colors ${
                       selectedCatalog === item.catalog
                         ? "bg-blue-50"
-                        : "hover:bg-gray-50"
+                        : "hover:bg-surface-secondary"
                     }`}
                     onClick={() => setSelectedCatalog(item.catalog)}
                   >
@@ -388,7 +388,7 @@ const ModalCatalogosContent = () => {
                 <tr>
                   <td
                     colSpan="2"
-                    className="px-3 py-8 text-center text-gray-500"
+                    className="px-3 py-8 text-center text-muted-foreground"
                   >
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
@@ -400,7 +400,7 @@ const ModalCatalogosContent = () => {
                 <tr>
                   <td
                     colSpan="2"
-                    className="px-3 py-8 text-center text-gray-500"
+                    className="px-3 py-8 text-center text-muted-foreground"
                   >
                     Selecciona un catálogo para ver sus valores
                   </td>
@@ -409,7 +409,7 @@ const ModalCatalogosContent = () => {
                 <tr>
                   <td
                     colSpan="2"
-                    className="px-3 py-8 text-center text-gray-500"
+                    className="px-3 py-8 text-center text-muted-foreground"
                   >
                     No hay valores disponibles para este catálogo
                   </td>

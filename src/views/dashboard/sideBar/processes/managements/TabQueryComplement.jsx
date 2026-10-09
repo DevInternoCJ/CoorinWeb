@@ -1,6 +1,6 @@
 // consulta complemento
 import React, { useState, useEffect } from "react";
-import FloatingSelect from "../../../../../components/Select/FloatingSelect";
+import CatalogSelect from "../../../../../components/Select/CatalogSelect";
 import { getQueryComplement } from "../../../../../services/mark/Orochi/LokiServices";
 import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
 import { toast } from "sonner";
@@ -215,13 +215,13 @@ const TabQueryComplement = () => {
             }}
             min={minDate}
             max={maxDate}
-            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+            className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
             id="desde-date"
             placeholder=" "
           />
           <label
             htmlFor="desde-date"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
+            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-muted-foreground"
           >
             Desde
           </label>
@@ -229,7 +229,7 @@ const TabQueryComplement = () => {
         </div>
 
         <div className="flex-1 order-1 sm:order-2">
-          <FloatingSelect
+          <CatalogSelect
             id="cartera-select"
             label="Cartera"
             value={String(cartera)}
@@ -237,12 +237,7 @@ const TabQueryComplement = () => {
               setCartera(e.target.value);
               clearError("idCartera");
             }}
-            options={[
-              { value: "1", label: "Cartera 1" },
-              { value: "2", label: "Cartera 2" },
-              { value: "3", label: "Cartera 3" },
-              { value: "31", label: "Cartera 31" },
-            ]}
+            required
           />
           <FieldError id="idCartera-error" message={errors.idCartera} />
         </div>
@@ -260,13 +255,13 @@ const TabQueryComplement = () => {
             }}
             min={minDate}
             max={maxDate}
-            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+            className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
             id="hasta-date"
             placeholder=" "
           />
           <label
             htmlFor="hasta-date"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
+            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-muted-foreground"
           >
             Hasta
           </label>

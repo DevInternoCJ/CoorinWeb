@@ -26,7 +26,7 @@ window.addEventListener("storage", (e) => {
     if (payload && payload.userData) {
       sessionStorage.setItem("userData", JSON.stringify(payload.userData));
     }
-  } catch (err) {
+  } catch {
     // silencioso
   }
 });

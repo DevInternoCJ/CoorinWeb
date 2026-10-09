@@ -181,7 +181,7 @@ const Template = ({
       if (onActualizarPlantillas) {
         await onActualizarPlantillas();
       }
-    } catch (error) {
+    } catch {
       toast.error("Error al eliminar la plantilla.");
     }
   };
@@ -240,7 +240,7 @@ const Template = ({
       if (onActualizarPlantillas) {
         await onActualizarPlantillas();
       }
-    } catch (error) {
+    } catch {
       // Manejo de error (puedes mostrar un toast)
     } finally {
       setLoading(false);
@@ -264,7 +264,7 @@ const Template = ({
     <div className=" rounded-lg">
       <div className="py-2 px-4 rounded-lg bg-background-tertiary justify-between flex items-center">
         <div className="flex justify-start items-end gap-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             Plantilla
           </label>
           <SelectWallet
@@ -275,27 +275,27 @@ const Template = ({
             }))}
             value={selectedPlantilla}
             onChange={handleSelectChange}
-            className=" bg-gray-600"
+            className=" bg-surface-secondary"
           />
         </div>
         <div className="flex justify-between items-center mb-1">
           <span className="text-jerarquia3 font-bold text-lg">Info</span>
         </div>
       </div>
-      <div className=" bg-gray-700 rounded-lg p-4">
+      <div className=" bg-surface rounded-lg p-4">
         <div className="border-1 p-3 border-jerarquia1 rounded-lg min-h-[200px] leading-relaxed">
           <input
             type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            className=" w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-neutral-200"
+            className=" w-full bg-transparent border-b border-border focus:border-jerarquia3 focus:outline-none py-1 text-foreground"
             placeholder="Nombre"
           />
           <input
             type="text"
             value={asunto}
             onChange={(e) => setAsunto(e.target.value)}
-            className="mt-4 w-full bg-transparent border-b border-background-dashboard focus:border-jerarquia3 focus:outline-none py-1 text-neutral-200"
+            className="mt-4 w-full bg-transparent border-b border-border focus:border-jerarquia3 focus:outline-none py-1 text-foreground"
             placeholder="Asunto"
           />
           <div
@@ -315,16 +315,16 @@ const Template = ({
               }}
               readOnly={vistaPrevia} // Input de solo lectura en vista previa
               className={`
-                w-full bg-transparent border-b focus:outline-none py-1 text-neutral-200
-                transition-all duration-200
+                w-full bg-transparent border-b focus:outline-none py-1 text-foreground
+                transition-[color,background-color,border-color,box-shadow] duration-200
                 ${
                   isDraggingOver && !vistaPrevia
-                    ? "border-blue-400 border-b-2 bg-blue-900 bg-opacity-20"
-                    : "border-background-dashboard focus:border-jerarquia3"
+                    ? "border-jerarquia2 border-b-2 bg-primary/10"
+                    : "border-border focus:border-jerarquia3"
                 }
                 ${
                   vistaPrevia
-                    ? "cursor-not-allowed opacity-80 bg-gray-800 bg-opacity-30"
+                    ? "cursor-not-allowed opacity-80 bg-surface-secondary"
                     : "cursor-text"
                 } //  Estilos para indicar que está bloqueado
               `}

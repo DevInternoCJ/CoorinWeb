@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import GlobalModal from "../../../../../components/Modal/GlobalModal";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import {
@@ -761,26 +762,13 @@ const valB = safeToString(b[colIdx] || "").toLowerCase();
     }
   };
   return open ? (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        background: "rgba(0,0,0,0.2)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-      }}
-    >
+    <GlobalModal isOpen={open} onClose={onClose} title="Filas de campaña" mode="content" showHeader={false} showCloseButton={false}>
       <div
         style={{
-          background: "white",
+          background: "var(--color-surface)",
           borderRadius: 8,
           padding: 28,
-          minWidth: 900,
+          minWidth: "min(900px, calc(100vw - 2rem))",
           minHeight: 520,
           boxShadow: "0 2px 16px rgba(0,0,0,0.15)",
           position: "relative",
@@ -832,10 +820,10 @@ const valB = safeToString(b[colIdx] || "").toLowerCase();
           >
             {tipoFilas === "archivo" ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontWeight: "bold", color: "#000" }}>
+                <span style={{ fontWeight: "bold", color: "var(--color-text-primary)" }}>
                   Cartera:
                 </span>
-                <span style={{ color: "#000" }}>{cartera}</span>
+                <span style={{ color: "var(--color-text-primary)" }}>{cartera}</span>
               </div>
             ) : (
               <div></div>
@@ -851,7 +839,7 @@ const valB = safeToString(b[colIdx] || "").toLowerCase();
                   height: "100%",
                 }}
               >
-                <label style={{ color: "#000", fontWeight: 400 }}>
+                <label style={{ color: "var(--color-text-primary)", fontWeight: 400 }}>
                   <input
                     type="radio"
                     name="tipo"
@@ -860,7 +848,7 @@ const valB = safeToString(b[colIdx] || "").toLowerCase();
                   />{" "}
                   Archivo
                 </label>
-                <label style={{ color: "#000", fontWeight: 400 }}>
+                <label style={{ color: "var(--color-text-primary)", fontWeight: 400 }}>
                   <input
                     type="radio"
                     name="tipo"
@@ -1197,12 +1185,12 @@ const valB = safeToString(b[colIdx] || "").toLowerCase();
                   }}
                 >
                   <label
-                    style={{ fontWeight: 500, color: "#000", marginRight: 8 }}
+                    style={{ fontWeight: 500, color: "var(--color-text-primary)", marginRight: 8 }}
                   >
                     Consulta
                   </label>
                   <select
-                    className="py-3 px-4 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:pointer-events-none min-w-60"
+                    className="py-3 px-4 text-sm rounded-lg border border-border bg-surface text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:pointer-events-none min-w-60"
                     value={selectedConsulta}
                     onChange={(e) => {
                       setSelectedConsulta(e.target.value);
@@ -1328,7 +1316,7 @@ const valB = safeToString(b[colIdx] || "").toLowerCase();
               : "Resultado"}
         </div>
       </div>
-    </div>
+      </GlobalModal>
   ) : null;
 };
 

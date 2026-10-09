@@ -94,7 +94,7 @@ const OptionFields = ({ data, onEdit }) => {
   return (
     <tr className="grid grid-cols-12 gap-3 items-center mx-3">
       {/* Position - Solo lectura */}
-      <td className="col-span-1 text-sm font-bold text-gray-800">
+      <td className="col-span-1 text-sm font-bold text-foreground">
         {data.position}
       </td>
 
@@ -111,10 +111,10 @@ const OptionFields = ({ data, onEdit }) => {
           className={`
             w-full rounded-md px-3 py-2 text-sm
             focus:outline-none focus:ring-2
-            transition-all duration-200
+            transition-colors duration-150
             ${isDraggingOverAlias
               ? 'border-jerarquia3 ring-2 ring-jerarquia2 bg-green-50'
-              : 'bg-gray-100 focus:ring-jerarquia2 focus:border-transparent'
+              : 'bg-surface-secondary focus:ring-jerarquia2 focus:border-transparent'
             }
           `}
           placeholder="Ingresa el alias..."
@@ -140,10 +140,10 @@ const OptionFields = ({ data, onEdit }) => {
           className={`
             w-full rounded-md px-3 py-2 text-sm
             focus:outline-none focus:ring-2
-            transition-all duration-200
+            transition-colors duration-150
             ${isDraggingOverCampos
               ? 'border-jerarquia3 ring-2 ring-jerarquia2 bg-green-50'
-              : 'bg-gray-100 focus:ring-jerarquia2 focus:border-transparent'
+              : 'bg-surface-secondary focus:ring-jerarquia2 focus:border-transparent'
             }
           `}
           placeholder="Ingresa el campo..."

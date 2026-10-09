@@ -1,29 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // Hook personalizado para manejar la lógica del modal
 const useModalLogic = () => {
     const [bounce, setBounce] = useState(false);
+    const timerRef = useRef(null);
 
-    // Efecto para manejar la tecla Escape
-    useEffect(() => {
-        const handler = (e) => {
-            if (e.key === "Escape") {
-                setBounce(true);
-                setTimeout(() => setBounce(false), 500);
-            }
-        };
-        window.addEventListener("keydown", handler);
-        return () => window.removeEventListener("keydown", handler);
-    }, []);
+    useEffect(() => () => clearTimeout(timerRef.current), []);
+
+    const triggerBounce = () => {
+        if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+        clearTimeout(timerRef.current);
+        setBounce(true);
+        timerRef.current = setTimeout(() => setBounce(false), 300);
+    };
 
     const handleBackdropClick = () => {
-        setBounce(true);
-        setTimeout(() => setBounce(false), 500);
+        triggerBounce();
     };
 
     const handleEscapeAnimation = () => {
-        setBounce(true);
-        setTimeout(() => setBounce(false), 500);
+        triggerBounce();
     };
 
     return {

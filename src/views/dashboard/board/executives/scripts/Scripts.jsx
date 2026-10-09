@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import GlobalModal from "../../../../../components/Modal/GlobalModal";
 import ModalHeader from "../../../sideBar/Administration/gespa/ModalHeader";
 import ModalBase from "../../../board/ModalBase";
 import IconCircular from "../../../../../components/Iconos/IconCircular";
@@ -14,7 +15,7 @@ const Scripts = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [scripts, setScripts] = useState([]); // Scripts disponibles
   const [placeholderValues, setPlaceholderValues] = useState({}); // Valores de vista previa
-  const [isDragging, setIsDragging] = useState(false); // Estado global del drag
+  const [, setIsDragging] = useState(false); // Estado global del drag
   const modalRef = useRef(null);
   const dropAreaRef = useRef(null); // Referencia para el área editable
   const { bounce } = ModalBase.useModalLogic();
@@ -96,12 +97,12 @@ const Scripts = ({ onClose }) => {
   }, []);
 
   return (
-    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black/55 flex items-center justify-center z-50 p-4">
+    <GlobalModal isOpen onClose={onClose} title="Scripts" mode="content" showHeader={false} showCloseButton={false}>
       <div
         ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] rounded-xl shadow-2xl w-full max-w-6xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
+        } bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] modal-container rounded-xl shadow-2xl w-full max-w-6xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -119,7 +120,7 @@ const Scripts = ({ onClose }) => {
           loading={loading}
           setLoading={setLoading}
         />
-        <div className="overflow-auto flex-1">
+        <div className="modal-scroll-body">
           <div className="m-5">
             {selectedProduct ? (
               <>
@@ -145,7 +146,7 @@ const Scripts = ({ onClose }) => {
           </div>
         </div>
       </div>
-    </div>
+    </GlobalModal>
   );
 };
 

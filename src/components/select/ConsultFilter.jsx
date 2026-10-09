@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { getColumsProduct } from "../../services/mark/orochi/LokiServices";
-import { chargueCatalog } from "../../services/mark/orochi/LokiServices";
+import CatalogService from "../../services/catalogs/CatalogService";
 import FloatingSelect from "./FloatingSelect";
 import { useCatalogStore } from "../../contextGlobal/catalogStore";
-import { ACTIVE_SERVER } from "../../config/backend";
 const EMPTY_OPTIONS = [];
 const ConsultFilter = ({
   options = EMPTY_OPTIONS,
@@ -42,12 +40,7 @@ const ConsultFilter = ({
         switch (filterValue) {
           case "Producto": {
             // Producto
-            const productData = await getColumsProduct({
-              params: {
-                servidor: ACTIVE_SERVER,
-                idProducto: idProducto,
-              },
-            });
+            const productData = await CatalogService.getColumnasProducto(idProducto);
 
             // Mapear la respuesta al formato esperado
             // La respuesta es un array de strings directamente
@@ -68,15 +61,10 @@ const ConsultFilter = ({
               break;
             }
             // Cuenta
-            const catalogDataCuenta = await chargueCatalog({
-              params: {
-                servidor: ACTIVE_SERVER,
-              },
-            });
+            const catalogDataCuenta = await CatalogService.getConsultaBootstrap();
 
             if (
               catalogDataCuenta &&
-              catalogDataCuenta.catalogosConsultas &&
               Array.isArray(catalogDataCuenta.catalogosConsultas)
             ) {
               // Filtrar solo los elementos con detalle "Cuenta"
@@ -100,15 +88,10 @@ const ConsultFilter = ({
               break;
             }
             // Conteos
-            const catalogDataConteos = await chargueCatalog({
-              params: {
-                servidor: ACTIVE_SERVER,
-              },
-            });
+            const catalogDataConteos = await CatalogService.getConsultaBootstrap();
 
             if (
               catalogDataConteos &&
-              catalogDataConteos.catalogosConsultas &&
               Array.isArray(catalogDataConteos.catalogosConsultas)
             ) {
               // Filtrar solo los elementos con detalle "Conteos"
@@ -132,14 +115,9 @@ const ConsultFilter = ({
               break;
             }
             // Fechas
-            const catalogDataFechas = await chargueCatalog({
-              params: {
-                servidor: ACTIVE_SERVER,
-              },
-            });
+            const catalogDataFechas = await CatalogService.getConsultaBootstrap();
             if (
               catalogDataFechas &&
-              catalogDataFechas.catalogosConsultas &&
               Array.isArray(catalogDataFechas.catalogosConsultas)
             ) {
               // Filtrar solo los elementos con detalle "Fechas"

@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import GlobalModal from "../../../../../components/Modal/GlobalModal";
 import ModalBase from "../../../board/ModalBase";
 import IconCircular from "../../../../../components/Iconos/IconCircular";
 import SelectWallet from "../../../board/screenFields/SelectWallet";
@@ -223,16 +224,16 @@ const Comments = ({ onClose, onSaveComment }) => {
   ];
 
   return (
-    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black/55 flex items-center justify-center z-50 p-4">
+    <GlobalModal isOpen onClose={onClose} title="Comentarios" mode="content" showHeader={false} showCloseButton={false}>
       <div
         ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-[var(--color-surface)] rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
+        } bg-[var(--color-surface)] modal-container rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader onClose={onClose} />
-        <div className="flex-1 overflow-y-auto bg-[var(--color-surface-secondary)]">
+        <div className="modal-scroll-body bg-[var(--color-surface-secondary)]">
           <section className="flex w-full justify-center items-start px-6 py-4 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
             <CheckboxGroup
               options={checkboxOptions}
@@ -312,7 +313,7 @@ const Comments = ({ onClose, onSaveComment }) => {
           />
         </div>
       </div>
-    </div>
+    </GlobalModal>
   );
 };
 

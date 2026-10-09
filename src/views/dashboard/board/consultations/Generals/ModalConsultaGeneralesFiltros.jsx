@@ -21,7 +21,7 @@ const DropdownArrow = () => (
 );
 
 const ModalConsultaGeneralesFiltros = () => (
-    <div className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col" style={{ minWidth: 0 }}>
+    <div className="bg-surface rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col" style={{ minWidth: 0 }}>
         {/* Fila de filtros con label a la izquierda, selects centrados y botón a la derecha */}
         <div className="flex items-center mb-2 w-full">
             <span className="text-xs font-semibold pl-1 mr-4" style={{ color: "var(--color-jerarquia2)" }}>Filtros</span>
@@ -30,7 +30,7 @@ const ModalConsultaGeneralesFiltros = () => (
                     <div className="relative">
                     </div>
                     <div className="relative">
-                        <select className="w-32 font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none">
+                        <select className="w-32 font-semibold text-[var(--color-jerarquia4)] bg-surface border border-black rounded px-2 py-1 appearance-none">
                             <option>Telefonía</option>
                             <option>Clase</option>
                             <option>Origen</option>
@@ -50,14 +50,14 @@ const ModalConsultaGeneralesFiltros = () => (
                         <DropdownArrow />
                     </div>
                     <div className="relative">
-                        <select className="w-12 font-bold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none">
+                        <select className="w-12 font-bold text-[var(--color-jerarquia4)] bg-surface border border-black rounded px-2 py-1 appearance-none">
                             <option className="font-bold">=</option>
                             <option className="font-bold">≠</option>
                         </select>
                         <DropdownArrow />
                     </div>
                     <div className="relative">
-                        <select className="w-45 font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none">
+                        <select className="w-45 font-semibold text-[var(--color-jerarquia4)] bg-surface border border-black rounded px-2 py-1 appearance-none">
                             <option>Extranjero 1</option>
                             <option>Internacional 1</option>
                             <option>Fija</option>

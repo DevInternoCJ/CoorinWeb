@@ -158,7 +158,7 @@ const FloatingInput = ({
           s.label,
           "flex items-center",
           "pointer-events-none",
-          "transition-all ease-in-out duration-150",
+          "transition-[transform,color,font-size] ease-out duration-150",
           hasError
             ? "text-[var(--color-btn-danger-text,#b91c1c)]"
             : "text-[var(--color-text-muted)]",

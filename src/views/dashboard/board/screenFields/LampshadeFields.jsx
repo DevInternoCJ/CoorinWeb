@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
+import GlobalModal from "../../../../components/Modal/GlobalModal";
 import ModalHeader from "../../sideBar/Administration/gespa/ModalHeader";
 import InfoSection from "./InfoSection";
 import TableEditFields from "./TableEditFields";
@@ -65,8 +66,8 @@ const LampshadeFields = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black/55 flex items-center justify-center z-50 p-4">
-      <div className="bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] rounded-xl shadow-2xl w-full max-w-6xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]">
+    <GlobalModal isOpen={isOpen} onClose={onClose} title="Campos Pantalla" mode="content" showHeader={false} showCloseButton={false}>
+      <div className="bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] modal-container rounded-xl shadow-2xl w-full max-w-6xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]">
         <ModalHeader
           icon={
             <IconCircular size="size-10">
@@ -83,7 +84,7 @@ const LampshadeFields = ({ isOpen, onClose }) => {
           setLoading={setLoading}
         />
         {selectedProduct ? (
-          <div className="p-4 overflow-auto scrollbar-gray  max-h-[calc(90vh-120px)] bg-[var(--color-surface-modal)] space-y-4">
+          <div className="modal-scroll-body p-3 sm:p-4 scrollbar-gray bg-surface-modal space-y-4">
             {memoizedInfoSection}
             {selectedProduct && selectedProduct.value !== 0 && (
               <>
@@ -103,7 +104,7 @@ const LampshadeFields = ({ isOpen, onClose }) => {
           </div>
         )}
       </div>
-    </div>
+    </GlobalModal>
   );
 };
 

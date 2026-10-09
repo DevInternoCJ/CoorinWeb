@@ -55,7 +55,7 @@ import * as XLSX from 'xlsx';
  * @param {string} filename - Nombre del archivo (sin extensión)
  * @param {Object} options - Opciones de configuración
  */
-export const exportDataToXLSX = (data, filename = 'export', options = {}) => {
+export const exportDataToXLSX = (data, filename = 'export') => {
     if (!data || !Array.isArray(data) || data.length === 0) {
         toast.warning('No hay datos para exportar.');
         return false;
@@ -440,7 +440,7 @@ export const processAPIResponse = async (response, options = {}) => {
             }
             return result;
 
-        } catch (error) {
+        } catch {
             if (showToast) {
                 toast.dismiss(loadingToast);
                 toast.error(errorMessage);

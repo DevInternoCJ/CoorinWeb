@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import GlobalModal from "../../../../../components/Modal/GlobalModal";
 import {
   ClipboardDocumentListIcon,
   StarIcon,
@@ -17,7 +18,7 @@ import {
 } from "../../processes/managements/ModalGestionesTabs";
 import TableCargaAccionamientos from "../../processes/accionamientos/TwoTablesAccionamientos";
 
-import { MODAL_SIZES, BOUNCE_MODAL_STYLES } from "./modalConstants";
+import { MODAL_SIZES } from "./modalConstants";
 import useEjecutivoInfo from "./useEjecutivoInfo";
 import VerticalTabsLayout from "./VerticalTabsLayout";
 import ModalHeaderInformacion from "./ModalHeaderInformacion";
@@ -25,7 +26,7 @@ import ModalHeaderInformacion from "./ModalHeaderInformacion";
 // ---------------------------------------------------------------------------
 // Helpers
 const resolveModalSize = ({isConsultaVisitas, isCapturaVisitas, isCargaVisitas, isAccionamientos, isGestiones, isSupervisor,
-  isInformacion, size, carouselNav, mostrarTabla, dynamicSize,
+  isInformacion, size,
 }) => {
   if (isConsultaVisitas) return "consultaVisits";
   if (isCapturaVisitas) return size === "pagos-xl" ? "informacion-xl" : "capturaVisit";
@@ -35,12 +36,7 @@ const resolveModalSize = ({isConsultaVisitas, isCapturaVisitas, isCargaVisitas, 
   if (isSupervisor) return "informacion-xl";
 
   if (isInformacion) {
-    const isPagosReportados =
-      carouselNav &&
-      tabsListInformacion[carouselNav.currentIndex]?.key === "Pagos Reportados";
-
-    if (isPagosReportados && mostrarTabla) return "informacion-xl";
-    return dynamicSize;
+    return "informacion-xl";
   }
 
   return size;
@@ -49,7 +45,6 @@ const resolveModalSize = ({isConsultaVisitas, isCapturaVisitas, isCargaVisitas, 
 const ModalBaseInformacion = ({
   onClose,
   tipoInformacion,
-  infoCuenta,
   children,
   size = "lg",
   modalStyle = {},
@@ -63,7 +58,7 @@ const ModalBaseInformacion = ({
   modalClassName = "",
   overlayClassName = "",
   enableBounce = true,
-  backdropBlur = true,
+  backdropBlur = false,
   ...props
 }) => {
   const modalRef = useRef(null);
@@ -123,20 +118,6 @@ const ModalBaseInformacion = ({
     setTimeout(() => setLocalBounce(false), 500);
   };
 
-  // Interceptar Escape para prevenir cierre y activar bounce
-  useEffect(() => {
-    const handleKey = (e) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        e.stopPropagation();
-        triggerBounce();
-      }
-    };
-    window.addEventListener("keydown", handleKey, true);
-    return () => window.removeEventListener("keydown", handleKey, true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // Notificar al sidebar que el modal está abierto / cerrado
   useEffect(() => {
     const dispatch = (open, byClose = false) => {
@@ -188,12 +169,7 @@ const ModalBaseInformacion = ({
   // Render
   // ---------------------------------------------------------------------------
   return (
-    <div className="modal-blur-bg">
-      {/* Overlay */}
-      <div
-        className={`modal-overlay ${overlayClassName} ${backdropBlur ? "backdrop-blur-sm" : ""}`}
-        onClick={handleBackdropClick}
-      />
+    <GlobalModal isOpen onClose={handleSafeClose} onBackdropClick={handleBackdropClick} title={tipoInformacion} mode="content" showHeader={false} showCloseButton={!showHeader} closeOnBackdropClick={false} backdropBlur={backdropBlur} overlayClassName={overlayClassName}>
 
       {/* Contenedor del modal */}
       <div
@@ -241,7 +217,7 @@ const ModalBaseInformacion = ({
         )}
 
         {/* ── Contenido ─────────────────────────────────────────────── */}
-        <div className={`flex-1 w-full overflow-auto ${contentClassName}`}>
+        <div className={`modal-scroll-body w-full ${contentClassName}`}>
           {isInformacion ? (
             <div className="mt-3 px-4 flex-1 overflow-auto">
               <ModalCicle
@@ -339,9 +315,8 @@ const ModalBaseInformacion = ({
         )}
 
         {/* ── Animación bounce CSS ──────────────────────────────────── */}
-        <style>{BOUNCE_MODAL_STYLES}</style>
       </div>
-    </div>
+    </GlobalModal>
   );
 };
 

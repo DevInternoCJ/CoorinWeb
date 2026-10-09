@@ -6,6 +6,26 @@ import {
 } from "../../../../../services/mark/Orochi/LokiServices";
 import { toast } from "sonner";
 
+const updateExecutiveAssignment = (executives, idEjecutivo, asignado) =>
+  executives.map((executive) => {
+    if (String(executive.idEjecutivo) === String(idEjecutivo)) {
+      return { ...executive, asignado };
+    }
+
+    if (Array.isArray(executive.subordinados) && executive.subordinados.length) {
+      return {
+        ...executive,
+        subordinados: updateExecutiveAssignment(
+          executive.subordinados,
+          idEjecutivo,
+          asignado,
+        ),
+      };
+    }
+
+    return executive;
+  });
+
 const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
   const [executiveTree, setExecutiveTree] = useState([]);
   const [loadingRow, setLoadingRow] = useState(null); // Para mostrar loading en el row
@@ -179,24 +199,26 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
   }, [ejecutivosOrdenados]);
 
   // Handler para asignar ejecutivo a campaña
-  const handleAsignar = async (checked, row, idx) => {
+  const handleAsignar = async (checked, row) => {
     if (!idCampaña || !row.idEjecutivo) return;
-    setLoadingRow(idx);
+    const previousValue = row.asignado;
+    setLoadingRow(row.idEjecutivo);
+    setExecutiveTree((prev) =>
+      updateExecutiveAssignment(prev, row.idEjecutivo, checked),
+    );
+
     try {
-      // inserta = checked (true/false), idCampaña = prop, idEjecutivo = row.idEjecutivo
-      const response = await asignaEjecutivoCampanas(
+      await asignaEjecutivoCampanas(
         checked,
         idCampaña,
         row.idEjecutivo,
       );
-      // Si la respuesta fue exitosa, actualiza el estado asignado
-      if (response?.data?.success || response?.status === 200) {
-        setExecutiveTree((prev) =>
-          prev.map((r, i) => (i === idx ? { ...r, asignado: checked } : r)),
-        );
-      }
     } catch (error) {
       console.error("Error al asignar ejecutivo:", error);
+      setExecutiveTree((prev) =>
+        updateExecutiveAssignment(prev, row.idEjecutivo, previousValue),
+      );
+      toast.error("No fue posible actualizar la asignación del ejecutivo");
     } finally {
       setLoadingRow(null);
     }
@@ -204,7 +226,7 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
 
   return (
     <div
-      className="bg-white rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col"
+      className="bg-surface rounded-lg p-3 shadow border border-[var(--color-jerarquia1)] h-full flex flex-col"
       style={{ minWidth: 0, width: "300px", maxWidth: "300px" }}
     >
       <div className="flex items-center mb-2 w-full">
@@ -310,49 +332,20 @@ const ModalConsultaCuentasColumnas = ({ idCampaña, nombreCampaña }) => {
                   }}
                 >
                   <div className="flex items-center justify-center">
-                    <label
-                      htmlFor={`switch-asignado-${row.idEjecutivo || i}`}
-                      className="relative inline-block w-8 h-5 cursor-pointer"
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={Boolean(row.asignado)}
+                      aria-label={`${row.asignado ? "Quitar" : "Asignar"} ${row.usuario} ${row.asignado ? "de" : "a"} la campaña`}
+                      disabled={!idCampaña || !row.idEjecutivo || loadingRow === row.idEjecutivo}
+                      onClick={() => handleAsignar(!row.asignado, row)}
+                      className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jerarquia2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none ${row.asignado ? "bg-jerarquia3" : "bg-surface-secondary"}`}
                     >
-                      <input
-                        type="checkbox"
-                        id={`switch-asignado-${row.idEjecutivo || i}`}
-                        className="peer sr-only"
-                        checked={row.asignado || false}
-                        disabled={loadingRow === i}
-                        onChange={(e) =>
-                          handleAsignar(e.target.checked, row, i)
-                        }
+                      <span
+                        aria-hidden="true"
+                        className={`pointer-events-none absolute start-0.5 top-1/2 size-4 -translate-y-1/2 rounded-full bg-surface shadow-sm transition-transform duration-200 motion-reduce:transition-none ${row.asignado ? "translate-x-full" : ""}`}
                       />
-                      <span className="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-jerarquia3"></span>
-                      <span className="absolute top-1/2 start-0.5 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
-                      <span className="absolute top-1/2 start-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-white transition-colors duration-200">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width={13}
-                          height={13}
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fill="currentColor"
-                            d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"
-                          ></path>
-                        </svg>
-                      </span>
-                      <span className="absolute top-1/2 end-0.5 -translate-y-1/2 flex justify-center items-center text-gray-500 peer-checked:text-jerarquia3 transition-colors duration-200 ">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width={13}
-                          height={13}
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fill="currentColor"
-                            d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"
-                          ></path>
-                        </svg>
-                      </span>
-                    </label>
+                    </button>
                   </div>
                 </td>
                 <td

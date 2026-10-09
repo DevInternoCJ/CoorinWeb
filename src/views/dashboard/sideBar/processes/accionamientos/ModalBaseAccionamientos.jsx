@@ -1,6 +1,7 @@
 // src/hu/dashboard/sideBar/processes/accionamientos/ModalBaseAccionamientos.jsx
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import GlobalModal from "../../../../../components/Modal/GlobalModal";
 import ModalCicle from '../../consultations/information/ModalCicle';
 import { tabsListAccionamientos, COMPONENT_ICONS_ACCIONAMIENTOS } from './ModalAccionamientosTabs';
 
@@ -25,17 +26,19 @@ const ModalBaseAccionamientos = ({
     modalClassName = "",
     overlayClassName = "",
     enableBounce = true,
-    backdropBlur = true,
-    ...props
+    backdropBlur = false,
+    initialTab = 0,
 }) => {
     console.log("ModalBaseAccionamientos renderizado");
-    const modalRef = useRef(null);
     const [localBounce, setLocalBounce] = useState(false);
-    const [activeTab, setActiveTab] = useState(0);
+    const [activeTab, setActiveTab] = useState(initialTab);
+    const bounceTimerRef = useRef(null);
 
     const triggerBounce = () => {
+        if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+        clearTimeout(bounceTimerRef.current);
         setLocalBounce(true);
-        setTimeout(() => setLocalBounce(false), 600);
+        bounceTimerRef.current = setTimeout(() => setLocalBounce(false), 300);
     };
 
     const handleBackdropClick = (e) => {
@@ -44,15 +47,7 @@ const ModalBaseAccionamientos = ({
         }
     };
 
-    useEffect(() => {
-        const handleEscape = (e) => {
-            if (e.key === 'Escape' && enableBounce) {
-                triggerBounce();
-            }
-        };
-        document.addEventListener('keydown', handleEscape);
-        return () => document.removeEventListener('keydown', handleEscape);
-    }, [enableBounce]);
+    useEffect(() => () => clearTimeout(bounceTimerRef.current), []);
 
     useEffect(() => {
         window.dispatchEvent(new CustomEvent('coorin-modal-open', { detail: { open: true } }));
@@ -71,11 +66,9 @@ const ModalBaseAccionamientos = ({
     );
 
     return (
-        <div className={`fixed inset-0 z-60 flex items-center justify-center ${overlayClassName}`}>
-            {backdropBlur && <div className="absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={handleBackdropClick} />}
+        <GlobalModal isOpen onClose={onClose} onBackdropClick={handleBackdropClick} title="Accionamientos" mode="content" showHeader={false} showCloseButton={!showHeader} closeOnBackdropClick={false} backdropBlur={backdropBlur} overlayClassName={overlayClassName}>
             <div
-                ref={modalRef}
-                className={`relative bg-surface text-foreground border border-border rounded-xl shadow-xl overflow-hidden ${modalClassName} ${localBounce ? 'animate-bounce' : ''}`}
+                className={`modal-container relative w-full max-w-6xl bg-surface text-foreground border border-border rounded-xl shadow-xl overflow-hidden ${modalClassName} ${localBounce ? 'animate-bounce-modal' : ''}`}
                 style={mergedModalStyle}
             >
                 {showHeader && (
@@ -107,7 +100,7 @@ const ModalBaseAccionamientos = ({
                         </button>
                     </header>
                 )}
-                <div className={`p-4 ${contentClassName}`}>
+                <div className={`modal-scroll-body p-4 ${contentClassName}`}>
                     <ModalCicle
                         tabsList={tabsListAccionamientos}
                         componentIcons={COMPONENT_ICONS_ACCIONAMIENTOS}
@@ -127,7 +120,7 @@ const ModalBaseAccionamientos = ({
                     </footer>
                 )}
             </div>
-        </div>
+        </GlobalModal>
     );
 };
 

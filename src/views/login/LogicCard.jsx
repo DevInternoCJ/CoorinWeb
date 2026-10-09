@@ -5,8 +5,7 @@ const LogicCard = ({
   children,
   className = "",
   intensity = 5,
-  scale = 1.05,
-  transition = "duration-200 ease-out"
+  scale = 1.05
 }) => {
   useEffect(() => {
     const card = document.getElementById(id);

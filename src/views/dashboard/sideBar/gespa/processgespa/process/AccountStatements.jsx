@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import CatalogSelect from "../../../../../../components/Select/CatalogSelect";
 import DatePicker from "../../../../../../components/Select/DatePicker";
 import { useUserStore } from "../../../../../../contextGlobal/userStore";
+import { ACTIVE_SERVER } from "../../../../../../config/backend";
 import { getAccountStatementsGespa, markAccountStatementGespa } from "../../../../../../services/mark/Orochi/LokiServices";
 import { exportDataToXLSX } from "../../../../../../utils/ExcelExporter";
 
@@ -50,7 +51,7 @@ export default function AccountStatements() {
     if (fechaDesde > fechaHasta) return setError("La fecha desde no puede ser posterior a la fecha hasta.");
     setLoading(true); setError(""); setMessage(""); setRows([]); setSelected({});
     try {
-      const response = await getAccountStatementsGespa({ idCartera: Number(cartera), fechaDesde, fechaHasta, servidor: null });
+      const response = await getAccountStatementsGespa({ idCartera: Number(cartera), fechaDesde, fechaHasta, servidor: ACTIVE_SERVER });
       const responseRows = asRows(response).sort((a, b) => String(valueOf(b, ["Fecha", "fecha"]) || "").localeCompare(String(valueOf(a, ["Fecha", "fecha"]) || "")));
       setRows(responseRows); setHasQueried(true);
       setMessage(responseRows.length ? "Consulta terminada con " + responseRows.length.toLocaleString("es-MX") + " estado(s) de cuenta." : "No existen registros para el periodo seleccionado.");
@@ -77,7 +78,7 @@ export default function AccountStatements() {
           idCuenta: valueOf(row, ["idCuenta", "IdCuenta", "Cuenta", "cuenta"]),
           fechaInsert: valueOf(row, ["FechaInsert", "fechaInsert", "Fecha", "fecha"]),
           hora: valueOf(row, ["Hora", "hora"]),
-          servidor: null,
+          servidor: ACTIVE_SERVER,
         });
       }
       const selectedKeys = new Set(selectedPending.map((row) => rowKey(row, rows.indexOf(row))));

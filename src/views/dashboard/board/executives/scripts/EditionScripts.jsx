@@ -38,7 +38,7 @@ const EditionScripts = ({
     script: "",
   });
   const [hasChanges, setHasChanges] = useState(false);
-  const [isEditingScript, setIsEditingScript] = useState(false);
+  const [, setIsEditingScript] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
   const editableRef = useRef(null);
@@ -167,7 +167,7 @@ const EditionScripts = ({
   );
 
   // Hook de editor
-  const { saveCursorPosition, restoreCursorPosition } = useScriptEditor(
+  const { saveCursorPosition } = useScriptEditor(
     editedData,
     showPreview,
     renderFormattedScriptToHTML,
@@ -461,7 +461,7 @@ const EditionScripts = ({
         onWalletChange={handleWalletChange}
         SelectWallet={SelectWallet}
       />
-      <div className="bg-gray-700 rounded-lg p-4 gap-2">
+      <div className="bg-surface rounded-lg p-4 gap-2">
         <div className="space-y-4">
           <ScriptInputs
             editedData={editedData}

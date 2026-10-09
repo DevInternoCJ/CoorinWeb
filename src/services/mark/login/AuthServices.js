@@ -28,7 +28,7 @@ export const loginUser = async (userData) => {
         (data) => {
           try {
             return JSON.parse(data);
-          } catch (jsonError) {
+          } catch {
             console.log(
               "Respuesta en texto plano, devolviendo como string:",
               data,

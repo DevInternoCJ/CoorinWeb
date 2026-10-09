@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import GlobalModal from "../../../../../../components/Modal/GlobalModal";
 import {
   getAddressesCapture,
   guardarVisitaCapturada,
@@ -12,6 +13,7 @@ import CapturaVisitsF4 from "../Capture/CapturaVisitsF4";
 import CapturaVisitsF5 from "../Capture/CapturaVisitsF5";
 import CapturaVisitsF6 from "../Capture/CapturaVisitsF6";
 import CapturaVisitsF7 from "../Capture/CapturaVisitsF7";
+import useCatalogOptions from "../../../../../../hooks/useCatalogOptions";
 
 const CaptureVisit = ({
   mostrarTabla,
@@ -30,40 +32,26 @@ const CaptureVisit = ({
   const [tienePermisoCaptura, setTienePermisoCaptura] = useState(true);
 
   const [cartera, setCartera] = useState(idCartera);
-  const [carterasOptions, setCarterasOptions] = useState([
-    { id: "1", nombre: "Cartera 1" },
-    { id: "2", nombre: "Cartera 2" },
-    { id: "3", nombre: "Cartera 3" },
-    { id: "4", nombre: "Cartera 4" },
-    { id: "22", nombre: "Cartera 22" },
-    { id: "31", nombre: "Cartera 31" },
-  ]);
+  const { carteraOptions: carterasOptions } = useCatalogOptions();
   const [porExpediente, setPorExpediente] = useState(false);
   const [idCuenta, setIdCuenta] = useState("");
   const [cuentaGuardada, setCuentaGuardada] = useState("");
-  const [expedienteGuardado, setExpedienteGuardado] = useState("");
-
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [, setExpedienteGuardado] = useState("");
   // Estado para datos de cuenta obtenidos
   // cuentaData y setCuentaData ahora vienen del padre (CoorinDashboard)
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   // Estado para dirección seleccionada
   const [direccionSeleccionada, setDireccionSeleccionada] = useState("");
+  const [, setShowDropdown] = useState(false);
 
   // Estado para mapeo de vivienda (F2) - comunicación con F4
   const [mapeoVivienda, setMapeoVivienda] = useState("");
-  const [mapeoViviendaId, setMapeoViviendaId] = useState("");
+  const [, setMapeoViviendaId] = useState("");
 
   // Estados para validaciones de domicilio
   const [mensajeDomicilio, setMensajeDomicilio] = useState("");
   const [mensajeColor, setMensajeColor] = useState("gray"); // "gray", "red", "green"
   const [mostrarBtnCaptura, setMostrarBtnCaptura] = useState(true);
   const [filtroHabitacion, setFiltroHabitacion] = useState(null); // ID a excluir (ej: 2805)
-  const [fechaVisita, setFechaVisita] = useState(
-    new Date().toISOString().split("T")[0],
-  );
-  const [fechaMinVisita, setFechaMinVisita] = useState("");
 
   // Estado para controlar visibilidad de F6 (Teléfonos) - oculto para carteras 4 y 47
   const [mostrarF6, setMostrarF6] = useState(true);
@@ -73,10 +61,14 @@ const CaptureVisit = ({
 
   // Estados para mostrar información de cuenta (similar al C# ObtieneCuenta)
   const [expedienteLabel, setExpedienteLabel] = useState("");
-  const [nombreDeudor, setNombreDeudor] = useState("");
 
   // Estado para habilitar/deshabilitar todos los grupos F2-F7
   const [gruposHabilitados, setGruposHabilitados] = useState(false);
+  const [, setFechaVisita] = useState(new Date().toISOString().split("T")[0]);
+  const [, setFechaMinVisita] = useState("");
+  const [, setNombreDeudor] = useState("");
+  const [, setLoading] = useState(false);
+  const [, setError] = useState(null);
 
   // Reset key para forzar re-render de componentes hijos al limpiar campos
   const [resetKey, setResetKey] = useState(0);
@@ -130,7 +122,6 @@ const CaptureVisit = ({
   }, [porExpediente, mostrarTabla]);
 
   // Efecto para actualizar _busquedaPorExpediente en cuentaData cuando cambia porExpediente
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (cuentaData) {
       setCuentaData((prev) => ({
@@ -138,7 +129,7 @@ const CaptureVisit = ({
         _busquedaPorExpediente: porExpediente,
       }));
     }
-  }, [porExpediente]);
+  }, [cuentaData, porExpediente, setCuentaData]);
 
   // Efecto para limpiar campos cuando cambia la cartera y volver a buscar
   useEffect(() => {
@@ -942,21 +933,21 @@ const CaptureVisit = ({
             {/* Cartera: más pequeño, responsive */}
             <div className="relative w-full min-w-0 flex flex-col items-center mb-2 sm:col-span-1 sm:w-[6.66vw] sm:mb-0">
               <select
-                className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                 value={cartera}
                 onChange={(e) => setCartera(e.target.value)}
                 id="cartera-select-carga-visits"
               >
                 <option value="" hidden></option>
                 {carterasOptions.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.nombre}
+                  <option key={item.value} value={item.value}>
+                    {item.label}
                   </option>
                 ))}
               </select>
               <label
                 htmlFor="cartera-select-carga-visits"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
               >
                 Cartera
               </label>
@@ -1013,12 +1004,12 @@ const CaptureVisit = ({
                 onBlur={handleCuentaBlur}
                 placeholder=" "
                 style={{ color: "var(--color-jerarquia3)" }}
-                className="peer p-4 block min-w-[150px] w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia4 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                className="peer p-4 block min-w-[150px] w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia4 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                 title="Enter"
               />
               <label
                 htmlFor="cuentaInput"
-                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
               >
                 {porExpediente ? "Expediente:" : "Cuenta:"}
               </label>
@@ -1033,8 +1024,8 @@ const CaptureVisit = ({
                 }
                 className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 ${
                   !tienePermisoCaptura
-                    ? "bg-gray-200 cursor-not-allowed opacity-60"
-                    : "bg-gray-50"
+                    ? "bg-surface-secondary cursor-not-allowed opacity-60"
+                    : "bg-surface-secondary"
                 }`}
                 value={direccionSeleccionada}
                 onChange={(e) => setDireccionSeleccionada(e.target.value)}
@@ -1050,7 +1041,7 @@ const CaptureVisit = ({
                     </option>
                   ))}
               </select>
-              <label className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500">
+              <label className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground">
                 Dirección
               </label>
             </div>
@@ -1124,7 +1115,7 @@ const CaptureVisit = ({
                   ? "text-red-600"
                   : mensajeColor === "green"
                     ? "text-green-600"
-                    : "text-gray-600"
+                    : "text-muted-foreground"
               }`}
             >
               {mensajeDomicilio}
@@ -1190,7 +1181,7 @@ const CaptureVisit = ({
                 {/* Cartera - dropdown animado modal pequeño */}
                 <div className="relative flex-1 min-w-[120px] min-w-0">
                   <select
-                    className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                    className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                     value={cartera}
                     onChange={(e) => setCartera(e.target.value)}
                     id="cartera-select-carga-visits"
@@ -1204,7 +1195,7 @@ const CaptureVisit = ({
                   </select>
                   <label
                     htmlFor="cartera-select-carga-visits"
-                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                    className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                   >
                     Cartera
                   </label>
@@ -1265,11 +1256,11 @@ const CaptureVisit = ({
                   onBlur={handleCuentaBlur}
                   placeholder=" "
                   style={{ color: "var(--color-jerarquia3)" }}
-                  className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                  className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia2 focus:border-jerarquia2 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                 />
                 <label
                   htmlFor="cuentaInput"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                 >
                   {porExpediente ? "Expediente:" : "Cuenta:"}
                 </label>
@@ -1281,8 +1272,8 @@ const CaptureVisit = ({
 
       {/* Modal de confirmación: Calles vacías */}
       {modalCallesVacias && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+        <GlobalModal isOpen={modalCallesVacias} onClose={handleCancelarModal} title="Calles sin capturar" mode="content" showHeader={false} showCloseButton={false}>
+          <div className="bg-surface rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-yellow-100">
                 <svg
@@ -1299,23 +1290,23 @@ const CaptureVisit = ({
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-foreground">
                 Calles sin capturar
               </h3>
             </div>
-            <p className="text-gray-600 mb-2">
+            <p className="text-muted-foreground mb-2">
               Las siguientes calles están vacías:
             </p>
-            <p className="text-gray-800 font-medium mb-4 pl-4">
+            <p className="text-foreground font-medium mb-4 pl-4">
               {callesVaciasTexto}
             </p>
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               ¿Desea continuar de todas formas?
             </p>
             <div className="flex justify-end gap-3">
               <button
                 type="button"
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-foreground bg-surface-secondary rounded-lg hover:bg-surface-secondary transition-colors"
                 onClick={handleCancelarModal}
               >
                 No, regresar
@@ -1329,13 +1320,13 @@ const CaptureVisit = ({
               </button>
             </div>
           </div>
-        </div>
+        </GlobalModal>
       )}
 
       {/* Modal de confirmación: Fecha de visita */}
       {modalConfirmacionFecha && datosValidados && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+        <GlobalModal isOpen={modalConfirmacionFecha && Boolean(datosValidados)} onClose={handleCancelarModal} title="Confirmar captura" mode="content" showHeader={false} showCloseButton={false}>
+          <div className="bg-surface rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-blue-100">
                 <svg
@@ -1352,14 +1343,14 @@ const CaptureVisit = ({
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-foreground">
                 Confirmar captura
               </h3>
             </div>
-            <p className="text-gray-600 mb-2">
+            <p className="text-muted-foreground mb-2">
               ¿Desea capturar la visita con fecha:
             </p>
-            <p className="text-gray-800 font-bold text-lg mb-1 text-center">
+            <p className="text-foreground font-bold text-lg mb-1 text-center">
               {datosValidados.dataF4?.fechaVisita
                 ? new Date(
                     datosValidados.dataF4.fechaVisita + "T00:00:00",
@@ -1371,13 +1362,13 @@ const CaptureVisit = ({
                   })
                 : ""}
             </p>
-            <p className="text-gray-500 text-sm mb-6 text-center">
+            <p className="text-muted-foreground text-sm mb-6 text-center">
               {datosValidados.dataF4?.fechaVisita}
             </p>
             <div className="flex justify-end gap-3">
               <button
                 type="button"
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-foreground bg-surface-secondary rounded-lg hover:bg-surface-secondary transition-colors"
                 onClick={handleCancelarModal}
               >
                 No, cancelar
@@ -1391,7 +1382,7 @@ const CaptureVisit = ({
               </button>
             </div>
           </div>
-        </div>
+        </GlobalModal>
       )}
     </div>
   );

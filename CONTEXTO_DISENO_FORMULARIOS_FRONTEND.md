@@ -9,7 +9,7 @@ Este documento define los componentes, estados visuales y reglas de interacción
 - Usar Preline como base para botones, controles y accesibilidad.
 - Usar únicamente tokens semánticos existentes: `bg-surface`, `bg-layer`, `bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-primary` y `text-destructive`.
 - No aplicar colores fijos para resolver modo claro/oscuro. Los valores de tema viven en `src/themes/coorin.css`.
-- Los modales deben usar `ReusableModal`. Cada modal incluye título, icono, cierre accesible y un tamaño acorde con su contenido; evitar espacios verticales vacíos.
+- Los modales deben usar `ReusableModal`. Cada modal incluye título, icono y cierre accesible. Mantener dimensiones estables durante carga, resultados y cambios de pestaña; adaptar el tamaño únicamente al viewport. El cuerpo usa `modal-scroll-body` con scroll interno y cabecera/footer sin contracción. En móvil, respetar el alto dinámico `dvh` y los márgenes del viewport.
 
 ## Controles obligatorios
 

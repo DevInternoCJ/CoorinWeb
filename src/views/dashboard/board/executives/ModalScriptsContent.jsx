@@ -139,7 +139,7 @@ const ModalScriptsContent = () => {
                                 <select
                                     value={selectedCartera}
                                     onChange={(e) => setSelectedCartera(e.target.value)}
-                                    className="font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
+                                    className="font-semibold text-[var(--color-jerarquia4)] bg-surface border border-black rounded px-2 py-1 appearance-none"
                                     style={{ fontSize: "14px", width: "100%", cursor: "pointer" }}
                                 >
                                     {carteras.map(cartera => (
@@ -164,7 +164,7 @@ const ModalScriptsContent = () => {
                                 <select
                                     value={selectedProducto}
                                     onChange={(e) => setSelectedProducto(e.target.value)}
-                                    className="font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
+                                    className="font-semibold text-[var(--color-jerarquia4)] bg-surface border border-black rounded px-2 py-1 appearance-none"
                                     style={{ fontSize: "14px", width: "100%", cursor: "pointer" }}
                                 >
                                     {productos.map(producto => (
@@ -189,7 +189,7 @@ const ModalScriptsContent = () => {
                                 <select
                                     value={selectedScript}
                                     onChange={(e) => setSelectedScript(e.target.value)}
-                                    className="font-semibold text-[var(--color-jerarquia4)] bg-white border border-black rounded px-2 py-1 appearance-none"
+                                    className="font-semibold text-[var(--color-jerarquia4)] bg-surface border border-black rounded px-2 py-1 appearance-none"
                                     style={{ fontSize: "14px", width: "100%", cursor: "pointer" }}
                                 >
                                     {scriptsExistentes.map(script => (

@@ -129,8 +129,8 @@ const ModalConsultaCuentasColumnas = ({
             </svg>
           </IconCircular>
           <IconCircular
-            bgColor="bg-[#EECCC9]"
-            textColor="text-[#C1493E]"
+            bgColor="bg-destructive/10"
+            textColor="text-destructive"
             borderColor="border-surface"
             size="size-8"
             borderWidth="border-2"
@@ -151,8 +151,8 @@ const ModalConsultaCuentasColumnas = ({
             </svg>
           </IconCircular>
           <IconCircular
-            bgColor="bg-[#bfdbfe]"
-            textColor="text-[#1F4356]"
+            bgColor="bg-primary/10"
+            textColor="text-foreground"
             borderColor="border-surface"
             size="size-8"
             borderWidth="border-2"
@@ -246,7 +246,7 @@ const ModalConsultaCuentasColumnas = ({
         </div>
         <input
           type="text"
-          className="py-1.5 ps-9 pe-8 block w-full bg-background-dashboard border-transparent rounded-lg text-xs focus:border-jerarquia2 focus:ring-jerarquia2 disabled:opacity-50 disabled:pointer-events-none placeholder:text-muted-foreground/60 transition-all font-medium"
+          className="py-1.5 ps-9 pe-8 block w-full bg-background-dashboard border-transparent rounded-lg text-xs focus:border-jerarquia2 focus:ring-jerarquia2 disabled:opacity-50 disabled:pointer-events-none placeholder:text-muted-foreground/60 transition-[color,border-color,box-shadow] duration-150 font-medium"
           placeholder="Buscar campo..."
           value={filtroTab}
           onChange={(e) => setFiltroTab(e.target.value)}
@@ -310,8 +310,8 @@ const ModalConsultaCuentasColumnas = ({
                   </td>
                   <td className="py-1 px-3 text-right">
                     <IconCircular
-                      bgColor="bg-[#EECCC9]"
-                      textColor="text-[#C1493E]"
+                      bgColor="bg-destructive/10"
+                      textColor="text-destructive"
                       borderColor="border-surface"
                       size="size-7"
                       borderWidth="border-0"

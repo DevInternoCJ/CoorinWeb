@@ -5,7 +5,7 @@ import ModalConsultaCuentasColumnas from "./ModalConsultaCuentasColumnas";
 import ModalConsultaCuentasFooter from "./ModalConsultaCuentasFooter";
 import ExcelDownloader from "../Historical/ExcelDownloader";
 import { toast } from "sonner";
-import { postReportCampaign } from "../../../../../services/mark/Orochi/LokiServices";
+import ConsultationService from "../../../../../services/consultations/ConsultationService";
 import * as XLSX from "xlsx";
 import { useUserStore } from "../../../../../contextGlobal/userStore";
 import { ACTIVE_SERVER } from "../../../../../config/backend";
@@ -47,7 +47,19 @@ const ModalConsultaCuentas = ({ onClose }) => {
 
   const handleHeaderDataChange = useCallback((data) => {
     setHeaderData(data);
+    setResultData({ data: [], totalRows: 0, excelUrl: "" });
+    setExcelBlob(null);
   }, []);
+
+  const handleExportResults = useCallback(() => {
+    if (!resultData.data?.length) {
+      toast.warning("No hay resultados para exportar");
+      return;
+    }
+    const blob = generateExcelFromData(resultData.data);
+    if (blob) setExcelBlob(blob);
+    else toast.error("No fue posible generar el archivo Excel");
+  }, [resultData.data]);
 
   const generateExcelFromData = (data) => {
     try {
@@ -120,7 +132,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
       setIsLoading(true);
       toast.info("Realizando consulta...");
 
-      const response = await postReportCampaign(validation.data);
+      const response = await ConsultationService.realizarBusqueda(validation.data);
 
       console.log("  Respuesta de la consulta:", response);
 
@@ -161,7 +173,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
   const filtersEnabled = Boolean(headerData.idCartera && headerData.tipoConsulta);
 
   return (
-    <div className="modal-xl-container flex flex-col w-full sm:max-h-[95vh] sm:max-w-[95vw] max-h-[90vh] max-w-[90vw]">
+    <div className="modal-xl-container flex flex-col w-full gap-3 p-3 sm:gap-4 sm:p-4 md:p-5 sm:max-h-[95vh] sm:max-w-[95vw] max-h-[90vh] max-w-[90vw]">
       {/* Header fijo */}
       <div className="flex-shrink-0 px-2 sm:px-0">
           <ModalConsultaCuentasHeader
@@ -173,7 +185,7 @@ const ModalConsultaCuentas = ({ onClose }) => {
 
       {/* Contenido con scroll */}
       <div
-        className="flex-1 scrollbar-gray py-1 overflow-x-hidden"
+        className="modal-scroll-body scrollbar-gray py-1"
         style={{ minHeight: 0 }}
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 w-full">
@@ -187,6 +199,8 @@ const ModalConsultaCuentas = ({ onClose }) => {
               onFiltrosChange={handleFiltrosChange}
               fechaDesde={fechaDesde}
               onFechaDesdeChange={setFechaDesde}
+              onExport={handleExportResults}
+              canExport={resultData.data.length > 0}
               enabled={filtersEnabled}
             />
           </div>

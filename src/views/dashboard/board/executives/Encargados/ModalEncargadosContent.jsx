@@ -2,10 +2,9 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   obetenerJerarquiaEncargados,
   obetenerDropdownsEncargados,
-  getCarteras,
-  getCarterasProductos,
   AsignaEncargados,
 } from "../../../../../services/mark/Orochi/LokiServices";
+import CatalogService from "../../../../../services/catalogs/CatalogService";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_5.svg";
 import { toast } from "sonner";
 import JerarquiaConR from "../../branchs/JerarquiaConR";
@@ -14,26 +13,20 @@ const ModalEncargadosContent = (props) => {
   // Estados para dropdowns y logo
   const [cartera, setCartera] = React.useState("");
   const [producto, setProducto] = React.useState("");
-  const [carteras, setCarteras] = React.useState([]);
-  const [productos, setProductos] = React.useState([]);
+  const [, setCarteras] = React.useState([]);
+  const [, setProductos] = React.useState([]);
   const [carterasProductosData, setCarterasProductosData] = React.useState([]); // Estado para guardar datos completos
   const [encargados, setEncargados] = React.useState([]);
   const [encargadosFiltrados, setEncargadosFiltrados] = React.useState([]); // Encargados filtrados por cartera/producto
   const [selectedEncargado, setSelectedEncargado] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [error] = React.useState(null);
-  const [isChangingAssignment, setIsChangingAssignment] = React.useState(false);
+  const [, setIsChangingAssignment] = React.useState(false);
 
   // Estados para la jerarquía de encargados (igual que en ModalValidadoresContent)
   const [executiveTree, setExecutiveTree] = useState([]);
   const [usuariosEncargados, setUsuariosEncargados] = useState([]);
   // Memo para obtener el nombre del ejecutivo de sesión (nodo raíz)
-  const nombreEjecutivoSesion = useMemo(() => {
-    if (executiveTree.length > 0) {
-      return executiveTree[0].nombreEjecutivo || "";
-    }
-    return "";
-  }, [executiveTree]);
 
   // Fetch carteras, productos y encargados desde endpoints específicos
   useEffect(() => {
@@ -41,8 +34,8 @@ const ModalEncargadosContent = (props) => {
 
     // Cargar carteras, productos y encargados en paralelo
     Promise.all([
-      getCarteras(),
-      getCarterasProductos(),
+      CatalogService.getCarteras(),
+      CatalogService.getCarterasProductos(),
       obetenerDropdownsEncargados(),
     ])
       .then(([carterasData, carterasProductosData, encargadosData]) => {
@@ -261,8 +254,8 @@ useEffect(() => {
       // Cargar carteras, productos y encargados en paralelo
       const [carterasData, carterasProductosData, encargadosData] =
         await Promise.all([
-          getCarteras(),
-          getCarterasProductos(),
+          CatalogService.getCarteras(),
+          CatalogService.getCarterasProductos(),
           obetenerDropdownsEncargados(),
         ]);
 

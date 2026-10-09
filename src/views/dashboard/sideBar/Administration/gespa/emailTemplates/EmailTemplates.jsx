@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import GlobalModal from "../../../../../../components/Modal/GlobalModal";
 import ModalHeader from "../ModalHeader";
 import Template from "./Template";
 import LoadDates from "./LoadDates";
@@ -60,12 +61,12 @@ const EmailTemplates = ({ onClose }) => {
   }, []);
 
   return (
-    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black/55 flex items-center justify-center z-50 p-4">
+    <GlobalModal isOpen onClose={onClose} title="Plantillas de correo" mode="content" showHeader={false} showCloseButton={false}>
       <div
         ref={modalRef}
         className={`${
           bounce ? " animate-bounce-modal" : ""
-        } bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
+        } bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] modal-container rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -85,7 +86,7 @@ const EmailTemplates = ({ onClose }) => {
           setShowDataTables={setShowDataTables}
         />
         {selectedProduct ? (
-          <div className="px-6 pb-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-[var(--color-surface-secondary)] space-y-4">
+          <div className="modal-scroll-body px-3 pb-3 sm:px-6 sm:pb-6 bg-surface-secondary space-y-4">
             {selectedProduct && (
               <Template
                 plantillas={plantillas}
@@ -119,7 +120,7 @@ const EmailTemplates = ({ onClose }) => {
           </div>
         )}
       </div>
-    </div>
+    </GlobalModal>
   );
 };
 

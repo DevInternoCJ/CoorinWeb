@@ -313,7 +313,7 @@ const RamificacionSesiones = ({ onExecutiveSelect, className = "" }) => {
                 bg-[var(--color-surface-secondary)]
                 text-center max-w-full truncate
                 font-semibold text-[var(--color-text-primary)]
-                transition-all duration-200 cursor-pointer rounded-md
+                transition-colors duration-150 cursor-pointer rounded-md
                 hover:bg-[var(--color-jerarquia1)] hover:text-[var(--color-text-inverse)]`}
               title={`Ejecutivo de la sesión actual: ${usuarioSesion} - ${nombreSesion}`}
               onClick={() => {
@@ -378,7 +378,7 @@ const RamificacionSesiones = ({ onExecutiveSelect, className = "" }) => {
                 if (showScrollTopBtn) setShowScrollTopBtn(false);
               }
             }}
-            className="w-full flex-auto min-h-[16vh] overflow-y-auto scrollbar-gray rounded-lg border border-[var(--color-border)] p-3 lg:p-4 bg-[var(--color-surface)] transition-all duration-300"
+            className="w-full flex-auto min-h-[16vh] overflow-y-auto scrollbar-gray rounded-lg border border-[var(--color-border)] p-3 lg:p-4 bg-[var(--color-surface)]"
           >
             {/* Contenido de la jerarquía con Preline Tree View */}
             {loadingJerarquia ? (
@@ -479,7 +479,7 @@ const RamificacionSesiones = ({ onExecutiveSelect, className = "" }) => {
             <button
               onClick={scrollToTop}
               title="Volver arriba"
-              className="absolute bottom-6 right-6 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-[var(--color-jerarquia2)] text-[var(--color-surface,white)] shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:bg-[var(--color-jerarquia3)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1"
+              className="absolute bottom-6 right-6 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-[var(--color-jerarquia2)] text-[var(--color-surface,white)] shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:bg-[var(--color-jerarquia3)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.2)] transition-[color,background-color,box-shadow,transform] duration-200 ease-out motion-reduce:transition-none hover:-translate-y-1"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

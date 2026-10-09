@@ -1,14 +1,13 @@
 import React from "react";
-import ButtonSave from "../../../sideBar/Administration/gespa/ButtonSave";
-import IconCircular from "../../../../../components/Iconos/IconCircular";
-import { IconClean } from "./IconScripts";
 import { toast } from "sonner";
 
-export const ScriptHeader = ({ scriptOptions, selectedScript, onWalletChange, SelectWallet }) => (
+export const ScriptHeader = ({ scriptOptions, selectedScript, onWalletChange, SelectWallet }) => {
+  const WalletComponent = SelectWallet;
+  return (
   <div className="flex justify-between items-center mb-0.5">
     <div className="flex items-center gap-3">
-      <label className="text-sm font-medium text-gray-300">Script</label>
-      <SelectWallet
+      <label className="text-sm font-medium text-foreground">Script</label>
+      <WalletComponent
         options={scriptOptions}
         label="Selecciona un script"
         onChange={onWalletChange}
@@ -17,6 +16,7 @@ export const ScriptHeader = ({ scriptOptions, selectedScript, onWalletChange, Se
     </div>
   </div>
 );
+};
 
 export const ScriptInputs = ({ editedData, onInputChange }) => (
   <>
@@ -25,7 +25,7 @@ export const ScriptInputs = ({ editedData, onInputChange }) => (
         type="text"
         value={editedData.nombre}
         onChange={(e) => onInputChange("nombre", e.target.value)}
-        className="w-full px-2 py-1 text-white border bg-gray-800 border-gray-800 rounded-lg focus:ring-2 focus:ring-jerarquia2 focus:border-transparent transition-all"
+        className="w-full px-2 py-1 text-foreground border bg-surface-secondary border-border rounded-lg focus:ring-2 focus:ring-jerarquia2 focus:border-transparent transition-[color,background-color,border-color,box-shadow] duration-150"
         placeholder="Nombre del script"
       />
     </div>
@@ -34,47 +34,51 @@ export const ScriptInputs = ({ editedData, onInputChange }) => (
         type="text"
         value={editedData.descripcion}
         onChange={(e) => onInputChange("descripcion", e.target.value)}
-        className="w-full px-2 py-1 bg-gray-800 text-white border border-gray-800 rounded-lg focus:ring-2 focus:ring-jerarquia2 focus:border-transparent resize-none transition-all"
+        className="w-full px-2 py-1 bg-surface-secondary text-foreground border border-border rounded-lg focus:ring-2 focus:ring-jerarquia2 focus:border-transparent resize-none transition-[color,background-color,border-color,box-shadow] duration-150"
         placeholder="Descripción del script"
       />
     </div>
   </>
 );
 
-export const FormatToolbar = ({ onInsertFormat, onCleanFormat, IconCircular, IconClean }) => (
+export const FormatToolbar = ({ onInsertFormat, onCleanFormat, IconCircular, IconClean }) => {
+  const CircularIcon = IconCircular;
+  const CleanIcon = IconClean;
+  return (
   <div className="flex gap-2 my-2">
     <button className="font-bold" onClick={() => onInsertFormat("*")} type="button">
-      <IconCircular 
-        textColor="text-gray-200" 
-        borderColor="border-gray-800 hover:border-jerarquia3" 
-        bgColor="bg-gray-800 hover:bg-jerarquia3" 
+      <CircularIcon
+        textColor="text-foreground" 
+        borderColor="border-border hover:border-jerarquia3" 
+        bgColor="bg-surface-secondary hover:bg-jerarquia3" 
         tooltip="Agregar / Quitar resaltado"
       >
         N
-      </IconCircular>
+      </CircularIcon>
     </button>
     <button onClick={() => onInsertFormat("&")} type="button">
-      <IconCircular 
+      <CircularIcon
         textColor="text-lime-500" 
-        borderColor="border-gray-800 hover:border-jerarquia3" 
-        bgColor="bg-gray-800 hover:bg-jerarquia3" 
+        borderColor="border-border hover:border-jerarquia3" 
+        bgColor="bg-surface-secondary hover:bg-jerarquia3" 
         tooltip="Agregar / Quitar color"
       >
         C
-      </IconCircular>
+      </CircularIcon>
     </button>
     <button onClick={onCleanFormat} type="button">
-      <IconCircular 
-        textColor="text-gray-200" 
-        borderColor="border-gray-800 hover:border-jerarquia3" 
-        bgColor="bg-gray-800 hover:bg-jerarquia3" 
+      <CircularIcon
+        textColor="text-foreground" 
+        borderColor="border-border hover:border-jerarquia3" 
+        bgColor="bg-surface-secondary hover:bg-jerarquia3" 
         tooltip="Deshacer cambios"
       >
-        <IconClean />
-      </IconCircular>
+        <CleanIcon />
+      </CircularIcon>
     </button>
   </div>
-);
+  );
+};
 
 export const PreviewControls = ({ 
   showPreview, 
@@ -85,6 +89,7 @@ export const PreviewControls = ({
   isConfirming,
   toast
 }) => {
+  const SaveButton = ButtonSave;
   const handleSaveClick = () => {
     toast.custom((t) => (
       <div className="bg-amber-50 text-amber-700 px-4 py-3 rounded-lg shadow-lg flex flex-col gap-3 w-80">
@@ -92,7 +97,7 @@ export const PreviewControls = ({
           ¿Está seguro de guardar los cambios?
         </span>
         <div className="flex justify-end gap-2">
-          <ButtonSave
+          <SaveButton
             onClick={() => {
               toast.dismiss(t);
               toast.info("Guardado cancelado");
@@ -100,7 +105,7 @@ export const PreviewControls = ({
             className="btn-danger hover:bg-red-600"
           >
             Cancelar
-          </ButtonSave>
+          </SaveButton>
           <ButtonSave
             onClick={() => {
               toast.dismiss(t);
@@ -137,7 +142,7 @@ export const PreviewControls = ({
               toast.dismiss(t);
               toast.info("Operación cancelada");
             }}
-            className="btn-secondary hover:bg-gray-400"
+            className="btn-secondary hover:bg-surface-secondary"
           >
             Cancelar
           </ButtonSave>
@@ -262,9 +267,9 @@ export const ScriptTextEditor = ({
       e.dataTransfer.dropEffect = "copy"; 
     }}
     onDrop={onDrop}
-    className={`w-full px-3 py-2 bg-gray-800 text-white border border-gray-800 rounded-lg ${
-      !showPreview ? "focus:ring-2 focus:ring-jerarquia2 focus:border-transparent resize-none transition-all" : ""
-    } text-sm min-h-[288px] max-h-96 overflow-auto transition-all outline-none ${
+    className={`w-full px-3 py-2 bg-surface-secondary text-foreground border border-border rounded-lg ${
+      !showPreview ? "focus:ring-2 focus:ring-jerarquia2 focus:border-transparent resize-none" : ""
+    } text-sm min-h-[288px] max-h-96 overflow-auto transition-[color,background-color,border-color,box-shadow] duration-150 outline-none ${
       showPreview ? "cursor-default" : "cursor-text"
     }`}
     style={{ whiteSpace: "pre-wrap", fontFamily: "sans-serif", lineHeight: "1.5" }}
@@ -273,8 +278,8 @@ export const ScriptTextEditor = ({
 
 export const EmptyState = ({ scriptOptions }) => (
   scriptOptions.length === 0 && (
-    <div className="text-center py-8 text-gray-400 text-sm bg-gray-800 rounded-lg mt-4">
+    <div className="text-center py-8 text-muted-foreground text-sm bg-surface-secondary rounded-lg mt-4">
       <p>No hay scripts disponibles.</p>
     </div>
   )
-);
+  );

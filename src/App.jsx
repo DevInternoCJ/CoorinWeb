@@ -8,6 +8,7 @@ import "./App.css";
 import ProtectedRoute from "./utils/ProtectedRoute";
 
 import { Toaster } from "sonner";
+import { useThemeStore } from "./contextGlobal/themeStore";
 import LoaderSuspense from "./components/Loading/LoaderSuspense";
 import CoorinBlack from "./assets/CoorinBlack.svg";
 
@@ -28,11 +29,12 @@ const Loader = () => (
 );
 
 function App() {
+  const isDark = useThemeStore((state) => state.isDark);
 
   return (
     <>
       <div className="container-fluid min-h-screen">
-        <Toaster position="top-right" richColors />
+        <Toaster position="top-right" richColors theme={isDark ? "dark" : "light"} />
         <Routes>
           {/* Suspense para LoginPage */}
           <Route

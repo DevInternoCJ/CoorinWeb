@@ -432,7 +432,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
   <div className="relative w-full min-w-0 sm:col-span-2">
         <input
           type="text"
-          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500"
+          className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground"
           id="atendio-input-f4"
           placeholder="Ingrese atendió"
           value={atendio}
@@ -444,7 +444,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
         />
         <label
           htmlFor="atendio-input-f4"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-muted-foreground"
         >
           Atendió
         </label>
@@ -495,12 +495,12 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
           onChange={(e) => setVisita(e.target.value)}
           min={fechaLimites.visita.min}
           max={fechaLimites.visita.max}
-          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500"
+          className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground"
           style={{ color: 'var(--color-jerarquia3)' }}
         />
         <label
           htmlFor="visita-date-f4"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
         >
           Visita
         </label>
@@ -513,12 +513,12 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
           placeholder="Seleccione hora"
           value={hora}
           onChange={(e) => setHora(e.target.value)}
-          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500"
+          className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground"
           style={{ color: 'var(--color-jerarquia3)' }}
         />
         <label
           htmlFor="hora-time-f4"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
         >
           Hora
         </label>
@@ -526,7 +526,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
   <div className="relative w-full min-w-0">
         <input
           type="text"
-          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500"
+          className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground"
           id="visitador-input-f4"
           placeholder="ABCD"
           value={visitador}
@@ -538,7 +538,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
         />
         <label
           htmlFor="visitador-input-f4"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-muted-foreground"
         >
           Visitador
         </label>
@@ -557,7 +557,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
   <div className="relative w-full min-w-0">
         <input
           type="text"
-          className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500"
+          className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground"
           id="paquete-input-f4"
           placeholder="Ingrese paquete"
           value={paquete}
@@ -569,7 +569,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
         />
         <label
           htmlFor="paquete-input-f4"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-muted-foreground"
         >
           Paquete
         </label>
@@ -586,14 +586,14 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
           disabled={!fechaPagoEnabled}
           min={fechaLimites.negociacion.min}
           max={fechaLimites.negociacion.max}
-          className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500 ${
-            fechaPagoEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
+          className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground ${
+            fechaPagoEnabled ? "bg-surface-secondary" : "bg-surface-secondary cursor-not-allowed opacity-60"
           }`}
           style={{ color: 'var(--color-jerarquia3)' }}
         />
         <label
           htmlFor="fechapago-date-f4"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
         >
           Fecha Pago
         </label>
@@ -604,8 +604,8 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
         <div className="relative w-full min-w-0">
           <input
             type="text"
-            className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500 ${
-              montoEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
+            className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground ${
+              montoEnabled ? "bg-surface-secondary" : "bg-surface-secondary cursor-not-allowed opacity-60"
             }`}
               id="monto-input-f4"
               placeholder="Ingrese monto"
@@ -619,7 +619,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
           />
           <label
             htmlFor="monto-input-f4"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-muted-foreground"
           >
             Monto
           </label>
@@ -632,7 +632,7 @@ const CapturaVisitsF4 = forwardRef(({ mapeoVivienda = "" }, ref) => {
           <label className="block text-xs mb-1">Observación</label>
         </div>
         <textarea
-          className="px-4 p-1 block w-full min-w-0 rounded-lg sm:text-sm bg-gray-50 border-transparent focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1"
+          className="px-4 p-1 block w-full min-w-0 rounded-lg sm:text-sm bg-surface-secondary border-transparent focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1"
           style={{ color: 'var(--color-jerarquia3)', minHeight: '8.2rem', height: '8.2rem' }}
           rows={4}
           placeholder="Ingrese observación"

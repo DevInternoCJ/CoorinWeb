@@ -1,6 +1,6 @@
 //carga complemento
 import React, { useState } from "react";
-import FloatingSelect from "../../../../../components/Select/FloatingSelect";
+import CatalogSelect from "../../../../../components/Select/CatalogSelect";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import { ManagmentLoadFile } from "../../../../../services/mark/Orochi/LokiServices";
@@ -514,7 +514,7 @@ const TabComplementLoad = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
         {/* Select Cartera */}
         <div className="flex-1">
-          <FloatingSelect
+          <CatalogSelect
             id="cartera-select"
             label="Cartera"
             value={cartera}
@@ -522,13 +522,7 @@ const TabComplementLoad = () => {
               setCartera(e.target.value);
               clearError("idCartera");
             }}
-            options={[
-              { value: "1", label: "Cartera 1" },
-              { value: "2", label: "Cartera 2" },
-              { value: "3", label: "Cartera 3" },
-              { value: "4", label: "Cartera 4" },
-              { value: "31", label: "Cartera 31" },
-            ]}
+            required
           />
           <FieldError id="idCartera-error" message={errors.idCartera} />
         </div>
@@ -539,13 +533,13 @@ const TabComplementLoad = () => {
             type="text"
             value={rutaArchivo}
             readOnly
-            className="peer p-4 pr-24 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+            className="peer p-4 pr-24 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
             id="archivo-input"
             placeholder=" "
           />
           <label
             htmlFor="archivo-input"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
           >
             Archivo
           </label>
@@ -561,7 +555,7 @@ const TabComplementLoad = () => {
       </div>
 
       {/* Tabla con datos o mensaje */}
-      <div className="metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full h-full overflow-hidden">
+      <div className="metas-block metas-block-3 bg-surface rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 w-full h-full overflow-hidden">
         <div
           className="scrollbar-gray w-full flex-1"
           style={{
@@ -799,10 +793,10 @@ const TabComplementLoad = () => {
 
         {/* Barra inferior con contadores y botón */}
         {fileData.length > 0 && (
-          <div className="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between p-4 border-t border-border bg-surface-secondary">
             {/* Columnas (izquierda) */}
             <div className="flex-1 text-left">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-foreground">
                 {numColumnas} Columnas
               </span>
             </div>
@@ -823,6 +817,7 @@ const TabComplementLoad = () => {
                 {isLoading ? (
                   <>
                     <span
+                      className="animate-spin motion-reduce:animate-none"
                       style={{
                         display: "inline-block",
                         width: "16px",
@@ -830,7 +825,6 @@ const TabComplementLoad = () => {
                         border: "2px solid #ffffff",
                         borderTop: "2px solid transparent",
                         borderRadius: "50%",
-                        animation: "spin 1s linear infinite",
                         marginRight: "8px",
                       }}
                     ></span>
@@ -844,7 +838,7 @@ const TabComplementLoad = () => {
 
             {/* Filas (derecha) */}
             <div className="flex-1 text-right">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-foreground">
                 {numFilas} Filas
               </span>
             </div>

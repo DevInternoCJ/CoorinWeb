@@ -1,7 +1,9 @@
-Jerarquia1: #9DC5BB;
-Jerarquia2: #17B890;
-Jerarquia3: #5E807F;
-Jerarquia4: #082D0F;
-
-Background-primary: #EFEFEF;
-Background-secondary: #526581;
+/* Legacy light palette must not override the active dark theme. */
+:root:not(.dark) {
+  --color-jerarquia1: #9dc5bb;
+  --color-jerarquia2: #17b890;
+  --color-jerarquia3: #5e807f;
+  --color-jerarquia4: #082d0f;
+  --color-background-primary: #efefef;
+  --color-background-secondary: #526581;
+}

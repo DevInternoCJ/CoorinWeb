@@ -59,14 +59,14 @@ export default function InputNumber({ id, value, onChange, min, max, step = 1, s
 
     return (
         // Wrapper keeps only background/rounding; border is applied on the input to avoid double outlines
-        <div className={`rounded-lg bg-white ${className}`} style={{ backgroundColor: '#ffffff' }} data-hs-input-number="">
+        <div className={`rounded-lg bg-surface-secondary ${className}`}  data-hs-input-number="">
             <div className="w-full flex justify-between items-center gap-x-3">
                 <div className="relative w-full">
                     <input
                         id={inputId}
                         aria-describedby={error ? helperId : undefined}
-                        className={inputClassName || `block w-full rounded-lg sm:text-sm bg-white ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1'} ${prefix ? 'pl-8 py-1 pr-2' : 'px-2 py-1'} [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                        style={{ MozAppearance: 'textfield', backgroundColor: '#ffffff', color: 'var(--color-jerarquia3)' }}
+                        className={inputClassName || `block w-full rounded-lg sm:text-sm bg-surface-secondary ${error ? 'border-destructive focus:border-destructive focus:ring-destructive' : 'border-border focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1'} ${prefix ? 'pl-8 py-1 pr-2' : 'px-2 py-1'} [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                        style={{ MozAppearance: 'textfield', backgroundColor: 'var(--color-surface-secondary)', color: 'var(--color-jerarquia3)' }}
                         type={asText ? 'text' : 'number'}
                         value={value === null || value === undefined ? '' : String(value)}
                         onChange={(e) => handleChange(e.target.value)}
@@ -79,7 +79,7 @@ export default function InputNumber({ id, value, onChange, min, max, step = 1, s
                     />
                     {error && (
                         <div className="absolute inset-y-0 end-0 flex items-center pointer-events-none">
-                            <svg className="shrink-0 size-4 text-red-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg className="shrink-0 size-4 text-destructive" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="12" x2="12" y1="8" y2="12"></line>
                                 <line x1="12" x2="12.01" y1="16" y2="16"></line>
@@ -95,12 +95,12 @@ export default function InputNumber({ id, value, onChange, min, max, step = 1, s
 
                 {showButtons && (
                     <div className="flex justify-end items-center gap-x-1.5">
-                        <button type="button" className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-full border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none" tabIndex={-1} aria-label="Decrease" onClick={dec}>
+                        <button type="button" className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-full border border-border bg-surface-secondary text-foreground shadow-2xs hover:bg-surface focus:outline-hidden focus:bg-surface disabled:opacity-50 disabled:pointer-events-none" tabIndex={-1} aria-label="Decrease" onClick={dec}>
                             <svg className="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M5 12h14"></path>
                             </svg>
                         </button>
-                        <button type="button" className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-full border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none" tabIndex={-1} aria-label="Increase" onClick={inc}>
+                        <button type="button" className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-full border border-border bg-surface-secondary text-foreground shadow-2xs hover:bg-surface focus:outline-hidden focus:bg-surface disabled:opacity-50 disabled:pointer-events-none" tabIndex={-1} aria-label="Increase" onClick={inc}>
                             <svg className="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M5 12h14"></path>
                                 <path d="M12 5v14"></path>

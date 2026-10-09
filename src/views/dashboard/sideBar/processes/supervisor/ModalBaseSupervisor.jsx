@@ -1,8 +1,8 @@
 // src/hu/dashboard/sideBar/processes/supervisor/ModalBaseSupervisor.jsx
 
-import React, { useState, useRef, useEffect } from 'react';
-import FloatingSelect from "../../../../../components/Select/FloatingSelect";
-import ModalBase from '../../../board/ModalBase';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import GlobalModal from "../../../../../components/Modal/GlobalModal";
+import CatalogSelect from "../../../../../components/Select/CatalogSelect";
 import CloseButtonCampanas from '../../../components/CloseButtonReusable';
 
 const MODAL_SIZES = {
@@ -21,24 +21,24 @@ const ModalBaseSupervisor = ({
     modalClassName = "",
     overlayClassName = "",
     enableBounce = true,
-    backdropBlur = true,
+    backdropBlur = false,
     cartera,
     setCartera,
     modo,
     setModo,
     children,
-    ...props
 }) => {
     console.log("ModalBaseSupervisor renderizado");
     const modalRef = useRef(null);
-    const { bounce } = ModalBase.useModalLogic?.() || { bounce: false };
     const [localBounce, setLocalBounce] = useState(false);
+    const bounceTimerRef = useRef(null);
 
-    const triggerBounce = () => {
-        if (!enableBounce) return;
+    const triggerBounce = useCallback(() => {
+        if (!enableBounce || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+        clearTimeout(bounceTimerRef.current);
         setLocalBounce(true);
-        setTimeout(() => setLocalBounce(false), 500);
-    };
+        bounceTimerRef.current = setTimeout(() => setLocalBounce(false), 300);
+    }, [enableBounce]);
 
     const handleBackdropClick = (e) => {
         if (enableBounce && e.target === e.currentTarget) {
@@ -46,28 +46,16 @@ const ModalBaseSupervisor = ({
         }
     };
 
-    useEffect(() => {
-        const handleEscape = (e) => {
-            if (e.key === 'Escape' && enableBounce) {
-                triggerBounce();
-            }
-        };
-        window.addEventListener('keydown', handleEscape);
-        return () => window.removeEventListener('keydown', handleEscape);
-    }, [enableBounce]);
+    useEffect(() => () => clearTimeout(bounceTimerRef.current), []);
 
     const defaultModalStyle = MODAL_SIZES[size] || MODAL_SIZES.informacion;
     const mergedModalStyle = { ...defaultModalStyle, ...modalStyle };
 
     return (
-        <div className="modal-blur-bg">
-            <div
-                className={`modal-overlay ${overlayClassName} ${backdropBlur ? 'backdrop-blur-sm' : ''}`}
-                onClick={handleBackdropClick}
-            />
+        <GlobalModal isOpen onClose={onClose} onBackdropClick={handleBackdropClick} title="Supervisor" mode="content" showHeader={false} showCloseButton={!showHeader} closeOnBackdropClick={false} backdropBlur={backdropBlur} overlayClassName={overlayClassName}>
             <div
                 ref={modalRef}
-                className={`modal-content rounded-xl shadow-2xl ${modalClassName} ${bounce || localBounce ? 'animate-bounce-modal' : ''}`}
+                className={`modal-content rounded-xl shadow-2xl ${modalClassName} ${localBounce ? 'animate-bounce-modal' : ''}`}
                 style={mergedModalStyle}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -82,16 +70,12 @@ const ModalBaseSupervisor = ({
                             </div>
                             {/* Select Cartera */}
                             <div className="w-full sm:w-auto sm:min-w-[11rem]">
-                                <FloatingSelect
+                                <CatalogSelect
                                     id="cartera-supervisor-select"
                                     label="Cartera"
                                     value={cartera}
                                     onChange={(e) => setCartera(e.target.value)}
-                                    options={[
-                                        { value: "1", label: "Cartera 1" },
-                                        { value: "2", label: "Cartera 2" },
-                                        { value: "31", label: "Cartera 31" },
-                                    ]}
+                                    required
                                 />
                             </div>
                             {/* Radio buttons Asignar / Consultar */}
@@ -128,7 +112,7 @@ const ModalBaseSupervisor = ({
                     </div>
                 )}
 
-                <div className={`p-2.5 sm:p-4 ${contentClassName}`}>
+                <div className={`modal-scroll-body p-2.5 sm:p-4 ${contentClassName}`}>
                     {children}
                 </div>
 
@@ -140,21 +124,7 @@ const ModalBaseSupervisor = ({
                     </div>
                 )}
             </div>
-
-            <style>{`
-                @keyframes bounce-modal {
-                    0% { transform: scale(1); }
-                    20% { transform: scale(1.05, 0.95); }
-                    40% { transform: scale(0.95, 1.05); }
-                    60% { transform: scale(1.03, 0.97); }
-                    80% { transform: scale(0.97, 1.03); }
-                    100% { transform: scale(1); }
-                }
-                .animate-bounce-modal {
-                    animation: bounce-modal 0.5s;
-                }
-            `}</style>
-        </div>
+        </GlobalModal>
     );
 };
 

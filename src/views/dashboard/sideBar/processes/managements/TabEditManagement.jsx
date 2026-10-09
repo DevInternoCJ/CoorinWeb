@@ -122,12 +122,6 @@ const TabEditManagement = () => {
                 editValidation.clearError("idCartera");
               }}
             required
-            options={[
-              { value: "1",  label: "Cartera 1"  },
-              { value: "2",  label: "Cartera 2"  },
-              { value: "3",  label: "Cartera 3"  },
-              { value: "31", label: "Cartera 31" },
-            ]}
           />
           <FieldError id="idCartera-error" message={searchValidation.errors.idCartera || editValidation.errors.idCartera} />
         </div>
@@ -161,7 +155,7 @@ const TabEditManagement = () => {
       {/* Row 2: Tabla y Textarea apilados */}
       <div className="flex-1 flex flex-col gap-4 min-h-0">
         {/* Tabla */}
-        <div className="flex-1 metas-block metas-block-3 bg-white rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 overflow-hidden">
+        <div className="flex-1 metas-block metas-block-3 bg-surface rounded-lg shadow border border-[var(--color-jerarquia1)] flex flex-col min-w-0 min-h-0 overflow-hidden">
           <div
             className="scrollbar-gray w-full flex-1"
             style={{
@@ -368,7 +362,7 @@ const TabEditManagement = () => {
               editValidation.clearError("comentario");
             }}
             aria-invalid={Boolean(editValidation.errors.comentario)}
-            className="w-full h-full p-4 pr-28 pb-4 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 resize-y"
+            className="w-full h-full p-4 pr-28 pb-4 bg-surface-secondary border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 resize-y"
             placeholder="Comentario de la Gestion. "
             style={{
               minHeight: "100px",

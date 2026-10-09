@@ -1,5 +1,30 @@
 import api from '../../../loki/apiConfig';
 
+// Helpers compartidos por los servicios que consumen el backend Albaz.
+// Se mantienen aquí para que los catálogos no dependan accidentalmente de Orochi.
+export const getToken = () => {
+  try {
+    return sessionStorage.getItem('token') || localStorage.getItem('token') || null;
+  } catch {
+    return null;
+  }
+};
+
+export const clearAuth = () => {
+  try {
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('userData');
+  } catch {
+    // Storage puede no estar disponible durante SSR/tests.
+  }
+  try {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+  } catch {
+    // Storage puede no estar disponible durante SSR/tests.
+  }
+};
+
 // export const ValidatePassword = async (userData, idEjecutivo) => {
 //   try {
 //     const requestData = {
@@ -1822,7 +1847,10 @@ export const getColumsProduct = async (Data) => {
       throw new Error('No hay token de autenticación disponible. Por favor, inicie sesión nuevamente.');
     }
 console.log('Enviando a /Catalogo/ColumnasProducto con:', Data);
-    const response = await api.get('/Catalogo/ColumnasProducto', Data);
+    const response = await api.get('/Catalogo/ColumnasProducto', {
+      ...Data,
+      params: { ...(Data?.params || {}), servidor: 'albaz' },
+    });
     return response.data;
   }
   catch (error) {
@@ -1834,7 +1862,10 @@ console.log('Enviando a /Catalogo/ColumnasProducto con:', Data);
 export const chargueCatalog = async (data) => {
   try {
  
-    const response = await api.get('Catalogo/cargaCatalogos', data);
+    const response = await api.get('Catalogo/cargaCatalogos', {
+      ...data,
+      params: { ...(data?.params || {}), servidor: 'albaz' },
+    });
   
     return response.data;
   }

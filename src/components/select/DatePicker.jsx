@@ -163,7 +163,7 @@ const DatePicker = ({
         />
         <label
           htmlFor={inputId}
-          className={`pointer-events-none absolute start-0 top-0 flex h-full items-center ps-3 text-xs text-[var(--color-text-muted)] transition-all duration-150 peer-focus:-translate-y-2 peer-focus:text-[10px] peer-focus:font-medium peer-focus:text-[var(--color-jerarquia3)] ${value ? "-translate-y-2 text-[10px] font-medium text-[var(--color-jerarquia3)]" : ""}`}
+          className={`pointer-events-none absolute start-0 top-0 flex h-full items-center ps-3 text-xs text-[var(--color-text-muted)] transition-[transform,color,font-size] duration-150 peer-focus:-translate-y-2 peer-focus:text-[10px] peer-focus:font-medium peer-focus:text-[var(--color-jerarquia3)] ${value ? "-translate-y-2 text-[10px] font-medium text-[var(--color-jerarquia3)]" : ""}`}
         >
           {label}
         </label>

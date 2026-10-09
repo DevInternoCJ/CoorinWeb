@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import ReusableModal from "../../modalGlobalReboot/ReusableModal";
+import ReusableModal from "../../../../../components/Modal/GlobalModal";
 import ModalValidadoresContent from "./ModalValidadoresContent";
 import { IconValidadores } from "../IconesEjecutives";
 
@@ -47,7 +47,7 @@ const ValidadoresModal = ({
     const carteraSelector = (
         <div className="relative mb-0 w-full md:w-auto">
             <select
-                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
+                className="peer p-4 pe-9 block w-full bg-surface-secondary border-transparent rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
                 style={{ minHeight: '3.2rem' }}
                 value={footerData.cartera}
                 onChange={e => setFooterData(f => ({ ...f, cartera: e.target.value }))}
@@ -57,7 +57,7 @@ const ValidadoresModal = ({
             </select>
             <label
                 htmlFor="cartera-select-header"
-                className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
             >
                 Cartera
             </label>
@@ -66,7 +66,7 @@ const ValidadoresModal = ({
     const productoSelector = (
         <div className="relative mb-0 w-full md:w-auto">
             <select
-                className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
+                className="peer p-4 pe-9 block w-full bg-surface-secondary border-transparent rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
                 style={{ minHeight: '3.2rem' }}
                 value={footerData.producto}
                 onChange={e => setFooterData(f => ({ ...f, producto: e.target.value }))}
@@ -77,7 +77,7 @@ const ValidadoresModal = ({
             </select>
             <label
                 htmlFor="producto-select-header"
-                className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
             >
                 Producto
             </label>

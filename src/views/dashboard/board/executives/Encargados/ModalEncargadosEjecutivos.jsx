@@ -1,19 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
+import GlobalModal from "../../../../../components/Modal/GlobalModal";
 import ModalEncargadosHeader from "../Encargados/ModalEncargadosHeader";
 import ModalEncargadosContent from "./Encargados/ModalEncargadosContent";
 import ModalEncargadosFooter from "./Encargados/ModalEncargadosFooter";
 
 const ModalEncargadosEjecutivos = ({ onClose }) => {
-    const [bounce, setBounce] = useState(false);
     const [shakeAnimation, setShakeAnimation] = useState(false);
     const modalRef = useRef(null);
-
-    // Siempre define los hooks antes de cualquier return o condicional
-    useEffect(() => {
-        setBounce(true);
-        const timer = setTimeout(() => setBounce(false), 200);
-        return () => clearTimeout(timer);
-    }, []);
 
     const handleBackdropClick = (e) => {
         if (modalRef.current && !modalRef.current.contains(e.target)) {
@@ -24,22 +17,7 @@ const ModalEncargadosEjecutivos = ({ onClose }) => {
     };
 
     return (
-        <div
-            style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                backgroundColor: "rgba(0, 0, 0, 0.6)",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                zIndex: 1000,
-                backdropFilter: "blur(5px)",
-            }}
-            onClick={handleBackdropClick}
-        >
+        <GlobalModal isOpen onClose={onClose} onBackdropClick={handleBackdropClick} title="Encargados de ejecutivos" mode="content" showHeader={false} showCloseButton={false} closeOnBackdropClick={false}>
             <div
                 ref={modalRef}
                 style={{
@@ -50,8 +28,6 @@ const ModalEncargadosEjecutivos = ({ onClose }) => {
                     maxHeight: "90vh",
                     overflow: "auto",
                     boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-                    transform: bounce ? "scale(1.02)" : "scale(1)",
-                    transition: "transform 0.2s ease-out",
                 }}
                 className={`scrollbar-gray${shakeAnimation ? " animate-shake-modal" : ""}`}
             >
@@ -89,7 +65,7 @@ const ModalEncargadosEjecutivos = ({ onClose }) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </GlobalModal>
     );
 };
 

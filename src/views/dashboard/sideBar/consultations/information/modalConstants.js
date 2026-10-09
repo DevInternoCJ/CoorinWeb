@@ -97,18 +97,3 @@ export const TITULOS_MODAL = {
   "Carga Conversación": "Carga de conversación - Coorin",
   VGP: "VGP - Coorin",
 };
-
-// Animación CSS de bounce para el modal
-export const BOUNCE_MODAL_STYLES = `
-  @keyframes bounce-modal {
-    0%   { transform: scale(1); }
-    20%  { transform: scale(1.05, 0.95); }
-    40%  { transform: scale(0.95, 1.05); }
-    60%  { transform: scale(1.03, 0.97); }
-    80%  { transform: scale(0.97, 1.03); }
-    100% { transform: scale(1); }
-  }
-  .animate-bounce-modal {
-    animation: bounce-modal 0.5s;
-  }
-`;

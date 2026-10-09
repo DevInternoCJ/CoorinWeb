@@ -265,14 +265,14 @@ const CapturaVisitsF3 = forwardRef((props, ref) => {
           onPaste={handleModeloPaste}
           maxLength={50}
           disabled={!camposEnabled}
-          className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500 ${
-            camposEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
+          className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground ${
+            camposEnabled ? "bg-surface-secondary" : "bg-surface-secondary cursor-not-allowed opacity-60"
           }`}
           style={{ color: 'var(--color-jerarquia3)' }}
         />
         <label
           htmlFor="modelo-input-f3"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-muted-foreground"
         >
           Modelo
         </label>
@@ -289,14 +289,14 @@ const CapturaVisitsF3 = forwardRef((props, ref) => {
           onPaste={handlePlacasPaste}
           maxLength={10}
           disabled={!camposEnabled}
-          className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500 ${
-            camposEnabled ? "bg-gray-50" : "bg-gray-200 cursor-not-allowed opacity-60"
+          className={`peer p-4 block w-full border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground ${
+            camposEnabled ? "bg-surface-secondary" : "bg-surface-secondary cursor-not-allowed opacity-60"
           }`}
           style={{ color: 'var(--color-jerarquia3)' }}
         />
         <label
           htmlFor="placas-input-f3"
-          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+          className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-muted-foreground"
         >
           Placas
         </label>

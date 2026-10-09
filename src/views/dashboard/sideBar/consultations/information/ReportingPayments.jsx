@@ -39,7 +39,6 @@ const ReportingPaymentsContent = ({
   const [loadingTabla, setLoadingTabla] = useState(false);
   const [errorTabla, setErrorTabla] = useState(null);
   const [tablaData, setTablaData] = useState([]);
-  const [abortController, setAbortController] = useState(null);
 
   // Persistir la cartera seleccionada
   useEffect(() => {
@@ -666,16 +665,6 @@ const ReportingPaymentsContent = ({
                   </table>
                 </div>
               </div>
-              {/* Spinner animación CSS */}
-              <style>{`
-                                .animate-spin {
-                                    animation: spin 1s linear infinite;
-                                }
-                                @keyframes spin {
-                                    0% { transform: rotate(0deg); }
-                                    100% { transform: rotate(360deg); }
-                                }
-                            `}</style>
             </div>
             {errorTabla && (
               <div className="text-red-500 text-xs text-center mt-1">

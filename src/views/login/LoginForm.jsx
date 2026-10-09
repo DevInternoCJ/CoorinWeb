@@ -70,7 +70,7 @@ const InputField = ({
             text-sm placeholder:text-transparent
             focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40
             disabled:opacity-50 disabled:pointer-events-none
-            transition-all duration-200
+            transition-[color,background-color,border-color,box-shadow] duration-150
             pt-3 pb-2
             not-placeholder-shown:pt-3 not-placeholder-shown:pb-2
             autofill:pt-3 autofill:pb-2
@@ -84,7 +84,7 @@ const InputField = ({
             h-full flex items-center
             text-xs text-slate-300/80 font-medium
             pointer-events-none
-            origin-[0_0] transition-all duration-150 ease-in-out
+            origin-[0_0] transition-[transform,color,font-size] duration-150 ease-out
             peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-300/60
             peer-focus:-translate-y-2.5 peer-focus:text-[10px] peer-focus:text-slate-200
             peer-not-placeholder-shown:-translate-y-2.5 peer-not-placeholder-shown:text-[10px] peer-not-placeholder-shown:text-slate-200

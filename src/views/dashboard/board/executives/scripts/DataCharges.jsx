@@ -9,7 +9,7 @@ const DataCharges = ({ onDataLoaded }) => {
   // Estados
   const [ejemploCuentas, setEjemploCuentas] = useState(null);
   const [ejemploProducto, setEjemploProducto] = useState(null);
-  const [scripts, setScripts] = useState([]);
+  const [, setScripts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [draggedLabel, setDraggedLabel] = useState("");
@@ -19,7 +19,6 @@ const DataCharges = ({ onDataLoaded }) => {
   const {
     walletProducts,
     isLoading: isLoadingStore,
-    error: errorStore,
   } = useWalletProducts();
   const idProducto = walletProducts?.[0]?.idProducto;
   const idCartera = walletProducts?.[0]?.idCartera;
@@ -155,18 +154,18 @@ const DataCharges = ({ onDataLoaded }) => {
   // Spinner de carga
   if (loading || isLoadingStore) {
     return (
-      <div className="min-h-60 flex flex-col bg-[var(--color-surface-modal)] border border-gray-200 shadow-2xs rounded-xl">
+      <div className="min-h-60 flex flex-col bg-[var(--color-surface-modal)] border border-border shadow-2xs rounded-xl">
         <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
           <div className="flex justify-center">
             <div
-              className="animate-spin inline-block size-6 border-[3px] border-current border-t-transparent text-blue-600 rounded-full"
+              className="animate-spin inline-block size-6 border-[3px] border-current border-t-transparent text-jerarquia2 rounded-full"
               role="status"
               aria-label="loading"
             >
               <span className="sr-only">Cargando...</span>
             </div>
           </div>
-          <p className="mt-4 text-sm text-gray-600">
+          <p className="mt-4 text-sm text-muted-foreground">
             Cargando datos del producto...
           </p>
         </div>
@@ -176,9 +175,9 @@ const DataCharges = ({ onDataLoaded }) => {
   // Estado de error
   if (error) {
     return (
-      <div className="min-h-60 flex flex-col bg-white border border-red-200 shadow-2xs rounded-xl">
+      <div className="min-h-60 flex flex-col bg-surface border border-destructive/30 shadow-2xs rounded-xl">
         <div className="flex flex-auto flex-col justify-center items-center p-4 md:p-5">
-          <div className="text-red-500 text-center">
+          <div className="text-destructive text-center">
             <IconError className="w-12 h-12 mx-auto mb-4" />
             <p className="font-semibold">Error</p>
             <p className="text-sm mt-2">{error}</p>
@@ -195,7 +194,7 @@ const DataCharges = ({ onDataLoaded }) => {
         return "text-green-700 [.dark_&]:text-green-300 hover:text-green-800 [.dark_&]:hover:text-green-200";
       case "gray":
       default:
-        return "text-gray-700 [.dark_&]:text-gray-300 hover:text-gray-800 [.dark_&]:hover:text-gray-200";
+        return "text-foreground [.dark_&]:text-gray-300 hover:text-foreground [.dark_&]:hover:text-gray-200";
     }
   };
 
@@ -207,7 +206,7 @@ const DataCharges = ({ onDataLoaded }) => {
         return "text-green-800 [.dark_&]:text-green-200";
       case "gray":
       default:
-        return "text-gray-800 [.dark_&]:text-gray-200";
+        return "text-foreground [.dark_&]:text-gray-200";
     }
   };
 
@@ -263,7 +262,7 @@ const DataCharges = ({ onDataLoaded }) => {
                   onDragEnd={handleDragEnd}
                   className={`inline-block text-xs font-medium ${getLabelColors(
                     item.color
-                  )} tracking-wide mb-2 cursor-grabbing select-none hover:bg-gray-100 [.dark_&]:hover:bg-gray-700/50 rounded-md transition-all duration-150 ${
+                  )} tracking-wide mb-2 cursor-grabbing select-none hover:bg-surface-secondary [.dark_&]:hover:bg-gray-700/50 rounded-md transition-[background-color,opacity,transform] duration-150 ease-out ${
                     draggedLabel === item.label ? "opacity-50 scale-95" : ""
                   }`}
                   title="Arrastra el texto al campo mensaje"
@@ -297,7 +296,7 @@ const DataCharges = ({ onDataLoaded }) => {
                         draggable="true"
                         onDragStart={(e) => handleDragStart(e, key)}
                         onDragEnd={handleDragEnd}
-                        className={`py-3 overflow-x-auto px-4 text-xs font-semibold tracking-wider whitespace-nowrap align-top cursor-grabbing select-none hover:bg-[var(--color-scrollbar-thumb)] active:bg-slate-500 transition-all duration-150 bg-jerarquia4 text-background-tertiary ${
+                        className={`py-3 overflow-x-auto px-4 text-xs font-semibold tracking-wider whitespace-nowrap align-top cursor-grabbing select-none hover:bg-[var(--color-scrollbar-thumb)] active:bg-slate-500 transition-[background-color,opacity,transform] duration-150 ease-out bg-jerarquia4 text-background-tertiary ${
                           draggedLabel === key ? "opacity-50 scale-95" : ""
                         }`}
                         title="Arrastra el texto al campo mensaje"
@@ -317,7 +316,7 @@ const DataCharges = ({ onDataLoaded }) => {
                       ([key, value], index) => (
                         <td
                           key={index}
-                          className="py-3 px-4 border-b border-gray-200 text-sm whitespace-nowrap align-top"
+                          className="py-3 px-4 border-b border-border text-sm whitespace-nowrap align-top"
                         >
                           {formatValue(value, key)}
                         </td>

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import ReusableModal from "../../../../dashboard/board/modalGlobalReboot/ReusableModal";
+import ReusableModal from "../../../../../components/Modal/GlobalModal";
 import ModalConsultaHistoricosFiltros from "./ModalConsultaHistoricosFiltros";
 import HistoricosTipoSelector from "./HistoricosTipoSelector";
 import { IconHistoricos } from "../IconesConsultations";
@@ -17,11 +17,11 @@ const HistoricosModal = ({
     const [isIndividual, setIsIndividual] = useState(); // null: ninguno, true: individual, false: archivo
     // Estados para los controles
     const [cartera, setCartera] = useState("");
-    const [carteras, setCarteras] = useState(["American Express"]);
-    const [carterasProductosData, setCarterasProductosData] = useState([]);
-    const [producto, setProducto] = useState("");
-    const [productos, setProductos] = useState(["-Sin Producto-"]);
-    const [tipoSeleccionado, setTipoSeleccionado] = useState(null);
+    const [carteras] = useState(["American Express"]);
+    const [carterasProductosData] = useState([]);
+    const [, setProducto] = useState("");
+    const [, setProductos] = useState(["-Sin Producto-"]);
+    const [, setTipoSeleccionado] = useState(null);
 
     // Reiniciar el estado al cerrar el modal
     React.useEffect(() => {

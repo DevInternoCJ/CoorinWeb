@@ -252,7 +252,6 @@ const TablaSesiones = ({ selectedExecutiveId }) => {
                         header.align !== "left" ? header.align : undefined,
                       top: 0,
                       background: "var(--color-jerarquia4)",
-                      color: "#fff",
                       whiteSpace: header.noWrap ? "nowrap" : undefined,
                       color: "var(--color-text-inverse)",
                     }}

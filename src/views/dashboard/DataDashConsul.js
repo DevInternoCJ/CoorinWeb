@@ -3,47 +3,47 @@ const dataDashConsul = [
     {
         id: 1,
         title: "Cuentas",
-        color: "color-background-secondary",
-        fontcolor: "color-text-mint",
+        color: "color-card-cuentas-bg",
+        fontcolor: "color-card-cuentas-font",
         icon: "ExecutiveChart",
         iconShadow: "50"
     },
     {
         id: 2,
         title: "Productividad",
-        color: "color-jerarquia1",
-        fontcolor: "color-base-200",
+        color: "color-card-productividad-bg",
+        fontcolor: "color-card-productividad-font",
         icon: "ExecutiveChart"
     },
     
     {
         id: 3,
         title: "Generales",
-        color: "color-background-primary",
-        fontcolor: "color-text-terra",
+        color: "color-card-generales-bg",
+        fontcolor: "color-card-generales-font",
         icon: "ExecutiveChart"
     },
     {
         id: 4,
         title: "Historicos",
-        color: "color-background-secondary",
-        fontcolor: "color-text-mint",
+        color: "color-card-cuentas-bg",
+        fontcolor: "color-card-cuentas-font",
         icon: "ExecutiveChart",
         iconShadow: "50"
     },
     {
         id: 5,
        title: "Ejecutivos",
-       color: "color-background-primary",
-        fontcolor: "color-text-terra",
+       color: "color-card-generales-bg",
+        fontcolor: "color-card-generales-font",
         icon: "ExecutiveChart",
         iconShadow: "50"
     },
     {
         id: 6,
         title: "Dia del Ejecutivo",
-        color: "color-jerarquia1",
-        fontcolor: "color-base-200",
+        color: "color-card-productividad-bg",
+        fontcolor: "color-card-productividad-font",
         icon: "ExecutiveChart"
     }
 ];

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { toast } from "sonner";
-import ReusableModal from "../../modalGlobalReboot/ReusableModal";
-import DefaultModalHeader from "../../modalGlobalReboot/DefaultModalHeader";
+import ReusableModal from "../../../../../components/Modal/GlobalModal";
+import DefaultModalHeader from "../../../../../components/Modal/DefaultModalHeader";
 import { IconEjecutivos } from "../../../board/consultations/IconesConsultations";
 import ConsorcioLogo from "../../../../../assets/logo_coorin_7.svg";
 import {
@@ -924,12 +923,12 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
       headerComponent={DefaultModalHeader}
       headerProps={{
         title: (
-          <span className="font-bold text-[#147f5e]">
+          <span className="font-bold text-jerarquia3">
             Reporte Ejecutivos - Coorin
           </span>
         ),
         icon: IconEjecutivos,
-        iconClassName: "text-[#147f5e]",
+        iconClassName: "text-jerarquia3",
         onClose,
         closeButtonClassName:
           "transition-colors duration-200 rounded-full p-1 sm:p-1.5 hover:bg-surface-secondary focus:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-jerarquia2",
@@ -982,7 +981,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                 </select>
                 <label
                   htmlFor="cartera-select"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                 >
                   Cartera
                 </label>
@@ -1000,7 +999,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                 </select>
                 <label
                   htmlFor="producto-select"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                 >
                   Producto
                 </label>
@@ -1038,7 +1037,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                 </select>
                 <label
                   htmlFor="encargado-select-row2"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                 >
                   Encargado
                 </label>
@@ -1061,7 +1060,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                 </select>
                 <label
                   htmlFor="indicador-select-row1"
-                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                  className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                 >
                   Indicador
                 </label>
@@ -1144,7 +1143,7 @@ const ModalConsultaEjecutivosModal = ({ isOpen, onClose }) => {
                   className="animate-spin rounded-full h-16 w-16 border-t-4 border-jerarquia1"
                   style={{ borderRightColor: "transparent" }}
                 ></div>
-                <div className="mt-2 text-sm text-gray-700">
+                <div className="mt-2 text-sm text-foreground">
                   Cargando resultados...
                 </div>
               </div>

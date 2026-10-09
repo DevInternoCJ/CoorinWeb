@@ -78,7 +78,7 @@ export default function TimePicker({ id, value, onChange, placeholder = 'hh:mm a
                     value={display()}
                     placeholder={placeholder}
                     onClick={() => setOpen(v => !v)}
-                    className={`${className} py-2.5 sm:py-3 ps-4 pe-12 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-200 dark:placeholder-neutral-400 dark:focus:ring-neutral-600`}
+                    className={`${className} py-2.5 sm:py-3 ps-4 pe-12 block w-full bg-surface-secondary text-foreground border-border rounded-lg sm:text-sm focus:border-jerarquia2 focus:ring-jerarquia2 disabled:opacity-50 disabled:pointer-events-none placeholder:text-muted-foreground`}
                 />
 
                 <div className="absolute inset-y-0 end-0 flex items-center pe-3">
@@ -89,7 +89,7 @@ export default function TimePicker({ id, value, onChange, placeholder = 'hh:mm a
                             aria-expanded={open}
                             aria-label="Dropdown"
                             onClick={() => setOpen(v => !v)}
-                            className="size-7 shrink-0 inline-flex justify-center items-center rounded-full bg-white text-gray-500 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
+                            className="size-7 shrink-0 inline-flex justify-center items-center rounded-full bg-surface text-muted-foreground hover:bg-surface-secondary focus:outline-hidden focus:bg-surface-secondary disabled:opacity-50 disabled:pointer-events-none"
                         >
                             <span className="sr-only">Dropdown</span>
                             <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -98,11 +98,11 @@ export default function TimePicker({ id, value, onChange, placeholder = 'hh:mm a
                             </svg>
                         </button>
 
-                        <div className={`hs-dropdown-menu transition-[opacity,margin] duration ${open ? 'opacity-100 block' : 'opacity-0 hidden'} min-w-30 bg-white border border-gray-200 shadow-xl rounded-lg mt-2 dark:bg-neutral-800 dark:border-neutral-700`} role="menu">
-                            <div className="flex flex-row divide-x divide-gray-200 dark:divide-neutral-700">
+                        <div className={`hs-dropdown-menu transition-[opacity,margin] duration ${open ? 'opacity-100 block' : 'opacity-0 hidden'} min-w-30 bg-surface border border-border shadow-xl rounded-lg mt-2`} role="menu">
+                            <div className="flex flex-row divide-x divide-border">
                                 <div className="p-1 max-h-56 overflow-y-auto">
                                     {hours.map(h => (
-                                        <label key={h} className={`group relative flex justify-center items-center p-1.5 w-10 text-center text-sm cursor-pointer rounded-md hover:bg-gray-100 dark:text-neutral-200 dark:hover:bg-neutral-700 ${internal.hh === h ? 'bg-blue-600 text-white' : 'text-gray-800'}`}>
+                                        <label key={h} className={`group relative flex justify-center items-center p-1.5 w-10 text-center text-sm cursor-pointer rounded-md hover:bg-surface-secondary ${internal.hh === h ? 'bg-primary text-primary-foreground' : 'text-foreground'}`}>
                                             <input type="radio" className="hidden" name={`${uid}-hh`} checked={internal.hh === h} onChange={() => setInternal(i => ({ ...i, hh: h }))} />
                                             <span className="block">{h}</span>
                                         </label>
@@ -111,7 +111,7 @@ export default function TimePicker({ id, value, onChange, placeholder = 'hh:mm a
 
                                 <div className="p-1 max-h-56 overflow-y-auto">
                                     {minutes.map(m => (
-                                        <label key={m} className={`group relative flex justify-center items-center p-1.5 w-10 text-center text-sm cursor-pointer rounded-md hover:bg-gray-100 dark:text-neutral-200 dark:hover:bg-neutral-700 ${internal.mm === m ? 'bg-blue-600 text-white' : 'text-gray-800'}`}>
+                                        <label key={m} className={`group relative flex justify-center items-center p-1.5 w-10 text-center text-sm cursor-pointer rounded-md hover:bg-surface-secondary ${internal.mm === m ? 'bg-primary text-primary-foreground' : 'text-foreground'}`}>
                                             <input type="radio" className="hidden" name={`${uid}-mm`} checked={internal.mm === m} onChange={() => setInternal(i => ({ ...i, mm: m }))} />
                                             <span className="block">{m}</span>
                                         </label>
@@ -119,20 +119,20 @@ export default function TimePicker({ id, value, onChange, placeholder = 'hh:mm a
                                 </div>
 
                                 <div className="p-1 max-h-56 overflow-y-auto">
-                                    <label className={`group relative flex justify-center items-center p-1.5 w-10 text-center text-sm cursor-pointer rounded-md hover:bg-gray-100 ${Number(internal.hh) < 12 ? 'bg-blue-600 text-white' : 'text-gray-800'}`}>
+                                    <label className={`group relative flex justify-center items-center p-1.5 w-10 text-center text-sm cursor-pointer rounded-md hover:bg-surface-secondary ${Number(internal.hh) < 12 ? 'bg-primary text-primary-foreground' : 'text-foreground'}`}>
                                         <input type="radio" className="hidden" name={`${uid}-ampm`} checked={Number(internal.hh) < 12} onChange={() => setInternal(i => ({ ...i, hh: pad((Number(i.hh) % 12)) }))} />
                                         <span className="block">AM</span>
                                     </label>
-                                    <label className={`group relative flex justify-center items-center p-1.5 w-10 text-center text-sm cursor-pointer rounded-md hover:bg-gray-100 ${Number(internal.hh) >= 12 ? 'bg-blue-600 text-white' : 'text-gray-800'}`}>
+                                    <label className={`group relative flex justify-center items-center p-1.5 w-10 text-center text-sm cursor-pointer rounded-md hover:bg-surface-secondary ${Number(internal.hh) >= 12 ? 'bg-primary text-primary-foreground' : 'text-foreground'}`}>
                                         <input type="radio" className="hidden" name={`${uid}-ampm`} checked={Number(internal.hh) >= 12} onChange={() => setInternal(i => ({ ...i, hh: pad((Number(i.hh) % 12) + 12) }))} />
                                         <span className="block">PM</span>
                                     </label>
                                 </div>
                             </div>
 
-                            <div className="py-2 px-3 flex flex-wrap justify-between items-center gap-2 border-t border-gray-200 dark:border-neutral-700">
-                                <button type="button" onClick={handleNow} className="text-[13px] font-medium rounded-md bg-white text-blue-600 hover:text-blue-700 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:text-blue-700 dark:bg-neutral-800 dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">Now</button>
-                                <button type="button" onClick={handleOk} className="py-1 px-2.5 text-[13px] font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:ring-2 focus:ring-blue-500">OK</button>
+                            <div className="py-2 px-3 flex flex-wrap justify-between items-center gap-2 border-t border-border">
+                                <button type="button" onClick={handleNow} className="text-[13px] font-medium rounded-md bg-surface text-jerarquia3 hover:text-jerarquia3 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:text-jerarquia3">Now</button>
+                                <button type="button" onClick={handleOk} className="py-1 px-2.5 text-[13px] font-medium rounded-md bg-primary text-primary-foreground hover:bg-jerarquia3 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:ring-2 focus:ring-jerarquia2">OK</button>
                             </div>
                         </div>
                     </div>

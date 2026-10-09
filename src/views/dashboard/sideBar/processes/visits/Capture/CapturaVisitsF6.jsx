@@ -64,14 +64,14 @@ const CapturaVisitsF6 = forwardRef((props, ref) => {
             value={telefono}
             onChange={(e) => setTelefono(e.target.value.replace(/\D/g, "").slice(0, 10))}
             onKeyDown={handleKeyDown}
-            className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-gray-500"
+            className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2 placeholder:text-transparent focus:placeholder:text-muted-foreground"
             id="telefono-input-f6"
             placeholder="Ingrese teléfono"
             style={{ color: 'var(--color-jerarquia3)' }}
           />
           <label
             htmlFor="telefono-input-f6"
-            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-gray-500"
+            className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-4 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-4 peer-[:not(:placeholder-shown)]:text-muted-foreground"
           >
             Tel. (10 dígitos)
           </label>
@@ -120,7 +120,7 @@ const CapturaVisitsF6 = forwardRef((props, ref) => {
           <tbody>
             {telefonos.length === 0 ? (
               <tr>
-                <td colSpan={2} className="text-center text-gray-400 py-4">
+                <td colSpan={2} className="text-center text-muted-foreground py-4">
                   No hay teléfonos agregados
                 </td>
               </tr>

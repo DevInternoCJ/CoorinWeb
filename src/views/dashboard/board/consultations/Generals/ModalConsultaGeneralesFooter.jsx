@@ -27,7 +27,7 @@ const ModalConsultaGeneralesFooter = () => {
                     <div className="flex items-center justify-between pr-2" style={{ flex: "1", minWidth: 0 }}>
                         {/* Radios al inicio */}
                         <div className="flex items-center gap-3">
-                            <label className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10]`}>
+                            <label className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer bg-surface hover:bg-[var(--color-jerarquia2)/10]`}>
                                 <input
                                     type="radio"
                                     name="tipo"
@@ -36,7 +36,7 @@ const ModalConsultaGeneralesFooter = () => {
                                 />
                                 <span className="text-base text-[var(--color-jerarquia4)] font-semibold">Contar</span>
                             </label>
-                            <label className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10]`}>
+                            <label className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer bg-surface hover:bg-[var(--color-jerarquia2)/10]`}>
                                 <input
                                     type="radio"
                                     name="tipo"
@@ -45,7 +45,7 @@ const ModalConsultaGeneralesFooter = () => {
                                 />
                                 <span className="text-base text-[var(--color-jerarquia4)] font-semibold">Cuentas</span>
                             </label>
-                            <label className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer bg-white hover:bg-[var(--color-jerarquia2)/10]`}>
+                            <label className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer bg-surface hover:bg-[var(--color-jerarquia2)/10]`}>
                                 <input
                                     type="radio"
                                     name="tipo"
@@ -69,7 +69,7 @@ const ModalConsultaGeneralesFooter = () => {
                                 <input
                                     type="date"
                                     defaultValue="2025-07-26"
-                                    className="w-32 px-2 py-1 text-sm bg-white border border-black rounded focus:outline-none focus:border-[var(--color-jerarquia3)] cursor-pointer calendar-input"
+                                    className="w-32 px-2 py-1 text-sm bg-surface border border-black rounded focus:outline-none focus:border-[var(--color-jerarquia3)] cursor-pointer calendar-input"
                                     style={{ 
                                         fontSize: "14px",
                                         color: "#000000"
@@ -96,7 +96,7 @@ const ModalConsultaGeneralesFooter = () => {
                     </div>
                 </div>
                 {/* Tabla vacía visual con mismo estilo que Filtros */}
-                <div className="w-full flex justify-center rounded-lg bg-white border border-[var(--color-jerarquia1)] p-0.5">
+                <div className="w-full flex justify-center rounded-lg bg-surface border border-[var(--color-jerarquia1)] p-0.5">
                     <div
                         style={{
                             overflowX: "auto",
@@ -108,7 +108,7 @@ const ModalConsultaGeneralesFooter = () => {
                         }}
                         className="scrollbar-gray"
                     >
-                        <table className="w-full text-xs mb-2 min-w-[1400px] bg-white text-black">
+                        <table className="w-full text-xs mb-2 min-w-[1400px] bg-surface text-black">
                             <thead style={{ position: "sticky", top: 0, zIndex: 2, background: "var(--color-background-secondary)" }}>
                                 <tr className="bg-[var(--color-background-secondary)] text-white">
                                     <th className="px-2 py-1 text-left border-r border-[var(--color-jerarquia1)] rounded-tl-md">Columna 1</th>
@@ -167,7 +167,7 @@ const ModalConsultaGeneralesFooter = () => {
                 </div>
             </div>
             <div className="w-full mt-8 mb-2 flex justify-start">
-                <span className="text-base text-gray-500">
+                <span className="text-base text-muted-foreground">
                     Indique los parámetros que desea buscar y presione Agregar.
                 </span>
             </div>

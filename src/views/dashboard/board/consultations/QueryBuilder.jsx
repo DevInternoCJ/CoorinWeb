@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import FloatingInput from "../../../../components/Select/FloatingInput";
 import FloatingSelect from "../../../../components/Select/FloatingSelect";
 import CatalogSelect from "../../../../components/Select/CatalogSelect";
-import { postReportCampaign } from "../../../../services/mark/Orochi/LokiServices";
+import ConsultationService from "../../../../services/consultations/ConsultationService";
 import { toast } from "sonner";
 import { CONFIRMED_CATALOG_IDS } from "../../../../schemas/formSchemas";
 import { ACTIVE_SERVER } from "../../../../config/backend";
@@ -60,21 +60,21 @@ export default function QueryBuilder({ idCartera, idProducto, modo = "detalle", 
       const request = buildSearchCriteria({ servidor: ACTIVE_SERVER, idCartera, idProducto, esDetalleResultado: modo === "detalle", parametros, agrupar: agrupaciones });
       const validation = realizarBusquedaRequestSchema.safeParse(request);
       if (!validation.success) throw new Error(validation.error.issues[0]?.message || "La consulta no es válida");
-      const response = await postReportCampaign(validation.data);
+      const response = await ConsultationService.realizarBusqueda(validation.data);
       onResult?.(response);
       toast.success("Consulta realizada");
     }
     catch { toast.error("No fue posible realizar la consulta"); } finally { setLoading(false); }
   };
   return <div className="bg-layer rounded-xl border border-border p-3 space-y-3">
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
       <FloatingSelect id="qb-concepto" label="Concepto" value={concepto} onChange={(e) => { const next = e.target.value; setConcepto(next); setCampo(CONCEPT_FIELDS[next][0]); setValor(""); }} options={options} />
       <FloatingSelect id="qb-campo" label="Campo" value={campo} onChange={(e) => { setCampo(e.target.value); setValor(""); }} options={(CONCEPT_FIELDS[concepto] || GENERAL_FIELDS).map((item) => ({ value: item, label: item }))} />
       <FloatingSelect id="qb-signo" label="Operador" value={signo} onChange={(e) => setSigno(e.target.value)} options={["=", "≠", ">", "<", "≤", "≥"]} />
       {isCatalog ? <CatalogSelect id="qb-valor" label="Valor" catalogId={catalogByField[campo]} value={valor} onChange={(e) => setValor(e.target.value)} /> : <FloatingInput id="qb-valor" label="Valor" type={fieldType} value={valor} onChange={(e) => setValor(e.target.value)} />}
-      <button type="button" onClick={add} className="py-2 px-3 rounded-lg bg-primary text-white font-semibold">Agregar</button>
+      <button type="button" onClick={add} className="py-2 px-3 inline-flex items-center justify-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-primary text-primary-foreground hover:bg-jerarquia3 focus:outline-none focus:ring-2 focus:ring-jerarquia2 disabled:opacity-50 disabled:pointer-events-none">Agregar</button>
     </div>
-    <div className="overflow-auto"><table className="w-full text-sm"><thead><tr><th>Concepto</th><th>Campo</th><th>Operador</th><th>Valor</th><th /></tr></thead><tbody>{parametros.map((row) => <tr key={row.id}><td>{row.concepto}</td><td>{row.campo}</td><td>{row.signo}</td><td>{row.valorTexto ?? row.idValor}</td><td><button type="button" onClick={() => setParametros((items) => items.filter((x) => x.id !== row.id))} className="text-destructive">Eliminar</button></td></tr>)}</tbody></table></div>
-    <div className="flex justify-end gap-2"><button type="button" disabled={loading} onClick={() => setAgrupaciones(parametros.map((x) => ({ campo: x.campo })))} className="py-2 px-3 rounded-lg border border-border">Agrupar filtros</button><button type="button" disabled={loading} onClick={consultar} className="py-2 px-3 rounded-lg bg-primary text-white">{loading ? "Consultando…" : "Consultar"}</button></div>
+    <div className="overflow-auto"><table className="modal-table w-full text-sm"><thead><tr><th>Concepto</th><th>Campo</th><th>Operador</th><th>Valor</th><th /></tr></thead><tbody>{parametros.map((row) => <tr key={row.id}><td>{row.concepto}</td><td>{row.campo}</td><td>{row.signo}</td><td>{row.valorTexto ?? row.idValor}</td><td><button type="button" onClick={() => setParametros((items) => items.filter((x) => x.id !== row.id))} className="text-destructive">Eliminar</button></td></tr>)}</tbody></table></div>
+    <div className="flex flex-wrap justify-end gap-3"><button type="button" disabled={loading} onClick={() => setAgrupaciones(parametros.map((x) => ({ campo: x.campo })))} className="py-2 px-3 inline-flex items-center justify-center gap-x-2 text-sm font-semibold rounded-lg border border-border bg-surface text-foreground hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-jerarquia2 disabled:opacity-50 disabled:pointer-events-none">Agrupar filtros</button><button type="button" disabled={loading} onClick={consultar} className="py-2 px-3 inline-flex items-center justify-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-primary text-primary-foreground hover:bg-jerarquia3 focus:outline-none focus:ring-2 focus:ring-jerarquia2 disabled:opacity-50 disabled:pointer-events-none">{loading ? "Consultando…" : "Consultar"}</button></div>
   </div>;
 }

@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import CatalogSelect from "../../../../../components/Select/CatalogSelect";
 import FloatingSelect from "../../../../../components/Select/FloatingSelect";
+import { postAccionamientosCarga } from "../../../../../services/mark/orochi/LokiServices";
 
 const CapturaContent = () => {
     const [cartera, setCartera] = useState('');
@@ -10,25 +12,40 @@ const CapturaContent = () => {
     const [devuelto, setDevuelto] = useState('');
     const [causaDevolucion, setCausaDevolucion] = useState('');
 
-    useEffect(() => {
-        // Lógica adicional si es necesaria
-    }, []);
+    const [nombre, setNombre] = useState('');
+    const [archivo, setArchivo] = useState(null);
+    const [estado, setEstado] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleCaptura = async () => {
+        if (!cartera || !archivo) {
+            setEstado('Selecciona una cartera y un archivo de accionamientos.');
+            return;
+        }
+        setLoading(true);
+        setEstado('');
+        try {
+            await postAccionamientosCarga({ idCartera: cartera, archivo });
+            setEstado('Archivo cargado correctamente.');
+            setArchivo(null);
+        } catch (error) {
+            setEstado(error?.response?.data?.message || error.message || 'No fue posible cargar el archivo.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="p-6 flex flex-col h-full space-y-4">
             {/* Row 1: Select Cartera, Input Cuenta, Checkbox Expediente */}
             <div className="flex flex-col gap-4 sm:flex-row sm:gap-">
                 <div className="flex-1">
-                    <FloatingSelect
+                    <CatalogSelect
                         id="cartera-captura-select"
                         label="Cartera"
                         value={cartera}
                         onChange={(e) => setCartera(e.target.value)}
-                        options={[
-                            { value: "cartera1", label: "Cartera 1" },
-                            { value: "cartera2", label: "Cartera 2" },
-                            { value: "cartera3", label: "Cartera 3" },
-                        ]}
+                        required
                     />
                 </div>
                 <div className="relative flex-1">
@@ -36,13 +53,13 @@ const CapturaContent = () => {
                         type="text"
                         value={cuenta}
                         onChange={(e) => setCuenta(e.target.value)}
-                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="cuenta-input"
                         placeholder=" "
                     />
                     <label
                         htmlFor="cuenta-input"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                     >
                         {expediente ? "Expediente" : "Cuenta"}
                     </label>
@@ -52,12 +69,12 @@ const CapturaContent = () => {
                         type="checkbox"
                         checked={expediente}
                         onChange={(e) => setExpediente(e.target.checked)}
-                        className="w-4 h-4 text-jerarquia1 bg-gray-100 border-gray-300 rounded focus:ring-jerarquia1 focus:ring-2"
+                        className="w-4 h-4 text-jerarquia1 bg-surface-secondary border-border rounded focus:ring-jerarquia1 focus:ring-2"
                         id="expediente-checkbox"
                     />
                     <label
                         htmlFor="expediente-checkbox"
-                        className="ml-2 text-sm font-medium text-gray-900"
+                        className="ml-2 text-sm font-medium text-foreground"
                     >
                         Expediente
                     </label>
@@ -82,15 +99,15 @@ const CapturaContent = () => {
                 <div className="relative flex-1">
                     <input
                         type="text"
-                        value="Juan Maradonio Uriel Pascual Montes."
-                        readOnly
-                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                        className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="nombre-input"
                         placeholder=" "
                     />
                     <label
                         htmlFor="nombre-input"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-sm peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
                     >
                         Nombre
                     </label>
@@ -104,13 +121,13 @@ const CapturaContent = () => {
                         type="date"
                         value={envio}
                         onChange={(e) => setEnvio(e.target.value)}
-                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="envio-date"
                         placeholder=" "
                     />
                     <label
                         htmlFor="envio-date"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-muted-foreground"
                     >
                         Envío
                     </label>
@@ -120,55 +137,50 @@ const CapturaContent = () => {
                         type="date"
                         value={devuelto}
                         onChange={(e) => setDevuelto(e.target.value)}
-                        className="peer p-4 block w-full bg-gray-50 border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
+                        className="peer p-4 block w-full bg-surface-secondary border-transparent rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 focus:pt-6 focus:pb-2 not-placeholder-shown:pt-6 not-placeholder-shown:pb-2 autofill:pt-6 autofill:pb-2"
                         id="devuelto-date"
                         placeholder=" "
                     />
                     <label
                         htmlFor="devuelto-date"
-                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-gray-500"
+                        className="absolute top-0 start-0 p-4 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent text-xs peer-focus:-translate-y-3 peer-focus:text-muted-foreground peer-[:not(:placeholder-shown)]:-translate-y-3 peer-[:not(:placeholder-shown)]:text-muted-foreground"
                     >
                         Devuelto
                     </label>
                 </div>
                 <div className="flex-1 sm:hidden md:hidden lg:flex">
-                    <FloatingSelect
+                    <CatalogSelect
                         id="causa-devolucion-select"
                         label="Causa Devolución"
+                        catalogId={10}
                         value={causaDevolucion}
                         onChange={(e) => setCausaDevolucion(e.target.value)}
-                        options={[
-                            { value: "causa1", label: "Causa 1" },
-                            { value: "causa2", label: "Causa 2" },
-                            { value: "causa3", label: "Causa 3" },
-                        ]}
                     />
                 </div>
             </div>
 
             {/* Row 4: Select Causa Devolución y Botón Captura */}
             <div className="flex flex-col gap-4 sm:flex-row sm:gap-4 sm:items-stretch lg:justify-center">
+                <input type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setArchivo(e.target.files?.[0] || null)} className="w-full sm:flex-1 text-sm" />
                 <div className="flex-1 lg:hidden">
-                    <FloatingSelect
+                    <CatalogSelect
                         id="causa-devolucion-select-row4"
                         label="Causa Devolución"
+                        catalogId={10}
                         value={causaDevolucion}
                         onChange={(e) => setCausaDevolucion(e.target.value)}
-                        options={[
-                            { value: "causa1", label: "Causa 1" },
-                            { value: "causa2", label: "Causa 2" },
-                            { value: "causa3", label: "Causa 3" },
-                        ]}
                     />
                 </div>
                 <button
-                    onClick={() => console.log('Captura')}
+                    onClick={handleCaptura}
+                    disabled={loading}
                     className="btn-success w-full sm:flex-1 md:flex-1 lg:w-auto lg:flex-none lg:min-w-[120px] sm:h-full md:h-full px-4 py-2.5 lg:py-2.5 text-base font-medium rounded-lg shadow-sm flex justify-center items-center sm:self-center md:self-center"
                 >
-                    Captura
+                    {loading ? 'Cargando...' : 'Captura'}
                 </button>
                 
             </div>
+            {estado && <p className="text-sm text-secondary" role="status">{estado}</p>}
         </div>
     );
 };

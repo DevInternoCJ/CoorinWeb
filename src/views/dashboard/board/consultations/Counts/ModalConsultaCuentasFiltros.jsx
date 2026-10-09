@@ -32,6 +32,8 @@ const ModalConsultaCuentasFiltros = ({
   onFiltrosCountChange,
   fechaDesde = "",
   onFechaDesdeChange,
+  onExport,
+  canExport = false,
   onFiltrosChange,
   enabled = false,
 }) => {
@@ -69,11 +71,11 @@ const ModalConsultaCuentasFiltros = ({
       toast.warning("Capture o seleccione un valor para el filtro");
       return;
     }
-    if (cuenta === "Conteos" && !/^\\d+$/.test(String(niegan).trim())) {
+    if (cuenta === "Conteos" && !/^\d+$/.test(String(niegan).trim())) {
       toast.warning("Los conteos deben ser enteros");
       return;
     }
-    if (cuenta === "Fechas" && !/^\\d{4}-\\d{2}-\\d{2}$/.test(String(niegan).trim())) {
+    if (cuenta === "Fechas" && !/^\d{4}-\d{2}-\d{2}$/.test(String(niegan).trim())) {
       toast.warning("Capture una fecha válida");
       return;
     }
@@ -454,8 +456,6 @@ const ModalConsultaCuentasFiltros = ({
     }
   }, [filtros.length, onFiltrosCountChange, onFiltrosChange, filtros]);
 
-  const showPeriod = filtros.some((filtro) => filtro.concepto === "Conteos");
-
   return (
     <>
       <fieldset className={!enabled ? "opacity-60" : ""}>
@@ -497,6 +497,9 @@ const ModalConsultaCuentasFiltros = ({
               <button
                 type="button"
                 className="btn-success flex-1 sm:flex-none h-[38px] px-3.5 text-xs font-medium rounded-lg flex items-center justify-center"
+                onClick={onExport}
+                disabled={!canExport}
+                title={canExport ? "Exportar resultados" : "Realice una consulta para exportar"}
               >
                 Exportar
               </button>
@@ -509,10 +512,9 @@ const ModalConsultaCuentasFiltros = ({
               </button>
 
               {/* Tooltip agregado aquí */}
-              <span className="hs-tooltip [--placement:top] inline-flex justify-center items-center size-[38px] rounded-lg bg-surface-secondary border border-border flex-shrink-0">
+              <button type="button" aria-label="Seleccionar campaña" onClick={() => setOpenSeleccionCampania(true)} className="hs-tooltip [--placement:top] inline-flex justify-center items-center size-[38px] rounded-lg bg-surface-secondary border border-border flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-jerarquia2">
                 <IconCustomTable
                   className="size-5 cursor-pointer text-jerarquia3"
-                  onClick={() => setOpenSeleccionCampania(true)}
                 />
                 <span
                   className="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-inverse text-foreground-inverse text-[10px] font-medium rounded-md shadow-sm whitespace-nowrap"
@@ -520,7 +522,7 @@ const ModalConsultaCuentasFiltros = ({
                 >
                   Cargar filas de trabajo
                 </span>
-              </span>
+              </button>
             </div>
           </div>
         </div>

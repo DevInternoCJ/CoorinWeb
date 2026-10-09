@@ -1,19 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
+import GlobalModal from "../../../../components/Modal/GlobalModal";
 import ModalScriptsHeader from "./ModalScriptsHeader";
 import ModalScriptsContent from "./ModalScriptsContent";
 import ModalScriptsFooter from "./ModalScriptsFooter";
 
 const ModalScriptsEjecutivos = ({ onClose }) => {
-  const [bounce, setBounce] = useState(false);
   const [shakeAnimation, setShakeAnimation] = useState(false);
   const modalRef = useRef(null);
-
-  // Siempre define los hooks antes de cualquier return o condicional
-  useEffect(() => {
-    setBounce(true);
-    const timer = setTimeout(() => setBounce(false), 200);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleBackdropClick = (e) => {
     if (modalRef.current && !modalRef.current.contains(e.target)) {
@@ -24,22 +17,7 @@ const ModalScriptsEjecutivos = ({ onClose }) => {
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        backgroundColor: "rgba(0, 0, 0, 0.6)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 1000,
-        backdropFilter: "blur(5px)",
-      }}
-      onClick={handleBackdropClick}
-    >
+    <GlobalModal isOpen onClose={onClose} onBackdropClick={handleBackdropClick} title="Scripts de ejecutivos" mode="content" showHeader={false} showCloseButton={false} closeOnBackdropClick={false}>
       <div
         ref={modalRef}
         style={{
@@ -50,8 +28,6 @@ const ModalScriptsEjecutivos = ({ onClose }) => {
           maxHeight: "90vh",
           overflow: "auto",
           boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          transform: bounce ? "scale(1.02)" : "scale(1)",
-          transition: "transform 0.2s ease-out",
         }}
         className={`scrollbar-gray${shakeAnimation ? " animate-shake-modal" : ""}`}
       >
@@ -99,17 +75,6 @@ const ModalScriptsEjecutivos = ({ onClose }) => {
         </div>
       </div>
       <style>{`
-                @keyframes shake-modal {
-                    0% { transform: scale(1); }
-                    20% { transform: scale(1.05, 0.95); }
-                    40% { transform: scale(0.95, 1.05); }
-                    60% { transform: scale(1.03, 0.97); }
-                    80% { transform: scale(0.97, 1.03); }
-                    100% { transform: scale(1); }
-                }
-                .animate-shake-modal {
-                    animation: shake-modal 0.5s;
-                }
                 .scrollbar-gray::-webkit-scrollbar {
                     height: 8px;
                     width: 8px;
@@ -123,7 +88,7 @@ const ModalScriptsEjecutivos = ({ onClose }) => {
                     background: #888;
                 }
             `}</style>
-    </div>
+    </GlobalModal>
   );
 };
 

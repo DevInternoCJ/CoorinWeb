@@ -170,7 +170,7 @@ const LoginCard = ({ logo = null, formComponent = null, children }) => {
                 <img
                   src={activeLogo}
                   alt="logo-coorin"
-                  className="mx-auto my-auto h-auto max-w-[15vh] lg:max-w-[25vh] rotate-x-30 -rotate-y-30 transition-all duration-500 ease-out"
+                  className="mx-auto my-auto h-auto max-w-[15vh] lg:max-w-[25vh] rotate-x-30 -rotate-y-30"
                 />
               </LogicCard>
             </div>

@@ -69,7 +69,7 @@ const PasswordChangeContent = ({ onAccept }) => {
             {/* Si NO ha expirado, mostrar ambos botones */}
             <button
               onClick={handleNoClick}
-              className="w-full btn rounded-lg bg-red-700 border border-red-700 hover:border-jerarquia4 text-background-dashboard hover:text-jerarquia4 hover:bg-red-600 hover:shadow-lg hover:shadow-red-700 transition-all duration-200 font-medium"
+              className="w-full btn rounded-lg bg-red-700 border border-red-700 hover:border-jerarquia4 text-background-dashboard hover:text-jerarquia4 hover:bg-red-600 hover:shadow-lg hover:shadow-red-700 transition-[color,background-color,border-color,box-shadow] duration-150 font-medium"
             >
               No
             </button>

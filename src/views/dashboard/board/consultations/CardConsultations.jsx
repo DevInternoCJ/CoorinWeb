@@ -3,8 +3,8 @@ import { useDashboardModalUrlSync } from "../../../../hooks/useDashboardModalUrl
 import DataDashConsul from "../../DataDashConsul";
 import { ExecutiveChart } from "../../DashboardIcons";
 import { IconCuentas, IconProductividad, IconGenerales, IconHistoricos,IconExecutive,IconDayExecutive } from "./IconesConsultations";
-import ModalConsultaCuentas from "./counts/ModalConsultaCuentas";
-import ModalBaseCuentas from "./counts/ModalBaseCuentas";
+import ModalConsultaCuentas from "./Counts/ModalConsultaCuentas";
+import ModalBaseCuentas from "./Counts/ModalBaseCuentas";
 import ProductivityModal from "./Productivity/ModalProductivityModal";
 import ModalConsultaGenerales from "./Generals/ModalConsultaGenerales";
 import ModalBaseGenerales from "./Generals/ModalBaseGenerales";
@@ -46,7 +46,7 @@ const CardConsultations = ({ onModalOpen, onModalClose }) => {
     const CardTile = ({ catalog, onClick }) => {
         return (
             <div
-                className="card card-sm sm:max-w-sm rounded-2xl p-2 xl:max-w-none transition-all duration-200 ease-in-out hover:scale-105 group relative overflow-visible animated-border cursor-pointer shadow-none h-[156px] min-h-[156px] flex flex-col justify-between"
+                className="card card-sm sm:max-w-sm rounded-2xl p-2 xl:max-w-none transition-transform duration-200 ease-out hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100 group relative overflow-visible animated-border cursor-pointer shadow-none h-[156px] min-h-[156px] flex flex-col justify-between"
                 style={{ backgroundColor: `var(--${catalog.color})` }}
                 tabIndex={0}
                 role="button"
@@ -62,26 +62,26 @@ const CardConsultations = ({ onModalOpen, onModalClose }) => {
                     <div className="flex justify-center">
                         <div className="avatar avatar-placeholder">
                             <div 
-                                className="w-15 h-15 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-300 group-hover:w-16 group-hover:h-16"
+                                className="w-15 h-15 rounded-full flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                                 style={{ 
                                     backgroundColor: 'rgba(255, 255, 255, 0.2)',
                                     
                                 }}
                             >
                                 {catalog.title === "Cuentas" ? (
-                                    <IconCuentas className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <IconCuentas className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 ) : catalog.title === "Productividad" ? (
-                                    <IconProductividad className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <IconProductividad className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 ) : catalog.title === "Generales" ? (
-                                    <IconGenerales className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <IconGenerales className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 ) : catalog.title === "Historicos" ? (
-                                    <IconHistoricos className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <IconHistoricos className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 ) : catalog.title === "Ejecutivos" ? (
-                                    <IconExecutive className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <IconExecutive className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 ) : catalog.title === "Dia del Ejecutivo" ? (
-                                    <IconDayExecutive className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <IconDayExecutive className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 ) : (
-                                    <ExecutiveChart className="size-9 transition-all duration-300 group-hover:size-12" style={{ color: `var(--${catalog.fontcolor})` }} />
+                                    <ExecutiveChart className="size-9 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100" style={{ color: `var(--${catalog.fontcolor})` }} />
                                 )}
                             </div>
                         </div>

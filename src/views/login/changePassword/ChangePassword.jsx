@@ -4,6 +4,7 @@ import PASSWORD_REQUIREMENTS from "./Validations";
 import ButtonLogin from "../ButtonLogin";
 import EyeClose from "../../../assets/eye-close.svg";
 import { UpdatePassword } from "../../../services/mark/Orochi/LokiServices";
+import { ACTIVE_SERVER } from "../../../config/backend";
 import { useUserStore } from "../../../contextGlobal/userStore";
 import { toast } from "sonner";
 
@@ -12,7 +13,6 @@ const ChangePassword = ({
   contraActual,
   username,
   passwordData,
-  mensaje,
 }) => {
   const user = useUserStore((state) => state.user);
 
@@ -111,13 +111,13 @@ const ChangePassword = ({
         usuario: currentUsername,
         contraActual: currentContraActual ? " PRESENTE" : " AUSENTE",
         nuevaContra: newPassword,
-        servidor: "Orochi",
+        servidor: ACTIVE_SERVER,
       });
 
       // Llamar al endpoint UpdatePassword
       const response = await UpdatePassword({
         usuario: currentUsername,
-        servidor: "Orochi",
+        servidor: ACTIVE_SERVER,
         nuevaContra: newPassword, // La nueva contraseña
         contra: currentContraActual, // La contraseña con la que intentó hacer login (de los props)
       });

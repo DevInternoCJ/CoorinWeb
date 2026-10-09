@@ -29,7 +29,7 @@ const ModalCampanas = ({ onClose }) => {
   };
 
   return (
-    <div>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <ModalHeader
         icon={
           <IconCircular size="size-10">
@@ -49,7 +49,7 @@ const ModalCampanas = ({ onClose }) => {
       />
 
       <div
-        className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 w-full scrollbar-gray"
+        className="modal-scroll-body grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 w-full scrollbar-gray"
         style={{
           minHeight: "1px",
           alignItems: "stretch",

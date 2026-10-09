@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import LogoCoorin from "../../../../../assets/logo_coorin_7.svg";
 import CustomSelect from "../../../board/screenFields/SelectWallet";
-import {
-  GetVerifyProduct,
-  getCarteras,
-  getCarterasProductos,
-} from "../../../../../services/mark/Orochi/LokiServices";
+import { GetVerifyProduct } from "../../../../../services/mark/Orochi/LokiServices";
+import useCatalogOptions from "../../../../../hooks/useCatalogOptions";
+import { ACTIVE_SERVER } from "../../../../../config/backend";
 import { toast } from "sonner";
 
 const ModalHeader = ({
@@ -14,104 +12,21 @@ const ModalHeader = ({
   icon,
   selectedProduct,
   setSelectedProduct,
-  selectedCartera, // ⭐ Nueva prop del padre
   setSelectedCartera, // ⭐ Nueva prop del padre
   setVerifyResult,
   setLoading,
   setShowDataTables, // opcional: notificar al padre para mostrar LoadDates
 }) => {
-  const servidor = "Orochi";
-  const [carteraOptions, setCarteraOptions] = useState([
-    { label: "Seleccione una cartera", value: "" },
-  ]);
-
-  const [productOptions, setProductOptions] = useState([
-    { label: "Selecciona una cartera primero", value: "" },
-  ]);
-
-  // ⭐ Estado interno para manejar la cartera localmente
+  const servidor = ACTIVE_SERVER;
+  // Estado interno para manejar la cartera localmente
   const [internalSelectedCartera, setInternalSelectedCartera] = useState("");
-
-  // Efecto para cargar las carteras
-  useEffect(() => {
-    const fetchCarteras = async () => {
-      try {
-        const carteras = await getCarteras();
-
-        const options = [
-          { label: "Seleccione una cartera", value: "" },
-          ...carteras.map((cartera) => ({
-            label: cartera.cartera,
-            value: cartera.idCartera,
-          })),
-        ];
-
-        setCarteraOptions(options);
-      } catch (error) {
-        console.error("Error fetching carteras:", error);
-        toast.error("Error al cargar las carteras");
-        setCarteraOptions([{ label: "Error al cargar", value: "" }]);
-      }
-    };
-
-    fetchCarteras();
-  }, []);
-
-  // ⭐ Efecto para cargar y filtrar productos cuando cambia la cartera seleccionada
-  useEffect(() => {
-    if (
-      !internalSelectedCartera ||
-      internalSelectedCartera === "" ||
-      internalSelectedCartera === "0" ||
-      internalSelectedCartera === 0
-    ) {
-      setProductOptions([
-        { label: "Selecciona una cartera primero", value: "" },
-      ]);
-      return;
-    }
-
-    const fetchAndFilterProducts = async () => {
-      setProductOptions([{ label: "Cargando productos...", value: "" }]);
-
-      try {
-        const productos = await getCarterasProductos();
-
-        // Convertir selectedCartera a número para la comparación
-        const carteraId = Number(internalSelectedCartera);
-
-        // Filtrar productos por idCartera (comparando números)
-        const filteredProducts = productos.filter((producto) => {
-          return Number(producto.idCartera) === carteraId;
-        });
-
-        console.log(
-          `Encontrados ${filteredProducts.length} productos para la cartera ${carteraId}`,
-        );
-
-        if (filteredProducts.length > 0) {
-          const options = [
-            { label: "Seleccione un producto", value: "" },
-            ...filteredProducts.map((producto) => ({
-              label: producto.producto,
-              value: producto.idProducto,
-            })),
-          ];
-          setProductOptions(options);
-        } else {
-          setProductOptions([
-            { label: "Sin productos disponibles", value: "" },
-          ]);
-        }
-      } catch (error) {
-        console.error("Error al cargar productos:", error);
-        toast.error("Error al cargar los productos");
-        setProductOptions([{ label: "Error al cargar productos", value: "" }]);
-      }
-    };
-
-    fetchAndFilterProducts();
-  }, [internalSelectedCartera]); // ⭐ Usar estado interno
+  const { carteraOptions: storedCarteraOptions, productoOptions: storedProductOptions } = useCatalogOptions({
+    idCartera: internalSelectedCartera,
+  });
+  const carteraOptions = [{ label: "Seleccione una cartera", value: "" }, ...storedCarteraOptions];
+  const productOptions = internalSelectedCartera
+    ? [{ label: "Seleccione un producto", value: "" }, ...storedProductOptions]
+    : [{ label: "Selecciona una cartera primero", value: "" }];
 
   // Efecto para la verificación del producto
   useEffect(() => {
@@ -182,7 +97,7 @@ const ModalHeader = ({
   };
 
   return (
-    <div className=" px-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-gray-200 dark:border-gray-800 mb-2">
+    <div className=" px-3 pt-3 w-full flex gap-5 justify-between items-start border-b border-border dark:border-gray-800 mb-2">
       <div className="block md:flex items-start justify-between w-3/4 gap-3">
         <div className="flex items-center gap-2 text-jerarquia3">
           {icon}

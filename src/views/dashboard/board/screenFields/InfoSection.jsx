@@ -36,7 +36,7 @@ const InfoSection = ({
 
         setDefaultData(initialArrayData); // Guardamos el array ordenado como defaultData
         setInfoData(initialArrayData); // Usamos el array ordenado como infoData inicial
-      } catch (error) {
+      } catch {
         // ... (manejo de error)
       } finally {
         setLoading(false);
@@ -115,7 +115,7 @@ const InfoSection = ({
       return "";
     }
     // Buscar coincidencia exacta primero
-    if (rowData.hasOwnProperty(fieldName)) {
+    if (Object.prototype.hasOwnProperty.call(rowData, fieldName)) {
       const value = rowData[fieldName];
       console.log(`Coincidencia exacta encontrada para "${fieldName}":`, value);
       return value;
@@ -246,7 +246,7 @@ const InfoSection = ({
       label: item.label, // Ya contiene el alias actualizado
       valor: item.valueObject?.valor || "",
       fontWeight: item.valueObject?.fontWeight || "font-weight-normal",
-      color: item.valueObject?.color || "FFFFFF",
+      color: item.valueObject?.color || null,
     }));
   };
 
@@ -266,10 +266,10 @@ const InfoSection = ({
 
   if (loading) {
     return (
-      <div className="bg-gray-700 p-4 rounded-lg shadow-sm">
+      <div className="bg-surface p-4 rounded-lg shadow-sm">
         <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400"></div>
-          <span className="ml-3 text-white">Cargando información...</span>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-jerarquia2"></div>
+          <span className="ml-3 text-muted-foreground">Cargando información...</span>
         </div>
       </div>
     );
@@ -277,9 +277,9 @@ const InfoSection = ({
 
   if (!infoData || infoArray.length === 0) {
     return (
-      <div className="bg-gray-700 p-4 rounded-lg shadow-sm">
+      <div className="bg-surface p-4 rounded-lg shadow-sm">
         <h3 className="text-lg text-jerarquia1 font-bold mb-3">Info</h3>
-        <div className="text-center py-8 text-gray-400">
+        <div className="text-center py-8 text-muted-foreground">
           No hay datos disponibles
         </div>
       </div>
@@ -287,10 +287,10 @@ const InfoSection = ({
   }
 
   return (
-    <div className="bg-gray-700 p-4 rounded-lg shadow-sm">
+    <div className="bg-surface p-4 rounded-lg shadow-sm">
       <h3 className="text-lg text-jerarquia1 font-bold -mb-1">Info</h3>
       <div className="overflow-x-auto">
-        <table className="table-border p-2 text-sm border border-jerarquia1 rounded-lg text-background-dashboard w-full">
+        <table className="table-border p-2 text-sm border border-jerarquia1 rounded-lg text-foreground w-full">
           <tbody>
             {rows.map((rowItems, rowIdx) => (
               <tr
@@ -299,7 +299,7 @@ const InfoSection = ({
               >
                 {rowItems.map((item, colIdx) => (
                   <React.Fragment key={`${rowIdx}-${colIdx}`}>
-                    <td className="py-1 px-1 font-semibold whitespace-nowrap text-white">
+                    <td className="py-1 px-1 font-semibold whitespace-nowrap text-foreground">
                       {item?.label || ""}
                     </td>
                     <td
@@ -309,7 +309,7 @@ const InfoSection = ({
                           item?.fontWeight === "font-weight-bold"
                             ? "bold"
                             : "normal",
-                        color: item ? `#${item.color}` : "#FFFFFF",
+                        color: item?.color ? `#${item.color}` : "var(--color-text-secondary)",
                       }}
                     >
                       {item?.valor || ""}

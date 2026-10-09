@@ -8,11 +8,10 @@ const SaveButton = ({
   size = 'medium',
   variant = 'primary',
   type = 'button',
-  icon = true,
   className = ''
 }) => {
   // Clases base para todos los botones
-  const baseClasses = "inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
+  const baseClasses = "inline-flex items-center justify-center font-semibold rounded-lg transition-[color,background-color,border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-offset-2";
   
   // Tamaños
   const sizes = {
@@ -23,13 +22,13 @@ const SaveButton = ({
   
   // Variantes de color
   const variants = {
-    primary: "bg-jerarquia2 text-neutral-900 hover:text-neutral-200 border-jerarquia2 hover:border-jerarquia1 focus:ring-jerarquia1 hover:shadow-lg",
-    secondary: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-500 text-white",
-    outline: "border-2 border-green-600 text-green-600 hover:text-white focus:ring-green-500"
+    primary: "bg-primary text-primary-foreground hover:bg-jerarquia3 border-transparent focus:ring-jerarquia2 hover:shadow-lg",
+    secondary: "bg-surface-secondary text-foreground border border-border hover:bg-surface focus:ring-jerarquia2",
+    outline: "border-2 border-jerarquia2 text-foreground hover:bg-primary/10 focus:ring-jerarquia2"
   };
   
   // Estado disabled
-  const disabledClasses = "bg-gray-300 text-gray-500 cursor-not-allowed";
+  const disabledClasses = "bg-surface-secondary text-muted-foreground opacity-50 pointer-events-none";
   
   // Estado loading
   const loadingClasses = "opacity-80 cursor-wait";

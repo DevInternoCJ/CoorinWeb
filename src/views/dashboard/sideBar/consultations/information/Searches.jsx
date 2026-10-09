@@ -7,6 +7,7 @@ import {
   getSearchesInformation,
 } from "../../../../../services/mark/Orochi/LokiServices";
 import { exportFromAPIResponse } from "../../../../../utils/ExcelExporter";
+import useCatalogOptions from "../../../../../hooks/useCatalogOptions";
 
 const SearchesContent = ({ headerControlsActive = false }) => {
   // Obtener datos de usuario desde localStorage
@@ -21,7 +22,7 @@ const SearchesContent = ({ headerControlsActive = false }) => {
     const saved = localStorage.getItem("selectedCartera");
     return saved ? parseInt(saved, 10) : idCartera;
   });
-  const [carterasOptions, setCarterasOptions] = useState([]);
+  const { carteraOptions: carterasOptions } = useCatalogOptions();
   const [consulta, setConsulta] = useState("");
   const [desde, setDesde] = useState(new Date().toISOString().slice(0, 10));
   const [hasta, setHasta] = useState(new Date().toISOString().slice(0, 10));
@@ -29,9 +30,8 @@ const SearchesContent = ({ headerControlsActive = false }) => {
   const [loadingConsultas, setLoadingConsultas] = useState(false);
   const [errorConsultas, setErrorConsultas] = useState(null);
   const [loadingExcel, setLoadingExcel] = useState(false);
-  const [errorExcel, setErrorExcel] = useState(null);
-  const [consultaSinRegistros, setConsultaSinRegistros] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [, setErrorExcel] = useState(null);
+  const [, setConsultaSinRegistros] = useState(false);
   const [abortController, setAbortController] = useState(null);
 
   const minDate = "2016-01-01";
@@ -173,8 +173,8 @@ const SearchesContent = ({ headerControlsActive = false }) => {
                   carterasOptions.length === 0
                     ? [{ value: String(cartera), label: `Cartera ${cartera}` }]
                     : carterasOptions.map((item) => ({
-                        value: String(item.id),
-                        label: item.nombre,
+                        value: String(item.value),
+                        label: item.label,
                       }))
                 }
               />
@@ -257,8 +257,8 @@ const SearchesContent = ({ headerControlsActive = false }) => {
                     carterasOptions.length === 0
                       ? [{ value: String(cartera), label: `Cartera ${cartera}` }]
                       : carterasOptions.map((item) => ({
-                          value: String(item.id),
-                          label: item.nombre,
+                          value: String(item.value),
+                          label: item.label,
                         }))
                   }
                 />
@@ -343,8 +343,8 @@ const SearchesContent = ({ headerControlsActive = false }) => {
                   carterasOptions.length === 0
                     ? [{ value: String(cartera), label: `Cartera ${cartera}` }]
                     : carterasOptions.map((item) => ({
-                        value: String(item.id),
-                        label: item.nombre,
+                        value: String(item.value),
+                        label: item.label,
                       }))
                 }
               />

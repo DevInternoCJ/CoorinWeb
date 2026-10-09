@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import GlobalModal from "../../../../../../components/Modal/GlobalModal";
 import ModalHeader from "../ModalHeader";
 import ModalBase from "../../../../board/ModalBase";
 import IconCircular from "../../../../../../components/Iconos/IconCircular";
@@ -44,12 +45,12 @@ const Phrases = ({ onClose }) => {
   ];
 
   return (
-    <div className="modal-blur-bg overflow-hidden fixed inset-0 bg-black/55 flex items-center justify-center z-50 p-4">
+    <GlobalModal isOpen onClose={onClose} title="Frases" mode="content" showHeader={false} showCloseButton={false}>
       <div
         ref={modalRef}
         className={`${
           bounce ? "animate-bounce-modal" : ""
-        } bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
+        } bg-[var(--color-surface-modal)] text-[var(--color-text-primary)] modal-container rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-[var(--color-border)] flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -67,9 +68,9 @@ const Phrases = ({ onClose }) => {
           loading={loading}
           setLoading={setLoading}
         />
-        <div className="flex-1 overflow-y-auto bg-[var(--color-surface-secondary)]">
+        <div className="modal-scroll-body bg-[var(--color-surface-secondary)]">
           {selectedProduct && (
-            <div className="flex items-center gap-6 px-6 py-4 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
+            <div className="flex flex-wrap items-center gap-3 px-3 py-3 sm:px-6 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
               {checkboxOptions.map((option) => (
                 <label
                   key={option.id}
@@ -111,20 +112,20 @@ const Phrases = ({ onClose }) => {
             )}
             {/* Vista: Agregar Frase */}
             {selectedProduct && activeView === "add" && (
-              <div className="transition-all duration-300 ease-in-out">
+              <div>
                 <InputPhrases />
               </div>
             )}
             {/* Vista: Lista de Frases */}
             {selectedProduct && activeView === "list" && (
-              <div className="transition-all duration-300 ease-in-out">
+              <div>
                 <SavePhrases />
               </div>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </GlobalModal>
   );
 };
 

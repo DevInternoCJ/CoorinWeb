@@ -23,18 +23,24 @@ const asRows = (payload, keys = []) => {
   return keys.reduce((rows, key) => (rows.length ? rows : Array.isArray(payload?.[key]) ? payload[key] : []), []);
 };
 
+const firstDefined = (row, keys) => keys.reduce((value, key) => value ?? row?.[key], undefined);
+const numeric = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 const normalizeCarteras = (rows) => asRows(rows, ["Carteras", "carteras"]).map((row) => ({
   ...row,
-  idCartera: row?.idCartera ?? row?.IdCartera,
-  cartera: row?.cartera ?? row?.Cartera ?? row?.NombreCartera,
-}));
+  idCartera: numeric(firstDefined(row, ["idCartera", "IdCartera", "id_cartera", "carteraId", "id", "Id"])),
+  cartera: firstDefined(row, ["cartera", "Cartera", "NombreCartera", "nombreCartera", "nombre_cartera", "descripcion", "Descripcion", "nombre"]),
+})).filter((row) => Number.isFinite(row.idCartera) && typeof row.cartera === "string" && row.cartera.trim());
 
 const normalizeProductos = (rows) => asRows(rows, ["Productos", "productos"]).map((row) => ({
   ...row,
-  idProducto: row?.idProducto ?? row?.IdProducto,
-  producto: row?.producto ?? row?.Producto ?? row?.NombreProducto,
-  idCartera: row?.idCartera ?? row?.IdCartera,
-}));
+  idProducto: numeric(firstDefined(row, ["idProducto", "IdProducto", "id_producto", "productoId", "id", "Id"])),
+  producto: firstDefined(row, ["producto", "Producto", "NombreProducto", "nombreProducto", "nombre_producto", "descripcion", "Descripcion", "nombre"]),
+  idCartera: numeric(firstDefined(row, ["idCartera", "IdCartera", "id_cartera", "carteraId"])),
+})).filter((row) => Number.isFinite(row.idProducto) && typeof row.producto === "string" && row.producto.trim());
 
 const sessionKey = (user) => {
   const server = ACTIVE_SERVER;
@@ -49,7 +55,9 @@ export const useCatalogStore = create(
       loadCatalogs: async (user) => {
         const loadedFor = sessionKey(user);
         if (get().status === "loading") return;
-        if (get().status === "ready" && get().loadedFor === loadedFor && get().valores.length) return get();
+        const currentCarteras = normalizeCarteras(get().carteras);
+        const currentProductos = normalizeProductos(get().productos);
+        if (get().status === "ready" && get().loadedFor === loadedFor && currentCarteras.length && currentProductos.length && get().valores.length) return get();
 
         set({ status: "loading", error: null, loadedFor });
         const results = await Promise.allSettled([

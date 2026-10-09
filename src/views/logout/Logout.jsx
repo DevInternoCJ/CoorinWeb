@@ -49,11 +49,11 @@ const Logout = ({ onLogout, expandSidebar }) => {
           alt={`${nombreEjecutivo} Avatar`}
           src={CoorinGrenn}
         />
-        <span className="truncate hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden whitespace-nowrap">
+        <span className="truncate hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-[opacity,max-width] duration-200 ease-out motion-reduce:transition-none overflow-hidden whitespace-nowrap">
           {nombreEjecutivo}
         </span>
         <svg
-          className="shrink-0 size-3.5 ms-auto hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-all duration-300 overflow-hidden text-[var(--color-text-muted)]"
+          className="shrink-0 size-3.5 ms-auto hs-overlay-minified:opacity-0 hs-overlay-minified:max-w-0 transition-[opacity,max-width] duration-200 ease-out motion-reduce:transition-none overflow-hidden text-[var(--color-text-muted)]"
           xmlns="http://www.w3.org/2000/svg"
           width="24"
           height="24"

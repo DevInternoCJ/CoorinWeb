@@ -225,10 +225,10 @@ const TableEditFields = ({
 
   if (loading) {
     return (
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+      <div className="bg-surface p-6 rounded-lg border border-border shadow-sm">
         <div className="flex justify-center items-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <span className="ml-3 text-gray-600">Cargando campos...</span>
+          <span className="ml-3 text-muted-foreground">Cargando campos...</span>
         </div>
       </div>
     );
@@ -236,7 +236,7 @@ const TableEditFields = ({
 
   if (error) {
     return (
-      <div className="bg-[var(--color-surface-modal)] p-6 rounded-lg border border-gray-200 shadow-sm">
+      <div className="bg-[var(--color-surface-modal)] p-6 rounded-lg border border-border shadow-sm">
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <div className="flex items-center">
             <div className="text-red-400 mr-2">
@@ -296,7 +296,7 @@ const TableEditFields = ({
       </div>
 
       {editData.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-muted-foreground">
           No hay campos de pantalla disponibles para los parámetros
           especificados
         </div>

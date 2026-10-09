@@ -1,14 +1,9 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import ReusableModal from "../../modalGlobalReboot/ReusableModal";
+import ReusableModal from "../../../../../components/Modal/GlobalModal";
 import ModalEncargadosContent from "../Encargados/ModalEncargadosContent";
 import { IconEncargados } from "../IconesEjecutives";
-import {
-  obetenerJerarquiaEncargados,
-  obetenerDropdownsEncargados,
-  getCarteras,
-  getCarterasProductos,
-  AsignaEncargados,
-} from "../../../../../services/mark/Orochi/LokiServices";
+import { obetenerDropdownsEncargados } from "../../../../../services/mark/Orochi/LokiServices";
+import CatalogService from "../../../../../services/catalogs/CatalogService";
 import { toast } from "sonner";
 
 const EncargadosModal = ({
@@ -29,7 +24,7 @@ const EncargadosModal = ({
   const [encargadosFiltrados, setEncargadosFiltrados] = useState([]);
   const [selectedEncargado, setSelectedEncargado] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error] = useState(null);
   const [isChangingAssignment, setIsChangingAssignment] = useState(false);
 
   // Ref para controlar si ya se mostró el toast
@@ -41,8 +36,8 @@ const EncargadosModal = ({
 
     setLoading(true);
     Promise.all([
-      getCarteras(),
-      getCarterasProductos(),
+      CatalogService.getCarteras(),
+      CatalogService.getCarterasProductos(),
       obetenerDropdownsEncargados(),
     ])
       .then(([carterasData, carterasProductosData, encargadosData]) => {
@@ -169,7 +164,7 @@ const EncargadosModal = ({
         toast.success("Encargado asignado correctamente.");
         setIsChangingAssignment(false);
       }, 1000);
-    } catch (error) {
+    } catch {
       toast.error("Error al cambiar el encargado.");
       setIsChangingAssignment(false);
     }
@@ -179,7 +174,7 @@ const EncargadosModal = ({
   const carteraSelector = (
     <div className="relative mb-0 w-full md:w-auto">
       <select
-        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
+        className="peer p-4 pe-9 block w-full bg-surface-secondary border-transparent rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
         style={{ minHeight: "3.2rem" }}
         value={cartera}
         onChange={(e) => {
@@ -196,7 +191,7 @@ const EncargadosModal = ({
       </select>
       <label
         htmlFor="cartera-select-header"
-        className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+        className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
       >
         Cartera
       </label>
@@ -206,7 +201,7 @@ const EncargadosModal = ({
   const productoSelector = (
     <div className="relative mb-0 w-full md:w-auto">
       <select
-        className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
+        className="peer p-4 pe-9 block w-full bg-surface-secondary border-transparent rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
         style={{ minHeight: "3.2rem" }}
         value={producto}
         onChange={(e) => {
@@ -223,7 +218,7 @@ const EncargadosModal = ({
       </select>
       <label
         htmlFor="producto-select-header"
-        className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+        className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
       >
         Producto
       </label>
@@ -233,13 +228,13 @@ const EncargadosModal = ({
   const encargadoSelector = (
     <div className="relative mb-0 w-full md:w-auto">
       {loading ? (
-        <div className="p-4 text-gray-500">Cargando encargados...</div>
+        <div className="p-4 text-muted-foreground">Cargando encargados...</div>
       ) : error ? (
         <div className="p-4 text-red-500">{error}</div>
       ) : (
         <>
           <select
-            className="peer p-4 pe-9 block w-full bg-gray-50 border-transparent rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
+            className="peer p-4 pe-9 block w-full bg-surface-secondary border-transparent rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-jerarquia1 focus:border-jerarquia1 disabled:opacity-50 disabled:pointer-events-none"
             style={{ minHeight: "3.2rem" }}
             value={
               selectedEncargado ||
@@ -274,7 +269,7 @@ const EncargadosModal = ({
           </select>
           <label
             htmlFor="encargado-select-header"
-            className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-gray-500"
+            className="absolute top-0 start-0 p-2 h-full truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:text-xs peer-focus:-translate-y-1.5 peer-focus:text-muted-foreground peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:-translate-y-1.5 peer-not-placeholder-shown:text-muted-foreground"
           >
             Encargado
           </label>

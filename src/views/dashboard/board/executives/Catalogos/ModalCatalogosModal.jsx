@@ -1,5 +1,5 @@
 import React from "react";
-import ReusableModal from "../../modalGlobalReboot/ReusableModal";
+import ReusableModal from "../../../../../components/Modal/GlobalModal";
 import ModalCatalogosContent from "./ModalCatalogosContent";
 import { IconCatalogos } from "../IconesEjecutives";
 

@@ -26,7 +26,7 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
   const userData = JSON.parse(localStorage.getItem("userData"));
   const idCartera = userData?.idCartera || 0;
   // Memorizar los parámetros actuales
-  const [cartera, setCartera] = useState(() => {
+  const [cartera] = useState(() => {
     const saved = localStorage.getItem("selectedCartera");
     return saved ? parseInt(saved, 10) : idCartera;
   });
@@ -53,7 +53,6 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
       // Simular clic en buscar automáticamente
       // buscarConParamsGuardados(); // Eliminado, ya no se usa exportar
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mostrarTabla, paramsGuardados]);
 
   // Función para exportar los errores con toast loading
@@ -547,15 +546,6 @@ const WrongsContent = ({ mostrarTabla, setMostrarTabla }) => {
                 </table>
               </div>
             </div>
-            <style>{`
-                                .animate-spin {
-                                    animation: spin 1s linear infinite;
-                                }
-                                @keyframes spin {
-                                    0% { transform: rotate(0deg); }
-                                    100% { transform: rotate(360deg); }
-                                }
-                            `}</style>
           </div>
           {errorTabla && (
             <div className="text-red-500 text-xs text-center mt-1">

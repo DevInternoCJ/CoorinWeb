@@ -202,7 +202,7 @@ const PreviewRenderer = ({ file, fileName }) => {
   // Render
   if (!file) {
     return (
-      <div className="border-none rounded-lg p-3 bg-white dark:bg-[var(--color-surface)] text-sm text-gray-500">
+      <div className="border-none rounded-lg p-3 bg-surface text-sm text-muted-foreground">
         No hay archivo seleccionado
       </div>
     );

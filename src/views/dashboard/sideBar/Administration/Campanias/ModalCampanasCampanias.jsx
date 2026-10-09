@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import GlobalModal from "../../../../../components/Modal/GlobalModal";
 import IconCircular from "../../../../../components/Iconos/IconCircular";
 import ModalFilasCampañas from "./ModalFilasCampanias";
 import {
@@ -41,7 +42,7 @@ const ModalCampanasCampanias = ({
     idCampaña: null,
     nombreCampaña: "",
   });
-  const [tipoFilas, setTipoFilas] = useState("archivo");
+  const [, setTipoFilas] = useState("archivo");
 
   const user = useUserStore((state) => state.user);
   const idEjecutivo = user?.idEjecutivo;
@@ -60,7 +61,7 @@ const ModalCampanasCampanias = ({
             userData?.cartera ||
             undefined
           );
-        } catch (e) {
+        } catch {
           return undefined;
         }
       })();
@@ -553,7 +554,7 @@ const ModalCampanasCampanias = ({
                       }
                     >
                       <IconCircular
-                        bgColor="bg-white"
+                        bgColor="bg-surface"
                         textColor="text-white"
                         borderColor="border-red-800"
                         size="size-5"
@@ -611,23 +612,10 @@ const ModalCampanasCampanias = ({
         onSuccess={cargarCampanas}
       />
       {modalLimpiar.open && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            background: "rgba(0,0,0,0.2)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          }}
-        >
+        <GlobalModal isOpen={modalLimpiar.open} onClose={() => setModalLimpiar({ open: false, idCampaña: null, nombre: "" })} title="Limpiar campaña" mode="content" showHeader={false} showCloseButton={false}>
           <div
             style={{
-              background: "white",
+              background: "var(--color-surface)",
               borderRadius: 8,
               padding: 24,
               minWidth: 320,
@@ -639,12 +627,12 @@ const ModalCampanasCampanias = ({
                 fontWeight: 600,
                 fontSize: 18,
                 marginBottom: 12,
-                color: "#000",
+                color: "var(--color-text-primary)",
               }}
             >
               Limpiar Campaña
             </div>
-            <div style={{ marginBottom: 18, fontSize: 15, color: "#000" }}>
+            <div style={{ marginBottom: 18, fontSize: 15, color: "var(--color-text-primary)" }}>
               ¿Desea remover todas las cuentas de la campaña "
               {modalLimpiar.nombre}"?
             </div>
@@ -657,7 +645,7 @@ const ModalCampanasCampanias = ({
                   minWidth: 60,
                   height: 28,
                   fontSize: 15,
-                  color: "#000",
+                  color: "var(--color-text-primary)",
                 }}
                 onClick={async () => {
                   try {
@@ -685,7 +673,7 @@ const ModalCampanasCampanias = ({
                   minWidth: 60,
                   height: 28,
                   fontSize: 15,
-                  color: "#000",
+                  color: "var(--color-text-primary)",
                 }}
                 onClick={() =>
                   setModalLimpiar({ open: false, idCampaña: null, nombre: "" })
@@ -695,27 +683,14 @@ const ModalCampanasCampanias = ({
               </button>
             </div>
           </div>
-        </div>
+        </GlobalModal>
       )}
 
       {modalEliminar.open && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            background: "rgba(0,0,0,0.2)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          }}
-        >
+        <GlobalModal isOpen={modalEliminar.open} onClose={() => setModalEliminar({ open: false, idCampaña: null, nombre: "" })} title="Eliminar campaña" mode="content" showHeader={false} showCloseButton={false}>
           <div
             style={{
-              background: "white",
+              background: "var(--color-surface)",
               borderRadius: 8,
               padding: 24,
               minWidth: 320,
@@ -727,12 +702,12 @@ const ModalCampanasCampanias = ({
                 fontWeight: 600,
                 fontSize: 18,
                 marginBottom: 12,
-                color: "#000",
+                color: "var(--color-text-primary)",
               }}
             >
               Eliminar Campaña
             </div>
-            <div style={{ marginBottom: 18, fontSize: 15, color: "#000" }}>
+            <div style={{ marginBottom: 18, fontSize: 15, color: "var(--color-text-primary)" }}>
               ¿Desea eliminar la campaña "{modalEliminar.nombre}"?
             </div>
             <div
@@ -744,7 +719,7 @@ const ModalCampanasCampanias = ({
                   minWidth: 60,
                   height: 28,
                   fontSize: 15,
-                  color: "#000",
+                  color: "var(--color-text-primary)",
                 }}
                 onClick={async () => {
                   try {
@@ -774,7 +749,7 @@ const ModalCampanasCampanias = ({
                   minWidth: 60,
                   height: 28,
                   fontSize: 15,
-                  color: "#000",
+                  color: "var(--color-text-primary)",
                 }}
                 onClick={() =>
                   setModalEliminar({ open: false, idCampaña: null, nombre: "" })
@@ -784,7 +759,7 @@ const ModalCampanasCampanias = ({
               </button>
             </div>
           </div>
-        </div>
+        </GlobalModal>
       )}
     </div>
   );
